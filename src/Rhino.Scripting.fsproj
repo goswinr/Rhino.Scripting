@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Name>Rhino.Scripting</Name>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,11 +47,37 @@
     <Compile Include="02_TypeExtensions.fs" />
     <Compile Include="09_ActiveDoc.fs" />
     <Compile Include="50_RhinoScriptingSyntax.fs" />
+    <Compile Include="Application.fs" />
+    <Compile Include="Block.fs" />
+    <Compile Include="Curve.fs" />
+    <Compile Include="Dimension.fs" />
+    <Compile Include="Document.fs" />
+    <Compile Include="Geometry.fs" />
+    <Compile Include="Grips.fs" />
+    <Compile Include="Group.fs" />
+    <Compile Include="Hatch.fs" />
+    <Compile Include="Layer.fs" />
+    <Compile Include="Light.fs" />
+    <Compile Include="Line.fs" />
+    <Compile Include="Linetype.fs" />
+    <Compile Include="Material.fs" />
+    <Compile Include="Mesh.fs" />
+    <Compile Include="Object.fs" />
+    <Compile Include="Plane.fs" />
+    <Compile Include="Pointvector.fs" />
+    <Compile Include="Selection.fs" />
+    <Compile Include="Surface.fs" />
+    <Compile Include="Toolbar.fs" />
+    <Compile Include="Transformation.fs" />
+    <Compile Include="Userdata.fs" />
+    <Compile Include="Userinterface.fs" />
+    <Compile Include="Utility.fs" />
+    <Compile Include="View.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
-      <HintPath>packages\FSharp.Core.4.6.2\lib\net45\FSharp.Core.dll</HintPath>
+      <HintPath>packages\FSharp.Core.4.7.0\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="RhinoCommon">

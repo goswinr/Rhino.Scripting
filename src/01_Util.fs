@@ -4,10 +4,15 @@ open System
 open System.Globalization
 
 
+
+
+
 module internal Util = 
     
-    type OPT = OptionalAttribute
-    type DEF = DefaultParameterValueAttribute
+    type OPT = Runtime.InteropServices.OptionalAttribute
+    type DEF = Runtime.InteropServices.DefaultParameterValueAttribute
+
+    let failNotImpl() = failwith "NOT IMPLEMENTED FAILURE"
 
     let inline notNull x = not (Object.ReferenceEquals(x,null))
     
@@ -39,7 +44,7 @@ module internal Util =
         else                 sprintf "%f"   x  
     
     ///parses english and german style flaots, recognizes comma and period as decimal separator
-    let paresFloatEnDe x =
+    let paresFloatEnDe (x:string) =
         match Double.TryParse(x, NumberStyles.Float, enUs) with
         | true, f -> f
         | _ ->  match Double.TryParse(x, NumberStyles.Any, deAt) with
@@ -47,7 +52,7 @@ module internal Util =
                 | _ -> failwithf "Could not parse '%s' into a floating point number" x
         
     /// this helper enables more generic code in parsing sequences
-    let floatOfObj (o) = 
+    let inline floatOfObj (o:^T) = 
         match box o with 
         | :? float   as x -> x
         | :? int     as x -> float (x)
@@ -61,7 +66,10 @@ module internal Util =
             with _ -> 
                 failwithf "Could not convert object '%A' into a floating point number" o
     
-    
+    let inline point3dOf3(x:^x, y:^y, z:^z) = 
+        try Rhino.Geometry.Point3d(floatOfObj (x),floatOfObj(y),floatOfObj(z))
+        with _ -> failwithf "*** could not coerce %A, %A and %A to Point3d" x y z
+
     /// test is a floating point value is Infinity or Not a Number
     let inline isNanOrInf f = Double.IsInfinity f || Double.IsNaN f
     
