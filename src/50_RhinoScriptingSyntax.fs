@@ -9,7 +9,55 @@ open Rhino.Scripting.ActiceDocument
 
 /// A static class with static mebres providing functions very similar to RhinoScript in Pyhton and VBscript 
 type RhinoScriptSyntax () = //private () = 
+    
+    ///<summary>clamps a value between a lower and an upper bound</summary>
+    ///<param name="minVal">(float): lower bound</param>
+    ///<param name="maxVal">(float): upper bound</param>
+    ///<param name="value">(float): the value to clamp</param>
+    ///<returns>(float):clamped value</returns>
+    static member Clamp (minVal:float,maxVal:float,value:float) : float =
+        if minVal > maxVal then  failwithf "Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
+        max minVal (min maxVal value) 
 
+
+    ///<summary>Like the Python 'xrange' function for integers this creates a range of floating point values.
+    ///this last or stop value will NOT be included in range as per python semanticsis, this is diffrent from F# semantics on range expressions</summary>
+    ///<param name="start">(float): first value of range</param> 
+    ///<param name="stop">(float): end of range( this last value will not be included in range,Python semantics)</param>    
+    ///<param name="step">(float): step size between two values</param>
+    ///<returns> a seq of floats </returns>
+    static member  Fxrange (start:float, stop:float, step:float) : float seq =
+        if isNanOrInf start then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf step  then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf stop  then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        let range = stop - start 
+                    |> BitConverter.DoubleToInt64Bits 
+                    |> (+) 5L // to make sure stop value is included in Range, will explicitly be removed below
+                    |> BitConverter.Int64BitsToDouble
+        let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semanticsis diffrent from F# semantics on range expressions)
+        if isNanOrInf steps then failwithf "*** range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
+    
+        if steps < 0.0 then 
+            failwithf "Frange: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
+        else 
+            // the actual alogorithm: 
+            let rec floatrange (start, i, steps) =
+                seq { if i <= steps then 
+                        yield start + i*step
+                        yield! floatrange (start, (i + 1.0), steps) } // tail recursive ?
+            floatrange (start, 0.0, steps) 
+
+    ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
+    ///this last or stop value will NOT be included in range as per python semanticsis, this is diffrent from F# semantics on range expressions</summary>
+    ///<param name="start">(float): first value of range</param> 
+    ///<param name="stop">(float): end of range( this last value will not be included in range,Python semantics)</param>    
+    ///<param name="step">(float): step size between two values</param>
+    ///<returns> an array of floats </returns>
+    static member Frange (start:float, stop:float, step:float) : float [] =
+        RhinoScriptSyntax.Fxrange (start, stop, step) |> Array.ofSeq
+    
+    
+    
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
     ///<returns>a Rhino.Geometry.Point3d. Fails on bad input</returns>
