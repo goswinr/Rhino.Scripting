@@ -69,7 +69,7 @@
     <PackageReference Update="FSharp.Core" Version="4.7.0" />
   </ItemGroup>
 
-  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 -->
+  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 
   <AllowedReferenceRelatedFileExtensions>
     .mdb
     .pdb
@@ -81,6 +81,7 @@
       <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
     </ItemGroup>
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
-</Target>
+  </Target>
+  -->
 
 </Project>
