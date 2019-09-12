@@ -9,6 +9,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsUserinterface =
   type RhinoScriptSyntax with
+    
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
     ///<param name="folder">(string) Optional, Default Value: <c>null</c>
     ///A default folder</param>
@@ -18,7 +19,8 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) selected folder</returns>
     static member BrowseForFolder([<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays a list of items in a checkable-style list dialog box</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
@@ -28,7 +30,8 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string seq) of tuples containing the input string in items along with their new boolean check value</returns>
     static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
     ///<param name="items">(string seq) A list of string</param>
@@ -38,7 +41,8 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display dialog prompting the user to enter a string. The
     ///  string value may span multiple lines</summary>
@@ -50,7 +54,8 @@ module ExtensionsUserinterface =
     ///A dialog box title.</param>
     ///<returns>(string) Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null)>]defaultValString:string, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pause for user input of an angle</summary>
     ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
@@ -64,7 +69,8 @@ module ExtensionsUserinterface =
     ///A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
     static member GetAngle([<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:int, [<OPT;DEF(null)>]message:string) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
     ///  displayed as click-able command line option toggles</summary>
@@ -77,7 +83,8 @@ module ExtensionsUserinterface =
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool seq) a list of values that represent the boolean values</returns>
     static member GetBoolean(message:string, items:string seq, defaultVals:bool seq) : bool seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a box</summary>
     ///<param name="mode">(float) Optional, Default Value: <c>0</c>
@@ -97,14 +104,16 @@ module ExtensionsUserinterface =
     ///Prompt3 of 'optional prompts to set' (FIXME 0)</param>
     ///<returns>(Point3d seq) list of eight Point3d that define the corners of the box on success</returns>
     static member GetBox([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]prompt1:string, [<OPT;DEF(null)>]prompt2:string, [<OPT;DEF(null)>]prompt3:string) : Point3d seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null</c>
     ///Default RGB value. If omitted, the default color is black</param>
     ///<returns>(Drawing.Color) RGB tuple of three numbers on success</returns>
     static member GetColor([<OPT;DEF(null)>]color:Drawing.Color) : Drawing.Color =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Retrieves the cursor's position</summary>
     ///<returns>(Point3d * Point3d * Guid * Point3d) containing the following information
@@ -113,7 +122,8 @@ module ExtensionsUserinterface =
     ///  2  id of the active viewport
     ///  3  cursor position in client coordinates</returns>
     static member GetCursorPos() : Point3d * Point3d * Guid * Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a distance.</summary>
     ///<param name="firstPt">(Point3d) Optional, Default Value: <c>null</c>
@@ -126,7 +136,8 @@ module ExtensionsUserinterface =
     ///Prompt for the second distance point</param>
     ///<returns>(float) The distance between the two points .</returns>
     static member GetDistance([<OPT;DEF(null)>]firstPt:Point3d, [<OPT;DEF(null)>]distance:float, [<OPT;DEF("First distance point")>]firstPtMsg:string, [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null</c>
@@ -139,7 +150,8 @@ module ExtensionsUserinterface =
     ///Select the duplicated edge curves.</param>
     ///<returns>(Guid seq) of selection prompts (curve id, parent id, selection point)</returns>
     static member GetEdgeCurves([<OPT;DEF(null)>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int, [<OPT;DEF(false)>]select:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a whole number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null</c>
@@ -152,7 +164,8 @@ module ExtensionsUserinterface =
     ///A maximum allowable value.</param>
     ///<returns>(float) The whole number input by the user .</returns>
     static member GetInteger([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]number:float, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays dialog box prompting the user to select a layer</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
@@ -165,7 +178,8 @@ module ExtensionsUserinterface =
     ///Show set current of 'Optional buttons to show on the dialog' (FIXME 0)</param>
     ///<returns>(string) name of selected layer</returns>
     static member GetLayer([<OPT;DEF("Select Layer")>]title:string, [<OPT;DEF(null)>]layer:string, [<OPT;DEF(false)>]showNewButton:bool, [<OPT;DEF(false)>]showSetCurrent:bool) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays a dialog box prompting the user to select one or more layers</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
@@ -174,7 +188,8 @@ module ExtensionsUserinterface =
     ///Optional button to show on the dialog</param>
     ///<returns>(string) The names of selected layers</returns>
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Prompts the user to pick points that define a line</summary>
     ///<param name="mode">(float) Optional, Default Value: <c>0</c>
@@ -199,7 +214,8 @@ module ExtensionsUserinterface =
     ///Message3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Line) Tuple of two points on success</returns>
     static member GetLine([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]message3:string) : Line =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
     ///<param name="defaultValLinetyp">(string) Optional, Default Value: <c>null</c>
@@ -208,7 +224,8 @@ module ExtensionsUserinterface =
     ///If True, the "by Layer" linetype will show. Defaults to False.</param>
     ///<returns>(string) The names of selected linetype</returns>
     static member GetLinetype([<OPT;DEF(null)>]defaultValLinetyp:string, [<OPT;DEF(false)>]showByLayer:bool) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Prompts the user to pick one or more mesh faces</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
@@ -222,7 +239,8 @@ module ExtensionsUserinterface =
     ///  If -1, selection stops as soon as there are at least minCount faces selected.</param>
     ///<returns>(float seq) of mesh face indices on success</returns>
     static member GetMeshFaces(objectId:Guid, [<OPT;DEF("")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : float seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Prompts the user to pick one or more mesh vertices</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
@@ -236,7 +254,8 @@ module ExtensionsUserinterface =
     ///  are at least minCount vertices selected.</param>
     ///<returns>(float seq) of mesh vertex indices on success</returns>
     static member GetMeshVertices(objectId:Guid, [<OPT;DEF("")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : float seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a point.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null</c>
@@ -249,7 +268,8 @@ module ExtensionsUserinterface =
     ///Constrains the point selections to the active construction plane.</param>
     ///<returns>(Point3d) point on success</returns>
     static member GetPoint([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a point constrainted to a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
@@ -257,7 +277,8 @@ module ExtensionsUserinterface =
     ///A prompt of message</param>
     ///<returns>(Point3d) 3d point</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a point constrained to a mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
@@ -265,7 +286,8 @@ module ExtensionsUserinterface =
     ///A prompt or message</param>
     ///<returns>(Point3d) 3d point</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a point constrained to a surface or polysurface
     ///  object</summary>
@@ -274,7 +296,8 @@ module ExtensionsUserinterface =
     ///A prompt or message</param>
     ///<returns>(Point3d) 3d point</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of one or more points</summary>
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
@@ -292,7 +315,8 @@ module ExtensionsUserinterface =
     ///A starting or base point</param>
     ///<returns>(Point3d seq) of 3d points</returns>
     static member GetPoints([<OPT;DEF(false)>]drawLines:bool, [<OPT;DEF(false)>]inPlane:bool, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]maxPoints:float, [<OPT;DEF(null)>]basisPoint:Point3d) : Point3d seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Prompts the user to pick points that define a polyline.</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
@@ -316,7 +340,8 @@ module ExtensionsUserinterface =
     ///The maximum number of points to require; 0 for no limit.  The default is 0.</param>
     ///<returns>(Point3d seq) A list of 3-D points that define the polyline .</returns>
     static member GetPolyline([<OPT;DEF(3)>]flags:int, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]message3:string, [<OPT;DEF(null)>]message4:string, [<OPT;DEF(2)>]min:float, [<OPT;DEF(0)>]max:float) : Point3d seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
@@ -329,7 +354,8 @@ module ExtensionsUserinterface =
     ///A maximum allowable value.</param>
     ///<returns>(float) The number input by the user .</returns>
     static member GetReal([<OPT;DEF("Number")>]message:string, [<OPT;DEF(null)>]number:float, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a rectangle</summary>
     ///<param name="mode">(float) Optional, Default Value: <c>0</c>
@@ -349,7 +375,8 @@ module ExtensionsUserinterface =
     ///Prompt3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) four 3d points that define the corners of the rectangle</returns>
     static member GetRectangle([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]prompt1:string, [<OPT;DEF(null)>]prompt2:string, [<OPT;DEF(null)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pauses for user input of a string value</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null</c>
@@ -362,7 +389,8 @@ module ExtensionsUserinterface =
     ///<returns>(string) The string either input or selected by the user .
     ///  If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
     static member GetString([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]defaultValString:string, [<OPT;DEF(null)>]strings:string seq) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display a list of items in a list box dialog.</summary>
     ///<param name="items">(string seq) A list of values to select</param>
@@ -374,7 +402,8 @@ module ExtensionsUserinterface =
     ///Selected item in the list</param>
     ///<returns>(string) he selected item</returns>
     static member ListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]defaultVal:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays a message box. A message box contains a message and
     ///  title, plus any combination of predefined icons and push buttons.</summary>
@@ -411,7 +440,8 @@ module ExtensionsUserinterface =
     ///  6      Yes button was clicked.
     ///  7      No button was clicked.</returns>
     static member MessageBox(message:string, [<OPT;DEF(0)>]buttons:float, [<OPT;DEF("")>]title:string) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
     ///<param name="items">(string seq) Items of 'list of string items and their corresponding values' (FIXME 0)</param>
@@ -422,7 +452,8 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string seq) of new values on success</returns>
     static member PropertyListBox(items:string seq, values:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays a list of items in a multiple-selection list box dialog</summary>
     ///<param name="items">(string seq) A zero-based list of string items</param>
@@ -435,7 +466,8 @@ module ExtensionsUserinterface =
     ///  or a list if multiple items are pre-selected</param>
     ///<returns>(string seq) containing the selected items</returns>
     static member MultiListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]defaultVals:string seq) : string seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
     ///  Note, this function does not open the file.</summary>
@@ -453,7 +485,8 @@ module ExtensionsUserinterface =
     ///A default file extension</param>
     ///<returns>(string) file name is successful</returns>
     static member OpenFileName([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
     ///  Note, this function does not open the file.</summary>
@@ -471,7 +504,8 @@ module ExtensionsUserinterface =
     ///A default file extension</param>
     ///<returns>(string seq) of selected file names</returns>
     static member OpenFileNames([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
     ///  anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
@@ -492,7 +526,8 @@ module ExtensionsUserinterface =
     ///  If omitted, the active view is used</param>
     ///<returns>(float) index of the menu item picked or -1 if no menu item was picked</returns>
     static member PopupMenu(items:string seq, [<OPT;DEF(null)>]modes:float seq, [<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]view:string) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
@@ -507,7 +542,8 @@ module ExtensionsUserinterface =
     ///A maximum allowable value.</param>
     ///<returns>(float) The newly entered number on success</returns>
     static member RealBox([<OPT;DEF("")>]message:string, [<OPT;DEF(null)>]defaultValNumber:float, [<OPT;DEF("")>]title:string, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display a save dialog box allowing the user to enter a file name.
     ///  Note, this function does not save the file.</summary>
@@ -525,7 +561,8 @@ module ExtensionsUserinterface =
     ///A default file extension</param>
     ///<returns>(string) the file name is successful</returns>
     static member SaveFileName([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null</c>
@@ -536,7 +573,8 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) the newly entered string value</returns>
     static member StringBox([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]defaultValValue:string, [<OPT;DEF(null)>]title:string) : string =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null</c>
@@ -545,5 +583,6 @@ module ExtensionsUserinterface =
     ///The message title</param>
     ///<returns>(unit) in any case</returns>
     static member TextOut([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : unit =
-        failNotImpl()
+        failNotImpl () 
+
 

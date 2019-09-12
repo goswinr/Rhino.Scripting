@@ -246,12 +246,13 @@ type RhinoScriptSyntax () = //private () =
         | :? Extrusion as b -> b.ToBrep(true)
         | _ -> failwithf "*** could not coerce %A to a Brep" id
 
+
+    
     ///<summary>attempt to get curve geometry from the document with a given id.</summary>
-    ///<param name="segmentIndex">index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<param name="id">id (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
-    ///<param name="segmentIndex">index of segment to retrieve</param>
+    ///<param name="segmentIndex">(int, optional) index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>Rhino.Geometry.Curve. Fails on bad input</returns>
-    static member CoerceCurve(segmentIndex:int) (id:'id) = 
+    static member CoerceCurve(id:'id, [<OPT;DEF(-1)>]segmentIndex:int): Curve = 
         if segmentIndex < 0 then 
             match RhinoScriptSyntax.CoerceGeometry(id) with 
             | :? Curve as c -> c
@@ -270,7 +271,7 @@ type RhinoScriptSyntax () = //private () =
     ///<summary>attempt to get surface geometry from the document with a given id</summary>
     ///<param name="objectId">objectId = the object's identifier</param>
     ///<returns>a Rhino.Geometry.Surface. Fails on bad input</returns>
-    static member CoerceSurface(id:'id) =
+    static member CoerceSurface(id:'id): Surface =
         match RhinoScriptSyntax.CoerceGeometry(id) with 
         | :? Surface as c -> c
         | :? Brep as b -> 
@@ -289,11 +290,11 @@ type RhinoScriptSyntax () = //private () =
     ///<summary>attempt to get Rhino LayerObject from the document with a given id or fullame</summary>
     ///<param name="nameOrId">(string or guid or index): layers identifier name</param>
     ///<returns>DocObjectys.Layer  Fails on bad input</returns>
-    static member CoerceLayer (nameOrId:'nameOrId) : Rhino.DocObjects.Layer=
+    static member CoerceLayer (nameOrId:'nameOrId) : DocObjects.Layer=
         try
             match box nameOrId with 
             | :? Guid as g   -> Doc.Layers.FindId(g)
-            | :? string as s -> Doc.Layers.[Doc.Layers.FindByFullPath(s, Rhino.RhinoMath.UnsetIntIndex)]
+            | :? string as s -> Doc.Layers.[Doc.Layers.FindByFullPath(s, RhinoMath.UnsetIntIndex)]
             | :? int as ix   -> Doc.Layers.[ix]
             | _ -> fail()            
         with _ ->
@@ -311,7 +312,7 @@ type RhinoScriptSyntax () = //private () =
     ///<summary>attempt to get Rhino View Object from the name of the view </summary>
     ///<param name="view">(string): name of the view, empty string will return the Active view</param> 
     ///<returns>a Doc.View object. Fails on bad input</returns>
-    static member CoerceView view =    
+    static member CoerceView (view) =    
         if view = "" then Doc.Views.ActiveView
         else 
             let allviews = Doc.Views.GetViewList(true, true) |> Seq.filter (fun v-> v.MainViewport.Name = view)
@@ -324,7 +325,7 @@ type RhinoScriptSyntax () = //private () =
     ///<returns>a Rhino.DocObjects.AnnotationObjectBase. Fails on bad input.</returns>
     static member CoerceAnnotation (id:'id) =
         match RhinoScriptSyntax.CoerceRhinoObject id with
-        | :? Rhino.DocObjects.AnnotationObjectBase as a -> a
+        | :?  DocObjects.AnnotationObjectBase as a -> a
         |_ -> failwithf "*** could not coerceAnnotation: %A is not a Rhino.DocObjects.AnnotationObjectBase " id
         
     ///<summary>attempt to get GeometryBase class from given Guid</summary>
@@ -339,11 +340,10 @@ type RhinoScriptSyntax () = //private () =
 
 
     ///<summary>attempt to get curve geometry from the document with a given id.</summary>
-    ///<param name="segmentIndex">index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<param name="id">id (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
-    ///<param name="segmentIndex">index of segment to retrieve</param>
+    ///<param name="segmentIndex">(int, optional) index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>Rhino.Geometry.Curve. Option</returns>
-    static member TryCoerceCurve(segmentIndex:int) (id:Guid) = 
+    static member TryCoerceCurve(id:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option= 
         match RhinoScriptSyntax.TryCoerceGeometry id with 
         | None -> None
         | Some geo -> 

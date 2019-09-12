@@ -9,12 +9,14 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsSurface =
   type RhinoScriptSyntax with
+    
     ///<summary>Adds a box shaped polysurface to the document</summary>
     ///<param name="corners">(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) 8 points that define the corners of the box. Points need to
     ///  be in counter-clockwise order starting with the bottom rectangle of the box</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
     static member AddBox(corners:Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a cone shaped polysurface to the document</summary>
     ///<param name="basis">(Plane) 3D origin point of the cone or a plane with an apex at the origin
@@ -27,7 +29,8 @@ module ExtensionsSurface =
     ///Cap basis of the cone</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
     static member AddCone(basis:Plane, height:float, radius:float, [<OPT;DEF(true)>]cap:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a planar surface through objects at a designated location. For more
     ///  information, see the Rhino help file for the CutPlane command</summary>
@@ -42,7 +45,8 @@ module ExtensionsSurface =
     ///  If omitted, the world Z axis is used</param>
     ///<returns>(Guid) identifier of new object on success</returns>
     static member AddCutPlane(objectIds:Guid seq, startPoint:Line, endePoint:Line, [<OPT;DEF(null)>]normal:Vector3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a cylinder-shaped polysurface to the document</summary>
     ///<param name="basis">(Plane) The 3D basis point of the cylinder or the basis plane of the cylinder</param>
@@ -55,13 +59,15 @@ module ExtensionsSurface =
     ///Cap the cylinder</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddCylinder(basis:Plane, height:float, radius:float, [<OPT;DEF(true)>]cap:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a surface from 2, 3, or 4 edge curves</summary>
     ///<param name="curveIds">(Guid seq) List or tuple of curves</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a surface from a network of crossing curves</summary>
     ///<param name="curves">(Guid seq) Curves from which to create the surface</param>
@@ -79,7 +85,8 @@ module ExtensionsSurface =
     ///Angle tolerance , in radians?</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddNetworkSrf(curves:Guid seq, [<OPT;DEF(1)>]continuity:float, [<OPT;DEF(0)>]edgeTolerance:float, [<OPT;DEF(0)>]interiorTolerance:float, [<OPT;DEF(0)>]angleTolerance:float) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a NURBS surface object to the document</summary>
     ///<param name="pointCount">(int * int) Number of control points in the u and v direction</param>
@@ -95,7 +102,8 @@ module ExtensionsSurface =
     ///  greater than zero.</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddNurbsSurface(pointCount:int * int, points:Point3d seq, knotsU:float seq, knotsV:float seq, degree:int * int, [<OPT;DEF(null)>]weights:float seq) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Fits a surface through curve, point, point cloud, and mesh objects.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
@@ -125,7 +133,8 @@ module ExtensionsSurface =
     ///  to move.  The default if False.</param>
     ///<returns>(Guid) Identifier of the new surface object .</returns>
     static member AddPatch(objectIds:Guid seq, uvSpansTupleORSurfaceObjectId:float * Guid, [<OPT;DEF(null)>]tolerance:float, [<OPT;DEF(true)>]trim:bool, [<OPT;DEF(0.1)>]pointSpacing:float, [<OPT;DEF(1.0)>]flexibility:float, [<OPT;DEF(1.0)>]surfacePull:float, [<OPT;DEF(false)>]fixEdges:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a single walled surface with a circular profile around a curve</summary>
     ///<param name="curveId">(Guid) Identifier of rail curve</param>
@@ -139,13 +148,15 @@ module ExtensionsSurface =
     ///Attempt to fit a single surface</param>
     ///<returns>(Guid seq) identifiers of new objects created</returns>
     static member AddPipe(curveId:Guid, parameters:float seq, radii:float seq, [<OPT;DEF(0)>]blendeType:int, [<OPT;DEF(0)>]cap:float, [<OPT;DEF(false)>]fit:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates one or more surfaces from planar curves</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar surfaces</param>
     ///<returns>(Guid seq) identifiers of surfaces created on success</returns>
     static member AddPlanarSrf(objectIds:Guid seq) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Create a plane surface and add it to the document.</summary>
     ///<param name="plane">(Plane) The plane.</param>
@@ -153,7 +164,8 @@ module ExtensionsSurface =
     ///<param name="vDir">(float) The magnitude in the V direction.</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
     static member AddPlaneSurface(plane:Plane, uDir:float, vDir:float) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a surface created by lofting curves to the document.
     ///  - no curve sorting performed. pass in curves in the order you want them sorted
@@ -196,7 +208,8 @@ module ExtensionsSurface =
     ///Close the loft back to the first curve</param>
     ///<returns>(Guid seq) Array containing the identifiers of the new surface objects</returns>
     static member AddLoftSrf(objectIds:Guid seq, [<OPT;DEF(null)>]start:Point3d, [<OPT;DEF(null)>]ende:Point3d, [<OPT;DEF(0)>]loftType:int, [<OPT;DEF(0)>]simplifyMethod:float, [<OPT;DEF(0)>]value:float, [<OPT;DEF(false)>]closed:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Create a surface by revolving a curve around an axis</summary>
     ///<param name="curveId">(Guid) Identifier of profile curve</param>
@@ -207,7 +220,8 @@ module ExtensionsSurface =
     ///End angles of revolve</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddRevSrf(curveId:Guid, axis:Line, [<OPT;DEF(0.0)>]startAngle:float, [<OPT;DEF(360.0)>]endeAngle:float) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Add a spherical surface to the document</summary>
     ///<param name="centerOrPlane">(Plane) Center point of the sphere. If a plane is input,
@@ -215,7 +229,8 @@ module ExtensionsSurface =
     ///<param name="radius">(float) Radius of the sphere in the current model units</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
     static member AddSphere(centerOrPlane:Plane, radius:float) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
     ///  defined cutting planes through a surface or polysurface. For more
@@ -228,7 +243,8 @@ module ExtensionsSurface =
     ///Distance between contour curves.</param>
     ///<returns>(Guid) ids of new contour curves on success</returns>
     static member AddSrfContourCrvs(objectId:Guid, pointsOrPlane:Point3d * Plane, [<OPT;DEF(null)>]interval:float) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u,v directions</param>
@@ -237,13 +253,15 @@ module ExtensionsSurface =
     ///Two numbers defining degree of the surface in the u,v directions</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
     static member AddSrfControlPtGrid(count:int * int, points:Point3d seq, [<OPT;DEF(null)>]degree:int * int) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a new surface from either 3 or 4 corner points.</summary>
     ///<param name="points">(Point3d * Point3d * Point3d * Point3d) List of either 3 or 4 corner points</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
     static member AddSrfPt(points:Point3d * Point3d * Point3d * Point3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u,v directions</param>
@@ -254,7 +272,8 @@ module ExtensionsSurface =
     ///Two booleans defining if the surface is closed in the u,v directions</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
     static member AddSrfPtGrid(count:int * int, points:Point3d seq, [<OPT;DEF(null)>]degree:int * int, [<OPT;DEF(null)>]closed:bool * bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a surface created through profile curves that define the surface
     ///  shape and one curve that defines a surface edge.</summary>
@@ -264,7 +283,8 @@ module ExtensionsSurface =
     ///If True, then create a closed surface</param>
     ///<returns>(Guid seq) of new surface objects</returns>
     static member AddSweep1(rail:Guid, shapes:Guid seq, [<OPT;DEF(false)>]closed:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a surface created through profile curves that define the surface
     ///  shape and two curves that defines a surface edge.</summary>
@@ -274,7 +294,8 @@ module ExtensionsSurface =
     ///If True, then create a closed surface</param>
     ///<returns>(Guid seq) of new surface objects</returns>
     static member AddSweep2(rails:Guid * Guid, shapes:Guid seq, [<OPT;DEF(false)>]closed:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a surface created through profile curves that define the surface
     ///  shape and two curves that defines a surface edge.</summary>
@@ -285,7 +306,8 @@ module ExtensionsSurface =
     ///If True, surface will be locally scaled. Defaults to False</param>
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddRailRevSrf(profile:Guid, rail:Guid, axis:Point3d * Point3d, [<OPT;DEF(false)>]scaleHeight:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Adds a torus shaped revolved surface to the document</summary>
     ///<param name="basis">(Point3d) 3D origin point of the torus or the basis plane of the torus</param>
@@ -296,7 +318,8 @@ module ExtensionsSurface =
     ///  If omitted, a torus that is parallel to the world XY plane is created</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
     static member AddTorus(basis:Point3d, majorRadius:float, minorRadius:float, [<OPT;DEF(null)>]direction:Point3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Performs a boolean difference operation on two sets of input surfaces
     ///  and polysurfaces. For more details, see the BooleanDifference command in
@@ -307,7 +330,8 @@ module ExtensionsSurface =
     ///Delete all input objects</param>
     ///<returns>(Guid seq) of identifiers of newly created objects on success</returns>
     static member BooleanDifference(input0:Guid seq, input1:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Performs a boolean intersection operation on two sets of input surfaces
     ///  and polysurfaces. For more details, see the BooleanIntersection command in
@@ -318,7 +342,8 @@ module ExtensionsSurface =
     ///Delete all input objects</param>
     ///<returns>(Guid seq) of identifiers of newly created objects on success</returns>
     static member BooleanIntersection(input0:Guid seq, input1:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Performs a boolean union operation on a set of input surfaces and
     ///  polysurfaces. For more details, see the BooleanUnion command in the
@@ -328,7 +353,8 @@ module ExtensionsSurface =
     ///Delete all input objects</param>
     ///<returns>(Guid seq) of identifiers of newly created objects on success</returns>
     static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the point on a surface or polysurface that is closest to a test
     ///  point. This function works on both untrimmed and trimmed surfaces.</summary>
@@ -348,13 +374,15 @@ module ExtensionsSurface =
     ///    3        Vector3d         The normal to the brep_face, or the tangent
     ///      to the brep_edge.</returns>
     static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * (float * float) * (float * float) * Vector3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Caps planar holes in a surface or polysurface</summary>
     ///<param name="surfaceId">(Guid) The identifier of the surface or polysurface to cap.</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CapPlanarHoles(surfaceId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Duplicates the edge curves of a surface or polysurface. For more
     ///  information, see the Rhino help file for information on the DupEdge
@@ -364,7 +392,8 @@ module ExtensionsSurface =
     ///Select the duplicated edge curves. The default is not to select (False).</param>
     ///<returns>(Guid seq) identifying the newly created curve objects .</returns>
     static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Create curves that duplicate a surface or polysurface border</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
@@ -375,7 +404,8 @@ module ExtensionsSurface =
     ///  2=interior</param>
     ///<returns>(Guid seq) list of curve ids on success</returns>
     static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Evaluates a surface at a U,V parameter</summary>
     ///<param name="surfaceId">(Guid) The object's identifier.</param>
@@ -383,7 +413,8 @@ module ExtensionsSurface =
     ///<param name="v">(float * float) V of 'u, v parameters to evaluate.' (FIXME 0)</param>
     ///<returns>(Point3d) a 3-D point</returns>
     static member EvaluateSurface(surfaceId:Guid, u:float * float, v:float * float) : Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Lengthens an untrimmed surface object</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
@@ -396,7 +427,8 @@ module ExtensionsSurface =
     ///  edge. If False, the surface is extended in a straight line from the edge</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member ExtendSurface(surfaceId:Guid, parameter:float * float, length:float, [<OPT;DEF(true)>]smooth:bool) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Explodes, or unjoins, one or more polysurface objects. Polysurfaces
     ///  will be exploded into separate surfaces</summary>
@@ -405,7 +437,8 @@ module ExtensionsSurface =
     ///Delete input objects after exploding</param>
     ///<returns>(Guid seq) of identifiers of exploded pieces on success</returns>
     static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Extracts isoparametric curves from a surface</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
@@ -416,7 +449,8 @@ module ExtensionsSurface =
     ///  2 = both</param>
     ///<returns>(Guid seq) of curve ids on success</returns>
     static member ExtractIsoCurve(surfaceId:Guid, parameter:float * float, direction:float) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Separates or copies a surface or a copy of a surface from a polysurface</summary>
     ///<param name="objectId">(Guid) Polysurface identifier</param>
@@ -425,21 +459,24 @@ module ExtensionsSurface =
     ///If True the faces are copied. If False, the faces are extracted</param>
     ///<returns>(Guid seq) identifiers of extracted surface objects on success</returns>
     static member ExtractSurface(objectId:Guid, faceIndices:float seq, [<OPT;DEF(false)>]copy:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a surface by extruding a curve along a path</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="pathId">(Guid) Identifier of the path curve</param>
     ///<returns>(Guid) identifier of new surface on success</returns>
     static member ExtrudeCurve(curveId:Guid, pathId:Guid) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates a surface by extruding a curve to a point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="point">(Point3d) 3D point</param>
     ///<returns>(Guid) identifier of new surface on success</returns>
     static member ExtrudeCurvePoint(curveId:Guid, point:Point3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Create surface by extruding a curve along two points that define a line</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
@@ -447,7 +484,8 @@ module ExtensionsSurface =
     ///<param name="endePoint">(Point3d) End point of '3D points that specify distance and direction' (FIXME 0)</param>
     ///<returns>(Guid) identifier of new surface on success</returns>
     static member ExtrudeCurveStraight(curveId:Guid, startPoint:Point3d, endePoint:Point3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Create surface by extruding along a path curve</summary>
     ///<param name="surface">(Guid) Identifier of the surface to extrude</param>
@@ -456,7 +494,8 @@ module ExtensionsSurface =
     ///Extrusion is capped at both ends</param>
     ///<returns>(Guid) identifier of new surface on success</returns>
     static member ExtrudeSurface(surface:Guid, curve:Guid, [<OPT;DEF(true)>]cap:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Create constant radius rolling ball fillets between two surfaces. Note,
     ///  this function does not trim the original surfaces of the fillets</summary>
@@ -470,14 +509,15 @@ module ExtensionsSurface =
     ///Same as uvparam0, but for surface1</param>
     ///<returns>(Guid) ids of surfaces created on success</returns>
     static member FilletSurfaces(surface0:Guid, surface1:Guid, radius:float, [<OPT;DEF(null)>]uvparam0:float * float, [<OPT;DEF(null)>]uvparam1:float * float) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the normal direction of a surface. This feature can
     /// also be found in Rhino's Dir command</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
     ///<returns>(Vector3d) The current normal orientation</returns>
     static member FlipSurface(surfaceId:Guid) : Vector3d =
-        failNotImpl()
+        failNotImpl () 
 
     ///<summary>Changes the normal direction of a surface. This feature can
     /// also be found in Rhino's Dir command</summary>
@@ -485,7 +525,8 @@ module ExtensionsSurface =
     ///<param name="flip">(bool)New normal orientation, either flipped(True) or not flipped (False).</param>
     ///<returns>(unit) unit</returns>
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Intersects a brep object with another brep object. Note, unlike the
     ///  SurfaceSurfaceIntersection function this function works on trimmed surfaces.</summary>
@@ -496,7 +537,8 @@ module ExtensionsSurface =
     ///  the current absolute tolerance is used.</param>
     ///<returns>(Guid seq) identifying the newly created intersection curve and point objects .</returns>
     static member IntersectBreps(brep1:Guid, brep2:Guid, [<OPT;DEF(null)>]tolerance:float) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Calculates intersections of two spheres</summary>
     ///<param name="spherePlane0">(Plane) An equatorial plane of the first sphere. The origin of the
@@ -509,32 +551,37 @@ module ExtensionsSurface =
     ///  [1] = Point of intersection or plane of circle intersection
     ///  [2] = radius of circle if circle intersection</returns>
     static member IntersectSpheres(spherePlane0:Plane, sphereRadius0:float, spherePlane1:Plane, sphereRadius1:float) : float * Point3d * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies an object is a Brep, or a boundary representation model, object.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
     ///<returns>(bool) True , otherwise False.</returns>
     static member IsBrep(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Determines if a surface is a portion of a cone</summary>
     ///<param name="objectId">(Guid) The surface object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsCone(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Determines if a surface is a portion of a cone</summary>
     ///<param name="objectId">(Guid) The cylinder object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsCylinder(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies an object is a plane surface. Plane surfaces can be created by
     ///  the Plane command. Note, a plane surface is not a planar NURBS surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPlaneSurface(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies that a point is inside a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -546,14 +593,16 @@ module ExtensionsSurface =
     ///  strict inclusion. If omitted, Rhino's internal tolerance is used</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPointInSurface(objectId:Guid, point:Point3d, [<OPT;DEF(false)>]strictlyIn:bool, [<OPT;DEF(null)>]tolerance:float) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies that a point lies on a surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPointOnSurface(objectId:Guid, point:Point3d) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies an object is a polysurface. Polysurfaces consist of two or more
     ///  surfaces joined together. If the polysurface fully encloses a volume, it is
@@ -561,27 +610,31 @@ module ExtensionsSurface =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True is successful, otherwise False</returns>
     static member IsPolysurface(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a polysurface object is closed. If the polysurface fully encloses
     ///  a volume, it is considered a solid.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True is successful, otherwise False</returns>
     static member IsPolysurfaceClosed(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Determines if a surface is a portion of a sphere</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsSphere(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies an object is a surface. Brep objects with only one face are
     ///  also considered surfaces.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
     ///<returns>(bool) True , otherwise False.</returns>
     static member IsSurface(objectId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a surface object is closed in the specified direction.  If the
     ///  surface fully encloses a volume, it is considered a solid</summary>
@@ -589,14 +642,16 @@ module ExtensionsSurface =
     ///<param name="direction">(float) 0=U direction check, 1=V direction check</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfaceClosed(surfaceId:Guid, direction:float) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a surface object is periodic in the specified direction.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="direction">(float) 0=U direction check, 1=V direction check</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfacePeriodic(surfaceId:Guid, direction:float) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a surface object is planar</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
@@ -605,13 +660,15 @@ module ExtensionsSurface =
     ///  tolerance is used</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(null)>]tolerance:float) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a surface object is rational</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsSurfaceRational(surfaceId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a surface object is singular in the specified direction.
     ///  Surfaces are considered singular if a side collapses to a point.</summary>
@@ -622,25 +679,29 @@ module ExtensionsSurface =
     ///  3=west</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfaceSingular(surfaceId:Guid, direction:float) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Verifies a surface object has been trimmed</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfaceTrimmed(surfaceId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Determines if a surface is a portion of a torus</summary>
     ///<param name="surfaceId">(Guid) The surface object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsTorus(surfaceId:Guid) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Gets the sphere definition from a surface, if possible.</summary>
     ///<param name="surfaceId">(Guid) The identifier of the surface object</param>
     ///<returns>(Plane * float) The equatorial plane of the sphere, and its radius.</returns>
     static member SurfaceSphere(surfaceId:Guid) : Plane * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Joins two or more surface or polysurface objects together to form one
     ///  polysurface object</summary>
@@ -649,7 +710,19 @@ module ExtensionsSurface =
     ///Delete the original surfaces</param>
     ///<returns>(Guid) identifier of newly created object on success</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
+
+    //(FIXME) VarOutTypes
+    ///<summary>Makes an existing surface a periodic NURBS surface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="direction">(float) The direction to make periodic, either 0=U or 1=V</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete the input surface</param>
+    ///<returns>(Guid) if delete_input is False, identifier of the new surface</returns>
+    static member MakeSurfacePeriodic(surfaceId:Guid, direction:float, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        failNotImpl () 
+
 
     ///<summary>Offsets a trimmed or untrimmed surface by a distance. The offset surface
     ///  will be added to Rhino.</summary>
@@ -664,7 +737,8 @@ module ExtensionsSurface =
     ///Make a solid object</param>
     ///<returns>(Guid) identifier of the new object</returns>
     static member OffsetSurface(surfaceId:Guid, distance:float, [<OPT;DEF(null)>]tolerance:float, [<OPT;DEF(false)>]bothSides:bool, [<OPT;DEF(false)>]createSolid:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Pulls a curve object to a surface object</summary>
     ///<param name="surface">(Guid) The surface's identifier</param>
@@ -673,7 +747,8 @@ module ExtensionsSurface =
     ///Should the input items be deleted</param>
     ///<returns>(Guid seq) of new curves</returns>
     static member PullCurve(surface:Guid, curve:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Rebuilds a surface to a given degree and control point count. For more
     ///  information see the Rhino help file for the Rebuild command</summary>
@@ -684,7 +759,8 @@ module ExtensionsSurface =
     ///Two numbers that identify the surface point count in both the U and V directions</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RebuildSurface(objectId:Guid, [<OPT;DEF(null)>]degree:int * int, [<OPT;DEF(null)>]pointcount:int * int) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Deletes a knot from a surface object.</summary>
     ///<param name="surface">(Guid) The reference of the surface object</param>
@@ -693,7 +769,8 @@ module ExtensionsSurface =
     ///<param name="vDirection">(bool) If True, or 1, the V direction will be addressed. If False, or 0, the U direction.</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RemoveSurfaceKnot(surface:Guid, uvParameter:float * float, vDirection:bool) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Reverses U or V directions of a surface, or swaps (transposes) U and V
     ///  directions.</summary>
@@ -704,7 +781,8 @@ module ExtensionsSurface =
     ///  4 = transpose U and V (values can be combined)</param>
     ///<returns>(bool) indicating success or failure</returns>
     static member ReverseSurface(surfaceId:Guid, direction:float) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Shoots a ray at a collection of surfaces</summary>
     ///<param name="surfaceIds">(Guid seq) One of more surface identifiers</param>
@@ -714,7 +792,8 @@ module ExtensionsSurface =
     ///The maximum number of times the ray will be reflected</param>
     ///<returns>(Point3d seq) of reflection points on success</returns>
     static member ShootRay(surfaceIds:Guid seq, startPoint:Point3d, direction:Vector3d, [<OPT;DEF(10)>]reflections:float) : Point3d seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Creates the shortest possible curve(geodesic) between two points on a
     ///  surface. For more details, see the ShortPath command in Rhino help</summary>
@@ -723,7 +802,24 @@ module ExtensionsSurface =
     ///<param name="endePoint">(Point3d) End point of 'start/end points of the short curve' (FIXME 0)</param>
     ///<returns>(Guid) identifier of the new surface on success</returns>
     static member ShortPath(surfaceId:Guid, startPoint:Point3d, endePoint:Point3d) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
+
+    //(FIXME) VarOutTypes
+    ///<summary>Shrinks the underlying untrimmed surfaces near to the trimming
+    ///  boundaries. See the ShrinkTrimmedSrf command in the Rhino help.</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="createCopy">(bool) Optional, Default Value: <c>false</c>
+    ///If True, the original surface is not deleted</param>
+    ///<returns>(bool) If create_copy is False, True or False indicating success or failure</returns>
+    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : bool =
+        failNotImpl () 
+
+
+    
+    static member internal GetMassProperties() : obj =
+        failNotImpl () 
+
 
     ///<summary>Splits a brep</summary>
     ///<param name="brepId">(Guid) Identifier of the brep to split</param>
@@ -732,20 +828,28 @@ module ExtensionsSurface =
     ///Delete input breps</param>
     ///<returns>(Guid seq) identifiers of split pieces on success</returns>
     static member SplitBrep(brepId:Guid, cutterId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Calculate the area of a surface or polysurface object. The results are
     ///  based on the current drawing units</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(float * float) of area information on success (area, absolute error bound)</returns>
     static member SurfaceArea(objectId:Guid) : float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Calculates the area centroid of a surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(Point3d * float * float * float) Area centroid information (Area Centroid, Error bound in X, Y, Z)</returns>
     static member SurfaceAreaCentroid(objectId:Guid) : Point3d * float * float * float =
-        failNotImpl()
+        failNotImpl () 
+
+
+    
+    static member internal AreaMomentsHelper() : obj =
+        failNotImpl () 
+
 
     ///<summary>Calculates area moments of inertia of a surface or polysurface object.
     ///  See the Rhino help for "Mass Properties calculation details"</summary>
@@ -767,14 +871,16 @@ module ExtensionsSurface =
     ///  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
     static member SurfaceAreaMoments(surfaceId:Guid) : float seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns U,V parameters of point on a surface that is closest to a test point</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
     ///<returns>(float * float) The U,V parameters of the closest point on the surface .</returns>
     static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the definition of a surface cone</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -784,7 +890,8 @@ module ExtensionsSurface =
     ///  [1]   the height of the cone
     ///  [2]   the radius of the cone</returns>
     static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the curvature of a surface at a U,V parameter. See Rhino help
     ///  for details of surface curvature</summary>
@@ -800,20 +907,53 @@ module ExtensionsSurface =
     ///  [6]   gaussian curvature
     ///  [7]   mean curvature</returns>
     static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * float * float * float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the definition of a cylinder surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(Plane * float * float) of the cylinder plane, height, radius on success</returns>
     static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
-        failNotImpl()
+        failNotImpl () 
+
+
+    //(FIXME) VarOutTypes
+    ///<summary>Returns the degree of a surface object in the specified direction</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="direction">(int) Optional, Default Value: <c>2</c>
+    ///The degree U, V direction
+    ///  0 = U
+    ///  1 = V
+    ///  2 = both</param>
+    ///<returns>(int) Single number if `direction` = 0 or 1</returns>
+    static member SurfaceDegree(surfaceId:Guid, [<OPT;DEF(2)>]direction:int) : int =
+        failNotImpl () 
+
 
     ///<summary>Returns the domain of a surface object in the specified direction.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="direction">(float) Domain direction 0 = U, or 1 = V</param>
     ///<returns>(float * float) containing the domain interval in the specified direction</returns>
     static member SurfaceDomain(surfaceId:Guid, direction:float) : float * float =
-        failNotImpl()
+        failNotImpl () 
+
+
+    //(FIXME) VarOutTypes
+    ///<summary>Returns the edit, or Greville points of a surface object. For each
+    ///  surface control point, there is a corresponding edit point</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="returnParameters">(bool) Optional, Default Value: <c>false</c>
+    ///If False, edit points are returned as a list of
+    ///  3D points. If True, edit points are returned as a list of U,V surface
+    ///  parameters</param>
+    ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
+    ///If True, all surface edit points are returned. If False,
+    ///  the function will return surface edit points based on whether or not the
+    ///  surface is closed or periodic</param>
+    ///<returns>(Point3d seq) if return_parameters is False, a list of 3D points</returns>
+    static member SurfaceEditPoints(surfaceId:Guid, [<OPT;DEF(false)>]returnParameters:bool, [<OPT;DEF(true)>]returnAll:bool) : Point3d seq =
+        failNotImpl () 
+
 
     ///<summary>A general purpose surface evaluator</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -830,7 +970,8 @@ module ExtensionsSurface =
     ///  [6]      etc...
     ///    None: If not successful, or on error.</returns>
     static member SurfaceEvaluate(surfaceId:Guid, parameter:float * float, derivative:float) : Point3d seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns a plane based on the normal, u, and v directions at a surface
     ///  U,V parameter</summary>
@@ -838,7 +979,8 @@ module ExtensionsSurface =
     ///<param name="uvParameter">(float * float) U,v parameter to evaluate</param>
     ///<returns>(Plane) plane on success</returns>
     static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the isocurve density of a surface or polysurface object.
     /// An isoparametric curve is a curve of constant U or V value on a surface.
@@ -852,7 +994,7 @@ module ExtensionsSurface =
     ///      are no interior knots
     ///        >=2: Display boundary and knot wires and (N+1) interior wires</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid) : int =
-        failNotImpl()
+        failNotImpl () 
 
     ///<summary>Sets the isocurve density of a surface or polysurface object.
     /// An isoparametric curve is a curve of constant U or V value on a surface.
@@ -867,14 +1009,16 @@ module ExtensionsSurface =
     ///        >=2: Display boundary and knot wires and (N+1) interior wires</param>
     ///<returns>(unit) unit</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid, density:float) : unit =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the control point count of a surface
     ///  surfaceId = the surface's identifier</summary>
     ///<param name="surfaceId">(Guid) The surface object's identifier</param>
     ///<returns>(int * int) a list containing (U count, V count) on success</returns>
     static member SurfaceKnotCount(surfaceId:Guid) : int * int =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the knots, or knot vector, of a surface object.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -885,14 +1029,16 @@ module ExtensionsSurface =
     ///    [1]     Knot vector in V direction
     ///  None: if not successful, or on error.</returns>
     static member SurfaceKnots(surfaceId:Guid) : float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns 3D vector that is the normal to a surface at a parameter</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="uvParameter">(float * float) The uv parameter to evaluate</param>
     ///<returns>(Vector3d) Normal vector on success</returns>
     static member SurfaceNormal(surfaceId:Guid, uvParameter:float * float) : Vector3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Converts surface parameter to a normalized surface parameter; one that
     ///  ranges between 0.0 and 1.0 in both the U and V directions</summary>
@@ -900,7 +1046,8 @@ module ExtensionsSurface =
     ///<param name="parameter">(float * float) The surface parameter to convert</param>
     ///<returns>(float * float) normalized surface parameter</returns>
     static member SurfaceNormalizedParameter(surfaceId:Guid, parameter:float * float) : float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Converts normalized surface parameter to a surface parameter; or
     ///  within the surface's domain</summary>
@@ -908,14 +1055,16 @@ module ExtensionsSurface =
     ///<param name="parameter">(float * float) The normalized parameter to convert</param>
     ///<returns>(float * float) surface parameter on success</returns>
     static member SurfaceParameter(surfaceId:Guid, parameter:float * float) : float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the control point count of a surface
     ///  surfaceId = the surface's identifier</summary>
     ///<param name="surfaceId">(Guid) The surface object's identifier</param>
     ///<returns>(int * int) THe number of control points in UV direction. (U count, V count)</returns>
     static member SurfacePointCount(surfaceId:Guid) : int * int =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the control points, or control vertices, of a surface object</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -925,7 +1074,8 @@ module ExtensionsSurface =
     ///  the surface is closed or periodic</param>
     ///<returns>(Point3d seq) the control points</returns>
     static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns the definition of a surface torus</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -934,19 +1084,22 @@ module ExtensionsSurface =
     ///  [1]   the major radius of the torus
     ///  [2]   the minor radius of the torus</returns>
     static member SurfaceTorus(surfaceId:Guid) : Plane * float * float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Calculates volume of a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(float) volume data returned (Volume, Error bound) on success</returns>
     static member SurfaceVolume(objectId:Guid) : float =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Calculates volume centroid of a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(Point3d) volume data returned (Volume Centriod, Error bound) on success</returns>
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Calculates volume moments of inertia of a surface or polysurface object.
     ///  For more information, see Rhino help for "Mass Properties calculation details"</summary>
@@ -968,7 +1121,8 @@ module ExtensionsSurface =
     ///  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
     static member SurfaceVolumeMoments(surfaceId:Guid) : float seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Returns list of weight values assigned to the control points of a surface.
     ///  The number of weights returned will be equal to the number of control points
@@ -976,7 +1130,8 @@ module ExtensionsSurface =
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(float seq) point weights.</returns>
     static member SurfaceWeights(objectId:Guid) : float seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Trims a surface using an oriented cutter</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
@@ -986,7 +1141,8 @@ module ExtensionsSurface =
     ///  tolerance is used</param>
     ///<returns>(Guid seq) identifiers of retained components on success</returns>
     static member TrimBrep(objectId:Guid, cutter:Plane, [<OPT;DEF(null)>]tolerance:float) : Guid seq =
-        failNotImpl()
+        failNotImpl () 
+
 
     ///<summary>Remove portions of the surface outside of the specified interval</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
@@ -997,12 +1153,31 @@ module ExtensionsSurface =
     ///Should the input surface be deleted</param>
     ///<returns>(Guid) new surface identifier on success</returns>
     static member TrimSurface(surfaceId:Guid, direction:float, interval:float*float, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        failNotImpl()
+        failNotImpl () 
+
+
+    //(FIXME) VarOutTypes
+    ///<summary>Flattens a developable surface or polysurface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
+    ///If True, the resulting surfaces ar not joined</param>
+    ///<param name="followingGeometry">(Guid seq) Optional, Default Value: <c>null</c>
+    ///List of curves, dots, and points which
+    ///  should be unrolled with the surface</param>
+    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>null</c>
+    ///Absolute tolerance</param>
+    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>null</c>
+    ///Relative tolerance</param>
+    ///<returns>(Guid seq) of unrolled surface ids</returns>
+    static member UnrollSurface(surfaceId:Guid, [<OPT;DEF(false)>]explode:bool, [<OPT;DEF(null)>]followingGeometry:Guid seq, [<OPT;DEF(null)>]absoluteTolerance:float, [<OPT;DEF(null)>]relativeTolerance:float) : Guid seq =
+        failNotImpl () 
+
 
     ///<summary>Changes the degree of a surface object.  For more information see the Rhino help file for the ChangeDegree command.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
     ///<param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
     static member ChangeSurfaceDegree(objectId:Guid, degree:int * int) : bool =
-        failNotImpl()
+        failNotImpl () 
+
 
