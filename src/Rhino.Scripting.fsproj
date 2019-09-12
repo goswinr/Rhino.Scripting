@@ -8,21 +8,12 @@
     <!--assembly info -->
     <Version>0.0.0.1</Version>
     <Authors>Goswin Rothenthal</Authors>
-    <Company>Studio Rothenthal</Company>
     <Product>Rhino.Scripting</Product>
-    <PackageId>Rhino.Scripting</PackageId>
     <AssemblyVersion>0.0.0.1</AssemblyVersion>
     <FileVersion>0.0.0.1</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Description>Rhino Script Syntax for F# and C#</Description>
-    <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>
-    <PackageLicenseUrl>License URL?</PackageLicenseUrl>
-    <PackageProjectUrl>Project URL?</PackageProjectUrl>
-    <PackageIconUrl>Icon URL?</PackageIconUrl>
-    <RepositoryUrl>Repo URL?</RepositoryUrl>
-    <RepositoryType>Repo type?</RepositoryType>
-    <PackageTags>Tags?</PackageTags>
-    <PackageReleaseNotes>Release?</PackageReleaseNotes>
+    <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>    
   </PropertyGroup>
   
   <ItemGroup>    
@@ -69,7 +60,7 @@
     <PackageReference Update="FSharp.Core" Version="4.7.0" />
   </ItemGroup>
 
-  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 
+  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 (does not work ?)
   </PropertyGroup>
     <AllowedReferenceRelatedFileExtensions>
       .mdb
