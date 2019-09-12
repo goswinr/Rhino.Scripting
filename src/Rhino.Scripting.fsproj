@@ -1,5 +1,4 @@
-﻿
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>  
@@ -70,11 +69,13 @@
     <PackageReference Update="FSharp.Core" Version="4.7.0" />
   </ItemGroup>
 
-  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 -->
-  <AllowedReferenceRelatedFileExtensions>
-    .mdb
-    .pdb
-  </AllowedReferenceRelatedFileExtensions>
+  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 
+  </PropertyGroup>
+    <AllowedReferenceRelatedFileExtensions>
+      .mdb
+      .pdb
+    </AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
 
   <Target Name="AfterBuild">
     <ItemGroup>
@@ -83,6 +84,7 @@
     </ItemGroup>
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
   </Target>
+  -->
   
 
 </Project>
