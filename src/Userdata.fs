@@ -18,19 +18,19 @@ module ExtensionsUserdata =
     ///Entry name. If omitted, all entries for section are removed</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteDocumentData([<OPT;DEF(null)>]section:string, [<OPT;DEF(null)>]entry:string) : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the number of user data strings in the current document</summary>
     ///<returns>(int) the number of user data strings in the current document</returns>
     static member DocumentDataCount() : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the number of user text strings in the current document</summary>
     ///<returns>(int) the number of user text strings in the current document</returns>
     static member DocumentUserTextCount() : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     //(FIXME) VarOutTypes
@@ -42,7 +42,7 @@ module ExtensionsUserdata =
     ///<returns>(string seq) of all section names if section name is omitted
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
     static member GetDocumentData([<OPT;DEF(null)>]section:string, [<OPT;DEF(null)>]entry:string) : string seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     //(FIXME) VarOutTypes
@@ -51,7 +51,7 @@ module ExtensionsUserdata =
     ///Key to use for retrieving user text. If empty, all keys are returned</param>
     ///<returns>(string) If key is specified, then the associated value .</returns>
     static member GetDocumentUserText([<OPT;DEF(null)>]key:string) : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     //(FIXME) VarOutTypes
@@ -63,19 +63,19 @@ module ExtensionsUserdata =
     ///Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value</returns>
     static member GetUserText(objectId:Guid, [<OPT;DEF(null)>]key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Verifies the current document contains user data</summary>
     ///<returns>(bool) True or False indicating the presence of Script user data</returns>
     static member IsDocumentData() : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Verifies the current document contains user text</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text</returns>
     static member IsDocumentUserText() : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Verifies that an object contains user text</summary>
@@ -86,7 +86,7 @@ module ExtensionsUserdata =
     ///  2 = geometry user text
     ///  3 = both attribute and geometry user text</returns>
     static member IsUserText(objectId:Guid) : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Adds or sets a user data string to the current document</summary>
@@ -95,7 +95,7 @@ module ExtensionsUserdata =
     ///<param name="value">(string) The string value</param>
     ///<returns>(unit) unit</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Sets or removes user text stored in the document</summary>
@@ -105,7 +105,7 @@ module ExtensionsUserdata =
     ///  specified by key will be deleted</param>
     ///<returns>(bool) True or False indicating success</returns>
     static member SetDocumentUserText(key:string, [<OPT;DEF(null)>]value:string) : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Sets or removes user text stored on an object.</summary>
@@ -118,6 +118,6 @@ module ExtensionsUserdata =
     ///Location on the object to store the user text</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member SetUserText(objectId:string, key:string, [<OPT;DEF(null)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 

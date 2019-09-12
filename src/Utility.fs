@@ -13,13 +13,13 @@ module ExtensionsUtility =
     ///<summary>Return True if the script is being executed in the context of Rhino</summary>
     ///<returns>(bool) True if the script is being executed in the context of Rhino</returns>
     static member ContextIsRhino() : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Return True if the script is being executed in a grasshopper component</summary>
     ///<returns>(bool) True if the script is being executed in a grasshopper component</returns>
     static member ContextIsGrasshopper() : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Measures the angle between two points</summary>
@@ -37,7 +37,7 @@ module ExtensionsUtility =
     ///  element 3 = delta in the Y direction
     ///  element 4 = delta in the Z direction</returns>
     static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(true)>]plane:bool) : float * float * float * float * float * float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Measures the angle between two lines</summary>
@@ -47,19 +47,19 @@ module ExtensionsUtility =
     ///  0 The angle in degrees.
     ///  1 The reflex angle in degrees.</returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns a text string to the Windows clipboard</summary>
     ///<returns>(string) The current text in the clipboard</returns>
     static member ClipboardText() : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets a text string to the Windows clipboard</summary>
     ///<param name="text">(string)Text to set</param>
     ///<returns>(unit) unit</returns>
     static member ClipboardText(text:string) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Changes the luminance of a red-green-blue value. Hue and saturation are
@@ -72,42 +72,42 @@ module ExtensionsUtility =
     ///  current luminance. If False, luma specified the absolute luminance.</param>
     ///<returns>(Drawing.Color) modified rgb value</returns>
     static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]scale:bool) : Drawing.Color =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Retrieves intensity value for the blue component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(float) The blue component , otherwise None</returns>
     static member ColorBlueValue(rgb:Drawing.Color) : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Retrieves intensity value for the green component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(float) The green component , otherwise None</returns>
     static member ColorGreenValue(rgb:Drawing.Color) : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts colors from hue-lumanence-saturation to RGB</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value , otherwise False</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Retrieves intensity value for the red component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(Drawing.Color) The red color value , otherwise False</returns>
     static member ColorRedValue(rgb:Drawing.Color) : Drawing.Color =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Convert colors from RGB to HLS</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(Drawing.Color) The HLS color value , otherwise False</returns>
     static member ColorRGBToHLS(rgb:Drawing.Color) : Drawing.Color =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Removes duplicates from an array of numbers.</summary>
@@ -116,7 +116,7 @@ module ExtensionsUtility =
     ///The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded.  If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(float seq) numbers with duplicates removed .</returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(null)>]tolerance:float) : float seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Removes duplicates from a list of 3D points.</summary>
@@ -127,7 +127,7 @@ module ExtensionsUtility =
     ///  is used.</param>
     ///<returns>(Point3d seq) of 3D points with duplicates removed .</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(-1)>]tolerance:float) : Point3d seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     //(FIXME) VarOutTypes
@@ -137,7 +137,7 @@ module ExtensionsUtility =
     ///<param name="point2">(Point3d) The second 3D point or list of 3-D points.</param>
     ///<returns>(Point3d) If point2 is a 3D point then the distance .</returns>
     static member Distance(point1:Point3d, point2:Point3d) : Point3d =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     //(FIXME) VarOutTypes
@@ -149,7 +149,7 @@ module ExtensionsUtility =
     ///Entry whose associated string is to be returned</param>
     ///<returns>(string seq) A list containing all section names</returns>
     static member GetSettings(filename:string, [<OPT;DEF(null)>]section:string, [<OPT;DEF(null)>]entry:string) : string seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns 3D point that is a specified angle and distance from a 3D point</summary>
@@ -161,21 +161,21 @@ module ExtensionsUtility =
     ///  x-y plane is used</param>
     ///<returns>(Point3d) resulting point is successful</returns>
     static member Polar(point:Point3d, angleDegrees:int, distance:float, [<OPT;DEF(null)>]plane:Plane) : Point3d =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float seq) A one-dimensional list containing real numbers, , otherwise None</returns>
     static member SimplifyArray(points:Point3d seq) : float seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Suspends execution of a running script for the specified interval</summary>
     ///<param name="milliseconds">(float) Thousands of a second</param>
     ///<returns>(unit) </returns>
     static member Sleep(milliseconds:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Sorts list of points so they will be connected in a "reasonable" polyline order</summary>
@@ -185,7 +185,7 @@ module ExtensionsUtility =
     ///  will be discarded. If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(Point3d seq) of sorted 3D points</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(null)>]tolerance:float) : Point3d seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Sorts the components of an array of 3D points</summary>
@@ -203,14 +203,14 @@ module ExtensionsUtility =
     ///  5           Z, Y, X</param>
     ///<returns>(Point3d seq) sorted 3-D points</returns>
     static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascendeing:bool, [<OPT;DEF(0)>]order:float) : Point3d seq =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>convert a formatted string value into a 3D point value</summary>
     ///<param name="point">(string) A string that contains a delimited point like "1,2,3".</param>
     ///<returns>(Point3d) Point structure from the input string.</returns>
     static member Str2Pt(point:string) : Point3d =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.
@@ -228,7 +228,7 @@ module ExtensionsUtility =
     ///  [1]  Y coordinate
     ///  [2]  Z coordinate.</returns>
     static member CreatePoint(point:'T * float * float, [<OPT;DEF(null)>]y:float, [<OPT;DEF(null)>]z:float) : Point3d =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts 'vector' into a Rhino.Geometry.Vector3d if possible.
@@ -244,7 +244,7 @@ module ExtensionsUtility =
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d. This can be seen as an object with three indices:
     ///  result[0]: X component, result[1]: Y component, and result[2] Z component.</returns>
     static member CreateVector(vector:'T * float * float, [<OPT;DEF(null)>]y:float, [<OPT;DEF(null)>]z:float) : Vector3d =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.
@@ -259,7 +259,7 @@ module ExtensionsUtility =
     ///Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane</returns>
     static member CreatePlane(planeOrOrigin:Point3d * Vector3d * Vector3d, [<OPT;DEF(null)>]xAxis:Vector3d, [<OPT;DEF(null)>]yAxis:Vector3d) : Plane =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.
@@ -269,7 +269,7 @@ module ExtensionsUtility =
     ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists or tuples.</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0,3] gives access to the first row, last column.</returns>
     static member CreateXform(xform:seq<seq<float>>) : Transform =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts 'color' into a native color object if possible.
@@ -287,7 +287,7 @@ module ExtensionsUtility =
     ///Alpha value</param>
     ///<returns>(Drawing.Color) An object that can be indexed for red, green, blu, alpha. Item[0] is red.</returns>
     static member CreateColor(color:float*float*float, [<OPT;DEF(null)>]g:int, [<OPT;DEF(null)>]b:int, [<OPT;DEF(null)>]a:int) : Drawing.Color =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Converts 'interval' into a Rhino.Geometry.Interval.
@@ -302,6 +302,6 @@ module ExtensionsUtility =
     ///  [0] start of interval
     ///  [1] end of interval</returns>
     static member CreateInterval(interval:float * float, [<OPT;DEF(null)>]y:float) : Rhino.Geometry.Interval =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 

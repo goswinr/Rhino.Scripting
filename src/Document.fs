@@ -26,7 +26,7 @@ module ExtensionsDocument =
     ///  a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CreatePreviewImage(filename:string, [<OPT;DEF(null)>]view:string, [<OPT;DEF(null)>]size:float, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the document's modified flag. This flag indicates whether
@@ -35,7 +35,7 @@ module ExtensionsDocument =
     /// file..." from displaying when you close Rhino.</summary>
     ///<returns>(bool) if no modified state is specified, the current modified state</returns>
     static member DocumentModified() : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the document's modified flag. This flag indicates whether
     /// or not any changes to the current document have been made. NOTE: setting the
@@ -44,19 +44,19 @@ module ExtensionsDocument =
     ///<param name="modified">(bool)The modified state, either True or False</param>
     ///<returns>(unit) unit</returns>
     static member DocumentModified(modified:bool) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the name of the currently loaded Rhino document (3DM file)</returns>
     static member DocumentName() : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns path of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the path of the currently loaded Rhino document (3DM file)</returns>
     static member DocumentPath() : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Enables or disables screen redrawing</summary>
@@ -64,7 +64,7 @@ module ExtensionsDocument =
     ///True to enable, False to disable</param>
     ///<returns>(unit) unit</returns>
     static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Extracts the bitmap preview image from the specified model (.3dm)</summary>
@@ -76,27 +76,27 @@ module ExtensionsDocument =
     ///  preview image. If omitted, the currently loaded model is used.</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member ExtractPreviewImage(filename:string, [<OPT;DEF(null)>]modelname:string) : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Verifies that the current document has been modified in some way</summary>
     ///<returns>(bool) True or False.</returns>
     static member IsDocumentModified() : bool =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<returns>(string) if `newnotes` is omitted, the current notes</returns>
     static member Notes() : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<param name="newnotes">(string)New notes to set</param>
     ///<returns>(unit) unit</returns>
     static member Notes(newnotes:string) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the file version of the current document. Use this function to
@@ -104,25 +104,25 @@ module ExtensionsDocument =
     ///  function will not return values from referenced or merged files.</summary>
     ///<returns>(string) the file version of the current document</returns>
     static member ReadFileVersion() : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Redraws all views</summary>
     ///<returns>(unit) </returns>
     static member Redraw() : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns render antialiasing style</summary>
     ///<returns>(float) The current antialiasing style</returns>
     static member RenderAntialias() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets render antialiasing style</summary>
     ///<param name="style">(int)Level of antialiasing (0=none, 1=normal, 2=best)</param>
     ///<returns>(unit) unit</returns>
     static member RenderAntialias(style:int) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render ambient light or background color</summary>
@@ -130,129 +130,129 @@ module ExtensionsDocument =
     ///<returns>(int) The current item color
     ///0=ambient light color, 1=background color</returns>
     static member RenderColor(item:int) : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render ambient light or background color</summary>
     ///<param name="item">(int) 0=ambient light color, 1=background color</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, the current item color is returned</param>
     ///<returns>(unit) unit</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render resolution</summary>
     ///<returns>(float * float) The current resolution width,height</returns>
     static member RenderResolution() : float * float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render resolution</summary>
     ///<param name="resolution">(float * float)Width and height of render</param>
     ///<returns>(unit) unit</returns>
     static member RenderResolution(resolution:float * float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     
     static member internal SetRenderMeshAndUpdateStyle() : obj =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh density .</returns>
     static member RenderMeshDensity() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="density">(float)The new render mesh density, which is a number between 0.0 and 1.0.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshDensity(density:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current maximum angle .</returns>
     static member RenderMeshMaxAngle() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="angleDegrees">(int)The new maximum angle, which is a positive number in degrees.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshMaxAngle(angleDegrees:int) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh maximum aspect ratio .</returns>
     static member RenderMeshMaxAspectRatio() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="ratio">(float)The render mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshMaxAspectRatio(ratio:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh maximum distance, edge to surface .</returns>
     static member RenderMeshMaxDistEdgeToSrf() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh maximum distance, edge to surface.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh maximum edge length .</returns>
     static member RenderMeshMaxEdgeLength() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh maximum edge length.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshMaxEdgeLength(distance:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh minimum edge length .</returns>
     static member RenderMeshMinEdgeLength() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh minimum edge length.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh minimum initial grid quads .</returns>
     static member RenderMeshMinInitialGridQuads() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="quads">(float)The render mesh minimum initial grid quads. The suggested range is from 0 to 10000.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshMinInitialGridQuads(quads:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh quality of the active document.
@@ -262,7 +262,7 @@ module ExtensionsDocument =
     ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
     ///  2: Custom.</returns>
     static member RenderMeshQuality() : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
@@ -272,7 +272,7 @@ module ExtensionsDocument =
     ///  2: Custom.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshQuality(quality:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the render mesh settings of the active document.
@@ -284,7 +284,7 @@ module ExtensionsDocument =
     ///    4: Simple planes enabled.
     ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized.</returns>
     static member RenderMeshSettings() : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
@@ -297,7 +297,7 @@ module ExtensionsDocument =
     ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized.</param>
     ///<returns>(unit) unit</returns>
     static member RenderMeshSettings(settings:int) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns render settings</summary>
@@ -308,7 +308,7 @@ module ExtensionsDocument =
     ///  4=render curves and isocurves,
     ///  8=render dimensions and text</returns>
     static member RenderSettings() : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets render settings</summary>
     ///<param name="settings">(int)Bit-coded flags of render settings to modify.
@@ -319,7 +319,7 @@ module ExtensionsDocument =
     ///  8=render dimensions and text</param>
     ///<returns>(unit) unit</returns>
     static member RenderSettings(settings:int) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the document's absolute tolerance. Absolute tolerance
@@ -327,7 +327,7 @@ module ExtensionsDocument =
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current absolute tolerance</returns>
     static member UnitAbsoluteTolerance() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Sets the document's absolute tolerance. Absolute tolerance
     /// is measured in drawing units. See Rhino's document properties command
@@ -337,7 +337,7 @@ module ExtensionsDocument =
     ///  or the document's page units (False)</param>
     ///<returns>(unit) unit</returns>
     static member UnitAbsoluteTolerance(tolerance:float, [<OPT;DEF(true)>]inModelUnits:bool) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Return the document's angle tolerance. Angle tolerance is
@@ -345,7 +345,7 @@ module ExtensionsDocument =
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current angle tolerance</returns>
     static member UnitAngleTolerance() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Set the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
@@ -355,13 +355,13 @@ module ExtensionsDocument =
     ///  or the document's page units (False)</param>
     ///<returns>(unit) unit</returns>
     static member UnitAngleTolerance(angleToleranceDegrees:float, [<OPT;DEF(true)>]inModelUnits:float) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Return the document's distance display precision</summary>
     ///<returns>(float) The current distance display precision .</returns>
     static member UnitDistanceDisplayPrecision() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Set the document's distance display precision</summary>
     ///<param name="precision">(float)The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
@@ -370,7 +370,7 @@ module ExtensionsDocument =
     ///<param name="modelUnits">(bool)Return or modify the document's model units (True) or the document's page units (False). The default is True.</param>
     ///<returns>(unit) unit</returns>
     static member UnitDistanceDisplayPrecision(precision:float, [<OPT;DEF(true)>]modelUnits:bool) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Return the document's relative tolerance. Relative tolerance
@@ -378,7 +378,7 @@ module ExtensionsDocument =
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current tolerance in percent</returns>
     static member UnitRelativeTolerance() : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Set the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
@@ -388,7 +388,7 @@ module ExtensionsDocument =
     ///  or the document's page units (False)</param>
     ///<returns>(unit) unit</returns>
     static member UnitRelativeTolerance(relativeTolerance:float, [<OPT;DEF(true)>]inModelUnits:bool) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Return the scale factor for changing between unit systems.</summary>
@@ -424,7 +424,7 @@ module ExtensionsDocument =
     ///  the document's current unit system is used</param>
     ///<returns>(float) scale factor for changing between unit systems</returns>
     static member UnitScale(toSystem:int, [<OPT;DEF(null)>]fromSystem:int) : float =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Return the document's unit system. See Rhino's DocumentProperties
@@ -457,7 +457,7 @@ module ExtensionsDocument =
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</returns>
     static member UnitSystem() : int =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
     ///<summary>Set the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
@@ -494,7 +494,7 @@ module ExtensionsDocument =
     ///  or the document's page units (False). The default is True.</param>
     ///<returns>(unit) unit</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool, [<OPT;DEF(true)>]inModelUnits:int) : unit =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
     ///<summary>Returns the name of the current unit system</summary>
@@ -508,6 +508,6 @@ module ExtensionsDocument =
     ///Return the document's model units (True) or the document's page units (False). The default is True.</param>
     ///<returns>(string) The name of the current units system .</returns>
     static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string =
-        failNotImpl () 
+        failNotImpl () // done in 2018
 
 
