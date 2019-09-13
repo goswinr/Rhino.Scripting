@@ -874,8 +874,8 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns the platform of the Rhino executable</summary>
-    ///<returns>(string) the platform of the Rhino executable</returns>
-    static member ExePlatform() : string =
+    ///<returns>(int) 1 for 64 bit, 0 for 32 bit</returns>
+    static member ExePlatform() : int =
         if System.Environment.Is64BitProcess then  1 else  0
     (*
     def ExePlatform():
@@ -980,18 +980,18 @@ module ExtensionsApplication =
 
     ///<summary>Determines if Rhino is currently running a command. Because Rhino allows
     ///  for transparent commands (commands run from inside of other commands), this
-    ///  method returns the total number of active commands.</summary>
-    ///<param name="ignoreRunners">(bool) Optional, Default Value: <c>true</c>
-    ///If True, script running commands, such as
-    ///  LoadScript, RunScript, and ReadCommandFile will not counted.
-    ///  If omitted the default is not to count script running command (True).</param>
-    ///<returns>(float) the number of active commands</returns>
-    static member InCommand([<OPT;DEF(true)>]ignoreRunners:bool) : float =
+    ///  method returns the total number of active commands.</summary>    
+    ///<returns>(int) the number of active commands</returns>
+    static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int =
+        //<param name="ignoreRunners">(bool) Optional, Default Value: <c>true</c>
+        //If True, script running commands, such as
+        //  LoadScript, RunScript, and ReadCommandFile will not counted.
+        //  If omitted the default is not to count script running command (True).</param>
         //let inCommand (ignoreRunners:bool) :int =
         //<param name="ignoreRunners">ignoreRunners If True, script running commands, such as
         //        LoadScript, RunScript, and ReadCommandFile will not counted.
         //        If omitted the default is not to count script running command (True).</param>
-        Rhino.Commands.Command.GetCommandStack()
+        Commands.Command.GetCommandStack()
         //|> Array.filter (fun i -> if ignoreRunners then  Commands.Command.GetInt(i) <> 1 else true)
         |> Array.length
     (*
@@ -1062,9 +1062,9 @@ module ExtensionsApplication =
 
 
     ///<summary>Verifies that a plug-in is registered</summary>
-    ///<param name="plugin">(Guid) The unique id of the plug-in</param>
+    ///<param name="plugin">(string) The unique id of the plug-in</param>
     ///<returns>(bool) True if the Guid is registered or False if it is not.</returns>
-    static member IsPlugIn(plugin:Guid) : bool =
+    static member IsPlugIn(plugin:string) : bool =
         let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if id = Guid.Empty then false
         else
@@ -1117,13 +1117,13 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns the result code for the last executed command</summary>
-    ///<returns>(float) the result code for the last executed command.
+    ///<returns>(int) the result code for the last executed command.
     ///  0 = success (command successfully completed)
     ///  1 = cancel (command was cancelled by the user)
     ///  2 = nothing (command did nothing, but was not cancelled)
     ///  3 = failure (command failed due to bad input, computational problem...)
     ///  4 = unknown command (the command was not found)</returns>
-    static member LastCommandResult() : float =
+    static member LastCommandResult() : int =
         int(Rhino.Commands.Command.LastCommandResult)
     (*
     def LastCommandResult():
@@ -1142,7 +1142,7 @@ module ExtensionsApplication =
 
     ///<summary>Returns the current language used for the Rhino interface.  The current
     ///  language is returned as a locale ID, or LCID, value.</summary>
-    ///<returns>(float) the current language used for the Rhino interface as a locale ID, or LCID.
+    ///<returns>(int) the current language used for the Rhino interface as a locale ID, or LCID.
     ///  1029  Czech
     ///  1031  German-Germany
     ///  1033  English-United States
@@ -1152,7 +1152,7 @@ module ExtensionsApplication =
     ///  1041  Japanese
     ///  1042  Korean
     ///  1045  Polish</returns>
-    static member LocaleID() : float =
+    static member LocaleID() : int =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
     (*
     def LocaleID():
@@ -1177,7 +1177,7 @@ module ExtensionsApplication =
     ///<summary>Get status of Rhino's ortho modeling aid.</summary>
     ///<returns>(bool) The current ortho status</returns>
     static member Ortho() : bool = //GET
-        ModelAidSettings.Ortho <- enable
+        ModelAidSettings.Ortho
     (*
     def Ortho(enable=None):
         '''Enables or disables Rhino's ortho modeling aid.
@@ -1216,7 +1216,7 @@ module ExtensionsApplication =
     ///  Object snaps are tools for specifying points on existing objects.</summary>
     ///<returns>(bool) The current osnap status</returns>
     static member Osnap() : bool = //GET
-        ModelAidSettings.Osnap <- enable
+        ModelAidSettings.Osnap 
     (*
     def Osnap(enable=None):
         '''Enables or disables Rhino's object snap modeling aid.
@@ -1257,7 +1257,7 @@ module ExtensionsApplication =
     ///<summary>Get status of Rhino's dockable object snap bar</summary>
     ///<returns>(bool) The current visible state</returns>
     static member OsnapDialog() : bool = //GET
-        ModelAidSettings.UseHorizontalDialog <- visible
+        ModelAidSettings.UseHorizontalDialog
     (*
     def OsnapDialog(visible=None):
         '''Shows or hides Rhino's dockable object snap bar
@@ -1310,7 +1310,7 @@ module ExtensionsApplication =
     ///  134217728  Point
     ///  Object snap modes can be added together to set multiple modes</returns>
     static member OsnapMode() : int = //GET
-        ModelAidSettings.OsnapModes
+        int(ModelAidSettings.OsnapModes)
     (*
     def OsnapMode(mode=None):
         '''Returns or sets the object snap mode. Object snaps are tools for
@@ -1366,13 +1366,8 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing</returns>
     static member OsnapMode(mode:float) : unit = //SET
         failwith "setOsnapMode is not implemented"
-        //rc <- int(ModelAidSettings.OsnapModes)
-        //m <- .[(0,0), (1,2), (2,8), (4,0x20), (8,0x80), (16,0x200), (32,0x800), (64,0x2000),
-        //      (128,0x20000), (256,0x80000), (512,0x200000), (1024,0x8000000), (2048, 0x40)]
-        //rc <- sum(.[x.[0] for x in m if x.[1] & rc])
-        //if mode = not <| None then 
-        //    mode <- sum(.[x.[1] for x in m if x.[0] & int(mode)])
-        //ModelAidSettings.OsnapModes <- System.Enum.ToObject( typeof<ApplicationSettings.OsnapModes> , mode)
+        // FIXME enum casting ?
+
     (*
     def OsnapMode(mode=None):
         '''Returns or sets the object snap mode. Object snaps are tools for
@@ -1412,7 +1407,7 @@ module ExtensionsApplication =
     ///<summary>Get status of Rhino's planar modeling aid</summary>
     ///<returns>(bool) The current planar status</returns>
     static member Planar() : bool = //GET
-        ModelAidSettings.Planar <- enable
+        ModelAidSettings.Planar
     (*
     def Planar(enable=None):
         '''Enables or disables Rhino's planar modeling aid
@@ -1448,11 +1443,11 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns the identifier of a plug-in given the plug-in name</summary>
-    ///<param name="plugin">(Guid) Unique id of the plug-in</param>
-    ///<returns>(Guid) the id of the plug-in</returns>
-    static member PlugInId(plugin:Guid) : Guid =
+    ///<param name="plugin">(string) the name  of the plug-in</param>
+    ///<returns>(Guid)the  Unique Guid of the plug-in </returns>
+    static member PlugInId(plugin:string) : Guid =
         let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if id<>System.Guid.Empty then  id 
+        if id<>Guid.Empty then  id 
         else failwithf "Plugin %s not found" plugin
     (*
     def PlugInId(plugin):
@@ -1469,7 +1464,7 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns a list of registered Rhino plug-ins</summary>
-    ///<param name="typs">(int) Optional, Default Value: <c>0</c>
+    ///<param name="types">(int) Optional, Default Value: <c>0</c>
     ///The type of plug-ins to return.
     ///  0=all
     ///  1=render
@@ -1481,7 +1476,7 @@ module ExtensionsApplication =
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
     ///0=both loaded and unloaded, 1=loaded, 2=unloaded.  If omitted both status is returned.</param>
     ///<returns>(string seq) list of registered Rhino plug-ins</returns>
-    static member PlugIns([<OPT;DEF(0)>]typs:int, [<OPT;DEF(0)>]status:int) : string seq =
+    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : string [] =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
         if types=1 then  filter <- Rhino.PlugIns.PlugInType.Render
         if types=2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
@@ -1524,7 +1519,7 @@ module ExtensionsApplication =
     ///<summary>Get status of object snap projection</summary>
     ///<returns>(bool) the current object snap projection status</returns>
     static member ProjectOsnaps() : bool = //GET
-        ModelAidSettings.ProjectSnapToCPlane <- enable
+        ModelAidSettings.ProjectSnapToCPlane
     (*
     def ProjectOsnaps(enable=None):
         '''Enables or disables object snap projection
@@ -1578,8 +1573,8 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns current width and height, of the screen of the primary monitor.</summary>
-    ///<returns>(float * float) containing two numbers identifying the width and height in pixels</returns>
-    static member ScreenSize() : float * float =
+    ///<returns>(int * int) containing two numbers identifying the width and height in pixels</returns>
+    static member ScreenSize() : int * int =
         let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds
         sz.Width, sz.Height
     (*
@@ -1594,8 +1589,8 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
-    ///<returns>(string) the version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
-    static member SdkVersion() : string =
+    ///<returns>(int) the version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
+    static member SdkVersion() : int =
         RhinoApp.SdkVersion
     (*
     def SdkVersion():
@@ -1626,7 +1621,7 @@ module ExtensionsApplication =
     ///<summary>Returns all of the path items in Rhino's search path list.
     ///  See "Options Files settings" in the Rhino help file for more details.</summary>
     ///<returns>(string seq) list of search paths</returns>
-    static member SearchPathList() : string seq =
+    static member SearchPathList() : string [] =
         ApplicationSettings.FileSettings.GetSearchPaths()
     (*
     def SearchPathList():
@@ -1663,7 +1658,7 @@ module ExtensionsApplication =
     ///<summary>Get status of Rhino's grid snap modeling aid</summary>
     ///<returns>(bool) the current grid snap status</returns>
     static member Snap() : bool = //GET
-        ModelAidSettings.GridSnap <- enable
+        ModelAidSettings.GridSnap 
     (*
     def Snap(enable=None):
         '''Enables or disables Rhino's grid snap modeling aid
@@ -1698,10 +1693,9 @@ module ExtensionsApplication =
 
 
     ///<summary>Sets Rhino's status bar distance pane</summary>
-    ///<param name="distance">(int) Optional, Default Value: <c>0</c>
-    ///The distance to set the status bar.  If omitted the distance will be set to 0.</param>
+    ///<param name="distance">(float) The distance to set the status bar.</param>
     ///<returns>(unit) </returns>
-    static member StatusBarDistance([<OPT;DEF(0)>]distance:int) : unit =
+    static member StatusBarDistance(distance:float) : unit =
         Rhino.UI.StatusBar.SetDistancePane(distance)
     (*
     def StatusBarDistance(distance=0):
@@ -1716,10 +1710,9 @@ module ExtensionsApplication =
 
 
     ///<summary>Sets Rhino's status bar message pane</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
-    ///The message to display.</param>
+    ///<param name="message">(string) The message to display.</param>
     ///<returns>(unit) </returns>
-    static member StatusBarMessage([<OPT;DEF(null)>]message:string) : unit =
+    static member StatusBarMessage(message:string) : unit =
         Rhino.UI.StatusBar.SetMessagePane(message)
     (*
     def StatusBarMessage(message=None):
@@ -1734,10 +1727,9 @@ module ExtensionsApplication =
 
 
     ///<summary>Sets Rhino's status bar point coordinate pane</summary>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
-    ///The 3d coordinates of the status bar.  If omitted the current poition is set to (0,0,0).</param>
+    ///<param name="point">(Point3d) The 3d coordinates of the status bar.</param>
     ///<returns>(unit) </returns>
-    static member StatusBarPoint([<OPT;DEF(null)>]point:Point3d) : unit =
+    static member StatusBarPoint(point:Point3d) : unit =
         Rhino.UI.StatusBar.SetPointPane(point)
     (*
     def StatusBarPoint(point=None):
@@ -1755,16 +1747,15 @@ module ExtensionsApplication =
 
     ///<summary>Start the Rhino status bar progress meter</summary>
     ///<param name="label">(string) Short description of the progesss</param>
-    ///<param name="lower">(string) Lower limit of the progress meter's range</param>
-    ///<param name="upper">(string) Upper limit of the progress meter's range</param>
+    ///<param name="lower">(int) Lower limit of the progress meter's range</param>
+    ///<param name="upper">(int) Upper limit of the progress meter's range</param>
     ///<param name="embedLabel">(bool) Optional, Default Value: <c>true</c>
-    ///If True, the label will show inside the meter.
-    ///  If false, the label will show to the left of the meter.
-    ///  If omitted the label will show inside the meter (True)</param>
+    ///  If true, the label will show inside the meter.
+    ///  If false, the label will show to the left of the meter.</param>
     ///<param name="showPercent">(bool) Optional, Default Value: <c>true</c>
-    ///Show the percent complete if True. If omitted the percnetage will be shown (True)</param>
+    ///  Show the percent complete if True. </param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member StatusBarProgressMeterShow(label:string, lower:string, upper:string, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
+    static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         let mutable rc = Rhino.UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
         rc=1
     (*
