@@ -12,6 +12,9 @@ open System.Windows.Forms
 
 [<AutoOpen>]
 module ExtensionsApplication =
+  
+  let mutable internal commandSerialNumbers = None // to store last created object form executing a rs.Command(...)
+  
   type RhinoScriptSyntax with
     
     ///<summary>Add new command alias to Rhino. Command aliases can be added manually by
@@ -104,7 +107,7 @@ module ExtensionsApplication =
     ///<summary>Modifies the macro of a command alias.</summary>
     ///<param name="alias">(string) The name of an existing command alias.</param>
     ///<param name="macro">(string)The new macro to run when the alias is executed. If omitted, the current alias macro is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member AliasMacro(alias:string, macro:string) : unit = //SET
         ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
         |> ignore
@@ -278,9 +281,9 @@ module ExtensionsApplication =
     ///  11 = Text
     ///  12 = Text Background
     ///  13 = Text hover</param>
-    ///<param name="color">(int * int * int)The new color value in (r255,g255,b255). If omitted, the current item color is returned.</param>
-    ///<returns>(unit) unit</returns>
-    static member AppearanceColor(item:int, color:int * int * int) : unit = //SET
+    ///<param name="color">(Drawing.Color )The new color value as System.Drawing.Color . </param>
+    ///<returns>(unit) void, nothing</returns>
+    static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
         if item=0 then AppearanceSettings.ViewportBackgroundColor <- color
         elif item=1 then AppearanceSettings.GridThickLineColor <- color
         elif item=2 then AppearanceSettings.GridThinLineColor <- color
@@ -297,6 +300,11 @@ module ExtensionsApplication =
         elif item=13 then AppearanceSettings.CommandPromptHypertextColor <- color
         else failwithf "setAppearanceColor: item %d is out of range" item
         Doc.Views.Redraw()
+
+
+
+
+
     (*
     def AppearanceColor(item, color=None):
         '''Returns or modifies an application interface item's color.
@@ -392,7 +400,7 @@ module ExtensionsApplication =
 
     ///<summary>Changes the file name used by Rhino's automatic file saving</summary>
     ///<param name="filename">(string)Name of the new autosave file</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member AutosaveFile(filename:string) : unit = //SET
         ApplicationSettings.FileSettings.AutoSaveFile <- filename
     (*
@@ -435,7 +443,7 @@ module ExtensionsApplication =
     ///<summary>Changes how often the document will be saved when Rhino's
     /// automatic file saving mechanism is enabled</summary>
     ///<param name="minutes">(float)The number of minutes between saves</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member AutosaveInterval(minutes:float) : unit = //SET
         ApplicationSettings.FileSettings.AutoSaveInterval <- TimeSpan.FromMinutes(minutes)
     (*
@@ -459,14 +467,14 @@ module ExtensionsApplication =
     ///<summary>Returns the build date of Rhino</summary>
     ///<returns>(DateTime) the build date of Rhino. Will be converted to a string by most functions.</returns>
     static member BuildDate() : DateTime =
-        Rhino.RhinoApp.BuildDate
+        RhinoApp.BuildDate
     (*
     def BuildDate():
         '''Returns the build date of Rhino
         Returns:
           Datetime.date: the build date of Rhino. Will be converted to a string by most functions.
         '''
-        build = Rhino.RhinoApp.BuildDate
+        build = RhinoApp.BuildDate
         return datetime.date(build.Year, build.Month, build.Day)
     *)
 
@@ -475,7 +483,7 @@ module ExtensionsApplication =
     ///  command history window by using the CommandHistory command in Rhino.</summary>
     ///<returns>(unit) </returns>
     static member ClearCommandHistory() : unit =
-        Rhino.RhinoApp.ClearCommandHistoryWindow()
+        RhinoApp.ClearCommandHistoryWindow()
     (*
     def ClearCommandHistory():
         '''Clears contents of Rhino's command history window. You can view the
@@ -483,7 +491,7 @@ module ExtensionsApplication =
         Returns:
           none
         '''
-        Rhino.RhinoApp.ClearCommandHistoryWindow()
+        RhinoApp.ClearCommandHistoryWindow()
     __command_serial_numbers = None
     *)
 
@@ -516,9 +524,9 @@ module ExtensionsApplication =
     ///The command echo mode True will display the commands on the commandline. If omitted, command prompts are echoed (True)</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member Command(commandString:string, [<OPT;DEF(true)>]echo:bool) : bool =
-        let start = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber
-        let rc = Rhino.RhinoApp.RunScript(commandString, echo)
-        let ende = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber
+        let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
+        let rc = RhinoApp.RunScript(commandString, echo)
+        let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
         commandSerialNumbers <- None
         if start<>ende then  commandSerialNumbers <- Some(start,ende)
         rc
@@ -556,9 +564,9 @@ module ExtensionsApplication =
           bool: True or False indicating success or failure
         
         '''
-        start = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber
-        rc = Rhino.RhinoApp.RunScript(commandString, echo)
-        end = Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber
+        start = DocObjects.RhinoObject.NextRuntimeSerialNumber
+        rc = RhinoApp.RunScript(commandString, echo)
+        end = DocObjects.RhinoObject.NextRuntimeSerialNumber
         global __command_serial_numbers
         __command_serial_numbers = None
         if start!=end: __command_serial_numbers = (start,end)
@@ -569,22 +577,22 @@ module ExtensionsApplication =
     ///<summary>Returns the contents of Rhino's command history window</summary>
     ///<returns>(string) the contents of Rhino's command history window</returns>
     static member CommandHistory() : string =
-        Rhino.RhinoApp.CommandHistoryWindowText
+        RhinoApp.CommandHistoryWindowText
     (*
     def CommandHistory():
         '''Returns the contents of Rhino's command history window
         Returns:
           str: the contents of Rhino's command history window
         '''
-        return Rhino.RhinoApp.CommandHistoryWindowText
+        return RhinoApp.CommandHistoryWindowText
     *)
 
 
     ///<summary>Returns the default render plug-in</summary>
-    ///<returns>(Guid) Unique identifier of default renderer</returns>
-    static member DefaultRenderer() : Guid = //GET
-        let mutable id = Rhino.Render.Utilities.DefaultRenderPlugInId
-        let mutable plugins = Rhino.PlugIns.PlugIn.GetInstalledPlugIns()
+    ///<returns>(string) Name of default renderer</returns>
+    static member DefaultRenderer() : string = //GET
+        let mutable id = Render.Utilities.DefaultRenderPlugInId
+        let mutable plugins = PlugIns.PlugIn.GetInstalledPlugIns()
         plugins.[id]
     (*
     def DefaultRenderer(renderer=None):
@@ -605,9 +613,9 @@ module ExtensionsApplication =
     *)
 
     ///<summary>Changes the default render plug-in</summary>
-    ///<param name="rendeerer">(string)The name of the rendeerer to set as default rendeerer.  If omitted the Guid of the current rendeerer is returned.</param>
-    ///<returns>(Guid) Unique identifier of default renderer</returns>
-    static member DefaultRenderer(rendeerer:string) : Guid = //SET
+    ///<param name="renderer">(string)The name of the renderer to set as default renderer. </param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
+    static member DefaultRenderer(renderer:string) : bool = //SET
         let id = Rhino.PlugIns.PlugIn.IdFromName(renderer)
         Rhino.Render.Utilities.SetDefaultRenderPlugIn(id)
     (*
@@ -631,7 +639,7 @@ module ExtensionsApplication =
 
     ///<summary>Delete an existing alias from Rhino.</summary>
     ///<param name="alias">(string) The name of an existing alias.</param>
-    ///<returns>(bool) True or False indicating success</returns>
+    ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteAlias(alias:string) : bool =
         ApplicationSettings.CommandAliasList.Delete(alias)
     (*
@@ -650,7 +658,7 @@ module ExtensionsApplication =
     ///  can be removed manually by using Rhino's options command and modifying the
     ///  contents of the files tab</summary>
     ///<param name="folder">(string) A folder to remove</param>
-    ///<returns>(bool) True or False indicating success</returns>
+    ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteSearchPath(folder:string) : bool =
         ApplicationSettings.FileSettings.DeleteSearchPath(folder)
     (*
@@ -685,8 +693,8 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns edge analysis color displayed by the ShowEdges command</summary>
-    ///<returns>(int * int * int) The current edge analysis color</returns>
-    static member EdgeAnalysisColor() : int * int * int = //GET
+    ///<returns>(Drawing.Color) The current edge analysis color</returns>
+    static member EdgeAnalysisColor() : Drawing.Color= //GET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdgeColor
     (*
     def EdgeAnalysisColor(color=None):
@@ -705,9 +713,9 @@ module ExtensionsApplication =
     *)
 
     ///<summary>Modifies edge analysis color displayed by the ShowEdges command</summary>
-    ///<param name="color">(int * int * int), optional): The new color for the analysis.</param>
-    ///<returns>(unit) unit</returns>
-    static member EdgeAnalysisColor(color:int * int * int) : unit = //SET
+    ///<param name="color">(Drawing.Color), optional): The new color for the analysis.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member EdgeAnalysisColor(color:Drawing.Color) : unit = //SET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdgeColor <- color
     (*
     def EdgeAnalysisColor(color=None):
@@ -750,15 +758,15 @@ module ExtensionsApplication =
     *)
 
     ///<summary>Modifies edge analysis mode displayed by the ShowEdges command</summary>
-    ///<param name="mode">(float)The new display mode. The available modes are
+    ///<param name="mode">(int)The new display mode. The available modes are
     ///  0 - display all edges
     ///  1 - display naked edges</param>
-    ///<returns>(unit) unit</returns>
-    static member EdgeAnalysisMode(mode:float) : unit = //SET
+    ///<returns>(unit) void, nothing</returns>
+    static member EdgeAnalysisMode(mode:int) : unit = //SET
         if mode=1 || mode=2 then 
             ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
         else
-            failwithf "bad edg analysisMode %d" mode
+            failwithf "bad edge analysisMode %d" mode
     (*
     def EdgeAnalysisMode(mode=None):
         '''Returns or modifies edge analysis mode displayed by the ShowEdges command
@@ -780,7 +788,7 @@ module ExtensionsApplication =
     ///<summary>Enables or disables Rhino's automatic file saving mechanism</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///The autosave state. If omitted automatic saving is enabled (True)</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit =
         ApplicationSettings.FileSettings.AutoSaveEnabled <- enable
     (*
@@ -798,18 +806,18 @@ module ExtensionsApplication =
 
 
     ///<summary>Get status of a Rhino plug-in</summary>
-    ///<param name="plugin">(Guid) The unique Guid id of the plugin.</param>
+    ///<param name="plugin">(string) The name of the plugin.</param>
     ///<returns>(bool) True if set to load silently otherwise False</returns>
-    static member EnablePlugIn(plugin:Guid) : bool = //GET
-        let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(id)
-        Rhino.PlugIns.PlugIn.SetLoadProtection(id, enable)
-        loadSilent
+    static member EnablePlugIn(plugin:string) : bool = //GET
+        let id = PlugIns.PlugIn.IdFromName(plugin)
+        let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(id)        
+        if rc then loadSilent 
+        else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
     (*
     def EnablePlugIn(plugin, enable=None):
         '''Enables or disables a Rhino plug-in
           Parameters:
-            plugin (guid): The unique Guid id of the plugin.
+            plugin (guid): The nameof the plugin.
             enable (bool, optional): Load silently if True. If omitted Load silently is False.
           Returns:
             bool: True if set to load silently otherwise False
@@ -823,18 +831,21 @@ module ExtensionsApplication =
     *)
 
     ///<summary>Enables or disables a Rhino plug-in</summary>
-    ///<param name="plugin">(Guid) The unique Guid id of the plugin.</param>
-    ///<param name="enable">(bool)Load silently if True. If omitted Load silently is False.</param>
-    static member EnablePlugIn(plugin:Guid, enable:bool) : unit = //SET
+    ///<param name="plugin">(string) The name of the plugin.</param>
+    ///<param name="enable">(bool) Load silently if True. </param>
+    ///<returns>(unit) void, nothing</returns>
+    static member EnablePlugIn(plugin:string, enable:bool) : unit = //SET
         let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(id)
-        Rhino.PlugIns.PlugIn.SetLoadProtection(id, enable)
-        loadSilent
+        if rc then PlugIns.PlugIn.SetLoadProtection(id, enable)
+        else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
+        
+
     (*
     def EnablePlugIn(plugin, enable=None):
         '''Enables or disables a Rhino plug-in
           Parameters:
-            plugin (guid): The unique Guid id of the plugin.
+            plugin (guid): The nameof the plugin.
             enable (bool, optional): Load silently if True. If omitted Load silently is False.
           Returns:
             bool: True if set to load silently otherwise False
@@ -878,49 +889,48 @@ module ExtensionsApplication =
 
 
     ///<summary>Returns the service release number of the Rhino executable</summary>
-    ///<returns>(string) the service release number of the Rhino executable</returns>
-    static member ExeServiceRelease() : string =
-        Rhino.RhinoApp.ExeServiceRelease
+    ///<returns>(int) the service release number of the Rhino executable</returns>
+    static member ExeServiceRelease() : int =
+        RhinoApp.ExeServiceRelease
     (*
     def ExeServiceRelease():
         '''Returns the service release number of the Rhino executable
         Returns:
           str: the service release number of the Rhino executable
         '''
-        return Rhino.RhinoApp.ExeServiceRelease
+        return RhinoApp.ExeServiceRelease
     *)
 
 
     ///<summary>Returns the major version number of the Rhino executable</summary>
-    ///<returns>(string) the major version number of the Rhino executable</returns>
-    static member ExeVersion() : string =
-        Rhino.RhinoApp.ExeVersion
+    ///<returns>(int) the major version number of the Rhino executable</returns>
+    static member ExeVersion() : int =
+        RhinoApp.ExeVersion
     (*
     def ExeVersion():
         '''Returns the major version number of the Rhino executable
         Returns:
           str: the major version number of the Rhino executable
         '''
-        return Rhino.RhinoApp.ExeVersion
+        return RhinoApp.ExeVersion
     *)
 
 
     ///<summary>Closes the rhino application</summary>
     ///<returns>(unit) </returns>
     static member Exit() : unit =
-        Rhino.RhinoApp.Exit()
+        RhinoApp.Exit()
     (*
     def Exit():
         '''Closes the rhino application
         Returns:
           none
         '''
-        Rhino.RhinoApp.Exit()
+        RhinoApp.Exit()
     *)
 
 
-    ///<summary>Searches for a file using Rhino's search path. Rhino will look for a
-    ///  file in the following locations:
+    ///<summary>Searches for a file using Rhino's search path. Rhino will look for a file in the following locations:
     ///    1. The current document's folder.
     ///    2. Folder's specified in Options dialog, File tab.
     ///    3. Rhino's System folders</summary>
@@ -949,9 +959,9 @@ module ExtensionsApplication =
     ///  to see if they support this capability.</summary>
     ///<param name="plugIn">(string) The name or Id of a registered plug-in that supports scripting.
     ///  If the plug-in is registered but not loaded, it will be loaded</param>
-    ///<returns>(Guid) scriptable object</returns>
-    static member GetPlugInObject(plugIn:string) : Guid =
-        Rhino.RhinoApp.GetPlugInObject(plugIn)
+    ///<returns>(object) a scriptable object</returns>
+    static member GetPlugInObject(plugIn:string) : obj =
+        RhinoApp.GetPlugInObject(plugIn)
     (*
     def GetPlugInObject(plug_in):
         '''Returns a scriptable object from a specified plug-in. Not all plug-ins
@@ -964,7 +974,7 @@ module ExtensionsApplication =
           guid: scriptable object if successful
           null: None on error
         '''
-        return Rhino.RhinoApp.GetPlugInObject(plug_in)
+        return RhinoApp.GetPlugInObject(plug_in)
     *)
 
 
@@ -1184,7 +1194,7 @@ module ExtensionsApplication =
 
     ///<summary>Enables or disables Rhino's ortho modeling aid.</summary>
     ///<param name="enable">(bool)The new enabled status (True or False). If omitted the current state is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Ortho(enable:bool) : unit = //SET
         ModelAidSettings.Ortho <- enable
     (*
@@ -1225,7 +1235,7 @@ module ExtensionsApplication =
     ///<summary>Enables or disables Rhino's object snap modeling aid.
     ///  Object snaps are tools for specifying points on existing objects.</summary>
     ///<param name="enable">(bool)The new enabled status.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Osnap(enable:bool) : unit = //SET
         ModelAidSettings.Osnap <- enable
     (*
@@ -1264,7 +1274,7 @@ module ExtensionsApplication =
 
     ///<summary>Shows or hides Rhino's dockable object snap bar</summary>
     ///<param name="visible">(bool)The new visibility state. If omitted then the current state is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member OsnapDialog(visible:bool) : unit = //SET
         ModelAidSettings.UseHorizontalDialog <- visible
     (*
@@ -1353,7 +1363,7 @@ module ExtensionsApplication =
     ///  2097152    Tangent
     ///  134217728  Point
     ///  Object snap modes can be added together to set multiple modes</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member OsnapMode(mode:float) : unit = //SET
         failwith "setOsnapMode is not implemented"
         //rc <- int(ModelAidSettings.OsnapModes)
@@ -1419,7 +1429,7 @@ module ExtensionsApplication =
 
     ///<summary>Enables or disables Rhino's planar modeling aid</summary>
     ///<param name="enable">(bool)The new enable status.  If omitted the current state is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Planar(enable:bool) : unit = //SET
         ModelAidSettings.Planar <- enable
     (*
@@ -1551,7 +1561,7 @@ module ExtensionsApplication =
     ///The new prompt on the commandline.  If omitted the prompt will be blank.</param>
     ///<returns>(unit) </returns>
     static member Prompt([<OPT;DEF(null)>]message:string) : unit =
-        Rhino.RhinoApp.SetCommandPrompt(message)
+        RhinoApp.SetCommandPrompt(message)
     (*
     def Prompt(message=None):
         '''Change Rhino's command window prompt
@@ -1563,7 +1573,7 @@ module ExtensionsApplication =
         if message and type(message) is not str:
             strList = [str(item) for item in message]
             message = "".join(strList)
-        Rhino.RhinoApp.SetCommandPrompt(message)
+        RhinoApp.SetCommandPrompt(message)
     *)
 
 
@@ -1586,14 +1596,14 @@ module ExtensionsApplication =
     ///<summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
     ///<returns>(string) the version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
     static member SdkVersion() : string =
-        Rhino.RhinoApp.SdkVersion
+        RhinoApp.SdkVersion
     (*
     def SdkVersion():
         '''Returns version of the Rhino SDK supported by the executing Rhino.
         Returns:
           str: the version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.
         '''
-        return Rhino.RhinoApp.SdkVersion
+        return RhinoApp.SdkVersion
     *)
 
 
@@ -1636,7 +1646,7 @@ module ExtensionsApplication =
     ///Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) </returns>
     static member SendKeystrokes([<OPT;DEF(null)>]keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
-        Rhino.RhinoApp.SendKeystrokes(keys, addReturn)
+        RhinoApp.SendKeystrokes(keys, addReturn)
     (*
     def SendKeystrokes(keys=None, add_return=True):
         '''Sends a string of printable characters to Rhino's command line
@@ -1646,7 +1656,7 @@ module ExtensionsApplication =
         Returns:
           none
         '''
-        Rhino.RhinoApp.SendKeystrokes(keys, add_return)
+        RhinoApp.SendKeystrokes(keys, add_return)
     *)
 
 
@@ -1780,7 +1790,7 @@ module ExtensionsApplication =
     ///<param name="position">(int) The new position in the progress meter</param>
     ///<param name="absolute">(bool) Optional, Default Value: <c>true</c>
     ///The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
         Rhino.UI.StatusBar.UpdateProgressMeter(position, absolute)
         |> ignore
@@ -1834,7 +1844,7 @@ module ExtensionsApplication =
     ///<summary>Sets Rhino's default template file. This is the file used
     /// when Rhino starts.</summary>
     ///<param name="filename">(string)The name of the new default template file. If omitted the current default template name is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TemplateFile(filename:string) : unit = //SET
         ApplicationSettings.FileSettings.TemplateFile <- filename
     (*
@@ -1873,7 +1883,7 @@ module ExtensionsApplication =
 
     ///<summary>Sets the location of Rhino's template folder</summary>
     ///<param name="folder">(string)The location of Rhino's template files. Note, the location must exist.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TemplateFolder(folder:string) : unit = //SET
         ApplicationSettings.FileSettings.TemplateFolder <- folder
     (*
@@ -1894,14 +1904,14 @@ module ExtensionsApplication =
     ///<summary>Returns the windows handle of Rhino's main window</summary>
     ///<returns>(IntPtr) the Window's handle of Rhino's main window. IntPtr is a platform-specific type that is used to represent a pointer or a handle.</returns>
     static member WindowHandle() : IntPtr =
-        Rhino.RhinoApp.MainWindowHandle()
+        RhinoApp.MainWindowHandle()
     (*
     def WindowHandle():
         '''Returns the windows handle of Rhino's main window
         Returns:
           IntPt: the Window's handle of Rhino's main window. IntPtr is a platform-specific type that is used to represent a pointer or a handle.
         '''
-        return Rhino.RhinoApp.MainWindowHandle()
+        return RhinoApp.MainWindowHandle()
     *)
 
 
@@ -1928,7 +1938,7 @@ module ExtensionsApplication =
     ///<summary>Sets Rhino's working folder (directory).
     /// The working folder is the default folder for all file operations.</summary>
     ///<param name="folder">(string)The new working folder for the current Rhino session.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member WorkingFolder(folder:string) : unit = //SET
         ApplicationSettings.FileSettings.WorkingFolder <- folder
     (*
