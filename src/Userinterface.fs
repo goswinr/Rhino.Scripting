@@ -1,11 +1,11 @@
 namespace Rhino.Scripting
 
 open System
+open Rhino
 open Rhino.Geometry
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.Scripting.Util
 open Rhino.Scripting.ActiceDocument
-
+//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsUserinterface =
   type RhinoScriptSyntax with
@@ -19,18 +19,10 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) selected folder</returns>
     static member BrowseForFolder([<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
-        let dlg = Eto.Forms.SelectFolderDialog()
-        if folder then
-            if not <| isinstance(folder, str) then folder <- string(folder)
-            let dlg.Directory = folder
-        if message then
-            if not <| isinstance(message, str) then message <- string(message)
-            let dlg.Title = message
-        if dlg.ShowDialog(null)=Eto.Forms.DialogResult.Ok then
-            dlg.Directory
+        failNotImpl () // genreation temp disabled !!
     (*
     def BrowseForFolder(folder=None, message=None, title=None):
-        """Display browse-for-folder dialog allowing the user to select a folder
+        '''Display browse-for-folder dialog allowing the user to select a folder
         Parameters:
           folder (str, optional): a default folder
           message (str, optional): a prompt or message
@@ -38,14 +30,7 @@ module ExtensionsUserinterface =
         Returns:
           str: selected folder
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          folder = rs.BrowseForFolder("C:\\Program Files\\" )
-          if folder: print folder
-        See Also:
-          OpenFileName
-          SaveFileName
-        """
+        '''
         dlg = Eto.Forms.SelectFolderDialog()
         if folder:
             if not isinstance(folder, str): folder = str(folder)
@@ -66,16 +51,10 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string seq) of tuples containing the input string in items along with their new boolean check value</returns>
     static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string seq =
-        let checkstates = .[item.[1] for item in items]
-        let itemstrs = .[string(item.[0]) for item in items]
-        let newcheckstates = Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
-        if newcheckstates then
-            let rc = zip(itemstrs, newcheckstates)
-            rc
-        failwithf "Rhino.Scripting Error:CheckListBox failed.  items:"%A" message:"%A" title:"%A"" items message title
+        failNotImpl () // genreation temp disabled !!
     (*
     def CheckListBox(items, message=None, title=None):
-        """Displays a list of items in a checkable-style list dialog box
+        '''Displays a list of items in a checkable-style list dialog box
         Parameters:
           items ([[str, bool], ...]): a list of tuples containing a string and a boolean check state
           message (str, optional):  a prompt or message
@@ -83,20 +62,7 @@ module ExtensionsUserinterface =
         Returns:
           list((str, bool), ...): of tuples containing the input string in items along with their new boolean check value
           None: on error
-        Example:
-          import rhinoscriptsyntax as  rs
-          layers = rs.LayerNames()
-          if layers:
-              items  = [(layer, rs.IsLayerOn(layer)) for layer in layers]
-              results  = rs.CheckListBox(items, "Turn layers on/off", "Layers")
-              if results:
-                  for  layer, state in results: rs.LayerVisible(layer, state)
-        See Also:
-          ComboListBox
-          ListBox
-          MultiListBox
-          PropertyListBox
-        """
+        '''
         checkstates = [item[1] for item in items]
         itemstrs = [str(item[0]) for item in items]
         newcheckstates = Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
@@ -115,10 +81,10 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
-        Rhino.UI.Dialogs.ShowComboListBox(title, message, items)
+        failNotImpl () // genreation temp disabled !!
     (*
     def ComboListBox(items, message=None, title=None):
-        """Displays a list of items in a combo-style list box dialog.
+        '''Displays a list of items in a combo-style list box dialog.
         Parameters:
           items ([str, ...]): a list of string
           message (str, optional):  a prompt of message
@@ -126,18 +92,7 @@ module ExtensionsUserinterface =
         Returns:
           str: The selected item if successful
           None: if not successful or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              layer = rs.ComboListBox(layers, "Select current layer")
-              if layer: rs.CurrentLayer(layer)
-        See Also:
-          CheckListBox
-          ListBox
-          MultiListBox
-          PropertyListBox
-        """
+        '''
         return Rhino.UI.Dialogs.ShowComboListBox(title, message, items)
     *)
 
@@ -152,11 +107,10 @@ module ExtensionsUserinterface =
     ///A dialog box title.</param>
     ///<returns>(string) Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null)>]defaultValString:string, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
-        let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
-        text
+        failNotImpl () // genreation temp disabled !!
     (*
     def EditBox(default_string=None, message=None, title=None):
-        """Display dialog prompting the user to enter a string. The
+        '''Display dialog prompting the user to enter a string. The
         string value may span multiple lines
         Parameters:
           default_string  (str, optional):  a default string value.
@@ -165,14 +119,7 @@ module ExtensionsUserinterface =
         Returns:
           str: Multiple lines that are separated by carriage return-linefeed combinations if successful
           None: if not successful
-        Example:
-          import rhinoscriptsyntax as rs
-          text = rs.EditBox(message="Enter some text")
-          print text
-        See Also:
-          GetString
-          StringBox
-        """
+        '''
         rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, default_string, True)
         return text
     *)
@@ -190,16 +137,10 @@ module ExtensionsUserinterface =
     ///A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
     static member GetAngle([<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:int, [<OPT;DEF(null)>]message:string) : float =
-        let point = Coerce.coerce3dpoint(point)
-        if not <| point then point <- Point3d.Unset
-        let reference_point = Coerce.coerce3dpoint(reference_point)
-        if not <| reference_point then reference_point <- Point3d.Unset
-        let default_angle = toRadians(defaultValAngleDegrees)
-        let rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, reference_point, default_angle)
-        if rc=Rhino.Commands.Result.Success then toDegrees(angle)
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetAngle(point=None, reference_point=None, default_angle_degrees=0, message=None):
-        """Pause for user input of an angle
+        '''Pause for user input of an angle
         Parameters:
           point (point): starting, or base point
           reference_point (point, optional): if specified, the reference angle is calculated
@@ -209,17 +150,7 @@ module ExtensionsUserinterface =
         Returns:
           number: angle in degree if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          point = rs.GetPoint("Base point")
-          if point:
-              reference = rs.GetPoint("Reference point", point)
-              if reference:
-                  angle = rs.GetAngle(point, reference)
-                  if angle!=None: print "Angle:", angle
-        See Also:
-          GetDistance
-        """
+        '''
         point = rhutil.coerce3dpoint(point)
         if not point: point = Rhino.Geometry.Point3d.Unset
         reference_point = rhutil.coerce3dpoint(reference_point)
@@ -241,32 +172,10 @@ module ExtensionsUserinterface =
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool seq) a list of values that represent the boolean values</returns>
     static member GetBoolean(message:string, items:string seq, defaultVals:bool seq) : bool seq =
-        let go = Rhino.Input.Custom.GetOption()
-        go.AcceptNothing(true)
-        go.SetCommandPrompt( message )
-        if typ(defaultVals) = list || typ(defaultVals) = tuple then pass
-        else defaultVals <- .[defaultVals]
-        // special case for single list. Wrap items into a list
-        if Seq.length(items)=3 && Seq.length(defaultVals)=1 then items <- .[items]
-        let count = Seq.length(items)
-        if count<1 || count<>len(defaultVals) then failwithf "Rhino.Scripting Error:GetBoolean failed.  message:"%A" items:"%A" defaultVals:"%A"" message items defaultVals
-        let toggles = ResizeArray()
-        for i=0 to count) do
-            let initial = defaultVals.[i]
-            let item = items.[i]
-            let offVal = item.[1]
-            let t = Rhino.Input.Custom.OptionToggle( initial, item.[1], item.[2] )
-            toggles.Add(t)
-            go.AddOptionToggle(item.[0], t)
-        while true:
-            let getrc = go.Get()
-            if getrc=Rhino.Input.GetResult.Option then continue
-            if getrc<>Rhino.Input.GetResult.Nothing then null
-            break
-        [| for t in toggles -> t.CurrentValue |]
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetBoolean(message, items, defaults):
-        """Pauses for user input of one or more boolean values. Boolean values are
+        '''Pauses for user input of one or more boolean values. Boolean values are
         displayed as click-able command line option toggles
         Parameters:
           message (str): a prompt
@@ -279,15 +188,7 @@ module ExtensionsUserinterface =
         Returns:
           list(bool, ...): a list of values that represent the boolean values if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          items = ("Lights", "Off", "On"), ("Cameras", "Disabled", "Enabled"), ("Action", "False", "True")
-          results = rs.GetBoolean("Boolean options", items, (True, True, True) )
-          if results:
-              for val in results: print val
-        See Also:
-          GetString
-        """
+        '''
         go = Rhino.Input.Custom.GetOption()
         go.AcceptNothing(True)
         go.SetCommandPrompt( message )
@@ -332,23 +233,10 @@ module ExtensionsUserinterface =
     ///Prompt3 of 'optional prompts to set' (FIXME 0)</param>
     ///<returns>(Point3d seq) list of eight Point3d that define the corners of the box on success</returns>
     static member GetBox([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]prompt1:string, [<OPT;DEF(null)>]prompt2:string, [<OPT;DEF(null)>]prompt3:string) : Point3d seq =
-        let basisPoint = Coerce.coerce3dpoint(basisPoint)
-        if basisPoint = null then basisPoint <- Point3d.Unset
-        def intToEnum(m):
-          if m not <| in range(1,5) then
-            let m = 0
-          {
-            0 : Rhino.Input.GetBoxMode.All,
-            1 : Rhino.Input.GetBoxMode.Corner,
-            2 : Rhino.Input.GetBoxMode.ThreePoint,
-            3 : Rhino.Input.GetBoxMode.Vertical,
-            4 : Rhino.Input.GetBoxMode.Center
-          }.[m]
-        let rc, box = Rhino.Input.RhinoGet.GetBox(intToEnum(mode), basisPoint, prompt1, prompt2, prompt3)
-        if rc=Rhino.Commands.Result.Success then tuple(box.GetCorners())
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetBox(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
-        """Pauses for user input of a box
+        '''Pauses for user input of a box
         Parameters:
           mode (number): The box selection mode.
              0 = All modes
@@ -361,14 +249,7 @@ module ExtensionsUserinterface =
         Returns:
           list(point, ...): list of eight Point3d that define the corners of the box on success
           None: is not successful, or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          box = rs.GetBox()
-          if box:
-              for i, pt in enumerate(box): rs.AddTextDot( i, pt )
-        See Also:
-          GetRectangle
-        """
+        '''
         base_point = rhutil.coerce3dpoint(base_point)
         if base_point is None: base_point = Rhino.Geometry.Point3d.Unset
         def intToEnum(m):
@@ -391,27 +272,16 @@ module ExtensionsUserinterface =
     ///Default RGB value. If omitted, the default color is black</param>
     ///<returns>(Drawing.Color) RGB tuple of three numbers on success</returns>
     static member GetColor([<OPT;DEF(null)>]color:Drawing.Color) : Drawing.Color =
-        let color = Coerce.coercecolor(color)
-        if color = null then color <- Drawing.Color.Black
-        let rc, color = Rhino.UI.Dialogs.ShowColorDialog(color)
-        if rc then color.R, color.G, color.B
-        failwithf "Rhino.Scripting Error:GetColor failed.  color:"%A"" color
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetColor(color=None):
-        """Display the Rhino color picker dialog allowing the user to select an RGB color
+        '''Display the Rhino color picker dialog allowing the user to select an RGB color
         Parameters:
           color (color, optional): default RGB value. If omitted, the default color is black
         Returns:
           color: RGB tuple of three numbers on success
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          color = rs.LayerColor("Default")
-          rgb = rs.GetColor(color)
-          if rgb: rs.LayerColor("Default", rgb)
-        See Also:
-          
-        """
+        '''
         color = rhutil.coercecolor(color)
         if color is None: color = System.Drawing.Color.Black
         rc, color = Rhino.UI.Dialogs.ShowColorDialog(color)
@@ -427,30 +297,17 @@ module ExtensionsUserinterface =
     ///  2  id of the active viewport
     ///  3  cursor position in client coordinates</returns>
     static member GetCursorPos() : Point3d * Point3d * Guid * Point3d =
-        let view = Doc.Views.ActiveView
-        let screen_pt = Rhino.UI.MouseCursor.Location
-        let client_pt = view.ScreenToClient(screen_pt)
-        let viewport = view.ActiveViewport
-        let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateScreen, Rhino.DocObjects.CoordinateWorld)
-        let world_pt = Point3d(client_pt.X, client_pt.Y, 0)
-        world_pt.Transform(xf)
-        world_pt, screen_pt, viewport.Id, client_pt
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetCursorPos():
-        """Retrieves the cursor's position
+        '''Retrieves the cursor's position
         Returns:
           tuple(point, point, guid, point): containing the following information
             0  cursor position in world coordinates
             1  cursor position in screen coordinates
             2  id of the active viewport
             3  cursor position in client coordinates
-        Example:
-          import rhinoscriptsyntax as  rs
-          world, screen, view, client  = rs.GetCursorPos()
-        See Also:
-          XformScreenToWorld
-          XformWorldToScreen
-        """
+        '''
         view = scriptcontext.doc.Views.ActiveView
         screen_pt = Rhino.UI.MouseCursor.Location
         client_pt = view.ScreenToClient(screen_pt)
@@ -473,40 +330,10 @@ module ExtensionsUserinterface =
     ///Prompt for the second distance point</param>
     ///<returns>(float) The distance between the two points .</returns>
     static member GetDistance([<OPT;DEF(null)>]firstPt:Point3d, [<OPT;DEF(null)>]distance:float, [<OPT;DEF("First distance point")>]firstPtMsg:string, [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
-        if distance <> null && first_pt = null then
-            failwithf "Rhino.Scripting Error:The "first_pt" parameter needs a value if "distance" is not null..  firstPt:"%A" distance:"%A" firstPtMsg:"%A" secondPtMsg:"%A"" firstPt distance firstPtMsg secondPtMsg
-        if distance <> null && not <| (isinstance(distance, int) || isinstance(distance, float)) then null
-        if first_pt_msg = null || not <| isinstance(first_pt_msg, str) then null
-        if secondPtMsg = null || not <| isinstance(secondPtMsg, str) then null
-        if first_pt <> null then
-          if first_pt = 0 then first_pt <- (0,0,0)
-          let first_pt = Coerce.coerce3dpoint(first_pt)
-          if first_pt = null then null
-        if first_pt = null then
-          first_pt <- GetPoint(first_pt_msg)
-          if first_pt = null then null
-        // cannot <| use GetPoint for 2nd point because of the need do differentiate
-        // between the user accepting none vs cancelling to exactly mimic RhinoScript
-        let gp = Rhino.Input.Custom.GetPoint()
-        if distance <> null then
-          gp.AcceptNothing(true)
-          let secondPtMsg = "{0}<{1}>".format(secondPtMsg, distance)
-        gp.SetCommandPrompt(secondPtMsg)
-        gp.DrawLineFromPoint(first_pt,true)
-        gp.EnableDrawLineFromPoint(true)
-        let r = gp.Get()
-        if r not <| in [Rhino.Input.GetResult.Cancel, Rhino.Input.GetResult.Point, then
-          Rhino.Input.GetResult.Nothing]: errorHandler()
-        if r = Rhino.Input.GetResult.Cancel then null
-        if r = Rhino.Input.GetResult.Point then
-          let second_pt = gp.Point()
-          let distance = second_pt.DistanceTo(first_pt)
-        gp.Dispose()
-        print "Distance: {0}".format(distance)
-        distance
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetDistance(first_pt=None, distance=None, first_pt_msg="First distance point", second_pt_msg="Second distance point"):
-        """Pauses for user input of a distance.
+        '''Pauses for user input of a distance.
         Parameters:
           first_pt (point, optional): First distance point
           distance (number, optional): Default distance
@@ -515,14 +342,7 @@ module ExtensionsUserinterface =
         Returns:
           number: The distance between the two points if successful.
           None: if not successful, or on error.
-        Example:
-          import rhinoscriptsyntax as  rs
-          dist = rs.GetDistance()
-          if dist:
-              print  dist
-        See Also:
-          GetAngle
-        """
+        '''
         if distance is not None and first_pt is None: 
             raise Exception("The 'first_pt' parameter needs a value if 'distance' is not None.")
         if distance is not None and not (isinstance(distance, int) or isinstance(distance, float)): return None
@@ -568,33 +388,10 @@ module ExtensionsUserinterface =
     ///Select the duplicated edge curves.</param>
     ///<returns>(Guid seq) of selection prompts (curve id, parent id, selection point)</returns>
     static member GetEdgeCurves([<OPT;DEF(null)>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int, [<OPT;DEF(false)>]select:bool) : Guid seq =
-        if min_count<0 || (maxCount>0 && min_count>maxCount) then 
-        if not <| message then message <- "Select Edges"
-        let go = Rhino.Input.Custom.GetObject()
-        go.SetCommandPrompt(message)
-        let go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve
-        let go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.EdgeCurve
-        go.EnablePreSelect(false, true)
-        let rc = go.GetMultiple(min_count, maxCount)
-        if rc<>Rhino.Input.GetResult.Object then 
-        rc <- []
-        for i=0 to go.ObjectCount) do
-            let edge = go.Object(i).Edge()
-            if not <| edge then continue
-            edge <- edge.Duplicate()
-            let curve_id = Doc.Objects.AddCurve(edge)
-            let parent_id = go.Object(i).ObjectId
-            let pt = go.Object(i).SelectionPoint()
-            rc.Add( (curve_id, parent_id, pt) )
-        if select then
-            for item in rc do
-                let rhobj = Doc.Objects.Find(item.[0])
-                rhobj.Select(true)
-            Doc.Views.Redraw()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetEdgeCurves(message=None, min_count=1, max_count=0, select=False):
-        """Prompt the user to pick one or more surface or polysurface edge curves
+        '''Prompt the user to pick one or more surface or polysurface edge curves
         Parameters:
           message  (str, optional):  A prompt or message.
           min_count (number, optional): minimum number of edges to select.
@@ -603,17 +400,7 @@ module ExtensionsUserinterface =
         Returns:
           list(tuple[guid, point, point], ...): of selection prompts (curve id, parent id, selection point)
           None: if not successful
-        Example:
-          import rhinoscriptsyntax as rs
-          edges = rs.GetEdgeCurves()
-          if edges:
-              for edgeinfo in edges:
-                  print "Curve Id =", edgeinfo[0]
-                  print "Parent Id =", edgeinfo[1]
-                  print "Pick point =", edgeinfo[2]
-        See Also:
-          DuplicateEdgeCurves
-        """
+        '''
         if min_count<0 or (max_count>0 and min_count>max_count): return
         if not message: message = "Select Edges"
         go = Rhino.Input.Custom.GetObject()
@@ -652,18 +439,10 @@ module ExtensionsUserinterface =
     ///A maximum allowable value.</param>
     ///<returns>(float) The whole number input by the user .</returns>
     static member GetInteger([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]number:float, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
-        let gi = Rhino.Input.Custom.GetInteger()
-        if message then gi.SetCommandPrompt(message)
-        if number <> null then gi.SetDefaultInteger(number)
-        if minimum <> null then gi.SetLowerLimit(minimum, false)
-        if maximum <> null then gi.SetUpperLimit(maximum, false)
-        if gi.Get()<>Rhino.Input.GetResult.Number then failwithf "Rhino.Scripting Error:GetInteger failed.  message:"%A" number:"%A" minimum:"%A" maximum:"%A"" message number minimum maximum
-        let rc = gi.Number()
-        gi.Dispose()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetInteger(message=None, number=None, minimum=None, maximum=None):
-        """Pauses for user input of a whole number.
+        '''Pauses for user input of a whole number.
         Parameters:
           message (str, optional): A prompt or message.
           number (number, optional): A default whole number value.
@@ -672,14 +451,7 @@ module ExtensionsUserinterface =
         Returns:
            number: The whole number input by the user if successful.
            None: if not successful, or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          color = rs.LayerColor("Default")
-          color = rs.GetInteger("Enter an RGB color value", color.ToArgb(), 0)
-          if color: rs.LayerColor("Default", color)
-        See Also:
-          
-        """
+        '''
         gi = Rhino.Input.Custom.GetInteger()
         if message: gi.SetCommandPrompt(message)
         if number is not None: gi.SetDefaultInteger(number)
@@ -703,17 +475,10 @@ module ExtensionsUserinterface =
     ///Show set current of 'Optional buttons to show on the dialog' (FIXME 0)</param>
     ///<returns>(string) name of selected layer</returns>
     static member GetLayer([<OPT;DEF("Select Layer")>]title:string, [<OPT;DEF(null)>]layer:string, [<OPT;DEF(false)>]showNewButton:bool, [<OPT;DEF(false)>]showSetCurrent:bool) : string =
-        let layer_index = Doc.Layers.CurrentLayerIndex
-        if layer then
-            let layer_instance = Doc.Layers.FindName(layer)
-            if layer_instance <> null then layer_index <- layer_instance.Index
-        let rc = Rhino.UI.Dialogs.ShowSelectLayerDialog(layer_index, title, show_new_button, showSetCurrent, true)
-        if rc.[0]<>true then null
-        let layer = Doc.Layers.[rc.[1]]
-        layer.FullPath
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetLayer(title="Select Layer", layer=None, show_new_button=False, show_set_current=False):
-        """Displays dialog box prompting the user to select a layer
+        '''Displays dialog box prompting the user to select a layer
         Parameters:
           title (str, optional): dialog box title
           layer (str, optional): name of a layer to preselect. If omitted, the current layer will be preselected
@@ -721,15 +486,7 @@ module ExtensionsUserinterface =
         Returns:
           str: name of selected layer if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          obj = rs.GetObject("Select object")
-          if obj:
-              layer = rs.GetLayer("Select Layer", rs.ObjectLayer(obj), True, True)
-              if layer: rs.ObjectLayer( obj, layer )
-        See Also:
-          
-        """
+        '''
         layer_index = scriptcontext.doc.Layers.CurrentLayerIndex
         if layer:
             layer_instance = scriptcontext.doc.Layers.FindName(layer)
@@ -748,25 +505,16 @@ module ExtensionsUserinterface =
     ///Optional button to show on the dialog</param>
     ///<returns>(string) The names of selected layers</returns>
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string =
-        let rc, layer_indices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
-        if rc then
-            .[Doc.Layers.[index].FullPath for index in layer_indices]
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetLayers(title="Select Layers", show_new_button=False):
-        """Displays a dialog box prompting the user to select one or more layers
+        '''Displays a dialog box prompting the user to select one or more layers
         Parameters:
           title (str, optional):  dialog box title
           show_new_button (bool, optional): Optional button to show on the dialog
         Returns:
           str: The names of selected layers if successful
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.GetLayers("Select Layers")
-          if layers:
-              for layer in layers: print layer
-        See Also:
-          GetLayer
-        """
+        '''
         rc, layer_indices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(None, title, show_new_button)
         if rc:
             return [scriptcontext.doc.Layers[index].FullPath for index in layer_indices]
@@ -796,20 +544,10 @@ module ExtensionsUserinterface =
     ///Message3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Line) Tuple of two points on success</returns>
     static member GetLine([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]message3:string) : Line =
-        let gl = Rhino.Input.Custom.GetLine()
-        if mode=0 then gl.EnableAllVariations(true)
-        else gl.GetLineMode <- Enum.ToObject( Rhino.Input.Custom.GetLineMode, mode-1 )
-        if point then
-            let point = Coerce.coerce3dpoint(point)
-            gl.SetFirstPoint(point)
-        if message1 then gl.FirstPointPrompt <- message1
-        if message2 then gl.MidPointPrompt <- message2
-        if message3 then gl.SecondPointPrompt <- message3
-        let rc, line = gl.Get()
-        if rc=Rhino.Commands.Result.Success then line.From, line.To
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetLine(mode=0, point=None, message1=None, message2=None, message3=None):
-        """Prompts the user to pick points that define a line
+        '''Prompts the user to pick points that define a line
         Parameters:
           mode (number, optional): line definition mode.
             0  Default - Show all modes, start in two-point mode
@@ -827,16 +565,7 @@ module ExtensionsUserinterface =
         Returns:
           line: Tuple of two points on success
           None: on error
-        Example:
-          import rhinoscriptsyntax as  rs
-          line = rs.GetLine()
-          if line: rs.AddLine( line[0],  line[1] )
-        See Also:
-          GetBox
-          GetPoint
-          GetPolyline
-          GetRectangle
-        """
+        '''
         gl = Rhino.Input.Custom.GetLine()
         if mode==0: gl.EnableAllVariations(True)
         else: gl.GetLineMode = System.Enum.ToObject( Rhino.Input.Custom.GetLineMode, mode-1 )
@@ -858,29 +587,16 @@ module ExtensionsUserinterface =
     ///If True, the "by Layer" linetype will show. Defaults to False.</param>
     ///<returns>(string) The names of selected linetype</returns>
     static member GetLinetype([<OPT;DEF(null)>]defaultValLinetyp:string, [<OPT;DEF(false)>]showByLayer:bool) : string =
-        let lt_instance = Doc.Linetyps.CurrentLinetyp
-        if default_linetyp then
-            let lt_new = Doc.Linetyps.FindName(default_linetyp)
-            if lt_new <> null then lt_instance <- lt_new
-        let id = Rhino.UI.Dialogs.ShowLineTypes("Select Linetyp", "", doc)
-        if id = "" then null
-        let linetyp = Doc.Linetyps.FindId(id)
-        linetyp.Name
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetLinetype(default_linetype=None, show_by_layer=False):
-        """Displays a dialog box prompting the user to select one linetype
+        '''Displays a dialog box prompting the user to select one linetype
         Parameters:
           default_linetype (str, optional):  Optional. The name of the linetype to select. If omitted, the current linetype will be selected.
           show_by_layer (bool, optional): If True, the "by Layer" linetype will show. Defaults to False.
         Returns:
           str: The names of selected linetype if successful
-        Example:
-          import rhinoscriptsyntax as rs
-          linetype = rs.GetLinetype()
-          if linetype: print(linetype)
-        See Also:
-          GetLayer
-        """
+        '''
         lt_instance = scriptcontext.doc.Linetypes.CurrentLinetype
         if default_linetype:
             lt_new = scriptcontext.doc.Linetypes.FindName(default_linetype)
@@ -904,24 +620,10 @@ module ExtensionsUserinterface =
     ///  If -1, selection stops as soon as there are at least minCount faces selected.</param>
     ///<returns>(float seq) of mesh face indices on success</returns>
     static member GetMeshFaces(objectId:Guid, [<OPT;DEF("")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : float seq =
-        Doc.Objects.UnselectAll()
-        Doc.Views.Redraw()
-        let object_id = Coerce.coerceguid(object_id, true)
-        def FilterById( rhino_object, geometry, component_index ):
-            object_id = rhino_object.Id
-        let go = Rhino.Input.Custom.GetObject()
-        go.SetCustomGeometryFilter(FilterById)
-        if message then go.SetCommandPrompt(message)
-        let go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshFace
-        go.AcceptNothing(true)
-        if go.GetMultiple(min_count,maxCount)<>Rhino.Input.GetResult.Object then null
-        let objrefs = go.Objects()
-        let rc = [| for item in objrefs -> item.GeometryComponentIndex.Index |]
-        go.Dispose()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetMeshFaces(object_id, message="", min_count=1, max_count=0):
-        """Prompts the user to pick one or more mesh faces
+        '''Prompts the user to pick one or more mesh faces
         Parameters:
           object_id (guid): the mesh object's identifier
           message (str, optional): a prompt of message
@@ -932,19 +634,7 @@ module ExtensionsUserinterface =
         Returns:
           list(number, ...): of mesh face indices on success
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          mesh = rs.GetObject("Select mesh", rs.filter.mesh)
-          if mesh:
-              indices = rs.GetMeshFaces(mesh)
-              if indices:
-                  for index in indices: print index
-        See Also:
-          GetMeshVertices
-          MeshFaces
-          MeshFaceVertices
-          MeshVertices
-        """
+        '''
         scriptcontext.doc.Objects.UnselectAll()
         scriptcontext.doc.Views.Redraw()
         object_id = rhutil.coerceguid(object_id, True)
@@ -975,24 +665,10 @@ module ExtensionsUserinterface =
     ///  are at least minCount vertices selected.</param>
     ///<returns>(float seq) of mesh vertex indices on success</returns>
     static member GetMeshVertices(objectId:Guid, [<OPT;DEF("")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : float seq =
-        Doc.Objects.UnselectAll()
-        Doc.Views.Redraw()
-        let object_id = Coerce.coerceguid(object_id, true)
-        class CustomGetObject(Rhino.Input.Custom.GetObject):
-            def CustomGeometryFilter( self, rhino_object, geometry, component_index ):
-                object_id = rhino_object.Id
-        let go = CustomGetObject()
-        if message then go.SetCommandPrompt(message)
-        let go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshVertex
-        go.AcceptNothing(true)
-        if go.GetMultiple(min_count,maxCount)<>Rhino.Input.GetResult.Object then null
-        let objrefs = go.Objects()
-        let rc = [| for item in objrefs -> item.GeometryComponentIndex.Index |]
-        go.Dispose()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetMeshVertices(object_id, message="", min_count=1, max_count=0):
-        """Prompts the user to pick one or more mesh vertices
+        '''Prompts the user to pick one or more mesh vertices
         Parameters:
           object_id (guid): the mesh object's identifier
           message (str, optional): a prompt of message
@@ -1003,19 +679,7 @@ module ExtensionsUserinterface =
         Returns:
           list(number, ...): of mesh vertex indices on success
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          mesh = rs.GetObject("Select mesh", rs.filter.mesh)
-          if mesh:
-              indices = rs.GetMeshVertices(mesh)
-              if indices:
-                  for index in indices: print index
-        See Also:
-          GetMeshFaces
-          MeshFaces
-          MeshFaceVertices
-          MeshVertices
-        """
+        '''
         scriptcontext.doc.Objects.UnselectAll()
         scriptcontext.doc.Views.Redraw()
         object_id = rhutil.coerceguid(object_id, True)
@@ -1045,23 +709,10 @@ module ExtensionsUserinterface =
     ///Constrains the point selections to the active construction plane.</param>
     ///<returns>(Point3d) point on success</returns>
     static member GetPoint([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : Point3d =
-        let gp = Rhino.Input.Custom.GetPoint()
-        if message then gp.SetCommandPrompt(message)
-        let basis_point = Coerce.coerce3dpoint(basis_point)
-        if basis_point then
-            gp.DrawLineFromPoint(basis_point,true)
-            gp.EnableDrawLineFromPoint(true)
-            if distance then gp.ConstrainDistanceFromBasePoint(distance)
-        if inPlane then gp.ConstrainToConstructionPlane(true)
-        gp.Get()
-        if gp.CommandResult()<>Rhino.Commands.Result.Success then
-            failwithf "Rhino.Scripting Error:GetPoint failed.  message:"%A" basisPoint:"%A" distance:"%A" inPlane:"%A"" message basisPoint distance inPlane
-        let pt = gp.Point()
-        gp.Dispose()
-        pt
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetPoint(message=None, base_point=None, distance=None, in_plane=False):
-        """Pauses for user input of a point.
+        '''Pauses for user input of a point.
         Parameters:
           message (str, optional): A prompt or message.
           base_point (point, optional): list of 3 numbers or Point3d identifying a starting, or base point
@@ -1070,23 +721,7 @@ module ExtensionsUserinterface =
         Returns:
           point: point on success
           None: if no point picked or user canceled
-        Example:
-          import rhinoscriptsyntax as rs
-          point1 = rs.GetPoint("Pick first point")
-          if point1:
-              rs.AddPoint(point1)
-              point2 = rs.GetPoint("Pick second point", point1)
-              if point2:
-                  rs.AddPoint(point2)
-                  distance = (point1-point2).Length
-                  point3 = rs.GetPoint("Pick third point", point2, distance)
-                  if point3: rs.AddPoint(point3)
-        See Also:
-          GetPointOnCurve
-          GetPointOnSurface
-          GetPoints
-          GetRectangle
-        """
+        '''
         gp = Rhino.Input.Custom.GetPoint()
         if message: gp.SetCommandPrompt(message)
         base_point = rhutil.coerce3dpoint(base_point)
@@ -1110,37 +745,17 @@ module ExtensionsUserinterface =
     ///A prompt of message</param>
     ///<returns>(Point3d) 3d point</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
-        let curve = Coerce.coercecurve(curveId, -1, true)
-        let gp = Rhino.Input.Custom.GetPoint()
-        if message then gp.SetCommandPrompt(message)
-        gp.Constrain(curve, false)
-        gp.Get()
-        if gp.CommandResult()<>Rhino.Commands.Result.Success then
-            failwithf "Rhino.Scripting Error:GetPointOnCurve failed.  curveId:"%A" message:"%A"" curveId message
-        let pt = gp.Point()
-        gp.Dispose()
-        pt
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetPointOnCurve(curve_id, message=None):
-        """Pauses for user input of a point constrainted to a curve object
+        '''Pauses for user input of a point constrainted to a curve object
         Parameters:
           curve_id (guid): identifier of the curve to get a point on
           message (str, optional): a prompt of message
         Returns:
           point: 3d point if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          obj = rs.GetObject("Pick a curve")
-          if rs.IsCurve(obj):
-              point = rs.GetPointOnCurve(obj, "Point on curve")
-              if point: rs.AddPoint(point)
-        See Also:
-          GetPoint
-          GetPointOnMesh
-          GetPointOnSurface
-          GetPoints
-        """
+        '''
         curve = rhutil.coercecurve(curve_id, -1, True)
         gp = Rhino.Input.Custom.GetPoint()
         if message: gp.SetCommandPrompt(message)
@@ -1160,31 +775,17 @@ module ExtensionsUserinterface =
     ///A prompt or message</param>
     ///<returns>(Point3d) 3d point</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
-        let meshId = Coerce.coerceguid(meshId, true)
-        if not <| message then message <- "Point"
-        let cmdrc, point = Rhino.Input.RhinoGet.GetPointOnMesh(meshId, message, false)
-        if cmdrc=Rhino.Commands.Result.Success then point
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetPointOnMesh(mesh_id, message=None):
-        """Pauses for user input of a point constrained to a mesh object
+        '''Pauses for user input of a point constrained to a mesh object
         Parameters:
           mesh_id (guid): identifier of the mesh to get a point on
           message (str, optional): a prompt or message
         Returns:
           point: 3d point if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          mesh = rs.GetObject("Pick a mesh", rs.filter.mesh)
-          if mesh:
-              point = rs.GetPointOnMesh(mesh, "Point on mesh")
-              if point: rs.AddPoint( point )
-        See Also:
-          GetPoint
-          GetPointOnCurve
-          GetPointOnSurface
-          GetPoints
-        """
+        '''
         mesh_id = rhutil.coerceguid(mesh_id, True)
         if not message: message = "Point"
         cmdrc, point = Rhino.Input.RhinoGet.GetPointOnMesh(mesh_id, message, False)
@@ -1199,24 +800,10 @@ module ExtensionsUserinterface =
     ///A prompt or message</param>
     ///<returns>(Point3d) 3d point</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
-        let surfOrBrep = Coerce.coercesurface(surfaceId)
-        if not <| surfOrBrep then
-            surfOrBrep <- Coerce.coercebrep(surfaceId, true)
-        let gp = Rhino.Input.Custom.GetPoint()
-        if message then gp.SetCommandPrompt(message)
-        if isinstance(surfOrBrep,Surface) then
-            gp.Constrain(surfOrBrep,false)
-        else
-            gp.Constrain(surfOrBrep, -1, -1, false)
-        gp.Get()
-        if gp.CommandResult()<>Rhino.Commands.Result.Success then
-            failwithf "Rhino.Scripting Error:GetPointOnSurface failed.  surfaceId:"%A" message:"%A"" surfaceId message
-        let pt = gp.Point()
-        gp.Dispose()
-        pt
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetPointOnSurface(surface_id, message=None):
-        """Pauses for user input of a point constrained to a surface or polysurface
+        '''Pauses for user input of a point constrained to a surface or polysurface
         object
         Parameters:
           surface_id (guid): identifier of the surface to get a point on
@@ -1224,18 +811,7 @@ module ExtensionsUserinterface =
         Returns:
           point: 3d point if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          surface = rs.GetObject("Pick a surface")
-          if surface:
-              point = rs.GetPointOnSurface(surface, "Point on surface")
-              if point: rs.AddPoint(point)
-        See Also:
-          GetPoint
-          GetPointOnCurve
-          GetPointOnMesh
-          GetPoints
-        """
+        '''
         surfOrBrep = rhutil.coercesurface(surface_id)
         if not surfOrBrep:
             surfOrBrep = rhutil.coercebrep(surface_id, True)
@@ -1270,39 +846,10 @@ module ExtensionsUserinterface =
     ///A starting or base point</param>
     ///<returns>(Point3d seq) of 3d points</returns>
     static member GetPoints([<OPT;DEF(false)>]drawLines:bool, [<OPT;DEF(false)>]inPlane:bool, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]maxPoints:float, [<OPT;DEF(null)>]basisPoint:Point3d) : Point3d seq =
-        let gp = Rhino.Input.Custom.GetPoint()
-        if message1 then gp.SetCommandPrompt(message1)
-        gp.EnableDrawLineFromPoint( draw_lines )
-        if in_plane then
-            gp.ConstrainToConstructionPlane(true)
-            let plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
-            gp.Constrain(plane, false)
-        let getres = gp.Get()
-        if gp.CommandResult()<>Rhino.Commands.Result.Success then null
-        let prevPoint = gp.Point()
-        let rc = .[prevPoint]
-        if max_points = null || max_points>1 then
-            let current_point = 1
-            if message2 then gp.SetCommandPrompt(message2)
-            def GetPointDynamicDrawFunc( sender, args ):
-                if Seq.length(rc)>1 then
-                    let c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor
-                    args.Display.DrawPolyline(rc, c)
-            if draw_lines then gp.DynamicDraw +<- GetPointDynamicDrawFunc
-            while true:
-                if max_points && current_point>=max_points then break
-                if draw_lines then gp.DrawLineFromPoint(prevPoint, true)
-                gp.SetBasePoint(prevPoint, true)
-                current_point += 1
-                getres <- gp.Get()
-                if getres=Rhino.Input.GetResult.Cancel then break
-                if gp.CommandResult()<>Rhino.Commands.Result.Success then null
-                prevPoint <- gp.Point()
-                rc.Add(prevPoint)
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetPoints(draw_lines=False, in_plane=False, message1=None, message2=None, max_points=None, base_point=None):
-        """Pauses for user input of one or more points
+        '''Pauses for user input of one or more points
         Parameters:
           draw_lines (bool, optional): Draw lines between points
           in_plane (bool, optional): Constrain point selection to the active construction plane
@@ -1314,16 +861,7 @@ module ExtensionsUserinterface =
         Returns:
           list(point, ...): of 3d points if successful
           None: if not successful or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          points = rs.GetPoints(True)
-          if points: rs.AddPointCloud(points)
-        See Also:
-          GetPoint
-          GetPointOnCurve
-          GetPointOnSurface
-          GetRectangle
-        """
+        '''
         gp = Rhino.Input.Custom.GetPoint()
         if message1: gp.SetCommandPrompt(message1)
         gp.EnableDrawLineFromPoint( draw_lines )
@@ -1379,20 +917,10 @@ module ExtensionsUserinterface =
     ///The maximum number of points to require; 0 for no limit.  The default is 0.</param>
     ///<returns>(Point3d seq) A list of 3-D points that define the polyline .</returns>
     static member GetPolyline([<OPT;DEF(3)>]flags:int, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]message3:string, [<OPT;DEF(null)>]message4:string, [<OPT;DEF(2)>]min:float, [<OPT;DEF(0)>]max:float) : Point3d seq =
-      let gpl = Rhino.Input.Custom.GetPolyline()
-      if message1 then gpl.FirstPointPrompt <- message1
-      if message2 then gpl.SecondPointPrompt <- message2
-      if message3 then gpl.ThirdPointPrompt <- message3
-      if message4 then gpl.FourthPointPrompt <- message4
-      if min then gpl.MinPointCount <- min
-      if max then gpl.MaxPointCount <- max
-      let rc, polyline = gpl.Get()
-      Doc.Views.Redraw()
-      if rc=Rhino.Commands.Result.Success then polyline
-      null
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetPolyline(flags=3, message1=None, message2=None, message3=None, message4=None, min=2, max=0):
-      """Prompts the user to pick points that define a polyline.
+        '''Prompts the user to pick points that define a polyline.
       Parameters:
         flags (number, optional) The options are bit coded flags. Values can be added together to specify more than one option. The default is 3.
           value description
@@ -1409,17 +937,7 @@ module ExtensionsUserinterface =
       Returns:
         list(point, ...): A list of 3-D points that define the polyline if successful.
         None: if not successful or on error
-      Example:
-        import rhinoscriptsyntax as rs
-        from scriptcontext import doc
-        arr = rs.GetPolyline()
-        if arr is not None:
-            doc.AddPolyline(arr)
-      See Also:
-        GetBox
-        GetLine
-        GetRectangle
-      """
+      '''
       gpl = Rhino.Input.Custom.GetPolyline()
       if message1: gpl.FirstPointPrompt = message1
       if message2: gpl.SecondPointPrompt = message2
@@ -1445,18 +963,10 @@ module ExtensionsUserinterface =
     ///A maximum allowable value.</param>
     ///<returns>(float) The number input by the user .</returns>
     static member GetReal([<OPT;DEF("Number")>]message:string, [<OPT;DEF(null)>]number:float, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
-        let gn = Rhino.Input.Custom.GetNumber()
-        if message then gn.SetCommandPrompt(message)
-        if number <> null then gn.SetDefaultNumber(number)
-        if minimum <> null then gn.SetLowerLimit(minimum, false)
-        if maximum <> null then gn.SetUpperLimit(maximum, false)
-        if gn.Get()<>Rhino.Input.GetResult.Number then null
-        let rc = gn.Number()
-        gn.Dispose()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetReal(message="Number", number=None, minimum=None, maximum=None):
-        """Pauses for user input of a number.
+        '''Pauses for user input of a number.
         Parameters:
           message (str, optional): A prompt or message.
           number (number, optional): A default number value.
@@ -1465,13 +975,7 @@ module ExtensionsUserinterface =
         Returns:
           number: The number input by the user if successful.
           None: if not successful, or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          radius = rs.GetReal("Radius of new circle", 3.14, 1.0)
-          if radius: rs.AddCircle( (0,0,0), radius )
-        See Also:
-          RealBox
-        """
+        '''
         gn = Rhino.Input.Custom.GetNumber()
         if message: gn.SetCommandPrompt(message)
         if number is not None: gn.SetDefaultNumber(number)
@@ -1502,19 +1006,10 @@ module ExtensionsUserinterface =
     ///Prompt3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) four 3d points that define the corners of the rectangle</returns>
     static member GetRectangle([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]prompt1:string, [<OPT;DEF(null)>]prompt2:string, [<OPT;DEF(null)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
-        let mode :  = LanguagePrimitives.EnumOfValue  Rhino.Input.GetBoxMode, mode )
-        let basisPoint = Coerce.coerce3dpoint(basisPoint)
-        if( basisPoint=null ) then basisPoint <- Point3d.Unset
-        let prompts = .["", "", ""]
-        if prompt1 then prompts.[0] <- prompt1
-        if prompt2 then prompts.[1] <- prompt2
-        if prompt3 then prompts.[2] <- prompt3
-        let rc, corners = Rhino.Input.RhinoGet.GetRectangle(mode, basisPoint, prompts)
-        if rc=Rhino.Commands.Result.Success then corners
-        null
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetRectangle(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
-        """Pauses for user input of a rectangle
+        '''Pauses for user input of a rectangle
         Parameters:
           mode (number, optional): The rectangle selection mode. The modes are as follows
               0 = All modes
@@ -1527,16 +1022,7 @@ module ExtensionsUserinterface =
         Returns:
           tuple(point, point, point, point): four 3d points that define the corners of the rectangle
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          rect = rs.GetRectangle()
-          if rect:
-              for i, corner in enumerate(rect):
-                  rs.AddTextDot( i, corner )
-        See Also:
-          GetPoint
-          GetPoints
-        """
+        '''
         mode = System.Enum.ToObject( Rhino.Input.GetBoxMode, mode )
         base_point = rhutil.coerce3dpoint(base_point)
         if( base_point==None ): base_point = Rhino.Geometry.Point3d.Unset
@@ -1561,20 +1047,10 @@ module ExtensionsUserinterface =
     ///<returns>(string) The string either input or selected by the user .
     ///  If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
     static member GetString([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]defaultValString:string, [<OPT;DEF(null)>]strings:string seq) : string =
-        let gs = Rhino.Input.Custom.GetString()
-        gs.AcceptNothing(true)
-        if message then gs.SetCommandPrompt(message)
-        if defaultValString then gs.SetDefaultString(defaultValString)
-        if strings then
-            for s in strings do gs.AddOption(s)
-        let result = gs.Get()
-        if result=Rhino.Input.GetResult.Cancel then null
-        if( result = Rhino.Input.GetResult.Option ) then
-            gs.Option().EnglishName
-        gs.StringResult()
+        failNotImpl () // genreation temp disabled !!
     (*
     def GetString(message=None, defaultString=None, strings=None):
-        """Pauses for user input of a string value
+        '''Pauses for user input of a string value
         Parameters:
           message (str, optional): a prompt or message
           defaultString (str, optional): a default value
@@ -1584,15 +1060,7 @@ module ExtensionsUserinterface =
           str: The string either input or selected by the user if successful.
                If the user presses the Enter key without typing in a string, an empty string "" is returned.
           None: if not successful, on error, or if the user pressed cancel.
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.CurrentLayer()
-          layer = rs.GetString("Layer to set current", layer)
-          if layer: rs.CurrentLayer(layer)
-        See Also:
-          GetBoolean
-          StringBox
-        """
+        '''
         gs = Rhino.Input.Custom.GetString()
         gs.AcceptNothing(True)
         if message: gs.SetCommandPrompt(message)
@@ -1617,10 +1085,10 @@ module ExtensionsUserinterface =
     ///Selected item in the list</param>
     ///<returns>(string) he selected item</returns>
     static member ListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]defaultVal:string) : string =
-        Rhino.UI.Dialogs.ShowListBox(title, message, items, defaultVal)
+        failNotImpl () // genreation temp disabled !!
     (*
     def ListBox(items, message=None, title=None, default=None):
-        """Display a list of items in a list box dialog.
+        '''Display a list of items in a list box dialog.
         Parameters:
           items ([str, ...]): a list of values to select
           message (str, optional): a prompt of message
@@ -1629,18 +1097,7 @@ module ExtensionsUserinterface =
         Returns:
           str: he selected item if successful
           None: if not successful or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              result = rs.ListBox(layers, "Layer to set current")
-              if result: rs.CurrentLayer( result )
-        See Also:
-          CheckListBox
-          ComboListBox
-          MultiListBox
-          PropertyListBox
-        """
+        '''
         return Rhino.UI.Dialogs.ShowListBox(title, message, items, default)
     *)
 
@@ -1680,40 +1137,10 @@ module ExtensionsUserinterface =
     ///  6      Yes button was clicked.
     ///  7      No button was clicked.</returns>
     static member MessageBox(message:string, [<OPT;DEF(0)>]buttons:float, [<OPT;DEF("")>]title:string) : float =
-        let buttontyp = buttons & 0x00000007 //111 in binary
-        let btn = Rhino.UI.ShowMessageButton.OK
-        if buttontyp=1 then btn <- Rhino.UI.ShowMessageButton.OKCancel
-        elif buttontyp=2 then btn <- Rhino.UI.ShowMessageButton.AbortRetryIgnore
-        elif buttontyp=3 then btn <- Rhino.UI.ShowMessageButton.YesNoCancel
-        elif buttontyp=4 then btn <- Rhino.UI.ShowMessageButton.YesNo
-        elif buttontyp=5 then btn <- Rhino.UI.ShowMessageButton.RetryCancel
-        let icontyp = buttons & 0x00000070
-        let icon = Rhino.UI.ShowMessageIcon.null
-        if icontyp=16 then icon <- Rhino.UI.ShowMessageIcon.Error
-        elif icontyp=32 then icon <- Rhino.UI.ShowMessageIcon.Question
-        elif icontyp=48 then icon <- Rhino.UI.ShowMessageIcon.Warning
-        elif icontyp=64 then icon <- Rhino.UI.ShowMessageIcon.Information
-        ////// 15 Sep 2014 Alain - default button not <| supported in new version of RC
-        ////// that isn"t tied to Windows.Forms but it probably will so I"m commenting
-        ////// the old code instead of deleting it.
-        let //defbtntyp = buttons & 0x00000300
-        let //defbtn = Windows.Forms.MessageDefaultButton.Button1
-        //if defbtntyp=256:
-        let //    defbtn = Windows.Forms.MessageDefaultButton.Button2
-        //elif defbtntyp=512:
-        //    defbtn <- Windows.Forms.MessageDefaultButton.Button3
-        if not <| isinstance(message, str) then message <- string(message)
-        let dlg_result = Rhino.UI.Dialogs.ShowMessage(message, title, btn, icon)
-        if dlg_result=Rhino.UI.ShowMessageResult.OK then     1
-        if dlg_result=Rhino.UI.ShowMessageResult.Cancel then 2
-        if dlg_result=Rhino.UI.ShowMessageResult.Abort then  3
-        if dlg_result=Rhino.UI.ShowMessageResult.Retry then  4
-        if dlg_result=Rhino.UI.ShowMessageResult.Ignore then 5
-        if dlg_result=Rhino.UI.ShowMessageResult.Yes then    6
-        if dlg_result=Rhino.UI.ShowMessageResult.No then     7
+        failNotImpl () // genreation temp disabled !!
     (*
     def MessageBox(message, buttons=0, title=""):
-        """Displays a message box. A message box contains a message and
+        '''Displays a message box. A message box contains a message and
         title, plus any combination of predefined icons and push buttons.
         Parameters:
           message (str): A prompt or message.
@@ -1747,14 +1174,7 @@ module ExtensionsUserinterface =
             5      Ignore button was clicked.
             6      Yes button was clicked.
             7      No button was clicked.
-        Example:
-          import rhinoscriptsyntax as rs
-          rs.MessageBox("Hello Rhino!")
-          rs.MessageBox("Hello Rhino!", 4 | 32)
-          rs.MessageBox("Hello Rhino!", 2 | 48)
-        See Also:
-          
-        """
+        '''
         buttontype = buttons & 0x00000007 #111 in binary
         btn = Rhino.UI.ShowMessageButton.OK
         if buttontype==1: btn = Rhino.UI.ShowMessageButton.OKCancel
@@ -1800,11 +1220,10 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string seq) of new values on success</returns>
     static member PropertyListBox(items:string seq, values:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string seq =
-        let values = [| for v in values -> v.ToString() |]
-        Rhino.UI.Dialogs.ShowPropertyListBox(title, message, items, values)
+        failNotImpl () // genreation temp disabled !!
     (*
     def PropertyListBox(items, values, message=None, title=None):
-        """Displays list of items and their values in a property-style list box dialog
+        '''Displays list of items and their values in a property-style list box dialog
         Parameters:
           items, values ([str, ...]): list of string items and their corresponding values
           message (str, optional): a prompt or message
@@ -1812,25 +1231,7 @@ module ExtensionsUserinterface =
         Returns:
           list(str, ..): of new values on success
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          objs = rs.GetObjects("Select Objects")
-          if objs:
-              names = []
-              for obj in objs:
-                  name = rs.ObjectName(obj)
-                  if name is None: name=""
-                  names.append(name)
-              results = rs.PropertyListBox(objs, names, "Modify object name(s)")
-              if results:
-                  for i in xrange(len(objs)):
-                      rs.ObjectName( objs[i], results[i] )
-        See Also:
-          CheckListBox
-          ComboListBox
-          ListBox
-          MultiListBox
-        """
+        '''
         values = [v.ToString() for v in values]
         return Rhino.UI.Dialogs.ShowPropertyListBox(title, message, items, values)
     *)
@@ -1847,12 +1248,10 @@ module ExtensionsUserinterface =
     ///  or a list if multiple items are pre-selected</param>
     ///<returns>(string seq) containing the selected items</returns>
     static member MultiListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]defaultVals:string seq) : string seq =
-        if isinstance(defaultVals, str) then
-          let defaultVals = .[defaultVals]
-        Rhino.UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
+        failNotImpl () // genreation temp disabled !!
     (*
     def MultiListBox(items, message=None, title=None, defaults=None):
-        """Displays a list of items in a multiple-selection list box dialog
+        '''Displays a list of items in a multiple-selection list box dialog
         Parameters:
           items ([str, ...]) a zero-based list of string items
           message (str, optional): a prompt or message
@@ -1862,20 +1261,7 @@ module ExtensionsUserinterface =
         Returns:
           list(str, ...): containing the selected items if successful
           None: on error
-        Example:
-          import rhinoscriptsyntax as  rs
-          layers = rs.LayerNames()
-          if layers:
-              layers  = rs.MultiListBox(layers, "Layers to lock")
-          if layers:
-              for  layer in layers:
-                  rs.LayerLocked(layer,  True)
-        See Also:
-          CheckListBox
-          ComboListBox
-          ListBox
-          PropertyListBox
-        """
+        '''
         if isinstance(defaults, str):
           defaults = [defaults]  
         return Rhino.UI.Dialogs.ShowMultiListBox(title, message, items, defaults)
@@ -1898,16 +1284,10 @@ module ExtensionsUserinterface =
     ///A default file extension</param>
     ///<returns>(string) file name is successful</returns>
     static member OpenFileName([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string =
-        let fd = Rhino.UI.OpenFileDialog()
-        if title then fd.Title <- title
-        if filter then fd.Filter <- filter
-        if folder then fd.InitialDirectory <- folder
-        if filename then fd.FileName <- filename
-        if extension then fd.DefaultExt <- extension
-        if fd.ShowOpenDialog() then fd.FileName
+        failNotImpl () // genreation temp disabled !!
     (*
     def OpenFileName(title=None, filter=None, folder=None, filename=None, extension=None):
-        """Displays file open dialog box allowing the user to enter a file name.
+        '''Displays file open dialog box allowing the user to enter a file name.
         Note, this function does not open the file.
         Parameters:
           title (str, optional): A dialog box title.
@@ -1920,19 +1300,7 @@ module ExtensionsUserinterface =
         Returns:
           str: file name is successful
           None: if not successful, or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          filename = rs.OpenFileName()
-          if filename: rs.MessageBox(filename)
-          filename = rs.OpenFileName("Open", "Text Files (*.txt)|*.txt||")
-          if filename: rs.MessageBox(filename)
-          filename = rs.OpenFileName("Open", "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||")
-          if filename: rs.MessageBox(filename)
-        See Also:
-          BrowseForFolder
-          OpenFileNames
-          SaveFileName
-        """
+        '''
         fd = Rhino.UI.OpenFileDialog()
         if title: fd.Title = title
         if filter: fd.Filter = filter
@@ -1959,18 +1327,10 @@ module ExtensionsUserinterface =
     ///A default file extension</param>
     ///<returns>(string seq) of selected file names</returns>
     static member OpenFileNames([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string seq =
-        let fd = Rhino.UI.OpenFileDialog()
-        if title then fd.Title <- title
-        if filter then fd.Filter <- filter
-        if folder then fd.InitialDirectory <- folder
-        if filename then fd.FileName <- filename
-        if extension then fd.DefaultExt <- extension
-        let fd.MultiSelect = true
-        if fd.ShowOpenDialog() then fd.FileNames
-        []
+        failNotImpl () // genreation temp disabled !!
     (*
     def OpenFileNames(title=None, filter=None, folder=None, filename=None, extension=None):
-        """Displays file open dialog box allowing the user to select one or more file names.
+        '''Displays file open dialog box allowing the user to select one or more file names.
         Note, this function does not open the file.
         Parameters:
           title (str, optional): A dialog box title.
@@ -1982,15 +1342,7 @@ module ExtensionsUserinterface =
           extension (str, optional): a default file extension
         Returns:
           list(str, ...): of selected file names
-        Example:
-          import rhinoscriptsyntax as rs
-          filenames = rs.OpenFileNames("Open", "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||")
-          for filename in filenames: print filename
-        See Also:
-          BrowseForFolder
-          OpenFileName
-          SaveFileName
-        """
+        '''
         fd = Rhino.UI.OpenFileDialog()
         if title: fd.Title = title
         if filter: fd.Filter = filter
@@ -2022,17 +1374,10 @@ module ExtensionsUserinterface =
     ///  If omitted, the active view is used</param>
     ///<returns>(float) index of the menu item picked or -1 if no menu item was picked</returns>
     static member PopupMenu(items:string seq, [<OPT;DEF(null)>]modes:float seq, [<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]view:string) : float =
-        let screen_point = Windows.Forms.Cursor.Position
-        if point then
-            let point = Coerce.coerce3dpoint(point)
-            let view = __viewhelper(view)
-            let viewport = view.ActiveViewport
-            let point2d = viewport.WorldToClient(point)
-            screen_point <- viewport.ClientToScreen(point2d)
-        Rhino.UI.Dialogs.ShowContextMenu(items, screen_point, modes);
+        failNotImpl () // genreation temp disabled !!
     (*
     def PopupMenu(items, modes=None, point=None, view=None):
-        """Display a context-style popup menu. The popup menu can appear almost
+        '''Display a context-style popup menu. The popup menu can appear almost
         anywhere, and can be dismissed by clicking the left or right mouse buttons
         Parameters:
           items ([str, ...]): list of strings representing the menu items. An empty string or None
@@ -2049,15 +1394,7 @@ module ExtensionsUserinterface =
             If omitted, the active view is used
         Returns:
           number: index of the menu item picked or -1 if no menu item was picked
-        Example:
-          import rhinoscriptsyntax as rs
-          items = "Line", "", "Circle", "Arc"
-          modes = 2,0,0,0
-          result = rs.PopupMenu(items, modes)
-          if result>=0: rs.MessageBox(items[result])
-        See Also:
-          
-        """
+        '''
         screen_point = System.Windows.Forms.Cursor.Position
         if point:
             point = rhutil.coerce3dpoint(point)
@@ -2082,14 +1419,10 @@ module ExtensionsUserinterface =
     ///A maximum allowable value.</param>
     ///<returns>(float) The newly entered number on success</returns>
     static member RealBox([<OPT;DEF("")>]message:string, [<OPT;DEF(null)>]defaultValNumber:float, [<OPT;DEF("")>]title:string, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
-        if defaultValNumber = null then defaultValNumber <- Rhino.RhinoMath.UnsetValue
-        if minimum = null then minimum <- Rhino.RhinoMath.UnsetValue
-        if maximum = null then maximum <- Rhino.RhinoMath.UnsetValue
-        let rc, number = Rhino.UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
-        if rc then number
+        failNotImpl () // genreation temp disabled !!
     (*
     def RealBox(message="", default_number=None, title="", minimum=None, maximum=None):
-        """Display a dialog box prompting the user to enter a number
+        '''Display a dialog box prompting the user to enter a number
         Parameters:
           message (str, optional): a prompt message.
           default_number (number, optional):  a default number.
@@ -2099,15 +1432,7 @@ module ExtensionsUserinterface =
         Returns:
           number: The newly entered number on success
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          radius = rs.RealBox("Enter a radius value", 5.0 )
-          if radius:
-              point = (0,0,0)
-              rs.AddCircle( point, radius )
-        See Also:
-          GetReal
-        """
+        '''
         if default_number is None: default_number = Rhino.RhinoMath.UnsetValue
         if minimum is None: minimum = Rhino.RhinoMath.UnsetValue
         if maximum is None: maximum = Rhino.RhinoMath.UnsetValue
@@ -2132,16 +1457,10 @@ module ExtensionsUserinterface =
     ///A default file extension</param>
     ///<returns>(string) the file name is successful</returns>
     static member SaveFileName([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string =
-        let fd = Rhino.UI.SaveFileDialog()
-        if title then fd.Title <- title
-        if filter then fd.Filter <- filter
-        if folder then fd.InitialDirectory <- folder
-        if filename then fd.FileName <- filename
-        if extension then fd.DefaultExt <- extension
-        if fd.ShowSaveDialog() then fd.FileName
+        failNotImpl () // genreation temp disabled !!
     (*
     def SaveFileName(title=None, filter=None, folder=None, filename=None, extension=None):
-        """Display a save dialog box allowing the user to enter a file name.
+        '''Display a save dialog box allowing the user to enter a file name.
         Note, this function does not save the file.
         Parameters:
           title (str, optional): A dialog box title.
@@ -2154,18 +1473,7 @@ module ExtensionsUserinterface =
         Returns:
           str: the file name is successful
           None: if not successful, or on error
-        Example:
-          import rhinoscriptsyntax as rs
-          filename = rs.SaveFileName()
-          if filename: rs.MessageBox(filename)
-          filename = rs.SaveFileName ("Save", "Text Files (*.txt)|*.txt||")
-          if filename: rs.MessageBox(filename)
-          filename = rrshui.SaveFileName ("Save", "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||")
-          if filename: rs.MessageBox(filename)
-        See Also:
-          BrowseForFolder
-          OpenFileName
-        """
+        '''
         fd = Rhino.UI.SaveFileDialog()
         if title: fd.Title = title
         if filter: fd.Filter = filter
@@ -2185,11 +1493,10 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) the newly entered string value</returns>
     static member StringBox([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]defaultValValue:string, [<OPT;DEF(null)>]title:string) : string =
-        let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
-        if rc then text
+        failNotImpl () // genreation temp disabled !!
     (*
     def StringBox(message=None, default_value=None, title=None):
-        """Display a dialog box prompting the user to enter a string value.
+        '''Display a dialog box prompting the user to enter a string value.
         Parameters:
           message (str, optional): a prompt message
           default_value (str, optional): a default string value
@@ -2197,13 +1504,7 @@ module ExtensionsUserinterface =
         Returns:
           str: the newly entered string value if successful
           None: if not successful
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.StringBox("New layer name" )
-          if layer: rs.AddLayer( layer )
-        See Also:
-          GetString
-        """
+        '''
         rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, default_value, False)
         if rc: return text
     *)
@@ -2216,21 +1517,16 @@ module ExtensionsUserinterface =
     ///The message title</param>
     ///<returns>(unit) in any case</returns>
     static member TextOut([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : unit =
-        Rhino.UI.Dialogs.ShowTextDialog(message, title)
+        failNotImpl () // genreation temp disabled !!
     (*
     def TextOut(message=None, title=None):
-        """Display a text dialog box similar to the one used by the _What command.
+        '''Display a text dialog box similar to the one used by the _What command.
         Parameters:
           message (str): a message
           title (str, optional): the message title
         Returns:
           None: in any case
-        Example:
-          import rhinoscriptsyntax as rs
-          rs.TextOut("This is a long string..." )
-        See Also:
-          MessagBox
-        """
+        '''
         Rhino.UI.Dialogs.ShowTextDialog(message, title)
     *)
 

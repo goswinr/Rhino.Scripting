@@ -1,30 +1,21 @@
 namespace Rhino.Scripting
 
 open System
+open Rhino
 open Rhino.Geometry
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.Scripting.Util
 open Rhino.Scripting.ActiceDocument
-
+//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsLayer =
   type RhinoScriptSyntax with
     
     
     static member internal Getlayer() : obj =
+        failNotImpl () // genreation temp disabled !!
     (*
     def __getlayer(name_or_id, raise_if_missing):
-        if not name_or_id: raise TypeError("Parameter must be a string or Guid")
-        id = rhutil.coerceguid(name_or_id)
-        if id:
-            layer = scriptcontext.doc.Layers.FindId(id)
-        else:
-            name = name_or_id
-            layer_index = scriptcontext.doc.Layers.FindByFullPath(name, UnsetIntIndex)
-            if layer_index != UnsetIntIndex: return scriptcontext.doc.Layers[layer_index]
-            layer = scriptcontext.doc.Layers.FindName(name)
-        if layer: return layer
-        if raise_if_missing: raise ValueError("%s does not exist in LayerTable" % name_or_id)
+        ''''''
     *)
 
 
@@ -43,38 +34,10 @@ module ExtensionsLayer =
     ///  layer will not have a parent layer.</param>
     ///<returns>(string) The full name of the new layer .</returns>
     static member AddLayer([<OPT;DEF(null)>]name:string, [<OPT;DEF(null)>]color:Drawing.Color, [<OPT;DEF(true)>]visible:bool, [<OPT;DEF(false)>]locked:bool, [<OPT;DEF(null)>]parent:string) : string =
-        let names = .[""]
-        if name then
-          if not <| isinstance(name, str) then name <- string(name)
-          names <- [| for n in name.split("::") if name -> n |]
-        let last_parent_index = -1
-        let last_parent = null
-        for idx, name in enumerate(names) do
-          let layer = Rhino.DocObjects.Layer.GetDefaultLayerProperties()
-          if idx = 0 then
-            if parent then
-              last_parent <- __getlayer(parent, true)
-          else
-            if last_parent_index <> -1 then
-              last_parent <- Doc.Layers.[last_parent_index]
-          if last_parent then
-            let layer.ParentLayerId = last_parent.Id
-          if name then
-            let layer.Name = name
-          let color = Coerce.coercecolor(color)
-          if color then layer.Color <- color
-          let layer.IsVisible = visible
-          let layer.IsLocked = locked
-          last_parent_index <- Doc.Layers.Add(layer)
-          if last_parent_index = -1 then
-            let full_path = layer.Name
-            if last_parent then
-                full_path <- last_parent.FullPath + "::" + full_path
-            last_parent_index <- Doc.Layers.FindByFullPath(full_path, RhinoMath.UnsetIntIndex)
-        Doc.Layers.[last_parent_index].FullPath
+        failNotImpl () // genreation temp disabled !!
     (*
     def AddLayer(name=None, color=None, visible=True, locked=False, parent=None):
-        """Add a new layer to the document
+        '''Add a new layer to the document
         Parameters:
           name (str, optional): The name of the new layer. If omitted, Rhino automatically
               generates the layer name.
@@ -85,19 +48,7 @@ module ExtensionsLayer =
               layer will not have a parent layer.
         Returns:
           str: The full name of the new layer if successful.
-        Example:
-          import rhinoscriptsyntax as rs
-          from System.Drawing import Color
-          print "New layer:", rs.AddLayer()
-          print "New layer:", rs.AddLayer("MyLayer1")
-          print "New layer:", rs.AddLayer("MyLayer2", Color.DarkSeaGreen)
-          print "New layer:", rs.AddLayer("MyLayer3", Color.Cornsilk)
-          print "New layer:", rs.AddLayer("MyLayer4",parent="MyLayer3")
-        See Also:
-          CurrentLayer
-          DeleteLayer
-          RenameLayer
-        """
+        '''
         names = ['']
         if name:
           if not isinstance(name, str): name = str(name)
@@ -135,29 +86,17 @@ module ExtensionsLayer =
 
     ///<summary>Returns the current layer</summary>
     ///<returns>(string) The full name of the current layer</returns>
-    static member CurrentLayer() : string =
-        let rc = Doc.Layers.CurrentLayer.FullPath
-        if layer then
-            let layer = __getlayer(layer, true)
-            Doc.Layers.SetCurrentLayerIndex(layer.LayerIndex, true)
-        rc
+    static member CurrentLayer() : string = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def CurrentLayer(layer=None):
-        """Returns or changes the current layer
+        '''Returns or changes the current layer
         Parameters:
           layer (guid): the name or Guid of an existing layer to make current
         Returns:
           str: If a layer name is not specified, the full name of the current layer
           str: If a layer name is specified, the full name of the previous current layer
-        Example:
-          import rhinoscriptsyntax as rs
-          rs.AddLayer("MyLayer")
-          rs.CurrentLayer("MyLayer")
-        See Also:
-          AddLayer
-          DeleteLayer
-          RenameLayer
-        """
+        '''
         rc = scriptcontext.doc.Layers.CurrentLayer.FullPath
         if layer:
             layer = __getlayer(layer, True)
@@ -168,29 +107,17 @@ module ExtensionsLayer =
     ///<summary>Changes the current layer</summary>
     ///<param name="layer">(Guid)The name or Guid of an existing layer to make current</param>
     ///<returns>(unit) unit</returns>
-    static member CurrentLayer(layer:Guid) : unit =
-        let rc = Doc.Layers.CurrentLayer.FullPath
-        if layer then
-            let layer = __getlayer(layer, true)
-            Doc.Layers.SetCurrentLayerIndex(layer.LayerIndex, true)
-        rc
+    static member CurrentLayer(layer:Guid) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def CurrentLayer(layer=None):
-        """Returns or changes the current layer
+        '''Returns or changes the current layer
         Parameters:
           layer (guid): the name or Guid of an existing layer to make current
         Returns:
           str: If a layer name is not specified, the full name of the current layer
           str: If a layer name is specified, the full name of the previous current layer
-        Example:
-          import rhinoscriptsyntax as rs
-          rs.AddLayer("MyLayer")
-          rs.CurrentLayer("MyLayer")
-        See Also:
-          AddLayer
-          DeleteLayer
-          RenameLayer
-        """
+        '''
         rc = scriptcontext.doc.Layers.CurrentLayer.FullPath
         if layer:
             layer = __getlayer(layer, True)
@@ -207,11 +134,10 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteLayer(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        Doc.Layers.Delete( layer.LayerIndex, true)
+        failNotImpl () // genreation temp disabled !!
     (*
     def DeleteLayer(layer):
-        """Removes an existing layer from the document. The layer to be removed
+        '''Removes an existing layer from the document. The layer to be removed
         cannot be the current layer. Unlike the PurgeLayer method, the layer must
         be empty, or contain no objects, before it can be removed. Any layers that
         are children of the specified layer will also be removed if they are also
@@ -220,16 +146,7 @@ module ExtensionsLayer =
           layer (str|guid): the name or id of an existing empty layer
         Returns:
           bool: True or False indicating success or failure
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer to remove")
-          if layer: rs.DeleteLayer(layer)
-        See Also:
-          AddLayer
-          CurrentLayer
-          PurgeLayer
-          RenameLayer
-        """
+        '''
         layer = __getlayer(layer, True)
         return scriptcontext.doc.Layers.Delete( layer.LayerIndex, True)
     *)
@@ -240,25 +157,16 @@ module ExtensionsLayer =
     ///<param name="expand">(bool) True to expand, False to collapse</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member ExpandLayer(layer:string, expand:bool) : bool =
-        let layer = __getlayer(layer, true)
-        if layer.IsExpanded=expand then false
-        let layer.IsExpanded = expand
-        true
+        failNotImpl () // genreation temp disabled !!
     (*
     def ExpandLayer( layer, expand ):
-        """Expands a layer. Expanded layers can be viewed in Rhino's layer dialog
+        '''Expands a layer. Expanded layers can be viewed in Rhino's layer dialog
         Parameters:
           layer (str): name of the layer to expand
           expand (bool): True to expand, False to collapse
         Returns:
           bool: True or False indicating success or failure
-        Example:
-          import rhinoscriptsyntax as rs
-          if rs.IsLayerExpanded("Default"):
-              rs.ExpandLayer( "Default", False )
-        See Also:
-          IsLayerExpanded
-        """
+        '''
         layer = __getlayer(layer, True)
         if layer.IsExpanded==expand: return False
         layer.IsExpanded = expand
@@ -270,31 +178,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of a layer to search for</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayer(layer:string) : bool =
-        let layer = __getlayer(layer, false)
-        layer <> null
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayer(layer):
-        """Verifies the existance of a layer in the document
+        '''Verifies the existance of a layer in the document
         Parameters:
           layer (str|guid): the name or id of a layer to search for
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              print "The layer exists."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayerChangeable
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerOn
-          IsLayerReference
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, False)
         return layer is not None
     *)
@@ -304,33 +196,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerChangeable(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        let rc = layer.IsVisible && not <| layer.IsLocked
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerChangeable(layer):
-        """Verifies that the objects on a layer can be changed (normal)
+        '''Verifies that the objects on a layer can be changed (normal)
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerChangeable(layer): print "The layer is changeable."
-              else: print "The layer is not changeable."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerOn
-          IsLayerReference
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.IsVisible and not layer.IsLocked
         return rc
@@ -342,26 +216,16 @@ module ExtensionsLayer =
     ///<param name="test">(string) The name or id to the layer to test</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerChildOf(layer:string, test:string) : bool =
-        let layer = __getlayer(layer, true)
-        let test = __getlayer(test, true)
-        test.IsChildOf(layer)
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerChildOf(layer, test):
-        """Verifies that a layer is a child of another layer
+        '''Verifies that a layer is a child of another layer
         Parameters:
           layer (str|guid): the name or id of the layer to test against
           test (str|guid): the name or id to the layer to test
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          rs.AddLayer("MyLayer1")
-          rs.AddLayer("MyLayer2", parent="MyLayer1")
-          rs.AddLayer("MyLayer3", parent="MyLayer2")
-          rs.MessageBox( rs.IsLayerChildOf("MyLayer1", "MyLayer3") )
-        See Also:
-          IsLayerParentOf
-        """
+        '''
         layer = __getlayer(layer, True)
         test = __getlayer(test, True)
         return test.IsChildOf(layer)
@@ -372,32 +236,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerCurrent(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.LayerIndex = Doc.Layers.CurrentLayerIndex
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerCurrent(layer):
-        """Verifies that a layer is the current layer
+        '''Verifies that a layer is the current layer
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerCurrent(layer): print "The layer is current."
-              else: print "The layer is not current."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerOn
-          IsLayerReference
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.LayerIndex == scriptcontext.doc.Layers.CurrentLayerIndex
     *)
@@ -407,33 +254,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerEmpty(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        let rhobjs = Doc.Objects.FindByLayer(layer)
-        if not <| rhobjs then true
-        false
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerEmpty(layer):
-        """Verifies that an existing layer is empty, or contains no objects
+        '''Verifies that an existing layer is empty, or contains no objects
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerEmpty(layer): print "The layer is empty."
-              else: print "The layer is not empty."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayerChangeable
-          IsLayerLocked
-          IsLayerOn
-          IsLayerReference
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         rhobjs = scriptcontext.doc.Objects.FindByLayer(layer)
         if not rhobjs: return True
@@ -446,23 +275,16 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerExpanded(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.IsExpanded
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerExpanded(layer):
-        """Verifies that a layer is expanded. Expanded layers can be viewed in
+        '''Verifies that a layer is expanded. Expanded layers can be viewed in
         Rhino's layer dialog
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          if rs.IsLayerExpanded("Default"):
-              rs.ExpandLayer( "Default", False )
-        See Also:
-          ExpandLayer
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.IsExpanded
     *)
@@ -472,32 +294,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerLocked(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.IsLocked
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerLocked(layer):
-        """Verifies that a layer is locked.
+        '''Verifies that a layer is locked.
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerLocked(layer): print "The layer is locked."
-              else: print "The layer is not locked."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerChangeable
-          IsLayerEmpty
-          IsLayerOn
-          IsLayerReference
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.IsLocked
     *)
@@ -507,32 +312,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerOn(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.IsVisible
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerOn(layer):
-        """Verifies that a layer is on.
+        '''Verifies that a layer is on.
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerOn(layer): print "The layer is on."
-              else: print "The layer is not on."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerChangeable
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerReference
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.IsVisible
     *)
@@ -542,32 +330,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerSelectable(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.IsVisible && not <| layer.IsLocked
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerSelectable(layer):
-        """Verifies that an existing layer is selectable (normal and reference)
+        '''Verifies that an existing layer is selectable (normal and reference)
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerSelectable(layer): print "The layer is selectable."
-              else: print "The layer is not selectable."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerChangeable
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerOn
-          IsLayerReference
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.IsVisible and not layer.IsLocked
     *)
@@ -578,26 +349,16 @@ module ExtensionsLayer =
     ///<param name="test">(string) The name or id to the layer to test</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerParentOf(layer:string, test:string) : bool =
-        let layer = __getlayer(layer, true)
-        let test = __getlayer(test, true)
-        test.IsParentOf(layer)
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerParentOf(layer, test):
-        """Verifies that a layer is a parent of another layer
+        '''Verifies that a layer is a parent of another layer
         Parameters:
           layer (str|guid): the name or id of the layer to test against
           test (str|guid): the name or id to the layer to test
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          rs.AddLayer("MyLayer1")
-          rs.AddLayer("MyLayer2", parent="MyLayer1")
-          rs.AddLayer("MyLayer3", parent="MyLayer2")
-          rs.MessageBox( rs.IsLayerParentOf("MyLayer3", "MyLayer1") )
-        See Also:
-          IsLayerChildOf
-        """
+        '''
         layer = __getlayer(layer, True)
         test = __getlayer(test, True)
         return test.IsParentOf(layer)
@@ -608,32 +369,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerReference(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.IsReference
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerReference(layer):
-        """Verifies that a layer is from a reference file.
+        '''Verifies that a layer is from a reference file.
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerReference(layer): print "The layer is a reference layer."
-              else: print "The layer is not a reference layer."
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerChangeable
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerOn
-          IsLayerSelectable
-          IsLayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.IsReference
     *)
@@ -643,32 +387,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerVisible(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        layer.IsVisible
+        failNotImpl () // genreation temp disabled !!
     (*
     def IsLayerVisible(layer):
-        """Verifies that a layer is visible (normal, locked, and reference)
+        '''Verifies that a layer is visible (normal, locked, and reference)
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           bool: True on success otherwise False
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer name")
-          if rs.IsLayer(layer):
-              if rs.IsLayerVisible(layer): print "The layer is visible"
-              else: print "The layer is not visible"
-          else:
-              print "The layer does not exist."
-        See Also:
-          IsLayer
-          IsLayerChangeable
-          IsLayerEmpty
-          IsLayerLocked
-          IsLayerOn
-          IsLayerReference
-          IsLayerSelectable
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.IsVisible
     *)
@@ -678,24 +405,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(int) the number of immediate child layers</returns>
     static member LayerChildCount(layer:string) : int =
-        let layer = __getlayer(layer, true)
-        let children = layer.GetChildren()
-        if children then Seq.length(children)
-        0
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerChildCount(layer):
-        """Returns the number of immediate child layers of a layer
+        '''Returns the number of immediate child layers of a layer
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           number: the number of immediate child layers if successful
-        Example:
-          import rhinoscriptsyntax as rs
-          children = rs.LayerChildCount("Default")
-          if children: rs.ExpandLayer("Default", True)
-        See Also:
-          LayerChildren
-        """
+        '''
         layer = __getlayer(layer, True)
         children = layer.GetChildren()
         if children: return len(children)
@@ -707,26 +425,15 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(string seq) List of children layer names</returns>
     static member LayerChildren(layer:string) : string seq =
-        let layer = __getlayer(layer, true)
-        let children = layer.GetChildren()
-        if children then [| for child in children -> child.FullPath |]
-        [] //empty list
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerChildren(layer):
-        """Returns the immediate child layers of a layer
+        '''Returns the immediate child layers of a layer
         Parameters:
           layer (str|guid): the name or id of an existing layer
         Returns:
           list(str, ...): List of children layer names
-        Example:
-          import rhinoscriptsyntax as rs
-          children = rs.LayerChildren("Default")
-          if children:
-              for child in children: print child
-        See Also:
-          LayerChildCount
-          ParentLayer
-        """
+        '''
         layer = __getlayer(layer, True)
         children = layer.GetChildren()
         if children: return [child.FullPath for child in children]
@@ -737,41 +444,18 @@ module ExtensionsLayer =
     ///<summary>Returns the color of a layer.</summary>
     ///<param name="layer">(string) Name or id of an existing layer</param>
     ///<returns>(Drawing.Color) The current color value on success</returns>
-    static member LayerColor(layer:string) : Drawing.Color =
-        let layer = __getlayer(layer, true)
-        let rc = layer.Color
-        if color then
-            let color = Coerce.coercecolor(color)
-            if color <> null then
-              let layer.Color = color
-              Doc.Views.Redraw()
-        rc
+    static member LayerColor(layer:string) : Drawing.Color = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerColor(layer, color=None):
-        """Returns or changes the color of a layer.
+        '''Returns or changes the color of a layer.
         Parameters:
           layer (str|guid): name or id of an existing layer
           color (color): the new color value. If omitted, the current layer color is returned.
         Returns:
           color: If a color value is not specified, the current color value on success
           color: If a color value is specified, the previous color value on success
-        Example:
-          import rhinoscriptsyntax as rs
-          import random
-          from System.Drawing import Color
-           
-          def randomcolor():
-              red = int(255*random.random())
-              green = int(255*random.random())
-              blue = int(255*random.random())
-              return Color.FromArgb(red,green,blue)
-           
-          layerNames = rs.LayerNames()
-          if layerNames:
-              for name in layerNames: rs.LayerColor(name, randomcolor())
-        See Also:
-          
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.Color
         if color:
@@ -786,41 +470,18 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name or id of an existing layer</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, the current layer color is returned.</param>
     ///<returns>(unit) unit</returns>
-    static member LayerColor(layer:string, color:Drawing.Color) : unit =
-        let layer = __getlayer(layer, true)
-        let rc = layer.Color
-        if color then
-            let color = Coerce.coercecolor(color)
-            if color <> null then
-              let layer.Color = color
-              Doc.Views.Redraw()
-        rc
+    static member LayerColor(layer:string, color:Drawing.Color) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerColor(layer, color=None):
-        """Returns or changes the color of a layer.
+        '''Returns or changes the color of a layer.
         Parameters:
           layer (str|guid): name or id of an existing layer
           color (color): the new color value. If omitted, the current layer color is returned.
         Returns:
           color: If a color value is not specified, the current color value on success
           color: If a color value is specified, the previous color value on success
-        Example:
-          import rhinoscriptsyntax as rs
-          import random
-          from System.Drawing import Color
-           
-          def randomcolor():
-              red = int(255*random.random())
-              green = int(255*random.random())
-              blue = int(255*random.random())
-              return Color.FromArgb(red,green,blue)
-           
-          layerNames = rs.LayerNames()
-          if layerNames:
-              for name in layerNames: rs.LayerColor(name, randomcolor())
-        See Also:
-          
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.Color
         if color:
@@ -835,19 +496,13 @@ module ExtensionsLayer =
     ///<summary>Returns the number of layers in the document</summary>
     ///<returns>(int) the number of layers in the document</returns>
     static member LayerCount() : int =
-        Doc.Layers.ActiveCount
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerCount():
-        """Returns the number of layers in the document
+        '''Returns the number of layers in the document
         Returns:
           number: the number of layers in the document
-        Example:
-          import rhinoscriptsyntax as rs
-          count = rs.LayerCount()
-          print "There are", count, "layers."
-        See Also:
-          LayerNames
-        """
+        '''
         return scriptcontext.doc.Layers.ActiveCount
     *)
 
@@ -855,20 +510,13 @@ module ExtensionsLayer =
     ///<summary>Return identifiers of all layers in the document</summary>
     ///<returns>(Guid seq) the identifiers of all layers in the document</returns>
     static member LayerIds() : Guid seq =
-        [| for layer in Doc.Layers if not <| layer.IsDeleted -> layer.Id |]
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerIds():
-        """Return identifiers of all layers in the document
+        '''Return identifiers of all layers in the document
         Returns:
           list(guid, ...): the identifiers of all layers in the document
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerIds()
-          for layer in layers: print layer
-        See Also:
-          LayerCount
-          LayerNames
-        """
+        '''
         return [layer.Id for layer in scriptcontext.doc.Layers if not layer.IsDeleted]
     *)
 
@@ -876,41 +524,18 @@ module ExtensionsLayer =
     ///<summary>Returns the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) Name of the current linetype</returns>
-    static member LayerLinetype(layer:string) : string =
-        let layer = __getlayer(layer, true)
-        let index = layer.LinetypIndex
-        let rc = Doc.Linetyps.[index].Name
-        if linetyp then
-            if not <| isinstance(linetyp, str) then linetyp <- string(linetyp)
-            if linetyp = Doc.Linetyps.ContinuousLinetypName then
-              index <- -1
-            else
-              let lt = Doc.Linetyps.FindName(linetyp)
-              if lt = null then failwithf "Rhino.Scripting Error:LayerLinetype failed.  layer:"%A" linetyp:"%A"" layer linetyp
-              index <- lt.LinetypIndex
-            let layer.LinetypIndex = index
-            Doc.Views.Redraw()
-        rc
+    static member LayerLinetype(layer:string) : string = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerLinetype(layer, linetype=None):
-        """Returns or changes the linetype of a layer
+        '''Returns or changes the linetype of a layer
         Parameters:
           layer (str): name of an existing layer
           linetype (str, optional): name of a linetype
         Returns:
           str: If linetype is not specified, name of the current linetype
           str: If linetype is specified, name of the previous linetype
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerLinetype(layer)!="Continuous":
-                      rs.LayerLinetype(layer,"Continuous")
-        See Also:
-          LayerPrintColor
-          LayerPrintWidth
-        """
+        '''
         layer = __getlayer(layer, True)
         index = layer.LinetypeIndex
         rc = scriptcontext.doc.Linetypes[index].Name
@@ -931,41 +556,18 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="linetyp">(string)Name of a linetyp</param>
     ///<returns>(unit) unit</returns>
-    static member LayerLinetype(layer:string, linetyp:string) : unit =
-        let layer = __getlayer(layer, true)
-        let index = layer.LinetypIndex
-        let rc = Doc.Linetyps.[index].Name
-        if linetyp then
-            if not <| isinstance(linetyp, str) then linetyp <- string(linetyp)
-            if linetyp = Doc.Linetyps.ContinuousLinetypName then
-              index <- -1
-            else
-              let lt = Doc.Linetyps.FindName(linetyp)
-              if lt = null then failwithf "Rhino.Scripting Error:LayerLinetype failed.  layer:"%A" linetyp:"%A"" layer linetyp
-              index <- lt.LinetypIndex
-            let layer.LinetypIndex = index
-            Doc.Views.Redraw()
-        rc
+    static member LayerLinetype(layer:string, linetyp:string) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerLinetype(layer, linetype=None):
-        """Returns or changes the linetype of a layer
+        '''Returns or changes the linetype of a layer
         Parameters:
           layer (str): name of an existing layer
           linetype (str, optional): name of a linetype
         Returns:
           str: If linetype is not specified, name of the current linetype
           str: If linetype is specified, name of the previous linetype
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerLinetype(layer)!="Continuous":
-                      rs.LayerLinetype(layer,"Continuous")
-        See Also:
-          LayerPrintColor
-          LayerPrintWidth
-        """
+        '''
         layer = __getlayer(layer, True)
         index = layer.LinetypeIndex
         rc = scriptcontext.doc.Linetypes[index].Name
@@ -986,31 +588,18 @@ module ExtensionsLayer =
     ///<summary>Returns the locked mode of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(bool) The current layer locked mode</returns>
-    static member LayerLocked(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        let rc = layer.IsLocked
-        if locked<>null && locked<>rc then
-            let layer.IsLocked = locked
-            Doc.Views.Redraw()
-        rc
+    static member LayerLocked(layer:string) : bool = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerLocked(layer, locked=None):
-        """Returns or changes the locked mode of a layer
+        '''Returns or changes the locked mode of a layer
         Parameters:
           layer (str): name of an existing layer
           locked (bool, optional): new layer locked mode
         Returns:
           bool: If locked is not specified, the current layer locked mode
           bool: If locked is specified, the previous layer locked mode
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerLocked(layer): rs.LayerLocked(layer, False)
-        See Also:
-          LayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.IsLocked
         if locked!=None and locked!=rc:
@@ -1023,31 +612,18 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="locked">(bool)New layer locked mode</param>
     ///<returns>(unit) unit</returns>
-    static member LayerLocked(layer:string, locked:bool) : unit =
-        let layer = __getlayer(layer, true)
-        let rc = layer.IsLocked
-        if locked<>null && locked<>rc then
-            let layer.IsLocked = locked
-            Doc.Views.Redraw()
-        rc
+    static member LayerLocked(layer:string, locked:bool) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerLocked(layer, locked=None):
-        """Returns or changes the locked mode of a layer
+        '''Returns or changes the locked mode of a layer
         Parameters:
           layer (str): name of an existing layer
           locked (bool, optional): new layer locked mode
         Returns:
           bool: If locked is not specified, the current layer locked mode
           bool: If locked is specified, the previous layer locked mode
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerLocked(layer): rs.LayerLocked(layer, False)
-        See Also:
-          LayerVisible
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.IsLocked
         if locked!=None and locked!=rc:
@@ -1062,16 +638,11 @@ module ExtensionsLayer =
     /// will use Rhino's default layer material</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(int) a zero-based material index</returns>
-    static member LayerMaterialIndex(layer:string) : int =
-        let layer = __getlayer(layer, true)
-        let rc = layer.RenderMaterialIndex
-        if index <> null && index>=-1 then
-            let layer.RenderMaterialIndex = index
-            Doc.Views.Redraw()
-        rc
+    static member LayerMaterialIndex(layer:string) : int = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerMaterialIndex(layer,index=None):
-        """Returns or changes the material index of a layer. A material index of -1
+        '''Returns or changes the material index of a layer. A material index of -1
         indicates that no material has been assigned to the layer. Thus, the layer
         will use Rhino's default layer material
         Parameters:
@@ -1080,17 +651,7 @@ module ExtensionsLayer =
         Returns:
           number: a zero-based material index if successful
           number: a zero-based material index if successful
-        Example:
-          import rhinoscriptsyntax as rs
-          index = rs.LayerMaterialIndex("Default")
-          if index is not None:
-              if index==-1:
-                  print "The default layer does not have a material assigned."
-              else:
-                  print "The default layer has a material assigned."
-        See Also:
-          
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.RenderMaterialIndex
         if index is not None and index>=-1:
@@ -1105,16 +666,11 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="index">(int)The new material index</param>
     ///<returns>(int) a zero-based material index</returns>
-    static member LayerMaterialIndex(layer:string, index:int) : int =
-        let layer = __getlayer(layer, true)
-        let rc = layer.RenderMaterialIndex
-        if index <> null && index>=-1 then
-            let layer.RenderMaterialIndex = index
-            Doc.Views.Redraw()
-        rc
+    static member LayerMaterialIndex(layer:string, index:int) : int = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerMaterialIndex(layer,index=None):
-        """Returns or changes the material index of a layer. A material index of -1
+        '''Returns or changes the material index of a layer. A material index of -1
         indicates that no material has been assigned to the layer. Thus, the layer
         will use Rhino's default layer material
         Parameters:
@@ -1123,17 +679,7 @@ module ExtensionsLayer =
         Returns:
           number: a zero-based material index if successful
           number: a zero-based material index if successful
-        Example:
-          import rhinoscriptsyntax as rs
-          index = rs.LayerMaterialIndex("Default")
-          if index is not None:
-              if index==-1:
-                  print "The default layer does not have a material assigned."
-              else:
-                  print "The default layer has a material assigned."
-        See Also:
-          
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.RenderMaterialIndex
         if index is not None and index>=-1:
@@ -1147,22 +693,16 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Guid) The layer's identifier .</returns>
     static member LayerId(layer:string) : Guid =
-        let idx = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        string(Doc.Layers.[idx].Id) if idx !<- RhinoMath.UnsetIntIndex else null
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerId(layer):
-        """Returns the identifier of a layer given the layer's name.
+        '''Returns the identifier of a layer given the layer's name.
         Parameters:
           layer (str): name of existing layer
         Returns:
           guid : The layer's identifier if successful.
           None: If not successful, or on error.
-        Example:
-          import rhinoscriptsyntax as  rs
-          id = rs.LayerId('Layer 01')
-        See Also:
-          LayerName
-        """
+        '''
         idx = scriptcontext.doc.Layers.FindByFullPath(layer, UnsetIntIndex)
         return str(scriptcontext.doc.Layers[idx].Id) if idx != UnsetIntIndex else None
     *)
@@ -1174,26 +714,17 @@ module ExtensionsLayer =
     ///Return the full path name `True` or short name `False`</param>
     ///<returns>(string) the layer's name</returns>
     static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullpath:bool) : string =
-        let layer = __getlayer(layerId, true)
-        if fullpath then layer.FullPath
-        layer.Name
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerName(layer_id, fullpath=True):
-        """Return the name of a layer given it's identifier
+        '''Return the name of a layer given it's identifier
         Parameters:
           layer_id (guid): layer identifier
           fullpath (bool, optional): return the full path name `True` or short name `False`
         Returns:
           str: the layer's name if successful
           None: if not successful
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerIds()
-          if layers:
-              for layer in layers: print rs.LayerName(layer)
-        See Also:
-          LayerId
-        """
+        '''
         layer = __getlayer(layer_id, True)
         if fullpath: return layer.FullPath
         return layer.Name
@@ -1203,26 +734,15 @@ module ExtensionsLayer =
     ///<summary>Returns the names of all layers in the document.</summary>
     ///<returns>(string seq) list of layer names</returns>
     static member LayerNames() : string seq =
-        let rc = ResizeArray()
-        for layer in Doc.Layers do
-            if not <| layer.IsDeleted then rc.Add(layer.FullPath)
-        if sort then rc.sort()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerNames(sort=False):
-        """Returns the names of all layers in the document.
+        '''Returns the names of all layers in the document.
         Parameters:
           sort (bool, optional): return a sorted list of the layer names
         Returns:
           list(str, ...): list of layer names
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers: print layer
-        See Also:
-          LayerCount
-        """
+        '''
         rc = []
         for layer in scriptcontext.doc.Layers:
             if not layer.IsDeleted: rc.append(layer.FullPath)
@@ -1237,26 +757,17 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(float) 0 based index of layer</returns>
     static member LayerOrder(layer:string) : float =
-        let layer = __getlayer(layer, true)
-        layer.SortIndex
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerOrder(layer):
-        """Returns the current display order index of a layer as displayed in Rhino's
+        '''Returns the current display order index of a layer as displayed in Rhino's
         layer dialog box. A display order index of -1 indicates that the current
         layer dialog filter does not allow the layer to appear in the layer list
         Parameters:
           layer (str): name of existing layer
         Returns:
           number: 0 based index of layer
-        Example:
-          import rhinoscriptsyntax as rs
-          index = rs.LayerOrder("Default")
-          if index is not None:
-              if index==-1: print "The layer does not display in the Layer dialog."
-              else: print "The layer does display in the Layer dialog."
-        See Also:
-          
-        """
+        '''
         layer = __getlayer(layer, True)
         return layer.SortIndex
     *)
@@ -1266,17 +777,11 @@ module ExtensionsLayer =
     /// represented as RGB colors.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Drawing.Color) The current layer print color</returns>
-    static member LayerPrintColor(layer:string) : Drawing.Color =
-        let layer = __getlayer(layer, true)
-        let rc = layer.PlotColor
-        if color then
-            let color = Coerce.coercecolor(color)
-            let layer.PlotColor = color
-            Doc.Views.Redraw()
-        rc
+    static member LayerPrintColor(layer:string) : Drawing.Color = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerPrintColor(layer, color=None):
-        """Returns or changes the print color of a layer. Layer print colors are
+        '''Returns or changes the print color of a layer. Layer print colors are
         represented as RGB colors.
         Parameters:
           layer (str): name of existing layer
@@ -1285,18 +790,7 @@ module ExtensionsLayer =
           color: if color is not specified, the current layer print color
           color: if color is specified, the previous layer print color
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  black = rs.CreateColor((0,0,0))
-                  if rs.LayerPrintColor(layer)!=black:
-                      rs.LayerPrintColor(layer, black)
-        See Also:
-          LayerLinetype
-          LayerPrintWidth
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.PlotColor
         if color:
@@ -1311,17 +805,11 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="color">(Drawing.Color)New print color</param>
     ///<returns>(unit) unit</returns>
-    static member LayerPrintColor(layer:string, color:Drawing.Color) : unit =
-        let layer = __getlayer(layer, true)
-        let rc = layer.PlotColor
-        if color then
-            let color = Coerce.coercecolor(color)
-            let layer.PlotColor = color
-            Doc.Views.Redraw()
-        rc
+    static member LayerPrintColor(layer:string, color:Drawing.Color) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerPrintColor(layer, color=None):
-        """Returns or changes the print color of a layer. Layer print colors are
+        '''Returns or changes the print color of a layer. Layer print colors are
         represented as RGB colors.
         Parameters:
           layer (str): name of existing layer
@@ -1330,18 +818,7 @@ module ExtensionsLayer =
           color: if color is not specified, the current layer print color
           color: if color is specified, the previous layer print color
           None: on error
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  black = rs.CreateColor((0,0,0))
-                  if rs.LayerPrintColor(layer)!=black:
-                      rs.LayerPrintColor(layer, black)
-        See Also:
-          LayerLinetype
-          LayerPrintWidth
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.PlotColor
         if color:
@@ -1356,16 +833,11 @@ module ExtensionsLayer =
     /// in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(float) The current layer print width</returns>
-    static member LayerPrintWidth(layer:string) : float =
-        let layer = __getlayer(layer, true)
-        let rc = layer.PlotWeight
-        if width <> null && width<>rc then
-            let layer.PlotWeight = width
-            Doc.Views.Redraw()
-        rc
+    static member LayerPrintWidth(layer:string) : float = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerPrintWidth(layer, width=None):
-        """Returns or changes the print width of a layer. Print width is specified
+        '''Returns or changes the print width of a layer. Print width is specified
         in millimeters. A print width of 0.0 denotes the "default" print width.
         Parameters:
           layer (str): name of existing layer
@@ -1373,17 +845,7 @@ module ExtensionsLayer =
         Returns:
           number: if width is not specified, the current layer print width
           number: if width is specified, the previous layer print width
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerPrintWidth(layer)!=0:
-                      rs.LayerPrintWidth(layer, 0)
-        See Also:
-          LayerLinetype
-          LayerPrintColor
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.PlotWeight
         if width is not None and width!=rc:
@@ -1397,16 +859,11 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="width">(float)New print width</param>
     ///<returns>(unit) unit</returns>
-    static member LayerPrintWidth(layer:string, width:float) : unit =
-        let layer = __getlayer(layer, true)
-        let rc = layer.PlotWeight
-        if width <> null && width<>rc then
-            let layer.PlotWeight = width
-            Doc.Views.Redraw()
-        rc
+    static member LayerPrintWidth(layer:string, width:float) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerPrintWidth(layer, width=None):
-        """Returns or changes the print width of a layer. Print width is specified
+        '''Returns or changes the print width of a layer. Print width is specified
         in millimeters. A print width of 0.0 denotes the "default" print width.
         Parameters:
           layer (str): name of existing layer
@@ -1414,17 +871,7 @@ module ExtensionsLayer =
         Returns:
           number: if width is not specified, the current layer print width
           number: if width is specified, the previous layer print width
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerPrintWidth(layer)!=0:
-                      rs.LayerPrintWidth(layer, 0)
-        See Also:
-          LayerLinetype
-          LayerPrintColor
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.PlotWeight
         if width is not None and width!=rc:
@@ -1437,21 +884,11 @@ module ExtensionsLayer =
     ///<summary>Returns the visible property of a layer.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility</returns>
-    static member LayerVisible(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        let rc = layer.IsVisible
-        if visible <> null then
-            let layer.IsVisible = visible
-            if visible && forcevisibleOrDonotpersist then
-                Doc.Layers.ForceLayerVisible(layer.Id)
-            if not <| visible && not <| forcevisibleOrDonotpersist then
-              if layer.ParentLayerId <> Guid.Empty then
-                layer.SetPersistentVisibility(visible)
-            Doc.Views.Redraw()
-        rc
+    static member LayerVisible(layer:string) : bool = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerVisible(layer, visible=None, forcevisible_or_donotpersist=False):
-        """Returns or changes the visible property of a layer.
+        '''Returns or changes the visible property of a layer.
         Parameters:
           layer (str): name of existing layer
           visible (bool, optional): new visible state
@@ -1459,16 +896,7 @@ module ExtensionsLayer =
         Returns:
           bool: if visible is not specified, the current layer visibility
           bool: if visible is specified, the previous layer visibility
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerVisible(layer)==False:
-                      rs.LayerVisible(layer,True)
-        See Also:
-          LayerLocked
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.IsVisible
         if visible is not None:
@@ -1487,21 +915,11 @@ module ExtensionsLayer =
     ///<param name="visible">(bool)New visible state</param>
     ///<param name="forcevisibleOrDonotpersist">(bool)If visible is True then turn parent layers on if True.  If visible is False then do not persist if True</param>
     ///<returns>(unit) unit</returns>
-    static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit =
-        let layer = __getlayer(layer, true)
-        let rc = layer.IsVisible
-        if visible <> null then
-            let layer.IsVisible = visible
-            if visible && forcevisibleOrDonotpersist then
-                Doc.Layers.ForceLayerVisible(layer.Id)
-            if not <| visible && not <| forcevisibleOrDonotpersist then
-              if layer.ParentLayerId <> Guid.Empty then
-                layer.SetPersistentVisibility(visible)
-            Doc.Views.Redraw()
-        rc
+    static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def LayerVisible(layer, visible=None, forcevisible_or_donotpersist=False):
-        """Returns or changes the visible property of a layer.
+        '''Returns or changes the visible property of a layer.
         Parameters:
           layer (str): name of existing layer
           visible (bool, optional): new visible state
@@ -1509,16 +927,7 @@ module ExtensionsLayer =
         Returns:
           bool: if visible is not specified, the current layer visibility
           bool: if visible is specified, the previous layer visibility
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          if layers:
-              for layer in layers:
-                  if rs.LayerVisible(layer)==False:
-                      rs.LayerVisible(layer,True)
-        See Also:
-          LayerLocked
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = layer.IsVisible
         if visible is not None:
@@ -1536,25 +945,11 @@ module ExtensionsLayer =
     ///<summary>Return the parent layer of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) The name of the current parent layer</returns>
-    static member ParentLayer(layer:string) : string =
-        let layer = __getlayer(layer, true)
-        let parent_id = layer.ParentLayerId
-        let oldparent = null
-        if parent_id<>Guid.Empty then
-            let oldparentlayer = Doc.Layers.Find(parent_id, -1)
-            if oldparentlayer <> null then
-                oldparentlayer <- Doc.Layers.[oldparentlayer]
-                oldparent <- oldparentlayer.FullPath
-        if parent = null then oldparent
-        if parent="" then
-            let layer.ParentLayerId = Guid.Empty
-        else
-            let parent = __getlayer(parent, true)
-            layer.ParentLayerId <- parent.Id
-        oldparent
+    static member ParentLayer(layer:string) : string = //GET
+        failNotImpl () // genreation temp disabled !!
     (*
     def ParentLayer(layer, parent=None):
-        """Return or modify the parent layer of a layer
+        '''Return or modify the parent layer of a layer
         Parameters:
           layer (str): name of an existing layer
           parent (str, optional):  name of new parent layer. To remove the parent layer,
@@ -1563,15 +958,7 @@ module ExtensionsLayer =
           str: If parent is not specified, the name of the current parent layer
           str: If parent is specified, the name of the previous parent layer
           None: if the layer does not have a parent
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          for layer in layers:
-              parent = rs.ParentLayer(layer)
-              print "Layer:", layer, ", Parent:", parent
-        See Also:
-          LayerChildren
-        """
+        '''
         layer = __getlayer(layer, True)
         parent_id = layer.ParentLayerId
         oldparent = None
@@ -1594,25 +981,11 @@ module ExtensionsLayer =
     ///<param name="parent">(string)Name of new parent layer. To remove the parent layer,
     ///  thus making a root-level layer, specify an empty string</param>
     ///<returns>(unit) unit</returns>
-    static member ParentLayer(layer:string, parent:string) : unit =
-        let layer = __getlayer(layer, true)
-        let parent_id = layer.ParentLayerId
-        let oldparent = null
-        if parent_id<>Guid.Empty then
-            let oldparentlayer = Doc.Layers.Find(parent_id, -1)
-            if oldparentlayer <> null then
-                oldparentlayer <- Doc.Layers.[oldparentlayer]
-                oldparent <- oldparentlayer.FullPath
-        if parent = null then oldparent
-        if parent="" then
-            let layer.ParentLayerId = Guid.Empty
-        else
-            let parent = __getlayer(parent, true)
-            layer.ParentLayerId <- parent.Id
-        oldparent
+    static member ParentLayer(layer:string, parent:string) : unit = //SET
+        failNotImpl () // genreation temp disabled !!
     (*
     def ParentLayer(layer, parent=None):
-        """Return or modify the parent layer of a layer
+        '''Return or modify the parent layer of a layer
         Parameters:
           layer (str): name of an existing layer
           parent (str, optional):  name of new parent layer. To remove the parent layer,
@@ -1621,15 +994,7 @@ module ExtensionsLayer =
           str: If parent is not specified, the name of the current parent layer
           str: If parent is specified, the name of the previous parent layer
           None: if the layer does not have a parent
-        Example:
-          import rhinoscriptsyntax as rs
-          layers = rs.LayerNames()
-          for layer in layers:
-              parent = rs.ParentLayer(layer)
-              print "Layer:", layer, ", Parent:", parent
-        See Also:
-          LayerChildren
-        """
+        '''
         layer = __getlayer(layer, True)
         parent_id = layer.ParentLayerId
         oldparent = None
@@ -1655,13 +1020,10 @@ module ExtensionsLayer =
     ///<param name="layer">(string) The name or id of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member PurgeLayer(layer:string) : bool =
-        let layer = __getlayer(layer, true)
-        let rc = Doc.Layers.Purge( layer.LayerIndex, true)
-        Doc.Views.Redraw()
-        rc
+        failNotImpl () // genreation temp disabled !!
     (*
     def PurgeLayer(layer):
-        """Removes an existing layer from the document. The layer will be removed
+        '''Removes an existing layer from the document. The layer will be removed
         even if it contains geometry objects. The layer to be removed cannot be the
         current layer
         empty.
@@ -1669,16 +1031,7 @@ module ExtensionsLayer =
           layer (str|guid): the name or id of an existing empty layer
         Returns:
           bool: True or False indicating success or failure
-        Example:
-          import rhinoscriptsyntax as rs
-          layer = rs.GetString("Layer to purge")
-          if layer: rs.PurgeLayer(layer)
-        See Also:
-          AddLayer
-          CurrentLayer
-          DeleteLayer
-          RenameLayer
-        """
+        '''
         layer = __getlayer(layer, True)
         rc = scriptcontext.doc.Layers.Purge( layer.LayerIndex, True)
         scriptcontext.doc.Views.Redraw()
@@ -1691,29 +1044,16 @@ module ExtensionsLayer =
     ///<param name="newname">(string) New layer name</param>
     ///<returns>(string) The new layer name  otherwise None</returns>
     static member RenameLayer(oldname:string, newname:string) : string =
-        if oldname && newname then
-            let layer = __getlayer(oldname, true)
-            let layer.Name = newname
-            newname
+        failNotImpl () // genreation temp disabled !!
     (*
     def RenameLayer(oldname, newname):
-        """Renames an existing layer
+        '''Renames an existing layer
         Parameters:
           oldname (str): original layer name
           newname (str): new layer name
         Returns: 
           str: The new layer name if successful otherwise None
-        Example:
-          import rhinoscriptsyntax as rs
-          oldname = rs.GetString("Old layer name")
-          if oldname:
-              newname = rs.GetString("New layer name")
-              if newname: rs.RenameLayer(oldname, newname)
-        See Also:
-          AddLayer
-          CurrentLayer
-          DeleteLayer
-        """
+        '''
         if oldname and newname:
             layer = __getlayer(oldname, True)
             layer.Name = newname
