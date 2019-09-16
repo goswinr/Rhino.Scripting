@@ -704,7 +704,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid) Id or ids of object(s)</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, then current object
     ///  color is returned. If objectIds is a list, color is required</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectColor(objectIds:Guid, color:Drawing.Color) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -760,7 +760,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Id or ids of object(s)</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, then current object
     ///  color is returned. If objectIds is a list, color is required</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectColor(objectIds:Guid, color:Drawing.Color seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -862,7 +862,7 @@ module ExtensionsObject =
     ///  1 = color from object
     ///  2 = color from material
     ///  3 = color from parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectColorSource(objectIds:Guid, source:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -909,7 +909,7 @@ module ExtensionsObject =
     ///  1 = color from object
     ///  2 = color from material
     ///  3 = color from parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectColorSource(objectIds:Guid, source:int seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1029,7 +1029,7 @@ module ExtensionsObject =
     ///<summary>Modifies the layer of an object</summary>
     ///<param name="objectId">(Guid) The identifier of the object(s)</param>
     ///<param name="layer">(string)Name of an existing layer</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLayer(objectId:Guid, layer:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1069,7 +1069,7 @@ module ExtensionsObject =
     ///<summary>Modifies the layer of an object</summary>
     ///<param name="objectId">(Guid seq) The identifier of the object(s)</param>
     ///<param name="layer">(string)Name of an existing layer</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLayer(objectId:Guid, layer:string seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1158,7 +1158,7 @@ module ExtensionsObject =
     ///  from page layout space to model space, just specify None</param>
     ///<param name="returnName">(bool)If True, the name, or title, of the page layout view
     ///  is returned. If False, the identifier of the page layout view is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLayout(objectId:Guid, layout:string, [<OPT;DEF(true)>]returnName:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1246,7 +1246,7 @@ module ExtensionsObject =
     ///<param name="linetyp">(string)Name of an existing linetyp. If omitted, the current
     ///  linetyp is returned. If objectIds is a list of identifiers, this parameter
     ///  is required</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetype(objectIds:Guid, linetyp:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1290,7 +1290,7 @@ module ExtensionsObject =
     ///<param name="linetyp">(string)Name of an existing linetyp. If omitted, the current
     ///  linetyp is returned. If objectIds is a list of identifiers, this parameter
     ///  is required</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetype(objectIds:Guid, linetyp:string seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1378,7 +1378,7 @@ module ExtensionsObject =
     ///    0 = By Layer
     ///    1 = By Object
     ///    3 = By Parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetypeSource(objectIds:Guid, source:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1423,7 +1423,7 @@ module ExtensionsObject =
     ///    0 = By Layer
     ///    1 = By Object
     ///    3 = By Parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetypeSource(objectIds:Guid, source:int seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1581,7 +1581,7 @@ module ExtensionsObject =
     ///  0 = Material from layer
     ///  1 = Material from object
     ///  3 = Material from parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectMaterialSource(objectIds:Guid, source:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1629,7 +1629,7 @@ module ExtensionsObject =
     ///  0 = Material from layer
     ///  1 = Material from object
     ///  3 = Material from parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectMaterialSource(objectIds:Guid, source:int seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1714,7 +1714,7 @@ module ExtensionsObject =
     ///<summary>Modifies the name of an object</summary>
     ///<param name="objectId">(Guid) Id or ids of object(s)</param>
     ///<param name="name">(string)The new object name. If omitted, the current name is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1759,7 +1759,7 @@ module ExtensionsObject =
     ///<summary>Modifies the name of an object</summary>
     ///<param name="objectId">(Guid seq) Id or ids of object(s)</param>
     ///<param name="name">(string)The new object name. If omitted, the current name is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectName(objectId:Guid, name:string seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1840,7 +1840,7 @@ module ExtensionsObject =
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<param name="color">(Drawing.Color)New print color. If omitted, the current color is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectIds:Guid, color:Drawing.Color) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1878,7 +1878,7 @@ module ExtensionsObject =
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of object(s)</param>
     ///<param name="color">(Drawing.Color)New print color. If omitted, the current color is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectIds:Guid, color:Drawing.Color seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1958,7 +1958,7 @@ module ExtensionsObject =
     ///  0 = print color by layer
     ///  1 = print color by object
     ///  3 = print color by parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColorSource(objectIds:Guid, source:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1999,7 +1999,7 @@ module ExtensionsObject =
     ///  0 = print color by layer
     ///  1 = print color by object
     ///  3 = print color by parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColorSource(objectIds:Guid, source:int seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2076,7 +2076,7 @@ module ExtensionsObject =
     ///<param name="width">(float)New print width value in millimeters, where width=0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
     ///  but does not show on print). If omitted, the current width is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidth(objectIds:Guid, width:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2117,7 +2117,7 @@ module ExtensionsObject =
     ///<param name="width">(float)New print width value in millimeters, where width=0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
     ///  but does not show on print). If omitted, the current width is returned.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidth(objectIds:Guid, width:float seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2198,7 +2198,7 @@ module ExtensionsObject =
     ///  0 = print width by layer
     ///  1 = print width by object
     ///  3 = print width by parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidthSource(objectIds:Guid, source:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2239,7 +2239,7 @@ module ExtensionsObject =
     ///  0 = print width by layer
     ///  1 = print width by object
     ///  3 = print width by parent</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidthSource(objectIds:Guid, source:int seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

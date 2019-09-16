@@ -213,7 +213,7 @@ module ExtensionsUserdata =
     ///<param name="section">(string) The section name</param>
     ///<param name="entry">(string) The entry name</param>
     ///<param name="value">(string) The string value</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
         failNotImpl () // genreation temp disabled !!
     (*

@@ -85,29 +85,7 @@ module ExtensionsGeometry =
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
-    (*
-    def AddPictureFrame(plane, filename, width=0.0, height=0.0, self_illumination=True, embed=False, use_alpha=False, make_mesh=False):
-        '''Creates a picture frame and adds it to the document.
-      Parameters:
-        plane (plane): The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.
-        filename (str): The path to a bitmap or image file.
-        width (number, optional): If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.
-        height (number, optional):  If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.
-        self_illumination (bool, optional): If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow.
-        embed (bool, optional): If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained.
-        use_alpha (bool, optional): If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot.
-        make_mesh (bool, optional): If True, the function will make a PictureFrame object from a mesh rather than a plane surface.
-      Returns:
-        guid: object identifier on success
-        None: on failure
-      '''
-      plane = rhutil.coerceplane(plane, True)
-      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception('\"{0}\" does not exist or is not a file name'.format(filename))
-      rc = scriptcontext.doc.Objects.AddPictureFrame(plane, filename, make_mesh, width, height, self_illumination, embed) 
-      if rc==System.Guid.Empty: raise Exception("unable to add picture frame to document")
-      scriptcontext.doc.Views.Redraw()
-      return rc
-    *)
+  
 
 
     ///<summary>Adds point object to the document.</summary>
@@ -876,7 +854,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the X, Y, and Z coordinates of a point object</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<param name="point">(Point3d)A new 3D point location.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -931,7 +909,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the font of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="fontface">(string)New font face name</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -987,7 +965,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the font height of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="height">(float)New font height</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextDotHeight(objectId:Guid, height:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1043,7 +1021,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the location, or insertion point, on a text dot object</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="point">(Point3d)A new 3D point location.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1100,7 +1078,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the text on a text dot object</summary>
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<param name="text">(string)A new string for the dot</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1160,7 +1138,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the font used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="font">(string)The new font face name</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1220,7 +1198,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the height of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="height">(float)The new text height.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1278,7 +1256,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="plane">(Plane)The new text object plane</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1338,7 +1316,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the location of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="point">(Point3d)The new text object location</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextObjectPoint(objectId:Guid, point:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1412,7 +1390,7 @@ module ExtensionsGeometry =
     ///  0 = Normal
     ///  1 = Bold
     ///  2 = Italic</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1479,7 +1457,7 @@ module ExtensionsGeometry =
     ///<summary>Modifies the text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="text">(string)A new text string</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

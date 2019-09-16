@@ -89,7 +89,7 @@ module ExtensionsDocument =
     /// document modified flag to False will prevent the "Do you want to save this
     /// file..." from displaying when you close Rhino.</summary>
     ///<param name="modified">(bool)The modified state, either True or False</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DocumentModified(modified:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -147,7 +147,7 @@ module ExtensionsDocument =
     ///<summary>Enables or disables screen redrawing</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///True to enable, False to disable</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
         failNotImpl () // genreation temp disabled !!
     (*
@@ -227,7 +227,7 @@ module ExtensionsDocument =
     ///<summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<param name="newnotes">(string)New notes to set</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Notes(newnotes:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -305,7 +305,7 @@ module ExtensionsDocument =
 
     ///<summary>Sets render antialiasing style</summary>
     ///<param name="style">(int)Level of antialiasing (0=none, 1=normal, 2=best)</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderAntialias(style:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -358,7 +358,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render ambient light or background color</summary>
     ///<param name="item">(int) 0=ambient light color, 1=background color</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, the current item color is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -408,7 +408,7 @@ module ExtensionsDocument =
 
     ///<summary>Sets the render resolution</summary>
     ///<param name="resolution">(float * float)Width and height of render</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderResolution(resolution:float * float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -465,7 +465,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="density">(float)The new render mesh density, which is a number between 0.0 and 1.0.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshDensity(density:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -516,7 +516,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="angleDegrees">(int)The new maximum angle, which is a positive number in degrees.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAngle(angleDegrees:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -567,7 +567,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="ratio">(float)The render mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAspectRatio(ratio:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -617,7 +617,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh maximum distance, edge to surface.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -667,7 +667,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh maximum edge length.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxEdgeLength(distance:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -717,7 +717,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh minimum edge length.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -767,7 +767,7 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="quads">(float)The render mesh minimum initial grid quads. The suggested range is from 0 to 10000.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinInitialGridQuads(quads:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -840,7 +840,7 @@ module ExtensionsDocument =
     ///  0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
     ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
     ///  2: Custom.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshQuality(quality:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -931,7 +931,7 @@ module ExtensionsDocument =
     ///    2: Jagged seams enabled.
     ///    4: Simple planes enabled.
     ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderMeshSettings(settings:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1012,7 +1012,7 @@ module ExtensionsDocument =
     ///  2=use lights on layers that are off,
     ///  4=render curves and isocurves,
     ///  8=render dimensions and text</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1081,7 +1081,7 @@ module ExtensionsDocument =
     ///<param name="tolerance">(float)The absolute tolerance to set</param>
     ///<param name="inModelUnits">(bool)Return or modify the document's model units (True)
     ///  or the document's page units (False)</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member UnitAbsoluteTolerance(tolerance:float, [<OPT;DEF(true)>]inModelUnits:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1145,7 +1145,7 @@ module ExtensionsDocument =
     ///<param name="angleToleranceDegrees">(float)The angle tolerance to set</param>
     ///<param name="inModelUnits">(float)Return or modify the document's model units (True)
     ///  or the document's page units (False)</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member UnitAngleTolerance(angleToleranceDegrees:float, [<OPT;DEF(true)>]inModelUnits:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1203,7 +1203,7 @@ module ExtensionsDocument =
     ///  If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
     ///  Use UnitDistanceDisplayMode to get the current distance display mode.</param>
     ///<param name="modelUnits">(bool)Return or modify the document's model units (True) or the document's page units (False). The default is True.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member UnitDistanceDisplayPrecision(precision:float, [<OPT;DEF(true)>]modelUnits:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1264,7 +1264,7 @@ module ExtensionsDocument =
     ///<param name="relativeTolerance">(float)The relative tolerance in percent</param>
     ///<param name="inModelUnits">(bool)Return or modify the document's model units (True)
     ///  or the document's page units (False)</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member UnitRelativeTolerance(relativeTolerance:float, [<OPT;DEF(true)>]inModelUnits:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1492,7 +1492,7 @@ module ExtensionsDocument =
     ///  If not specified, any existing geometry is not scaled (False)</param>
     ///<param name="inModelUnits">(int)Return or modify the document's model units (True)
     ///  or the document's page units (False). The default is True.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool, [<OPT;DEF(true)>]inModelUnits:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

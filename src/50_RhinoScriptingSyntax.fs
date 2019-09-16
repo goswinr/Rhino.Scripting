@@ -328,6 +328,14 @@ type RhinoScriptSyntax () = //private () =
         | :?  DocObjects.AnnotationObjectBase as a -> a
         |_ -> failwithf "*** could not coerceAnnotation: %A is not a Rhino.DocObjects.AnnotationObjectBase " id
         
+    ///<summary>Returns the Rhino Block instance object for a given Id</summary>
+    ///<param name="id">(Guid) Id of block instance</param>    
+    ///<returns>(Rhino.DocObjects.InstanceObject) block instance object</returns>
+    static member CoerceBlockInstanceObject(id:Guid) : Rhino.DocObjects.InstanceObject =
+        match RhinoScriptSyntax.CoerceRhinoObject(id) with  
+        | :? DocObjects.InstanceObject as b -> b
+        | _ -> failwithf "unable to find Block InstanceObject for '%A'" id
+
     ///<summary>attempt to get GeometryBase class from given Guid</summary>
     ///<param name="id">geometry identifier (Guid)</param>
     ///<returns>Rhino.Geometry.GeometryBase Option. </returns>

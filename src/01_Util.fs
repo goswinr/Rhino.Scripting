@@ -4,9 +4,6 @@ open System
 open System.Globalization
 
 
-
-
-
 module internal Util = 
     
     type OPT = Runtime.InteropServices.OptionalAttribute
@@ -98,7 +95,7 @@ module internal Util =
     let inline ignoreGuid   (g:Guid) = ()
 
 
-module internal MathUtils =
+module UtilMath =
     let internal Rand = new System.Random () 
     
     /// converts Angels from Degrees to Radians

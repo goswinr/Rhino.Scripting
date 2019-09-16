@@ -191,7 +191,7 @@ module ExtensionsView =
     ///<param name="layout">(string) Title or identifier of an existing page layout view</param>
     ///<param name="detail">(string)Title or identifier the the detail view to set</param>
     ///<param name="returnName">(bool)Return title if True, else return identifier</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member CurrentDetail(layout:string, detail:string, [<OPT;DEF(true)>]returnName:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -262,7 +262,7 @@ module ExtensionsView =
     ///  If omitted, only the title or identifier of the current view is returned</param>
     ///<param name="returnName">(bool)If True, then the name, or title, of the view is returned.
     ///  If False, then the identifier of the view is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member CurrentView(view:string, [<OPT;DEF(true)>]returnName:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -355,7 +355,7 @@ module ExtensionsView =
     ///<summary>Modifies the projection locked state of a detail</summary>
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
     ///<param name="lock">(bool)The new lock state</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -416,7 +416,7 @@ module ExtensionsView =
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
     ///<param name="modelLength">(float)A length in the current model units</param>
     ///<param name="pageLength">(float)A length in the current page units</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DetailScale(detailId:Guid, modelLength:float, [<OPT;DEF(null)>]pageLength:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -716,7 +716,7 @@ module ExtensionsView =
     ///<summary>Changes the title of the specified view</summary>
     ///<param name="oldTitle">(string) The title or identifier of the view to rename</param>
     ///<param name="newTitle">(string) The new title of the view</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member RenameView(oldTitle:string, newTitle:string) : unit =
         failNotImpl () // genreation temp disabled !!
     (*
@@ -949,7 +949,7 @@ module ExtensionsView =
     ///<summary>Shows or hides a view's construction plane grid</summary>
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The grid state to set. If omitted, the current grid display state is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ShowGrid(view:string, [<OPT;DEF(null)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -998,7 +998,7 @@ module ExtensionsView =
     ///<summary>Shows or hides a view's construction plane grid axes.</summary>
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set. If omitted, the current grid axes display state is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ShowGridAxes(view:string, [<OPT;DEF(null)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1085,7 +1085,7 @@ module ExtensionsView =
     ///<summary>Shows or hides a view's world axis icon</summary>
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ShowWorldAxes(view:string, [<OPT;DEF(null)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1185,7 +1185,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="cameraLocation">(Point3d)A 3D point identifying the new camera location.
     ///  If omitted, the current camera location is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewCamera(view:string, [<OPT;DEF(null)>]cameraLocation:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1241,7 +1241,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="length">(float)The new 35mm camera lens length. If omitted, the previous
     ///  35mm camera lens length is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewCameraLens(view:string, [<OPT;DEF(null)>]length:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1325,7 +1325,7 @@ module ExtensionsView =
     ///  target are not specified, current camera and target locations are returned</param>
     ///<param name="target">(Point3d)3d point identifying the new target location. If camera and
     ///  target are not specified, current camera and target locations are returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewCameraTarget(view:string, [<OPT;DEF(null)>]camera:Point3d, [<OPT;DEF(null)>]target:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1381,7 +1381,7 @@ module ExtensionsView =
     ///<summary>Sets the camera up direction of a specified</summary>
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="upVector">(Vector3d)3D vector identifying the new camera up direction</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewCameraUp(view:string, [<OPT;DEF(null)>]upVector:Vector3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1429,7 +1429,7 @@ module ExtensionsView =
     ///<summary>Set a view's construction plane</summary>
     ///<param name="view">(string)Title or id of the view. If omitted, current active view is used.</param>
     ///<param name="plane">(Plane)The new construction plane if setting</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewCPlane(view:string, [<OPT;DEF(null)>]plane:Plane) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1453,7 +1453,7 @@ module ExtensionsView =
 
 
     ///<summary>Return a view display mode</summary>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewDisplayMode() : unit = //GET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1669,7 +1669,7 @@ module ExtensionsView =
     ///  1 = parallel
     ///  2 = perspective
     ///  3 = two point perspective</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewProjection(view:string, [<OPT;DEF(null)>]mode:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1743,7 +1743,7 @@ module ExtensionsView =
     ///  towards/away from the target so that the amount of the screen
     ///  subtended by an object changes.  true = perform a "zoom"
     ///  magnification by adjusting the "lens" angle</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewRadius(view:string, [<OPT;DEF(null)>]radius:float, [<OPT;DEF(false)>]mode:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1869,7 +1869,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, current active view is used</param>
     ///<param name="target">(Point3d)3d point identifying the new target location. If omitted,
     ///  the current target location is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ViewTarget(view:string, [<OPT;DEF(null)>]target:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1948,7 +1948,7 @@ module ExtensionsView =
     ///<param name="view">(string)The identifier of the view. If omitted, the
     ///  active view is used</param>
     ///<param name="filename">(string)Name of the bitmap file to set as wallpaper</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Wallpaper(view:string, [<OPT;DEF(null)>]filename:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2003,7 +2003,7 @@ module ExtensionsView =
     ///<param name="view">(string)The identifier of the view. If omitted, the
     ///  active view is used</param>
     ///<param name="grayscale">(bool)Display the wallpaper in gray(True) or color (False)</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member WallpaperGrayScale(view:string, [<OPT;DEF(null)>]grayscale:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2057,7 +2057,7 @@ module ExtensionsView =
     ///<param name="view">(string)The identifier of the view. If omitted, the
     ///  active view is used</param>
     ///<param name="hidden">(bool)Show or hide the wallpaper</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member WallpaperHidden(view:string, [<OPT;DEF(null)>]hidden:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

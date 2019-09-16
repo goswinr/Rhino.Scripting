@@ -213,7 +213,7 @@ module ExtensionsGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to either query or modify</param>
     ///<param name="point">(Point3d)3D point defining new location of the grip</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectGripLocation(objectId:Guid, index:int, point:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -289,7 +289,7 @@ module ExtensionsGrips =
     /// of points at grips</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="points">(Point3d seq)List of 3D points identifying the new grip locations</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ObjectGripLocations(objectId:Guid, points:Point3d seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

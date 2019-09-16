@@ -6,43 +6,51 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.ActiceDocument
 //open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
 [<AutoOpen>]
 module ExtensionsBlock =
   type RhinoScriptSyntax with
-    
-    ///<summary>Returns the Rhino Block instance object for a given Id</summary>
-    ///<param name="id">(Guid) Id of block instance</param>
-    ///<param name="raiseIfMissing">(bool) Optional, Default Value: <c>false</c>
-    ///Raise error if id is missing?</param>
-    ///<returns>(Rhino.DocObjects.InstanceObject) block instance object</returns>
-    static member InstanceObjectFromId(id:Guid, [<OPT;DEF(false)>]raiseIfMissing:bool) : Rhino.DocObjects.InstanceObject =
-        failNotImpl () // genreation temp disabled !!
-    (*
-    def InstanceObjectFromId(id, raise_if_missing=False):
-        '''Returns the Rhino Block instance object for a given Id
-        Parameters:
-          id (guid): Id of block instance
-          raise_if_missing(bool,optional): raise error if id is missing?
-        Returns:
-          Rhino.DocObjects.InstanceObject: block instance object
-        '''
-        rhobj = rhutil.coercerhinoobject(id, True, raise_if_missing)
-        if isinstance(rhobj, Rhino.DocObjects.InstanceObject): return rhobj
-        if raise_if_missing: raise ValueError("unable to find InstanceObject")
-    *)
 
 
     ///<summary>Adds a new block definition to the document</summary>
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
     ///<param name="basisPoint">(Point3d) 3D base point for the block definition</param>
     ///<param name="name">(string) Optional, Default Value: <c>null</c>
-    ///Name of the block definition. If omitted a name will be
-    ///  automatically generated</param>
+    ///Name of the block definition. If omitted a name will be automatically generated</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///If True, the objectIds will be deleted</param>
     ///<returns>(string) name of new block definition on success</returns>
-    static member AddBlock(objectIds:Guid seq, basisPoint:Point3d, [<OPT;DEF(null)>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
-        failNotImpl () // genreation temp disabled !!
+    static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF(null)>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
+        let name = if isNull name then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
+        let found = Doc.InstanceDefinitions.Find(name)
+        let objects = ResizeArray()
+        for id in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(id)  //Coerce should not be needed
+            if obj.IsReference then  failwithf "AddBlock: cannt add Refrence Object %A to %s" id name
+            let ot = obj.ObjectType
+            if   ot=DocObjects.ObjectType.Light then  failwithf "AddBlock: cannot add Light Object %A to %s" id name
+            elif ot=DocObjects.ObjectType.Grip then  failwithf "AddBlock: cannot add Grip Object %A to %s" id name
+            elif ot=DocObjects.ObjectType.Phantom then failwithf "AddBlock: cannot add Phantom Object %A to %s" id name
+            elif ot=DocObjects.ObjectType.InstanceReference && notNull found then
+                let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(id) // not obj ?
+                let uses, nesting = bli.UsesDefinition(found.Index)
+                if uses then failwithf "AddBlock: cannt add Instance Ref Object %A to %s" id name
+            
+            objects.Add(obj)
+        if objects.Count>0 then
+            let geometry = [ for obj in objects -> obj.Geometry]
+            let attrs = [ for obj in objects -> obj.Attributes]
+            let mutable rc = -1
+            if notNull found then
+              rc <- if Doc.InstanceDefinitions.ModifyGeometry(found.Index, geometry, attrs) then 0 else -1
+            else
+              rc <- Doc.InstanceDefinitions.Add(name, "", basePoint, geometry, attrs)
+            if rc >= 0 then
+                if deleteInput then
+                    for obj in objects do Doc.Objects.Delete(obj, true) |>ignore
+                Doc.Views.Redraw()
+        name
+        
     (*
     def AddBlock(object_ids, base_point, name=None, delete_input=False):
         '''Adds a new block definition to the document
@@ -87,31 +95,21 @@ module ExtensionsBlock =
     *)
 
 
-    ///<summary>Returns number of block definitions that contain a specified
-    ///  block definition</summary>
-    ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<returns>(int) the number of block definitions that contain a specified block definition</returns>
-    static member BlockContainerCount(blockName:string) : int =
-        failNotImpl () // genreation temp disabled !!
-    (*
-    def BlockContainerCount(block_name):
-        '''Returns number of block definitions that contain a specified
-        block definition
-        Parameters:
-          block_name (str): the name of an existing block definition
-        Returns:
-          number: the number of block definitions that contain a specified block definition
-        '''
-        return len(BlockContainers(block_name))
-    *)
+
 
 
     ///<summary>Returns names of the block definitions that contain a specified block
     ///  definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<returns>(string seq) A list of block definition names</returns>
-    static member BlockContainers(blockName:string) : string seq =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(string List/ResizeArray) A list of block definition names</returns>
+    static member BlockContainers(blockName:string) : string ResizeArray =
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let containers = idef.GetContainers()
+        let rc = ResizeArray()
+        for item in containers do
+            if not <| item.IsDeleted then  rc.Add(item.Name)
+        rc
     (*
     def BlockContainers(block_name):
         '''Returns names of the block definitions that contain a specified block
@@ -130,11 +128,29 @@ module ExtensionsBlock =
         return rc
     *)
 
+    ///<summary>Returns number of block definitions that contain a specified
+    ///  block definition</summary>
+    ///<param name="blockName">(string) The name of an existing block definition</param>
+    ///<returns>(int) the number of block definitions that contain a specified block definition</returns>
+    static member BlockContainerCount(blockName:string) : int =
+        (RhinoScriptSyntax.BlockContainers(blockName)).Count
+    (*
+    def BlockContainerCount(block_name):
+        '''Returns number of block definitions that contain a specified
+        block definition
+        Parameters:
+          block_name (str): the name of an existing block definition
+        Returns:
+          number: the number of block definitions that contain a specified block definition
+        '''
+        return len(BlockContainers(block_name))
+    *)
+
 
     ///<summary>Returns the number of block definitions in the document</summary>
     ///<returns>(int) the number of block definitions in the document</returns>
     static member BlockCount() : int =
-        failNotImpl () // genreation temp disabled !!
+        Doc.InstanceDefinitions.ActiveCount
     (*
     def BlockCount():
         '''Returns the number of block definitions in the document
@@ -149,7 +165,9 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string) The current description</returns>
     static member BlockDescription(blockName:string) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        idef.Description
     (*
     def BlockDescription(block_name, description=None):
         '''Returns or sets the description of a block definition
@@ -170,9 +188,11 @@ module ExtensionsBlock =
     ///<summary>Sets the description of a block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="description">(string)The new description.</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member BlockDescription(blockName:string, description:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        Doc.InstanceDefinitions.Modify( idef, idef.Name, description, true ) |>ignore
     (*
     def BlockDescription(block_name, description=None):
         '''Returns or sets the description of a block definition
@@ -201,7 +221,10 @@ module ExtensionsBlock =
     ///  2 = check for references from other instance definitions, counts every instance of nested block</param>
     ///<returns>(int) the number of instances of the block in the document</returns>
     static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let  refs = idef.GetReferences(whereToLook)
+        refs.Length
     (*
     def BlockInstanceCount(block_name,where_to_look=0):
         '''Counts number of instances of the block in the document.
@@ -227,7 +250,11 @@ module ExtensionsBlock =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Point3d) The insertion 3D point</returns>
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
-        failNotImpl () // genreation temp disabled !!
+        let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
+        let  xf = instance.InstanceXform
+        let  pt = Geometry.Point3d.Origin
+        pt.Transform(xf)
+        pt
     (*
     def BlockInstanceInsertPoint(object_id):
         '''Returns the insertion point of a block instance.
@@ -236,7 +263,7 @@ module ExtensionsBlock =
         Returns:
           point: The insertion 3D point if successful
         '''
-        instance = __InstanceObjectFromId(object_id, True)
+        instance = __CoerceBlockInstanceObject(object_id, True)
         xf = instance.InstanceXform
         pt = Rhino.Geometry.Point3d.Origin
         pt.Transform(xf)
@@ -248,7 +275,9 @@ module ExtensionsBlock =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(string) the block name of a block instance</returns>
     static member BlockInstanceName(objectId:Guid) : string =
-        failNotImpl () // genreation temp disabled !!
+        let mutable instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
+        let mutable idef = instance.InstanceDefinition
+        idef.Name
     (*
     def BlockInstanceName(object_id):
         '''Returns the block name of a block instance
@@ -257,7 +286,7 @@ module ExtensionsBlock =
         Returns:
           str: the block name of a block instance
         '''
-        instance = __InstanceObjectFromId(object_id, True)
+        instance = __CoerceBlockInstanceObject(object_id, True)
         idef = instance.InstanceDefinition
         return idef.Name
     *)
@@ -270,8 +299,11 @@ module ExtensionsBlock =
     ///  1 = get top level and nested references in active document.
     ///  2 = check for references from other instance definitions</param>
     ///<returns>(Guid seq) Ids identifying the instances of a block in the model.</returns>
-    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Guid seq =
-        failNotImpl () // genreation temp disabled !!
+    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Guid [] =
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let instances = idef.GetReferences(0)
+        [| for item in instances do yield item.Id |]
     (*
     def BlockInstances(block_name,where_to_look=0):
         '''Returns the identifiers of the inserted instances of a block.
@@ -298,7 +330,8 @@ module ExtensionsBlock =
     ///<returns>(Transform) the location, as a transform matrix, of a block instance relative to the world coordinate
     ///  system origin</returns>
     static member BlockInstanceXform(objectId:Guid) : Transform =
-        failNotImpl () // genreation temp disabled !!
+        let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
+        instance.InstanceXform
     (*
     def BlockInstanceXform(object_id):
         '''Returns the location of a block instance relative to the world coordinate
@@ -310,15 +343,17 @@ module ExtensionsBlock =
           transform: the location, as a transform matrix, of a block instance relative to the world coordinate
         system origin
         '''
-        instance = __InstanceObjectFromId(object_id, True)
+        instance = __CoerceBlockInstanceObject(object_id, True)
         return instance.InstanceXform
     *)
 
 
     ///<summary>Returns the names of all block definitions in the document</summary>
     ///<returns>(string seq) the names of all block definitions in the document</returns>
-    static member BlockNames() : string seq =
-        failNotImpl () // genreation temp disabled !!
+    static member BlockNames() : string [] =
+        let  ideflist = Doc.InstanceDefinitions.GetList(true)
+        [| for item in ideflist do yield item.Name|]
+        
     (*
     def BlockNames( sort=False ):
         '''Returns the names of all block definitions in the document
@@ -338,7 +373,9 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(int) the number of objects that make up a block definition</returns>
     static member BlockObjectCount(blockName:string) : int =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        idef.ObjectCount
     (*
     def BlockObjectCount(block_name):
         '''Returns number of objects that make up a block definition
@@ -356,8 +393,11 @@ module ExtensionsBlock =
     ///<summary>Returns identifiers of the objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(Guid seq) list of identifiers on success</returns>
-    static member BlockObjects(blockName:string) : Guid seq =
-        failNotImpl () // genreation temp disabled !!
+    static member BlockObjects(blockName:string) : Guid [] =
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let  rhobjs = idef.GetObjects()
+        [|for obj in rhobjs -> obj.Id|]
     (*
     def BlockObjects(block_name):
         '''Returns identifiers of the objects that make up a block definition
@@ -379,7 +419,9 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block on success</returns>
     static member BlockPath(blockName:string) : string =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        idef.SourceArchive
     (*
     def BlockPath(block_name):
         '''Returns path to the source of a linked or embedded block definition.
@@ -408,7 +450,9 @@ module ExtensionsBlock =
     ///    2    The linked block definition's file is older than definition.
     ///    3    The linked block definition's file is different than definition.</returns>
     static member BlockStatus(blockName:string) : int =
-        failNotImpl () // genreation temp disabled !!
+        let  idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  -3
+        else int(idef.ArchiveFileStatus)
     (*
     def BlockStatus(block_name):
         '''Returns the status of a linked block
@@ -435,7 +479,11 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteBlock(blockName:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let  rc = Doc.InstanceDefinitions.Delete(idef.Index, true, false)
+        Doc.Views.Redraw()
+        rc
     (*
     def DeleteBlock(block_name):
         '''Deletes a block definition and all of it's inserted instances.
@@ -458,8 +506,11 @@ module ExtensionsBlock =
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
     ///By default nested blocks are not exploded.</param>
     ///<returns>(Guid seq) identifiers for the newly exploded objects on success</returns>
-    static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : Guid seq =
-        failNotImpl () // genreation temp disabled !!
+    static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : Guid [] =
+        let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
+        let  guids = Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance=true)
+        if guids.Length > 0 then Doc.Views.Redraw()
+        guids
     (*
     def ExplodeBlockInstance(object_id, explode_nested_instances=False):
         '''Explodes a block instance into it's geometric components. The
@@ -470,7 +521,7 @@ module ExtensionsBlock =
         Returns:
           list(guid, ...): identifiers for the newly exploded objects on success
         '''
-        instance = __InstanceObjectFromId(object_id, True)
+        instance = __CoerceBlockInstanceObject(object_id, True)
         guids = scriptcontext.doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances=explode_nested_instances, deleteInstance=True)
         if guids:
           scriptcontext.doc.Views.Redraw()
@@ -478,18 +529,54 @@ module ExtensionsBlock =
     *)
 
 
+
+    ///<summary>Inserts a block whose definition already exists in the document</summary>
+    ///<param name="blockName">(string) Name of an existing block definition</param>
+    ///<param name="xform">(Transform) 4x4 transformation matrix to apply</param>
+    ///<returns>(Guid) id for the block that was added to the doc on success</returns>
+    static member InsertBlock2(blockName:string, xform:Transform) : Guid =
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let id = Doc.Objects.AddInstanceObject(idef.Index, xform )
+        if id<>System.Guid.Empty then
+            Doc.Views.Redraw()
+        id
+    (*
+    def InsertBlock2(block_name, xform):
+        '''Inserts a block whose definition already exists in the document
+        Parameters:
+          block_name (str): name of an existing block definition
+          xform (transform): 4x4 transformation matrix to apply
+        Returns:
+          guid: id for the block that was added to the doc on success
+        '''
+        idef = scriptcontext.doc.InstanceDefinitions.Find(block_name)
+        if not idef: raise ValueError("%s does not exist in InstanceDefinitionsTable"%block_name)
+        xform = rhutil.coercexform(xform, True)
+        id = scriptcontext.doc.Objects.AddInstanceObject(idef.Index, xform )
+        if id!=System.Guid.Empty:
+            scriptcontext.doc.Views.Redraw()
+            return id
+    *)
+    
+    
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
     ///<param name="scale">(float*float*float) Optional, Default Value: <c>1*1*1</c>
     ///X,y,z scale factors</param>
-    ///<param name="angleDegrees">(int) Optional, Default Value: <c>0</c>
+    ///<param name="angleDegrees">(float) Optional, Default Value: <c>0</c>
     ///Rotation angle in degrees</param>
     ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c>0*0*1</c>
     ///The axis of rotation.</param>
     ///<returns>(Guid) id for the block that was added to the doc</returns>
-    static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(null)>]scale:float*float*float, [<OPT;DEF(0)>]angleDegrees:int, [<OPT;DEF(null)>]rotationNormal:Vector3d) : Guid =
-        failNotImpl () // genreation temp disabled !!
+    static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(null)>]scale:float*float*float, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(null)>]rotationNormal:Vector3d) : Guid =
+        let angleRadians = UtilMath.toRadians(angleDegrees)
+        let move = Transform.Translation(insertionPoint.X,insertionPoint.Y,insertionPoint.Z)
+        let scale = Transform.Scale(Geometry.Plane.WorldXY, t1 scale, t2 scale, t3 scale)
+        let rotate = Transform.Rotation(angleRadians, rotationNormal, Geometry.Point3d.Origin)
+        let xform = move * scale * rotate
+        RhinoScriptSyntax.InsertBlock2 (blockName,xform)
     (*
     def InsertBlock( block_name, insertion_point, scale=(1,1,1), angle_degrees=0, rotation_normal=(0,0,1) ):
         '''Inserts a block whose definition already exists in the document
@@ -514,36 +601,12 @@ module ExtensionsBlock =
     *)
 
 
-    ///<summary>Inserts a block whose definition already exists in the document</summary>
-    ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<param name="xform">(Transform) 4x4 transformation matrix to apply</param>
-    ///<returns>(Guid) id for the block that was added to the doc on success</returns>
-    static member InsertBlock2(blockName:string, xform:Transform) : Guid =
-        failNotImpl () // genreation temp disabled !!
-    (*
-    def InsertBlock2(block_name, xform):
-        '''Inserts a block whose definition already exists in the document
-        Parameters:
-          block_name (str): name of an existing block definition
-          xform (transform): 4x4 transformation matrix to apply
-        Returns:
-          guid: id for the block that was added to the doc on success
-        '''
-        idef = scriptcontext.doc.InstanceDefinitions.Find(block_name)
-        if not idef: raise ValueError("%s does not exist in InstanceDefinitionsTable"%block_name)
-        xform = rhutil.coercexform(xform, True)
-        id = scriptcontext.doc.Objects.AddInstanceObject(idef.Index, xform )
-        if id!=System.Guid.Empty:
-            scriptcontext.doc.Views.Redraw()
-            return id
-    *)
-
-
     ///<summary>Verifies the existence of a block definition in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlock(blockName:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        not <| isNull idef
     (*
     def IsBlock(block_name):
         '''Verifies the existence of a block definition in the document.
@@ -561,7 +624,12 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockEmbedded(blockName:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        match int( idef.UpdateType) with
+        | 1  -> true //DocObjects.InstanceDefinitionUpdateType.Embedded
+        | 2  -> true //DocObjects.InstanceDefinitionUpdateType.LinkedAndEmbedded
+        |_-> false
     (*
     def IsBlockEmbedded(block_name):
         '''Verifies a block definition is embedded, or linked, from an external file.
@@ -581,7 +649,9 @@ module ExtensionsBlock =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockInstance(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+         match RhinoScriptSyntax.CoerceRhinoObject(id) with  //Coerce should not be needed
+         | :? DocObjects.InstanceObject as b -> true
+         | _ -> false
     (*
     def IsBlockInstance(object_id):
         '''Verifies an object is a block instance
@@ -590,20 +660,22 @@ module ExtensionsBlock =
         Returns:
           bool: True or False
         '''
-        return  __InstanceObjectFromId(object_id, False) is not None
+        return  __CoerceBlockInstanceObject(object_id, False) is not None
     *)
 
 
     ///<summary>Verifies that a block definition is being used by an inserted instance</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<param name="whereToLook">(float) Optional, Default Value: <c>0</c>
+    ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///One of the following values
     ///  0 = Check for top level references in active document
     ///  1 = Check for top level and nested references in active document
     ///  2 = Check for references in other instance definitions</param>
     ///<returns>(bool) True or False</returns>
-    static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:float) : bool =
-        failNotImpl () // genreation temp disabled !!
+    static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        idef.InUse(whereToLook)
     (*
     def IsBlockInUse(block_name, where_to_look=0):
         '''Verifies that a block definition is being used by an inserted instance
@@ -626,7 +698,9 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockReference(blockName:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        idef.IsReference
     (*
     def IsBlockReference(block_name):
         '''Verifies that a block definition is from a reference file.
@@ -646,7 +720,10 @@ module ExtensionsBlock =
     ///<param name="newName">(string) Name to change to</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let idef = Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
+        let description = idef.Description
+        Doc.InstanceDefinitions.Modify(idef, newName, description, false)
     (*
     def RenameBlock( block_name, new_name ):
         '''Renames an existing block definition

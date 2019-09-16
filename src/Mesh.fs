@@ -1064,7 +1064,7 @@ module ExtensionsMesh =
     ///<param name="colors">(Drawing.Color seq), optional) A list of color values. Note, for each vertex, there must
     ///  be a corresponding vertex color. If the value is None, then any
     ///  existing vertex colors will be removed from the mesh</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member MeshVertexColors(meshId:Guid, colors:Drawing.Color seq) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

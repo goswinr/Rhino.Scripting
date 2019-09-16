@@ -171,7 +171,7 @@ module ExtensionsHatch =
 
     ///<summary>Sets the current hatch pattern file</summary>
     ///<param name="hatchPattern">(string)Name of an existing hatch pattern to make current</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member CurrentHatchPattern(hatchPattern:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -269,7 +269,7 @@ module ExtensionsHatch =
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<param name="hatchPattern">(string)Name of an existing hatch pattern to replace the
     ///  current hatch pattern</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member HatchPattern(hatchId:Guid, hatchPattern:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -418,7 +418,7 @@ module ExtensionsHatch =
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<param name="rotation">(float)Rotation angle in degrees</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -480,7 +480,7 @@ module ExtensionsHatch =
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<param name="scale">(float)Scale factor</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member HatchScale(hatchId:Guid, scale:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

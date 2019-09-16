@@ -1108,7 +1108,7 @@ module ExtensionsCurve =
     ///  1 = display arrow at start of curve
     ///  2 = display arrow at end of curve
     ///  3 = display arrow at both start and end of curve</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member CurveArrows(curveId:Guid, arrowStyle:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

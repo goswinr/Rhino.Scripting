@@ -1597,7 +1597,7 @@ module ExtensionsSurface =
     /// also be found in Rhino's Dir command</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
     ///<param name="flip">(bool)New normal orientation, either flipped(True) or not flipped (False).</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -2993,7 +2993,7 @@ module ExtensionsSurface =
     ///    1: Display boundary and knot wires and one interior wire if there
     ///      are no interior knots
     ///        >=2: Display boundary and knot wires and (N+1) interior wires</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid, density:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

@@ -165,7 +165,7 @@ module ExtensionsUtility =
 
     ///<summary>Sets a text string to the Windows clipboard</summary>
     ///<param name="text">(string)Text to set</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ClipboardText(text:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*

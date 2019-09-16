@@ -209,7 +209,7 @@ module ExtensionsDimension =
 
     ///<summary>Changes the current default dimension style</summary>
     ///<param name="dimstyleName">(string)Name of an existing dimension style to make current</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member CurrentDimStyle(dimstyleName:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -285,7 +285,7 @@ module ExtensionsDimension =
     ///<summary>Modifies the dimension style of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="dimstyleName">(string)The name of an existing dimension style</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimensionStyle(objectId:Guid, dimstyleName:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -360,7 +360,7 @@ module ExtensionsDimension =
     /// text is the string that gets printed when the dimension is defined</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="usertext">(string)The new user text string value</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimensionUserText(objectId:Guid, usertext:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -432,7 +432,7 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new angle precision value. If omitted, the current angle
     ///  precision is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleAnglePrecision(dimstyle:string, precision:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -486,7 +486,7 @@ module ExtensionsDimension =
     ///<summary>Changes the arrow size of a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="size">(int)The new arrow size. If omitted, the current arrow size is returned</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleArrowSize(dimstyle:string, size:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -554,7 +554,7 @@ module ExtensionsDimension =
     ///<summary>Changes the extension line extension of a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="extension">(int)The new extension line extension</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleExtension(dimstyle:string, extension:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -609,7 +609,7 @@ module ExtensionsDimension =
     ///<summary>Changes the font used by a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="font">(string)The new font face name</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleFont(dimstyle:string, font:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -664,7 +664,7 @@ module ExtensionsDimension =
     ///<summary>Changes the leader arrow size of a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="size">(int)The new leader arrow size</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleLeaderArrowSize(dimstyle:string, size:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -721,7 +721,7 @@ module ExtensionsDimension =
     /// is the conversion between Rhino units and dimension units</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="factor">(int)The new length factor</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleLengthFactor(dimstyle:string, factor:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -776,7 +776,7 @@ module ExtensionsDimension =
     ///<summary>Changes the linear display precision of a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new linear precision value</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleLinearPrecision(dimstyle:string, precision:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -859,7 +859,7 @@ module ExtensionsDimension =
     ///  0 = Decimal
     ///  1 = Fractional
     ///  2 = Feet and inches</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleNumberFormat(dimstyle:string, format:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -918,7 +918,7 @@ module ExtensionsDimension =
     ///<summary>Changes the extension line offset of a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="offset">(int)The new extension line offset</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleOffset(dimstyle:string, offset:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -975,7 +975,7 @@ module ExtensionsDimension =
     /// prefix to the dimension text.</summary>
     ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
     ///<param name="prefix">(string)The new prefix</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStylePrefix(dimstyle:string, prefix:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1033,7 +1033,7 @@ module ExtensionsDimension =
     /// append to the dimension text.</summary>
     ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
     ///<param name="suffix">(string)The new suffix</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleSuffix(dimstyle:string, suffix:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1103,7 +1103,7 @@ module ExtensionsDimension =
     ///  1 = Horizontal to view
     ///  2 = Above the dimension line
     ///  3 = In the dimension line</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextAlignment(dimstyle:string, alignment:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1164,7 +1164,7 @@ module ExtensionsDimension =
     ///<summary>Changes the text gap used by a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="gap">(int)The new text gap</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextGap(dimstyle:string, gap:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1218,7 +1218,7 @@ module ExtensionsDimension =
     ///<summary>Changes the text height used by a dimension style</summary>
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<param name="height">(int)The new text height</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextHeight(dimstyle:string, height:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -1485,7 +1485,7 @@ module ExtensionsDimension =
     ///<summary>Modifies the text string of a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="text">(string)The new text string</param>
-    ///<returns>(unit) unit</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectId:Guid, text:string) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
