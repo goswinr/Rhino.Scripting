@@ -1,10 +1,8 @@
-// https://github.com/dotnet/fsharp/tree/master/src/utils
+//  taken from https://github.com/dotnet/fsharp/tree/master/src/utils
 
 namespace Rhino.Scripting
 
 
-open System
-open System.Collections.Generic
 open Microsoft.FSharp.Core
 open Microsoft.FSharp.Collections
 
@@ -214,8 +212,8 @@ module ResizeArray =
     /// that satisfies the given predicate.
     val tryFindIndexi : (int -> 'T -> bool) -> ResizeArray<'T> -> int option
 
-    /// Combine the two arrays into an array of pairs. The two arrays must have equal lengths, otherwise an <c>ArgumentException</c> is
-    /// raised..
+    /// Combine the two arrays into an array of pairs. The two arrays must have equal lengths, 
+    /// otherwise an <c>ArgumentException</c> is raised..
     val zip : ResizeArray<'T> -> ResizeArray<'U> -> ResizeArray<'T * 'U>
 
     /// Split an array of pairs into two arrays.

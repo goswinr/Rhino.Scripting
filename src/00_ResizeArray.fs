@@ -1,4 +1,4 @@
-// https://github.com/dotnet/fsharp/tree/master/src/utils
+// taken from https://github.com/dotnet/fsharp/tree/master/src/utils
 
 namespace Rhino.Scripting
 
