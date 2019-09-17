@@ -17,11 +17,13 @@
   </PropertyGroup>
   
   <ItemGroup>    
+    <Compile Include="00_ResizeArray.fsi" />    
+    <Compile Include="00_ResizeArray.fs" />    
     <Compile Include="01_Util.fs" />
     <Compile Include="02_TypeExtensions.fs" />
-    <Compile Include="03_RhinoTypeExtensions.fs" />
-    <Compile Include="04_CumputationalExpressions.fs" />
-    <Compile Include="09_ActiveDoc.fs" />
+    <Compile Include="04_ComputationalExpressions.fs" />
+    <Compile Include="13_RhinoTypeExtensions.fs" />
+    <Compile Include="19_ActiveDoc.fs" />
     <Compile Include="50_RhinoScriptingSyntax.fs" />
     <Compile Include="Application.fs" />
     <Compile Include="Block.fs" />
