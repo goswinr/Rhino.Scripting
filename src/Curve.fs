@@ -664,13 +664,10 @@ module ExtensionsCurve =
     ///  removed. The list must contain at least two points. If the
     ///  list contains less than four points, then the first point and
     ///  last point must be different.</param>
-    ///<param name="replaceId">(Guid) Optional, Default Value: <c>null</c>
-    ///If set to the id of an existing object, the object
-    ///  will be replaced by this polyline</param>
     ///<returns>(Guid) id of the new curve object</returns>
-    static member AddPolyline(points:Point3d seq, [<OPT;DEF(null)>]replaceId:Guid) : Guid =
+    static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        pl.DeleteShortSegments(Doc.ModelAbsoluteTolerance) |>ignore
+        //pl.DeleteShortSegments(Doc.ModelAbsoluteTolerance) |>ignore
         let rc = Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then failwithf "Unable to add polyline to document.  points:'%A' " points
         Doc.Views.Redraw()
@@ -745,14 +742,15 @@ module ExtensionsCurve =
     ///  distance between helix "threads"</param>
     ///<param name="turns">(float) Number of turns</param>
     ///<param name="radius0">(float) Starting radius of spiral</param>
-    ///<param name="radius1">(float) Optional, Default Value: <c>null</c>
+    ///<param name="radius1">(float) Optional, Default Value: <c>0.0</c>
     ///Ending radius of spiral. If omitted, the starting radius is used for the complete spiral.</param>
     ///<returns>(Guid) id of new curve on success</returns>
-    static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(null)>]radius1:float) : Guid =
+    static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid =
         let dir = point1 - point0
         let plane = Plane(point0, dir)
         let point2 = point0 + plane.XAxis
-        let curve = NurbsCurve.CreateSpiral(point0, dir, point2, pitch, turns, radius0, radius1)
+        let r2 = if radius1=0.0 then radius0 else radius1
+        let curve = NurbsCurve.CreateSpiral(point0, dir, point2, pitch, turns, radius0, r2)
         if isNull curve then failwithf "Unable to add curve to document.  point0:'%A' point1:'%A' pitch:'%A' turns:'%A' radius0:'%A' radius1:'%A'" point0 point1 pitch turns radius0 radius1
         let rc = Doc.Objects.AddCurve(curve)
         if rc = Guid.Empty then failwithf "Unable to add curve to document.  point0:'%A' point1:'%A' pitch:'%A' turns:'%A' radius0:'%A' radius1:'%A'" point0 point1 pitch turns radius0 radius1
@@ -1056,17 +1054,18 @@ module ExtensionsCurve =
     ///<summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
     ///  planar curve</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
-    ///<param name="direction">(Vector3d) Optional, Default Value: <c>0*0*1</c>
+    ///<param name="direction">(Vector3d) Optional, Default Value: <c>null</c>
     ///3d vector that identifies up, or Z axs, direction of
     ///  the plane to test against</param>
     ///<returns>(int) 1 if the curve's orientation is clockwise
     ///  -1 if the curve's orientation is counter-clockwise
     ///   0 if unable to compute the curve's orientation</returns>
     static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(null)>]direction:Vector3d) : int =
+        let direction0 =  match box direction with :?Vector3d as v -> v |_ -> Vector3d.ZAxis
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
         if not <| curve.IsClosed then  0
         else
-            let orientation = curve.ClosedCurveOrientation(direction)
+            let orientation = curve.ClosedCurveOrientation(direction0)
             int(orientation)
     (*
     def ClosedCurveOrientation(curve_id, direction=(0,0,1)):
@@ -1789,8 +1788,8 @@ module ExtensionsCurve =
     ///<param name="curveB">(Guid) Optional, Default Value: <c>null</c>
     ///Identifier of the second curve object. If omitted, then a
     ///  self-intersection test will be performed on curveA.</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>-1</c>
-    ///Absolute tolerance in drawing units. If omitted,
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///  Absolute tolerance in drawing units. If omitted,
     ///  the document's current absolute tolerance is used.</param>
     ///<returns>( a List of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float)
     ///  List of tuples: containing intersection information .
@@ -1821,9 +1820,10 @@ module ExtensionsCurve =
     ///    [n][8]  Number   If the event type is Point (1), then the second curve parameter.
     ///      If the event type is Overlap (2), then the end value of the
     ///      second curve parameter range.</returns>
-    static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(null)>]curveB:Guid, [<OPT;DEF(-1)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
-        let curve1 = RhinoScriptSyntax.CoerceCurve curveA  
-        let curve2 = RhinoScriptSyntax.CoerceCurve curveB  
+    static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(null)>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
+        let curve1 = RhinoScriptSyntax.CoerceCurve curveA 
+        let curve2 =  match box curveB with :?Guid as g -> RhinoScriptSyntax.CoerceCurve g |_ -> curve1
+          
         let tolerance0 = max tolerance Doc.ModelAbsoluteTolerance
         let mutable rc = null
         if curveB<>curveA then
@@ -2394,15 +2394,21 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<param name="subDomain">(float * float) Optional, Default Value: <c>null</c>
-    ///List of two numbers identifying the sub-domain of the
+    ///<param name="subDomain">(Interval) Optional, Default Value: <c>null</c>
+    ///  List of two numbers identifying the sub-domain of the
     ///  curve on which the calculation will be performed. The two parameters
     ///  (sub-domain) must be non-decreasing. If omitted, the length of the
     ///  entire curve is returned.</param>
     ///<returns>(float) The length of the curve .</returns>
-    static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(null)>]subDomain:float * float) : float =
+    static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(null)>]subDomain:Interval) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)  
-        curve.GetLength()
+        match box subDomain with
+        | null -> curve.GetLength()
+        | :? Interval as pl -> curve.GetLength(subDomain)
+        | _ -> failwithf "curveLength failed on bad interval '%A' subDomain" subDomain
+        
+        
+   
     (*
     def CurveLength(curve_id, segment_index=-1, sub_domain=None):
         '''Returns the length of a curve object.
@@ -2734,9 +2740,20 @@ module ExtensionsCurve =
     ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
     ///New start point</param>
     ///<returns>(Point3d) The 3D starting point of the curve .</returns>
-    static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(null)>]point:Point3d) : Point3d =
+    static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)  
         curve.PointAtStart
+
+    ///<summary>Sets the start point of a curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
+    ///<param name="point">(Point3d) New start point</param>
+    ///<returns>(unit)</returns>
+    static member CurveStartPoint(curveId:Guid, point:Point3d) : unit =
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId)  
+        if not <|curve.SetStartPoint(point) then failwithf "CurveStartPoint failed on '%A' and '%A'" point curveId
+        Doc.Objects.Replace(curveId, curve) |> ignore
+        Doc.Views.Redraw()
+
     (*
     def CurveStartPoint(curve_id, segment_index=-1, point=None):
         '''Returns the start point of a curve object
@@ -4162,9 +4179,9 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="direction">(Point3d) Point describing direction of the offset</param>
     ///<param name="distance">(float) Distance of the offset</param>
-    ///<param name="normal">(Vector3d) Optional, Default Value: <c>null</c>
-    ///Normal of the plane in which the offset will occur.
-    ///  If omitted, the normal of the active construction plane will be used</param>
+    ///<param name="normal">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
+    ///  Normal of the plane in which the offset will occur.
+    ///  If omitted, the WorldXY  plane will be used</param>
     ///<param name="style">(int) Optional, Default Value: <c>1</c>
     ///The corner style. If omitted, the style is sharp.
     ///  0 = None
@@ -4174,10 +4191,11 @@ module ExtensionsCurve =
     ///  4 = Chamfer</param>
     ///<returns>(Guid seq) list of ids for the new curves on success</returns>
     static member OffsetCurve(curveId:Guid, direction:Point3d, distance:float, [<OPT;DEF(null)>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Guid [] =
+        let normal0 =  match box normal with :?Vector3d as v -> v |_ -> Vector3d.ZAxis
         let curve = RhinoScriptSyntax.CoerceCurve curveId  
         let tolerance = Doc.ModelAbsoluteTolerance
         let style:CurveOffsetCornerStyle = EnumOfValue style
-        let curves = curve.Offset(direction, normal, distance, tolerance, style)
+        let curves = curve.Offset(direction, normal0, distance, tolerance, style)
         if isNull curves then  failwithf "offsetCurve failed.  curveId:'%A' direction:'%A' distance:'%A' normal:'%A' style:'%A'" curveId direction distance normal style
         let rc = [| for curve in curves -> Doc.Objects.AddCurve(curve) |]
         Doc.Views.Redraw()
@@ -4228,7 +4246,7 @@ module ExtensionsCurve =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)      
         let tol = Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves  then  failwithf "offsetCurveOnSurface failed.  curveId:'%A' surfaceId:'%A' distance:'%A'" curveId surfaceId distance
+        if isNull curves  then  failwithf "offsetCurveOnSurface failed.  curveId:'%A' surfaceId:'%A' parameter:'%A'" curveId surfaceId parameter
         let rc = [| for curve in curves -> Doc.Objects.AddCurve(curve) |]
         Doc.Views.Redraw()
         rc
@@ -4281,13 +4299,11 @@ module ExtensionsCurve =
     *)
 
 
-    ///<summary>Determines the relationship between the regions bounded by two coplanar
-    ///  simple closed curves</summary>
+    ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed curves</summary>
     ///<param name="curveA">(Guid) Curve a of 'identifiers of two planar, closed curves' (FIXME 0)</param>
     ///<param name="curveB">(Guid) Curve b of 'identifiers of two planar, closed curves' (FIXME 0)</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>null</c>
-    ///Test plane. If omitted, the currently active construction
-    ///  plane is used</param>
+    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
+    ///Test plane. If omitted, the Plane.WorldXY plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///If omitted, the document absolute tolerance is used</param>
     ///<returns>(int) a number identifying the relationship
@@ -4299,7 +4315,8 @@ module ExtensionsCurve =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA  
         let curveB = RhinoScriptSyntax.CoerceCurve curveB  
         let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
-        let rc = Curve.PlanarClosedCurveRelationship(curveA, curveB, plane, tolerance0)
+        let plane0 =  match box plane with :?Plane as pl -> pl |_ -> Plane.WorldXY
+        let rc = Curve.PlanarClosedCurveRelationship(curveA, curveB, plane0, tolerance0)
         int(rc)
     (*
     def PlanarClosedCurveContainment(curve_a, curve_b, plane=None, tolerance=None):
@@ -4344,7 +4361,8 @@ module ExtensionsCurve =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA  
         let curveB = RhinoScriptSyntax.CoerceCurve curveB  
         let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
-        Curve.PlanarCurveCollision(curveA, curveB, plane, tolerance0)
+        let plane0 =  match box plane with :?Plane as pl -> pl |_ -> Plane.WorldXY
+        Curve.PlanarCurveCollision(curveA, curveB, plane0, tolerance0)
     (*
     def PlanarCurveCollision(curve_a, curve_b, plane=None, tolerance=None):
         '''Determines if two coplanar curves intersect
@@ -4372,9 +4390,8 @@ module ExtensionsCurve =
     ///  outside of a closed curve</summary>
     ///<param name="point">(Point3d) Text point</param>
     ///<param name="curve">(Guid) Identifier of a curve object</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>null</c>
-    ///Plane containing the closed curve and point. If omitted,
-    ///  the currently active construction plane is used</param>
+    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
+    ///Plane containing the closed curve and point. If omitted, Plane.WorldXY  is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///  If omitted, the document abosulte tolerance is used</param>
     ///<returns>(int) number identifying the result
@@ -4384,7 +4401,8 @@ module ExtensionsCurve =
     static member PointInPlanarClosedCurve(point:Point3d, curve:Guid, [<OPT;DEF(null)>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
         let curve = RhinoScriptSyntax.CoerceCurve curve  
         let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
-        let rc = curve.Contains(point, plane, tolerance0)
+        let plane0 =  match box plane with :?Plane as pl -> pl |_ -> Plane.WorldXY
+        let rc = curve.Contains(point, plane0, tolerance0)
         if rc=PointContainment.Unset then
             failwithf "pointInPlanarClosedCurve Curve.Contains is Unset.  point:'%A' curve:'%A' plane:'%A' tolerance:'%A'" point curve plane tolerance
         if rc=PointContainment.Outside then  0
