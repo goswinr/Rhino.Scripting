@@ -5,6 +5,7 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument 
 
 /// A static class with static mebres providing functions very similar to RhinoScript in Pyhton and VBscript 
@@ -57,35 +58,38 @@ type RhinoScriptSyntax () = //private () =
         RhinoScriptSyntax.Fxrange (start, stop, step) |> Array.ofSeq
     
     
-    
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>
-    ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
+    ///<param name="pt">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
     ///<returns>a Rhino.Geometry.Point3d. Fails on bad input</returns>
-    static member Coerce3dPoint(pt:'point) : Point3d=
+    static member Coerce3dPoint(pt:'T) : Point3d=
+        let inline  point3dOf3(x:^x, y:^y, z:^z) = 
+            try Geometry.Point3d(floatOfObj (x),floatOfObj(y),floatOfObj(z))
+            with _ -> failwithf "*** could not coerce %A, %A and %A to Point3d" x y z
+        
         let b = box pt
         match b with
         | :? Point3d    as pt               -> pt
         | :? Vector3d   as v                -> Point3d(v)
         | :? Point3f    as pt               -> Point3d(pt)
         | :? (float*float*float) as xyz     -> let x,y,z = xyz in Point3d(x,y,z)
+        | :? (single*single*single) as xyz  -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))        
         | :? (int*int*int) as xyz           -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))
         | _ ->
             try
                 match b with
-                | :? (string*string*string) as xyz  -> let x,y,z = xyz in Point3d(float(x),float(y),float(z)) 
+                | :? (string*string*string) as xyz  -> let x,y,z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
                 | :? Guid as g ->  ((Doc.Objects.Find(g).Geometry) :?> Point).Location 
                 | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
-                | :? seq<int>    as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
                 | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
                 | :? string as s  -> 
-                    let xs = s.Split(',')
-                    if Seq.length xs = 3 then Point3d(Double.Parse(Seq.item 0 xs),Double.Parse(Seq.item 1 xs),Double.Parse(Seq.item 2 xs)) else fail()                
-                | _ -> 
-                    let xs = b :?> seq<_>
-                    let x = floatOfObj(Seq.item 0 xs)
-                    let y = floatOfObj(Seq.item 1 xs)
-                    let z = floatOfObj(Seq.item 2 xs)
-                    Point3d(x,y,z)                    
+                    let xs = s.Split(';')
+                    if Seq.length xs > 2 then 
+                        Point3d(parseFloatEnDe(Seq.item 0 xs),parseFloatEnDe(Seq.item 1 xs),parseFloatEnDe(Seq.item 2 xs))
+                    else
+                        let ys = s.Split(',') 
+                        Point3d(parseFloatEnDe(Seq.item 0 ys),parseFloatEnDe(Seq.item 1 ys),parseFloatEnDe(Seq.item 2 ys))   
+                |_ -> failwithf "*** could not coerce %A to a Point3d" pt
             with _ ->
                 failwithf "*** could not coerce %A to a Point3d" pt
     

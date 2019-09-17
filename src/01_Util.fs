@@ -16,7 +16,7 @@ module internal Util =
     /// returns the value on the left unless it is null, then returns the value on the right
     let inline (|?) x b = if Object.ReferenceEquals(x,null) then b else x
 
-    let fail() = failwith "Rhino.Scripting failed (outer exception should show more helpful message)"
+    let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"
    
     let enUs = CultureInfo.GetCultureInfo("en-us")
     let deAt = CultureInfo.GetCultureInfo("de-at")    
@@ -41,7 +41,7 @@ module internal Util =
         else                 sprintf "%f"   x  
     
     ///parses english and german style flaots, recognizes comma and period as decimal separator
-    let paresFloatEnDe (x:string) =
+    let parseFloatEnDe (x:string) =
         match Double.TryParse(x, NumberStyles.Float, enUs) with
         | true, f -> f
         | _ ->  match Double.TryParse(x, NumberStyles.Any, deAt) with
@@ -56,19 +56,12 @@ module internal Util =
         | :? single  as x -> float (x)
         | :? int64   as x -> float (x)
         | :? decimal as x -> float (x)
-        | :? string  as x -> paresFloatEnDe (x)
+        | :? string  as x -> parseFloatEnDe (x)
         | _               -> 
             try 
                 float(o)
             with _ -> 
-                failwithf "Could not convert object '%A' into a floating point number" o
-    
-    let inline point3dOf3(x:^x, y:^y, z:^z) = 
-        try Rhino.Geometry.Point3d(floatOfObj (x),floatOfObj(y),floatOfObj(z))
-        with _ -> failwithf "*** could not coerce %A, %A and %A to Point3d" x y z
-
-    /// test is a floating point value is Infinity or Not a Number
-    let inline isNanOrInf f = Double.IsInfinity f || Double.IsNaN f
+                failwithf "Could not convert object '%A' into a floating point number" o  
     
 
     ///Returns a Sequence(IEnumerable) of Tuples (this, next) from (first, second) upto (secondLast, last)
@@ -98,6 +91,9 @@ module internal Util =
 module UtilMath =
     let internal Rand = new System.Random () 
     
+    /// test is a floating point value is Infinity or Not a Number
+    let inline isNanOrInf f = Double.IsInfinity f || Double.IsNaN f
+
     /// converts Angels from Degrees to Radians
     let inline toRadians degrees = (Math.PI / 180.) * degrees
 
