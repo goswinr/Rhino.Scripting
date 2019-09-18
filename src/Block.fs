@@ -15,13 +15,13 @@ module ExtensionsBlock =
     ///<summary>Adds a new block definition to the document</summary>
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
     ///<param name="basisPoint">(Point3d) 3D base point for the block definition</param>
-    ///<param name="name">(string) Optional, Default Value: <c>null</c>
+    ///<param name="name">(string) Optional, Default Value: <c>InstanceDefinitions.GetUnusedInstanceDefinitionName()</c>
     ///Name of the block definition. If omitted a name will be automatically generated</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///If True, the objectIds will be deleted</param>
     ///<returns>(string) name of new block definition on success</returns>
-    static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF(null)>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
-        let name = if isNull name then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
+    static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
+        let name = if name="" then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = Doc.InstanceDefinitions.Find(name)
         let objects = ResizeArray()
         for id in objectIds do
@@ -563,18 +563,20 @@ module ExtensionsBlock =
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
-    ///<param name="scale">(float*float*float) Optional, Default Value: <c>1*1*1</c>
-    ///X,y,z scale factors</param>
+    ///<param name="scale">(float*float*float) Optional, Default Value: <c>Vector3d(1. , 1. , 1.)</c>
+    ///  X,y,z scale factors</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>0</c>
-    ///Rotation angle in degrees</param>
-    ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c>0*0*1</c>
-    ///The axis of rotation.</param>
+    ///  Rotation angle in degrees</param>
+    ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c> Vector3d.ZAxis</c>
+    ///  The axis of rotation.</param>
     ///<returns>(Guid) id for the block that was added to the doc</returns>
-    static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(null)>]scale:float*float*float, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(null)>]rotationNormal:Vector3d) : Guid =
+    static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
+        let sc= if scale.IsZero then Vector3d(1. ,1. ,1.) else scale
+        let rotationNormal0= if rotationNormal.IsZero then Vector3d.ZAxis else rotationNormal
         let move = Transform.Translation(insertionPoint.X,insertionPoint.Y,insertionPoint.Z)
-        let scale = Transform.Scale(Geometry.Plane.WorldXY, t1 scale, t2 scale, t3 scale)
-        let rotate = Transform.Rotation(angleRadians, rotationNormal, Geometry.Point3d.Origin)
+        let scale = Transform.Scale(Geometry.Plane.WorldXY, sc.X, sc.Y, sc.Z)
+        let rotate = Transform.Rotation(angleRadians, rotationNormal0, Geometry.Point3d.Origin)
         let xform = move * scale * rotate
         RhinoScriptSyntax.InsertBlock2 (blockName,xform)
     (*

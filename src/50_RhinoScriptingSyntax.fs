@@ -60,17 +60,14 @@ type RhinoScriptSyntax () = //private () =
     
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="pt">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
-    ///<param name="nullIsUnset">(bool) Optional, Default Value: <c>false</c>
-    ///   if true null will be interpreted as Point3d.Unset </param>
     ///<returns>a Rhino.Geometry.Point3d. Fails on bad input</returns>
-    static member Coerce3dPoint(pt:'T, [<OPT;DEF(false)>]nullIsUnset:bool) : Point3d =               
+    static member Coerce3dPoint(pt:'T) : Point3d =               
         let inline  point3dOf3(x:^x, y:^y, z:^z) = 
             try Geometry.Point3d(floatOfObj (x),floatOfObj(y),floatOfObj(z))
             with _ -> failwithf "*** could not coerce %A, %A and %A to Point3d" x y z
         
         let b = box pt
         match b with
-        | null -> if nullIsUnset then Point3d.Unset else failwith "*** could not coerce 'null' to a Point3d"
         | :? Point3d    as pt               -> pt
         | :? Vector3d   as v                -> Point3d(v)
         | :? Point3f    as pt               -> Point3d(pt)
@@ -107,13 +104,10 @@ type RhinoScriptSyntax () = //private () =
         | _ -> failwithf "*** could not coerce: Could not convert %A to a Point2d"  point
     
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible.</summary>
-    ///<param name="vector">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
-     ///<param name="nullIsUnset">(bool) Optional, Default Value: <c>false</c>
-    ///   if true null will be interpreted as Vector3d.Unset </param>
+    ///<param name="vector">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>    
     ///<returns>a Rhino.Geometry.Vector3d. Fails on bad input</returns>
-    static member Coerce3dVector(vector:'T, [<OPT;DEF(false)>]nullIsUnset:bool) : Vector3d =
+    static member Coerce3dVector(vector:'T) : Vector3d =
         match box vector with
-        | null -> if nullIsUnset then Vector3d.Unset else failwith "*** could not coerce 'null' to a Vector3d"
         | :? Vector3d   as v  -> v   
         | _ ->         
             try Vector3d(RhinoScriptSyntax.Coerce3dPoint(vector))
@@ -138,7 +132,7 @@ type RhinoScriptSyntax () = //private () =
     ///<param name="plane">Plane,point, list, tuple</param>
     ///<returns>a Rhino.Geometry.Plane. Fails on bad input</returns>
     static member CoercePlane(plane:'plane) =
-        match box plane with // TODO add more
+        match box plane with 
         | :? Plane  as plane -> plane // TODO add more
         | _ -> failwithf "*** could not coerce: %A can not be converted to a Plane" plane
     

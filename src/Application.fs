@@ -1348,7 +1348,7 @@ module ExtensionsApplication =
 
     ///<summary>Sets the object snap mode. Object snaps are tools for
     /// specifying points on existing objects</summary>
-    ///<param name="mode">(float)The object snap mode or modes to set.
+    ///<param name="mode">(int)The object snap mode or modes to set.
     ///  0          None
     ///  2          Near
     ///  8          Focus
@@ -1364,9 +1364,10 @@ module ExtensionsApplication =
     ///  134217728  Point
     ///  Object snap modes can be added together to set multiple modes</param>
     ///<returns>(unit) void, nothing</returns>
-    static member OsnapMode(mode:float) : unit = //SET
-        failwith "setOsnapMode is not implemented"
-        // FIXME enum casting ?
+    static member OsnapMode(mode:int) : unit = //SET
+        ModelAidSettings.OsnapModes <- LanguagePrimitives.EnumOfValue mode
+
+
 
     (*
     def OsnapMode(mode=None):
@@ -1552,10 +1553,9 @@ module ExtensionsApplication =
 
 
     ///<summary>Change Rhino's command window prompt</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
-    ///The new prompt on the commandline.  If omitted the prompt will be blank.</param>
+    ///<param name="message">The new prompt on the commandline.</param>
     ///<returns>(unit) </returns>
-    static member Prompt([<OPT;DEF(null)>]message:string) : unit =
+    static member Prompt(message:string) : unit =
         RhinoApp.SetCommandPrompt(message)
     (*
     def Prompt(message=None):
@@ -1635,12 +1635,11 @@ module ExtensionsApplication =
 
 
     ///<summary>Sends a string of printable characters to Rhino's command line</summary>
-    ///<param name="keys">(string) Optional, Default Value: <c>null</c>
-    ///A string of characters to send to the command line.</param>
+    ///<param name="keys">(string) A string of characters to send to the command line.</param>
     ///<param name="addReturn">(bool) Optional, Default Value: <c>true</c>
     ///Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) </returns>
-    static member SendKeystrokes([<OPT;DEF(null)>]keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
+    static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoApp.SendKeystrokes(keys, addReturn)
     (*
     def SendKeystrokes(keys=None, add_return=True):
