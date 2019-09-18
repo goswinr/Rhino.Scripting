@@ -9,7 +9,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument 
 
 /// A static class with static mebres providing functions very similar to RhinoScript in Pyhton and VBscript 
-type RhinoScriptSyntax () = //private () = 
+type RhinoScriptSyntax private () = // no constructor?
     
     ///<summary>clamps a value between a lower and an upper bound</summary>
     ///<param name="minVal">(float): lower bound</param>
