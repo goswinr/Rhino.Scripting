@@ -15,18 +15,18 @@ module ExtensionsMesh =
     ///<param name="faceVertices">(float seq) List containing lists of 3 or 4 numbers that define the
     ///  vertex indices for each face of the mesh. If the third a fourth vertex
     ///    indices of a face are identical, a triangular face will be created.</param>
-    ///<param name="vertexNormals">(Vector3d seq) Optional, Default Value: <c>null</c>
+    ///<param name="vertexNormals">(Vector3d seq) Optional, Default Value: <c>null:Vector3d seq</c>
     ///List of 3D vectors defining the vertex normals of
     ///  the mesh. Note, for every vertex, there must be a corresponding vertex
     ///  normal</param>
-    ///<param name="textureCoordinates">(float seq) Optional, Default Value: <c>null</c>
+    ///<param name="textureCoordinates">(float seq) Optional, Default Value: <c>null:float seq</c>
     ///List of 2D texture coordinates. For every
     ///  vertex, there must be a corresponding texture coordinate</param>
-    ///<param name="vertexColors">(Drawing.Color seq) Optional, Default Value: <c>null</c>
+    ///<param name="vertexColors">(Drawing.Color seq) Optional, Default Value: <c>null:Drawing.Color seq</c>
     ///A list of color values. For every vertex,
     ///  there must be a corresponding vertex color</param>
     ///<returns>(Guid) Identifier of the new object</returns>
-    static member AddMesh(vertices:Point3d seq, faceVertices:float seq, [<OPT;DEF(null)>]vertexNormals:Vector3d seq, [<OPT;DEF(null)>]textureCoordinates:float seq, [<OPT;DEF(null)>]vertexColors:Drawing.Color seq) : Guid =
+    static member AddMesh(vertices:Point3d seq, faceVertices:float seq, [<OPT;DEF(null:Vector3d seq)>]vertexNormals:Vector3d seq, [<OPT;DEF(null:float seq)>]textureCoordinates:float seq, [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddMesh(vertices, face_vertices, vertex_normals=None, texture_coordinates=None, vertex_colors=None):
@@ -417,10 +417,10 @@ module ExtensionsMesh =
     ///<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///Delete the input meshes</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///A positive tolerance value, or None to use the default of the document.</param>
     ///<returns>(Guid seq) identifiers of newly created meshes</returns>
-    static member MeshBooleanDifference(input0:Guid, input1:Guid, [<OPT;DEF(true)>]deleteInput:bool, [<OPT;DEF(null)>]tolerance:float) : Guid seq =
+    static member MeshBooleanDifference(input0:Guid, input1:Guid, [<OPT;DEF(true)>]deleteInput:bool, [<OPT;DEF(null:float)>]tolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshBooleanDifference(input0, input1, delete_input=True, tolerance=None):
@@ -568,7 +568,7 @@ module ExtensionsMesh =
     ///<summary>Returns the point on a mesh that is closest to a test point</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="point">(Point3d) Point to test</param>
-    ///<param name="maximumDistance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="maximumDistance">(float) Optional, Default Value: <c>null:float</c>
     ///Upper bound used for closest point calculation.
     ///  If you are only interested in finding a point Q on the mesh when
     ///  point.DistanceTo(Q) < maximumDistance, then set maximumDistance to
@@ -576,7 +576,7 @@ module ExtensionsMesh =
     ///<returns>(Point3d * float) containing the results of the calculation where
     ///  [0] = the 3-D point on the mesh
     ///  [1] = the index of the mesh face on which the 3-D point lies</returns>
-    static member MeshClosestPoint(objectId:Guid, point:Point3d, [<OPT;DEF(null)>]maximumDistance:float) : Point3d * float =
+    static member MeshClosestPoint(objectId:Guid, point:Point3d, [<OPT;DEF(null:float)>]maximumDistance:float) : Point3d * float =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshClosestPoint(object_id, point, maximum_distance=None):
@@ -813,10 +813,10 @@ module ExtensionsMesh =
     ///<summary>Calculates the intersections of a mesh object with another mesh object</summary>
     ///<param name="mesh1">(Guid) Mesh1 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="mesh2">(Guid) Mesh2 of 'identifiers of meshes' (FIXME 0)</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///The intersection tolerance</param>
     ///<returns>(Point3d seq) of points that define the vertices of the intersection curves</returns>
-    static member MeshMeshIntersection(mesh1:Guid, mesh2:Guid, [<OPT;DEF(null)>]tolerance:float) : Point3d seq =
+    static member MeshMeshIntersection(mesh1:Guid, mesh2:Guid, [<OPT;DEF(null:float)>]tolerance:float) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshMeshIntersection(mesh1, mesh2, tolerance=None):
@@ -897,10 +897,10 @@ module ExtensionsMesh =
 
     ///<summary>Creates polyline curve outlines of mesh objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null</c>
+    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///View to use for outline direction</param>
     ///<returns>(Guid seq) polyline curve identifiers on success</returns>
-    static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null)>]view:string) : Guid seq =
+    static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshOutline(object_ids, view=None):

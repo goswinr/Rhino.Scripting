@@ -11,14 +11,14 @@ module ExtensionsUserinterface =
   type RhinoScriptSyntax with
     
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
-    ///<param name="folder">(string) Optional, Default Value: <c>null</c>
+    ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
     ///A default folder</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
     ///<returns>(string) selected folder</returns>
-    static member BrowseForFolder([<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
+    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def BrowseForFolder(folder=None, message=None, title=None):
@@ -45,12 +45,12 @@ module ExtensionsUserinterface =
 
     ///<summary>Displays a list of items in a checkable-style list dialog box</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
     ///<returns>(string seq) of tuples containing the input string in items along with their new boolean check value</returns>
-    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string seq =
+    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def CheckListBox(items, message=None, title=None):
@@ -75,12 +75,12 @@ module ExtensionsUserinterface =
 
     ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
     ///<param name="items">(string seq) A list of string</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt of message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
     ///<returns>(string) The selected item</returns>
-    static member ComboListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
+    static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def ComboListBox(items, message=None, title=None):
@@ -99,14 +99,14 @@ module ExtensionsUserinterface =
 
     ///<summary>Display dialog prompting the user to enter a string. The
     ///  string value may span multiple lines</summary>
-    ///<param name="defaultValString">(string) Optional, Default Value: <c>null</c>
+    ///<param name="defaultValString">(string) Optional, Default Value: <c>null:string</c>
     ///A default string value.</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt message.</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title.</param>
     ///<returns>(string) Multiple lines that are separated by carriage return-linefeed combinations</returns>
-    static member EditBox([<OPT;DEF(null)>]defaultValString:string, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string =
+    static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def EditBox(default_string=None, message=None, title=None):
@@ -126,17 +126,17 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Pause for user input of an angle</summary>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Starting, or base point</param>
-    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///If specified, the reference angle is calculated
     ///  from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(int) Optional, Default Value: <c>0</c>
     ///A default angle value specified</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
-    static member GetAngle([<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:int, [<OPT;DEF(null)>]message:string) : float =
+    static member GetAngle([<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:Point3d)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:int, [<OPT;DEF(null:string)>]message:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetAngle(point=None, reference_point=None, default_angle_degrees=0, message=None):
@@ -223,16 +223,16 @@ module ExtensionsUserinterface =
     ///  2 = 3-Point. The base rectangle is created by picking three points
     ///  3 = Vertical. The base vertical rectangle is created by picking three points.
     ///  4 = Center. The base rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Optional 3D base point</param>
-    ///<param name="prompt1">(string) Optional, Default Value: <c>null</c>
+    ///<param name="prompt1">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt1 of 'optional prompts to set' (FIXME 0)</param>
-    ///<param name="prompt2">(string) Optional, Default Value: <c>null</c>
+    ///<param name="prompt2">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt2 of 'optional prompts to set' (FIXME 0)</param>
-    ///<param name="prompt3">(string) Optional, Default Value: <c>null</c>
+    ///<param name="prompt3">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt3 of 'optional prompts to set' (FIXME 0)</param>
     ///<returns>(Point3d seq) list of eight Point3d that define the corners of the box on success</returns>
-    static member GetBox([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]prompt1:string, [<OPT;DEF(null)>]prompt2:string, [<OPT;DEF(null)>]prompt3:string) : Point3d seq =
+    static member GetBox([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetBox(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
@@ -268,10 +268,10 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null</c>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null:Drawing.Color</c>
     ///Default RGB value. If omitted, the default color is black</param>
     ///<returns>(Drawing.Color) RGB tuple of three numbers on success</returns>
-    static member GetColor([<OPT;DEF(null)>]color:Drawing.Color) : Drawing.Color =
+    static member GetColor([<OPT;DEF(null:Drawing.Color)>]color:Drawing.Color) : Drawing.Color =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetColor(color=None):
@@ -320,16 +320,16 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Pauses for user input of a distance.</summary>
-    ///<param name="firstPt">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="firstPt">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///First distance point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="distance">(float) Optional, Default Value: <c>null:float</c>
     ///Default distance</param>
     ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///Prompt for the second distance point</param>
     ///<returns>(float) The distance between the two points .</returns>
-    static member GetDistance([<OPT;DEF(null)>]firstPt:Point3d, [<OPT;DEF(null)>]distance:float, [<OPT;DEF("First distance point")>]firstPtMsg:string, [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
+    static member GetDistance([<OPT;DEF(null:Point3d)>]firstPt:Point3d, [<OPT;DEF(null:float)>]distance:float, [<OPT;DEF("First distance point")>]firstPtMsg:string, [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetDistance(first_pt=None, distance=None, first_pt_msg="First distance point", second_pt_msg="Second distance point"):
@@ -378,7 +378,7 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
     ///Minimum number of edges to select.</param>
@@ -387,7 +387,7 @@ module ExtensionsUserinterface =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the duplicated edge curves.</param>
     ///<returns>(Guid seq) of selection prompts (curve id, parent id, selection point)</returns>
-    static member GetEdgeCurves([<OPT;DEF(null)>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int, [<OPT;DEF(false)>]select:bool) : Guid seq =
+    static member GetEdgeCurves([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int, [<OPT;DEF(false)>]select:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetEdgeCurves(message=None, min_count=1, max_count=0, select=False):
@@ -429,16 +429,16 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Pauses for user input of a whole number.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="number">(float) Optional, Default Value: <c>null</c>
+    ///<param name="number">(float) Optional, Default Value: <c>null:float</c>
     ///A default whole number value.</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>null</c>
+    ///<param name="minimum">(float) Optional, Default Value: <c>null:float</c>
     ///A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>null</c>
+    ///<param name="maximum">(float) Optional, Default Value: <c>null:float</c>
     ///A maximum allowable value.</param>
     ///<returns>(float) The whole number input by the user .</returns>
-    static member GetInteger([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]number:float, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
+    static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:float)>]number:float, [<OPT;DEF(null:float)>]minimum:float, [<OPT;DEF(null:float)>]maximum:float) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetInteger(message=None, number=None, minimum=None, maximum=None):
@@ -467,14 +467,14 @@ module ExtensionsUserinterface =
     ///<summary>Displays dialog box prompting the user to select a layer</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
     ///Dialog box title</param>
-    ///<param name="layer">(string) Optional, Default Value: <c>null</c>
+    ///<param name="layer">(string) Optional, Default Value: <c>null:string</c>
     ///Name of a layer to preselect. If omitted, the current layer will be preselected</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
     ///Show new button of 'Optional buttons to show on the dialog' (FIXME 0)</param>
     ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
     ///Show set current of 'Optional buttons to show on the dialog' (FIXME 0)</param>
     ///<returns>(string) name of selected layer</returns>
-    static member GetLayer([<OPT;DEF("Select Layer")>]title:string, [<OPT;DEF(null)>]layer:string, [<OPT;DEF(false)>]showNewButton:bool, [<OPT;DEF(false)>]showSetCurrent:bool) : string =
+    static member GetLayer([<OPT;DEF("Select Layer")>]title:string, [<OPT;DEF(null:string)>]layer:string, [<OPT;DEF(false)>]showNewButton:bool, [<OPT;DEF(false)>]showSetCurrent:bool) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetLayer(title="Select Layer", layer=None, show_new_button=False, show_set_current=False):
@@ -534,16 +534,16 @@ module ExtensionsUserinterface =
     ///  7  Perpendicular - Defines a line perpendicular to or from a curve
     ///  8  Tangent - Defines a line tangent from a curve.
     ///  9  Extension - Defines a line that extends from a curve.</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Optional starting point</param>
-    ///<param name="message1">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message1">(string) Optional, Default Value: <c>null:string</c>
     ///Message1 of 'optional prompts' (FIXME 0)</param>
-    ///<param name="message2">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message2">(string) Optional, Default Value: <c>null:string</c>
     ///Message2 of 'optional prompts' (FIXME 0)</param>
-    ///<param name="message3">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message3">(string) Optional, Default Value: <c>null:string</c>
     ///Message3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Line) Tuple of two points on success</returns>
-    static member GetLine([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]message3:string) : Line =
+    static member GetLine([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : Line =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetLine(mode=0, point=None, message1=None, message2=None, message3=None):
@@ -581,12 +581,12 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
-    ///<param name="defaultValLinetyp">(string) Optional, Default Value: <c>null</c>
+    ///<param name="defaultValLinetyp">(string) Optional, Default Value: <c>null:string</c>
     ///Optional. The name of the linetype to select. If omitted, the current linetype will be selected.</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///If True, the "by Layer" linetype will show. Defaults to False.</param>
     ///<returns>(string) The names of selected linetype</returns>
-    static member GetLinetype([<OPT;DEF(null)>]defaultValLinetyp:string, [<OPT;DEF(false)>]showByLayer:bool) : string =
+    static member GetLinetype([<OPT;DEF(null:string)>]defaultValLinetyp:string, [<OPT;DEF(false)>]showByLayer:bool) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetLinetype(default_linetype=None, show_by_layer=False):
@@ -699,16 +699,16 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Pauses for user input of a point.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///List of 3 numbers or Point3d identifying a starting, or base point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="distance">(float) Optional, Default Value: <c>null:float</c>
     ///Constraining distance. If distance is specified, basePoint must also be specified.</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrains the point selections to the active construction plane.</param>
     ///<returns>(Point3d) point on success</returns>
-    static member GetPoint([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : Point3d =
+    static member GetPoint([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:float)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPoint(message=None, base_point=None, distance=None, in_plane=False):
@@ -741,10 +741,10 @@ module ExtensionsUserinterface =
 
     ///<summary>Pauses for user input of a point constrainted to a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt of message</param>
     ///<returns>(Point3d) 3d point</returns>
-    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
+    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF(null:string)>]message:string) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPointOnCurve(curve_id, message=None):
@@ -771,10 +771,10 @@ module ExtensionsUserinterface =
 
     ///<summary>Pauses for user input of a point constrained to a mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
     ///<returns>(Point3d) 3d point</returns>
-    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
+    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF(null:string)>]message:string) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPointOnMesh(mesh_id, message=None):
@@ -796,10 +796,10 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a point constrained to a surface or polysurface
     ///  object</summary>
     ///<param name="surfaceId">(Guid) Identifier of the surface to get a point on</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
     ///<returns>(Point3d) 3d point</returns>
-    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF(null)>]message:string) : Point3d =
+    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF(null:string)>]message:string) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPointOnSurface(surface_id, message=None):
@@ -835,17 +835,17 @@ module ExtensionsUserinterface =
     ///Draw lines between points</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrain point selection to the active construction plane</param>
-    ///<param name="message1">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message1">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the first point</param>
-    ///<param name="message2">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message2">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the next points</param>
-    ///<param name="maxPoints">(float) Optional, Default Value: <c>null</c>
+    ///<param name="maxPoints">(float) Optional, Default Value: <c>null:float</c>
     ///Maximum number of points to pick. If not specified, an
     ///  unlimited number of points can be picked.</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///A starting or base point</param>
     ///<returns>(Point3d seq) of 3d points</returns>
-    static member GetPoints([<OPT;DEF(false)>]drawLines:bool, [<OPT;DEF(false)>]inPlane:bool, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]maxPoints:float, [<OPT;DEF(null)>]basisPoint:Point3d) : Point3d seq =
+    static member GetPoints([<OPT;DEF(false)>]drawLines:bool, [<OPT;DEF(false)>]inPlane:bool, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:float)>]maxPoints:float, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPoints(draw_lines=False, in_plane=False, message1=None, message2=None, max_points=None, base_point=None):
@@ -903,20 +903,20 @@ module ExtensionsUserinterface =
     ///  2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
     ///  4     Force close. If specified, then the returned polyline is always closed. If specified, then intMax must be 0 or >= 4.
     ///  Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False".</param>
-    ///<param name="message1">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message1">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the first point.</param>
-    ///<param name="message2">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message2">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the second point.</param>
-    ///<param name="message3">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message3">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the third point.</param>
-    ///<param name="message4">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message4">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the 'next' point.</param>
     ///<param name="min">(float) Optional, Default Value: <c>2</c>
     ///The minimum number of points to require. The default is 2.</param>
     ///<param name="max">(float) Optional, Default Value: <c>0</c>
     ///The maximum number of points to require; 0 for no limit.  The default is 0.</param>
     ///<returns>(Point3d seq) A list of 3-D points that define the polyline .</returns>
-    static member GetPolyline([<OPT;DEF(3)>]flags:int, [<OPT;DEF(null)>]message1:string, [<OPT;DEF(null)>]message2:string, [<OPT;DEF(null)>]message3:string, [<OPT;DEF(null)>]message4:string, [<OPT;DEF(2)>]min:float, [<OPT;DEF(0)>]max:float) : Point3d seq =
+    static member GetPolyline([<OPT;DEF(3)>]flags:int, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string, [<OPT;DEF(null:string)>]message4:string, [<OPT;DEF(2)>]min:float, [<OPT;DEF(0)>]max:float) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPolyline(flags=3, message1=None, message2=None, message3=None, message4=None, min=2, max=0):
@@ -955,14 +955,14 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
     ///A prompt or message.</param>
-    ///<param name="number">(float) Optional, Default Value: <c>null</c>
+    ///<param name="number">(float) Optional, Default Value: <c>null:float</c>
     ///A default number value.</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>null</c>
+    ///<param name="minimum">(float) Optional, Default Value: <c>null:float</c>
     ///A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>null</c>
+    ///<param name="maximum">(float) Optional, Default Value: <c>null:float</c>
     ///A maximum allowable value.</param>
     ///<returns>(float) The number input by the user .</returns>
-    static member GetReal([<OPT;DEF("Number")>]message:string, [<OPT;DEF(null)>]number:float, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
+    static member GetReal([<OPT;DEF("Number")>]message:string, [<OPT;DEF(null:float)>]number:float, [<OPT;DEF(null:float)>]minimum:float, [<OPT;DEF(null:float)>]maximum:float) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetReal(message="Number", number=None, minimum=None, maximum=None):
@@ -996,16 +996,16 @@ module ExtensionsUserinterface =
     ///  2 = 3Point - a rectangle is created by picking three points
     ///  3 = Vertical - a vertical rectangle is created by picking three points
     ///  4 = Center - a rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///A 3d base point</param>
-    ///<param name="prompt1">(string) Optional, Default Value: <c>null</c>
+    ///<param name="prompt1">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt1 of 'optional prompts' (FIXME 0)</param>
-    ///<param name="prompt2">(string) Optional, Default Value: <c>null</c>
+    ///<param name="prompt2">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt2 of 'optional prompts' (FIXME 0)</param>
-    ///<param name="prompt3">(string) Optional, Default Value: <c>null</c>
+    ///<param name="prompt3">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) four 3d points that define the corners of the rectangle</returns>
-    static member GetRectangle([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null)>]basisPoint:Point3d, [<OPT;DEF(null)>]prompt1:string, [<OPT;DEF(null)>]prompt2:string, [<OPT;DEF(null)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
+    static member GetRectangle([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetRectangle(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
@@ -1037,16 +1037,16 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Pauses for user input of a string value</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
-    ///<param name="defaultValString">(string) Optional, Default Value: <c>null</c>
+    ///<param name="defaultValString">(string) Optional, Default Value: <c>null:string</c>
     ///A default value</param>
-    ///<param name="strings">(string seq) Optional, Default Value: <c>null</c>
+    ///<param name="strings">(string seq) Optional, Default Value: <c>null:string seq</c>
     ///List of strings to be displayed as a click-able command options.
     ///  Note, strings cannot begin with a numeric character</param>
     ///<returns>(string) The string either input or selected by the user .
     ///  If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
-    static member GetString([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]defaultValString:string, [<OPT;DEF(null)>]strings:string seq) : string =
+    static member GetString([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string seq)>]strings:string seq) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetString(message=None, defaultString=None, strings=None):
@@ -1077,14 +1077,14 @@ module ExtensionsUserinterface =
 
     ///<summary>Display a list of items in a list box dialog.</summary>
     ///<param name="items">(string seq) A list of values to select</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt of message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
-    ///<param name="defaultVal">(string) Optional, Default Value: <c>null</c>
+    ///<param name="defaultVal">(string) Optional, Default Value: <c>null:string</c>
     ///Selected item in the list</param>
     ///<returns>(string) he selected item</returns>
-    static member ListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]defaultVal:string) : string =
+    static member ListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null:string)>]defaultVal:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def ListBox(items, message=None, title=None, default=None):
@@ -1214,12 +1214,12 @@ module ExtensionsUserinterface =
     ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
     ///<param name="items">(string seq) Items of 'list of string items and their corresponding values' (FIXME 0)</param>
     ///<param name="values">(string seq) Values of 'list of string items and their corresponding values' (FIXME 0)</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
     ///<returns>(string seq) of new values on success</returns>
-    static member PropertyListBox(items:string seq, values:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : string seq =
+    static member PropertyListBox(items:string seq, values:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def PropertyListBox(items, values, message=None, title=None):
@@ -1239,15 +1239,15 @@ module ExtensionsUserinterface =
 
     ///<summary>Displays a list of items in a multiple-selection list box dialog</summary>
     ///<param name="items">(string seq) A zero-based list of string items</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
-    ///<param name="defaultVals">(string seq) Optional, Default Value: <c>null</c>
+    ///<param name="defaultVals">(string seq) Optional, Default Value: <c>null:string seq</c>
     ///Either a string representing the pre-selected item in the list
     ///  or a list if multiple items are pre-selected</param>
     ///<returns>(string seq) containing the selected items</returns>
-    static member MultiListBox(items:string seq, [<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]defaultVals:string seq) : string seq =
+    static member MultiListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null:string seq)>]defaultVals:string seq) : string seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def MultiListBox(items, message=None, title=None, defaults=None):
@@ -1270,20 +1270,20 @@ module ExtensionsUserinterface =
 
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
     ///  Note, this function does not open the file.</summary>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title.</param>
-    ///<param name="filter">(string) Optional, Default Value: <c>null</c>
+    ///<param name="filter">(string) Optional, Default Value: <c>null:string</c>
     ///A filter string. The filter must be in the following form:
     ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
     ///  If omitted, the filter (*.*) is used.</param>
-    ///<param name="folder">(string) Optional, Default Value: <c>null</c>
+    ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
     ///A default folder.</param>
-    ///<param name="filename">(string) Optional, Default Value: <c>null</c>
+    ///<param name="filename">(string) Optional, Default Value: <c>null:string</c>
     ///A default file name</param>
-    ///<param name="extension">(string) Optional, Default Value: <c>null</c>
+    ///<param name="extension">(string) Optional, Default Value: <c>null:string</c>
     ///A default file extension</param>
     ///<returns>(string) file name is successful</returns>
-    static member OpenFileName([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string =
+    static member OpenFileName([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null:string)>]filter:string, [<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]filename:string, [<OPT;DEF(null:string)>]extension:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def OpenFileName(title=None, filter=None, folder=None, filename=None, extension=None):
@@ -1313,20 +1313,20 @@ module ExtensionsUserinterface =
 
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
     ///  Note, this function does not open the file.</summary>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title.</param>
-    ///<param name="filter">(string) Optional, Default Value: <c>null</c>
+    ///<param name="filter">(string) Optional, Default Value: <c>null:string</c>
     ///A filter string. The filter must be in the following form:
     ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
     ///  If omitted, the filter (*.*) is used.</param>
-    ///<param name="folder">(string) Optional, Default Value: <c>null</c>
+    ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
     ///A default folder.</param>
-    ///<param name="filename">(string) Optional, Default Value: <c>null</c>
+    ///<param name="filename">(string) Optional, Default Value: <c>null:string</c>
     ///A default file name</param>
-    ///<param name="extension">(string) Optional, Default Value: <c>null</c>
+    ///<param name="extension">(string) Optional, Default Value: <c>null:string</c>
     ///A default file extension</param>
     ///<returns>(string seq) of selected file names</returns>
-    static member OpenFileNames([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string seq =
+    static member OpenFileNames([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null:string)>]filter:string, [<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]filename:string, [<OPT;DEF(null:string)>]extension:string) : string seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def OpenFileNames(title=None, filter=None, folder=None, filename=None, extension=None):
@@ -1359,21 +1359,21 @@ module ExtensionsUserinterface =
     ///  anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
     ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
     ///  will create a separator</param>
-    ///<param name="modes">(float seq) Optional, Default Value: <c>null</c>
+    ///<param name="modes">(float seq) Optional, Default Value: <c>null:float seq</c>
     ///List of numbers identifying the display modes. If omitted, all
     ///  modes are enabled.
     ///    0 = menu item is enabled
     ///    1 = menu item is disabled
     ///    2 = menu item is checked
     ///    3 = menu item is disabled and checked</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///A 3D point where the menu item will appear. If omitted, the menu
     ///  will appear at the current cursor position</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null</c>
+    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///If point is specified, the view in which the point is computed.
     ///  If omitted, the active view is used</param>
     ///<returns>(float) index of the menu item picked or -1 if no menu item was picked</returns>
-    static member PopupMenu(items:string seq, [<OPT;DEF(null)>]modes:float seq, [<OPT;DEF(null)>]point:Point3d, [<OPT;DEF(null)>]view:string) : float =
+    static member PopupMenu(items:string seq, [<OPT;DEF(null:float seq)>]modes:float seq, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]view:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def PopupMenu(items, modes=None, point=None, view=None):
@@ -1409,16 +1409,16 @@ module ExtensionsUserinterface =
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///A prompt message.</param>
-    ///<param name="defaultValNumber">(float) Optional, Default Value: <c>null</c>
+    ///<param name="defaultValNumber">(float) Optional, Default Value: <c>null:float</c>
     ///A default number.</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
     ///A dialog box title.</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>null</c>
+    ///<param name="minimum">(float) Optional, Default Value: <c>null:float</c>
     ///A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>null</c>
+    ///<param name="maximum">(float) Optional, Default Value: <c>null:float</c>
     ///A maximum allowable value.</param>
     ///<returns>(float) The newly entered number on success</returns>
-    static member RealBox([<OPT;DEF("")>]message:string, [<OPT;DEF(null)>]defaultValNumber:float, [<OPT;DEF("")>]title:string, [<OPT;DEF(null)>]minimum:float, [<OPT;DEF(null)>]maximum:float) : float =
+    static member RealBox([<OPT;DEF("")>]message:string, [<OPT;DEF(null:float)>]defaultValNumber:float, [<OPT;DEF("")>]title:string, [<OPT;DEF(null:float)>]minimum:float, [<OPT;DEF(null:float)>]maximum:float) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def RealBox(message="", default_number=None, title="", minimum=None, maximum=None):
@@ -1443,20 +1443,20 @@ module ExtensionsUserinterface =
 
     ///<summary>Display a save dialog box allowing the user to enter a file name.
     ///  Note, this function does not save the file.</summary>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title.</param>
-    ///<param name="filter">(string) Optional, Default Value: <c>null</c>
+    ///<param name="filter">(string) Optional, Default Value: <c>null:string</c>
     ///A filter string. The filter must be in the following form:
     ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
     ///  If omitted, the filter (*.*) is used.</param>
-    ///<param name="folder">(string) Optional, Default Value: <c>null</c>
+    ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
     ///A default folder.</param>
-    ///<param name="filename">(string) Optional, Default Value: <c>null</c>
+    ///<param name="filename">(string) Optional, Default Value: <c>null:string</c>
     ///A default file name</param>
-    ///<param name="extension">(string) Optional, Default Value: <c>null</c>
+    ///<param name="extension">(string) Optional, Default Value: <c>null:string</c>
     ///A default file extension</param>
     ///<returns>(string) the file name is successful</returns>
-    static member SaveFileName([<OPT;DEF(null)>]title:string, [<OPT;DEF(null)>]filter:string, [<OPT;DEF(null)>]folder:string, [<OPT;DEF(null)>]filename:string, [<OPT;DEF(null)>]extension:string) : string =
+    static member SaveFileName([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null:string)>]filter:string, [<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]filename:string, [<OPT;DEF(null:string)>]extension:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def SaveFileName(title=None, filter=None, folder=None, filename=None, extension=None):
@@ -1485,14 +1485,14 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt message</param>
-    ///<param name="defaultValValue">(string) Optional, Default Value: <c>null</c>
+    ///<param name="defaultValValue">(string) Optional, Default Value: <c>null:string</c>
     ///A default string value</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
     ///<returns>(string) the newly entered string value</returns>
-    static member StringBox([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]defaultValValue:string, [<OPT;DEF(null)>]title:string) : string =
+    static member StringBox([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]defaultValValue:string, [<OPT;DEF(null:string)>]title:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def StringBox(message=None, default_value=None, title=None):
@@ -1511,12 +1511,12 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null</c>
+    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///The message title</param>
     ///<returns>(unit) in any case</returns>
-    static member TextOut([<OPT;DEF(null)>]message:string, [<OPT;DEF(null)>]title:string) : unit =
+    static member TextOut([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : unit =
         failNotImpl () // genreation temp disabled !!
     (*
     def TextOut(message=None, title=None):

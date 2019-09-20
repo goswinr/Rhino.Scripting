@@ -140,7 +140,7 @@ module ExtensionsPlane =
     ///<summary>Intersect an infinite plane and a curve object</summary>
     ///<param name="plane">(Plane) The plane to intersect.</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///The intersection tolerance. If omitted, the document's absolute tolerance is used.</param>
     ///<returns>(float * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
     ///  Element Type        Description
@@ -165,7 +165,7 @@ module ExtensionsPlane =
     ///    If the event type is Overlap (2), then the U plane parameter for curve at (n, 6).
     ///  [10]      Number      If the event type is Point (1), then the V plane parameter.
     ///    If the event type is Overlap (2), then the V plane parameter for curve at (n, 6).</returns>
-    static member PlaneCurveIntersection(plane:Plane, curve:Guid, [<OPT;DEF(null)>]tolerance:float) : float * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float =
+    static member PlaneCurveIntersection(plane:Plane, curve:Guid, [<OPT;DEF(null:float)>]tolerance:float) : float * Point3d * Point3d * Point3d * Point3d * float * float * float * float * float =
         failNotImpl () // genreation temp disabled !!
     (*
     def PlaneCurveIntersection(plane, curve, tolerance=None):
@@ -301,10 +301,10 @@ module ExtensionsPlane =
     ///<summary>Creates a plane from an origin point and a normal direction vector.</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane.</param>
     ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane.</param>
-    ///<param name="xaxis">(Vector3d) Optional, Default Value: <c>null</c>
+    ///<param name="xaxis">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
     ///Optional vector defining the plane's x-axis</param>
     ///<returns>(Plane) The plane .</returns>
-    static member PlaneFromNormal(origin:Point3d, normal:Vector3d, [<OPT;DEF(null)>]xaxis:Vector3d) : Plane =
+    static member PlaneFromNormal(origin:Point3d, normal:Vector3d, [<OPT;DEF(null:Vector3d)>]xaxis:Vector3d) : Plane =
         failNotImpl () // genreation temp disabled !!
     (*
     def PlaneFromNormal(origin, normal, xaxis=None):

@@ -427,10 +427,10 @@ module ExtensionsTransformation =
 
     ///<summary>Creates a scale transformation</summary>
     ///<param name="scale">(float*float*float) Single number, list of 3 numbers, Point3d, or Vector3d</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Center of scale. If omitted, world origin is used</param>
     ///<returns>(Transform) The 4x4 transformation matrix on success</returns>
-    static member XformScale(scale:float*float*float, [<OPT;DEF(null)>]point:Point3d) : Transform =
+    static member XformScale(scale:float*float*float, [<OPT;DEF(null:Point3d)>]point:Point3d) : Transform =
         failNotImpl () // genreation temp disabled !!
     (*
     def XformScale(scale, point=None):
@@ -459,13 +459,13 @@ module ExtensionsTransformation =
     ///  or screen coordinates to world coordinates. The resulting coordinates are represented
     ///  as a 3-D point</summary>
     ///<param name="point">(Point3d) 2D point</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null</c>
+    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///Title or identifier of a view. If omitted, the active view is used</param>
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
     ///If False, point is in client-area coordinates. If True,
     ///  point is in screen-area coordinates</param>
     ///<returns>(Point3d) on success</returns>
-    static member XformScreenToWorld(point:Point3d, [<OPT;DEF(null)>]view:string, [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
+    static member XformScreenToWorld(point:Point3d, [<OPT;DEF(null:string)>]view:string, [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def XformScreenToWorld(point, view=None, screen_coordinates=False):
@@ -564,13 +564,13 @@ module ExtensionsTransformation =
     ///  the specified view or screen coordinates. The resulting coordinates are represented
     ///  as a 2D point</summary>
     ///<param name="point">(Point3d) 3D point in world coordinates</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null</c>
+    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///Title or identifier of a view. If omitted, the active view is used</param>
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
     ///If False, the function returns the results as
     ///  client-area coordinates. If True, the result is in screen-area coordinates</param>
     ///<returns>(Point3d) 2D point on success</returns>
-    static member XformWorldToScreen(point:Point3d, [<OPT;DEF(null)>]view:string, [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
+    static member XformWorldToScreen(point:Point3d, [<OPT;DEF(null:string)>]view:string, [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def XformWorldToScreen(point, view=None, screen_coordinates=False):

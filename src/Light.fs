@@ -42,10 +42,10 @@ module ExtensionsLight =
     ///<summary>Adds a new linear light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endePoint">(Point3d) Ending point and direction of the light</param>
-    ///<param name="width">(float) Optional, Default Value: <c>null</c>
+    ///<param name="width">(float) Optional, Default Value: <c>null:float</c>
     ///Width of the light</param>
     ///<returns>(Guid) identifier of the new object</returns>
-    static member AddLinearLight(startPoint:Point3d, endePoint:Point3d, [<OPT;DEF(null)>]width:float) : Guid =
+    static member AddLinearLight(startPoint:Point3d, endePoint:Point3d, [<OPT;DEF(null:float)>]width:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddLinearLight(start_point, end_point, width=None):

@@ -314,10 +314,10 @@ module ExtensionsUtility =
 
     ///<summary>Removes duplicates from an array of numbers.</summary>
     ///<param name="numbers">(float seq) List or tuple</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded.  If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(float seq) numbers with duplicates removed .</returns>
-    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(null)>]tolerance:float) : float seq =
+    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(null:float)>]tolerance:float) : float seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def CullDuplicateNumbers(numbers, tolerance=None):
@@ -406,12 +406,12 @@ module ExtensionsUtility =
     //(FIXME) VarOutTypes
     ///<summary>Returns string from a specified section in a initialization file.</summary>
     ///<param name="filename">(string) Name of the initialization file</param>
-    ///<param name="section">(string) Optional, Default Value: <c>null</c>
+    ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section containing the entry</param>
-    ///<param name="entry">(string) Optional, Default Value: <c>null</c>
+    ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
     ///Entry whose associated string is to be returned</param>
     ///<returns>(string seq) A list containing all section names</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null)>]section:string, [<OPT;DEF(null)>]entry:string) : string seq =
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetSettings(filename, section=None, entry=None):
@@ -445,11 +445,11 @@ module ExtensionsUtility =
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="angleDegrees">(int) Angle in degrees</param>
     ///<param name="distance">(float) Distance from point</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>null</c>
+    ///<param name="plane">(Plane) Optional, Default Value: <c>null:Plane</c>
     ///Plane to base the transformation. If omitted, the world
     ///  x-y plane is used</param>
     ///<returns>(Point3d) resulting point is successful</returns>
-    static member Polar(point:Point3d, angleDegrees:int, distance:float, [<OPT;DEF(null)>]plane:Plane) : Point3d =
+    static member Polar(point:Point3d, angleDegrees:int, distance:float, [<OPT;DEF(null:Plane)>]plane:Plane) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def Polar(point, angle_degrees, distance, plane=None):
@@ -521,11 +521,11 @@ module ExtensionsUtility =
 
     ///<summary>Sorts list of points so they will be connected in a "reasonable" polyline order</summary>
     ///<param name="points">(Point3d seq) The points to sort</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Minimum distance between points. Points that fall within this tolerance
     ///  will be discarded. If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(Point3d seq) of sorted 3D points</returns>
-    static member SortPointList(points:Point3d seq, [<OPT;DEF(null)>]tolerance:float) : Point3d seq =
+    static member SortPointList(points:Point3d seq, [<OPT;DEF(null:float)>]tolerance:float) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def SortPointList(points, tolerance=None):
@@ -637,15 +637,15 @@ module ExtensionsUtility =
     ///  Alternatively, you can also pass two coordinates singularly for a
     ///  point on the XY plane, or three for a 3D point.</summary>
     ///<param name="point">('T * float * float) </param>
-    ///<param name="y">(float) Optional, Default Value: <c>null</c>
+    ///<param name="y">(float) Optional, Default Value: <c>null:float</c>
     ///Y position</param>
-    ///<param name="z">(float) Optional, Default Value: <c>null</c>
+    ///<param name="z">(float) Optional, Default Value: <c>null:float</c>
     ///Z position</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d. This can be seen as an object with three indices:
     ///  [0]  X coordinate
     ///  [1]  Y coordinate
     ///  [2]  Z coordinate.</returns>
-    static member CreatePoint(point:'T * float * float, [<OPT;DEF(null)>]y:float, [<OPT;DEF(null)>]z:float) : Point3d =
+    static member CreatePoint(point:'T * float * float, [<OPT;DEF(null:float)>]y:float, [<OPT;DEF(null:float)>]z:float) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def CreatePoint(point, y=None, z=None):
@@ -676,13 +676,13 @@ module ExtensionsUtility =
     ///  Alternatively, you can also pass two coordinates singularly for a
     ///  vector on the XY plane, or three for a 3D vector.</summary>
     ///<param name="vector">('T * float * float) </param>
-    ///<param name="y">(float) Optional, Default Value: <c>null</c>
+    ///<param name="y">(float) Optional, Default Value: <c>null:float</c>
     ///Y position</param>
-    ///<param name="z">(float) Optional, Default Value: <c>null</c>
+    ///<param name="z">(float) Optional, Default Value: <c>null:float</c>
     ///Z position</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d. This can be seen as an object with three indices:
     ///  result[0]: X component, result[1]: Y component, and result[2] Z component.</returns>
-    static member CreateVector(vector:'T * float * float, [<OPT;DEF(null)>]y:float, [<OPT;DEF(null)>]z:float) : Vector3d =
+    static member CreateVector(vector:'T * float * float, [<OPT;DEF(null:float)>]y:float, [<OPT;DEF(null:float)>]z:float) : Vector3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def CreateVector(vector, y=None, z=None):
@@ -711,12 +711,12 @@ module ExtensionsUtility =
     ///  The Z axis is in any case computed from the X and Y axes, so providing it is possible but not required.
     ///  If the conversion fails, an error is raised.</summary>
     ///<param name="planeOrOrigin">(Point3d * Vector3d * Vector3d) </param>
-    ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>null</c>
+    ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
     ///Direction of X-Axis</param>
-    ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>null</c>
+    ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
     ///Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane</returns>
-    static member CreatePlane(planeOrOrigin:Point3d * Vector3d * Vector3d, [<OPT;DEF(null)>]xAxis:Vector3d, [<OPT;DEF(null)>]yAxis:Vector3d) : Plane =
+    static member CreatePlane(planeOrOrigin:Point3d * Vector3d * Vector3d, [<OPT;DEF(null:Vector3d)>]xAxis:Vector3d, [<OPT;DEF(null:Vector3d)>]yAxis:Vector3d) : Plane =
         failNotImpl () // genreation temp disabled !!
     (*
     def CreatePlane(plane_or_origin, x_axis=None, y_axis=None):
@@ -774,14 +774,14 @@ module ExtensionsUtility =
     ///  Alternatively, you can also pass three coordinates singularly for an RGB color, or four
     ///  for an RGBA color point.</summary>
     ///<param name="color">(float*float*float) List or 3 or 4 items. Also, a single int can be passed and it will be bitwise-parsed.</param>
-    ///<param name="g">(int) Optional, Default Value: <c>null</c>
+    ///<param name="g">(int) Optional, Default Value: <c>null:int</c>
     ///Green value</param>
-    ///<param name="b">(int) Optional, Default Value: <c>null</c>
+    ///<param name="b">(int) Optional, Default Value: <c>null:int</c>
     ///Blue value</param>
-    ///<param name="a">(int) Optional, Default Value: <c>null</c>
+    ///<param name="a">(int) Optional, Default Value: <c>null:int</c>
     ///Alpha value</param>
     ///<returns>(Drawing.Color) An object that can be indexed for red, green, blu, alpha. Item[0] is red.</returns>
-    static member CreateColor(color:float*float*float, [<OPT;DEF(null)>]g:int, [<OPT;DEF(null)>]b:int, [<OPT;DEF(null)>]a:int) : Drawing.Color =
+    static member CreateColor(color:float*float*float, [<OPT;DEF(null:int)>]g:int, [<OPT;DEF(null:int)>]b:int, [<OPT;DEF(null:int)>]a:int) : Drawing.Color =
         failNotImpl () // genreation temp disabled !!
     (*
     def CreateColor(color, g=None, b=None, a=None):
@@ -811,12 +811,12 @@ module ExtensionsUtility =
     ///  In case a single number is provided, it will be translated to an increasing interval that includes
     ///  the provided input and 0. If two values are provided, they will be used instead.</summary>
     ///<param name="interval">(float * float) Or any item that can be accessed at index 0 and 1; an Interval or just the lower bound</param>
-    ///<param name="y">(float) Optional, Default Value: <c>null</c>
+    ///<param name="y">(float) Optional, Default Value: <c>null:float</c>
     ///Uper bound of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///  [0] start of interval
     ///  [1] end of interval</returns>
-    static member CreateInterval(interval:float * float, [<OPT;DEF(null)>]y:float) : Rhino.Geometry.Interval =
+    static member CreateInterval(interval:float * float, [<OPT;DEF(null:float)>]y:float) : Rhino.Geometry.Interval =
         failNotImpl () // genreation temp disabled !!
     (*
     def CreateInterval(interval, y=None):

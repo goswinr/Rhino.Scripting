@@ -141,7 +141,7 @@ module ExtensionsSelection =
 
 
     ///<summary>Prompts user to pick or select a single curve object</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for the selection of pre-selected objects.</param>
@@ -159,7 +159,7 @@ module ExtensionsSelection =
     ///  [3]  point    selection point
     ///  [4]  number   the curve parameter of the selection point
     ///  [5]  str      name of the view selection was made</returns>
-    static member GetCurveObject([<OPT;DEF(null)>]message:string, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool) : Guid * bool * int * Point3d * float * string =
+    static member GetCurveObject([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool) : Guid * bool * int * Point3d * float * string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetCurveObject(message=None, preselect=False, select=False):
@@ -216,7 +216,7 @@ module ExtensionsSelection =
 
 
     ///<summary>Prompts user to pick, or select, a single object.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
     ///<param name="filter">(float) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
@@ -227,14 +227,14 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
     ///  picked are not selected.</param>
-    ///<param name="customFilter">(obj->unit) Optional, Default Value: <c>null</c>
+    ///<param name="customFilter">(obj->unit) Optional, Default Value: <c>null:obj->unit</c>
     ///A custom filter function</param>
     ///<param name="subobjects">(bool) Optional, Default Value: <c>false</c>
     ///If True, subobjects can be selected. When this is the
     ///  case, an ObjRef is returned instead of a Guid to allow for tracking
     ///  of the subobject when passed into other functions</param>
     ///<returns>(Guid) Identifier of the picked object</returns>
-    static member GetObject([<OPT;DEF(null)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null)>]customFilter:obj->unit, [<OPT;DEF(false)>]subobjects:bool) : Guid =
+    static member GetObject([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:obj->unit)>]customFilter:obj->unit, [<OPT;DEF(false)>]subobjects:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObject(message=None, filter=0, preselect=False, select=False, custom_filter=None, subobjects=False):
@@ -300,7 +300,7 @@ module ExtensionsSelection =
 
     //(FIXME) VarOutTypes
     ///<summary>Prompts user to pick, or select a single object</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
     ///<param name="filter">(float) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
@@ -311,7 +311,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
     ///  picked are not selected.</param>
-    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null</c>
+    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
     ///List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
     ///<returns>(Guid * bool * float * Point3d * string) containing the following information
@@ -320,7 +320,7 @@ module ExtensionsSelection =
     ///  [2] selection method (see help)
     ///  [3] selection point
     ///  [4] name of the view selection was made</returns>
-    static member GetObjectEx([<OPT;DEF(null)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null)>]objects:Guid seq) : Guid * bool * float * Point3d * string =
+    static member GetObjectEx([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * float * Point3d * string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjectEx(message=None, filter=0, preselect=False, select=False, objects=None):
@@ -380,7 +380,7 @@ module ExtensionsSelection =
 
 
     ///<summary>Prompts user to pick or select one or more objects.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
     ///<param name="filter">(float) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
@@ -415,16 +415,16 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
     ///  picked are not selected.</param>
-    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null</c>
+    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
     ///List of objects that are allowed to be selected</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
     ///Minimum count of 'limits on number of objects allowed to be selected' (FIXME 0)</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of 'limits on number of objects allowed to be selected' (FIXME 0)</param>
-    ///<param name="customFilter">(string) Optional, Default Value: <c>null</c>
+    ///<param name="customFilter">(string) Optional, Default Value: <c>null:string</c>
     ///Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid seq) identifiers of the picked objects</returns>
-    static member GetObjects([<OPT;DEF(null)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null)>]objects:Guid seq, [<OPT;DEF(1)>]minimumCount:int, [<OPT;DEF(0)>]maximumCount:int, [<OPT;DEF(null)>]customFilter:string) : Guid seq =
+    static member GetObjects([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq, [<OPT;DEF(1)>]minimumCount:int, [<OPT;DEF(0)>]maximumCount:int, [<OPT;DEF(null:string)>]customFilter:string) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjects(message=None, filter=0, group=True, preselect=False, select=False, objects=None, minimum_count=1, maximum_count=0, custom_filter=None):
@@ -506,7 +506,7 @@ module ExtensionsSelection =
 
 
     ///<summary>Prompts user to pick, or select one or more objects</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
     ///<param name="filter">(float) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
@@ -521,7 +521,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, the objects that are
     ///  picked are not selected.</param>
-    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null</c>
+    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
     ///List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
     ///<returns>((Guid*bool*int*Point3d*string) seq) containing the following information
@@ -530,7 +530,7 @@ module ExtensionsSelection =
     ///  [n][2]  selection method (see help)
     ///  [n][3]  selection point
     ///  [n][4]  name of the view selection was made</returns>
-    static member GetObjectsEx([<OPT;DEF(null)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null)>]objects:Guid seq) : (Guid*bool*int*Point3d*string) seq =
+    static member GetObjectsEx([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : (Guid*bool*int*Point3d*string) seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjectsEx(message=None, filter=0, group=True, preselect=False, select=False, objects=None):
@@ -1227,7 +1227,7 @@ module ExtensionsSelection =
 
 
     ///<summary>Return identifiers of all objects that are visible in a specified view</summary>
-    ///<param name="view">(bool) Optional, Default Value: <c>null</c>
+    ///<param name="view">(bool) Optional, Default Value: <c>null:bool</c>
     ///The view to use. If omitted, the current active view is used</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the objects</param>
@@ -1236,7 +1236,7 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grip objects</param>
     ///<returns>(Guid seq) identifiers of the visible objects</returns>
-    static member VisibleObjects([<OPT;DEF(null)>]view:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid seq =
+    static member VisibleObjects([<OPT;DEF(null:bool)>]view:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def VisibleObjects(view=None, select=False, include_lights=False, include_grips=False):
@@ -1273,14 +1273,14 @@ module ExtensionsSelection =
     ///<summary>Picks objects using either a window or crossing selection</summary>
     ///<param name="corner1">(Point3d) Corner1 of 'corners of selection window' (FIXME 0)</param>
     ///<param name="corner2">(Point3d) Corner2 of 'corners of selection window' (FIXME 0)</param>
-    ///<param name="view">(bool) Optional, Default Value: <c>null</c>
+    ///<param name="view">(bool) Optional, Default Value: <c>null:bool</c>
     ///View to perform the selection in</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select picked objects</param>
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
     ///If False, then a crossing window selection is performed</param>
     ///<returns>(Guid seq) identifiers of selected objects on success</returns>
-    static member WindowPick(corner1:Point3d, corner2:Point3d, [<OPT;DEF(null)>]view:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(true)>]inWindow:bool) : Guid seq =
+    static member WindowPick(corner1:Point3d, corner2:Point3d, [<OPT;DEF(null:bool)>]view:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(true)>]inWindow:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def WindowPick(corner1, corner2, view=None, select=False, in_window=True):

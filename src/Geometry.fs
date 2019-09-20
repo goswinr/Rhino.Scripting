@@ -15,11 +15,11 @@ module ExtensionsGeometry =
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uMagnitude">(float) U magnitude of 'size of the plane' (FIXME 0)</param>
     ///<param name="vMagnitude">(float) V magnitude of 'size of the plane' (FIXME 0)</param>
-    ///<param name="views">(string seq) Optional, Default Value: <c>null</c>
+    ///<param name="views">(string seq) Optional, Default Value: <c>null:string seq</c>
     ///Titles or ids the the view(s) to clip. If omitted, the active
     ///  view is used.</param>
     ///<returns>(Guid) object identifier on success</returns>
-    static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null)>]views:string seq) : Guid =
+    static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddClippingPlane(plane, u_magnitude, v_magnitude, views=None):
@@ -85,17 +85,39 @@ module ExtensionsGeometry =
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
-  
+    (*
+    def AddPictureFrame(plane, filename, width=0.0, height=0.0, self_illumination=True, embed=False, use_alpha=False, make_mesh=False):
+        '''Creates a picture frame and adds it to the document.
+      Parameters:
+        plane (plane): The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.
+        filename (str): The path to a bitmap or image file.
+        width (number, optional): If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.
+        height (number, optional):  If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.
+        self_illumination (bool, optional): If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow.
+        embed (bool, optional): If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained.
+        use_alpha (bool, optional): If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot.
+        make_mesh (bool, optional): If True, the function will make a PictureFrame object from a mesh rather than a plane surface.
+      Returns:
+        guid: object identifier on success
+        None: on failure
+      '''
+      plane = rhutil.coerceplane(plane, True)
+      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception('\"{0}\" does not exist or is not a file name'.format(filename))
+      rc = scriptcontext.doc.Objects.AddPictureFrame(plane, filename, make_mesh, width, height, self_illumination, embed) 
+      if rc==System.Guid.Empty: raise Exception("unable to add picture frame to document")
+      scriptcontext.doc.Views.Redraw()
+      return rc
+    *)
 
 
     ///<summary>Adds point object to the document.</summary>
     ///<param name="pointOrX">(float) A point3d or X location of point to add</param>
-    ///<param name="y">(float) Optional, Default Value: <c>null</c>
+    ///<param name="y">(float) Optional, Default Value: <c>null:float</c>
     ///Y location of point to add</param>
-    ///<param name="z">(float) Optional, Default Value: <c>null</c>
+    ///<param name="z">(float) Optional, Default Value: <c>null:float</c>
     ///Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
-    static member AddPoint(pointOrX:float, [<OPT;DEF(null)>]y:float, [<OPT;DEF(null)>]z:float) : Guid =
+    static member AddPoint(pointOrX:float, [<OPT;DEF(null:float)>]y:float, [<OPT;DEF(null:float)>]z:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddPoint(pointOrX, y=None, z=None):
@@ -118,10 +140,10 @@ module ExtensionsGeometry =
 
     ///<summary>Adds point cloud object to the document</summary>
     ///<param name="points">(Point3d seq) List of values where every multiple of three represents a point</param>
-    ///<param name="colors">(Drawing.Color seq) Optional, Default Value: <c>null</c>
+    ///<param name="colors">(Drawing.Color seq) Optional, Default Value: <c>null:Drawing.Color seq</c>
     ///List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud on success</returns>
-    static member AddPointCloud(points:Point3d seq, [<OPT;DEF(null)>]colors:Drawing.Color seq) : Guid =
+    static member AddPointCloud(points:Point3d seq, [<OPT;DEF(null:Drawing.Color seq)>]colors:Drawing.Color seq) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddPointCloud(points, colors=None):
@@ -172,7 +194,7 @@ module ExtensionsGeometry =
     ///  The origin of the plane will be the origin point of the text</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
     ///The text height</param>
-    ///<param name="font">(string) Optional, Default Value: <c>null</c>
+    ///<param name="font">(string) Optional, Default Value: <c>null:string</c>
     ///The text font</param>
     ///<param name="fontStyle">(int) Optional, Default Value: <c>0</c>
     ///Any of the following flags
@@ -180,7 +202,7 @@ module ExtensionsGeometry =
     ///  1 = bold
     ///  2 = italic
     ///  3 = bold and italic</param>
-    ///<param name="justification">(float) Optional, Default Value: <c>null</c>
+    ///<param name="justification">(float) Optional, Default Value: <c>null:float</c>
     ///Text justification. Values may be added to create combinations.
     ///  1 = Left
     ///  2 = Center (horizontal)
@@ -189,7 +211,7 @@ module ExtensionsGeometry =
     ///  131072 = Middle (vertical)
     ///  262144 = Top</param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
-    static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(null)>]justification:float) : Guid =
+    static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null:string)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(null:float)>]justification:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddText(text, point_or_plane, height=1.0, font=None, font_style=0, justification=None):
@@ -325,7 +347,7 @@ module ExtensionsGeometry =
     ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
     ///  bounding box of an object or of several objects</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
-    ///<param name="viewOrPlane">(string) Optional, Default Value: <c>null</c>
+    ///<param name="viewOrPlane">(string) Optional, Default Value: <c>null:string</c>
     ///Title or id of the view that contains the
     ///  construction plane to which the bounding box should be aligned -or-
     ///  user defined plane. If omitted, a world axis-aligned bounding box
@@ -336,7 +358,7 @@ module ExtensionsGeometry =
     ///  world axis-aligned bounding boxes.</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) Eight 3D points that define the bounding box.
     ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq, [<OPT;DEF(null)>]viewOrPlane:string, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d =
+    static member BoundingBox(objects:Guid seq, [<OPT;DEF(null:string)>]viewOrPlane:string, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def BoundingBox(objects, view_or_plane=None, in_world_coords=True):

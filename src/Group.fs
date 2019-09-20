@@ -11,11 +11,11 @@ module ExtensionsGroup =
   type RhinoScriptSyntax with
     
     ///<summary>Adds a new empty group to the document</summary>
-    ///<param name="groupName">(string) Optional, Default Value: <c>null</c>
+    ///<param name="groupName">(string) Optional, Default Value: <c>null:string</c>
     ///Name of the new group. If omitted, rhino automatically
     ///  generates the group name</param>
     ///<returns>(string) name of the new group</returns>
-    static member AddGroup([<OPT;DEF(null)>]groupName:string) : string =
+    static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddGroup(group_name=None):

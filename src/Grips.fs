@@ -38,7 +38,7 @@ module ExtensionsGrips =
 
 
     ///<summary>Prompts the user to pick a single object grip</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for selection of pre-selected object grip.</param>
@@ -48,7 +48,7 @@ module ExtensionsGrips =
     ///  [0] = identifier of the object that owns the grip
     ///  [1] = index value of the grip
     ///  [2] = location of the grip</returns>
-    static member GetObjectGrip([<OPT;DEF(null)>]message:string, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool) : Guid * float * Point3d =
+    static member GetObjectGrip([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool) : Guid * float * Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjectGrip(message=None, preselect=False, select=False):
@@ -77,7 +77,7 @@ module ExtensionsGrips =
 
 
     ///<summary>Prompts user to pick one or more object grips from one or more objects.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null</c>
+    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for selection of pre-selected object grips</param>
@@ -87,7 +87,7 @@ module ExtensionsGrips =
     ///  [n][0] = identifier of the object that owns the grip
     ///  [n][1] = index value of the grip
     ///  [n][2] = location of the grip</returns>
-    static member GetObjectGrips([<OPT;DEF(null)>]message:string, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool) : Guid seq =
+    static member GetObjectGrips([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjectGrips(message=None, preselect=False, select=False):

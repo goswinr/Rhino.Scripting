@@ -12,10 +12,10 @@ module ExtensionsObject =
     
     ///<summary>Copies object from one location to another, or in-place.</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Default Value: <c>null</c>
+    ///<param name="translation">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
     ///Translation vector to apply</param>
     ///<returns>(Guid) id for the copy</returns>
-    static member CopyObject(objectId:Guid, [<OPT;DEF(null)>]translation:Vector3d) : Guid =
+    static member CopyObject(objectId:Guid, [<OPT;DEF(null:Vector3d)>]translation:Vector3d) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def CopyObject(object_id, translation=None):
@@ -34,11 +34,11 @@ module ExtensionsObject =
 
     ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Default Value: <c>null</c>
+    ///<param name="translation">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
     ///List of three numbers or Vector3d representing
     ///  translation vector to apply to copied set</param>
     ///<returns>(Guid seq) identifiers for the copies</returns>
-    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(null)>]translation:Vector3d) : Guid seq =
+    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(null:Vector3d)>]translation:Vector3d) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def CopyObjects(object_ids, translation=None):
@@ -258,14 +258,14 @@ module ExtensionsObject =
     //(FIXME) VarOutTypes
     ///<summary>Verifies that an object is a member of a group</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="groupName">(string) Optional, Default Value: <c>null</c>
+    ///<param name="groupName">(string) Optional, Default Value: <c>null:string</c>
     ///The name of a group. If omitted, the function
     ///  verifies that the object is a member of any group</param>
     ///<returns>(bool) True if the object is a member of the specified group. If a group_name
     ///  was not specified, the object is a member of some group.
     ///  False if the object  is not a member of the specified group.
     ///  If a group_name was not specified, the object is not a member of any group</returns>
-    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null)>]groupName:string) : bool =
+    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsObjectInGroup(object_id, group_name=None):
@@ -443,10 +443,10 @@ module ExtensionsObject =
 
     ///<summary>Verifies an object is visible in a view</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null</c>
+    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///He title of the view.  If omitted, the current active view is used.</param>
     ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
-    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null)>]view:string) : bool =
+    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsVisibleInView(object_id, view=None):
@@ -511,11 +511,11 @@ module ExtensionsObject =
 
     ///<summary>Matches, or copies the attributes of a source object to a target object</summary>
     ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
-    ///<param name="sourceId">(Guid) Optional, Default Value: <c>null</c>
+    ///<param name="sourceId">(Guid) Optional, Default Value: <c>null:Guid</c>
     ///Identifier of object to copy attributes from. If None,
     ///  then the default attributes are copied to the targetIds</param>
     ///<returns>(float) number of objects modified</returns>
-    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(null)>]sourceId:Guid) : float =
+    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(null:Guid)>]sourceId:Guid) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def MatchObjectAttributes(target_ids, source_id=None):
@@ -2418,13 +2418,13 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
     ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Plane) Optional, Default Value: <c>null</c>
+    ///<param name="axis">(Plane) Optional, Default Value: <c>null:Plane</c>
     ///Axis of rotation, If omitted, the Z axis of the active
     ///  construction plane is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object</param>
     ///<returns>(Guid) Identifier of the rotated object</returns>
-    static member RotateObject(objectId:Guid, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(null)>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid =
+    static member RotateObject(objectId:Guid, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(null:Plane)>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotateObject(object_id, center_point, rotation_angle, axis=None, copy=False):
@@ -2450,13 +2450,13 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
     ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Plane) Optional, Default Value: <c>null</c>
+    ///<param name="axis">(Plane) Optional, Default Value: <c>null:Plane</c>
     ///Axis of rotation, If omitted, the Z axis of the active
     ///  construction plane is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object</param>
     ///<returns>(Guid seq) identifiers of the rotated objects</returns>
-    static member RotateObjects(objectIds:Guid seq, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(null)>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid seq =
+    static member RotateObjects(objectIds:Guid seq, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(null:Plane)>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotateObjects( object_ids, center_point, rotation_angle, axis=None, copy=False):

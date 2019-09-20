@@ -12,9 +12,9 @@ module ExtensionsDocument =
     
     ///<summary>Create a bitmap preview image of the current model</summary>
     ///<param name="filename">(string) Name of the bitmap file to create</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null</c>
+    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///Title of the view. If omitted, the active view is used</param>
-    ///<param name="size">(float) Optional, Default Value: <c>null</c>
+    ///<param name="size">(float) Optional, Default Value: <c>null:float</c>
     ///Two integers that specify width and height of the bitmap</param>
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
     ///Bitmap creation flags. Can be the combination of:
@@ -25,7 +25,7 @@ module ExtensionsDocument =
     ///If True then a wireframe preview image. If False,
     ///  a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member CreatePreviewImage(filename:string, [<OPT;DEF(null)>]view:string, [<OPT;DEF(null)>]size:float, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
+    static member CreatePreviewImage(filename:string, [<OPT;DEF(null:string)>]view:string, [<OPT;DEF(null:float)>]size:float, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def CreatePreviewImage(filename, view=None, size=None, flags=0, wireframe=False):
@@ -168,11 +168,11 @@ module ExtensionsDocument =
     ///<param name="filename">(string) Name of the bitmap file to create. The extension of
     ///  the filename controls the format of the bitmap file created.
     ///  (.bmp, .tga, .jpg, .jpeg, .pcx, .png, .tif, .tiff)</param>
-    ///<param name="modelname">(string) Optional, Default Value: <c>null</c>
+    ///<param name="modelname">(string) Optional, Default Value: <c>null:string</c>
     ///The model (.3dm) from which to extract the
     ///  preview image. If omitted, the currently loaded model is used.</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member ExtractPreviewImage(filename:string, [<OPT;DEF(null)>]modelname:string) : bool =
+    static member ExtractPreviewImage(filename:string, [<OPT;DEF(null:string)>]modelname:string) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def ExtractPreviewImage(filename, modelname=None):
@@ -1320,11 +1320,11 @@ module ExtensionsDocument =
     ///    23 - Astronomical (1.4959787e+11)
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</param>
-    ///<param name="fromSystem">(int) Optional, Default Value: <c>null</c>
+    ///<param name="fromSystem">(int) Optional, Default Value: <c>null:int</c>
     ///The unit system to convert from (see above). If omitted,
     ///  the document's current unit system is used</param>
     ///<returns>(float) scale factor for changing between unit systems</returns>
-    static member UnitScale(toSystem:int, [<OPT;DEF(null)>]fromSystem:int) : float =
+    static member UnitScale(toSystem:int, [<OPT;DEF(null:int)>]fromSystem:int) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def UnitScale(to_system, from_system=None):

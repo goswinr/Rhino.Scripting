@@ -6,6 +6,8 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.ActiceDocument
 //open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
+
 [<AutoOpen>]
 module ExtensionsDimension =
   type RhinoScriptSyntax with
@@ -13,13 +15,33 @@ module ExtensionsDimension =
     ///<summary>Adds an aligned dimension object to the document. An aligned dimension
     ///  is a linear dimension lined up with two points</summary>
     ///<param name="startPoint">(Point3d) First point of dimension</param>
-    ///<param name="endePoint">(Point3d) Second point of dimension</param>
+    ///<param name="endPoint">(Point3d) Second point of dimension</param>
     ///<param name="pointOnDimensionLine">(Point3d) Location point of dimension line</param>
-    ///<param name="style">(string) Optional, Default Value: <c>null</c>
+    ///<param name="style">(string) Optional, Default Value: <c>null:string</c>
     ///Name of dimension style</param>
     ///<returns>(Guid) identifier of new dimension on success</returns>
-    static member AddAlignedDimension(startPoint:Point3d, endePoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF(null)>]style:string) : Guid =
-        failNotImpl () // genreation temp disabled !!
+    static member AddAlignedDimension(startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF(null:string)>]style:string) : Guid =
+        let mutable start = startPoint
+        let mutable ende = endPoint
+        let mutable onpoint = pointOnDimensionLine
+        let mutable plane = Geometry.Plane(start, ende, onpoint)
+        let mutable success, s, t = plane.ClosestParameter(start)
+        let start2 = Point2d(s,t)
+        let success, s, t = plane.ClosestParameter(ende)
+        let ende2 = Point2d(s,t)
+        let success, s, t = plane.ClosestParameter(onpoint)
+        let onpoint2 = Point2d(s,t)
+        let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
+        if isNull ldim then  failwithf "addAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
+        ldim.Aligned <- true
+        if style <> "" then
+            let ds = Doc.DimStyles.FindName(style)
+            if isNull ds then  failwithf "addAlignedDimension, style not found, failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
+            ldim.DimensionStyleIndex <- ds.Index
+        let rc = Doc.Objects.AddLinearDimension(ldim)
+        if rc = Guid.Empty then  failwithf "addAlignedDimension Unable to add dimension to document.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
+        Doc.Views.Redraw()
+        rc
     (*
     def AddAlignedDimension(start_point, end_point, point_on_dimension_line, style=None):
         '''Adds an aligned dimension object to the document. An aligned dimension
@@ -33,9 +55,9 @@ module ExtensionsDimension =
           guid: identifier of new dimension on success
           None: on error
         '''
-        start = rhutil.coerce3dpoint(start_point, True)
-        end = rhutil.coerce3dpoint(end_point, True)
-        onpoint = rhutil.coerce3dpoint(point_on_dimension_line, True)
+        start = rhutil.Coerce3dpoint(start_point, True)
+        end = rhutil.Coerce3dpoint(end_point, True)
+        onpoint = rhutil.Coerce3dpoint(point_on_dimension_line, True)
         plane = Rhino.Geometry.Plane(start, end, onpoint)
         success, s, t = plane.ClosestParameter(start)
         start = Rhino.Geometry.Point2d(s,t)
@@ -59,11 +81,14 @@ module ExtensionsDimension =
 
     ///<summary>Adds a new dimension style to the document. The new dimension style will
     ///  be initialized with the current default dimension style properties.</summary>
-    ///<param name="dimstyleName">(string) Optional, Default Value: <c>null</c>
+    ///<param name="dimstyleName">(string) Optional, Default Value: <c>null:string</c>
     ///Name of the new dimension style. If omitted, Rhino automatically generates the dimension style name</param>
     ///<returns>(string) name of the new dimension style on success</returns>
-    static member AddDimStyle([<OPT;DEF(null)>]dimstyleName:string) : string =
-        failNotImpl () // genreation temp disabled !!
+    static member AddDimStyle([<OPT;DEF(null:string)>]dimstyleName:string) : string =
+        let index = Doc.DimStyles.Add(dimstyleName)
+        if index<0 then  failwithf "addDimStyle failed.  dimstyleName:'%A'" dimstyleName
+        let ds = Doc.DimStyles.[index]
+        ds.Name
     (*
     def AddDimStyle(dimstyle_name=None):
         '''Adds a new dimension style to the document. The new dimension style will
@@ -84,15 +109,15 @@ module ExtensionsDimension =
     ///<summary>Adds a leader to the document. Leader objects are planar.
     ///  The 3D points passed to this function should be co-planar</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
-    ///<param name="viewOrPlane">(string) Optional, Default Value: <c>null</c>
+    ///<param name="viewOrPlane">(string) Optional, Default Value: <c>null:string</c>
     ///If a view name is specified, points will be constrained
     ///  to the view's construction plane. If a view is not specified, points
     ///  will be constrained to a plane fit through the list of points</param>
-    ///<param name="text">(string) Optional, Default Value: <c>null</c>
+    ///<param name="text">(string) Optional, Default Value: <c>null:string</c>
     ///Leader's text string</param>
     ///<returns>(Guid) identifier of the new leader on success</returns>
-    static member AddLeader(points:Point3d seq, [<OPT;DEF(null)>]viewOrPlane:string, [<OPT;DEF(null)>]text:string) : Guid =
-        failNotImpl () // genreation temp disabled !!
+    static member AddLeader(points:Point3d seq, [<OPT;DEF(null:string)>]viewOrPlane:string, [<OPT;DEF(null:string)>]text:string) : Guid =
+        failNotImpl () // not done in 2018
     (*
     def AddLeader(points, view_or_plane=None, text=None):
         '''Adds a leader to the document. Leader objects are planar.
@@ -107,7 +132,7 @@ module ExtensionsDimension =
           guid: identifier of the new leader on success
           None: on error
         '''
-        points = rhutil.coerce3dpointlist(points)
+        points = rhutil.Coerce3dpointlist(points)
         if points is None or len(points)<2: raise ValueError("points must have at least two items")
         rc = System.Guid.Empty
         view = None
@@ -120,7 +145,7 @@ module ExtensionsDimension =
             else:
                 rc = scriptcontext.doc.Objects.AddLeader(text, points)
         else:
-            plane = rhutil.coerceplane(view_or_plane)
+            plane = rhutil.Coerceplane(view_or_plane)
             if not plane:
                 view = __viewhelper(view_or_plane)
                 plane = view.ActiveViewport.ConstructionPlane()
@@ -143,11 +168,28 @@ module ExtensionsDimension =
     ///<summary>Adds a linear dimension to the document</summary>
     ///<param name="plane">(Plane) The plane on which the dimension will lie.</param>
     ///<param name="startPoint">(Point3d) The origin, or first point of the dimension.</param>
-    ///<param name="endePoint">(Point3d) The offset, or second point of the dimension.</param>
+    ///<param name="endPoint">(Point3d) The offset, or second point of the dimension.</param>
     ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line.</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
-    static member AddLinearDimension(plane:Plane, startPoint:Point3d, endePoint:Point3d, pointOnDimensionLine:Point3d) : Guid =
-        failNotImpl () // genreation temp disabled !!
+    static member AddLinearDimension(plane:Plane, startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d) : Guid =
+        let mutable plane0 = if plane = Plane.Unset then Doc.Views.ActiveView.ActiveViewport.ConstructionPlane() else Plane(plane) // copy
+        plane0.Origin <- startPoint // needed ?
+        // Calculate 2d dimension points
+        let success, s, t = plane0.ClosestParameter(startPoint)
+        let start = Point2d(s,t)
+        let success, s, t = plane0.ClosestParameter(endPoint)
+        let ende = Point2d(s,t)
+        let success, s, t = plane0.ClosestParameter(pointOnDimensionLine)
+        let onpoint = Point2d(s,t)
+        // Add the dimension
+        let ldim = new LinearDimension(plane0, start, ende, onpoint)
+        if isNull ldim then
+            failwithf "addLinearDimension failed.  plane:'%A' startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" plane startPoint endPoint pointOnDimensionLine
+        let rc = Doc.Objects.AddLinearDimension(ldim)
+        if rc=Guid.Empty then
+            failwithf "addLinearDimension Unable to add dimension to document.  plane:'%A' startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" plane startPoint endPoint pointOnDimensionLine
+        Doc.Views.Redraw()
+        rc
     (*
     def AddLinearDimension(plane, start_point, end_point, point_on_dimension_line):
         '''Adds a linear dimension to the document
@@ -163,11 +205,11 @@ module ExtensionsDimension =
         if not plane: 
           plane = ViewCPlane()
         else:
-          plane = rhutil.coerceplane(plane, True)
-        start = rhutil.coerce3dpoint(start_point, True)
+          plane = rhutil.Coerceplane(plane, True)
+        start = rhutil.Coerce3dpoint(start_point, True)
         plane.Origin = start
-        end = rhutil.coerce3dpoint(end_point, True)
-        onpoint = rhutil.coerce3dpoint(point_on_dimension_line, True)
+        end = rhutil.Coerce3dpoint(end_point, True)
+        onpoint = rhutil.Coerce3dpoint(point_on_dimension_line, True)
         # Calculate 2d dimension points
         success, s, t = plane.ClosestParameter(start)
         start = Rhino.Geometry.Point2d(s,t)
@@ -188,7 +230,7 @@ module ExtensionsDimension =
     ///<summary>Returns the current default dimension style</summary>
     ///<returns>(string) Name of the current dimension style</returns>
     static member CurrentDimStyle() : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        Doc.DimStyles.CurrentDimensionStyle.Name
     (*
     def CurrentDimStyle(dimstyle_name=None):
         '''Returns or changes the current default dimension style
@@ -211,7 +253,11 @@ module ExtensionsDimension =
     ///<param name="dimstyleName">(string)Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing</returns>
     static member CurrentDimStyle(dimstyleName:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimstyleName,true)
+        if notNull ds  then  failwithf "setCurrentDimStyle failed.  dimstyleName:'%A'" dimstyleName
+        if not <| Doc.DimStyles.SetCurrentDimensionStyleIndex(ds.Index, false) then
+            failwithf "setCurrentDimStyle failed.  dimstyleName:'%A'" dimstyleName
+        dimstyleName
     (*
     def CurrentDimStyle(dimstyle_name=None):
         '''Returns or changes the current default dimension style
@@ -236,7 +282,12 @@ module ExtensionsDimension =
     ///<param name="dimstyleName">(string) The name of an unreferenced dimension style</param>
     ///<returns>(string) The name of the deleted dimension style</returns>
     static member DeleteDimStyle(dimstyleName:string) : string =
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyleName,true)
+        if isNull ds then
+            failwithf "deleteDimStyle failed. dimStyleName:'%A'" dimStyleName
+        let ok = Doc.DimStyles.DeleteDimensionStyle(ds.Index, true)
+        if not ok then
+            failwithf "deleteDimStyle failed. dimStyleName:' %A '" dimStyleName
     (*
     def DeleteDimStyle(dimstyle_name):
         '''Removes an existing dimension style from the document. The dimension style
@@ -258,7 +309,13 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The object's current dimension style name</returns>
     static member DimensionStyle(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+        let annotation = annotationObject.Geometry:?> AnnotationBase
+        let ds = Doc.DimStyles.[annotation.Index]
+        // rh6 : let ds = annotationObject.AnnotationGeometry.ParentDimensionStyle
+        ds.Name
+        // this is how Rhino Python is doing it :
+        // let ds:DocObjects.DimensionStyle = annotationObject?DimensionStyle //TODO verify Duck typing works ok
     (*
     def DimensionStyle(object_id, dimstyle_name=None):
         '''Returns or modifies the dimension style of a dimension object
@@ -270,7 +327,7 @@ module ExtensionsDimension =
           str: if dimstyle_name is specified, the object's previous dimension style name
           None: on error
         '''
-        annotation_object = __coerceannotation(object_id)
+        annotation_object = __Coerceannotation(object_id)
         ds = annotation_object.AnnotationGeometry.ParentDimensionStyle
         rc = ds.Name
         if dimstyle_name:
@@ -287,7 +344,13 @@ module ExtensionsDimension =
     ///<param name="dimstyleName">(string)The name of an existing dimension style</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimensionStyle(objectId:Guid, dimstyleName:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+        let ds =  Doc.DimStyles.Find(dimstyleName,true)
+        if isNull ds then  failwithf "setDimensionStyle failed.  objectId:'%A' dimstyleName:'%A'" objectId dimstyleName
+        let mutable annotation = annotationObject.Geometry:?> AnnotationBase
+        annotation.Index <- ds.Index
+        annotationObject.CommitChanges() |>ignore // TODO verivy this works ok
+        dimstyleName
     (*
     def DimensionStyle(object_id, dimstyle_name=None):
         '''Returns or modifies the dimension style of a dimension object
@@ -299,7 +362,7 @@ module ExtensionsDimension =
           str: if dimstyle_name is specified, the object's previous dimension style name
           None: on error
         '''
-        annotation_object = __coerceannotation(object_id)
+        annotation_object = __Coerceannotation(object_id)
         ds = annotation_object.AnnotationGeometry.ParentDimensionStyle
         rc = ds.Name
         if dimstyle_name:
@@ -316,7 +379,8 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) the text displayed by a dimension object</returns>
     static member DimensionText(objectId:Guid) : string =
-        failNotImpl () // genreation temp disabled !!
+        let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+        annotationObject.DisplayText
     (*
     def DimensionText(object_id):
         '''Returns the text displayed by a dimension object
@@ -325,7 +389,7 @@ module ExtensionsDimension =
         Returns:
           str: the text displayed by a dimension object
         '''
-        annotation_object = __coerceannotation(object_id)
+        annotation_object = __Coerceannotation(object_id)
         return annotation_object.DisplayText
     *)
 
@@ -335,7 +399,9 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The current usertext string</returns>
     static member DimensionUserText(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+        let geo = annotationObject.Geometry :?> AnnotationBase
+        geo.Text
     (*
     def DimensionUserText(object_id, usertext=None):
         '''Returns or modifies the user text string of a dimension object. The user
@@ -347,7 +413,7 @@ module ExtensionsDimension =
           str: if usertext is not specified, the current usertext string
           str: if usertext is specified, the previous usertext string
         '''
-        annotation_object = __coerceannotation(object_id)
+        annotation_object = __Coerceannotation(object_id)
         rc = annotation_object.Geometry.Text
         if usertext is not None:
             annotation_object.Geometry.Text = usertext
@@ -362,7 +428,12 @@ module ExtensionsDimension =
     ///<param name="usertext">(string)The new user text string value</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimensionUserText(objectId:Guid, usertext:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+        let geo = annotationObject.Geometry :?> AnnotationBase
+        geo.Text <- usertext
+        annotationObject.CommitChanges() |>ignore
+        Doc.Views.Redraw()
+        objectId
     (*
     def DimensionUserText(object_id, usertext=None):
         '''Returns or modifies the user text string of a dimension object. The user
@@ -374,7 +445,7 @@ module ExtensionsDimension =
           str: if usertext is not specified, the current usertext string
           str: if usertext is specified, the previous usertext string
         '''
-        annotation_object = __coerceannotation(object_id)
+        annotation_object = __Coerceannotation(object_id)
         rc = annotation_object.Geometry.Text
         if usertext is not None:
             annotation_object.Geometry.Text = usertext
@@ -388,7 +459,9 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(float) numeric value of the dimension</returns>
     static member DimensionValue(objectId:Guid) : float =
-        failNotImpl () // genreation temp disabled !!
+        let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+        let geo = annotationObject.Geometry :?> AnnotationBase
+        geo.NumericValue
     (*
     def DimensionValue(object_id):
         '''Returns the value of a dimension object
@@ -397,7 +470,7 @@ module ExtensionsDimension =
         Returns:
           number: numeric value of the dimension if successful
         '''
-        annotation_object = __coerceannotation(object_id)
+        annotation_object = __Coerceannotation(object_id)
         return annotation_object.Geometry.NumericValue
     *)
 
@@ -406,7 +479,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current angle precision</returns>
     static member DimStyleAnglePrecision(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleAnglePrecision failed.  dimStyle:'%A'" dimStyle
+        ds.AngleResolution
     (*
     def DimStyleAnglePrecision(dimstyle, precision=None):
         '''Returns or changes the angle display precision of a dimension style
@@ -434,7 +509,14 @@ module ExtensionsDimension =
     ///  precision is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleAnglePrecision(dimstyle:string, precision:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleAnglePrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+        let rc = ds.AngleResolution
+        if precision >= 0 then
+            ds.AngleResolution <- precision
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleAnglePrecision(dimstyle, precision=None):
         '''Returns or changes the angle display precision of a dimension style
@@ -461,7 +543,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current arrow size</returns>
     static member DimStyleArrowSize(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleArrowSize failed.  dimStyle:'%A'" dimStyle
+        ds.ArrowLength
     (*
     def DimStyleArrowSize(dimstyle, size=None):
         '''Returns or changes the arrow size of a dimension style
@@ -488,7 +572,16 @@ module ExtensionsDimension =
     ///<param name="size">(int)The new arrow size. If omitted, the current arrow size is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleArrowSize(dimstyle:string, size:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
+        let rc = ds.ArrowLength
+        if size > 0.0 then
+            ds.ArrowLength <- size
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        else
+            failwithf "setDimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
+        dimStyle
     (*
     def DimStyleArrowSize(dimstyle, size=None):
         '''Returns or changes the arrow size of a dimension style
@@ -514,7 +607,7 @@ module ExtensionsDimension =
     ///<summary>Returns the number of dimension styles in the document</summary>
     ///<returns>(int) the number of dimension styles in the document</returns>
     static member DimStyleCount() : int =
-        failNotImpl () // genreation temp disabled !!
+        Doc.DimStyles.Count
     (*
     def DimStyleCount():
         '''Returns the number of dimension styles in the document
@@ -529,7 +622,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current extension line extension</returns>
     static member DimStyleExtension(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleExtension failed.  dimStyle:'%A'" dimStyle
+        ds.ExtensionLineExtension
     (*
     def DimStyleExtension(dimstyle, extension=None):
         '''Returns or changes the extension line extension of a dimension style
@@ -556,7 +651,16 @@ module ExtensionsDimension =
     ///<param name="extension">(int)The new extension line extension</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleExtension(dimstyle:string, extension:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
+        let rc = ds.ExtensionLineExtension
+        if extension > 0.0 then
+            ds.ExtensionLineExtension <- extension
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        else
+            failwithf "setDimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
+        dimStyle
     (*
     def DimStyleExtension(dimstyle, extension=None):
         '''Returns or changes the extension line extension of a dimension style
@@ -583,7 +687,10 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(string) The current font</returns>
     static member DimStyleFont(dimstyle:string) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleFont failed.  dimStyle:'%A'" dimStyle
+        let i = ds.FontIndex
+        Doc.Fonts.[i].FaceName
     (*
     def DimStyleFont(dimstyle, font=None):
         '''Returns or changes the font used by a dimension style
@@ -611,7 +718,13 @@ module ExtensionsDimension =
     ///<param name="font">(string)The new font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleFont(dimstyle:string, font:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
+        let newindex = Doc.Fonts.FindOrCreate(font, false, false)
+        ds.FontIndex <- newindex
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleFont(dimstyle, font=None):
         '''Returns or changes the font used by a dimension style
@@ -639,7 +752,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current leader arrow size</returns>
     static member DimStyleLeaderArrowSize(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleLeaderArrowSize failed.  dimStyle:'%A'" dimStyle
+        ds.LeaderArrowLength
     (*
     def DimStyleLeaderArrowSize(dimstyle, size=None):
         '''Returns or changes the leader arrow size of a dimension style
@@ -666,7 +781,13 @@ module ExtensionsDimension =
     ///<param name="size">(int)The new leader arrow size</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleLeaderArrowSize(dimstyle:string, size:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleLeaderArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
+        if size > 0.0 then
+            ds.LeaderArrowLength <- size
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleLeaderArrowSize(dimstyle, size=None):
         '''Returns or changes the leader arrow size of a dimension style
@@ -694,7 +815,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) if factor is not defined, the current length factor</returns>
     static member DimStyleLengthFactor(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleLengthFactor failed.  dimStyle:'%A'" dimStyle
+        ds.LengthFactor
     (*
     def DimStyleLengthFactor(dimstyle, factor=None):
         '''Returns or changes the length factor of a dimension style. Length factor
@@ -723,7 +846,12 @@ module ExtensionsDimension =
     ///<param name="factor">(int)The new length factor</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleLengthFactor(dimstyle:string, factor:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleLengthFactor failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
+        ds.LengthFactor <- factor
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleLengthFactor(dimstyle, factor=None):
         '''Returns or changes the length factor of a dimension style. Length factor
@@ -751,7 +879,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current linear precision value</returns>
     static member DimStyleLinearPrecision(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleLinearPrecision failed.  dimStyle:'%A'" dimStyle
+        ds.LengthResolution
     (*
     def DimStyleLinearPrecision(dimstyle, precision=None):
         '''Returns or changes the linear display precision of a dimension style
@@ -778,7 +908,15 @@ module ExtensionsDimension =
     ///<param name="precision">(int)The new linear precision value</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleLinearPrecision(dimstyle:string, precision:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+        if precision >= 0 then
+            ds.LengthResolution <- precision
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        else
+            failwithf "setDimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+        dimStyle
     (*
     def DimStyleLinearPrecision(dimstyle, precision=None):
         '''Returns or changes the linear display precision of a dimension style
@@ -804,7 +942,9 @@ module ExtensionsDimension =
     ///<summary>Returns the names of all dimension styles in the document</summary>
     ///<returns>(string seq) the names of all dimension styles in the document</returns>
     static member DimStyleNames() : string seq =
-        failNotImpl () // genreation temp disabled !!
+        let rc = [| for ds in Doc.DimStyles -> ds.Name |]
+        if sort then  rc |> Array.sort
+        else rc
     (*
     def DimStyleNames(sort=False):
         '''Returns the names of all dimension styles in the document
@@ -826,7 +966,9 @@ module ExtensionsDimension =
     ///  1 = Fractional
     ///  2 = Feet and inches</returns>
     static member DimStyleNumberFormat(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
+        int(ds.LengthFormat)
     (*
     def DimStyleNumberFormat(dimstyle, format=None):
         '''Returns or changes the number display format of a dimension style
@@ -861,7 +1003,15 @@ module ExtensionsDimension =
     ///  2 = Feet and inches</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleNumberFormat(dimstyle:string, format:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+        if   format=0 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Decimal
+        elif format=1 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Feet
+        elif format=2 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.FeetAndInches
+        else failwithf "setDimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleNumberFormat(dimstyle, format=None):
         '''Returns or changes the number display format of a dimension style
@@ -893,7 +1043,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current extension line offset</returns>
     static member DimStyleOffset(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleOffset failed.  dimStyle:'%A'" dimStyle
+        ds.ExtensionLineOffset
     (*
     def DimStyleOffset(dimstyle, offset=None):
         '''Returns or changes the extension line offset of a dimension style
@@ -920,7 +1072,12 @@ module ExtensionsDimension =
     ///<param name="offset">(int)The new extension line offset</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleOffset(dimstyle:string, offset:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleOffset failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
+        ds.ExtensionLineOffset <- offset
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleOffset(dimstyle, offset=None):
         '''Returns or changes the extension line offset of a dimension style
@@ -948,7 +1105,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
     ///<returns>(string) The current prefix</returns>
     static member DimStylePrefix(dimstyle:string) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStylePrefix failed.  dimStyle:'%A'" dimStyle
+        ds.Prefix
     (*
     def DimStylePrefix(dimstyle, prefix=None):
         '''Returns or changes the prefix of a dimension style - the text to
@@ -977,7 +1136,12 @@ module ExtensionsDimension =
     ///<param name="prefix">(string)The new prefix</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStylePrefix(dimstyle:string, prefix:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStylePrefix failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
+        ds.Prefix <- prefix
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStylePrefix(dimstyle, prefix=None):
         '''Returns or changes the prefix of a dimension style - the text to
@@ -1006,7 +1170,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
     ///<returns>(string) The current suffix</returns>
     static member DimStyleSuffix(dimstyle:string) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleSuffix failed.  dimStyle:'%A'" dimStyle
+        ds.Suffix
     (*
     def DimStyleSuffix(dimstyle, suffix=None):
         '''Returns or changes the suffix of a dimension style - the text to
@@ -1035,7 +1201,12 @@ module ExtensionsDimension =
     ///<param name="suffix">(string)The new suffix</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleSuffix(dimstyle:string, suffix:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleSuffix failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
+        ds.Suffix <- suffix
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleSuffix(dimstyle, suffix=None):
         '''Returns or changes the suffix of a dimension style - the text to
@@ -1067,7 +1238,9 @@ module ExtensionsDimension =
     ///  2 = Above the dimension line
     ///  3 = In the dimension line</returns>
     static member DimStyleTextAlignment(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
+        int(ds.TextAlignment)
     (*
     def DimStyleTextAlignment(dimstyle, alignment=None):
         '''Returns or changes the text alignment mode of a dimension style
@@ -1105,7 +1278,16 @@ module ExtensionsDimension =
     ///  3 = In the dimension line</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextAlignment(dimstyle:string, alignment:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+        elif alignment=0 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Normal
+        elif alignment=1 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Horizontal
+        elif alignment=2 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.AboveLine
+        elif alignment=3 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.InLine
+        else failwithf "setDimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        Doc.Views.Redraw()
+        dimStyle
     (*
     def DimStyleTextAlignment(dimstyle, alignment=None):
         '''Returns or changes the text alignment mode of a dimension style
@@ -1139,7 +1321,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current text gap</returns>
     static member DimStyleTextGap(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleTextGap failed.  dimStyle:'%A'" dimStyle
+        ds.TextGap
     (*
     def DimStyleTextGap(dimstyle, gap=None):
         '''Returns or changes the text gap used by a dimension style
@@ -1166,7 +1350,15 @@ module ExtensionsDimension =
     ///<param name="gap">(int)The new text gap</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextGap(dimstyle:string, gap:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
+        if gap >= 0.0 then
+            ds.TextGap <- gap
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        else
+            failwithf "setDimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
+        dimStyle
     (*
     def DimStyleTextGap(dimstyle, gap=None):
         '''Returns or changes the text gap used by a dimension style
@@ -1193,7 +1385,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current text height</returns>
     static member DimStyleTextHeight(dimstyle:string) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "getDimStyleTextHeight failed.  dimStyle:'%A'" dimStyle
+        ds.TextHeight
     (*
     def DimStyleTextHeight(dimstyle, height=None):
         '''Returns or changes the text height used by a dimension style
@@ -1220,7 +1414,15 @@ module ExtensionsDimension =
     ///<param name="height">(int)The new text height</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextHeight(dimstyle:string, height:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then  failwithf "setDimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
+        if height>0.0 then
+            ds.TextHeight <- height
+            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            Doc.Views.Redraw()
+        else
+            failwithf "setDimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
+        dimStyle
     (*
     def DimStyleTextHeight(dimstyle, height=None):
         '''Returns or changes the text height used by a dimension style
@@ -1247,7 +1449,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> false
+        | Some g ->
+            match g with
+            | :? LinearDimension as g -> g.Aligned
+            | _ -> false
     (*
     def IsAlignedDimension(object_id):
         '''Verifies an object is an aligned dimension object
@@ -1256,8 +1463,8 @@ module ExtensionsDimension =
         Returns:
           bool: True or False.  None on error
         '''
-        annotation_object = __coerceannotation(object_id)
-        id = rhutil.coerceguid(object_id, True)
+        annotation_object = __Coerceannotation(object_id)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         if isinstance(geom, Rhino.Geometry.LinearDimension): return geom.Aligned
@@ -1269,7 +1476,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> false
+        | Some g ->
+            match g with
+            | :? AngularDimension -> true
+            | _ -> false
     (*
     def IsAngularDimension(object_id):
         '''Verifies an object is an angular dimension object
@@ -1279,7 +1491,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.AngularDimension)
@@ -1290,7 +1502,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> false
+        | Some g ->
+            match g with
+            | :? RadialDimension as g -> g.IsDiameterDimension
+            | _ -> false
     (*
     def IsDiameterDimension(object_id):
         '''Verifies an object is a diameter dimension object
@@ -1300,7 +1517,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         if isinstance(geom, Rhino.Geometry.RadialDimension):
@@ -1313,7 +1530,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> false
+        | Some g ->
+            match g with
+            | :? AnnotationBase  -> true
+            | _ -> false
     (*
     def IsDimension(object_id):
         '''Verifies an object is a dimension object
@@ -1323,7 +1545,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.AnnotationBase)
@@ -1334,7 +1556,8 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of a dimstyle to test for</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimStyle(dimstyle:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        notNull ds
     (*
     def IsDimStyle(dimstyle):
         '''Verifies the existance of a dimension style in the document
@@ -1353,7 +1576,9 @@ module ExtensionsDimension =
     ///<param name="dimstyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimStyleReference(dimstyle:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let ds = Doc.DimStyles.Find(dimStyle,true)
+        if isNull ds then false
+        else ds.IsReference
     (*
     def IsDimStyleReference(dimstyle):
         '''Verifies that an existing dimension style is from a reference file
@@ -1373,7 +1598,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+         match Coerce.tryCoerceGeometry(objectId) with
+         | None -> false
+         | Some g ->
+            match g with
+            | :? Leader  -> true
+            | _ -> false
     (*
     def IsLeader(object_id):
         '''Verifies an object is a dimension leader object
@@ -1383,7 +1613,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.Leader)
@@ -1394,7 +1624,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+         match Coerce.tryCoerceGeometry(objectId) with
+         | None -> false
+         | Some g ->
+            match g with
+            | :? LinearDimension  -> true
+            | _ -> false
     (*
     def IsLinearDimension(object_id):
         '''Verifies an object is a linear dimension object
@@ -1404,7 +1639,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.LinearDimension)
@@ -1415,7 +1650,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+         match Coerce.tryCoerceGeometry(objectId) with
+         | None -> false
+         | Some g ->
+            match g with
+            | :? OrdinateDimension  -> true
+            | _ -> false
     (*
     def IsOrdinateDimension(object_id):
         '''Verifies an object is an ordinate dimension object
@@ -1425,7 +1665,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.OrdinateDimension)
@@ -1436,7 +1676,12 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> false
+        | Some g ->
+           match g with
+           | :? RadialDimension  -> true
+           | _ -> false
     (*
     def IsRadialDimension(object_id):
         '''Verifies an object is a radial dimension object
@@ -1446,7 +1691,7 @@ module ExtensionsDimension =
           bool: True or False.
           None: on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.RadialDimension)
@@ -1457,7 +1702,14 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(string) The current text string</returns>
     static member LeaderText(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+        | Some g ->
+            match g with
+            | :? Leader as g ->
+                let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+                annotationObject.DisplayText
+            | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
     (*
     def LeaderText(object_id, text=None):
         '''Returns or modifies the text string of a dimension leader object
@@ -1469,7 +1721,7 @@ module ExtensionsDimension =
           str: if text is specified, the previous text string
           None on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         if not isinstance(geom, Rhino.Geometry.Leader):
@@ -1487,7 +1739,18 @@ module ExtensionsDimension =
     ///<param name="text">(string)The new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectId:Guid, text:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        match Coerce.tryCoerceGeometry(objectId) with
+        | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+        | Some g ->
+            match g with
+            | :? Leader as g ->
+                let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+                //rh6:  g.RichText <- text
+                g.TextFormula<- text
+                annotationObject.CommitChanges()|> ignore
+                Doc.Views.Redraw()
+                objectId
+            | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
     (*
     def LeaderText(object_id, text=None):
         '''Returns or modifies the text string of a dimension leader object
@@ -1499,7 +1762,7 @@ module ExtensionsDimension =
           str: if text is specified, the previous text string
           None on error
         '''
-        id = rhutil.coerceguid(object_id, True)
+        id = rhutil.Coerceguid(object_id, True)
         annotation_object = scriptcontext.doc.Objects.Find(id)
         geom = annotation_object.Geometry
         if not isinstance(geom, Rhino.Geometry.Leader):
@@ -1518,7 +1781,10 @@ module ExtensionsDimension =
     ///<param name="newstyle">(string) The new dimension style name</param>
     ///<returns>(string) the new dimension style name</returns>
     static member RenameDimStyle(oldstyle:string, newstyle:string) : string =
-        failNotImpl () // genreation temp disabled !!
+        let mutable ds = Doc.DimStyles.Find(oldstyle,true)
+        if isNull ds then  failwithf "renameDimStyle failed.  oldstyle:'%A' newstyle:'%A'" oldstyle newstyle
+        ds.Name <- newstyle
+        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false) then  newstyle
     (*
     def RenameDimStyle(oldstyle, newstyle):
         '''Renames an existing dimension style

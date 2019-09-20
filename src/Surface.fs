@@ -84,13 +84,13 @@ module ExtensionsSurface =
     ///  pass through</param>
     ///<param name="startPoint">(Line) Start point of 'line that defines the cutting plane' (FIXME 0)</param>
     ///<param name="endePoint">(Line) End point of 'line that defines the cutting plane' (FIXME 0)</param>
-    ///<param name="normal">(Vector3d) Optional, Default Value: <c>null</c>
+    ///<param name="normal">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
     ///Vector that will be contained in the returned planar
     ///  surface. In the case of Rhino's CutPlane command, this is the
     ///  normal to, or Z axis of, the active view's construction plane.
     ///  If omitted, the world Z axis is used</param>
     ///<returns>(Guid) identifier of new object on success</returns>
-    static member AddCutPlane(objectIds:Guid seq, startPoint:Line, endePoint:Line, [<OPT;DEF(null)>]normal:Vector3d) : Guid =
+    static member AddCutPlane(objectIds:Guid seq, startPoint:Line, endePoint:Line, [<OPT;DEF(null:Vector3d)>]normal:Vector3d) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddCutPlane(object_ids, start_point, end_point, normal=None):
@@ -254,12 +254,12 @@ module ExtensionsSurface =
     ///<param name="knotsV">(float seq) Knot values for the surface in the v direction.
     ///  Must contain pointCount[1]+degree[1]-1 elements</param>
     ///<param name="degree">(int * int) Degree of the surface in the u and v directions.</param>
-    ///<param name="weights">(float seq) Optional, Default Value: <c>null</c>
+    ///<param name="weights">(float seq) Optional, Default Value: <c>null:float seq</c>
     ///Weight values for the surface. The number of elements in
     ///  weights must equal the number of elements in points. Values must be
     ///  greater than zero.</param>
     ///<returns>(Guid) identifier of new object</returns>
-    static member AddNurbsSurface(pointCount:int * int, points:Point3d seq, knotsU:float seq, knotsV:float seq, degree:int * int, [<OPT;DEF(null)>]weights:float seq) : Guid =
+    static member AddNurbsSurface(pointCount:int * int, points:Point3d seq, knotsU:float seq, knotsV:float seq, degree:int * int, [<OPT;DEF(null:float seq)>]weights:float seq) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddNurbsSurface(point_count, points, knots_u, knots_v, degree, weights=None):
@@ -311,7 +311,7 @@ module ExtensionsSurface =
     ///<param name="uvSpansTupleORSurfaceObjectId">(float * Guid) The U and V direction span counts for the automatically generated surface OR
     ///  The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
     ///  to the surface you are trying to create.</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///The tolerance used by input analysis functions. If omitted, Rhino's document absolute tolerance is used.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     ///Try to find an outside curve and trims the surface to it.  The default value is True.</param>
@@ -332,7 +332,7 @@ module ExtensionsSurface =
     ///  curve or points for deforming an existing surface, and you do not want the edges of the starting surface
     ///  to move.  The default if False.</param>
     ///<returns>(Guid) Identifier of the new surface object .</returns>
-    static member AddPatch(objectIds:Guid seq, uvSpansTupleORSurfaceObjectId:float * Guid, [<OPT;DEF(null)>]tolerance:float, [<OPT;DEF(true)>]trim:bool, [<OPT;DEF(0.1)>]pointSpacing:float, [<OPT;DEF(1.0)>]flexibility:float, [<OPT;DEF(1.0)>]surfacePull:float, [<OPT;DEF(false)>]fixEdges:bool) : Guid =
+    static member AddPatch(objectIds:Guid seq, uvSpansTupleORSurfaceObjectId:float * Guid, [<OPT;DEF(null:float)>]tolerance:float, [<OPT;DEF(true)>]trim:bool, [<OPT;DEF(0.1)>]pointSpacing:float, [<OPT;DEF(1.0)>]flexibility:float, [<OPT;DEF(1.0)>]surfacePull:float, [<OPT;DEF(false)>]fixEdges:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddPatch(object_ids, uv_spans_tuple_OR_surface_object_id, tolerance=None, trim=True, point_spacing=0.1, flexibility=1.0, surface_pull=1.0, fix_edges=False):
@@ -497,9 +497,9 @@ module ExtensionsSurface =
     ///  - seams of closed curves are not adjusted. Use CurveSeam to adjust the seam
     ///    of closed curves</summary>
     ///<param name="objectIds">(Guid seq) Ordered list of the curves to loft through</param>
-    ///<param name="start">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="start">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Starting point of the loft</param>
-    ///<param name="ende">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="ende">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Ending point of the loft</param>
     ///<param name="loftType">(int) Optional, Default Value: <c>0</c>
     ///Type of loft. Possible options are:
@@ -530,7 +530,7 @@ module ExtensionsSurface =
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
     ///Close the loft back to the first curve</param>
     ///<returns>(Guid seq) Array containing the identifiers of the new surface objects</returns>
-    static member AddLoftSrf(objectIds:Guid seq, [<OPT;DEF(null)>]start:Point3d, [<OPT;DEF(null)>]ende:Point3d, [<OPT;DEF(0)>]loftType:int, [<OPT;DEF(0)>]simplifyMethod:float, [<OPT;DEF(0)>]value:float, [<OPT;DEF(false)>]closed:bool) : Guid seq =
+    static member AddLoftSrf(objectIds:Guid seq, [<OPT;DEF(null:Point3d)>]start:Point3d, [<OPT;DEF(null:Point3d)>]ende:Point3d, [<OPT;DEF(0)>]loftType:int, [<OPT;DEF(0)>]simplifyMethod:float, [<OPT;DEF(0)>]value:float, [<OPT;DEF(false)>]closed:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddLoftSrf(object_ids, start=None, end=None, loft_type=0, simplify_method=0, value=0, closed=False):
@@ -680,10 +680,10 @@ module ExtensionsSurface =
     ///<param name="pointsOrPlane">(Point3d * Plane) Either a list/tuple of two points or a plane
     ///  if two points, they define the start and end points of a center line
     ///  if a plane, the plane defines the cutting plane</param>
-    ///<param name="interval">(float) Optional, Default Value: <c>null</c>
+    ///<param name="interval">(float) Optional, Default Value: <c>null:float</c>
     ///Distance between contour curves.</param>
     ///<returns>(Guid) ids of new contour curves on success</returns>
-    static member AddSrfContourCrvs(objectId:Guid, pointsOrPlane:Point3d * Plane, [<OPT;DEF(null)>]interval:float) : Guid =
+    static member AddSrfContourCrvs(objectId:Guid, pointsOrPlane:Point3d * Plane, [<OPT;DEF(null:float)>]interval:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddSrfContourCrvs(object_id, points_or_plane, interval=None):
@@ -916,11 +916,11 @@ module ExtensionsSurface =
     ///<param name="basis">(Point3d) 3D origin point of the torus or the basis plane of the torus</param>
     ///<param name="majorRadius">(float) Major radius of 'the two radii of the torus' (FIXME 0)</param>
     ///<param name="minorRadius">(float) Minor radius of 'the two radii of the torus' (FIXME 0)</param>
-    ///<param name="direction">(Point3d) Optional, Default Value: <c>null</c>
+    ///<param name="direction">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///A point that defines the direction of the torus when basis is a point.
     ///  If omitted, a torus that is parallel to the world XY plane is created</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
-    static member AddTorus(basis:Point3d, majorRadius:float, minorRadius:float, [<OPT;DEF(null)>]direction:Point3d) : Guid =
+    static member AddTorus(basis:Point3d, majorRadius:float, minorRadius:float, [<OPT;DEF(null:Point3d)>]direction:Point3d) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddTorus(base, major_radius, minor_radius, direction=None):
@@ -1521,10 +1521,10 @@ module ExtensionsSurface =
     ///<param name="surface0">(Guid) Surface0 of 'identifiers of first and second surface' (FIXME 0)</param>
     ///<param name="surface1">(Guid) Surface1 of 'identifiers of first and second surface' (FIXME 0)</param>
     ///<param name="radius">(float) A positive fillet radius</param>
-    ///<param name="uvparam0">(float * float) Optional, Default Value: <c>null</c>
+    ///<param name="uvparam0">(float * float) Optional, Default Value: <c>null:float * float</c>
     ///A u,v surface parameter of surface0 near where the fillet
     ///  is expected to hit the surface</param>
-    ///<param name="uvparam1">(float * float) Optional, Default Value: <c>null</c>
+    ///<param name="uvparam1">(float * float) Optional, Default Value: <c>null:float * float</c>
     ///Same as uvparam0, but for surface1</param>
     ///<returns>(Guid) ids of surfaces created on success</returns>
     static member FilletSurfaces(surface0:Guid, surface1:Guid, radius:float, [<OPT;DEF(null)>]uvparam0:float * float, [<OPT;DEF(null)>]uvparam1:float * float) : Guid =
@@ -1629,11 +1629,11 @@ module ExtensionsSurface =
     ///  SurfaceSurfaceIntersection function this function works on trimmed surfaces.</summary>
     ///<param name="brep1">(Guid) Identifier of first brep object</param>
     ///<param name="brep2">(Guid) Identifier of second brep object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Distance tolerance at segment midpoints. If omitted,
     ///  the current absolute tolerance is used.</param>
     ///<returns>(Guid seq) identifying the newly created intersection curve and point objects .</returns>
-    static member IntersectBreps(brep1:Guid, brep2:Guid, [<OPT;DEF(null)>]tolerance:float) : Guid seq =
+    static member IntersectBreps(brep1:Guid, brep2:Guid, [<OPT;DEF(null:float)>]tolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def IntersectBreps(brep1, brep2, tolerance=None):
@@ -1807,11 +1807,11 @@ module ExtensionsSurface =
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
     ///If true, the test point must be inside by at least tolerance</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Distance tolerance used for intersection and determining
     ///  strict inclusion. If omitted, Rhino's internal tolerance is used</param>
     ///<returns>(bool) True , otherwise False</returns>
-    static member IsPointInSurface(objectId:Guid, point:Point3d, [<OPT;DEF(false)>]strictlyIn:bool, [<OPT;DEF(null)>]tolerance:float) : bool =
+    static member IsPointInSurface(objectId:Guid, point:Point3d, [<OPT;DEF(false)>]strictlyIn:bool, [<OPT;DEF(null:float)>]tolerance:float) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsPointInSurface(object_id, point, strictly_in=False, tolerance=None):
@@ -1996,11 +1996,11 @@ module ExtensionsSurface =
 
     ///<summary>Verifies a surface object is planar</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Tolerance used when checked. If omitted, the current absolute
     ///  tolerance is used</param>
     ///<returns>(bool) True or False</returns>
-    static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(null)>]tolerance:float) : bool =
+    static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(null:float)>]tolerance:float) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsSurfacePlanar(surface_id, tolerance=None):
@@ -2201,7 +2201,7 @@ module ExtensionsSurface =
     ///  will be added to Rhino.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="distance">(float) The distance to offset</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
     ///  document's absolute tolerance is usually sufficient.</param>
     ///<param name="bothSides">(bool) Optional, Default Value: <c>false</c>
@@ -2209,7 +2209,7 @@ module ExtensionsSurface =
     ///<param name="createSolid">(bool) Optional, Default Value: <c>false</c>
     ///Make a solid object</param>
     ///<returns>(Guid) identifier of the new object</returns>
-    static member OffsetSurface(surfaceId:Guid, distance:float, [<OPT;DEF(null)>]tolerance:float, [<OPT;DEF(false)>]bothSides:bool, [<OPT;DEF(false)>]createSolid:bool) : Guid =
+    static member OffsetSurface(surfaceId:Guid, distance:float, [<OPT;DEF(null:float)>]tolerance:float, [<OPT;DEF(false)>]bothSides:bool, [<OPT;DEF(false)>]createSolid:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def OffsetSurface(surface_id, distance, tolerance=None, both_sides=False, create_solid=False):
@@ -3358,11 +3358,11 @@ module ExtensionsSurface =
     ///<summary>Trims a surface using an oriented cutter</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
     ///<param name="cutter">(Plane) Surface, polysurface, or plane performing the trim</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Trimming tolerance. If omitted, the document's absolute
     ///  tolerance is used</param>
     ///<returns>(Guid seq) identifiers of retained components on success</returns>
-    static member TrimBrep(objectId:Guid, cutter:Plane, [<OPT;DEF(null)>]tolerance:float) : Guid seq =
+    static member TrimBrep(objectId:Guid, cutter:Plane, [<OPT;DEF(null:float)>]tolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def TrimBrep(object_id, cutter, tolerance=None):
@@ -3451,15 +3451,15 @@ module ExtensionsSurface =
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
     ///If True, the resulting surfaces ar not joined</param>
-    ///<param name="followingGeometry">(Guid seq) Optional, Default Value: <c>null</c>
+    ///<param name="followingGeometry">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
     ///List of curves, dots, and points which
     ///  should be unrolled with the surface</param>
-    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Absolute tolerance</param>
-    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Relative tolerance</param>
     ///<returns>(Guid seq) of unrolled surface ids</returns>
-    static member UnrollSurface(surfaceId:Guid, [<OPT;DEF(false)>]explode:bool, [<OPT;DEF(null)>]followingGeometry:Guid seq, [<OPT;DEF(null)>]absoluteTolerance:float, [<OPT;DEF(null)>]relativeTolerance:float) : Guid seq =
+    static member UnrollSurface(surfaceId:Guid, [<OPT;DEF(false)>]explode:bool, [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq, [<OPT;DEF(null:float)>]absoluteTolerance:float, [<OPT;DEF(null:float)>]relativeTolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def UnrollSurface(surface_id, explode=False, following_geometry=None, absolute_tolerance=None, relative_tolerance=None):

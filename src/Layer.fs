@@ -20,20 +20,20 @@ module ExtensionsLayer =
 
 
     ///<summary>Add a new layer to the document</summary>
-    ///<param name="name">(string) Optional, Default Value: <c>null</c>
+    ///<param name="name">(string) Optional, Default Value: <c>null:string</c>
     ///The name of the new layer. If omitted, Rhino automatically
     ///  generates the layer name.</param>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null</c>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null:Drawing.Color</c>
     ///A Red-Green-Blue color value. If omitted, the color Black is assigned.</param>
     ///<param name="visible">(bool) Optional, Default Value: <c>true</c>
     ///Layer's visibility</param>
     ///<param name="locked">(bool) Optional, Default Value: <c>false</c>
     ///Layer's locked state</param>
-    ///<param name="parent">(string) Optional, Default Value: <c>null</c>
+    ///<param name="parent">(string) Optional, Default Value: <c>null:string</c>
     ///Name of the new layer's parent layer. If omitted, the new
     ///  layer will not have a parent layer.</param>
     ///<returns>(string) The full name of the new layer .</returns>
-    static member AddLayer([<OPT;DEF(null)>]name:string, [<OPT;DEF(null)>]color:Drawing.Color, [<OPT;DEF(true)>]visible:bool, [<OPT;DEF(false)>]locked:bool, [<OPT;DEF(null)>]parent:string) : string =
+    static member AddLayer([<OPT;DEF(null:string)>]name:string, [<OPT;DEF(null:Drawing.Color)>]color:Drawing.Color, [<OPT;DEF(true)>]visible:bool, [<OPT;DEF(false)>]locked:bool, [<OPT;DEF(null:string)>]parent:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddLayer(name=None, color=None, visible=True, locked=False, parent=None):

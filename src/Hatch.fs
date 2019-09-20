@@ -22,7 +22,7 @@ module ExtensionsHatch =
     ///<summary>Creates a new hatch object from a closed planar curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar curve that defines the
     ///  boundary of the hatch object</param>
-    ///<param name="hatchPattern">(string) Optional, Default Value: <c>null</c>
+    ///<param name="hatchPattern">(string) Optional, Default Value: <c>null:string</c>
     ///Name of the hatch pattern to be used by the hatch
     ///  object. If omitted, the current hatch pattern will be used</param>
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
@@ -30,7 +30,7 @@ module ExtensionsHatch =
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
     ///Hatch pattern rotation angle in degrees.</param>
     ///<returns>(Guid) identifier of the newly created hatch on success</returns>
-    static member AddHatch(curveId:Guid, [<OPT;DEF(null)>]hatchPattern:string, [<OPT;DEF(1.0)>]scale:float, [<OPT;DEF(0.0)>]rotation:float) : Guid =
+    static member AddHatch(curveId:Guid, [<OPT;DEF(null:string)>]hatchPattern:string, [<OPT;DEF(1.0)>]scale:float, [<OPT;DEF(0.0)>]rotation:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddHatch(curve_id, hatch_pattern=None, scale=1.0, rotation=0.0):
@@ -55,17 +55,17 @@ module ExtensionsHatch =
     ///<summary>Creates one or more new hatch objects a list of closed planar curves</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar curves that defines the
     ///  boundary of the hatch objects</param>
-    ///<param name="hatchPattern">(string) Optional, Default Value: <c>null</c>
+    ///<param name="hatchPattern">(string) Optional, Default Value: <c>null:string</c>
     ///Name of the hatch pattern to be used by the hatch
     ///  object. If omitted, the current hatch pattern will be used</param>
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
     ///Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
     ///Hatch pattern rotation angle in degrees.</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
     ///Tolerance for hatch fills.</param>
     ///<returns>(Guid seq) identifiers of the newly created hatch on success</returns>
-    static member AddHatches(curveIds:Guid seq, [<OPT;DEF(null)>]hatchPattern:string, [<OPT;DEF(1.0)>]scale:float, [<OPT;DEF(0.0)>]rotation:float, [<OPT;DEF(null)>]tolerance:float) : Guid seq =
+    static member AddHatches(curveIds:Guid seq, [<OPT;DEF(null:string)>]hatchPattern:string, [<OPT;DEF(1.0)>]scale:float, [<OPT;DEF(0.0)>]rotation:float, [<OPT;DEF(null:float)>]tolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddHatches(curve_ids, hatch_pattern=None, scale=1.0, rotation=0.0, tolerance=None):
@@ -256,7 +256,7 @@ module ExtensionsHatch =
             return scriptcontext.errorhandler()
         old_index = hatchobj.HatchGeometry.PatternIndex
         if hatch_pattern:
-            _initHatchPatterns(hatch_pattern)
+            __initHatchPatterns()
             new_patt = scriptcontext.doc.HatchPatterns.FindName(hatch_pattern)
             if new_patt is None: return scriptcontext.errorhandler()
             hatchobj.HatchGeometry.PatternIndex = new_patt.Index
@@ -289,7 +289,7 @@ module ExtensionsHatch =
             return scriptcontext.errorhandler()
         old_index = hatchobj.HatchGeometry.PatternIndex
         if hatch_pattern:
-            _initHatchPatterns(hatch_pattern)
+            __initHatchPatterns()
             new_patt = scriptcontext.doc.HatchPatterns.FindName(hatch_pattern)
             if new_patt is None: return scriptcontext.errorhandler()
             hatchobj.HatchGeometry.PatternIndex = new_patt.Index

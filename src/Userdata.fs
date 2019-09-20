@@ -11,13 +11,13 @@ module ExtensionsUserdata =
   type RhinoScriptSyntax with
     
     ///<summary>Removes user data strings from the current document</summary>
-    ///<param name="section">(string) Optional, Default Value: <c>null</c>
+    ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section name. If omitted, all sections and their corresponding
     ///  entries are removed</param>
-    ///<param name="entry">(string) Optional, Default Value: <c>null</c>
+    ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
     ///Entry name. If omitted, all entries for section are removed</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member DeleteDocumentData([<OPT;DEF(null)>]section:string, [<OPT;DEF(null)>]entry:string) : bool =
+    static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def DeleteDocumentData(section=None, entry=None):
@@ -63,13 +63,13 @@ module ExtensionsUserdata =
 
     //(FIXME) VarOutTypes
     ///<summary>Returns a user data item from the current document</summary>
-    ///<param name="section">(string) Optional, Default Value: <c>null</c>
+    ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section name. If omitted, all section names are returned</param>
-    ///<param name="entry">(string) Optional, Default Value: <c>null</c>
+    ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
     ///Entry name. If omitted, all entry names for section are returned</param>
     ///<returns>(string seq) of all section names if section name is omitted
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
-    static member GetDocumentData([<OPT;DEF(null)>]section:string, [<OPT;DEF(null)>]entry:string) : string seq =
+    static member GetDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetDocumentData(section=None, entry=None):
@@ -96,10 +96,10 @@ module ExtensionsUserdata =
 
     //(FIXME) VarOutTypes
     ///<summary>Returns user text stored in the document</summary>
-    ///<param name="key">(string) Optional, Default Value: <c>null</c>
+    ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
     ///Key to use for retrieving user text. If empty, all keys are returned</param>
     ///<returns>(string) If key is specified, then the associated value .</returns>
-    static member GetDocumentUserText([<OPT;DEF(null)>]key:string) : string =
+    static member GetDocumentUserText([<OPT;DEF(null:string)>]key:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetDocumentUserText(key=None):
@@ -123,12 +123,12 @@ module ExtensionsUserdata =
     //(FIXME) VarOutTypes
     ///<summary>Returns user text stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<param name="key">(string) Optional, Default Value: <c>null</c>
+    ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
     ///The key name. If omitted all key names for an object are returned</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value</returns>
-    static member GetUserText(objectId:Guid, [<OPT;DEF(null)>]key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
+    static member GetUserText(objectId:Guid, [<OPT;DEF(null:string)>]key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetUserText(object_id, key=None, attached_to_geometry=False):
@@ -233,11 +233,11 @@ module ExtensionsUserdata =
 
     ///<summary>Sets or removes user text stored in the document</summary>
     ///<param name="key">(string) Key name to set</param>
-    ///<param name="value">(string) Optional, Default Value: <c>null</c>
+    ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
     ///The string value to set. If omitted the key/value pair
     ///  specified by key will be deleted</param>
     ///<returns>(bool) True or False indicating success</returns>
-    static member SetDocumentUserText(key:string, [<OPT;DEF(null)>]value:string) : bool =
+    static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def SetDocumentUserText(key, value=None):
@@ -258,13 +258,13 @@ module ExtensionsUserdata =
     ///<summary>Sets or removes user text stored on an object.</summary>
     ///<param name="objectId">(string) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
-    ///<param name="value">(string) Optional, Default Value: <c>null</c>
+    ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
     ///The string value to set. If omitted, the key/value pair
     ///  specified by key will be deleted</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to store the user text</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member SetUserText(objectId:string, key:string, [<OPT;DEF(null)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : bool =
+    static member SetUserText(objectId:string, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def SetUserText(object_id, key, value=None, attach_to_geometry=False):
