@@ -9,9 +9,12 @@ open Rhino.Scripting.ActiceDocument
 
 [<AutoOpen>]
 module ExtensionsBlock =
+  
+  [<Ext>] 
   type RhinoScriptSyntax with
 
 
+    [<EXT>]
     ///<summary>Adds a new block definition to the document</summary>
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
     ///<param name="basisPoint">(Point3d) 3D base point for the block definition</param>
@@ -98,6 +101,7 @@ module ExtensionsBlock =
 
 
 
+    [<EXT>]
     ///<summary>Returns names of the block definitions that contain a specified block
     ///  definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
@@ -128,6 +132,7 @@ module ExtensionsBlock =
         return rc
     *)
 
+    [<EXT>]
     ///<summary>Returns number of block definitions that contain a specified
     ///  block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
@@ -147,6 +152,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of block definitions in the document</summary>
     ///<returns>(int) the number of block definitions in the document</returns>
     static member BlockCount() : int =
@@ -161,6 +167,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the description of a block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string) The current description</returns>
@@ -185,6 +192,7 @@ module ExtensionsBlock =
         return rc
     *)
 
+    [<EXT>]
     ///<summary>Sets the description of a block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="description">(string)The new description.</param>
@@ -211,6 +219,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Counts number of instances of the block in the document.
     ///  Nested instances are not included in the count. Attention this may include deleted blocks.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
@@ -246,6 +255,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the insertion point of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Point3d) The insertion 3D point</returns>
@@ -271,6 +281,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the block name of a block instance</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(string) the block name of a block instance</returns>
@@ -292,6 +303,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the identifiers of the inserted instances of a block.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
@@ -323,6 +335,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the location of a block instance relative to the world coordinate
     ///  system origin (0,0,0). The position is returned as a 4x4 transformation
     ///  matrix</summary>
@@ -348,6 +361,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the names of all block definitions in the document</summary>
     ///<returns>(string seq) the names of all block definitions in the document</returns>
     static member BlockNames() : string [] =
@@ -369,6 +383,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns number of objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(int) the number of objects that make up a block definition</returns>
@@ -390,6 +405,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of the objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(Guid seq) list of identifiers on success</returns>
@@ -413,6 +429,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns path to the source of a linked or embedded block definition.
     ///  A linked or embedded block definition is a block definition that was
     ///  inserted from an external file.</summary>
@@ -438,6 +455,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the status of a linked block</summary>
     ///<param name="blockName">(string) Name of an existing block</param>
     ///<returns>(int) the status of a linked block
@@ -475,6 +493,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Deletes a block definition and all of it's inserted instances.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -500,6 +519,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Explodes a block instance into it's geometric components. The
     ///  exploded objects are added to the document</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
@@ -530,6 +550,7 @@ module ExtensionsBlock =
 
 
 
+    [<EXT>]
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="xform">(Transform) 4x4 transformation matrix to apply</param>
@@ -560,6 +581,7 @@ module ExtensionsBlock =
     *)
     
     
+    [<EXT>]
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
@@ -603,6 +625,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the existence of a block definition in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
@@ -622,6 +645,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a block definition is embedded, or linked, from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
@@ -647,6 +671,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a block instance</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False</returns>
@@ -666,6 +691,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a block definition is being used by an inserted instance</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
@@ -696,6 +722,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a block definition is from a reference file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
@@ -717,6 +744,7 @@ module ExtensionsBlock =
     *)
 
 
+    [<EXT>]
     ///<summary>Renames an existing block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="newName">(string) Name to change to</param>

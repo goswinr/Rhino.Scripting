@@ -93,6 +93,7 @@ type RhinoScriptSyntax private () = // no constructor?
             with _ ->
                 failwithf "*** could not coerce %A to a Point3d" pt
     
+    
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible.</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
     ///<returns>a Rhino.Geometry.Point2d. Fails on bad input</returns>

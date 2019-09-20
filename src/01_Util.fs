@@ -8,6 +8,7 @@ module internal Util =
     
     type OPT = Runtime.InteropServices.OptionalAttribute
     type DEF = Runtime.InteropServices.DefaultParameterValueAttribute
+    type EXT = Runtime.CompilerServices.ExtensionAttribute
 
     let failNotImpl() = failwith "NOT IMPLEMENTED FAILURE"
 
