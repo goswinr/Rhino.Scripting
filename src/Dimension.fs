@@ -17,10 +17,10 @@ module ExtensionsDimension =
     ///<param name="startPoint">(Point3d) First point of dimension</param>
     ///<param name="endPoint">(Point3d) Second point of dimension</param>
     ///<param name="pointOnDimensionLine">(Point3d) Location point of dimension line</param>
-    ///<param name="style">(string) Optional, Default Value: <c>null:string</c>
+    ///<param name="style">(string) Optional, Default Value: <c>""</c>
     ///Name of dimension style</param>
     ///<returns>(Guid) identifier of new dimension on success</returns>
-    static member AddAlignedDimension(startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF(null:string)>]style:string) : Guid =
+    static member AddAlignedDimension(startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF("")>]style:string) : Guid =
         let mutable start = startPoint
         let mutable ende = endPoint
         let mutable onpoint = pointOnDimensionLine
@@ -37,7 +37,7 @@ module ExtensionsDimension =
         if style <> "" then
             let ds = Doc.DimStyles.FindName(style)
             if isNull ds then  failwithf "addAlignedDimension, style not found, failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
-            ldim.DimensionStyleIndex <- ds.Index
+            ldim.DimensionStyleId <- ds.Id
         let rc = Doc.Objects.AddLinearDimension(ldim)
         if rc = Guid.Empty then  failwithf "addAlignedDimension Unable to add dimension to document.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
         Doc.Views.Redraw()
@@ -81,25 +81,24 @@ module ExtensionsDimension =
 
     ///<summary>Adds a new dimension style to the document. The new dimension style will
     ///  be initialized with the current default dimension style properties.</summary>
-    ///<param name="dimstyleName">(string) Optional, Default Value: <c>null:string</c>
-    ///Name of the new dimension style. If omitted, Rhino automatically generates the dimension style name</param>
-    ///<returns>(string) name of the new dimension style on success</returns>
-    static member AddDimStyle([<OPT;DEF(null:string)>]dimstyleName:string) : string =
-        let index = Doc.DimStyles.Add(dimstyleName)
-        if index<0 then  failwithf "addDimStyle failed.  dimstyleName:'%A'" dimstyleName
-        let ds = Doc.DimStyles.[index]
-        ds.Name
+    ///<param name="dimStyleName">(string) Name of the new dimension style. </param>
+    ///<returns>(unit) void, nothing</returns>
+    static member AddDimStyle(dimStyleName:string) : unit =
+        let index = Doc.DimStyles.Add(dimStyleName)
+        if index<0 then  failwithf "addDimStyle failed.  dimStyleName:'%A'" dimStyleName
+        
+        
     (*
-    def AddDimStyle(dimstyle_name=None):
+    def AddDimStyle(dimStyle_name=None):
         '''Adds a new dimension style to the document. The new dimension style will
         be initialized with the current default dimension style properties.
         Parameters:
-          dimstyle_name (str, optional): name of the new dimension style. If omitted, Rhino automatically generates the dimension style name
+          dimStyle_name (str, optional): name of the new dimension style. If omitted, Rhino automatically generates the dimension style name
         Returns:
           str: name of the new dimension style on success
           None: on error
         '''
-        index = scriptcontext.doc.DimStyles.Add(dimstyle_name)
+        index = scriptcontext.doc.DimStyles.Add(dimStyle_name)
         if index<0: return scriptcontext.errorhandler()
         ds = scriptcontext.doc.DimStyles[index]
         return ds.Name
@@ -107,17 +106,14 @@ module ExtensionsDimension =
 
 
     ///<summary>Adds a leader to the document. Leader objects are planar.
-    ///  The 3D points passed to this function should be co-planar</summary>
+    ///  The 3D points passed will define th eplane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
-    ///<param name="viewOrPlane">(string) Optional, Default Value: <c>null:string</c>
-    ///If a view name is specified, points will be constrained
-    ///  to the view's construction plane. If a view is not specified, points
-    ///  will be constrained to a plane fit through the list of points</param>
-    ///<param name="text">(string) Optional, Default Value: <c>null:string</c>
-    ///Leader's text string</param>
+    ///<param name="text">(string) Leader's text </param>
+    ///<param name="plane">(string) Optional, Default Value: <c>defined by points arg</c>
+    ///  If points will be projected to this plane</param>    
     ///<returns>(Guid) identifier of the new leader on success</returns>
-    static member AddLeader(points:Point3d seq, [<OPT;DEF(null:string)>]viewOrPlane:string, [<OPT;DEF(null:string)>]text:string) : Guid =
-        failNotImpl () // not done in 2018
+    static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =
+        failNotImpl () //FIXME not done in 2018
     (*
     def AddLeader(points, view_or_plane=None, text=None):
         '''Adds a leader to the document. Leader objects are planar.
@@ -230,47 +226,47 @@ module ExtensionsDimension =
     ///<summary>Returns the current default dimension style</summary>
     ///<returns>(string) Name of the current dimension style</returns>
     static member CurrentDimStyle() : string = //GET
-        Doc.DimStyles.CurrentDimensionStyle.Name
+        Doc.DimStyles.Current.Name
     (*
-    def CurrentDimStyle(dimstyle_name=None):
+    def CurrentDimStyle(dimStyle_name=None):
         '''Returns or changes the current default dimension style
         Parameters:
-          dimstyle_name (str, optional): name of an existing dimension style to make current
+          dimStyle_name (str, optional): name of an existing dimension style to make current
         Returns:
-          str: if dimstyle_name is not specified, name of the current dimension style
-          str: if dimstyle_name is specified, name of the previous dimension style
+          str: if dimStyle_name is not specified, name of the current dimension style
+          str: if dimStyle_name is specified, name of the previous dimension style
           None: on error
         '''
         rc = scriptcontext.doc.DimStyles.Current.Name
-        if dimstyle_name:
-            ds = scriptcontext.doc.DimStyles.FindName(dimstyle_name)
+        if dimStyle_name:
+            ds = scriptcontext.doc.DimStyles.FindName(dimStyle_name)
             if ds is None: return scriptcontext.errorhandler()
             scriptcontext.doc.DimStyles.SetCurrent(ds.Index, False)
         return rc
     *)
 
     ///<summary>Changes the current default dimension style</summary>
-    ///<param name="dimstyleName">(string)Name of an existing dimension style to make current</param>
+    ///<param name="dimStyleName">(string)Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing</returns>
-    static member CurrentDimStyle(dimstyleName:string) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimstyleName,true)
-        if notNull ds  then  failwithf "setCurrentDimStyle failed.  dimstyleName:'%A'" dimstyleName
-        if not <| Doc.DimStyles.SetCurrentDimensionStyleIndex(ds.Index, false) then
-            failwithf "setCurrentDimStyle failed.  dimstyleName:'%A'" dimstyleName
-        dimstyleName
+    static member CurrentDimStyle(dimStyleName:string) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyleName)
+        if notNull ds  then  failwithf "setCurrentDimStyle failed.  dimStyleName:'%A'" dimStyleName
+        if not <| Doc.DimStyles.SetCurrent(ds.Index, false) then
+            failwithf "setCurrentDimStyle failed.  dimStyleName:'%A'" dimStyleName
+        
     (*
-    def CurrentDimStyle(dimstyle_name=None):
+    def CurrentDimStyle(dimStyle_name=None):
         '''Returns or changes the current default dimension style
         Parameters:
-          dimstyle_name (str, optional): name of an existing dimension style to make current
+          dimStyle_name (str, optional): name of an existing dimension style to make current
         Returns:
-          str: if dimstyle_name is not specified, name of the current dimension style
-          str: if dimstyle_name is specified, name of the previous dimension style
+          str: if dimStyle_name is not specified, name of the current dimension style
+          str: if dimStyle_name is specified, name of the previous dimension style
           None: on error
         '''
         rc = scriptcontext.doc.DimStyles.Current.Name
-        if dimstyle_name:
-            ds = scriptcontext.doc.DimStyles.FindName(dimstyle_name)
+        if dimStyle_name:
+            ds = scriptcontext.doc.DimStyles.FindName(dimStyle_name)
             if ds is None: return scriptcontext.errorhandler()
             scriptcontext.doc.DimStyles.SetCurrent(ds.Index, False)
         return rc
@@ -279,28 +275,28 @@ module ExtensionsDimension =
 
     ///<summary>Removes an existing dimension style from the document. The dimension style
     ///  to be removed cannot be referenced by any dimension objects.</summary>
-    ///<param name="dimstyleName">(string) The name of an unreferenced dimension style</param>
-    ///<returns>(string) The name of the deleted dimension style</returns>
-    static member DeleteDimStyle(dimstyleName:string) : string =
-        let ds = Doc.DimStyles.Find(dimStyleName,true)
+    ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
+    ///<returns>(unit) void, nothing (fails on error)</returns>
+    static member DeleteDimStyle(dimStyleName:string) : unit =
+        let ds = Doc.DimStyles.FindName(dimStyleName)
         if isNull ds then
             failwithf "deleteDimStyle failed. dimStyleName:'%A'" dimStyleName
-        let ok = Doc.DimStyles.DeleteDimensionStyle(ds.Index, true)
+        let ok = Doc.DimStyles.Delete(ds.Index, true)
         if not ok then
             failwithf "deleteDimStyle failed. dimStyleName:' %A '" dimStyleName
     (*
-    def DeleteDimStyle(dimstyle_name):
+    def DeleteDimStyle(dimStyle_name):
         '''Removes an existing dimension style from the document. The dimension style
         to be removed cannot be referenced by any dimension objects.
         Parameters:
-          dimstyle_name (str): the name of an unreferenced dimension style
+          dimStyle_name (str): the name of an unreferenced dimension style
         Returns:
           str: The name of the deleted dimension style if successful
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle_name)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle_name)
         if ds and scriptcontext.doc.DimStyles.DeleteDimensionStyle(ds.Index, True):
-            return dimstyle_name
+            return dimStyle_name
         return scriptcontext.errorhandler()
     *)
 
@@ -310,28 +306,27 @@ module ExtensionsDimension =
     ///<returns>(string) The object's current dimension style name</returns>
     static member DimensionStyle(objectId:Guid) : string = //GET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-        let annotation = annotationObject.Geometry:?> AnnotationBase
-        let ds = Doc.DimStyles.[annotation.Index]
-        // rh6 : let ds = annotationObject.AnnotationGeometry.ParentDimensionStyle
+        let annotation = annotationObject.Geometry:?> AnnotationBase        
+        let ds = annotationObject.AnnotationGeometry.ParentDimensionStyle
         ds.Name
         // this is how Rhino Python is doing it :
         // let ds:DocObjects.DimensionStyle = annotationObject?DimensionStyle //TODO verify Duck typing works ok
     (*
-    def DimensionStyle(object_id, dimstyle_name=None):
+    def DimensionStyle(object_id, dimStyle_name=None):
         '''Returns or modifies the dimension style of a dimension object
         Parameters:
           object_id (guid): identifier of the object
-          dimstyle_name (str, optional): the name of an existing dimension style
+          dimStyle_name (str, optional): the name of an existing dimension style
         Returns:
-          str: if dimstyle_name is not specified, the object's current dimension style name
-          str: if dimstyle_name is specified, the object's previous dimension style name
+          str: if dimStyle_name is not specified, the object's current dimension style name
+          str: if dimStyle_name is specified, the object's previous dimension style name
           None: on error
         '''
         annotation_object = __Coerceannotation(object_id)
         ds = annotation_object.AnnotationGeometry.ParentDimensionStyle
         rc = ds.Name
-        if dimstyle_name:
-            ds = scriptcontext.doc.DimStyles.FindName(dimstyle_name)
+        if dimStyle_name:
+            ds = scriptcontext.doc.DimStyles.FindName(dimStyle_name)
             if not ds: return scriptcontext.errorhandler()
             annotation = annotation_object.Geometry
             annotation.DimensionStyleId = ds.Id
@@ -341,32 +336,32 @@ module ExtensionsDimension =
 
     ///<summary>Modifies the dimension style of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<param name="dimstyleName">(string)The name of an existing dimension style</param>
+    ///<param name="dimStyleName">(string)The name of an existing dimension style</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimensionStyle(objectId:Guid, dimstyleName:string) : unit = //SET
+    static member DimensionStyle(objectId:Guid, dimStyleName:string) : unit = //SET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-        let ds =  Doc.DimStyles.Find(dimstyleName,true)
-        if isNull ds then  failwithf "setDimensionStyle failed.  objectId:'%A' dimstyleName:'%A'" objectId dimstyleName
+        let ds =  Doc.DimStyles.FindName(dimStyleName)
+        if isNull ds then  failwithf "set DimensionStyle failed.  objectId:'%A' dimStyleName:'%A'" objectId dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
-        annotation.Index <- ds.Index
-        annotationObject.CommitChanges() |>ignore // TODO verivy this works ok
-        dimstyleName
+        annotation.DimensionStyleId <- ds.Id
+        annotationObject.CommitChanges() |>ignore // TODO verify this works ok
+        
     (*
-    def DimensionStyle(object_id, dimstyle_name=None):
+    def DimensionStyle(object_id, dimStyle_name=None):
         '''Returns or modifies the dimension style of a dimension object
         Parameters:
           object_id (guid): identifier of the object
-          dimstyle_name (str, optional): the name of an existing dimension style
+          dimStyle_name (str, optional): the name of an existing dimension style
         Returns:
-          str: if dimstyle_name is not specified, the object's current dimension style name
-          str: if dimstyle_name is specified, the object's previous dimension style name
+          str: if dimStyle_name is not specified, the object's current dimension style name
+          str: if dimStyle_name is specified, the object's previous dimension style name
           None: on error
         '''
         annotation_object = __Coerceannotation(object_id)
         ds = annotation_object.AnnotationGeometry.ParentDimensionStyle
         rc = ds.Name
-        if dimstyle_name:
-            ds = scriptcontext.doc.DimStyles.FindName(dimstyle_name)
+        if dimStyle_name:
+            ds = scriptcontext.doc.DimStyles.FindName(dimStyle_name)
             if not ds: return scriptcontext.errorhandler()
             annotation = annotation_object.Geometry
             annotation.DimensionStyleId = ds.Id
@@ -401,7 +396,7 @@ module ExtensionsDimension =
     static member DimensionUserText(objectId:Guid) : string = //GET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
-        geo.Text
+        geo.PlainText
     (*
     def DimensionUserText(object_id, usertext=None):
         '''Returns or modifies the user text string of a dimension object. The user
@@ -416,7 +411,7 @@ module ExtensionsDimension =
         annotation_object = __Coerceannotation(object_id)
         rc = annotation_object.Geometry.Text
         if usertext is not None:
-            annotation_object.Geometry.Text = usertext
+            annotation_object.Geometry.PlainText = usertext
             annotation_object.CommitChanges()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -430,10 +425,10 @@ module ExtensionsDimension =
     static member DimensionUserText(objectId:Guid, usertext:string) : unit = //SET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
-        geo.Text <- usertext
+        geo.PlainText <- usertext
         annotationObject.CommitChanges() |>ignore
         Doc.Views.Redraw()
-        objectId
+        
     (*
     def DimensionUserText(object_id, usertext=None):
         '''Returns or modifies the user text string of a dimension object. The user
@@ -446,9 +441,9 @@ module ExtensionsDimension =
           str: if usertext is specified, the previous usertext string
         '''
         annotation_object = __Coerceannotation(object_id)
-        rc = annotation_object.Geometry.Text
+        rc = annotation_object.Geometry.PlainText
         if usertext is not None:
-            annotation_object.Geometry.Text = usertext
+            annotation_object.Geometry.PlainText = usertext
             annotation_object.CommitChanges()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -460,7 +455,7 @@ module ExtensionsDimension =
     ///<returns>(float) numeric value of the dimension</returns>
     static member DimensionValue(objectId:Guid) : float =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-        let geo = annotationObject.Geometry :?> AnnotationBase
+        let geo = annotationObject.Geometry :?> Dimension
         geo.NumericValue
     (*
     def DimensionValue(object_id):
@@ -476,24 +471,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the angle display precision of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current angle precision</returns>
-    static member DimStyleAnglePrecision(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleAnglePrecision failed.  dimStyle:'%A'" dimStyle
+    static member DimStyleAnglePrecision(dimStyle:string) : int = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleAnglePrecision failed.  dimStyle:'%A'" dimStyle
         ds.AngleResolution
     (*
-    def DimStyleAnglePrecision(dimstyle, precision=None):
+    def DimStyleAnglePrecision(dimStyle, precision=None):
         '''Returns or changes the angle display precision of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           precision (number, optional): the new angle precision value. If omitted, the current angle
             precision is returned
         Returns:
           number: If a precision is not specified, the current angle precision
           number: If a precision is specified, the previous angle precision
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.AngleResolution
         if precision is not None:
@@ -504,31 +499,31 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the angle display precision of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new angle precision value. If omitted, the current angle
     ///  precision is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleAnglePrecision(dimstyle:string, precision:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleAnglePrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+    static member DimStyleAnglePrecision(dimStyle:string, precision:int) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleAnglePrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
         let rc = ds.AngleResolution
         if precision >= 0 then
             ds.AngleResolution <- precision
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleAnglePrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
             Doc.Views.Redraw()
-        dimStyle
+        
     (*
-    def DimStyleAnglePrecision(dimstyle, precision=None):
+    def DimStyleAnglePrecision(dimStyle, precision=None):
         '''Returns or changes the angle display precision of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           precision (number, optional): the new angle precision value. If omitted, the current angle
             precision is returned
         Returns:
           number: If a precision is not specified, the current angle precision
           number: If a precision is specified, the previous angle precision
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.AngleResolution
         if precision is not None:
@@ -540,24 +535,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the arrow size of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current arrow size</returns>
-    static member DimStyleArrowSize(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleArrowSize failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current arrow size</returns>
+    static member DimStyleArrowSize(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleArrowSize failed.  dimStyle:'%A'" dimStyle
         ds.ArrowLength
     (*
-    def DimStyleArrowSize(dimstyle, size=None):
+    def DimStyleArrowSize(dimStyle, size=None):
         '''Returns or changes the arrow size of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           size (number, optional): the new arrow size. If omitted, the current arrow size is returned
         Returns:
           number: If size is not specified, the current arrow size
           number: If size is specified, the previous arrow size
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.ArrowLength
         if size is not None:
@@ -568,32 +563,32 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the arrow size of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="size">(int)The new arrow size. If omitted, the current arrow size is returned</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="size">(float)The new arrow size.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleArrowSize(dimstyle:string, size:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
+    static member DimStyleArrowSize(dimStyle:string, size:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
         let rc = ds.ArrowLength
         if size > 0.0 then
             ds.ArrowLength <- size
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
             Doc.Views.Redraw()
         else
-            failwithf "setDimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
-        dimStyle
+            failwithf "set DimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
+       
     (*
-    def DimStyleArrowSize(dimstyle, size=None):
+    def DimStyleArrowSize(dimStyle, size=None):
         '''Returns or changes the arrow size of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           size (number, optional): the new arrow size. If omitted, the current arrow size is returned
         Returns:
           number: If size is not specified, the current arrow size
           number: If size is specified, the previous arrow size
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.ArrowLength
         if size is not None:
@@ -619,24 +614,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the extension line extension of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current extension line extension</returns>
-    static member DimStyleExtension(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleExtension failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current extension line extension</returns>
+    static member DimStyleExtension(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleExtension failed.  dimStyle:'%A'" dimStyle
         ds.ExtensionLineExtension
     (*
-    def DimStyleExtension(dimstyle, extension=None):
+    def DimStyleExtension(dimStyle, extension=None):
         '''Returns or changes the extension line extension of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           extension (number, optional): the new extension line extension
         Returns:
           number: if extension is not specified, the current extension line extension
           number: if extension is specified, the previous extension line extension
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.ExtensionLineExtension
         if extension is not None:
@@ -647,32 +642,32 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the extension line extension of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="extension">(int)The new extension line extension</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="extension">(float)The new extension line extension</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleExtension(dimstyle:string, extension:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
+    static member DimStyleExtension(dimStyle:string, extension:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
         let rc = ds.ExtensionLineExtension
         if extension > 0.0 then
             ds.ExtensionLineExtension <- extension
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "DimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
             Doc.Views.Redraw()
         else
-            failwithf "setDimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
-        dimStyle
+            failwithf "set DimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
+       
     (*
-    def DimStyleExtension(dimstyle, extension=None):
+    def DimStyleExtension(dimStyle, extension=None):
         '''Returns or changes the extension line extension of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           extension (number, optional): the new extension line extension
         Returns:
           number: if extension is not specified, the current extension line extension
           number: if extension is specified, the previous extension line extension
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.ExtensionLineExtension
         if extension is not None:
@@ -684,25 +679,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the font used by a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(string) The current font</returns>
-    static member DimStyleFont(dimstyle:string) : string = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleFont failed.  dimStyle:'%A'" dimStyle
-        let i = ds.FontIndex
-        Doc.Fonts.[i].FaceName
+    static member DimStyleFont(dimStyle:string) : string = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleFont failed.  dimStyle:'%A'" dimStyle
+        ds.Font.FaceName
     (*
-    def DimStyleFont(dimstyle, font=None):
+    def DimStyleFont(dimStyle, font=None):
         '''Returns or changes the font used by a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           font (str, optional): the new font face name
         Returns:
           str: if font is not specified, the current font if successful
           str: if font is specified, the previous font if successful
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.Font.FaceName
         if font:
@@ -714,29 +708,29 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the font used by a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="font">(string)The new font face name</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleFont(dimstyle:string, font:string) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
-        let newindex = Doc.Fonts.FindOrCreate(font, false, false)
-        ds.FontIndex <- newindex
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+    static member DimStyleFont(dimStyle:string, font:string) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
+        let newindex = Doc.Fonts.FindOrCreate(font, false, false) // FIXME deprecated ??
+        ds.Font <- Doc.Fonts.[newindex]
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  failwithf "set DimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
         Doc.Views.Redraw()
-        dimStyle
+        
     (*
-    def DimStyleFont(dimstyle, font=None):
+    def DimStyleFont(dimStyle, font=None):
         '''Returns or changes the font used by a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           font (str, optional): the new font face name
         Returns:
           str: if font is not specified, the current font if successful
           str: if font is specified, the previous font if successful
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.Font.FaceName
         if font:
@@ -749,24 +743,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the leader arrow size of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current leader arrow size</returns>
-    static member DimStyleLeaderArrowSize(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleLeaderArrowSize failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current leader arrow size</returns>
+    static member DimStyleLeaderArrowSize(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleLeaderArrowSize failed.  dimStyle:'%A'" dimStyle
         ds.LeaderArrowLength
     (*
-    def DimStyleLeaderArrowSize(dimstyle, size=None):
+    def DimStyleLeaderArrowSize(dimStyle, size=None):
         '''Returns or changes the leader arrow size of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           size (number, optional) the new leader arrow size
         Returns:
           number: if size is not specified, the current leader arrow size
           number: if size is specified, the previous leader arrow size
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.LeaderArrowLength
         if size is not None:
@@ -777,29 +771,29 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the leader arrow size of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="size">(int)The new leader arrow size</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="size">(float)The new leader arrow size</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleLeaderArrowSize(dimstyle:string, size:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleLeaderArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
+    static member DimStyleLeaderArrowSize(dimStyle:string, size:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleLeaderArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
         if size > 0.0 then
             ds.LeaderArrowLength <- size
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleLeaderArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
             Doc.Views.Redraw()
-        dimStyle
+       
     (*
-    def DimStyleLeaderArrowSize(dimstyle, size=None):
+    def DimStyleLeaderArrowSize(dimStyle, size=None):
         '''Returns or changes the leader arrow size of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           size (number, optional) the new leader arrow size
         Returns:
           number: if size is not specified, the current leader arrow size
           number: if size is specified, the previous leader arrow size
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.LeaderArrowLength
         if size is not None:
@@ -812,25 +806,25 @@ module ExtensionsDimension =
 
     ///<summary>Returns the length factor of a dimension style. Length factor
     /// is the conversion between Rhino units and dimension units</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) if factor is not defined, the current length factor</returns>
-    static member DimStyleLengthFactor(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleLengthFactor failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) if factor is not defined, the current length factor</returns>
+    static member DimStyleLengthFactor(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleLengthFactor failed.  dimStyle:'%A'" dimStyle
         ds.LengthFactor
     (*
-    def DimStyleLengthFactor(dimstyle, factor=None):
+    def DimStyleLengthFactor(dimStyle, factor=None):
         '''Returns or changes the length factor of a dimension style. Length factor
         is the conversion between Rhino units and dimension units
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           factor (number, optional): the new length factor
         Returns:
           number: if factor is not defined, the current length factor
           number: if factor is defined, the previous length factor
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.LengthFactor
         if factor is not None:
@@ -842,29 +836,29 @@ module ExtensionsDimension =
 
     ///<summary>Changes the length factor of a dimension style. Length factor
     /// is the conversion between Rhino units and dimension units</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="factor">(int)The new length factor</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="factor">(float)The new length factor</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleLengthFactor(dimstyle:string, factor:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleLengthFactor failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
+    static member DimStyleLengthFactor(dimStyle:string, factor:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleLengthFactor failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
         ds.LengthFactor <- factor
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleLengthFactor failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
         Doc.Views.Redraw()
-        dimStyle
+        
     (*
-    def DimStyleLengthFactor(dimstyle, factor=None):
+    def DimStyleLengthFactor(dimStyle, factor=None):
         '''Returns or changes the length factor of a dimension style. Length factor
         is the conversion between Rhino units and dimension units
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           factor (number, optional): the new length factor
         Returns:
           number: if factor is not defined, the current length factor
           number: if factor is defined, the previous length factor
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.LengthFactor
         if factor is not None:
@@ -876,24 +870,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the linear display precision of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current linear precision value</returns>
-    static member DimStyleLinearPrecision(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleLinearPrecision failed.  dimStyle:'%A'" dimStyle
+    static member DimStyleLinearPrecision(dimStyle:string) : int = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleLinearPrecision failed.  dimStyle:'%A'" dimStyle
         ds.LengthResolution
     (*
-    def DimStyleLinearPrecision(dimstyle, precision=None):
+    def DimStyleLinearPrecision(dimStyle, precision=None):
         '''Returns or changes the linear display precision of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           precision (number, optional): the new linear precision value
         Returns:
           number: if precision is not specified, the current linear precision value
           number: if precision is specified, the previous linear precision value
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.LengthResolution
         if precision is not None:
@@ -904,31 +898,31 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the linear display precision of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new linear precision value</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleLinearPrecision(dimstyle:string, precision:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+    static member DimStyleLinearPrecision(dimStyle:string, precision:int) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
         if precision >= 0 then
             ds.LengthResolution <- precision
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
             Doc.Views.Redraw()
         else
-            failwithf "setDimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
-        dimStyle
+            failwithf "set DimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+        
     (*
-    def DimStyleLinearPrecision(dimstyle, precision=None):
+    def DimStyleLinearPrecision(dimStyle, precision=None):
         '''Returns or changes the linear display precision of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           precision (number, optional): the new linear precision value
         Returns:
           number: if precision is not specified, the current linear precision value
           number: if precision is specified, the previous linear precision value
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.LengthResolution
         if precision is not None:
@@ -940,13 +934,11 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the names of all dimension styles in the document</summary>
-    ///<returns>(string seq) the names of all dimension styles in the document</returns>
-    static member DimStyleNames() : string seq =
-        let rc = [| for ds in Doc.DimStyles -> ds.Name |]
-        if sort then  rc |> Array.sort
-        else rc
+    ///<returns>(string []) the names of all dimension styles in the document</returns>
+    static member DimStyleNames() : string [] =
+        [| for ds in Doc.DimStyles -> ds.Name |]
     (*
-    def DimStyleNames(sort=False):
+    def dimStyleNames(sort=False):
         '''Returns the names of all dimension styles in the document
         Parameters:
           sort (bool): sort the list if True, not sorting is the default (False)
@@ -959,21 +951,21 @@ module ExtensionsDimension =
     *)
 
 
-    ///<summary>Returns the number display format of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current display format
-    ///  0 = Decimal
-    ///  1 = Fractional
-    ///  2 = Feet and inches</returns>
-    static member DimStyleNumberFormat(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
-        int(ds.LengthFormat)
+    // ///<summary>Returns the number display format of a dimension style</summary>
+    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    // ///<returns>(float) The current display format
+    // ///  0 = Decimal
+    // ///  1 = Fractional
+    // ///  2 = Feet and inches</returns>
+    // static member DimStyleNumberFormat(dimStyle:string) : int = //GET
+    //     let ds = Doc.DimStyles.FindName(dimStyle)
+    //     if isNull ds then  failwithf "get DimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
+    //     int(ds.LengthFormat) FIXME
     (*
-    def DimStyleNumberFormat(dimstyle, format=None):
+    def DimStyleNumberFormat(dimStyle, format=None):
         '''Returns or changes the number display format of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           format (number, optional) the new number format
              0 = Decimal
              1 = Fractional
@@ -983,7 +975,7 @@ module ExtensionsDimension =
           number: if format is specified, the previous display format
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = int(ds.LengthFormat)
         if format is not None:
@@ -995,28 +987,27 @@ module ExtensionsDimension =
         return rc
     *)
 
-    ///<summary>Changes the number display format of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="format">(int)The new number format
-    ///  0 = Decimal
-    ///  1 = Fractional
-    ///  2 = Feet and inches</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member DimStyleNumberFormat(dimstyle:string, format:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
-        if   format=0 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Decimal
-        elif format=1 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Feet
-        elif format=2 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.FeetAndInches
-        else failwithf "setDimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
-        Doc.Views.Redraw()
-        dimStyle
+    // ///<summary>Changes the number display format of a dimension style</summary>
+    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    // ///<param name="format">(int)The new number format
+    // ///  0 = Decimal
+    // ///  1 = Fractional
+    // ///  2 = Feet and inches</param>
+    // ///<returns>(unit) void, nothing</returns>
+    // static member DimStyleNumberFormat(dimStyle:string, format:int) : unit = //SET
+    //     let ds = Doc.DimStyles.FindName(dimStyle)
+    //     if isNull ds then  failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+    //     if   format=0 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Decimal
+    //     elif format=1 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Feet
+    //     elif format=2 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.FeetAndInches
+    //     else failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+    //     if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+    //     Doc.Views.Redraw()        
     (*
-    def DimStyleNumberFormat(dimstyle, format=None):
+    def DimStyleNumberFormat(dimStyle, format=None):
         '''Returns or changes the number display format of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           format (number, optional) the new number format
              0 = Decimal
              1 = Fractional
@@ -1026,9 +1017,9 @@ module ExtensionsDimension =
           number: if format is specified, the previous display format
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
-        rc = int(ds.LengthFormat)
+        rc = float(ds.LengthFormat)
         if format is not None:
             if format==0: ds.LengthFormat = Rhino.DocObjects.DistanceDisplayMode.Decimal
             if format==1: ds.LengthFormat = Rhino.DocObjects.DistanceDisplayMode.Feet
@@ -1040,24 +1031,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the extension line offset of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current extension line offset</returns>
-    static member DimStyleOffset(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleOffset failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current extension line offset</returns>
+    static member DimStyleOffset(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleOffset failed.  dimStyle:'%A'" dimStyle
         ds.ExtensionLineOffset
     (*
-    def DimStyleOffset(dimstyle, offset=None):
+    def DimStyleOffset(dimStyle, offset=None):
         '''Returns or changes the extension line offset of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           offset (number, optional): the new extension line offset
         Returns:
           number: if offset is not specified, the current extension line offset
           number: if offset is specified, the previous extension line offset
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.ExtensionLineOffset
         if offset is not None:
@@ -1068,28 +1059,28 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the extension line offset of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="offset">(int)The new extension line offset</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="offset">(float)The new extension line offset</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleOffset(dimstyle:string, offset:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleOffset failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
+    static member DimStyleOffset(dimStyle:string, offset:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleOffset failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
         ds.ExtensionLineOffset <- offset
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleOffset failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
         Doc.Views.Redraw()
-        dimStyle
+   
     (*
-    def DimStyleOffset(dimstyle, offset=None):
+    def DimStyleOffset(dimStyle, offset=None):
         '''Returns or changes the extension line offset of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           offset (number, optional): the new extension line offset
         Returns:
           number: if offset is not specified, the current extension line offset
           number: if offset is specified, the previous extension line offset
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.ExtensionLineOffset
         if offset is not None:
@@ -1102,25 +1093,25 @@ module ExtensionsDimension =
 
     ///<summary>Returns the prefix of a dimension style - the text to
     /// prefix to the dimension text.</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
+    ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<returns>(string) The current prefix</returns>
-    static member DimStylePrefix(dimstyle:string) : string = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStylePrefix failed.  dimStyle:'%A'" dimStyle
+    static member DimStylePrefix(dimStyle:string) : string = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStylePrefix failed.  dimStyle:'%A'" dimStyle
         ds.Prefix
     (*
-    def DimStylePrefix(dimstyle, prefix=None):
+    def DimStylePrefix(dimStyle, prefix=None):
         '''Returns or changes the prefix of a dimension style - the text to
         prefix to the dimension text.
         Parameters:
-          dimstyle (str): the name of an existing dimstyle
+          dimStyle (str): the name of an existing dimStyle
           prefix (str, optional): the new prefix
         Returns:
           str: if prefix is not specified, the current prefix
           str: if prefix is specified, the previous prefix
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.Prefix
         if prefix is not None:
@@ -1132,29 +1123,29 @@ module ExtensionsDimension =
 
     ///<summary>Changes the prefix of a dimension style - the text to
     /// prefix to the dimension text.</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
+    ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<param name="prefix">(string)The new prefix</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStylePrefix(dimstyle:string, prefix:string) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStylePrefix failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
+    static member DimStylePrefix(dimStyle:string, prefix:string) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStylePrefix failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
         ds.Prefix <- prefix
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStylePrefix failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
         Doc.Views.Redraw()
-        dimStyle
+       
     (*
-    def DimStylePrefix(dimstyle, prefix=None):
+    def DimStylePrefix(dimStyle, prefix=None):
         '''Returns or changes the prefix of a dimension style - the text to
         prefix to the dimension text.
         Parameters:
-          dimstyle (str): the name of an existing dimstyle
+          dimStyle (str): the name of an existing dimStyle
           prefix (str, optional): the new prefix
         Returns:
           str: if prefix is not specified, the current prefix
           str: if prefix is specified, the previous prefix
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.Prefix
         if prefix is not None:
@@ -1167,25 +1158,25 @@ module ExtensionsDimension =
 
     ///<summary>Returns the suffix of a dimension style - the text to
     /// append to the dimension text.</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
+    ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<returns>(string) The current suffix</returns>
-    static member DimStyleSuffix(dimstyle:string) : string = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleSuffix failed.  dimStyle:'%A'" dimStyle
+    static member DimStyleSuffix(dimStyle:string) : string = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleSuffix failed.  dimStyle:'%A'" dimStyle
         ds.Suffix
     (*
-    def DimStyleSuffix(dimstyle, suffix=None):
+    def DimStyleSuffix(dimStyle, suffix=None):
         '''Returns or changes the suffix of a dimension style - the text to
         append to the dimension text.
         Parameters:
-          dimstyle (str): the name of an existing dimstyle
+          dimStyle (str): the name of an existing dimStyle
           suffix (str, optional): the new suffix
         Returns:
           str: if suffix is not specified, the current suffix
           str: if suffix is specified, the previous suffix
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.Suffix
         if suffix is not None:
@@ -1197,29 +1188,29 @@ module ExtensionsDimension =
 
     ///<summary>Changes the suffix of a dimension style - the text to
     /// append to the dimension text.</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimstyle</param>
+    ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<param name="suffix">(string)The new suffix</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleSuffix(dimstyle:string, suffix:string) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleSuffix failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
+    static member DimStyleSuffix(dimStyle:string, suffix:string) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleSuffix failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
         ds.Suffix <- suffix
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleSuffix failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
         Doc.Views.Redraw()
-        dimStyle
+        
     (*
-    def DimStyleSuffix(dimstyle, suffix=None):
+    def DimStyleSuffix(dimStyle, suffix=None):
         '''Returns or changes the suffix of a dimension style - the text to
         append to the dimension text.
         Parameters:
-          dimstyle (str): the name of an existing dimstyle
+          dimStyle (str): the name of an existing dimStyle
           suffix (str, optional): the new suffix
         Returns:
           str: if suffix is not specified, the current suffix
           str: if suffix is specified, the previous suffix
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.Suffix
         if suffix is not None:
@@ -1230,22 +1221,22 @@ module ExtensionsDimension =
     *)
 
 
-    ///<summary>Returns the text alignment mode of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current text alignment
-    ///  0 = Normal (same as 2)
-    ///  1 = Horizontal to view
-    ///  2 = Above the dimension line
-    ///  3 = In the dimension line</returns>
-    static member DimStyleTextAlignment(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
-        int(ds.TextAlignment)
+    // ///<summary>Returns the text alignment mode of a dimension style</summary>
+    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    // ///<returns>(int) The current text alignment
+    // ///  0 = Normal (same as 2)
+    // ///  1 = Horizontal to view
+    // ///  2 = Above the dimension line
+    // ///  3 = In the dimension line</returns>
+    // static member DimStyleTextAlignment(dimStyle:string) : int = //GET
+    //     let ds = Doc.DimStyles.FindName(dimStyle)
+    //     if isNull ds then  failwithf "get DimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
+    //     int(ds.TextAlignment) //FIXME
     (*
-    def DimStyleTextAlignment(dimstyle, alignment=None):
+    def DimStyleTextAlignment(dimStyle, alignment=None):
         '''Returns or changes the text alignment mode of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           alignment (number, optional): the new text alignment
               0 = Normal (same as 2)
               1 = Horizontal to view
@@ -1256,7 +1247,7 @@ module ExtensionsDimension =
           number: if alignment is specified, the previous text alignment
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = int(ds.TextAlignment)
         if alignment is not None:
@@ -1269,30 +1260,29 @@ module ExtensionsDimension =
         return rc
     *)
 
-    ///<summary>Changes the text alignment mode of a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="alignment">(int)The new text alignment
-    ///  0 = Normal (same as 2)
-    ///  1 = Horizontal to view
-    ///  2 = Above the dimension line
-    ///  3 = In the dimension line</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member DimStyleTextAlignment(dimstyle:string, alignment:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-        elif alignment=0 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Normal
-        elif alignment=1 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Horizontal
-        elif alignment=2 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.AboveLine
-        elif alignment=3 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.InLine
-        else failwithf "setDimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
-        Doc.Views.Redraw()
-        dimStyle
+    // ///<summary>Changes the text alignment mode of a dimension style</summary>
+    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    // ///<param name="alignment">(int)The new text alignment
+    // ///  0 = Normal (same as 2)
+    // ///  1 = Horizontal to view
+    // ///  2 = Above the dimension line
+    // ///  3 = In the dimension line</param>
+    // ///<returns>(unit) void, nothing</returns>
+    // static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
+    //     let ds = Doc.DimStyles.FindName(dimStyle)
+    //     if isNull ds then  failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+    //     elif alignment=0 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Normal //FIXME
+    //     elif alignment=1 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Horizontal
+    //     elif alignment=2 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.AboveLine
+    //     elif alignment=3 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.InLine
+    //     else failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+    //     if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+    //     Doc.Views.Redraw()        
     (*
-    def DimStyleTextAlignment(dimstyle, alignment=None):
+    def DimStyleTextAlignment(dimStyle, alignment=None):
         '''Returns or changes the text alignment mode of a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           alignment (number, optional): the new text alignment
               0 = Normal (same as 2)
               1 = Horizontal to view
@@ -1303,9 +1293,9 @@ module ExtensionsDimension =
           number: if alignment is specified, the previous text alignment
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
-        rc = int(ds.TextAlignment)
+        rc = float(ds.TextAlignment)
         if alignment is not None:
             if alignment==0: ds.TextAlignment = Rhino.DocObjects.TextDisplayAlignment.Normal
             if alignment==1: ds.TextAlignment = Rhino.DocObjects.TextDisplayAlignment.Horizontal
@@ -1318,24 +1308,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the text gap used by a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current text gap</returns>
-    static member DimStyleTextGap(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleTextGap failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current text gap</returns>
+    static member DimStyleTextGap(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleTextGap failed.  dimStyle:'%A'" dimStyle
         ds.TextGap
     (*
-    def DimStyleTextGap(dimstyle, gap=None):
+    def DimStyleTextGap(dimStyle, gap=None):
         '''Returns or changes the text gap used by a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           gap (number, optional): the new text gap
         Returns:
           number: if gap is not specified, the current text gap
           number: if gap is specified, the previous text gap
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.TextGap
         if gap is not None:
@@ -1346,31 +1336,31 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the text gap used by a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="gap">(int)The new text gap</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="gap">(float)The new text gap</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleTextGap(dimstyle:string, gap:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
+    static member DimStyleTextGap(dimStyle:string, gap:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
         if gap >= 0.0 then
             ds.TextGap <- gap
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
-            Doc.Views.Redraw()
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
+            Doc.Views.Redraw() 
         else
-            failwithf "setDimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
-        dimStyle
+            failwithf "set DimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
+     
     (*
-    def DimStyleTextGap(dimstyle, gap=None):
+    def DimStyleTextGap(dimStyle, gap=None):
         '''Returns or changes the text gap used by a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           gap (number, optional): the new text gap
         Returns:
           number: if gap is not specified, the current text gap
           number: if gap is specified, the previous text gap
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.TextGap
         if gap is not None:
@@ -1382,24 +1372,24 @@ module ExtensionsDimension =
 
 
     ///<summary>Returns the text height used by a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<returns>(int) The current text height</returns>
-    static member DimStyleTextHeight(dimstyle:string) : int = //GET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "getDimStyleTextHeight failed.  dimStyle:'%A'" dimStyle
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current text height</returns>
+    static member DimStyleTextHeight(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleTextHeight failed.  dimStyle:'%A'" dimStyle
         ds.TextHeight
     (*
-    def DimStyleTextHeight(dimstyle, height=None):
+    def DimStyleTextHeight(dimStyle, height=None):
         '''Returns or changes the text height used by a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           height (number, optional): the new text height
         Returns:
           number: if height is not specified, the current text height
           number: if height is specified, the previous text height
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.TextHeight
         if height:
@@ -1410,31 +1400,30 @@ module ExtensionsDimension =
     *)
 
     ///<summary>Changes the text height used by a dimension style</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
-    ///<param name="height">(int)The new text height</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="height">(float)The new text height</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DimStyleTextHeight(dimstyle:string, height:int) : unit = //SET
-        let ds = Doc.DimStyles.Find(dimStyle,true)
-        if isNull ds then  failwithf "setDimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
+    static member DimStyleTextHeight(dimStyle:string, height:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
         if height>0.0 then
             ds.TextHeight <- height
-            ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false)
+            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
             Doc.Views.Redraw()
         else
-            failwithf "setDimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
-        dimStyle
+            failwithf "set DimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
     (*
-    def DimStyleTextHeight(dimstyle, height=None):
+    def DimStyleTextHeight(dimStyle, height=None):
         '''Returns or changes the text height used by a dimension style
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
           height (number, optional): the new text height
         Returns:
           number: if height is not specified, the current text height
           number: if height is specified, the previous text height
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         rc = ds.TextHeight
         if height:
@@ -1449,7 +1438,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
         | Some g ->
             match g with
@@ -1476,7 +1465,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
         | Some g ->
             match g with
@@ -1502,7 +1491,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
         | Some g ->
             match g with
@@ -1530,7 +1519,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool =
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
         | Some g ->
             match g with
@@ -1553,42 +1542,42 @@ module ExtensionsDimension =
 
 
     ///<summary>Verifies the existance of a dimension style in the document</summary>
-    ///<param name="dimstyle">(string) The name of a dimstyle to test for</param>
+    ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimStyle(dimstyle:string) : bool =
-        let ds = Doc.DimStyles.Find(dimStyle,true)
+    static member IsDimStyle(dimStyle:string) : bool =
+        let ds = Doc.DimStyles.FindName(dimStyle)
         notNull ds
     (*
-    def IsDimStyle(dimstyle):
+    def IsDimStyle(dimStyle):
         '''Verifies the existance of a dimension style in the document
         Parameters:
-          dimstyle (str): the name of a dimstyle to test for
+          dimStyle (str): the name of a dimStyle to test for
         Returns:
           bool: True or False.
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         return ds is not None
     *)
 
 
     ///<summary>Verifies that an existing dimension style is from a reference file</summary>
-    ///<param name="dimstyle">(string) The name of an existing dimension style</param>
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimStyleReference(dimstyle:string) : bool =
-        let ds = Doc.DimStyles.Find(dimStyle,true)
+    static member IsDimStyleReference(dimStyle:string) : bool =
+        let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then false
         else ds.IsReference
     (*
-    def IsDimStyleReference(dimstyle):
+    def IsDimStyleReference(dimStyle):
         '''Verifies that an existing dimension style is from a reference file
         Parameters:
-          dimstyle (str): the name of an existing dimension style
+          dimStyle (str): the name of an existing dimension style
         Returns:
           bool: True or False.
           None: on error
         '''
-        ds = scriptcontext.doc.DimStyles.FindName(dimstyle)
+        ds = scriptcontext.doc.DimStyles.FindName(dimStyle)
         if ds is None: return scriptcontext.errorhandler()
         return ds.IsReference
     *)
@@ -1598,7 +1587,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool =
-         match Coerce.tryCoerceGeometry(objectId) with
+         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
          | None -> false
          | Some g ->
             match g with
@@ -1624,7 +1613,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-         match Coerce.tryCoerceGeometry(objectId) with
+         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
          | None -> false
          | Some g ->
             match g with
@@ -1650,7 +1639,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-         match Coerce.tryCoerceGeometry(objectId) with
+         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
          | None -> false
          | Some g ->
             match g with
@@ -1676,7 +1665,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
         | Some g ->
            match g with
@@ -1702,7 +1691,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(string) The current text string</returns>
     static member LeaderText(objectId:Guid) : string = //GET
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
         | Some g ->
             match g with
@@ -1739,17 +1728,15 @@ module ExtensionsDimension =
     ///<param name="text">(string)The new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectId:Guid, text:string) : unit = //SET
-        match Coerce.tryCoerceGeometry(objectId) with
+        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
         | Some g ->
             match g with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-                //rh6:  g.RichText <- text
-                g.TextFormula<- text
+                g.PlainText <- text               // TODO or use rich text?
                 annotationObject.CommitChanges()|> ignore
-                Doc.Views.Redraw()
-                objectId
+                Doc.Views.Redraw()                
             | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
     (*
     def LeaderText(object_id, text=None):
@@ -1779,12 +1766,12 @@ module ExtensionsDimension =
     ///<summary>Renames an existing dimension style</summary>
     ///<param name="oldstyle">(string) The name of an existing dimension style</param>
     ///<param name="newstyle">(string) The new dimension style name</param>
-    ///<returns>(string) the new dimension style name</returns>
-    static member RenameDimStyle(oldstyle:string, newstyle:string) : string =
-        let mutable ds = Doc.DimStyles.Find(oldstyle,true)
+    ///<returns>(unit) void, nothing</returns>
+    static member RenameDimStyle(oldstyle:string, newstyle:string) : unit =
+        let mutable ds = Doc.DimStyles.FindName(oldstyle)
         if isNull ds then  failwithf "renameDimStyle failed.  oldstyle:'%A' newstyle:'%A'" oldstyle newstyle
         ds.Name <- newstyle
-        ds.CommitChanges() |>ignore // rh6: Doc.DimStyles.Modify(ds, ds.Id, false) then  newstyle
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  failwithf "renameDimStyle failed.  oldstyle:'%A' newstyle:'%A'" oldstyle newstyle
     (*
     def RenameDimStyle(oldstyle, newstyle):
         '''Renames an existing dimension style

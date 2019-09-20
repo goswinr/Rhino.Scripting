@@ -496,7 +496,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Clears contents of Rhino's command history window. You can view the
     ///  command history window by using the CommandHistory command in Rhino.</summary>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member ClearCommandHistory() : unit =
         RhinoApp.ClearCommandHistoryWindow()
     (*
@@ -699,7 +699,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Enables/disables OLE Server Busy/Not Responding dialog boxes</summary>
     ///<param name="enable">(bool) Whether alerts should be visible (True or False)</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member DisplayOleAlerts(enable:bool) : unit =
         Rhino.Runtime.HostUtils.DisplayOleAlerts( enable )
     (*
@@ -951,7 +951,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Closes the rhino application</summary>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Exit() : unit =
         RhinoApp.Exit()
     (*
@@ -1614,7 +1614,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Change Rhino's command window prompt</summary>
     ///<param name="message">The new prompt on the commandline.</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Prompt(message:string) : unit =
         RhinoApp.SetCommandPrompt(message)
     (*
@@ -1703,7 +1703,7 @@ module ExtensionsApplication =
     ///<param name="keys">(string) A string of characters to send to the command line.</param>
     ///<param name="addReturn">(bool) Optional, Default Value: <c>true</c>
     ///Append a return character to the end of the string. If omitted an return character will be added (True)</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoApp.SendKeystrokes(keys, addReturn)
     (*
@@ -1761,7 +1761,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets Rhino's status bar distance pane</summary>
     ///<param name="distance">(float) The distance to set the status bar.</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member StatusBarDistance(distance:float) : unit =
         Rhino.UI.StatusBar.SetDistancePane(distance)
     (*
@@ -1779,7 +1779,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets Rhino's status bar message pane</summary>
     ///<param name="message">(string) The message to display.</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member StatusBarMessage(message:string) : unit =
         Rhino.UI.StatusBar.SetMessagePane(message)
     (*
@@ -1797,7 +1797,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets Rhino's status bar point coordinate pane</summary>
     ///<param name="point">(Point3d) The 3d coordinates of the status bar.</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member StatusBarPoint(point:Point3d) : unit =
         Rhino.UI.StatusBar.SetPointPane(point)
     (*
@@ -1871,7 +1871,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Hide the progress meter</summary>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit) void, nothing</returns>
     static member StatusBarProgressMeterHide() : unit =
         Rhino.UI.StatusBar.HideProgressMeter()
     (*
