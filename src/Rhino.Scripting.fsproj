@@ -54,18 +54,21 @@
   </ItemGroup>
 
   <ItemGroup>
+  
     <Reference Include="RhinoCommon">
       <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="System.Windows.Forms" />
+
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.7.0" />
   </ItemGroup>
 
-  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 (does not work ?)
+  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 (After Build does not work ?)
   </PropertyGroup>
     <AllowedReferenceRelatedFileExtensions>
       .mdb
