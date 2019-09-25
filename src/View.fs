@@ -11,6 +11,7 @@ module ExtensionsView =
   [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     
     static member internal Viewhelper() : obj =
         failNotImpl () // genreation temp disabled !!
@@ -100,11 +101,11 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Adds new named construction plane to the document</summary>
     ///<param name="cplaneName">(string) The name of the new named construction plane</param>
-    ///<param name="view">(Guid) Optional, Default Value: <c>null:Guid</c>
+    ///<param name="view">(Guid) Optional, Default Value: <c>Guid()</c>
     ///Title or identifier of the view from which to save
     ///  the construction plane. If omitted, the current active view is used.</param>
     ///<returns>(string) name of the newly created construction plane</returns>
-    static member AddNamedCPlane(cplaneName:string, [<OPT;DEF(null:Guid)>]view:Guid) : string =
+    static member AddNamedCPlane(cplaneName:string, [<OPT;DEF(Guid())>]view:Guid) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddNamedCPlane(cplane_name, view=None):
@@ -129,11 +130,11 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Adds a new named view to the document</summary>
     ///<param name="name">(string) The name of the new named view</param>
-    ///<param name="view">(Guid) Optional, Default Value: <c>null:Guid</c>
+    ///<param name="view">(Guid) Optional, Default Value: <c>Guid()</c>
     ///The title or identifier of the view to save. If omitted, the current
     ///  active view is saved</param>
     ///<returns>(string) name fo the newly created named view</returns>
-    static member AddNamedView(name:string, [<OPT;DEF(null:Guid)>]view:Guid) : string =
+    static member AddNamedView(name:string, [<OPT;DEF(Guid())>]view:Guid) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddNamedView(name, view=None):
@@ -155,6 +156,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the current detail view in a page layout view</summary>
     ///<param name="layout">(string) Title or identifier of an existing page layout view</param>
     ///<returns>(string) The title or id of the current detail view</returns>
@@ -232,6 +234,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the currently active view</summary>
     ///<returns>(string) The title or id of the current view</returns>
     static member CurrentView() : string = //GET
@@ -333,6 +336,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the projection locked state of a detail</summary>
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
     ///<returns>(bool) if lock==None, the current detail projection locked state</returns>
@@ -387,6 +391,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the scale of a detail object</summary>
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
     ///<returns>(float) current page to model scale ratio if model_length and page_length are both None</returns>
@@ -424,7 +429,7 @@ module ExtensionsView =
     ///<param name="modelLength">(float)A length in the current model units</param>
     ///<param name="pageLength">(float)A length in the current page units</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DetailScale(detailId:Guid, modelLength:float, [<OPT;DEF(null:float)>]pageLength:float) : unit = //SET
+    static member DetailScale(detailId:Guid, modelLength:float, [<OPT;DEF(7e89)>]pageLength:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def DetailScale(detail_id, model_length=None, page_length=None):
@@ -843,12 +848,12 @@ module ExtensionsView =
     ///  1=left
     ///  2=down
     ///  3=up</param>
-    ///<param name="angle">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="angle">(float) Optional, Default Value: <c>7e89</c>
     ///The angle to rotate. If omitted, the angle of rotation
     ///  is specified by the "Increment in divisions of a circle" parameter
     ///  specified in Options command's View tab</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member RotateCamera([<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0)>]direction:int, [<OPT;DEF(null:float)>]angle:float) : bool =
+    static member RotateCamera([<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0)>]direction:int, [<OPT;DEF(7e89)>]angle:float) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotateCamera(view=None, direction=0, angle=None):
@@ -907,12 +912,12 @@ module ExtensionsView =
     ///  1=left
     ///  2=down
     ///  3=up</param>
-    ///<param name="angle">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="angle">(float) Optional, Default Value: <c>7e89</c>
     ///Angle to rotate. If omitted, the angle of rotation is specified
     ///  by the "Increment in divisions of a circle" parameter specified in
     ///  Options command's View tab</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member RotateView([<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0)>]direction:int, [<OPT;DEF(null:float)>]angle:float) : bool =
+    static member RotateView([<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0)>]direction:int, [<OPT;DEF(7e89)>]angle:float) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotateView(view=None, direction=0, angle=None):
@@ -947,6 +952,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Get status of a view's construction plane grid</summary>
     ///<returns>(bool) The grid display state</returns>
     static member ShowGrid() : bool = //GET
@@ -974,7 +980,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The grid state to set. If omitted, the current grid display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ShowGrid(view:string, [<OPT;DEF(null:bool)>]show:bool) : unit = //SET
+    static member ShowGrid(view:string, show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ShowGrid(view=None, show=None):
@@ -996,6 +1002,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Get status of a view's construction plane grid axes.</summary>
     ///<returns>(bool) The grid axes display state</returns>
     static member ShowGridAxes() : bool = //GET
@@ -1045,6 +1052,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Get status of the title window of a view</summary>
     ///<returns>(unit) </returns>
     static member ShowViewTitle() : unit = //GET
@@ -1083,6 +1091,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Get status of a view's world axis icon</summary>
     ///<returns>(bool) The world axes display state</returns>
     static member ShowWorldAxes() : bool = //GET
@@ -1141,12 +1150,12 @@ module ExtensionsView =
     ///The direction to rotate the view where
     ///  0=right
     ///  1=left</param>
-    ///<param name="angle">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="angle">(float) Optional, Default Value: <c>7e89</c>
     ///The angle to rotate. If omitted, the angle of rotation is
     ///  specified by the "Increment in divisions of a circle" parameter specified
     ///  in Options command's View tab</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member TiltView([<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0)>]direction:int, [<OPT;DEF(null:float)>]angle:float) : bool =
+    static member TiltView([<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0)>]direction:int, [<OPT;DEF(7e89)>]angle:float) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def TiltView(view=None, direction=0, angle=None):
@@ -1180,6 +1189,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the camera location of the specified view</summary>
     ///<returns>(Point3d) The current camera location</returns>
     static member ViewCamera() : Point3d = //GET
@@ -1211,7 +1221,7 @@ module ExtensionsView =
     ///<param name="cameraLocation">(Point3d)A 3D point identifying the new camera location.
     ///  If omitted, the current camera location is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCamera(view:string, [<OPT;DEF(null:Point3d)>]cameraLocation:Point3d) : unit = //SET
+    static member ViewCamera(view:string, [<OPT;DEF(Point3d())>]cameraLocation:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewCamera(view=None, camera_location=None):
@@ -1236,6 +1246,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the 35mm camera lens length of the specified perspective
     /// projection view.</summary>
     ///<returns>(float) The current lens length</returns>
@@ -1267,7 +1278,7 @@ module ExtensionsView =
     ///<param name="length">(float)The new 35mm camera lens length. If omitted, the previous
     ///  35mm camera lens length is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCameraLens(view:string, [<OPT;DEF(null:float)>]length:float) : unit = //SET
+    static member ViewCameraLens(view:string, [<OPT;DEF(7e89)>]length:float) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewCameraLens(view=None, length=None):
@@ -1313,6 +1324,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the camera and target positions of the specified view</summary>
     ///<returns>(Point3d * Point3d) if both camera and target are not specified, then the 3d points containing
     ///  the current camera and target locations is returned</returns>
@@ -1352,7 +1364,7 @@ module ExtensionsView =
     ///<param name="target">(Point3d)3d point identifying the new target location. If camera and
     ///  target are not specified, current camera and target locations are returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCameraTarget(view:string, [<OPT;DEF(null:Point3d)>]camera:Point3d, [<OPT;DEF(null:Point3d)>]target:Point3d) : unit = //SET
+    static member ViewCameraTarget(view:string, [<OPT;DEF(Point3d())>]camera:Point3d, [<OPT;DEF(Point3d())>]target:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewCameraTarget(view=None, camera=None, target=None):
@@ -1382,6 +1394,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the camera up direction of a specified</summary>
     ///<returns>(Vector3d) The current camera up direction</returns>
     static member ViewCameraUp() : Vector3d = //GET
@@ -1408,7 +1421,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="upVector">(Vector3d)3D vector identifying the new camera up direction</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCameraUp(view:string, [<OPT;DEF(null:Vector3d)>]upVector:Vector3d) : unit = //SET
+    static member ViewCameraUp(view:string, [<OPT;DEF(Vector3d())>]upVector:Vector3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewCameraUp(view=None, up_vector=None):
@@ -1429,6 +1442,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Return a view's construction plane</summary>
     ///<returns>(Plane) The current construction plane</returns>
     static member ViewCPlane() : Plane = //GET
@@ -1456,7 +1470,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, current active view is used.</param>
     ///<param name="plane">(Plane)The new construction plane if setting</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCPlane(view:string, [<OPT;DEF(null:Plane)>]plane:Plane) : unit = //SET
+    static member ViewCPlane(view:string, [<OPT;DEF(Plane())>]plane:Plane) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewCPlane(view=None, plane=None):
@@ -1478,6 +1492,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Return a view display mode</summary>
     ///<returns>(unit) void, nothing</returns>
     static member ViewDisplayMode() : unit = //GET
@@ -1660,6 +1675,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Return a view's projection mode.</summary>
     ///<returns>(int) The current projection mode for the specified view
     ///  1 = parallel
@@ -1701,7 +1717,7 @@ module ExtensionsView =
     ///  2 = perspective
     ///  3 = two point perspective</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewProjection(view:string, [<OPT;DEF(null:int)>]mode:int) : unit = //SET
+    static member ViewProjection(view:string, [<OPT;DEF(987654321)>]mode:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewProjection(view=None, mode=None):
@@ -1731,6 +1747,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the radius of a parallel-projected view. Useful
     /// when you need an absolute zoom factor for a parallel-projected view</summary>
     ///<returns>(float) The current view radius for the specified view</returns>
@@ -1775,7 +1792,7 @@ module ExtensionsView =
     ///  subtended by an object changes.  true = perform a "zoom"
     ///  magnification by adjusting the "lens" angle</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewRadius(view:string, [<OPT;DEF(null:float)>]radius:float, [<OPT;DEF(false)>]mode:bool) : unit = //SET
+    static member ViewRadius(view:string, [<OPT;DEF(7e89)>]radius:float, [<OPT;DEF(false)>]mode:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewRadius(view=None, radius=None, mode=False):
@@ -1871,6 +1888,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the target location of the specified view</summary>
     ///<returns>(Point3d) The current target location</returns>
     static member ViewTarget() : Point3d = //GET
@@ -1903,7 +1921,7 @@ module ExtensionsView =
     ///<param name="target">(Point3d)3d point identifying the new target location. If omitted,
     ///  the current target location is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewTarget(view:string, [<OPT;DEF(null:Point3d)>]target:Point3d) : unit = //SET
+    static member ViewTarget(view:string, [<OPT;DEF(Point3d())>]target:Point3d) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewTarget(view=None, target=None):
@@ -1952,6 +1970,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the wallpaper bitmap of the specified view. To remove a
     /// wallpaper bitmap, pass an empty string ""</summary>
     ///<returns>(string) The current wallpaper bitmap filename</returns>
@@ -2006,6 +2025,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the grayscale display option of the wallpaper bitmap in a
     /// specified view</summary>
     ///<returns>(bool) The current grayscale display option</returns>
@@ -2062,6 +2082,7 @@ module ExtensionsView =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the visibility of the wallpaper bitmap in a specified view</summary>
     ///<returns>(bool) The current hidden state</returns>
     static member WallpaperHidden() : bool = //GET

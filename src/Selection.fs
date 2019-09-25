@@ -240,7 +240,7 @@ module ExtensionsSelection =
     ///  case, an ObjRef is returned instead of a Guid to allow for tracking
     ///  of the subobject when passed into other functions</param>
     ///<returns>(Guid) Identifier of the picked object</returns>
-    static member GetObject([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:int, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:obj->unit)>]customFilter:obj->unit, [<OPT;DEF(false)>]subobjects:bool) : Guid =
+    static member GetObject([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:int, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool,  [<OPT;DEF(false)>]subobjects:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObject(message=None, filter=0, preselect=False, select=False, custom_filter=None, subobjects=False):
@@ -304,8 +304,8 @@ module ExtensionsSelection =
     *)
 
 
-    //(FIXME) VarOutTypes
     [<EXT>]
+    //(FIXME) VarOutTypes
     ///<summary>Prompts user to pick, or select a single object</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
@@ -1307,7 +1307,7 @@ module ExtensionsSelection =
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
     ///If False, then a crossing window selection is performed</param>
     ///<returns>(Guid seq) identifiers of selected objects on success</returns>
-    static member WindowPick(corner1:Point3d, corner2:Point3d, [<OPT;DEF(null:bool)>]view:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(true)>]inWindow:bool) : Guid seq =
+    static member WindowPick(corner1:Point3d, corner2:Point3d, view:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(true)>]inWindow:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def WindowPick(corner1, corner2, view=None, select=False, in_window=True):

@@ -6,6 +6,7 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
+open Rhino
 [<AutoOpen>]
 module ExtensionsGeometry =
   [<EXT>] 
@@ -88,40 +89,17 @@ module ExtensionsGeometry =
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
-    (*
-    def AddPictureFrame(plane, filename, width=0.0, height=0.0, self_illumination=True, embed=False, use_alpha=False, make_mesh=False):
-        '''Creates a picture frame and adds it to the document.
-      Parameters:
-        plane (plane): The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.
-        filename (str): The path to a bitmap or image file.
-        width (number, optional): If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.
-        height (number, optional):  If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.
-        self_illumination (bool, optional): If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow.
-        embed (bool, optional): If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained.
-        use_alpha (bool, optional): If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot.
-        make_mesh (bool, optional): If True, the function will make a PictureFrame object from a mesh rather than a plane surface.
-      Returns:
-        guid: object identifier on success
-        None: on failure
-      '''
-      plane = rhutil.coerceplane(plane, True)
-      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception('\"{0}\" does not exist or is not a file name'.format(filename))
-      rc = scriptcontext.doc.Objects.AddPictureFrame(plane, filename, make_mesh, width, height, self_illumination, embed) 
-      if rc==System.Guid.Empty: raise Exception("unable to add picture frame to document")
-      scriptcontext.doc.Views.Redraw()
-      return rc
-    *)
-
+   
 
     [<EXT>]
     ///<summary>Adds point object to the document.</summary>
     ///<param name="pointOrX">(float) A point3d or X location of point to add</param>
-    ///<param name="y">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="y">(float) Optional, Default Value: <c>7e89</c>
     ///Y location of point to add</param>
-    ///<param name="z">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="z">(float) Optional, Default Value: <c>7e89</c>
     ///Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
-    static member AddPoint(pointOrX:float, [<OPT;DEF(null:float)>]y:float, [<OPT;DEF(null:float)>]z:float) : Guid =
+    static member AddPoint(pointOrX:float, [<OPT;DEF(7e89)>]y:float, [<OPT;DEF(7e89)>]z:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddPoint(pointOrX, y=None, z=None):
@@ -209,7 +187,7 @@ module ExtensionsGeometry =
     ///  1 = bold
     ///  2 = italic
     ///  3 = bold and italic</param>
-    ///<param name="justification">(int) Optional, Default Value: <c>null:int</c>
+    ///<param name="justification">(int) Optional, Default Value: <c>987654321</c>
     ///Text justification. Values may be added to create combinations.
     ///  1 = Left
     ///  2 = Center (horizontal)
@@ -218,7 +196,7 @@ module ExtensionsGeometry =
     ///  131072 = Middle (vertical)
     ///  262144 = Top</param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
-    static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null:string)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(null:int)>]justification:int) : Guid =
+    static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null:string)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(987654321)>]justification:int) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddText(text, point_or_plane, height=1.0, font=None, font_style=0, justification=None):
@@ -630,6 +608,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the hidden points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool seq) List of point cloud hidden states</returns>
@@ -694,6 +673,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the point colors of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Drawing.Color seq) List of point cloud colors</returns>
@@ -777,6 +757,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     
     static member internal SimplifyPointCloudKNeighbors() : obj =
         failNotImpl () // genreation temp disabled !!
@@ -828,6 +809,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     
     static member internal SimplifyPointCloudClosestPoints() : obj =
         failNotImpl () // genreation temp disabled !!
@@ -870,6 +852,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the X, Y, and Z coordinates of a point object</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<returns>(Point3d) The current 3-D point location</returns>
@@ -924,6 +907,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the font of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(string) The current text dot font</returns>
@@ -980,6 +964,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the font height of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(float) The current text dot height</returns>
@@ -1036,6 +1021,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the location, or insertion point, on a text dot object</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(Point3d) The current 3-D text dot location</returns>
@@ -1092,6 +1078,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the text on a text dot object</summary>
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<returns>(string) The current text dot text</returns>
@@ -1150,6 +1137,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the font used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name</returns>
@@ -1212,6 +1200,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the height of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(float) The current text height</returns>
@@ -1270,6 +1259,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Plane) The current plane</returns>
@@ -1328,6 +1318,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the location of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Point3d) The 3D point identifying the current location</returns>
@@ -1390,6 +1381,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the font style of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(int) The current font style
@@ -1470,6 +1462,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value</returns>

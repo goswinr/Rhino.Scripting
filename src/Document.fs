@@ -16,7 +16,6 @@ module ExtensionsDocument =
   type RhinoScriptSyntax with
     
     [<EXT>]
-    [<EXT>]
      ///<summary>Create a bitmap preview image of the current model</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
@@ -1468,7 +1467,6 @@ module ExtensionsDocument =
     *)
 
 
-    [<EXT>]
     [<EXT>]
      ///<summary>Return the scale factor for changing between unit systems.</summary>
     ///<param name="toSystem">(int) The unit system to convert to. The unit systems are are:
