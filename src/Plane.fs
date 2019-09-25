@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsPlane =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Returns the distance from a 3D point to a plane</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
@@ -31,6 +33,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Evaluates a plane at a U,V parameter</summary>
     ///<param name="plane">(Plane) The plane to evaluate</param>
     ///<param name="parameter">(float * float) List of two numbers defining the U,V parameter to evaluate</param>
@@ -51,6 +54,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of three planes</summary>
     ///<param name="plane1">(Plane) The 1st plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd plane to intersect</param>
@@ -77,6 +81,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Moves the origin of a plane</summary>
     ///<param name="plane">(Plane) Plane or ConstructionPlane</param>
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
@@ -101,6 +106,7 @@ module ExtensionsPlane =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Returns the point on a plane that is closest to a test point.</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test.</param>
@@ -137,6 +143,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Intersect an infinite plane and a curve object</summary>
     ///<param name="plane">(Plane) The plane to intersect.</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
@@ -226,6 +233,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the equation of a plane as a tuple of four numbers. The standard
     ///  equation of a plane with a non-zero vector is Ax+By+Cz+D=0</summary>
     ///<param name="plane">(Plane) The plane to deconstruct</param>
@@ -248,6 +256,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a plane that was fit through an array of 3D points.</summary>
     ///<param name="points">(Point3d) An array of 3D points.</param>
     ///<returns>(Plane) The plane</returns>
@@ -268,6 +277,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Construct a plane from a point, and two vectors in the plane.</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane.</param>
     ///<param name="xAxis">(Vector3d) A non-zero 3D vector in the plane that determines the X axis
@@ -298,6 +308,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a plane from an origin point and a normal direction vector.</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane.</param>
     ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane.</param>
@@ -329,6 +340,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a plane from three non-colinear points</summary>
     ///<param name="origin">(Point3d) Origin point of the plane</param>
     ///<param name="x">(Point3d) X of 'points on the plane's x and y axes' (FIXME 0)</param>
@@ -353,6 +365,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of two planes</summary>
     ///<param name="plane1">(Plane) The 1st plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd plane to intersect</param>
@@ -376,6 +389,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of a plane and a sphere</summary>
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="spherePlane">(Plane) Equatorial plane of the sphere. origin of the plane is
@@ -417,6 +431,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Transforms a plane</summary>
     ///<param name="plane">(Plane) Plane to transform</param>
     ///<param name="xform">(Transform) Transformation to apply</param>
@@ -440,12 +455,13 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Rotates a plane</summary>
     ///<param name="plane">(Plane) Plane to rotate</param>
-    ///<param name="angleDegrees">(int) Rotation angle in degrees</param>
+    ///<param name="angleDegrees">(float) Rotation angle in degrees</param>
     ///<param name="axis">(Vector3d) Axis of rotation or list of three numbers</param>
     ///<returns>(Plane) rotated plane on success</returns>
-    static member RotatePlane(plane:Plane, angleDegrees:int, axis:Vector3d) : Plane =
+    static member RotatePlane(plane:Plane, angleDegrees:float, axis:Vector3d) : Plane =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotatePlane(plane, angle_degrees, axis):
@@ -465,6 +481,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns Rhino's world XY plane</summary>
     ///<returns>(Plane) Rhino's world XY plane</returns>
     static member WorldXYPlane() : Plane =
@@ -479,6 +496,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns Rhino's world YZ plane</summary>
     ///<returns>(Plane) Rhino's world YZ plane</returns>
     static member WorldYZPlane() : Plane =
@@ -493,6 +511,7 @@ module ExtensionsPlane =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns Rhino's world ZX plane</summary>
     ///<returns>(Plane) Rhino's world ZX plane</returns>
     static member WorldZXPlane() : Plane =

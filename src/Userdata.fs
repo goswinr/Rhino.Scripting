@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsUserdata =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Removes user data strings from the current document</summary>
     ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section name. If omitted, all sections and their corresponding
@@ -33,6 +35,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of user data strings in the current document</summary>
     ///<returns>(int) the number of user data strings in the current document</returns>
     static member DocumentDataCount() : int =
@@ -47,6 +50,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of user text strings in the current document</summary>
     ///<returns>(int) the number of user text strings in the current document</returns>
     static member DocumentUserTextCount() : int =
@@ -62,6 +66,7 @@ module ExtensionsUserdata =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Returns a user data item from the current document</summary>
     ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section name. If omitted, all section names are returned</param>
@@ -95,6 +100,7 @@ module ExtensionsUserdata =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Returns user text stored in the document</summary>
     ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
     ///Key to use for retrieving user text. If empty, all keys are returned</param>
@@ -121,6 +127,7 @@ module ExtensionsUserdata =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Returns user text stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
@@ -152,6 +159,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the current document contains user data</summary>
     ///<returns>(bool) True or False indicating the presence of Script user data</returns>
     static member IsDocumentData() : bool =
@@ -166,6 +174,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the current document contains user text</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text</returns>
     static member IsDocumentUserText() : bool =
@@ -180,6 +189,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object contains user text</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) result of test:
@@ -209,6 +219,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds or sets a user data string to the current document</summary>
     ///<param name="section">(string) The section name</param>
     ///<param name="entry">(string) The entry name</param>
@@ -231,6 +242,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Sets or removes user text stored in the document</summary>
     ///<param name="key">(string) Key name to set</param>
     ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
@@ -255,6 +267,7 @@ module ExtensionsUserdata =
     *)
 
 
+    [<EXT>]
     ///<summary>Sets or removes user text stored on an object.</summary>
     ///<param name="objectId">(string) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>

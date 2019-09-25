@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsMaterial =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Add material to a layer and returns the new material's index. If the
     ///  layer already has a material, then the layer's current material index is
     ///  returned</summary>
@@ -38,6 +40,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds material to an object and returns the new material's index. If the
     ///  object already has a material, the the object's current material index is
     ///  returned.</summary>
@@ -70,6 +73,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Copies definition of a source material to a destination material</summary>
     ///<param name="sourceIndex">(int) Source index of 'indices of materials to copy' (FIXME 0)</param>
     ///<param name="destinationIndex">(int) Destination index of 'indices of materials to copy' (FIXME 0)</param>
@@ -93,6 +97,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a material is a copy of Rhino's built-in "default" material.
     ///  The default material is used by objects and layers that have not been
     ///  assigned a material.</summary>
@@ -115,6 +120,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a material is referenced from another file</summary>
     ///<param name="materialIndex">(int) The zero-based material index</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -133,6 +139,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Copies the material definition from one material to one or more objects</summary>
     ///<param name="source">(Guid) Source material index -or- identifier of the source object.
     ///  The object must have a material assigned</param>
@@ -678,6 +685,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Resets a material to Rhino's default material</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(bool) True or False indicating success or failure</returns>

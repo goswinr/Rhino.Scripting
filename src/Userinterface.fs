@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsUserinterface =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
     ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
     ///A default folder</param>
@@ -43,6 +45,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays a list of items in a checkable-style list dialog box</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
@@ -73,6 +76,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
@@ -97,6 +101,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display dialog prompting the user to enter a string. The
     ///  string value may span multiple lines</summary>
     ///<param name="defaultValString">(string) Optional, Default Value: <c>null:string</c>
@@ -125,18 +130,19 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pause for user input of an angle</summary>
     ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///Starting, or base point</param>
     ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///If specified, the reference angle is calculated
     ///  from it and the base point</param>
-    ///<param name="defaultValAngleDegrees">(int) Optional, Default Value: <c>0</c>
+    ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0</c>
     ///A default angle value specified</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
-    static member GetAngle([<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:Point3d)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:int, [<OPT;DEF(null:string)>]message:string) : float =
+    static member GetAngle([<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:Point3d)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:float, [<OPT;DEF(null:string)>]message:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetAngle(point=None, reference_point=None, default_angle_degrees=0, message=None):
@@ -161,6 +167,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
     ///  displayed as click-able command line option toggles</summary>
     ///<param name="message">(string) A prompt</param>
@@ -215,8 +222,9 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a box</summary>
-    ///<param name="mode">(float) Optional, Default Value: <c>0</c>
+    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///The box selection mode.
     ///  0 = All modes
     ///  1 = Corner. The base rectangle is created by picking two corner points
@@ -232,7 +240,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt3">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt3 of 'optional prompts to set' (FIXME 0)</param>
     ///<returns>(Point3d seq) list of eight Point3d that define the corners of the box on success</returns>
-    static member GetBox([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d seq =
+    static member GetBox([<OPT;DEF(0)>]mode:int, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetBox(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
@@ -267,6 +275,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null:Drawing.Color</c>
     ///Default RGB value. If omitted, the default color is black</param>
@@ -290,6 +299,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Retrieves the cursor's position</summary>
     ///<returns>(Point3d * Point3d * Guid * Point3d) containing the following information
     ///  0  cursor position in world coordinates
@@ -319,6 +329,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a distance.</summary>
     ///<param name="firstPt">(Point3d) Optional, Default Value: <c>null:Point3d</c>
     ///First distance point</param>
@@ -377,6 +388,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
@@ -428,6 +440,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a whole number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
@@ -464,6 +477,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays dialog box prompting the user to select a layer</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
     ///Dialog box title</param>
@@ -498,6 +512,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays a dialog box prompting the user to select one or more layers</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
     ///Dialog box title</param>
@@ -521,8 +536,9 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to pick points that define a line</summary>
-    ///<param name="mode">(float) Optional, Default Value: <c>0</c>
+    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///Line definition mode.
     ///  0  Default - Show all modes, start in two-point mode
     ///  1  Two-point - Defines a line from two points.
@@ -543,7 +559,7 @@ module ExtensionsUserinterface =
     ///<param name="message3">(string) Optional, Default Value: <c>null:string</c>
     ///Message3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Line) Tuple of two points on success</returns>
-    static member GetLine([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : Line =
+    static member GetLine([<OPT;DEF(0)>]mode:int, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : Line =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetLine(mode=0, point=None, message1=None, message2=None, message3=None):
@@ -580,6 +596,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
     ///<param name="defaultValLinetyp">(string) Optional, Default Value: <c>null:string</c>
     ///Optional. The name of the linetype to select. If omitted, the current linetype will be selected.</param>
@@ -608,6 +625,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to pick one or more mesh faces</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
@@ -653,6 +671,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to pick one or more mesh vertices</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
@@ -698,6 +717,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a point.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
@@ -739,6 +759,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a point constrainted to a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
@@ -769,6 +790,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a point constrained to a mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
@@ -793,6 +815,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a point constrained to a surface or polysurface
     ///  object</summary>
     ///<param name="surfaceId">(Guid) Identifier of the surface to get a point on</param>
@@ -830,6 +853,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of one or more points</summary>
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
     ///Draw lines between points</param>
@@ -895,6 +919,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to pick points that define a polyline.</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
     ///The options are bit coded flags. Values can be added together to specify more than one option. The default is 3.
@@ -952,6 +977,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
     ///A prompt or message.</param>
@@ -988,8 +1014,9 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a rectangle</summary>
-    ///<param name="mode">(float) Optional, Default Value: <c>0</c>
+    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///The rectangle selection mode. The modes are as follows
     ///  0 = All modes
     ///  1 = Corner - a rectangle is created by picking two corner points
@@ -1005,7 +1032,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt3">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) four 3d points that define the corners of the rectangle</returns>
-    static member GetRectangle([<OPT;DEF(0)>]mode:float, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
+    static member GetRectangle([<OPT;DEF(0)>]mode:int, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetRectangle(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
@@ -1036,6 +1063,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pauses for user input of a string value</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message</param>
@@ -1075,6 +1103,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display a list of items in a list box dialog.</summary>
     ///<param name="items">(string seq) A list of values to select</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
@@ -1102,10 +1131,11 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays a message box. A message box contains a message and
     ///  title, plus any combination of predefined icons and push buttons.</summary>
     ///<param name="message">(string) A prompt or message.</param>
-    ///<param name="buttons">(float) Optional, Default Value: <c>0</c>
+    ///<param name="buttons">(int) Optional, Default Value: <c>0</c>
     ///Buttons and icon to display as a bit coded flag. Can be a combination of the
     ///  following flags. If omitted, an OK button and no icon is displayed
     ///  0      Display OK button only.
@@ -1136,7 +1166,7 @@ module ExtensionsUserinterface =
     ///  5      Ignore button was clicked.
     ///  6      Yes button was clicked.
     ///  7      No button was clicked.</returns>
-    static member MessageBox(message:string, [<OPT;DEF(0)>]buttons:float, [<OPT;DEF("")>]title:string) : float =
+    static member MessageBox(message:string, [<OPT;DEF(0)>]buttons:int, [<OPT;DEF("")>]title:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def MessageBox(message, buttons=0, title=""):
@@ -1211,6 +1241,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
     ///<param name="items">(string seq) Items of 'list of string items and their corresponding values' (FIXME 0)</param>
     ///<param name="values">(string seq) Values of 'list of string items and their corresponding values' (FIXME 0)</param>
@@ -1237,6 +1268,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays a list of items in a multiple-selection list box dialog</summary>
     ///<param name="items">(string seq) A zero-based list of string items</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
@@ -1268,6 +1300,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
     ///  Note, this function does not open the file.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
@@ -1311,6 +1344,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
     ///  Note, this function does not open the file.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
@@ -1355,11 +1389,12 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
     ///  anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
     ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
     ///  will create a separator</param>
-    ///<param name="modes">(float seq) Optional, Default Value: <c>null:float seq</c>
+    ///<param name="modes">(int seq) Optional, Default Value: <c>null:int seq</c>
     ///List of numbers identifying the display modes. If omitted, all
     ///  modes are enabled.
     ///    0 = menu item is enabled
@@ -1373,7 +1408,7 @@ module ExtensionsUserinterface =
     ///If point is specified, the view in which the point is computed.
     ///  If omitted, the active view is used</param>
     ///<returns>(float) index of the menu item picked or -1 if no menu item was picked</returns>
-    static member PopupMenu(items:string seq, [<OPT;DEF(null:float seq)>]modes:float seq, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]view:string) : float =
+    static member PopupMenu(items:string seq, [<OPT;DEF(null:int seq)>]modes:int seq, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]view:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def PopupMenu(items, modes=None, point=None, view=None):
@@ -1406,6 +1441,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///A prompt message.</param>
@@ -1441,6 +1477,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display a save dialog box allowing the user to enter a file name.
     ///  Note, this function does not save the file.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
@@ -1484,6 +1521,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt message</param>
@@ -1510,6 +1548,7 @@ module ExtensionsUserinterface =
     *)
 
 
+    [<EXT>]
     ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A message</param>

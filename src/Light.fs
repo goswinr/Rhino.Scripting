@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsLight =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Adds a new directional light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endePoint">(Point3d) Ending point and direction of the light</param>
@@ -39,6 +41,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a new linear light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endePoint">(Point3d) Ending point and direction of the light</param>
@@ -88,6 +91,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a new point light object to the document</summary>
     ///<param name="point">(Point3d) The 3d location of the point</param>
     ///<returns>(Guid) identifier of the new object</returns>
@@ -113,6 +117,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a new rectangular light object to the document</summary>
     ///<param name="origin">(Point3d) 3d origin point of the light</param>
     ///<param name="widthPoint">(Point3d) 3d width and direction point of the light</param>
@@ -151,6 +156,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a new spot light object to the document</summary>
     ///<param name="origin">(Point3d) 3d origin point of the light</param>
     ///<param name="radius">(float) Radius of the cone</param>
@@ -241,6 +247,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is a directional light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -259,6 +266,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -277,6 +285,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is enabled</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -295,6 +304,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is referenced from another file</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -313,6 +323,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is a linear light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -331,6 +342,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is a point light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -349,6 +361,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is a rectangular light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -367,6 +380,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a light object is a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -443,6 +457,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of light objects in the document</summary>
     ///<returns>(int) the number of light objects in the document</returns>
     static member LightCount() : int =
@@ -627,6 +642,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns list of identifiers of light objects in the document</summary>
     ///<returns>(Guid seq) the list of identifiers of light objects in the document</returns>
     static member LightObjects() : Guid seq =
@@ -646,6 +662,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the plane of a rectangular light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Plane) the plane</returns>
@@ -798,8 +815,8 @@ module ExtensionsLight =
 
     ///<summary>Returns the shadow intensity of a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(float) The current intensity</returns>
-    static member SpotLightShadowIntensity(objectId:Guid) : float = //GET
+    ///<returns>(int) The current intensity</returns>
+    static member SpotLightShadowIntensity(objectId:Guid) : int = //GET
         failNotImpl () // genreation temp disabled !!
     (*
     def SpotLightShadowIntensity(object_id, intensity=None):
@@ -826,9 +843,9 @@ module ExtensionsLight =
 
     ///<summary>Changes the shadow intensity of a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="intensity">(float)The light's new intensity</param>
+    ///<param name="intensity">(int)The light's new intensity</param>
     ///<returns>(unit) void, nothing</returns>
-    static member SpotLightShadowIntensity(objectId:Guid, intensity:float) : unit = //SET
+    static member SpotLightShadowIntensity(objectId:Guid, intensity:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def SpotLightShadowIntensity(object_id, intensity=None):

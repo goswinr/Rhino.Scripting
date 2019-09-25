@@ -4,14 +4,19 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
-
+open Microsoft.FSharp.Core.LanguagePrimitives
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ExtensionsDimension =
+  
+  [<EXT>]  
   type RhinoScriptSyntax with
     
+    
+    [<EXT>]  
     ///<summary>Adds an aligned dimension object to the document. An aligned dimension
     ///  is a linear dimension lined up with two points</summary>
     ///<param name="startPoint">(Point3d) First point of dimension</param>
@@ -79,6 +84,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Adds a new dimension style to the document. The new dimension style will
     ///  be initialized with the current default dimension style properties.</summary>
     ///<param name="dimStyleName">(string) Name of the new dimension style. </param>
@@ -105,6 +111,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Adds a leader to the document. Leader objects are planar.
     ///  The 3D points passed will define th eplane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
@@ -161,6 +168,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Adds a linear dimension to the document</summary>
     ///<param name="plane">(Plane) The plane on which the dimension will lie.</param>
     ///<param name="startPoint">(Point3d) The origin, or first point of the dimension.</param>
@@ -223,6 +231,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the current default dimension style</summary>
     ///<returns>(string) Name of the current dimension style</returns>
     static member CurrentDimStyle() : string = //GET
@@ -245,6 +254,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the current default dimension style</summary>
     ///<param name="dimStyleName">(string)Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing</returns>
@@ -273,6 +283,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Removes an existing dimension style from the document. The dimension style
     ///  to be removed cannot be referenced by any dimension objects.</summary>
     ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
@@ -301,6 +312,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the dimension style of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The object's current dimension style name</returns>
@@ -334,6 +346,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Modifies the dimension style of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="dimStyleName">(string)The name of an existing dimension style</param>
@@ -370,6 +383,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the text displayed by a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) the text displayed by a dimension object</returns>
@@ -389,6 +403,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the user text string of a dimension object. The user
     /// text is the string that gets printed when the dimension is defined</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -417,6 +432,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Modifies the user text string of a dimension object. The user
     /// text is the string that gets printed when the dimension is defined</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -450,6 +466,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the value of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(float) numeric value of the dimension</returns>
@@ -470,6 +487,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the angle display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current angle precision</returns>
@@ -498,6 +516,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the angle display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new angle precision value. If omitted, the current angle
@@ -534,6 +553,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current arrow size</returns>
@@ -562,6 +582,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="size">(float)The new arrow size.</param>
@@ -599,6 +620,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the number of dimension styles in the document</summary>
     ///<returns>(int) the number of dimension styles in the document</returns>
     static member DimStyleCount() : int =
@@ -613,6 +635,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the extension line extension of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current extension line extension</returns>
@@ -641,6 +664,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the extension line extension of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="extension">(float)The new extension line extension</param>
@@ -678,6 +702,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the font used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(string) The current font</returns>
@@ -708,6 +733,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Changes the font used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="font">(string)The new font face name</param>
@@ -744,6 +770,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Gets all Available Font Face Names</summary>    
     ///<returns>(string array) array of all available font names</returns>
     static member DimStyleAvailableFonts() :string[] = // not part of original rhinoscriptsyntax
@@ -751,6 +778,7 @@ module ExtensionsDimension =
         
 
 
+    [<EXT>]  
     ///<summary>Returns the leader arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current leader arrow size</returns>
@@ -779,6 +807,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the leader arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="size">(float)The new leader arrow size</param>
@@ -813,6 +842,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the length factor of a dimension style. Length factor
     /// is the conversion between Rhino units and dimension units</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -843,6 +873,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the length factor of a dimension style. Length factor
     /// is the conversion between Rhino units and dimension units</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -878,6 +909,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the linear display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current linear precision value</returns>
@@ -906,6 +938,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the linear display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new linear precision value</param>
@@ -942,6 +975,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the names of all dimension styles in the document</summary>
     ///<returns>(string []) the names of all dimension styles in the document</returns>
     static member DimStyleNames() : string [] =
@@ -960,7 +994,8 @@ module ExtensionsDimension =
     *)
 
 
-    // ///<summary>Returns the number display format of a dimension style</summary>
+    // [<EXT>]  
+    ///<summary>Returns the number display format of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<returns>(float) The current display format
     // ///  0 = Decimal
@@ -996,7 +1031,8 @@ module ExtensionsDimension =
         return rc
     *)
 
-    // ///<summary>Changes the number display format of a dimension style</summary>
+    // [<EXT>]  
+    ///<summary>Changes the number display format of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<param name="format">(int)The new number format
     // ///  0 = Decimal
@@ -1039,6 +1075,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the extension line offset of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current extension line offset</returns>
@@ -1067,6 +1104,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the extension line offset of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="offset">(float)The new extension line offset</param>
@@ -1100,6 +1138,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the prefix of a dimension style - the text to
     /// prefix to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -1130,6 +1169,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the prefix of a dimension style - the text to
     /// prefix to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -1165,6 +1205,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the suffix of a dimension style - the text to
     /// append to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -1195,6 +1236,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the suffix of a dimension style - the text to
     /// append to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -1230,7 +1272,8 @@ module ExtensionsDimension =
     *)
 
 
-    // ///<summary>Returns the text alignment mode of a dimension style</summary>
+    // [<EXT>]  
+    ///<summary>Returns the text alignment mode of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<returns>(int) The current text alignment
     // ///  0 = Normal (same as 2)
@@ -1269,7 +1312,8 @@ module ExtensionsDimension =
         return rc
     *)
 
-    // ///<summary>Changes the text alignment mode of a dimension style</summary>
+    // [<EXT>]  
+    ///<summary>Changes the text alignment mode of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<param name="alignment">(int)The new text alignment
     // ///  0 = Normal (same as 2)
@@ -1316,6 +1360,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the text gap used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current text gap</returns>
@@ -1344,6 +1389,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the text gap used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="gap">(float)The new text gap</param>
@@ -1380,6 +1426,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the text height used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current text height</returns>
@@ -1408,6 +1455,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Changes the text height used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="height">(float)The new text height</param>
@@ -1443,6 +1491,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is an aligned dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1470,6 +1519,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is an angular dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1496,6 +1546,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is a diameter dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1524,6 +1575,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is a dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1550,6 +1602,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies the existance of a dimension style in the document</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
@@ -1570,6 +1623,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies that an existing dimension style is from a reference file</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
@@ -1592,6 +1646,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1618,6 +1673,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is a linear dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1644,6 +1700,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is an ordinate dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1670,6 +1727,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Verifies an object is a radial dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -1696,6 +1754,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Returns the text string of a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(string) The current text string</returns>
@@ -1732,6 +1791,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+    [<EXT>]  
     ///<summary>Modifies the text string of a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="text">(string)The new text string</param>
@@ -1772,6 +1832,7 @@ module ExtensionsDimension =
     *)
 
 
+    [<EXT>]  
     ///<summary>Renames an existing dimension style</summary>
     ///<param name="oldstyle">(string) The name of an existing dimension style</param>
     ///<param name="newstyle">(string) The new dimension style name</param>

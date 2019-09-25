@@ -4,10 +4,11 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsLayer =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
     
@@ -19,6 +20,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Add a new layer to the document</summary>
     ///<param name="name">(string) Optional, Default Value: <c>null:string</c>
     ///The name of the new layer. If omitted, Rhino automatically
@@ -126,6 +128,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Removes an existing layer from the document. The layer to be removed
     ///  cannot be the current layer. Unlike the PurgeLayer method, the layer must
     ///  be empty, or contain no objects, before it can be removed. Any layers that
@@ -152,6 +155,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Expands a layer. Expanded layers can be viewed in Rhino's layer dialog</summary>
     ///<param name="layer">(string) Name of the layer to expand</param>
     ///<param name="expand">(bool) True to expand, False to collapse</param>
@@ -174,6 +178,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the existance of a layer in the document</summary>
     ///<param name="layer">(string) The name or id of a layer to search for</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -192,6 +197,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that the objects on a layer can be changed (normal)</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -211,6 +217,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is a child of another layer</summary>
     ///<param name="layer">(string) The name or id of the layer to test against</param>
     ///<param name="test">(string) The name or id to the layer to test</param>
@@ -232,6 +239,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is the current layer</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -250,6 +258,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an existing layer is empty, or contains no objects</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -270,6 +279,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
     ///  Rhino's layer dialog</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
@@ -290,6 +300,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is locked.</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -308,6 +319,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is on.</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -326,6 +338,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an existing layer is selectable (normal and reference)</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -344,6 +357,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is a parent of another layer</summary>
     ///<param name="layer">(string) The name or id of the layer to test against</param>
     ///<param name="test">(string) The name or id to the layer to test</param>
@@ -365,6 +379,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is from a reference file.</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -383,6 +398,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a layer is visible (normal, locked, and reference)</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -401,6 +417,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(int) the number of immediate child layers</returns>
@@ -421,6 +438,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name or id of an existing layer</param>
     ///<returns>(string seq) List of children layer names</returns>
@@ -493,6 +511,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of layers in the document</summary>
     ///<returns>(int) the number of layers in the document</returns>
     static member LayerCount() : int =
@@ -507,6 +526,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Return identifiers of all layers in the document</summary>
     ///<returns>(Guid seq) the identifiers of all layers in the document</returns>
     static member LayerIds() : Guid seq =
@@ -689,6 +709,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the identifier of a layer given the layer's name.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Guid) The layer's identifier .</returns>
@@ -708,6 +729,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Return the name of a layer given it's identifier</summary>
     ///<param name="layerId">(Guid) Layer identifier</param>
     ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
@@ -731,6 +753,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the names of all layers in the document.</summary>
     ///<returns>(string seq) list of layer names</returns>
     static member LayerNames() : string seq =
@@ -751,12 +774,13 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the current display order index of a layer as displayed in Rhino's
     ///  layer dialog box. A display order index of -1 indicates that the current
     ///  layer dialog filter does not allow the layer to appear in the layer list</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(float) 0 based index of layer</returns>
-    static member LayerOrder(layer:string) : float =
+    ///<returns>(int) 0 based index of layer</returns>
+    static member LayerOrder(layer:string) : int =
         failNotImpl () // genreation temp disabled !!
     (*
     def LayerOrder(layer):
@@ -1013,6 +1037,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Removes an existing layer from the document. The layer will be removed
     ///  even if it contains geometry objects. The layer to be removed cannot be the
     ///  current layer
@@ -1039,6 +1064,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Renames an existing layer</summary>
     ///<param name="oldname">(string) Original layer name</param>
     ///<param name="newname">(string) New layer name</param>

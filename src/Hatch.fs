@@ -4,10 +4,11 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsHatch =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
     
@@ -19,6 +20,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a new hatch object from a closed planar curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar curve that defines the
     ///  boundary of the hatch object</param>
@@ -52,6 +54,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates one or more new hatch objects a list of closed planar curves</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar curves that defines the
     ///  boundary of the hatch objects</param>
@@ -110,6 +113,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds hatch patterns to the document by importing hatch pattern definitions
     ///  from a pattern file.</summary>
     ///<param name="filename">(string) Name of the hatch pattern file</param>
@@ -194,6 +198,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Explodes a hatch object into its component objects. The exploded objects
     ///  will be added to the document. If the hatch object uses a solid pattern,
     ///  then planar face Brep objects will be created. Otherwise, line curve objects
@@ -299,6 +304,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of hatch patterns in the document</summary>
     ///<returns>(int) the number of hatch patterns in the document</returns>
     static member HatchPatternCount() : int =
@@ -314,6 +320,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the description of a hatch pattern. Note, not all hatch patterns
     ///  have descriptions</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
@@ -336,6 +343,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the fill type of a hatch pattern.</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(int) hatch pattern's fill type
@@ -363,6 +371,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the names of all of the hatch patterns in the document</summary>
     ///<returns>(string seq) the names of all of the hatch patterns in the document</returns>
     static member HatchPatternNames() : string seq =
@@ -507,6 +516,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the existence of a hatch object in the document</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(bool) True or False</returns>
@@ -525,6 +535,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the existence of a hatch pattern in the document</summary>
     ///<param name="name">(string) The name of a hatch pattern</param>
     ///<returns>(bool) True or False</returns>
@@ -543,6 +554,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a hatch pattern is the current hatch pattern</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(bool) True or False</returns>
@@ -564,6 +576,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a hatch pattern is from a reference file</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(bool) True or False</returns>

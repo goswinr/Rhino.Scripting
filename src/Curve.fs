@@ -8,12 +8,11 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 open Microsoft.FSharp.Core.LanguagePrimitives
 open System.Collections.Generic
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 
 [<AutoOpen>]
 module ExtensionsCurve =
 
-  [<Ext>] 
+  [<EXT>] 
   type RhinoScriptSyntax with
     
     [<EXT>]

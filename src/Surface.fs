@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsSurface =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Adds a box shaped polysurface to the document</summary>
     ///<param name="corners">(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) 8 points that define the corners of the box. Points need to
     ///  be in counter-clockwise order starting with the bottom rectangle of the box</param>
@@ -35,6 +37,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a cone shaped polysurface to the document</summary>
     ///<param name="basis">(Plane) 3D origin point of the cone or a plane with an apex at the origin
     ///  and normal along the plane's z-axis</param>
@@ -78,6 +81,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a planar surface through objects at a designated location. For more
     ///  information, see the Rhino help file for the CutPlane command</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects that the cutting plane will
@@ -129,6 +133,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a cylinder-shaped polysurface to the document</summary>
     ///<param name="basis">(Plane) The 3D basis point of the cylinder or the basis plane of the cylinder</param>
     ///<param name="height">(float) If basis is a point, then height is a 3D height point of the
@@ -180,6 +185,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a surface from 2, 3, or 4 edge curves</summary>
     ///<param name="curveIds">(Guid seq) List or tuple of curves</param>
     ///<returns>(Guid) identifier of new object</returns>
@@ -204,9 +210,10 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a surface from a network of crossing curves</summary>
     ///<param name="curves">(Guid seq) Curves from which to create the surface</param>
-    ///<param name="continuity">(float) Optional, Default Value: <c>1</c>
+    ///<param name="continuity">(int) Optional, Default Value: <c>1</c>
     ///How the edges match the input geometry
     ///  0 = loose
     ///  1 = position
@@ -219,7 +226,7 @@ module ExtensionsSurface =
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>0</c>
     ///Angle tolerance , in radians?</param>
     ///<returns>(Guid) identifier of new object</returns>
-    static member AddNetworkSrf(curves:Guid seq, [<OPT;DEF(1)>]continuity:float, [<OPT;DEF(0)>]edgeTolerance:float, [<OPT;DEF(0)>]interiorTolerance:float, [<OPT;DEF(0)>]angleTolerance:float) : Guid =
+    static member AddNetworkSrf(curves:Guid seq, [<OPT;DEF(1)>]continuity:int, [<OPT;DEF(0)>]edgeTolerance:float, [<OPT;DEF(0)>]interiorTolerance:float, [<OPT;DEF(0)>]angleTolerance:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddNetworkSrf(curves, continuity=1, edge_tolerance=0, interior_tolerance=0, angle_tolerance=0):
@@ -246,6 +253,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a NURBS surface object to the document</summary>
     ///<param name="pointCount">(int * int) Number of control points in the u and v direction</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
@@ -305,6 +313,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Fits a surface through curve, point, point cloud, and mesh objects.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
     ///  Acceptable object types include curves, points, point clouds, and meshes.</param>
@@ -394,6 +403,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a single walled surface with a circular profile around a curve</summary>
     ///<param name="curveId">(Guid) Identifier of rail curve</param>
     ///<param name="parameters">(float seq) Parameters of 'list of radius values at normalized curve parameters' (FIXME 0)</param>
@@ -434,6 +444,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates one or more surfaces from planar curves</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar surfaces</param>
     ///<returns>(Guid seq) identifiers of surfaces created on success</returns>
@@ -460,6 +471,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Create a plane surface and add it to the document.</summary>
     ///<param name="plane">(Plane) The plane.</param>
     ///<param name="uDir">(float) The magnitude in the U direction.</param>
@@ -490,6 +502,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a surface created by lofting curves to the document.
     ///  - no curve sorting performed. pass in curves in the order you want them sorted
     ///  - directions of open curves not adjusted. Use CurveDirectionsMatch and
@@ -608,6 +621,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Create a surface by revolving a curve around an axis</summary>
     ///<param name="curveId">(Guid) Identifier of profile curve</param>
     ///<param name="axis">(Line) Line for the rail revolve axis</param>
@@ -643,6 +657,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Add a spherical surface to the document</summary>
     ///<param name="centerOrPlane">(Plane) Center point of the sphere. If a plane is input,
     ///  the origin of the plane will be the center of the sphere</param>
@@ -673,6 +688,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
     ///  defined cutting planes through a surface or polysurface. For more
     ///  information, see Rhino help for details on the Contour command</summary>
@@ -722,6 +738,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u,v directions</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
@@ -751,6 +768,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a new surface from either 3 or 4 corner points.</summary>
     ///<param name="points">(Point3d * Point3d * Point3d * Point3d) List of either 3 or 4 corner points</param>
     ///<returns>(Guid) The identifier of the new object .</returns>
@@ -779,6 +797,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u,v directions</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
@@ -811,6 +830,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a surface created through profile curves that define the surface
     ///  shape and one curve that defines a surface edge.</summary>
     ///<param name="rail">(Guid) Identifier of the rail curve</param>
@@ -843,6 +863,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a surface created through profile curves that define the surface
     ///  shape and two curves that defines a surface edge.</summary>
     ///<param name="rails">(Guid * Guid) Identifiers of the two rail curve</param>
@@ -876,6 +897,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a surface created through profile curves that define the surface
     ///  shape and two curves that defines a surface edge.</summary>
     ///<param name="profile">(Guid) Identifier of the profile curve</param>
@@ -912,6 +934,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a torus shaped revolved surface to the document</summary>
     ///<param name="basis">(Point3d) 3D origin point of the torus or the basis plane of the torus</param>
     ///<param name="majorRadius">(float) Major radius of 'the two radii of the torus' (FIXME 0)</param>
@@ -952,6 +975,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs a boolean difference operation on two sets of input surfaces
     ///  and polysurfaces. For more details, see the BooleanDifference command in
     ///  the Rhino help file</summary>
@@ -995,6 +1019,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs a boolean intersection operation on two sets of input surfaces
     ///  and polysurfaces. For more details, see the BooleanIntersection command in
     ///  the Rhino help file</summary>
@@ -1037,6 +1062,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs a boolean union operation on a set of input surfaces and
     ///  polysurfaces. For more details, see the BooleanUnion command in the
     ///  Rhino help file</summary>
@@ -1072,6 +1098,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the point on a surface or polysurface that is closest to a test
     ///  point. This function works on both untrimmed and trimmed surfaces.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
@@ -1124,6 +1151,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Caps planar holes in a surface or polysurface</summary>
     ///<param name="surfaceId">(Guid) The identifier of the surface or polysurface to cap.</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -1151,6 +1179,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Duplicates the edge curves of a surface or polysurface. For more
     ///  information, see the Rhino help file for information on the DupEdge
     ///  command.</summary>
@@ -1187,6 +1216,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Create curves that duplicate a surface or polysurface border</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="typ">(int) Optional, Default Value: <c>0</c>
@@ -1224,6 +1254,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Evaluates a surface at a U,V parameter</summary>
     ///<param name="surfaceId">(Guid) The object's identifier.</param>
     ///<param name="u">(float * float) U of 'u, v parameters to evaluate.' (FIXME 0)</param>
@@ -1248,6 +1279,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Lengthens an untrimmed surface object</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="parameter">(float * float) Tuple of two values definfing the U,V parameter to evaluate.
@@ -1285,6 +1317,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Explodes, or unjoins, one or more polysurface objects. Polysurfaces
     ///  will be exploded into separate surfaces</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of polysurfaces to explode</param>
@@ -1319,15 +1352,16 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Extracts isoparametric curves from a surface</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="parameter">(float * float) U,v parameter of the surface to evaluate</param>
-    ///<param name="direction">(float) Direction to evaluate
+    ///<param name="direction">(int) Direction to evaluate
     ///  0 = u
     ///  1 = v
     ///  2 = both</param>
     ///<returns>(Guid seq) of curve ids on success</returns>
-    static member ExtractIsoCurve(surfaceId:Guid, parameter:float * float, direction:float) : Guid seq =
+    static member ExtractIsoCurve(surfaceId:Guid, parameter:float * float, direction:int) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def ExtractIsoCurve(surface_id, parameter, direction):
@@ -1370,6 +1404,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Separates or copies a surface or a copy of a surface from a polysurface</summary>
     ///<param name="objectId">(Guid) Polysurface identifier</param>
     ///<param name="faceIndices">(float seq) One or more numbers representing faces</param>
@@ -1407,6 +1442,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a surface by extruding a curve along a path</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="pathId">(Guid) Identifier of the path curve</param>
@@ -1433,6 +1469,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a surface by extruding a curve to a point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="point">(Point3d) 3D point</param>
@@ -1459,6 +1496,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Create surface by extruding a curve along two points that define a line</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="startPoint">(Point3d) Start point of '3D points that specify distance and direction' (FIXME 0)</param>
@@ -1488,6 +1526,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Create surface by extruding along a path curve</summary>
     ///<param name="surface">(Guid) Identifier of the surface to extrude</param>
     ///<param name="curve">(Guid) Identifier of the path curve</param>
@@ -1516,6 +1555,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Create constant radius rolling ball fillets between two surfaces. Note,
     ///  this function does not trim the original surfaces of the fillets</summary>
     ///<param name="surface0">(Guid) Surface0 of 'identifiers of first and second surface' (FIXME 0)</param>
@@ -1625,6 +1665,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Intersects a brep object with another brep object. Note, unlike the
     ///  SurfaceSurfaceIntersection function this function works on trimmed surfaces.</summary>
     ///<param name="brep1">(Guid) Identifier of first brep object</param>
@@ -1683,6 +1724,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates intersections of two spheres</summary>
     ///<param name="spherePlane0">(Plane) An equatorial plane of the first sphere. The origin of the
     ///  plane will be the center point of the sphere</param>
@@ -1726,6 +1768,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a Brep, or a boundary representation model, object.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -1744,6 +1787,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Determines if a surface is a portion of a cone</summary>
     ///<param name="objectId">(Guid) The surface object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -1762,6 +1806,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Determines if a surface is a portion of a cone</summary>
     ///<param name="objectId">(Guid) The cylinder object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -1780,6 +1825,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a plane surface. Plane surfaces can be created by
     ///  the Plane command. Note, a plane surface is not a planar NURBS surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -1802,6 +1848,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a point is inside a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
@@ -1841,6 +1888,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a point lies on a surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
@@ -1869,6 +1917,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a polysurface. Polysurfaces consist of two or more
     ///  surfaces joined together. If the polysurface fully encloses a volume, it is
     ///  considered a solid.</summary>
@@ -1892,6 +1941,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a polysurface object is closed. If the polysurface fully encloses
     ///  a volume, it is considered a solid.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -1912,6 +1962,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Determines if a surface is a portion of a sphere</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -1930,6 +1981,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a surface. Brep objects with only one face are
     ///  also considered surfaces.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
@@ -1952,12 +2004,13 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a surface object is closed in the specified direction.  If the
     ///  surface fully encloses a volume, it is considered a solid</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="direction">(float) 0=U direction check, 1=V direction check</param>
+    ///<param name="direction">(int) 0=U direction check, 1=V direction check</param>
     ///<returns>(bool) True or False</returns>
-    static member IsSurfaceClosed(surfaceId:Guid, direction:float) : bool =
+    static member IsSurfaceClosed(surfaceId:Guid, direction:int) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsSurfaceClosed( surface_id, direction ):
@@ -1974,11 +2027,12 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a surface object is periodic in the specified direction.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="direction">(float) 0=U direction check, 1=V direction check</param>
+    ///<param name="direction">(int) 0=U direction check, 1=V direction check</param>
     ///<returns>(bool) True or False</returns>
-    static member IsSurfacePeriodic(surfaceId:Guid, direction:float) : bool =
+    static member IsSurfacePeriodic(surfaceId:Guid, direction:int) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsSurfacePeriodic(surface_id, direction):
@@ -1994,6 +2048,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a surface object is planar</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
@@ -2019,6 +2074,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a surface object is rational</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -2039,15 +2095,16 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a surface object is singular in the specified direction.
     ///  Surfaces are considered singular if a side collapses to a point.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="direction">(float) 0=south
+    ///<param name="direction">(int) 0=south
     ///  1=east
     ///  2=north
     ///  3=west</param>
     ///<returns>(bool) True or False</returns>
-    static member IsSurfaceSingular(surfaceId:Guid, direction:float) : bool =
+    static member IsSurfaceSingular(surfaceId:Guid, direction:int) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def IsSurfaceSingular(surface_id, direction):
@@ -2068,6 +2125,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a surface object has been trimmed</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -2086,6 +2144,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Determines if a surface is a portion of a torus</summary>
     ///<param name="surfaceId">(Guid) The surface object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -2104,6 +2163,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Gets the sphere definition from a surface, if possible.</summary>
     ///<param name="surfaceId">(Guid) The identifier of the surface object</param>
     ///<returns>(Plane * float) The equatorial plane of the sphere, and its radius.</returns>
@@ -2127,6 +2187,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Joins two or more surface or polysurface objects together to form one
     ///  polysurface object</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
@@ -2164,13 +2225,14 @@ module ExtensionsSurface =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Makes an existing surface a periodic NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="direction">(float) The direction to make periodic, either 0=U or 1=V</param>
+    ///<param name="direction">(int) The direction to make periodic, either 0=U or 1=V</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Delete the input surface</param>
     ///<returns>(Guid) if delete_input is False, identifier of the new surface</returns>
-    static member MakeSurfacePeriodic(surfaceId:Guid, direction:float, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+    static member MakeSurfacePeriodic(surfaceId:Guid, direction:int, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def MakeSurfacePeriodic(surface_id, direction, delete_input=False):
@@ -2197,6 +2259,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Offsets a trimmed or untrimmed surface by a distance. The offset surface
     ///  will be added to Rhino.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -2240,6 +2303,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Pulls a curve object to a surface object</summary>
     ///<param name="surface">(Guid) The surface's identifier</param>
     ///<param name="curve">(Guid) The curve's identifier</param>
@@ -2273,6 +2337,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Rebuilds a surface to a given degree and control point count. For more
     ///  information see the Rhino help file for the Rebuild command</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
@@ -2304,6 +2369,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Deletes a knot from a surface object.</summary>
     ///<param name="surface">(Guid) The reference of the surface object</param>
     ///<param name="uvParameter">(float * float) ): An indexable item containing a U,V parameter on the surface. List, tuples and UVIntervals will work.
@@ -2339,15 +2405,16 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Reverses U or V directions of a surface, or swaps (transposes) U and V
     ///  directions.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
-    ///<param name="direction">(float) As a bit coded flag to swap
+    ///<param name="direction">(int) As a bit coded flag to swap
     ///  1 = reverse U
     ///  2 = reverse V
     ///  4 = transpose U and V (values can be combined)</param>
     ///<returns>(bool) indicating success or failure</returns>
-    static member ReverseSurface(surfaceId:Guid, direction:float) : bool =
+    static member ReverseSurface(surfaceId:Guid, direction:int) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def ReverseSurface(surface_id, direction):
@@ -2378,6 +2445,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Shoots a ray at a collection of surfaces</summary>
     ///<param name="surfaceIds">(Guid seq) One of more surface identifiers</param>
     ///<param name="startPoint">(Point3d) Starting point of the ray</param>
@@ -2422,6 +2490,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates the shortest possible curve(geodesic) between two points on a
     ///  surface. For more details, see the ShortPath command in Rhino help</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
@@ -2460,6 +2529,7 @@ module ExtensionsSurface =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Shrinks the underlying untrimmed surfaces near to the trimming
     ///  boundaries. See the ShrinkTrimmedSrf command in the Rhino help.</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
@@ -2504,6 +2574,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Splits a brep</summary>
     ///<param name="brepId">(Guid) Identifier of the brep to split</param>
     ///<param name="cutterId">(Guid) Identifier of the brep to split with</param>
@@ -2537,6 +2608,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculate the area of a surface or polysurface object. The results are
     ///  based on the current drawing units</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
@@ -2558,6 +2630,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the area centroid of a surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(Point3d * float * float * float) Area centroid information (Area Centroid, Error bound in X, Y, Z)</returns>
@@ -2587,6 +2660,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates area moments of inertia of a surface or polysurface object.
     ///  See the Rhino help for "Mass Properties calculation details"</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -2637,6 +2711,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns U,V parameters of point on a surface that is closest to a test point</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
@@ -2661,6 +2736,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the definition of a surface cone</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the cone
@@ -2690,6 +2766,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the curvature of a surface at a U,V parameter. See Rhino help
     ///  for details of surface curvature</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -2732,6 +2809,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the definition of a cylinder surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(Plane * float * float) of the cylinder plane, height, radius on success</returns>
@@ -2755,6 +2833,7 @@ module ExtensionsSurface =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Returns the degree of a surface object in the specified direction</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="direction">(int) Optional, Default Value: <c>2</c>
@@ -2786,11 +2865,12 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the domain of a surface object in the specified direction.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="direction">(float) Domain direction 0 = U, or 1 = V</param>
+    ///<param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
     ///<returns>(float * float) containing the domain interval in the specified direction</returns>
-    static member SurfaceDomain(surfaceId:Guid, direction:float) : float * float =
+    static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
         failNotImpl () // genreation temp disabled !!
     (*
     def SurfaceDomain(surface_id, direction):
@@ -2810,6 +2890,7 @@ module ExtensionsSurface =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Returns the edit, or Greville points of a surface object. For each
     ///  surface control point, there is a corresponding edit point</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -2869,6 +2950,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>A general purpose surface evaluator</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="parameter">(float * float) U,v parameter to evaluate</param>
@@ -2914,6 +2996,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a plane based on the normal, u, and v directions at a surface
     ///  U,V parameter</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -2987,14 +3070,14 @@ module ExtensionsSurface =
     /// Rhino uses isocurves and surface edge curves to visualize the shape of a
     /// NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="density">(float)The isocurve wireframe density. The possible values are
+    ///<param name="density">(int)The isocurve wireframe density. The possible values are
     ///  -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
     ///    1: Display boundary and knot wires and one interior wire if there
     ///      are no interior knots
     ///        >=2: Display boundary and knot wires and (N+1) interior wires</param>
     ///<returns>(unit) void, nothing</returns>
-    static member SurfaceIsocurveDensity(surfaceId:Guid, density:float) : unit = //SET
+    static member SurfaceIsocurveDensity(surfaceId:Guid, density:int) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def SurfaceIsocurveDensity(surface_id, density=None):
@@ -3028,6 +3111,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the control point count of a surface
     ///  surfaceId = the surface's identifier</summary>
     ///<param name="surfaceId">(Guid) The surface object's identifier</param>
@@ -3049,6 +3133,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the knots, or knot vector, of a surface object.</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(float * float) knot values of the surface . The list will
@@ -3082,6 +3167,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns 3D vector that is the normal to a surface at a parameter</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="uvParameter">(float * float) The uv parameter to evaluate</param>
@@ -3102,6 +3188,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Converts surface parameter to a normalized surface parameter; one that
     ///  ranges between 0.0 and 1.0 in both the U and V directions</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -3133,6 +3220,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Converts normalized surface parameter to a surface parameter; or
     ///  within the surface's domain</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -3157,6 +3245,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the control point count of a surface
     ///  surfaceId = the surface's identifier</summary>
     ///<param name="surfaceId">(Guid) The surface object's identifier</param>
@@ -3178,6 +3267,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the control points, or control vertices, of a surface object</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
@@ -3211,6 +3301,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the definition of a surface torus</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the torus
@@ -3237,6 +3328,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates volume of a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(float) volume data returned (Volume, Error bound) on success</returns>
@@ -3256,6 +3348,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates volume centroid of a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(Point3d) volume data returned (Volume Centriod, Error bound) on success</returns>
@@ -3275,6 +3368,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates volume moments of inertia of a surface or polysurface object.
     ///  For more information, see Rhino help for "Mass Properties calculation details"</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
@@ -3325,6 +3419,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns list of weight values assigned to the control points of a surface.
     ///  The number of weights returned will be equal to the number of control points
     ///  in the U and V directions.</summary>
@@ -3355,6 +3450,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Trims a surface using an oriented cutter</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
     ///<param name="cutter">(Plane) Surface, polysurface, or plane performing the trim</param>
@@ -3401,15 +3497,16 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Remove portions of the surface outside of the specified interval</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
-    ///<param name="direction">(float) 0(U), 1(V), or 2(U and V)</param>
+    ///<param name="direction">(int) 0(U), 1(V), or 2(U and V)</param>
     ///<param name="interval">(float*float) Sub section of the surface to keep.
     ///  If both U and V then a list or tuple of 2 intervals</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Should the input surface be deleted</param>
     ///<returns>(Guid) new surface identifier on success</returns>
-    static member TrimSurface(surfaceId:Guid, direction:float, interval:float*float, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+    static member TrimSurface(surfaceId:Guid, direction:int, interval:float*float, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def TrimSurface( surface_id, direction, interval, delete_input=False):
@@ -3447,6 +3544,7 @@ module ExtensionsSurface =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Flattens a developable surface or polysurface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
@@ -3507,6 +3605,7 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
     ///<summary>Changes the degree of a surface object.  For more information see the Rhino help file for the ChangeDegree command.</summary>
     ///<param name="objectId">(Guid) The object's identifier.</param>
     ///<param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>

@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsObject =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Copies object from one location to another, or in-place.</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
     ///<param name="translation">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
@@ -32,6 +34,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
@@ -59,6 +62,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Deletes a single object from the document</summary>
     ///<param name="objectId">(Guid) Identifier of object to delete</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
@@ -79,6 +83,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Deletes one or more objects from the document</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
     ///<returns>(float) Number of objects deleted</returns>
@@ -103,6 +108,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Causes the selection state of one or more objects to change momentarily
     ///  so the object appears to flash on the screen</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to flash</param>
@@ -130,6 +136,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Hides a single object</summary>
     ///<param name="objectId">(Guid) Id of object to hide</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
@@ -147,6 +154,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Hides one or more objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden</returns>
@@ -171,6 +179,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is in either page layout space or model space</summary>
     ///<param name="objectId">(Guid) Id of an object to test</param>
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space</returns>
@@ -189,6 +198,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the existence of an object</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist</returns>
@@ -206,6 +216,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is hidden. Hidden objects are not visible, cannot
     ///  be snapped to, and cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
@@ -226,6 +237,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object's bounding box is inside of another bounding box</summary>
     ///<param name="objectId">(Guid) Identifier of an object to be tested</param>
     ///<param name="box">(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) Bounding box to test for containment</param>
@@ -256,6 +268,7 @@ module ExtensionsObject =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Verifies that an object is a member of a group</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="groupName">(string) Optional, Default Value: <c>null:string</c>
@@ -293,6 +306,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is locked. Locked objects are visible, and can
     ///  be snapped to, but cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
@@ -313,6 +327,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is normal. Normal objects are visible, can be
     ///  snapped to, and can be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
@@ -333,6 +348,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is a reference object. Reference objects are
     ///  objects that are not part of the current document</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
@@ -353,6 +369,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object can be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True or False</returns>
@@ -371,6 +388,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is currently selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(int) 0, the object is not selected
@@ -396,6 +414,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Determines if an object is closed, solid</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is solid, or a mesh is closed., False otherwise.</returns>
@@ -423,6 +442,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object's geometry is valid and without error</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is valid</returns>
@@ -441,6 +461,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is visible in a view</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
@@ -464,6 +485,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Locks a single object. Locked objects are visible, and they can be
     ///  snapped to. But, they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -483,6 +505,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Locks one or more objects. Locked objects are visible, and they can be
     ///  snapped to. But, they cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
@@ -509,6 +532,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Matches, or copies the attributes of a source object to a target object</summary>
     ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
     ///<param name="sourceId">(Guid) Optional, Default Value: <c>null:Guid</c>
@@ -543,6 +567,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Mirrors a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
@@ -569,6 +594,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Mirrors a list of objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
@@ -602,6 +628,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Moves a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
@@ -623,6 +650,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Moves one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
@@ -949,6 +977,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a short text description of an object</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object .</returns>
@@ -967,6 +996,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns all of the group names that an object is assigned to</summary>
     ///<param name="objectId">(Guid) Identifier of an object(s)</param>
     ///<returns>(string seq) list of group names on success</returns>
@@ -2274,6 +2304,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the object type</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) The object type .
@@ -2337,6 +2368,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Orients a single object based on input points.
     ///  If two 3-D points are specified, then this method will function similar to Rhino's Orient command.  If more than two 3-D points are specified, then the function will orient similar to Rhino's Orient3Pt command.
     ///  The orient flags values can be added together to specify multiple options.
@@ -2414,6 +2446,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Rotates a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
@@ -2446,6 +2479,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Rotates multiple objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
@@ -2482,6 +2516,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
     ///  scale transformation. Scaling is based on the active construction plane.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -2511,6 +2546,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
     ///  uniform scale transformation. Scaling is based on the active construction plane.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
@@ -2544,6 +2580,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Selects a single object</summary>
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
     ///<param name="redraw">(bool) Optional, Default Value: <c>true</c>
@@ -2567,6 +2604,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Selects one or more objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
     ///<returns>(float) number of selected objects</returns>
@@ -2590,15 +2628,16 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Perform a shear transformation on a single object</summary>
     ///<param name="objectId">(Guid seq) The identifier of an object</param>
     ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
     ///<param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
-    ///<param name="angleDegrees">(int) The shear angle in degrees</param>
+    ///<param name="angleDegrees">(float) The shear angle in degrees</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the objects</param>
     ///<returns>(Guid) Identifier of the sheared object</returns>
-    static member ShearObject(objectId:Guid seq, origin:Point3d, referencePoint:Point3d, angleDegrees:int, [<OPT;DEF(false)>]copy:bool) : Guid =
+    static member ShearObject(objectId:Guid seq, origin:Point3d, referencePoint:Point3d, angleDegrees:float, [<OPT;DEF(false)>]copy:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def ShearObject(object_id, origin, reference_point, angle_degrees, copy=False):
@@ -2618,15 +2657,16 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Shears one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to shear</param>
     ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
     ///<param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
-    ///<param name="angleDegrees">(int) The shear angle in degrees</param>
+    ///<param name="angleDegrees">(float) The shear angle in degrees</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the objects</param>
     ///<returns>(Guid seq) identifiers of the sheared objects</returns>
-    static member ShearObjects(objectIds:Guid seq, origin:Point3d, referencePoint:Point3d, angleDegrees:int, [<OPT;DEF(false)>]copy:bool) : Guid seq =
+    static member ShearObjects(objectIds:Guid seq, origin:Point3d, referencePoint:Point3d, angleDegrees:float, [<OPT;DEF(false)>]copy:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def ShearObjects(object_ids, origin, reference_point, angle_degrees, copy=False):
@@ -2664,6 +2704,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Shows a previously hidden object. Hidden objects are not visible, cannot
     ///  be snapped to and cannot be selected</summary>
     ///<param name="objectId">(Guid) Representing id of object to show</param>
@@ -2683,6 +2724,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Shows one or more objects. Hidden objects are not visible, cannot be
     ///  snapped to and cannot be selected</summary>
     ///<param name="objectIds">(Guid seq) Ids of objects to show</param>
@@ -2709,6 +2751,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
     ///  The matrix acts on the left.</summary>
     ///<param name="objectId">(Guid) The identifier of the object.</param>
@@ -2741,6 +2784,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///  matrix. The matrix acts on the left.</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers.</param>
@@ -2794,6 +2838,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Unlocks an object. Locked objects are visible, and can be snapped to,
     ///  but they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -2813,6 +2858,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
     ///  snapped to, but they cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
@@ -2839,6 +2885,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Unselects a single selected object</summary>
     ///<param name="objectId">(Guid) Id of object to unselect</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
@@ -2856,6 +2903,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Unselects one or more selected objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect.</param>
     ///<returns>(float) The number of objects unselected</returns>

@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsLine =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Finds the point on an infinite line that is closest to a test point</summary>
     ///<param name="line">(Point3d * Point3d) List of 6 numbers or 2 Point3d.  Two 3-D points identifying the starting and ending points of the line.</param>
     ///<param name="testpoint">(Point3d) List of 3 numbers or Point3d.  The test point.</param>
@@ -31,6 +33,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of a line and a cylinder</summary>
     ///<param name="line">(Line) The line to intersect</param>
     ///<param name="cylinderPlane">(Plane) Base plane of the cylinder</param>
@@ -65,6 +68,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Determines if the shortest distance from a line to a point or another
     ///  line is greater than a specified distance</summary>
     ///<param name="line">(Line) List of 6 numbers, 2 Point3d, or Line.</param>
@@ -95,6 +99,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of two non-parallel lines. The lines are considered endless.
     ///  If the two lines do not actually intersect the closest point on each is returned</summary>
     ///<param name="lineA">(Line) LineA of 'lines to intersect' (FIXME 0)</param>
@@ -120,6 +125,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Finds the longest distance between a line as a finite chord, and a point
     ///  or another line</summary>
     ///<param name="line">(Line) List of 6 numbers, two Point3d, or Line.</param>
@@ -145,6 +151,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
     ///  or another line</summary>
     ///<param name="line">(Line) List of 6 numbers, two Point3d, or Line.</param>
@@ -170,6 +177,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a plane that contains the line. The origin of the plane is at the start of
     ///  the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
     ///<param name="line">(Line) List of 6 numbers, two Point3d, or Line.</param>
@@ -193,6 +201,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of a line and a plane.</summary>
     ///<param name="line">(Point3d * Point3d) Two 3D points identifying the starting and ending points of the line to intersect.</param>
     ///<param name="plane">(Plane) The plane to intersect.</param>
@@ -218,6 +227,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of a line and a sphere</summary>
     ///<param name="line">(Line) The line</param>
     ///<param name="sphereCenter">(Point3d) The center point of the sphere</param>
@@ -245,6 +255,7 @@ module ExtensionsLine =
     *)
 
 
+    [<EXT>]
     ///<summary>Transforms a line</summary>
     ///<param name="line">(Guid) The line to transform</param>
     ///<param name="xform">(Transform) The transformation to apply</param>

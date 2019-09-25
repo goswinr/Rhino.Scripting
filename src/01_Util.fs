@@ -91,6 +91,15 @@ module internal Util =
 
 module UtilMath =
     let internal Rand = new System.Random () 
+
+    /// allows ints to be multiplied by floats
+    /// int(round(float(i) * f))
+    let inline ( *. ) (i:int) (f:float) = int(round(float(i) * f))
+    
+    /// gives a float from int / int division
+    /// (float(i)) / (float(j))
+    let inline ( /. ) (i:int) (j:int) = (float(i)) / (float(j))
+   
     
     /// test is a floating point value is Infinity or Not a Number
     let inline isNanOrInf f = Double.IsInfinity f || Double.IsNaN f

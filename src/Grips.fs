@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsGrips =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Enables or disables an object's grips. For curves and surfaces, these are
     ///  also called control points.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -37,6 +39,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to pick a single object grip</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt for picking</param>
@@ -76,6 +79,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts user to pick one or more object grips from one or more objects.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt for picking</param>
@@ -130,15 +134,16 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the next grip index from a specified grip index of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the next grip index</param>
-    ///<param name="direction">(float * float) Optional, Default Value: <c>0</c>
+    ///<param name="direction">(int * int) Optional, Default Value: <c>0</c>
     ///Direction to get the next grip index (0=U, 1=V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///If True, the next grip index found will be selected</param>
     ///<returns>(float) index of the next grip on success</returns>
-    static member NextObjectGrip(objectId:Guid, index:int, [<OPT;DEF(0)>]direction:float * float, [<OPT;DEF(true)>]enable:bool) : float =
+    static member NextObjectGrip(objectId:Guid, index:int, [<OPT;DEF(0)>]direction:int * int, [<OPT;DEF(true)>]enable:bool) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def NextObjectGrip(object_id, index, direction=0, enable=True):
@@ -156,6 +161,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns number of grips owned by an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) number of grips</returns>
@@ -323,6 +329,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object's grips are turned on</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating Grips state</returns>
@@ -342,6 +349,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object's grips are turned on and at least one grip
     ///  is selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -367,15 +375,16 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the previous grip index from a specified grip index of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
-    ///<param name="direction">(float * float) Optional, Default Value: <c>0</c>
+    ///<param name="direction">(int * int) Optional, Default Value: <c>0</c>
     ///Direction to get the next grip index (0=U, 1=V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///If True, the next grip index found will be selected</param>
     ///<returns>(float) index of the next grip on success</returns>
-    static member PrevObjectGrip(objectId:Guid, index:int, [<OPT;DEF(0)>]direction:float * float, [<OPT;DEF(true)>]enable:bool) : float =
+    static member PrevObjectGrip(objectId:Guid, index:int, [<OPT;DEF(0)>]direction:int * int, [<OPT;DEF(true)>]enable:bool) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def PrevObjectGrip(object_id, index, direction=0, enable=True):
@@ -393,6 +402,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a list of grip indices indentifying an object's selected grips</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int seq) list of indices on success</returns>
@@ -418,6 +428,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Selects a single grip owned by an object. If the object's grips are
     ///  not turned on, the grips will not be selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -448,6 +459,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Selects an object's grips. If the object's grips are not turned on,
     ///  they will not be selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -478,6 +490,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Unselects a single grip owned by an object. If the object's grips are
     ///  not turned on, the grips will not be unselected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -508,6 +521,7 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
     ///<summary>Unselects an object's grips. Note, the grips will not be turned off.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(float) Number of grips unselected on success</returns>

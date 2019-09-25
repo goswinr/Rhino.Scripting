@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsMesh =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Add a mesh object to the document</summary>
     ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     ///<param name="faceVertices">(float seq) List containing lists of 3 or 4 numbers that define the
@@ -79,6 +81,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a planar mesh from a closed, planar curve</summary>
     ///<param name="objectId">(Guid) Identifier of a closed, planar curve</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
@@ -111,6 +114,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersection of a curve object and a mesh object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="meshId">(Guid) Identifier or a mesh object</param>
@@ -154,6 +158,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns number of meshes that could be created by calling SplitDisjointMesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(int) The number of meshes that could be created</returns>
@@ -172,6 +177,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates curves that duplicates a mesh border</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Guid seq) list of curve ids on success</returns>
@@ -198,6 +204,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Explodes a mesh object, or mesh objects int submeshes. A submesh is a
     ///  collection of mesh faces that are contained within a closed loop of
     ///  unwelded mesh edges. Unwelded mesh edges are where the mesh faces that
@@ -241,6 +248,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies if an object is a mesh</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -259,6 +267,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a mesh object is closed</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -277,6 +286,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a mesh object is manifold. A mesh for which every edge is shared
     ///  by at most two faces is called manifold. If a mesh has at least one edge
     ///  that is shared by more than two faces, then that mesh is called non-manifold</summary>
@@ -300,6 +310,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a point is on a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="point">(Point3d) Test point</param>
@@ -324,6 +335,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Joins two or or more mesh objects together</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of two or more mesh objects</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
@@ -353,6 +365,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns approximate area of one or more mesh objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more mesh objects</param>
     ///<returns>(float * float * float)   where
@@ -391,6 +404,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the area centroid of a mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Point3d) representing the area centroid</returns>
@@ -412,6 +426,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs boolean difference operation on two sets of input meshes</summary>
     ///<param name="input0">(Guid) Input0 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
@@ -454,6 +469,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs boolean intersection operation on two sets of input meshes</summary>
     ///<param name="input0">(Guid) Input0 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
@@ -493,6 +509,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs boolean split operation on two sets of input meshes</summary>
     ///<param name="input0">(Guid) Input0 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
@@ -533,6 +550,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Performs boolean union operation on a set of input meshes</summary>
     ///<param name="meshIds">(Guid seq) Identifiers of meshes</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
@@ -565,6 +583,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the point on a mesh that is closest to a test point</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="point">(Point3d) Point to test</param>
@@ -603,6 +622,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the center of each face of the mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Point3d seq) points defining the center of each face</returns>
@@ -621,6 +641,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns total face count of a mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(int) the number of mesh faces</returns>
@@ -639,6 +660,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the face unit normal for each face of a mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Vector3d seq) 3D vectors that define the face unit normals of the mesh</returns>
@@ -664,6 +686,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns face vertices of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="faceType">(bool) Optional, Default Value: <c>true</c>
@@ -712,6 +735,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the vertex indices of all faces of a mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(float seq) containing tuples of 4 numbers that define the vertex indices for
@@ -738,6 +762,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a mesh object has face normals</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -756,6 +781,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a mesh object has texture coordinates</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -774,6 +800,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a mesh object has vertex colors</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -792,6 +819,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a mesh object has vertex normals</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -810,6 +838,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the intersections of a mesh object with another mesh object</summary>
     ///<param name="mesh1">(Guid) Mesh1 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="mesh2">(Guid) Mesh2 of 'identifiers of meshes' (FIXME 0)</param>
@@ -835,6 +864,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Identifies the naked edge points of a mesh object. This function shows
     ///  where mesh vertices are not completely surrounded by faces. Joined
     ///  meshes, such as are made by MeshBox, have naked mesh edge points where
@@ -867,6 +897,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Makes a new mesh with vertices offset at a distance in the opposite
     ///  direction of the existing vertex normals</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
@@ -895,6 +926,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates polyline curve outlines of mesh objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
@@ -928,6 +960,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of quad faces of a mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(int) the number of quad mesh faces</returns>
@@ -946,6 +979,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Converts a mesh object's quad faces to triangles</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -971,6 +1005,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Duplicates each polygon in a mesh with a NURBS surface. The resulting
     ///  surfaces are then joined into a polysurface and added to the document</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
@@ -1006,6 +1041,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns number of triangular faces of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(int) The number of triangular mesh faces</returns>
@@ -1098,6 +1134,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the vertex count of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(int) The number of mesh vertices .</returns>
@@ -1116,6 +1153,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the mesh faces that share a specified mesh vertex</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<param name="vertexIndex">(int) Index of the mesh vertex to find faces for</param>
@@ -1137,6 +1175,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the vertex unit normal for each vertex of a mesh</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Vector3d seq) of vertex normals, (empty list if no normals exist)</returns>
@@ -1157,6 +1196,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the vertices of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Point3d seq) vertex points in the mesh</returns>
@@ -1180,6 +1220,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the approximate volume of one or more closed meshes</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more mesh objects</param>
     ///<returns>(float * float * float) containing 3 velues  where
@@ -1217,6 +1258,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Calculates the volume centroid of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Point3d) Point3d representing the volume centroid</returns>
@@ -1238,6 +1280,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Pulls a curve to a mesh. The function makes a polyline approximation of
     ///  the input curve and gets the closest point on the mesh for each point on
     ///  the polyline. Then it "connects the points" to create a polyline on the mesh</summary>
@@ -1270,6 +1313,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Splits up a mesh into its unconnected pieces</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
@@ -1297,6 +1341,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Fixes inconsistencies in the directions of faces of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(float) the number of faces that were modified</returns>

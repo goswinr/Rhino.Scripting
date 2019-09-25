@@ -4,34 +4,62 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open Microsoft.FSharp.Core.LanguagePrimitives
+open System.IO
+
 [<AutoOpen>]
 module ExtensionsDocument =
+
+  [<EXT>] 
   type RhinoScriptSyntax with
     
-    ///<summary>Create a bitmap preview image of the current model</summary>
-    ///<param name="filename">(string) Name of the bitmap file to create</param>
+    [<EXT>]
+    [<EXT>]
+     ///<summary>Create a bitmap preview image of the current model</summary>
+    ///<param name="fileName">(string) Name of the bitmap file to create</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title of the view. If omitted, the active view is used</param>
-    ///<param name="size">(float) Optional, Default Value: <c>null:float</c>
-    ///Two integers that specify width and height of the bitmap</param>
+    ///  Title of the view. If omitted, the active view is used</param>
+    ///<param name="width">(int) Optional, Default Value: <c>0</c>
+    /// integer that specifies width of the bitmap in pixel. if only width given height will be scaled to kepp screen ratio</param>
+    ///<param name="height">(int) Optional, Default Value: <c>0</c>
+    /// integer that specifies height of the bitmap in pixel. if only height given width will be scaled to kepp screen ratio</param>
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
-    ///Bitmap creation flags. Can be the combination of:
+    ///  Bitmap creation flags. Can be the combination of:
     ///  1 = honor object highlighting
     ///  2 = draw construction plane
     ///  4 = use ghosted shading</param>
     ///<param name="wireframe">(bool) Optional, Default Value: <c>false</c>
-    ///If True then a wireframe preview image. If False,
+    ///  If True then a wireframe preview image. If False,
     ///  a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member CreatePreviewImage(filename:string, [<OPT;DEF(null:string)>]view:string, [<OPT;DEF(null:float)>]size:float, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
-        failNotImpl () // genreation temp disabled !!
+    static member CreatePreviewImage(fileName:string, [<OPT;DEF(null:string)>]view:string, [<OPT;DEF(0:int)>]width:int,[<OPT;DEF(0:int)>]height:int, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
+        let rhview =
+            if view = "" then Doc.Views.ActiveView
+            else Doc.Views.Find(view, false)
+        let rhsize =
+            match width,height with
+            | 0,0 -> rhview.ClientRectangle.Size
+            | x,0 -> 
+                let sc = x /. rhview.ClientRectangle.Size.Width
+                Drawing.Size(x, rhview.ClientRectangle.Size.Height *. sc)
+            | 0,y -> 
+                let sc = y /. rhview.ClientRectangle.Size.Height
+                Drawing.Size(rhview.ClientRectangle.Size.Width *. sc , y)   
+            | x,y -> Drawing.Size(x,y)
+        let ignoreHighlights =  (flags &&& 1) <> 1
+        let drawcplane =        (flags &&& 2)  = 2
+        let useghostedshading = (flags &&& 4)  = 4
+        if wireframe then
+            rhview.CreateWireframePreviewImage(fileName, rhsize, ignoreHighlights, drawcplane)
+        else
+            rhview.CreateShadedPreviewImage(fileName, rhsize, ignoreHighlights, drawcplane, useghostedshading)
     (*
-    def CreatePreviewImage(filename, view=None, size=None, flags=0, wireframe=False):
+    def CreatePreviewImage(fileName, view=None, size=None, flags=0, wireframe=False):
         '''Create a bitmap preview image of the current model
         Parameters:
-          filename (str): name of the bitmap file to create
+          fileName (str): name of the bitmap file to create
           view (str, optional): title of the view. If omitted, the active view is used
           size (number, optional): two integers that specify width and height of the bitmap
           flags (number, optional): Bitmap creation flags. Can be the combination of:
@@ -53,19 +81,20 @@ module ExtensionsDocument =
         drawcplane = (flags&2)==2
         useghostedshading = (flags&4)==4
         if wireframe:
-            return rhview.CreateWireframePreviewImage(filename, rhsize, ignore_highlights, drawcplane)
+            return rhview.CreateWireframePreviewImage(fileName, rhsize, ignore_highlights, drawcplane)
         else:
-            return rhview.CreateShadedPreviewImage(filename, rhsize, ignore_highlights, drawcplane, useghostedshading)
+            return rhview.CreateShadedPreviewImage(fileName, rhsize, ignore_highlights, drawcplane, useghostedshading)
     *)
 
 
-    ///<summary>Returns the document's modified flag. This flag indicates whether
+    [<EXT>]
+     ///<summary>Returns the document's modified flag. This flag indicates whether
     /// or not any changes to the current document have been made. NOTE: setting the
     /// document modified flag to False will prevent the "Do you want to save this
     /// file..." from displaying when you close Rhino.</summary>
     ///<returns>(bool) if no modified state is specified, the current modified state</returns>
     static member DocumentModified() : bool = //GET
-        failNotImpl () // genreation temp disabled !!
+        Doc.Modified
     (*
     def DocumentModified(modified=None):
         '''Returns or sets the document's modified flag. This flag indicates whether
@@ -84,14 +113,15 @@ module ExtensionsDocument =
         return oldstate
     *)
 
-    ///<summary>Sets the document's modified flag. This flag indicates whether
+    [<EXT>]
+     ///<summary>Sets the document's modified flag. This flag indicates whether
     /// or not any changes to the current document have been made. NOTE: setting the
     /// document modified flag to False will prevent the "Do you want to save this
     /// file..." from displaying when you close Rhino.</summary>
     ///<param name="modified">(bool)The modified state, either True or False</param>
     ///<returns>(unit) void, nothing</returns>
     static member DocumentModified(modified:bool) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        Doc.Modified <- modified
     (*
     def DocumentModified(modified=None):
         '''Returns or sets the document's modified flag. This flag indicates whether
@@ -111,10 +141,12 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
+  
+    [<EXT>]
+     ///<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the name of the currently loaded Rhino document (3DM file)</returns>
     static member DocumentName() : string =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Name |? ""
     (*
     def DocumentName():
         '''Returns the name of the currently loaded Rhino document (3DM file)
@@ -125,10 +157,17 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns path of the currently loaded Rhino document (3DM file)</summary>
+
+    [<EXT>]
+     ///<summary>Returns path of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the path of the currently loaded Rhino document (3DM file)</returns>
     static member DocumentPath() : string =
-        failNotImpl () // genreation temp disabled !!
+        let p = Doc.Path
+        if isNull p then ""
+        else
+            let slash = string Path.DirectorySeparatorChar
+            if p.EndsWith slash then p
+            else p + slash // add \ or / at the ende to be consistent with RhinoScript
     (*
     def DocumentPath():
         '''Returns path of the currently loaded Rhino document (3DM file)
@@ -144,12 +183,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Enables or disables screen redrawing</summary>
+
+    [<EXT>]
+     ///<summary>Enables or disables screen redrawing</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///True to enable, False to disable</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Views.RedrawEnabled <- enable
     (*
     def EnableRedraw(enable=True):
         '''Enables or disables screen redrawing
@@ -164,36 +205,44 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Extracts the bitmap preview image from the specified model (.3dm)</summary>
-    ///<param name="filename">(string) Name of the bitmap file to create. The extension of
-    ///  the filename controls the format of the bitmap file created.
+    [<EXT>]
+     ///<summary>Extracts the bitmap preview image from the specified model (.3dm)</summary>
+    ///<param name="fileName">(string) Name of the bitmap file to create. The extension of
+    ///  the fileName controls the format of the bitmap file created.
     ///  (.bmp, .tga, .jpg, .jpeg, .pcx, .png, .tif, .tiff)</param>
     ///<param name="modelname">(string) Optional, Default Value: <c>null:string</c>
     ///The model (.3dm) from which to extract the
     ///  preview image. If omitted, the currently loaded model is used.</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
-    static member ExtractPreviewImage(filename:string, [<OPT;DEF(null:string)>]modelname:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(unit) void, nothing</returns>
+    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelname:string) : unit =
+        let bmp =
+            if notNull modelname  then
+                if notNull Doc.Path then RhinoDoc.ExtractPreviewImage(Doc.Path) // TODO test this works ok
+                else failwithf "extractPreviewImage failed on unsaved file"
+            else
+                RhinoDoc.ExtractPreviewImage(modelname)
+        bmp.Save(fileName)
     (*
-    def ExtractPreviewImage(filename, modelname=None):
+    def ExtractPreviewImage(fileName, modelname=None):
         '''Extracts the bitmap preview image from the specified model (.3dm)
         Parameters:
-          filename (str): name of the bitmap file to create. The extension of
-             the filename controls the format of the bitmap file created.
+          fileName (str): name of the bitmap file to create. The extension of
+             the fileName controls the format of the bitmap file created.
              (.bmp, .tga, .jpg, .jpeg, .pcx, .png, .tif, .tiff)
           modelname (str, optional): The model (.3dm) from which to extract the
              preview image. If omitted, the currently loaded model is used.
         Returns:
           bool: True or False indicating success or failure
         '''
-        return scriptcontext.doc.ExtractPreviewImage(filename, modelname)
+        return scriptcontext.doc.ExtractPreviewImage(fileName, modelname)
     *)
 
 
-    ///<summary>Verifies that the current document has been modified in some way</summary>
+    [<EXT>]
+     ///<summary>Verifies that the current document has been modified in some way</summary>
     ///<returns>(bool) True or False.</returns>
     static member IsDocumentModified() : bool =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Modified
     (*
     def IsDocumentModified():
         '''Verifies that the current document has been modified in some way
@@ -204,11 +253,12 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the document's notes. Notes are generally created
+    [<EXT>]
+     ///<summary>Returns the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<returns>(string) if `newnotes` is omitted, the current notes</returns>
     static member Notes() : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        Doc.Notes
     (*
     def Notes(newnotes=None):
         '''Returns or sets the document's notes. Notes are generally created
@@ -224,12 +274,13 @@ module ExtensionsDocument =
         return old
     *)
 
-    ///<summary>Sets the document's notes. Notes are generally created
+    [<EXT>]
+     ///<summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<param name="newnotes">(string)New notes to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member Notes(newnotes:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        Doc.Notes <- newnotes
     (*
     def Notes(newnotes=None):
         '''Returns or sets the document's notes. Notes are generally created
@@ -246,12 +297,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the file version of the current document. Use this function to
+
+    [<EXT>]
+     ///<summary>Returns the file version of the current document. Use this function to
     ///  determine which version of Rhino last saved the document. Note, this
     ///  function will not return values from referenced or merged files.</summary>
-    ///<returns>(string) the file version of the current document</returns>
-    static member ReadFileVersion() : string =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(int) the file version of the current document</returns>
+    static member ReadFileVersion() : int =
+        Doc.ReadFileVersion()
     (*
     def ReadFileVersion():
         '''Returns the file version of the current document. Use this function to
@@ -264,10 +317,15 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Redraws all views</summary>
+    [<EXT>]
+     ///<summary>Redraws all views</summary>
     ///<returns>(unit) </returns>
     static member Redraw() : unit =
-        failNotImpl () // genreation temp disabled !!
+        let old = Doc.Views.RedrawEnabled
+        Doc.Views.RedrawEnabled <- true
+        Doc.Views.Redraw()
+        RhinoApp.Wait()
+        Doc.Views.RedrawEnabled <- old
     (*
     def Redraw():
         '''Redraws all views
@@ -282,10 +340,11 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns render antialiasing style</summary>
-    ///<returns>(float) The current antialiasing style</returns>
-    static member RenderAntialias() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+    [<EXT>]
+     ///<summary>Returns render antialiasing style</summary>
+    ///<returns>(int) The current antialiasing style (0=none, 1=normal, 2=best)</returns>
+    static member RenderAntialias() : int = //GET
+        int(Doc.RenderSettings.AntialiasLevel) // TODO check
     (*
     def RenderAntialias(style=None):
         '''Returns or sets render antialiasing style
@@ -303,11 +362,15 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets render antialiasing style</summary>
+    [<EXT>]
+     ///<summary>Sets render antialiasing style</summary>
     ///<param name="style">(int)Level of antialiasing (0=none, 1=normal, 2=best)</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderAntialias(style:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        if style=0 || style=1 || style=2 then
+            let settings = Doc.RenderSettings
+            settings.AntialiasLevel <- EnumOfValue (style)
+            Doc.RenderSettings <- settings
     (*
     def RenderAntialias(style=None):
         '''Returns or sets render antialiasing style
@@ -326,12 +389,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render ambient light or background color</summary>
+    [<EXT>]
+     ///<summary>Returns the render ambient light or background color</summary>
     ///<param name="item">(int) 0=ambient light color, 1=background color</param>
-    ///<returns>(int) The current item color
-    ///0=ambient light color, 1=background color</returns>
-    static member RenderColor(item:int) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(Drawing.Color) The current item color</returns>
+    static member RenderColor(item:int) : Drawing.Color = //GET
+        if item<>0 && item<>1 then  failwithf "Item must be 0 or 1.  item:'%A'" item
+        if item=0 then  Doc.RenderSettings.AmbientLight
+        else Doc.RenderSettings.BackgroundColorTop
     (*
     def RenderColor(item, color=None):
         '''Returns or sets the render ambient light or background color
@@ -355,12 +420,18 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render ambient light or background color</summary>
+    [<EXT>]
+     ///<summary>Sets the render ambient light or background color</summary>
     ///<param name="item">(int) 0=ambient light color, 1=background color</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, the current item color is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        if item<>0 && item<>1 then  failwithf "Item must be 0 || 1.  item:'%A' color:'%A'" item color
+        let settings = Doc.RenderSettings
+        if item=0 then  settings.AmbientLight <- color
+        else            settings.BackgroundColorTop <- color
+        Doc.RenderSettings <- settings
+        Doc.Views.Redraw()
     (*
     def RenderColor(item, color=None):
         '''Returns or sets the render ambient light or background color
@@ -385,10 +456,12 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render resolution</summary>
-    ///<returns>(float * float) The current resolution width,height</returns>
-    static member RenderResolution() : float * float = //GET
-        failNotImpl () // genreation temp disabled !!
+    [<EXT>]
+     ///<summary>Returns the render resolution</summary>
+    ///<returns>(int * int) The current resolution width,height</returns>
+    static member RenderResolution() : int * int = //GET
+        let rc = Doc.RenderSettings.ImageSize
+        rc.Width, rc.Height
     (*
     def RenderResolution(resolution=None):
         '''Returns or sets the render resolution
@@ -406,11 +479,15 @@ module ExtensionsDocument =
         return rc.Width, rc.Height
     *)
 
-    ///<summary>Sets the render resolution</summary>
-    ///<param name="resolution">(float * float)Width and height of render</param>
+    [<EXT>]
+     ///<summary>Sets the render resolution</summary>
+    ///<param name="width">(int) width and height of render</param>
+    ///<param name="height">(int) height of render</param>
     ///<returns>(unit) void, nothing</returns>
-    static member RenderResolution(resolution:float * float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member RenderResolution(width:int, height:int) : unit = //SET
+            let settings = Doc.RenderSettings
+            settings.ImageSize <- Drawing.Size(width ,height)
+            Doc.RenderSettings <- settings
     (*
     def RenderResolution(resolution=None):
         '''Returns or sets the render resolution
@@ -429,20 +506,14 @@ module ExtensionsDocument =
     *)
 
 
-    
-    static member internal SetRenderMeshAndUpdateStyle() : obj =
-        failNotImpl () // genreation temp disabled !!
-    (*
-    def _SetRenderMeshAndUpdateStyle(current):
-        ''''''
-    *)
 
-
-    ///<summary>Returns the render mesh density property of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh density .</returns>
     static member RenderMeshDensity() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        current.RelativeTolerance
     (*
     def RenderMeshDensity(density=None):
         '''Returns or sets the render mesh density property of the active document.
@@ -462,12 +533,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh density property of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="density">(float)The new render mesh density, which is a number between 0.0 and 1.0.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshDensity(density:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        if RhinoMath.Clamp(density, 0.0, 1.0) = density then
+            current.RelativeTolerance <- density
+            Doc.SetCustomMeshingParameters(current)
+            Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshDensity(density=None):
         '''Returns or sets the render mesh density property of the active document.
@@ -488,11 +564,13 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh maximum angle property of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current maximum angle .</returns>
     static member RenderMeshMaxAngle() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        toDegrees(current.RefineAngle)
     (*
     def RenderMeshMaxAngle(angle_degrees=None):
         '''Returns or sets the render mesh maximum angle property of the active document.  
@@ -513,12 +591,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh maximum angle property of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="angleDegrees">(int)The new maximum angle, which is a positive number in degrees.</param>
+    ///<param name="angleDegrees">(float)The new maximum angle, which is a positive number in degrees.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member RenderMeshMaxAngle(angleDegrees:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member RenderMeshMaxAngle(angleDegrees:float) : unit = //SET
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        if angleDegrees > 0. then
+                current.RefineAngle <- toRadians(angleDegrees)
+                Doc.SetCustomMeshingParameters(current)
+                Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshMaxAngle(angle_degrees=None):
         '''Returns or sets the render mesh maximum angle property of the active document.  
@@ -540,11 +623,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh maximum aspect ratio property of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh maximum aspect ratio .</returns>
     static member RenderMeshMaxAspectRatio() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let rc = current.GridAspectRatio
+        rc
     (*
     def RenderMeshMaxAspectRatio(ratio=None):
         '''Returns or sets the render mesh maximum aspect ratio property of the active document.
@@ -564,12 +650,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh maximum aspect ratio property of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="ratio">(float)The render mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAspectRatio(ratio:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        if ratio <> 0.0 then
+            current.GridAspectRatio <- ratio
+            Doc.SetCustomMeshingParameters(current)
+            Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshMaxAspectRatio(ratio=None):
         '''Returns or sets the render mesh maximum aspect ratio property of the active document.
@@ -590,11 +681,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh maximum distance, edge to surface .</returns>
     static member RenderMeshMaxDistEdgeToSrf() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let rc = current.Tolerance
+        rc
     (*
     def RenderMeshMaxDistEdgeToSrf(distance=None):
         '''Returns or sets the render mesh maximum distance, edge to surface parameter of the active document.
@@ -614,12 +708,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh maximum distance, edge to surface.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        if distance > 0. then
+            current.Tolerance <- distance
+            Doc.SetCustomMeshingParameters(current)
+            Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshMaxDistEdgeToSrf(distance=None):
         '''Returns or sets the render mesh maximum distance, edge to surface parameter of the active document.
@@ -640,11 +739,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh maximum edge length parameter of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh maximum edge length .</returns>
     static member RenderMeshMaxEdgeLength() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let rc = current.MaximumEdgeLength
+        rc
     (*
     def RenderMeshMaxEdgeLength(distance=None):
         '''Returns or sets the render mesh maximum edge length parameter of the active document.
@@ -664,12 +766,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh maximum edge length parameter of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh maximum edge length.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxEdgeLength(distance:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        if distance > 0.0 then
+            current.MaximumEdgeLength <- distance
+            Doc.SetCustomMeshingParameters(current)
+            Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshMaxEdgeLength(distance=None):
         '''Returns or sets the render mesh maximum edge length parameter of the active document.
@@ -690,11 +797,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh minimum edge length parameter of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(float) The current render mesh minimum edge length .</returns>
     static member RenderMeshMinEdgeLength() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let rc = current.MinimumEdgeLength
+        rc
     (*
     def RenderMeshMinEdgeLength(distance=None):
         '''Returns or sets the render mesh minimum edge length parameter of the active document.
@@ -714,12 +824,18 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh minimum edge length parameter of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="distance">(float)The render mesh minimum edge length.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let rc = current.MinimumEdgeLength
+        if distance > 0.0 then
+            current.MinimumEdgeLength <- distance
+            Doc.SetCustomMeshingParameters(current)
+            Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshMinEdgeLength(distance=None):
         '''Returns or sets the render mesh minimum edge length parameter of the active document.
@@ -740,11 +856,14 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh minimum initial grid quads parameter of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<returns>(float) The current render mesh minimum initial grid quads .</returns>
-    static member RenderMeshMinInitialGridQuads() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(int) The current render mesh minimum initial grid quads .</returns>
+    static member RenderMeshMinInitialGridQuads() : int = //GET
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        current.GridMinCount
+        
     (*
     def RenderMeshMinInitialGridQuads(quads=None):
         '''Returns or sets the render mesh minimum initial grid quads parameter of the active document.
@@ -764,12 +883,18 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="quads">(float)The render mesh minimum initial grid quads. The suggested range is from 0 to 10000.</param>
+    ///<param name="quads">(int)The render mesh minimum initial grid quads. The suggested range is from 0 to 10000.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member RenderMeshMinInitialGridQuads(quads:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member RenderMeshMinInitialGridQuads(quads:int) : unit = //SET
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let rc = current.GridMinCount
+        if quads > 0 then
+            current.GridMinCount <- quads
+            Doc.SetCustomMeshingParameters(current)
+            Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshMinInitialGridQuads(quads=None):
         '''Returns or sets the render mesh minimum initial grid quads parameter of the active document.
@@ -790,14 +915,19 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh quality of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(int) The current render mesh quality .
     ///  0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
     ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
     ///  2: Custom.</returns>
     static member RenderMeshQuality() : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.MeshingParameterStyle
+        if current = MeshingParameterStyle.Fast then 0
+        elif current = MeshingParameterStyle.Quality then 1
+        elif current = MeshingParameterStyle.Custom then  2
+        else -1
     (*
     def RenderMeshQuality(quality=None):
         '''Returns or sets the render mesh quality of the active document.
@@ -834,15 +964,25 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh quality of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="quality">(float)The render mesh quality, either:
+    ///<param name="quality">(int)The render mesh quality, either:
     ///  0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
     ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
     ///  2: Custom.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member RenderMeshQuality(quality:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member RenderMeshQuality(quality:int) : unit = //SET
+        let newValue =
+            if quality = 0 then
+                MeshingParameterStyle.Fast
+            elif quality = 1 then
+                MeshingParameterStyle.Quality
+            elif quality = 2 then
+                MeshingParameterStyle.Custom
+            else
+                MeshingParameterStyle.None
+        Doc.MeshingParameterStyle <- newValue
     (*
     def RenderMeshQuality(quality=None):
         '''Returns or sets the render mesh quality of the active document.
@@ -880,7 +1020,8 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the render mesh settings of the active document.
+    [<EXT>]
+     ///<summary>Returns the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<returns>(int) The current render mesh settings .
     ///    0: No settings enabled.
@@ -889,7 +1030,12 @@ module ExtensionsDocument =
     ///    4: Simple planes enabled.
     ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized.</returns>
     static member RenderMeshSettings() : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        let mutable rc = 0
+        if current.RefineGrid then  rc <- rc +  1
+        if current.JaggedSeams then  rc <- rc +  2
+        if current.SimplePlanes then  rc <- rc +  4
+        rc
     (*
     def RenderMeshSettings(settings=None):
         '''Returns or sets the render mesh settings of the active document.
@@ -922,7 +1068,8 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the render mesh settings of the active document.
+    [<EXT>]
+     ///<summary>Sets the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
     ///<param name="settings">(int)The render mesh settings, which is a bit-coded number that allows or disallows certain features.
     ///  The bits can be added together in any combination to form a value between 0 and 7.  The bit values are as follows:
@@ -933,7 +1080,12 @@ module ExtensionsDocument =
     ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshSettings(settings:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
+        current.RefineGrid <- (settings &&& 1)   <> 0
+        current.JaggedSeams <- (settings &&& 2)  <> 0
+        current.SimplePlanes <- (settings &&& 4) <> 0
+        Doc.SetCustomMeshingParameters(current)
+        Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
     (*
     def RenderMeshSettings(settings=None):
         '''Returns or sets the render mesh settings of the active document.
@@ -967,7 +1119,8 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns render settings</summary>
+    [<EXT>]
+     ///<summary>Returns render settings</summary>
     ///<returns>(int) if settings are not specified, the current render settings in bit-coded flags
     ///  0=none,
     ///  1=create shadows,
@@ -975,7 +1128,13 @@ module ExtensionsDocument =
     ///  4=render curves and isocurves,
     ///  8=render dimensions and text</returns>
     static member RenderSettings() : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let mutable rc = 0
+        let rendersettings = Doc.RenderSettings
+        if 0 <> rendersettings.ShadowmapLevel   then  rc <- rc + 1
+        if rendersettings.UseHiddenLights       then  rc <- rc + 2
+        if rendersettings.RenderCurves          then  rc <- rc + 4
+        if rendersettings.RenderAnnotations     then  rc <- rc + 8
+        rc
     (*
     def RenderSettings(settings=None):
         '''Returns or sets render settings
@@ -1005,7 +1164,8 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets render settings</summary>
+    [<EXT>]
+     ///<summary>Sets render settings</summary>
     ///<param name="settings">(int)Bit-coded flags of render settings to modify.
     ///  0=none,
     ///  1=create shadows,
@@ -1014,7 +1174,12 @@ module ExtensionsDocument =
     ///  8=render dimensions and text</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let rendersettings = Doc.RenderSettings
+        rendersettings.ShadowmapLevel <-    (settings &&& 1)
+        rendersettings.UseHiddenLights <-   (settings &&& 2) = 2
+        rendersettings.RenderCurves <-      (settings &&& 4) = 4
+        rendersettings.RenderAnnotations <- (settings &&& 8) = 8
+        Doc.RenderSettings <- rendersettings
     (*
     def RenderSettings(settings=None):
         '''Returns or sets render settings
@@ -1045,12 +1210,13 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the document's absolute tolerance. Absolute tolerance
+    [<EXT>]
+     ///<summary>Returns the document's absolute tolerance. Absolute tolerance
     /// is measured in drawing units. See Rhino's document properties command
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current absolute tolerance</returns>
     static member UnitAbsoluteTolerance() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        Doc.ModelAbsoluteTolerance 
     (*
     def UnitAbsoluteTolerance(tolerance=None, in_model_units=True):
         '''Returns or sets the document's absolute tolerance. Absolute tolerance
@@ -1075,15 +1241,18 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Sets the document's absolute tolerance. Absolute tolerance
+    [<EXT>]
+     ///<summary>Sets the document's absolute tolerance. Absolute tolerance
     /// is measured in drawing units. See Rhino's document properties command
     /// (Units and Page Units Window) for details</summary>
     ///<param name="tolerance">(float)The absolute tolerance to set</param>
-    ///<param name="inModelUnits">(bool)Return or modify the document's model units (True)
-    ///  or the document's page units (False)</param>
     ///<returns>(unit) void, nothing</returns>
-    static member UnitAbsoluteTolerance(tolerance:float, [<OPT;DEF(true)>]inModelUnits:bool) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member UnitAbsoluteTolerance(tolerance:float) : unit = //SET
+        if tolerance > 0.0 then
+            Doc.ModelAbsoluteTolerance <- tolerance
+        else
+            failwithf "UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
+            
     (*
     def UnitAbsoluteTolerance(tolerance=None, in_model_units=True):
         '''Returns or sets the document's absolute tolerance. Absolute tolerance
@@ -1109,12 +1278,13 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Return the document's angle tolerance. Angle tolerance is
+    [<EXT>]
+     ///<summary>Return the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current angle tolerance</returns>
     static member UnitAngleTolerance() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+       Doc.ModelAngleToleranceDegrees 
     (*
     def UnitAngleTolerance(angle_tolerance_degrees=None, in_model_units=True):
         '''Return or set the document's angle tolerance. Angle tolerance is
@@ -1139,15 +1309,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Set the document's angle tolerance. Angle tolerance is
+    [<EXT>]
+     ///<summary>Set the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
     ///<param name="angleToleranceDegrees">(float)The angle tolerance to set</param>
-    ///<param name="inModelUnits">(float)Return or modify the document's model units (True)
-    ///  or the document's page units (False)</param>
     ///<returns>(unit) void, nothing</returns>
-    static member UnitAngleTolerance(angleToleranceDegrees:float, [<OPT;DEF(true)>]inModelUnits:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member UnitAngleTolerance(angleToleranceDegrees:float) : unit = //SET
+            if angleToleranceDegrees > 0. then
+                Doc.ModelAngleToleranceDegrees <- angleToleranceDegrees
+            else
+                failwithf "UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
     (*
     def UnitAngleTolerance(angle_tolerance_degrees=None, in_model_units=True):
         '''Return or set the document's angle tolerance. Angle tolerance is
@@ -1173,10 +1345,11 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Return the document's distance display precision</summary>
-    ///<returns>(float) The current distance display precision .</returns>
-    static member UnitDistanceDisplayPrecision() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+    [<EXT>]
+     ///<summary>Return the document's distance display precision</summary>
+    ///<returns>(int) The current distance display precision .</returns>
+    static member UnitDistanceDisplayPrecision() : int = //GET
+        Doc.ModelDistanceDisplayPrecision 
     (*
     def UnitDistanceDisplayPrecision(precision=None, model_units=True):
         '''Return or set the document's distance display precision
@@ -1198,14 +1371,14 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Set the document's distance display precision</summary>
-    ///<param name="precision">(float)The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
+    [<EXT>]
+     ///<summary>Set the document's distance display precision</summary>
+    ///<param name="precision">(int)The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
     ///  If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
     ///  Use UnitDistanceDisplayMode to get the current distance display mode.</param>
-    ///<param name="modelUnits">(bool)Return or modify the document's model units (True) or the document's page units (False). The default is True.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member UnitDistanceDisplayPrecision(precision:float, [<OPT;DEF(true)>]modelUnits:bool) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member UnitDistanceDisplayPrecision(precision:int) : unit = //SET
+            Doc.ModelDistanceDisplayPrecision <- precision
     (*
     def UnitDistanceDisplayPrecision(precision=None, model_units=True):
         '''Return or set the document's distance display precision
@@ -1228,12 +1401,13 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Return the document's relative tolerance. Relative tolerance
+    [<EXT>]
+     ///<summary>Return the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current tolerance in percent</returns>
     static member UnitRelativeTolerance() : float = //GET
-        failNotImpl () // genreation temp disabled !!
+         Doc.ModelRelativeTolerance 
     (*
     def UnitRelativeTolerance(relative_tolerance=None, in_model_units=True):
         '''Return or set the document's relative tolerance. Relative tolerance
@@ -1258,15 +1432,17 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Set the document's relative tolerance. Relative tolerance
+    [<EXT>]
+     ///<summary>Set the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
-    ///<param name="relativeTolerance">(float)The relative tolerance in percent</param>
-    ///<param name="inModelUnits">(bool)Return or modify the document's model units (True)
-    ///  or the document's page units (False)</param>
+    ///<param name="relativeTolerance">(float)The relative tolerance in percent</param>    
     ///<returns>(unit) void, nothing</returns>
-    static member UnitRelativeTolerance(relativeTolerance:float, [<OPT;DEF(true)>]inModelUnits:bool) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member UnitRelativeTolerance(relativeTolerance:float) : unit = //SET
+            if relativeTolerance > 0.0 then
+                Doc.ModelRelativeTolerance <- relativeTolerance
+            else
+              failwithf "UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
     (*
     def UnitRelativeTolerance(relative_tolerance=None, in_model_units=True):
         '''Return or set the document's relative tolerance. Relative tolerance
@@ -1292,7 +1468,9 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Return the scale factor for changing between unit systems.</summary>
+    [<EXT>]
+    [<EXT>]
+     ///<summary>Return the scale factor for changing between unit systems.</summary>
     ///<param name="toSystem">(int) The unit system to convert to. The unit systems are are:
     ///  0 - No unit system
     ///  1 - Microns (1.0e-6 meters)
@@ -1320,12 +1498,12 @@ module ExtensionsDocument =
     ///    23 - Astronomical (1.4959787e+11)
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</param>
-    ///<param name="fromSystem">(int) Optional, Default Value: <c>null:int</c>
-    ///The unit system to convert from (see above). If omitted,
-    ///  the document's current unit system is used</param>
+    ///<param name="fromSystem">(int) The unit system to convert from (see above)</param>
     ///<returns>(float) scale factor for changing between unit systems</returns>
-    static member UnitScale(toSystem:int, [<OPT;DEF(null:int)>]fromSystem:int) : float =
-        failNotImpl () // genreation temp disabled !!
+    static member UnitScale(toSystem:int, fromSystem:int) : float =
+      let toSystemt:UnitSystem   = LanguagePrimitives.EnumOfValue  (byte toSystem)
+      let fromSystemt:UnitSystem  = LanguagePrimitives.EnumOfValue (byte fromSystem)
+      RhinoMath.UnitScale(fromSystemt, toSystemt)
     (*
     def UnitScale(to_system, from_system=None):
         '''Return the scale factor for changing between unit systems.
@@ -1372,7 +1550,8 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Return the document's unit system. See Rhino's DocumentProperties
+    [<EXT>]
+     ///<summary>Return the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
     ///<returns>(int) The current unit system
     ///  0 - No unit system
@@ -1401,8 +1580,8 @@ module ExtensionsDocument =
     ///    23 - Astronomical (1.4959787e+11)
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</returns>
-    static member UnitSystem() : int = //GET
-        failNotImpl () // genreation temp disabled !!
+    static member UnitSystem() : int = //GET        
+            int(Doc.ModelUnitSystem)
     (*
     def UnitSystem(unit_system=None, scale=False, in_model_units=True):
         '''Return or set the document's unit system. See Rhino's DocumentProperties
@@ -1437,7 +1616,7 @@ module ExtensionsDocument =
             25 - Parsecs (3.08567758e+16)
           scale (bool, optional): Scale existing geometry based on the new unit system.
               If not specified, any existing geometry is not scaled (False)
-          in_model_units (number, optional): Return or modify the document's model units (True)
+          in_model_units (bool, optional): Return or modify the document's model units (True)
               or the document's page units (False). The default is True.
         Returns:
           number: if unit_system is not specified, the current unit system
@@ -1459,7 +1638,8 @@ module ExtensionsDocument =
         return rc
     *)
 
-    ///<summary>Set the document's unit system. See Rhino's DocumentProperties
+    [<EXT>]
+     ///<summary>Set the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
     ///<param name="unitSystem">(int)The unit system to set the document to. The unit systems are:
     ///  0 - No unit system
@@ -1489,12 +1669,13 @@ module ExtensionsDocument =
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</param>
     ///<param name="scale">(bool)Scale existing geometry based on the new unit system.
-    ///  If not specified, any existing geometry is not scaled (False)</param>
-    ///<param name="inModelUnits">(int)Return or modify the document's model units (True)
-    ///  or the document's page units (False). The default is True.</param>
+    ///  If not specified, any existing geometry is not scaled (False)</param>    
     ///<returns>(unit) void, nothing</returns>
-    static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool, [<OPT;DEF(true)>]inModelUnits:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+    static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
+        if unitSystem < 1 || unitSystem > 25 then
+            failwithf "unitSystem value of %d is not  valid" unitSystem        
+            let unitSystem : UnitSystem  = LanguagePrimitives.EnumOfValue (byte unitSystem)
+            Doc.AdjustPageUnitSystem(unitSystem, scale)
     (*
     def UnitSystem(unit_system=None, scale=False, in_model_units=True):
         '''Return or set the document's unit system. See Rhino's DocumentProperties
@@ -1529,7 +1710,7 @@ module ExtensionsDocument =
             25 - Parsecs (3.08567758e+16)
           scale (bool, optional): Scale existing geometry based on the new unit system.
               If not specified, any existing geometry is not scaled (False)
-          in_model_units (number, optional): Return or modify the document's model units (True)
+          in_model_units (bool, optional): Return or modify the document's model units (True)
               or the document's page units (False). The default is True.
         Returns:
           number: if unit_system is not specified, the current unit system
@@ -1552,7 +1733,9 @@ module ExtensionsDocument =
     *)
 
 
-    ///<summary>Returns the name of the current unit system</summary>
+   
+    [<EXT>]
+     ///<summary>Returns the name of the current unit system</summary>
     ///<param name="capitalize">(bool) Optional, Default Value: <c>false</c>
     ///Capitalize the first character of the units system name (e.g. return "Millimeter" instead of "millimeter"). The default is not to capitalize the first character (false).</param>
     ///<param name="singular">(bool) Optional, Default Value: <c>true</c>
@@ -1563,7 +1746,7 @@ module ExtensionsDocument =
     ///Return the document's model units (True) or the document's page units (False). The default is True.</param>
     ///<returns>(string) The name of the current units system .</returns>
     static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string =
-        failNotImpl () // genreation temp disabled !!
+        Doc.GetUnitSystemName(modelUnits, capitalize, singular, abbreviate)
     (*
     def UnitSystemName(capitalize=False, singular=True, abbreviate=False, model_units=True):
         '''Returns the name of the current unit system

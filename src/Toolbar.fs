@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsToolbar =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Closes a currently open toolbar collection</summary>
     ///<param name="name">(string) Name of a currently open toolbar collection</param>
     ///<param name="prompt">(bool) Optional, Default Value: <c>false</c>
@@ -34,6 +36,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Hides a previously visible toolbar group in an open toolbar collection</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<param name="toolbarGroup">(string) Name of a toolbar group to hide</param>
@@ -59,6 +62,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies a toolbar (or toolbar group) exists in an open collection file</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<param name="toolbar">(string) Name of a toolbar group</param>
@@ -85,6 +89,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a toolbar collection is open</summary>
     ///<param name="file">(string) Full path to a toolbar collection file</param>
     ///<returns>(string) Rhino-assigned name of the toolbar collection</returns>
@@ -104,6 +109,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a toolbar group in an open toolbar collection is visible</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<param name="toolbarGroup">(string) Name of a toolbar group</param>
@@ -127,6 +133,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a toolbar group in an open toolbar collection is visible</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<param name="toolbarGroup">(string) Name of a toolbar group</param>
@@ -150,6 +157,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Opens a toolbar collection file</summary>
     ///<param name="file">(string) Full path to the collection file</param>
     ///<returns>(string) Rhino-assigned name of the toolbar collection</returns>
@@ -169,6 +177,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Saves an open toolbar collection to disk</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -188,6 +197,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Saves an open toolbar collection to a different disk file</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<param name="file">(string) Full path to file name to save to</param>
@@ -209,6 +219,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Shows a previously hidden toolbar group in an open toolbar collection</summary>
     ///<param name="name">(string) Name of a currently open toolbar file</param>
     ///<param name="toolbarGroup">(string) Name of a toolbar group to show</param>
@@ -234,6 +245,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns number of currently open toolbar collections</summary>
     ///<returns>(int) the number of currently open toolbar collections</returns>
     static member ToolbarCollectionCount() : int =
@@ -248,6 +260,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns names of all currently open toolbar collections</summary>
     ///<returns>(string seq) the names of all currently open toolbar collections</returns>
     static member ToolbarCollectionNames() : string seq =
@@ -262,6 +275,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns full path to a currently open toolbar collection file</summary>
     ///<param name="name">(string) Name of currently open toolbar collection</param>
     ///<returns>(string) full path on success</returns>
@@ -281,6 +295,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the number of toolbars or groups in a currently open toolbar file</summary>
     ///<param name="name">(string) Name of currently open toolbar collection</param>
     ///<param name="groups">(bool) Optional, Default Value: <c>false</c>
@@ -305,6 +320,7 @@ module ExtensionsToolbar =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the names of all toolbars (or toolbar groups) found in a
     ///  currently open toolbar file</summary>
     ///<param name="name">(string) Name of currently open toolbar collection</param>

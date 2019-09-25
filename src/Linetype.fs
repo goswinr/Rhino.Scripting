@@ -4,10 +4,11 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsLinetype =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
     
@@ -19,6 +20,7 @@ module ExtensionsLinetype =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies the existance of a linetype in the document</summary>
     ///<param name="nameOrId">(Guid) The name or identifier of an existing linetype.</param>
     ///<returns>(bool) True or False</returns>
@@ -37,6 +39,7 @@ module ExtensionsLinetype =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an existing linetype is from a reference file</summary>
     ///<param name="nameOrId">(Guid) The name or identifier of an existing linetype.</param>
     ///<returns>(bool) True or False</returns>
@@ -56,6 +59,7 @@ module ExtensionsLinetype =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns number of linetypes in the document</summary>
     ///<returns>(int) the number of linetypes in the document</returns>
     static member LinetypeCount() : int =
@@ -70,6 +74,7 @@ module ExtensionsLinetype =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns names of all linetypes in the document</summary>
     ///<returns>(string seq) list of linetype names</returns>
     static member LinetypeNames() : string seq =

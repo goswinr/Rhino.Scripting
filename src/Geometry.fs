@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsGeometry =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Create a clipping plane for visibly clipping away geometry in a specific
     ///  view. Note, clipping planes are infinite</summary>
     ///<param name="plane">(Plane) The plane</param>
@@ -67,6 +69,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates a picture frame and adds it to the document.</summary>
     ///<param name="plane">(Plane) The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.</param>
     ///<param name="filename">(string) The path to a bitmap or image file.</param>
@@ -110,6 +113,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds point object to the document.</summary>
     ///<param name="pointOrX">(float) A point3d or X location of point to add</param>
     ///<param name="y">(float) Optional, Default Value: <c>null:float</c>
@@ -138,6 +142,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds point cloud object to the document</summary>
     ///<param name="points">(Point3d seq) List of values where every multiple of three represents a point</param>
     ///<param name="colors">(Drawing.Color seq) Optional, Default Value: <c>null:Drawing.Color seq</c>
@@ -168,6 +173,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds one or more point objects to the document</summary>
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid seq) identifiers of the new objects on success</returns>
@@ -188,6 +194,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Adds a text string to the document</summary>
     ///<param name="text">(string) The text to display</param>
     ///<param name="pointOrPlane">(Plane) A 3-D point or the plane on which the text will lie.
@@ -202,7 +209,7 @@ module ExtensionsGeometry =
     ///  1 = bold
     ///  2 = italic
     ///  3 = bold and italic</param>
-    ///<param name="justification">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="justification">(int) Optional, Default Value: <c>null:int</c>
     ///Text justification. Values may be added to create combinations.
     ///  1 = Left
     ///  2 = Center (horizontal)
@@ -211,7 +218,7 @@ module ExtensionsGeometry =
     ///  131072 = Middle (vertical)
     ///  262144 = Top</param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
-    static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null:string)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(null:float)>]justification:float) : Guid =
+    static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null:string)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(null:int)>]justification:int) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddText(text, point_or_plane, height=1.0, font=None, font_style=0, justification=None):
@@ -299,6 +306,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Add a text dot to the document.</summary>
     ///<param name="text">(string) String in dot</param>
     ///<param name="point">(Point3d) A 3D point identifying the origin point.</param>
@@ -323,6 +331,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Compute the area of a closed curve, hatch, surface, polysurface, or mesh</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area</returns>
@@ -344,6 +353,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
     ///  bounding box of an object or of several objects</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
@@ -419,6 +429,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Compares two objects to determine if they are geometrically identical.</summary>
     ///<param name="first">(Guid) The identifier of the first object to compare.</param>
     ///<param name="second">(Guid) The identifier of the second object to compare.</param>
@@ -440,6 +451,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Creates outline curves for a given text entity</summary>
     ///<param name="textId">(Guid) Identifier of Text object to explode</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
@@ -466,6 +478,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that an object is a clipping plane object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a clipping plane</returns>
@@ -484,6 +497,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a point object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a point</returns>
@@ -502,6 +516,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a point cloud object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a point cloud</returns>
@@ -520,6 +535,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a text object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a text object</returns>
@@ -538,6 +554,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies an object is a text dot object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a text dot object</returns>
@@ -556,6 +573,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the point count of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(int) number of points</returns>
@@ -574,6 +592,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a point cloud has hidden points</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False</returns>
@@ -592,6 +611,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Verifies that a point cloud has point colors</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False</returns>
@@ -738,6 +758,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Guid seq) list of points</returns>
@@ -765,6 +786,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns amount indices of points in a point cloud that are near needlePoints.</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points.</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the point_cloud. This can also be specified as a point cloud.</param>
@@ -815,6 +837,7 @@ module ExtensionsGeometry =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
     ///  closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius.</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points.</param>

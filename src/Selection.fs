@@ -4,12 +4,14 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
+open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 [<AutoOpen>]
 module ExtensionsSelection =
+  [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     ///<summary>Returns identifiers of all objects in the document.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the objects</param>
@@ -50,6 +52,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifier of the first object in the document. The first
     ///  object is the last object created by the user.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -84,6 +87,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>A helper Function for Rhino.DocObjects.ObjectType Enum</summary>
     ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types.</param>
     ///<returns>(Rhino.DocObjects.ObjectType) translated Rhino.DocObjects.ObjectType Enum</returns>
@@ -140,6 +144,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts user to pick or select a single curve object</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
@@ -215,10 +220,11 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts user to pick, or select, a single object.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="filter">(float) Optional, Default Value: <c>0</c>
+    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the filter class to get values</param>
@@ -234,7 +240,7 @@ module ExtensionsSelection =
     ///  case, an ObjRef is returned instead of a Guid to allow for tracking
     ///  of the subobject when passed into other functions</param>
     ///<returns>(Guid) Identifier of the picked object</returns>
-    static member GetObject([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:obj->unit)>]customFilter:obj->unit, [<OPT;DEF(false)>]subobjects:bool) : Guid =
+    static member GetObject([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:int, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:obj->unit)>]customFilter:obj->unit, [<OPT;DEF(false)>]subobjects:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObject(message=None, filter=0, preselect=False, select=False, custom_filter=None, subobjects=False):
@@ -299,10 +305,11 @@ module ExtensionsSelection =
 
 
     //(FIXME) VarOutTypes
+    [<EXT>]
     ///<summary>Prompts user to pick, or select a single object</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="filter">(float) Optional, Default Value: <c>0</c>
+    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the filter class to get values</param>
@@ -320,7 +327,7 @@ module ExtensionsSelection =
     ///  [2] selection method (see help)
     ///  [3] selection point
     ///  [4] name of the view selection was made</returns>
-    static member GetObjectEx([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * float * Point3d * string =
+    static member GetObjectEx([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:int, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * float * Point3d * string =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjectEx(message=None, filter=0, preselect=False, select=False, objects=None):
@@ -379,10 +386,11 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts user to pick or select one or more objects.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="filter">(float) Optional, Default Value: <c>0</c>
+    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the filter class to get values
@@ -424,7 +432,7 @@ module ExtensionsSelection =
     ///<param name="customFilter">(string) Optional, Default Value: <c>null:string</c>
     ///Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid seq) identifiers of the picked objects</returns>
-    static member GetObjects([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq, [<OPT;DEF(1)>]minimumCount:int, [<OPT;DEF(0)>]maximumCount:int, [<OPT;DEF(null:string)>]customFilter:string) : Guid seq =
+    static member GetObjects([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:int, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq, [<OPT;DEF(1)>]minimumCount:int, [<OPT;DEF(0)>]maximumCount:int, [<OPT;DEF(null:string)>]customFilter:string) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjects(message=None, filter=0, group=True, preselect=False, select=False, objects=None, minimum_count=1, maximum_count=0, custom_filter=None):
@@ -505,10 +513,11 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts user to pick, or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="filter">(float) Optional, Default Value: <c>0</c>
+    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the filter class to get values</param>
@@ -530,7 +539,7 @@ module ExtensionsSelection =
     ///  [n][2]  selection method (see help)
     ///  [n][3]  selection point
     ///  [n][4]  name of the view selection was made</returns>
-    static member GetObjectsEx([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:float, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : (Guid*bool*int*Point3d*string) seq =
+    static member GetObjectsEx([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(0)>]filter:int, [<OPT;DEF(true)>]group:bool, [<OPT;DEF(false)>]preselect:bool, [<OPT;DEF(false)>]select:bool, [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : (Guid*bool*int*Point3d*string) seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetObjectsEx(message=None, filter=0, group=True, preselect=False, select=False, objects=None):
@@ -595,6 +604,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to select one or more point objects.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select points"</c>
     ///A prompt message.</param>
@@ -621,6 +631,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Prompts the user to select a single surface</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select surface"</c>
     ///Prompt displayed</param>
@@ -688,6 +699,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
     ///  cannot be snapped to, and cannot be selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -723,6 +735,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
     ///  are not visible, cannot be snapped to, and cannot be selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -758,6 +771,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Inverts the current object selection. The identifiers of the newly
     ///  selected objects are returned</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -798,6 +812,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of the objects that were most recently created or changed
     ///  by scripting a Rhino command using the Command function. It is important to
     ///  call this function immediately after calling the Command function as only the
@@ -834,6 +849,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the identifier of the last object in the document. The last object
     ///  in the document is the first object created by the user</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -872,6 +888,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the identifier of the next object in the document</summary>
     ///<param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -907,6 +924,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
     ///  are visible, can be snapped to, and are independent of selection state</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -935,6 +953,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all objects based on color</summary>
     ///<param name="color">(Drawing.Color) Color to get objects by</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -963,6 +982,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all objects based on the objects' group name</summary>
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -990,6 +1010,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all objects based on the objects' layer name</summary>
     ///<param name="layerName">(string) Name of the layer</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -1016,6 +1037,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all objects based on user-assigned name</summary>
     ///<param name="name">(string) Name of the object or objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -1056,6 +1078,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns identifiers of all objects based on the objects' geometry type.</summary>
     ///<param name="geometryType">(int) The type(s) of geometry objects (points, curves, surfaces,
     ///  meshes, etc.) that can be selected. Object types can be
@@ -1188,6 +1211,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the identifiers of all objects that are currently selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///Include light objects</param>
@@ -1210,6 +1234,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Unselects all objects in the document</summary>
     ///<returns>(float) the number of objects that were unselected</returns>
     static member UnselectAllObjects() : float =
@@ -1226,6 +1251,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Return identifiers of all objects that are visible in a specified view</summary>
     ///<param name="view">(bool) Optional, Default Value: <c>null:bool</c>
     ///The view to use. If omitted, the current active view is used</param>
@@ -1270,6 +1296,7 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
     ///<summary>Picks objects using either a window or crossing selection</summary>
     ///<param name="corner1">(Point3d) Corner1 of 'corners of selection window' (FIXME 0)</param>
     ///<param name="corner2">(Point3d) Corner2 of 'corners of selection window' (FIXME 0)</param>
