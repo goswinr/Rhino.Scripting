@@ -707,6 +707,7 @@ module ExtensionsDimension =
         return rc
     *)
 
+
     ///<summary>Changes the font used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="font">(string)The new font face name</param>
@@ -714,8 +715,10 @@ module ExtensionsDimension =
     static member DimStyleFont(dimStyle:string, font:string) : unit = //SET
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  failwithf "set DimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
-        let newindex = Doc.Fonts.FindOrCreate(font, false, false) // FIXME deprecated ??
-        ds.Font <- Doc.Fonts.[newindex]
+        
+        ds.Font <- DocObjects.Font(font) // TODO check if works OK !
+        // let newindex = Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
+        // ds.Font <- Doc.Fonts.[newindex]
         if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  failwithf "set DimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
         Doc.Views.Redraw()
         
@@ -740,6 +743,12 @@ module ExtensionsDimension =
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
+
+    ///<summary>Gets all Available Font Face Names</summary>    
+    ///<returns>(string array) array of all available font names</returns>
+    static member DimStyleAvailableFonts() :string[] = // not part of original rhinoscriptsyntax
+        DocObjects.Font.AvailableFontFaceNames()
+        
 
 
     ///<summary>Returns the leader arrow size of a dimension style</summary>
