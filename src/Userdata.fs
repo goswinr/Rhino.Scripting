@@ -65,8 +65,8 @@ module ExtensionsUserdata =
     *)
 
 
-    //(FIXME) VarOutTypes
     [<EXT>]
+    //(FIXME) VarOutTypes
     ///<summary>Returns a user data item from the current document</summary>
     ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section name. If omitted, all section names are returned</param>
@@ -99,8 +99,8 @@ module ExtensionsUserdata =
     *)
 
 
-    //(FIXME) VarOutTypes
     [<EXT>]
+    //(FIXME) VarOutTypes
     ///<summary>Returns user text stored in the document</summary>
     ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
     ///Key to use for retrieving user text. If empty, all keys are returned</param>
@@ -126,8 +126,8 @@ module ExtensionsUserdata =
     *)
 
 
-    //(FIXME) VarOutTypes
     [<EXT>]
+    //(FIXME) VarOutTypes
     ///<summary>Returns user text stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) Optional, Default Value: <c>null:string</c>

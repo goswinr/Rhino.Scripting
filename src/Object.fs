@@ -14,10 +14,10 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Copies object from one location to another, or in-place.</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
+    ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///Translation vector to apply</param>
     ///<returns>(Guid) id for the copy</returns>
-    static member CopyObject(objectId:Guid, [<OPT;DEF(null:Vector3d)>]translation:Vector3d) : Guid =
+    static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def CopyObject(object_id, translation=None):
@@ -37,11 +37,11 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Default Value: <c>null:Vector3d</c>
+    ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///List of three numbers or Vector3d representing
     ///  translation vector to apply to copied set</param>
     ///<returns>(Guid seq) identifiers for the copies</returns>
-    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(null:Vector3d)>]translation:Vector3d) : Guid seq =
+    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def CopyObjects(object_ids, translation=None):
@@ -267,8 +267,8 @@ module ExtensionsObject =
     *)
 
 
-    //(FIXME) VarOutTypes
     [<EXT>]
+    //(FIXME) VarOutTypes
     ///<summary>Verifies that an object is a member of a group</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="groupName">(string) Optional, Default Value: <c>null:string</c>
@@ -535,11 +535,11 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Matches, or copies the attributes of a source object to a target object</summary>
     ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
-    ///<param name="sourceId">(Guid) Optional, Default Value: <c>null:Guid</c>
+    ///<param name="sourceId">(Guid) Optional, Default Value: <c>Guid()</c>
     ///Identifier of object to copy attributes from. If None,
     ///  then the default attributes are copied to the targetIds</param>
     ///<returns>(float) number of objects modified</returns>
-    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(null:Guid)>]sourceId:Guid) : float =
+    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def MatchObjectAttributes(target_ids, source_id=None):
@@ -673,6 +673,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
@@ -838,6 +839,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the color source of an object.</summary>
     ///<param name="objectIds">(Guid) Single identifier of list of identifiers</param>
     ///<returns>(int) The current color source
@@ -1018,6 +1020,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the layer of an object</summary>
     ///<param name="objectId">(Guid) The identifier of the object(s)</param>
     ///<returns>(string) The object's current layer</returns>
@@ -1136,6 +1139,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The object's current page layout view</returns>
@@ -1231,6 +1235,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the linetype of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<returns>(string) The object's current linetype</returns>
@@ -1359,6 +1364,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the linetype source of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<returns>(int) The object's current linetype source
@@ -1491,6 +1497,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
@@ -1559,6 +1566,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the rendering material source of an object.</summary>
     ///<param name="objectIds">(Guid) One or more object identifiers</param>
     ///<returns>(int) The current rendering material source
@@ -1698,6 +1706,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the name of an object</summary>
     ///<param name="objectId">(Guid) Id or ids of object(s)</param>
     ///<returns>(string) The current object name</returns>
@@ -1831,6 +1840,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the print color of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<returns>(Drawing.Color) The object's current print color</returns>
@@ -1943,6 +1953,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the print color source of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<returns>(int) The object's current print color source
@@ -2064,6 +2075,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the print width of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<returns>(float) The object's current print width</returns>
@@ -2183,6 +2195,7 @@ module ExtensionsObject =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the print width source of an object</summary>
     ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
     ///<returns>(int) The object's current print width source
@@ -2451,13 +2464,13 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
     ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Plane) Optional, Default Value: <c>null:Plane</c>
+    ///<param name="axis">(Plane) Optional, Default Value: <c>Plane()</c>
     ///Axis of rotation, If omitted, the Z axis of the active
     ///  construction plane is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object</param>
     ///<returns>(Guid) Identifier of the rotated object</returns>
-    static member RotateObject(objectId:Guid, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(null:Plane)>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid =
+    static member RotateObject(objectId:Guid, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(Plane())>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotateObject(object_id, center_point, rotation_angle, axis=None, copy=False):
@@ -2484,13 +2497,13 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
     ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Plane) Optional, Default Value: <c>null:Plane</c>
+    ///<param name="axis">(Plane) Optional, Default Value: <c>Plane()</c>
     ///Axis of rotation, If omitted, the Z axis of the active
     ///  construction plane is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object</param>
     ///<returns>(Guid seq) identifiers of the rotated objects</returns>
-    static member RotateObjects(objectIds:Guid seq, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(null:Plane)>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid seq =
+    static member RotateObjects(objectIds:Guid seq, centerPoint:Point3d, rotationAngle:float, [<OPT;DEF(Plane())>]axis:Plane, [<OPT;DEF(false)>]copy:bool) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def RotateObjects( object_ids, center_point, rotation_angle, axis=None, copy=False):

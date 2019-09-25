@@ -45,10 +45,10 @@ module ExtensionsLight =
     ///<summary>Adds a new linear light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endePoint">(Point3d) Ending point and direction of the light</param>
-    ///<param name="width">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="width">(float) Optional, Default Value: <c>7e89</c>
     ///Width of the light</param>
     ///<returns>(Guid) identifier of the new object</returns>
-    static member AddLinearLight(startPoint:Point3d, endePoint:Point3d, [<OPT;DEF(null:float)>]width:float) : Guid =
+    static member AddLinearLight(startPoint:Point3d, endePoint:Point3d, [<OPT;DEF(7e89)>]width:float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddLinearLight(start_point, end_point, width=None):
@@ -191,6 +191,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Get status of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) The current enabled status</returns>
@@ -399,6 +400,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Drawing.Color) The current color</returns>
@@ -472,6 +474,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Vector3d) The current direction</returns>
@@ -530,6 +533,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Point3d) The current location</returns>
@@ -588,6 +592,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(string) The current name</returns>
@@ -689,6 +694,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
@@ -751,6 +757,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the radius of a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(float) The current radius</returns>
@@ -813,6 +820,7 @@ module ExtensionsLight =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the shadow intensity of a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(int) The current intensity</returns>

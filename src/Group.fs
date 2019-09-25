@@ -187,8 +187,8 @@ module ExtensionsGroup =
     *)
 
 
-    //(FIXME) VarOutTypes
     [<EXT>]
+    //(FIXME) VarOutTypes
     ///<summary>Verifies that an existing group is empty, or contains no object members</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(bool) True or False if group_name exists</returns>

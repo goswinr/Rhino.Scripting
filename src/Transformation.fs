@@ -447,10 +447,10 @@ module ExtensionsTransformation =
     [<EXT>]
     ///<summary>Creates a scale transformation</summary>
     ///<param name="scale">(float*float*float) Single number, list of 3 numbers, Point3d, or Vector3d</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Center of scale. If omitted, world origin is used</param>
     ///<returns>(Transform) The 4x4 transformation matrix on success</returns>
-    static member XformScale(scale:float*float*float, [<OPT;DEF(null:Point3d)>]point:Point3d) : Transform =
+    static member XformScale(scale:float*float*float, [<OPT;DEF(Point3d())>]point:Point3d) : Transform =
         failNotImpl () // genreation temp disabled !!
     (*
     def XformScale(scale, point=None):

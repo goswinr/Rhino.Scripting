@@ -11,6 +11,7 @@ module ExtensionsHatch =
   [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     
     static member internal InitHatchPatterns() : obj =
         failNotImpl () // genreation temp disabled !!
@@ -65,10 +66,10 @@ module ExtensionsHatch =
     ///Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
     ///Hatch pattern rotation angle in degrees.</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///Tolerance for hatch fills.</param>
     ///<returns>(Guid seq) identifiers of the newly created hatch on success</returns>
-    static member AddHatches(curveIds:Guid seq, [<OPT;DEF(null:string)>]hatchPattern:string, [<OPT;DEF(1.0)>]scale:float, [<OPT;DEF(0.0)>]rotation:float, [<OPT;DEF(null:float)>]tolerance:float) : Guid seq =
+    static member AddHatches(curveIds:Guid seq, [<OPT;DEF(null:string)>]hatchPattern:string, [<OPT;DEF(1.0)>]scale:float, [<OPT;DEF(0.0)>]rotation:float, [<OPT;DEF(0.0)>]tolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddHatches(curve_ids, hatch_pattern=None, scale=1.0, rotation=0.0, tolerance=None):
@@ -150,6 +151,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the current hatch pattern file</summary>
     ///<returns>(string) The current hatch pattern</returns>
     static member CurrentHatchPattern() : string = //GET
@@ -239,6 +241,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a hatch object's hatch pattern</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<returns>(string) The current hatch pattern</returns>
@@ -392,6 +395,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the rotation applied to the hatch pattern when
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
@@ -456,6 +460,7 @@ module ExtensionsHatch =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the scale applied to the hatch pattern when it is
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>

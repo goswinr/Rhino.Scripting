@@ -229,11 +229,11 @@ module ExtensionsPointvector =
     ///<summary>Compares two 3D points</summary>
     ///<param name="point1">(Point3d) Point1 of 'the points to compare' (FIXME 0)</param>
     ///<param name="point2">(Point3d) Point2 of 'the points to compare' (FIXME 0)</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///Tolerance to use for comparison. If omitted,
     ///  Rhino's internal zero tolerance is used</param>
     ///<returns>(bool) True or False</returns>
-    static member PointCompare(point1:Point3d, point2:Point3d, [<OPT;DEF(null:float)>]tolerance:float) : bool =
+    static member PointCompare(point1:Point3d, point2:Point3d, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         failNotImpl () // genreation temp disabled !!
     (*
     def PointCompare(point1, point2, tolerance=None):
@@ -792,7 +792,7 @@ module ExtensionsPointvector =
     ///<summary>Returns either a world axis-aligned or a construction plane axis-aligned
     ///  bounding box of an array of 3-D point locations.</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
-    ///<param name="viewOrPlane">(Plane) Optional, Default Value: <c>null:Plane</c>
+    ///<param name="viewOrPlane">(Plane) Optional, Default Value: <c>Plane()</c>
     ///Title or id of the view that contains the
     ///  construction plane to which the bounding box should be aligned -or-
     ///  user defined plane. If omitted, a world axis-aligned bounding box
@@ -803,7 +803,7 @@ module ExtensionsPointvector =
     ///  world axis-aligned bounding boxes.</param>
     ///<returns>(Point3d seq) Eight points that define the bounding box. Points returned in counter-
     ///  clockwise order starting with the bottom rectangle of the box.</returns>
-    static member PointArrayBoundingBox(points:Point3d seq, [<OPT;DEF(null:Plane)>]viewOrPlane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d seq =
+    static member PointArrayBoundingBox(points:Point3d seq, [<OPT;DEF(Plane())>]viewOrPlane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def PointArrayBoundingBox(points, view_or_plane=None, in_world_coords=True):

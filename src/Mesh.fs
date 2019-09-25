@@ -432,10 +432,10 @@ module ExtensionsMesh =
     ///<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///Delete the input meshes</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///A positive tolerance value, or None to use the default of the document.</param>
     ///<returns>(Guid seq) identifiers of newly created meshes</returns>
-    static member MeshBooleanDifference(input0:Guid, input1:Guid, [<OPT;DEF(true)>]deleteInput:bool, [<OPT;DEF(null:float)>]tolerance:float) : Guid seq =
+    static member MeshBooleanDifference(input0:Guid, input1:Guid, [<OPT;DEF(true)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshBooleanDifference(input0, input1, delete_input=True, tolerance=None):
@@ -587,7 +587,7 @@ module ExtensionsMesh =
     ///<summary>Returns the point on a mesh that is closest to a test point</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="point">(Point3d) Point to test</param>
-    ///<param name="maximumDistance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="maximumDistance">(float) Optional, Default Value: <c>7e89</c>
     ///Upper bound used for closest point calculation.
     ///  If you are only interested in finding a point Q on the mesh when
     ///  point.DistanceTo(Q) < maximumDistance, then set maximumDistance to
@@ -595,7 +595,7 @@ module ExtensionsMesh =
     ///<returns>(Point3d * float) containing the results of the calculation where
     ///  [0] = the 3-D point on the mesh
     ///  [1] = the index of the mesh face on which the 3-D point lies</returns>
-    static member MeshClosestPoint(objectId:Guid, point:Point3d, [<OPT;DEF(null:float)>]maximumDistance:float) : Point3d * float =
+    static member MeshClosestPoint(objectId:Guid, point:Point3d, [<OPT;DEF(7e89)>]maximumDistance:float) : Point3d * float =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshClosestPoint(object_id, point, maximum_distance=None):
@@ -842,10 +842,10 @@ module ExtensionsMesh =
     ///<summary>Calculates the intersections of a mesh object with another mesh object</summary>
     ///<param name="mesh1">(Guid) Mesh1 of 'identifiers of meshes' (FIXME 0)</param>
     ///<param name="mesh2">(Guid) Mesh2 of 'identifiers of meshes' (FIXME 0)</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///The intersection tolerance</param>
     ///<returns>(Point3d seq) of points that define the vertices of the intersection curves</returns>
-    static member MeshMeshIntersection(mesh1:Guid, mesh2:Guid, [<OPT;DEF(null:float)>]tolerance:float) : Point3d seq =
+    static member MeshMeshIntersection(mesh1:Guid, mesh2:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def MeshMeshIntersection(mesh1, mesh2, tolerance=None):
@@ -1060,6 +1060,7 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns vertex colors of a mesh</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Drawing.Color) The current vertex colors</returns>

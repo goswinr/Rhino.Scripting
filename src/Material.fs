@@ -181,6 +181,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current bump bitmap filename</returns>
@@ -237,6 +238,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's diffuse color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material color</returns>
@@ -293,6 +295,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's environment bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current environment bitmap filename</returns>
@@ -349,6 +352,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's user defined name</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current material name</returns>
@@ -401,6 +405,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's reflective color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material reflective color</returns>
@@ -457,6 +462,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(int) The current material shine value
@@ -515,6 +521,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's texture bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current texture bitmap filename</returns>
@@ -571,6 +578,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(int) The current material transparency value
@@ -629,6 +637,7 @@ module ExtensionsMaterial =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current transparency bitmap filename</returns>

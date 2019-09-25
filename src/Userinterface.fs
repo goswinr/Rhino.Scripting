@@ -132,9 +132,9 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Pause for user input of an angle</summary>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Starting, or base point</param>
-    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///If specified, the reference angle is calculated
     ///  from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0</c>
@@ -142,7 +142,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
-    static member GetAngle([<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:Point3d)>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:float, [<OPT;DEF(null:string)>]message:string) : float =
+    static member GetAngle([<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(Point3d())>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:float, [<OPT;DEF(null:string)>]message:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetAngle(point=None, reference_point=None, default_angle_degrees=0, message=None):
@@ -231,7 +231,7 @@ module ExtensionsUserinterface =
     ///  2 = 3-Point. The base rectangle is created by picking three points
     ///  3 = Vertical. The base vertical rectangle is created by picking three points.
     ///  4 = Center. The base rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Optional 3D base point</param>
     ///<param name="prompt1">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt1 of 'optional prompts to set' (FIXME 0)</param>
@@ -240,7 +240,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt3">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt3 of 'optional prompts to set' (FIXME 0)</param>
     ///<returns>(Point3d seq) list of eight Point3d that define the corners of the box on success</returns>
-    static member GetBox([<OPT;DEF(0)>]mode:int, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d seq =
+    static member GetBox([<OPT;DEF(0)>]mode:int, [<OPT;DEF(Point3d())>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetBox(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
@@ -277,10 +277,10 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null:Drawing.Color</c>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color()</c>
     ///Default RGB value. If omitted, the default color is black</param>
     ///<returns>(Drawing.Color) RGB tuple of three numbers on success</returns>
-    static member GetColor([<OPT;DEF(null:Drawing.Color)>]color:Drawing.Color) : Drawing.Color =
+    static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetColor(color=None):
@@ -331,16 +331,16 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Pauses for user input of a distance.</summary>
-    ///<param name="firstPt">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="firstPt">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///First distance point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="distance">(float) Optional, Default Value: <c>7e89</c>
     ///Default distance</param>
     ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///Prompt for the second distance point</param>
     ///<returns>(float) The distance between the two points .</returns>
-    static member GetDistance([<OPT;DEF(null:Point3d)>]firstPt:Point3d, [<OPT;DEF(null:float)>]distance:float, [<OPT;DEF("First distance point")>]firstPtMsg:string, [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
+    static member GetDistance([<OPT;DEF(Point3d())>]firstPt:Point3d, [<OPT;DEF(7e89)>]distance:float, [<OPT;DEF("First distance point")>]firstPtMsg:string, [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetDistance(first_pt=None, distance=None, first_pt_msg="First distance point", second_pt_msg="Second distance point"):
@@ -444,14 +444,14 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a whole number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="number">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="number">(float) Optional, Default Value: <c>7e89</c>
     ///A default whole number value.</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="minimum">(float) Optional, Default Value: <c>7e89</c>
     ///A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="maximum">(float) Optional, Default Value: <c>7e89</c>
     ///A maximum allowable value.</param>
     ///<returns>(float) The whole number input by the user .</returns>
-    static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:float)>]number:float, [<OPT;DEF(null:float)>]minimum:float, [<OPT;DEF(null:float)>]maximum:float) : float =
+    static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(7e89)>]number:float, [<OPT;DEF(7e89)>]minimum:float, [<OPT;DEF(7e89)>]maximum:float) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetInteger(message=None, number=None, minimum=None, maximum=None):
@@ -550,7 +550,7 @@ module ExtensionsUserinterface =
     ///  7  Perpendicular - Defines a line perpendicular to or from a curve
     ///  8  Tangent - Defines a line tangent from a curve.
     ///  9  Extension - Defines a line that extends from a curve.</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Optional starting point</param>
     ///<param name="message1">(string) Optional, Default Value: <c>null:string</c>
     ///Message1 of 'optional prompts' (FIXME 0)</param>
@@ -559,7 +559,7 @@ module ExtensionsUserinterface =
     ///<param name="message3">(string) Optional, Default Value: <c>null:string</c>
     ///Message3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Line) Tuple of two points on success</returns>
-    static member GetLine([<OPT;DEF(0)>]mode:int, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : Line =
+    static member GetLine([<OPT;DEF(0)>]mode:int, [<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : Line =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetLine(mode=0, point=None, message1=None, message2=None, message3=None):
@@ -721,14 +721,14 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a point.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message.</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///List of 3 numbers or Point3d identifying a starting, or base point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="distance">(float) Optional, Default Value: <c>7e89</c>
     ///Constraining distance. If distance is specified, basePoint must also be specified.</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrains the point selections to the active construction plane.</param>
     ///<returns>(Point3d) point on success</returns>
-    static member GetPoint([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:float)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : Point3d =
+    static member GetPoint([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(Point3d())>]basisPoint:Point3d, [<OPT;DEF(7e89)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPoint(message=None, base_point=None, distance=None, in_plane=False):
@@ -863,13 +863,13 @@ module ExtensionsUserinterface =
     ///A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, Default Value: <c>null:string</c>
     ///A prompt or message for the next points</param>
-    ///<param name="maxPoints">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="maxPoints">(float) Optional, Default Value: <c>7e89</c>
     ///Maximum number of points to pick. If not specified, an
     ///  unlimited number of points can be picked.</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///A starting or base point</param>
     ///<returns>(Point3d seq) of 3d points</returns>
-    static member GetPoints([<OPT;DEF(false)>]drawLines:bool, [<OPT;DEF(false)>]inPlane:bool, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:float)>]maxPoints:float, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d) : Point3d seq =
+    static member GetPoints([<OPT;DEF(false)>]drawLines:bool, [<OPT;DEF(false)>]inPlane:bool, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(7e89)>]maxPoints:float, [<OPT;DEF(Point3d())>]basisPoint:Point3d) : Point3d seq =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetPoints(draw_lines=False, in_plane=False, message1=None, message2=None, max_points=None, base_point=None):
@@ -981,14 +981,14 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
     ///A prompt or message.</param>
-    ///<param name="number">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="number">(float) Optional, Default Value: <c>7e89</c>
     ///A default number value.</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="minimum">(float) Optional, Default Value: <c>7e89</c>
     ///A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="maximum">(float) Optional, Default Value: <c>7e89</c>
     ///A maximum allowable value.</param>
     ///<returns>(float) The number input by the user .</returns>
-    static member GetReal([<OPT;DEF("Number")>]message:string, [<OPT;DEF(null:float)>]number:float, [<OPT;DEF(null:float)>]minimum:float, [<OPT;DEF(null:float)>]maximum:float) : float =
+    static member GetReal([<OPT;DEF("Number")>]message:string, [<OPT;DEF(7e89)>]number:float, [<OPT;DEF(7e89)>]minimum:float, [<OPT;DEF(7e89)>]maximum:float) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetReal(message="Number", number=None, minimum=None, maximum=None):
@@ -1023,7 +1023,7 @@ module ExtensionsUserinterface =
     ///  2 = 3Point - a rectangle is created by picking three points
     ///  3 = Vertical - a vertical rectangle is created by picking three points
     ///  4 = Center - a rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///A 3d base point</param>
     ///<param name="prompt1">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt1 of 'optional prompts' (FIXME 0)</param>
@@ -1032,7 +1032,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt3">(string) Optional, Default Value: <c>null:string</c>
     ///Prompt3 of 'optional prompts' (FIXME 0)</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) four 3d points that define the corners of the rectangle</returns>
-    static member GetRectangle([<OPT;DEF(0)>]mode:int, [<OPT;DEF(null:Point3d)>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
+    static member GetRectangle([<OPT;DEF(0)>]mode:int, [<OPT;DEF(Point3d())>]basisPoint:Point3d, [<OPT;DEF(null:string)>]prompt1:string, [<OPT;DEF(null:string)>]prompt2:string, [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
         failNotImpl () // genreation temp disabled !!
     (*
     def GetRectangle(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
@@ -1401,14 +1401,14 @@ module ExtensionsUserinterface =
     ///    1 = menu item is disabled
     ///    2 = menu item is checked
     ///    3 = menu item is disabled and checked</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null:Point3d</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///A 3D point where the menu item will appear. If omitted, the menu
     ///  will appear at the current cursor position</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
     ///If point is specified, the view in which the point is computed.
     ///  If omitted, the active view is used</param>
     ///<returns>(float) index of the menu item picked or -1 if no menu item was picked</returns>
-    static member PopupMenu(items:string seq, [<OPT;DEF(null:int seq)>]modes:int seq, [<OPT;DEF(null:Point3d)>]point:Point3d, [<OPT;DEF(null:string)>]view:string) : float =
+    static member PopupMenu(items:string seq, [<OPT;DEF(null:int seq)>]modes:int seq, [<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(null:string)>]view:string) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def PopupMenu(items, modes=None, point=None, view=None):
@@ -1445,16 +1445,16 @@ module ExtensionsUserinterface =
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///A prompt message.</param>
-    ///<param name="defaultValNumber">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="defaultValNumber">(float) Optional, Default Value: <c>7e89</c>
     ///A default number.</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
     ///A dialog box title.</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="minimum">(float) Optional, Default Value: <c>7e89</c>
     ///A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>null:float</c>
+    ///<param name="maximum">(float) Optional, Default Value: <c>7e89</c>
     ///A maximum allowable value.</param>
     ///<returns>(float) The newly entered number on success</returns>
-    static member RealBox([<OPT;DEF("")>]message:string, [<OPT;DEF(null:float)>]defaultValNumber:float, [<OPT;DEF("")>]title:string, [<OPT;DEF(null:float)>]minimum:float, [<OPT;DEF(null:float)>]maximum:float) : float =
+    static member RealBox([<OPT;DEF("")>]message:string, [<OPT;DEF(7e89)>]defaultValNumber:float, [<OPT;DEF("")>]title:string, [<OPT;DEF(7e89)>]minimum:float, [<OPT;DEF(7e89)>]maximum:float) : float =
         failNotImpl () // genreation temp disabled !!
     (*
     def RealBox(message="", default_number=None, title="", minimum=None, maximum=None):

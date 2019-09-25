@@ -11,6 +11,7 @@ module ExtensionsLinetype =
   [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     
     static member internal Getlinetype() : obj =
         failNotImpl () // genreation temp disabled !!

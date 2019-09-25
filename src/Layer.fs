@@ -11,6 +11,7 @@ module ExtensionsLayer =
   [<EXT>] 
   type RhinoScriptSyntax with
     
+    [<EXT>]
     
     static member internal Getlayer() : obj =
         failNotImpl () // genreation temp disabled !!
@@ -25,7 +26,7 @@ module ExtensionsLayer =
     ///<param name="name">(string) Optional, Default Value: <c>null:string</c>
     ///The name of the new layer. If omitted, Rhino automatically
     ///  generates the layer name.</param>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>null:Drawing.Color</c>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color()</c>
     ///A Red-Green-Blue color value. If omitted, the color Black is assigned.</param>
     ///<param name="visible">(bool) Optional, Default Value: <c>true</c>
     ///Layer's visibility</param>
@@ -35,7 +36,7 @@ module ExtensionsLayer =
     ///Name of the new layer's parent layer. If omitted, the new
     ///  layer will not have a parent layer.</param>
     ///<returns>(string) The full name of the new layer .</returns>
-    static member AddLayer([<OPT;DEF(null:string)>]name:string, [<OPT;DEF(null:Drawing.Color)>]color:Drawing.Color, [<OPT;DEF(true)>]visible:bool, [<OPT;DEF(false)>]locked:bool, [<OPT;DEF(null:string)>]parent:string) : string =
+    static member AddLayer([<OPT;DEF(null:string)>]name:string, [<OPT;DEF(Drawing.Color())>]color:Drawing.Color, [<OPT;DEF(true)>]visible:bool, [<OPT;DEF(false)>]locked:bool, [<OPT;DEF(null:string)>]parent:string) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddLayer(name=None, color=None, visible=True, locked=False, parent=None):
@@ -86,6 +87,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the current layer</summary>
     ///<returns>(string) The full name of the current layer</returns>
     static member CurrentLayer() : string = //GET
@@ -459,6 +461,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the color of a layer.</summary>
     ///<param name="layer">(string) Name or id of an existing layer</param>
     ///<returns>(Drawing.Color) The current color value on success</returns>
@@ -541,6 +544,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) Name of the current linetype</returns>
@@ -605,6 +609,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the locked mode of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(bool) The current layer locked mode</returns>
@@ -653,6 +658,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the material index of a layer. A material index of -1
     /// indicates that no material has been assigned to the layer. Thus, the layer
     /// will use Rhino's default layer material</summary>
@@ -797,6 +803,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the print color of a layer. Layer print colors are
     /// represented as RGB colors.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -853,6 +860,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the print width of a layer. Print width is specified
     /// in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -905,6 +913,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Returns the visible property of a layer.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility</returns>
@@ -966,6 +975,7 @@ module ExtensionsLayer =
     *)
 
 
+    [<EXT>]
     ///<summary>Return the parent layer of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) The name of the current parent layer</returns>
