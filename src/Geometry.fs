@@ -6,7 +6,7 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-open Rhino
+
 [<AutoOpen>]
 module ExtensionsGeometry =
   [<EXT>] 
@@ -89,7 +89,8 @@ module ExtensionsGeometry =
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
-   
+  
+
 
     [<EXT>]
     ///<summary>Adds point object to the document.</summary>

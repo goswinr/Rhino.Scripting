@@ -653,7 +653,7 @@ module ExtensionsUtility =
     *)
 
 
-
+ 
     [<EXT>]
     ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.
     ///  If the provided object is already a point, it value is copied.

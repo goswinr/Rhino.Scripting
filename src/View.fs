@@ -980,7 +980,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The grid state to set. If omitted, the current grid display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ShowGrid(view:string, show:bool) : unit = //SET
+    static member ShowGrid(view:string, [<OPT;DEF(null:bool)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ShowGrid(view=None, show=None):
