@@ -18,9 +18,9 @@ module ExtensionsUserdata =
     ///  entries are removed</param>
     ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
     ///Entry name. If omitted, all entries for section are removed</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
-    static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(unit) void, nothing</returns>
+    static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit =
+        Doc.Strings.Delete(section, entry)
     (*
     def DeleteDocumentData(section=None, entry=None):
         '''Removes user data strings from the current document
@@ -39,7 +39,12 @@ module ExtensionsUserdata =
     ///<summary>Returns the number of user data strings in the current document</summary>
     ///<returns>(int) the number of user data strings in the current document</returns>
     static member DocumentDataCount() : int =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.DocumentDataCount 
+
+
+    //<summary>Returns the number of user text strings in the current document</summary>
+    //<returns>(float) The number of user text strings in the current document</returns>
+    //let documentUserTextCount () :int = Doc.Strings.Count //DocumentUserTextCount //TODO same as Data count? only in Rhino 6?
     (*
     def DocumentDataCount():
         '''Returns the number of user data strings in the current document
@@ -54,7 +59,7 @@ module ExtensionsUserdata =
     ///<summary>Returns the number of user text strings in the current document</summary>
     ///<returns>(int) the number of user text strings in the current document</returns>
     static member DocumentUserTextCount() : int =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.DocumentUserTextCount
     (*
     def DocumentUserTextCount():
         '''Returns the number of user text strings in the current document
@@ -75,7 +80,7 @@ module ExtensionsUserdata =
     ///<returns>(string seq) of all section names if section name is omitted
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.GetSectionNames()
     (*
     def GetDocumentData(section=None, entry=None):
         '''Returns a user data item from the current document
@@ -106,7 +111,7 @@ module ExtensionsUserdata =
     ///Key to use for retrieving user text. If empty, all keys are returned</param>
     ///<returns>(string) If key is specified, then the associated value .</returns>
     static member GetDocumentUserText([<OPT;DEF(null:string)>]key:string) : string =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.GetValue(key)
     (*
     def GetDocumentUserText(key=None):
         '''Returns user text stored in the document
@@ -136,7 +141,11 @@ module ExtensionsUserdata =
     ///Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value</returns>
     static member GetUserText(objectId:Guid, [<OPT;DEF(null:string)>]key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
-        failNotImpl () // genreation temp disabled !!
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if attachedToGeometry then
+            obj.Geometry.GetUserString(key)
+        else
+            obj.Attributes.GetUserString(key)
     (*
     def GetUserText(object_id, key=None, attached_to_geometry=False):
         '''Returns user text stored on an object.
@@ -163,7 +172,7 @@ module ExtensionsUserdata =
     ///<summary>Verifies the current document contains user data</summary>
     ///<returns>(bool) True or False indicating the presence of Script user data</returns>
     static member IsDocumentData() : bool =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.Count > 0 //DocumentDataCount > 0
     (*
     def IsDocumentData():
         '''Verifies the current document contains user data
@@ -178,7 +187,7 @@ module ExtensionsUserdata =
     ///<summary>Verifies the current document contains user text</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text</returns>
     static member IsDocumentUserText() : bool =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
     (*
     def IsDocumentUserText():
         '''Verifies the current document contains user text
@@ -198,7 +207,11 @@ module ExtensionsUserdata =
     ///  2 = geometry user text
     ///  3 = both attribute and geometry user text</returns>
     static member IsUserText(objectId:Guid) : float =
-        failNotImpl () // genreation temp disabled !!
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let mutable rc = 0
+        if obj.Attributes.UserStringCount > 0 then  rc <- rc ||| 1
+        if obj.Geometry.UserStringCount > 0   then  rc <- rc ||| 2
+        rc
     (*
     def IsUserText(object_id):
         '''Verifies that an object contains user text
@@ -226,7 +239,7 @@ module ExtensionsUserdata =
     ///<param name="value">(string) The string value</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.SetString(section, entry, value) |> ignore
     (*
     def SetDocumentData(section, entry, value):
         '''Adds or sets a user data string to the current document
@@ -250,7 +263,7 @@ module ExtensionsUserdata =
     ///  specified by key will be deleted</param>
     ///<returns>(bool) True or False indicating success</returns>
     static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : bool =
-        failNotImpl () // genreation temp disabled !!
+        Doc.Strings.SetString(key,value) |> ignore
     (*
     def SetDocumentUserText(key, value=None):
         '''Sets or removes user text stored in the document
@@ -278,7 +291,12 @@ module ExtensionsUserdata =
     ///Location on the object to store the user text</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member SetUserText(objectId:string, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if attachToGeometry then
+            obj.Geometry.SetUserString(key, value)|> ignore
+        else
+            obj.Attributes.SetUserString(key, value)|> ignore
+        objectId
     (*
     def SetUserText(object_id, key, value=None, attach_to_geometry=False):
         '''Sets or removes user text stored on an object.
