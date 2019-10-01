@@ -315,7 +315,7 @@ module ExtensionsUserdata =
     ///<param name="objectId">(string) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
-    ///The string value to set. If omitted, the key/value pair
+    ///  The string value to set. If omitted, the key/value pair
     ///  specified by key will be deleted</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to store the user text</param>
