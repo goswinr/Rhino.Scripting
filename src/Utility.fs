@@ -6,16 +6,18 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
+
 [<AutoOpen>]
 module ExtensionsUtility =
+  
   [<EXT>] 
   type RhinoScriptSyntax with
     
     [<EXT>]
-    ///<summary>Return True if the script is being executed in the context of Rhino</summary>
-    ///<returns>(bool) True if the script is being executed in the context of Rhino</returns>
+    ///<summary>Return True if the script is being executed in the context of Rhino(currently always true)</summary>
+    ///<returns>(bool) True if the script is being executed in the context of Rhino(currently always true)</returns>
     static member ContextIsRhino() : bool =
-        failNotImpl () // genreation temp disabled !!
+        true //TODO implement correctly
     (*
     def ContextIsRhino():
         '''Return True if the script is being executed in the context of Rhino
@@ -27,10 +29,10 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Return True if the script is being executed in a grasshopper component</summary>
-    ///<returns>(bool) True if the script is being executed in a grasshopper component</returns>
+    ///<summary>Return True if the script is being executed in a grasshopper component(currently always true)</summary>
+    ///<returns>(bool) True if the script is being executed in a grasshopper component(currently always true)</returns>
     static member ContextIsGrasshopper() : bool =
-        failNotImpl () // genreation temp disabled !!
+        true //TODO implement correctly
     (*
     def ContextIsGrasshopper():
         '''Return True if the script is being executed in a grasshopper component
@@ -43,21 +45,31 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>Measures the angle between two points</summary>
-    ///<param name="point1">(Point3d) Point1 of 'the input points' (FIXME 0)</param>
-    ///<param name="point2">(Point3d) Point2 of 'the input points' (FIXME 0)</param>
-    ///<param name="plane">(bool) Optional, Default Value: <c>true</c>
-    ///Boolean or Plane
-    ///  If True, angle calculation is based on the world coordinate system.
-    ///  If False, angle calculation is based on the active construction plane
+    ///<param name="point1">(Point3d) Point1 of input points</param>
+    ///<param name="point2">(Point3d) Point2 of input points</param>
+    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldX</c>
     ///  If a plane is provided, angle calculation is with respect to this plane</param>
-    ///<returns>(float * float * float * float * float * float) containing the following elements
+    ///<returns>(float * float * float * float * float * float) containing the following elements:
     ///  element 0 = the X,Y angle in degrees
     ///  element 1 = the elevation
     ///  element 2 = delta in the X direction
     ///  element 3 = delta in the Y direction
     ///  element 4 = delta in the Z direction</returns>
-    static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(true)>]plane:bool) : float * float * float * float * float * float =
-        failNotImpl () // genreation temp disabled !!
+    static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
+        let plane = if plane.IsValid then plane else Plane.WorldXY 
+        let vector = point2 - point1
+        let mutable x = vector.X
+        let mutable y = vector.Y
+        let mutable z = vector.Z
+        let vfrom = point1 - plane.Origin
+        let vto = point2 - plane.Origin
+        x <- vto * plane.XAxis - vfrom * plane.XAxis
+        y <- vto * plane.YAxis - vfrom * plane.YAxis
+        z <- vto * plane.ZAxis - vfrom * plane.ZAxis
+        let h = Math.Sqrt( x * x + y * y)
+        let angleXY = toDegrees( Math.Atan2( y, x ) )
+        let elevation = toDegrees( Math.Atan2( z, h ) )
+        angleXY, elevation, x, y, z
     (*
     def Angle(point1, point2, plane=True):
         '''Measures the angle between two points
@@ -117,7 +129,16 @@ module ExtensionsUtility =
     ///  0 The angle in degrees.
     ///  1 The reflex angle in degrees.</returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
-        failNotImpl () // genreation temp disabled !!
+        let vec0 = line1.To - line1.From
+        let vec1 = line2.To - line2.From
+        if not <| vec0.Unitize() || not <| vec1.Unitize() then  failwithf "angle two failed on %A and %A" line1 line2
+        let mutable dot = vec0 * vec1
+        dot <- max -1.0 (min 1.0 dot) // clamp for math errors
+        let mutable angle = Math.Acos(dot)
+        let mutable reflexAngle = 2.0*Math.PI - angle
+        angle <- toDegrees(angle)
+        reflexAngle <- toDegrees(reflexAngle)
+        angle, reflexAngle
     (*
     def Angle2(line1, line2):
         '''Measures the angle between two lines
@@ -149,7 +170,7 @@ module ExtensionsUtility =
     ///<summary>Returns a text string to the Windows clipboard</summary>
     ///<returns>(string) The current text in the clipboard</returns>
     static member ClipboardText() : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
     (*
     def ClipboardText(text=None):
         '''Returns or sets a text string to the Windows clipboard
@@ -173,7 +194,7 @@ module ExtensionsUtility =
     ///<param name="text">(string)Text to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member ClipboardText(text:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        System.Windows.Forms.Clipboard.SetText(text)
     (*
     def ClipboardText(text=None):
         '''Returns or sets a text string to the Windows clipboard
@@ -200,12 +221,16 @@ module ExtensionsUtility =
     ///<param name="rgb">(Drawing.Color) Initial rgb value</param>
     ///<param name="luma">(float) The luminance in units of 0.1 percent of the total range. A
     ///  value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
-    ///<param name="scale">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="isScaleRelative">(bool) Optional, Default Value: <c>false</c>
     ///If True, luma specifies how much to increment or decrement the
     ///  current luminance. If False, luma specified the absolute luminance.</param>
     ///<returns>(Drawing.Color) modified rgb value</returns>
-    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]scale:bool) : Drawing.Color =
-        failNotImpl () // genreation temp disabled !!
+    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
+        let mutable hsl = Display.ColorHSL(rgb)
+        let mutable luma = luma / 1000.0
+        if isScaleRelative then luma <- hsl.L + luma
+        hsl.L <- luma
+        hsl.ToArgbColor()
     (*
     def ColorAdjustLuma(rgb, luma, scale=False):
         '''Changes the luminance of a red-green-blue value. Hue and saturation are
@@ -231,9 +256,9 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Retrieves intensity value for the blue component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(float) The blue component , otherwise None</returns>
-    static member ColorBlueValue(rgb:Drawing.Color) : float =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(int) The blue component </returns>
+    static member ColorBlueValue(rgb:Drawing.Color) : int =
+       int rgb.B
     (*
     def ColorBlueValue(rgb):
         '''Retrieves intensity value for the blue component of an RGB color
@@ -249,9 +274,9 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Retrieves intensity value for the green component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(float) The green component , otherwise None</returns>
-    static member ColorGreenValue(rgb:Drawing.Color) : float =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(int) The green component</returns>
+    static member ColorGreenValue(rgb:Drawing.Color) : int =
+       int rgb.G
     (*
     def ColorGreenValue(rgb):
         '''Retrieves intensity value for the green component of an RGB color
@@ -267,9 +292,10 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Converts colors from hue-lumanence-saturation to RGB</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
-    ///<returns>(Drawing.Color) The RGB color value , otherwise False</returns>
+    ///<returns>(Drawing.Color) The RGB color value</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
-        failNotImpl () // genreation temp disabled !!
+        let hls = Rhino.Display.ColorHSL(hls.A.AsDouble/240.0, hls.R.AsDouble/240.0, hls.G.AsDouble/240.0, hls.B.AsDouble/240.0) // TODO test if correct with reverse function
+        hls.ToArgbColor()
     (*
     def ColorHLSToRGB(hls):
         '''Converts colors from hue-lumanence-saturation to RGB
@@ -289,9 +315,9 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Retrieves intensity value for the red component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(Drawing.Color) The red color value , otherwise False</returns>
-    static member ColorRedValue(rgb:Drawing.Color) : Drawing.Color =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(int) The red color value </returns>
+    static member ColorRedValue(rgb:Drawing.Color) : int =
+        int rgb.R
     (*
     def ColorRedValue(rgb):
         '''Retrieves intensity value for the red component of an RGB color
@@ -305,11 +331,12 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Convert colors from RGB to HLS</summary>
+    ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance)</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(Drawing.Color) The HLS color value , otherwise False</returns>
-    static member ColorRGBToHLS(rgb:Drawing.Color) : Drawing.Color =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(Rhino.Display.ColorHSL) The HLS color value </returns>
+    static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
+        let hsl = Rhino.Display.ColorHSL(rgb)
+        hsl
     (*
     def ColorRGBToHLS(rgb):
         '''Convert colors from RGB to HLS
@@ -331,7 +358,22 @@ module ExtensionsUtility =
     ///The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded.  If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(float seq) numbers with duplicates removed .</returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float seq =
-        failNotImpl () // genreation temp disabled !!
+        if Seq.length numbers < 2 then numbers
+        else
+            let tol = max tolerance  RhinoMath.ZeroTolerance // or Doc.ModelAbsoluteTolerance
+            let nums = numbers|> Seq.sort
+            let first = Seq.head nums
+            let second = (Seq.item 1 nums)
+            let mutable lastOK = first
+            seq{
+                if abs(first-second) > tol then
+                    yield first
+                    lastOK <- second
+                for n in Seq.skip 2 nums do
+                    if abs(lastOK-n) > tol then
+                        yield n
+                        lastOK <- n
+               }
     (*
     def CullDuplicateNumbers(numbers, tolerance=None):
         '''Removes duplicates from an array of numbers.
@@ -365,9 +407,10 @@ module ExtensionsUtility =
     ///Minimum distance between points. Points within this
     ///  tolerance will be discarded. If omitted, Rhino's internal zero tolerance
     ///  is used.</param>
-    ///<returns>(Point3d seq) of 3D points with duplicates removed .</returns>
-    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(-1)>]tolerance:float) : Point3d seq =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(Point3d array) of 3D points with duplicates removed .</returns>
+    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(-1)>]tolerance:float) : Point3d array =
+        let tol = max tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
+        Geometry.Point3d.CullDuplicates(points, tolerance)
     (*
     def CullDuplicatePoints(points, tolerance=-1):
         '''Removes duplicates from a list of 3D points.
@@ -388,14 +431,20 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
-    ///<summary>Measures distance between two 3D points, or between a 3D point and
-    ///  an array of 3D points.</summary>
+    ///<summary>Measures Square distance between two 3D points. Does not validate input. </summary>
     ///<param name="point1">(Point3d) The first 3D point.</param>
-    ///<param name="point2">(Point3d) The second 3D point or list of 3-D points.</param>
-    ///<returns>(Point3d) If point2 is a 3D point then the distance .</returns>
-    static member Distance(point1:Point3d, point2:Point3d) : Point3d =
-        failNotImpl () // genreation temp disabled !!
+    ///<param name="point2">(Point3d) The second 3D point </param>
+    ///<returns>(float) the square distance.</returns>
+    static member DistanceSquare(point1:Point3d, point2:Point3d) : float =
+        (point1 - point2).SquareLength
+
+    [<EXT>]
+    ///<summary>Measures distance between two 3D points</summary>
+    ///<param name="point1">(Point3d) The first 3D point.</param>
+    ///<param name="point2">(Point3d) The second 3D point </param>
+    ///<returns>(float) the distance .</returns>
+    static member Distance(point1:Point3d, point2:Point3d) : float =
+        (point1 - point2).Length
     (*
     def Distance(point1, point2):
         '''Measures distance between two 3D points, or between a 3D point and
@@ -419,8 +468,7 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
-    ///<summary>Returns string from a specified section in a initialization file.</summary>
+    ///<summary>Returns string from a specified section in a initialization file. NOT IMPLEMENTED YET</summary> 
     ///<param name="filename">(string) Name of the initialization file</param>
     ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
     ///Section containing the entry</param>
@@ -428,7 +476,7 @@ module ExtensionsUtility =
     ///Entry whose associated string is to be returned</param>
     ///<returns>(string seq) A list containing all section names</returns>
     static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
-        failNotImpl () // genreation temp disabled !!
+        failwithf "getSettings is missing implementation" // TODO!
     (*
     def GetSettings(filename, section=None, entry=None):
         '''Returns string from a specified section in a initialization file.
@@ -467,7 +515,14 @@ module ExtensionsUtility =
     ///  x-y plane is used</param>
     ///<returns>(Point3d) resulting point is successful</returns>
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
-        failNotImpl () // genreation temp disabled !!
+        let angle = toRadians(angleDegrees)
+        let mutable offset = plane.XAxis
+        offset.Unitize() |> ignore
+        offset <- distance * offset
+        let rc = point+offset
+        let xform = Transform.Rotation(angle, plane.ZAxis, point)
+        rc.Transform(xform)
+        rc
     (*
     def Polar(point, angle_degrees, distance, plane=None):
         '''Returns 3D point that is a specified angle and distance from a 3D point
@@ -498,9 +553,12 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
-    ///<returns>(float seq) A one-dimensional list containing real numbers, , otherwise None</returns>
-    static member SimplifyArray(points:Point3d seq) : float seq =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(float array) A one-dimensional list containing real numbers, , otherwise None</returns>
+    static member SimplifyArray(points:Point3d seq) : float array =
+        [| for p in points do
+                yield p.X
+                yield p.Y
+                yield p.Z |]
     (*
     def SimplifyArray(points):
         '''Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.
@@ -524,7 +582,7 @@ module ExtensionsUtility =
     ///<param name="milliseconds">(float) Thousands of a second</param>
     ///<returns>(unit) </returns>
     static member Sleep(milliseconds:float) : unit =
-        failNotImpl () // genreation temp disabled !!
+        failNotImpl () // not done in 2018
     (*
     def Sleep(milliseconds):
         '''Suspends execution of a running script for the specified interval
@@ -544,9 +602,9 @@ module ExtensionsUtility =
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///Minimum distance between points. Points that fall within this tolerance
     ///  will be discarded. If omitted, Rhino's internal zero tolerance is used.</param>
-    ///<returns>(Point3d seq) of sorted 3D points</returns>
-    static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d seq =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(Point3d array) of sorted 3D points</returns>
+    static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
+        Point3d.SortAndCullPointList(points, tolerance)
     (*
     def SortPointList(points, tolerance=None):
         '''Sorts list of points so they will be connected in a "reasonable" polyline order
@@ -567,7 +625,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Sorts the components of an array of 3D points</summary>
     ///<param name="points">(Point3d seq) Points to sort</param>
-    ///<param name="ascendeing">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="ascending">(bool) Optional, Default Value: <c>true</c>
     ///Ascendeing if omitted (True) or True, descending if False.</param>
     ///<param name="order">(int) Optional, Default Value: <c>0</c>
     ///The component sort order
@@ -579,8 +637,18 @@ module ExtensionsUtility =
     ///  4           Z, X, Y
     ///  5           Z, Y, X</param>
     ///<returns>(Point3d seq) sorted 3-D points</returns>
-    static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascendeing:bool, [<OPT;DEF(0)>]order:int) : Point3d seq =
-        failNotImpl () // genreation temp disabled !!
+    static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq =
+        let f =
+            match order with
+            |0 -> fun (p:Point3d) -> p.X, p.Y, p.Z
+            |1 -> fun (p:Point3d) -> p.X, p.Z, p.Y
+            |2 -> fun (p:Point3d) -> p.Y, p.X, p.Z
+            |3 -> fun (p:Point3d) -> p.Y, p.Z, p.X
+            |4 -> fun (p:Point3d) -> p.Z, p.X, p.Y
+            |5 -> fun (p:Point3d) -> p.Z, p.Y, p.X
+            |_ -> failwithf "sortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
+        if ascending then points |>  Seq.sortBy           f
+        else              points |>  Seq.sortByDescending f
     (*
     def SortPoints(points, ascending=True, order=0):
         '''Sorts the components of an array of 3D points
@@ -639,7 +707,7 @@ module ExtensionsUtility =
     ///<param name="point">(string) A string that contains a delimited point like "1,2,3".</param>
     ///<returns>(Point3d) Point structure from the input string.</returns>
     static member Str2Pt(point:string) : Point3d =
-        failNotImpl () // genreation temp disabled !!
+        RhinoScriptSyntax.Coerce3dPoint point
     (*
     def Str2Pt(point):
         '''convert a formatted string value into a 3D point value
@@ -654,25 +722,19 @@ module ExtensionsUtility =
 
 
     [<EXT>]
+    ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
+    ///<param name="point">something that can be converted or parsed to a point</param>
+    ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
+    static member CreatePoint(point:'T ) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint point    
     [<EXT>]
-    [<EXT>]
-    [<EXT>]
-    ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.
-    ///  If the provided object is already a point, it value is copied.
-    ///  In case the conversion fails, an error is raised.
-    ///  Alternatively, you can also pass two coordinates singularly for a
-    ///  point on the XY plane, or three for a 3D point.</summary>
-    ///<param name="point">('T * float * float) </param>
-    ///<param name="y">(float) Optional, Default Value: <c>7e89</c>
-    ///Y position</param>
-    ///<param name="z">(float) Optional, Default Value: <c>7e89</c>
-    ///Z position</param>
-    ///<returns>(Point3d) a Rhino.Geometry.Point3d. This can be seen as an object with three indices:
-    ///  [0]  X coordinate
-    ///  [1]  Y coordinate
-    ///  [2]  Z coordinate.</returns>
-    static member CreatePoint(point:'T * float * float, [<OPT;DEF(7e89)>]y:float, [<OPT;DEF(7e89)>]z:float) : Point3d =
-        failNotImpl () // genreation temp disabled !!
+    ///<summary>Converts x,y and z into a Rhino.Geometry.Point3d if possible</summary>
+    ///<param name="x">something that can be converted or parsed to X coordinate </param>
+    ///<param name="y">something that can be converted or parsed to Y coordinate</param>
+    ///<param name="z">something that can be converted or parsed to Z coordinate</param>
+    ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
+    static member CreatePoint(x:'T, y:'T,z:'T ) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint ((x,y,z))
     (*
     def CreatePoint(point, y=None, z=None):
         '''Converts 'point' into a Rhino.Geometry.Point3d if possible.
@@ -697,20 +759,20 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts 'vector' into a Rhino.Geometry.Vector3d if possible.
-    ///  If the provided object is already a vector, it value is copied.
-    ///  If the conversion fails, an error is raised.
-    ///  Alternatively, you can also pass two coordinates singularly for a
-    ///  vector on the XY plane, or three for a 3D vector.</summary>
-    ///<param name="vector">('T * float * float) </param>
-    ///<param name="y">(float) Optional, Default Value: <c>7e89</c>
-    ///Y position</param>
-    ///<param name="z">(float) Optional, Default Value: <c>7e89</c>
-    ///Z position</param>
-    ///<returns>(Vector3d) a Rhino.Geometry.Vector3d. This can be seen as an object with three indices:
-    ///  result[0]: X component, result[1]: Y component, and result[2] Z component.</returns>
-    static member CreateVector(vector:'T * float * float, [<OPT;DEF(7e89)>]y:float, [<OPT;DEF(7e89)>]z:float) : Vector3d =
-        failNotImpl () // genreation temp disabled !!
+    ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
+    ///<param name="vector">something that can be converted or parsed to a Vector</param>
+    ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
+    static member CreateVector(vector:'T ) : Vector3d =
+        RhinoScriptSyntax.Coerce3dVector vector    
+    [<EXT>]
+    ///<summary>Converts x,y and z into a Rhino.Geometry.Vector3d if possible</summary>
+    ///<param name="x">something that can be converted or parsed to X coordinate </param>
+    ///<param name="y">something that can be converted or parsed to Y coordinate</param>
+    ///<param name="z">something that can be converted or parsed to Z coordinate</param>
+    ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
+    static member CreateVector(x:'T, y:'T,z:'T ) : Vector3d =
+        RhinoScriptSyntax.Coerce3dVector ((x,y,z))
+   
     (*
     def CreateVector(vector, y=None, z=None):
         '''Converts 'vector' into a Rhino.Geometry.Vector3d if possible.
@@ -733,19 +795,18 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.
-    ///  If the provided object is already a plane, its value is copied.
-    ///  The returned data is accessible by indexing[origin, X axis, Y axis, Z axis], and that is the suggested method to interact with the type.
-    ///  The Z axis is in any case computed from the X and Y axes, so providing it is possible but not required.
-    ///  If the conversion fails, an error is raised.</summary>
-    ///<param name="planeOrOrigin">(Point3d * Vector3d * Vector3d) </param>
-    ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
+    ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.</summary>
+    ///<param name="origin">(Point3d) the Plane Center or Origin </param>
+    ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d.XAxis</c>
     ///Direction of X-Axis</param>
-    ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
+    ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>Vector3d.YAxis</c>
     ///Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane</returns>
-    static member CreatePlane(planeOrOrigin:Point3d * Vector3d * Vector3d, [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
-        failNotImpl () // genreation temp disabled !!
+    static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
+        if xAxis.IsZero || yAxis.IsZero then 
+            Plane(origin,Vector3d.XAxis,Vector3d.YAxis)
+        else
+            Plane(origin, xAxis, yAxis)
     (*
     def CreatePlane(plane_or_origin, x_axis=None, y_axis=None):
         '''Converts input into a Rhino.Geometry.Plane object if possible.
@@ -772,14 +833,11 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.
-    ///  If the provided object is already a transform, its value is copied.
-    ///  The returned data is accessible by indexing[row, column], and that is the suggested method to interact with the type.
-    ///  If the conversion fails, an error is raised.</summary>
-    ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists or tuples.</param>
+    ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
+    ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists.</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0,3] gives access to the first row, last column.</returns>
     static member CreateXform(xform:seq<seq<float>>) : Transform =
-        failNotImpl () // genreation temp disabled !!
+        RhinoScriptSyntax.CoerceXform(xform) // TODO verify row, column order !!
     (*
     def CreateXform(xform):
         '''Converts input into a Rhino.Geometry.Transform object if possible.
@@ -797,22 +855,20 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts 'color' into a native color object if possible.
+    ///<summary>Converts input into a native color object if possible.
     ///  The returned data is accessible by indexing, and that is the suggested method to interact with the type.
     ///  Red index is [0], Green index is [1], Blue index is [2] and Alpha index is [3].
     ///  If the provided object is already a color, its value is copied.
     ///  Alternatively, you can also pass three coordinates singularly for an RGB color, or four
     ///  for an RGBA color point.</summary>
-    ///<param name="color">(float*float*float) List or 3 or 4 items. Also, a single int can be passed and it will be bitwise-parsed.</param>
-    ///<param name="g">(int) Optional, Default Value: <c>987654321</c>
-    ///Green value</param>
-    ///<param name="b">(int) Optional, Default Value: <c>987654321</c>
-    ///Blue value</param>
-    ///<param name="a">(int) Optional, Default Value: <c>987654321</c>
+    ///<param name="red">(int) Red Value</param>
+    ///<param name="green">(int) Green value</param>
+    ///<param name="blue">(int) Blue value</param>
+    ///<param name="alpha">(int)Optional, Default Value: <c>0</c>
     ///Alpha value</param>
-    ///<returns>(Drawing.Color) An object that can be indexed for red, green, blu, alpha. Item[0] is red.</returns>
-    static member CreateColor(color:float*float*float, [<OPT;DEF(987654321)>]g:int, [<OPT;DEF(987654321)>]b:int, [<OPT;DEF(987654321)>]a:int) : Drawing.Color =
-        failNotImpl () // genreation temp disabled !!
+    ///<returns>(Drawing.Color) a Color</returns>
+    static member CreateColor(red:int, green:int,blue:int, [<OPT;DEF(0)>]alpha:int) : Drawing.Color =
+        RhinoScriptSyntax.CoerceColor((red,green,blue,alpha))
     (*
     def CreateColor(color, g=None, b=None, a=None):
         '''Converts 'color' into a native color object if possible.
@@ -836,19 +892,14 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts 'interval' into a Rhino.Geometry.Interval.
-    ///  If the provided object is already an interval, its value is copied.
-    ///  In case the conversion fails, an error is raised.
-    ///  In case a single number is provided, it will be translated to an increasing interval that includes
-    ///  the provided input and 0. If two values are provided, they will be used instead.</summary>
-    ///<param name="interval">(float * float) Or any item that can be accessed at index 0 and 1; an Interval or just the lower bound</param>
-    ///<param name="y">(float) Optional, Default Value: <c>7e89</c>
-    ///Uper bound of interval</param>
+    ///<summary>Converts input into a Rhino.Geometry.Interval.</summary>
+    ///<param name="start">(float) The lower bound</param>
+    ///<param name="ende">(float) Uper bound of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///  [0] start of interval
     ///  [1] end of interval</returns>
-    static member CreateInterval(interval:float * float, [<OPT;DEF(7e89)>]y:float) : Rhino.Geometry.Interval =
-        failNotImpl () // genreation temp disabled !!
+    static member CreateInterval(start:float,ende:float) : Rhino.Geometry.Interval =
+        Geometry.Interval(start , ende)
     (*
     def CreateInterval(interval, y=None):
         '''Converts 'interval' into a Rhino.Geometry.Interval.
@@ -872,5 +923,3 @@ module ExtensionsUtility =
         except:
             raise ValueError("unable to convert %s into an Interval: it cannot be indexed."%interval)
     *)
-
-

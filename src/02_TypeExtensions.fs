@@ -9,25 +9,40 @@ module TypeExtensions =
 
     [<EXT>] 
     type Collections.Generic.Dictionary<'K,'V> with
+        
         [<EXT>]
-        member d.SetValue k v =
+        member inline  d.SetValue k v =
             d.[k] <-v
         
         [<EXT>] 
-        member d.GetValue k  =
+        member inline d.GetValue k  =
             d.[k]
         
         /// get a value and remove it from Dictionary, like *.pop() in Python 
         [<EXT>] 
-        member d.PopValue k  =
+        member inline d.PopValue k  =
             let v= d.[k]
             d.Remove(k)|> ignore
             v
 
+    [<EXT>]       
+    type Int32 with  
+        [<EXT>] member inline x.AsDouble = float(x)
+        [<EXT>] member inline x.AsByte = byte(x)
+
+    [<EXT>]       
+    type Byte with  
+        [<EXT>] member inline x.AsDouble = float(x)
+        [<EXT>] member inline x.AsInt = int(x)
 
     [<EXT>]       
     type Double with  
+        ///int(round(x)) converts int to float
+        [<EXT>] member inline x.AsInt = int(round(x))
+
         [<EXT>] member x.AsNiceString = Util.floatToString x
+        
+        
 
     [<EXT>]       
     type Single with  
@@ -38,7 +53,7 @@ module TypeExtensions =
         
         ///Compare to another color only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor        
         [<EXT>] 
-        member this.EqualsARGB(other:Drawing.Color)=
+        member inline this.EqualsARGB(other:Drawing.Color)=
             this.A = other.A && 
             this.R = other.R && 
             this.G = other.G && 
@@ -46,7 +61,7 @@ module TypeExtensions =
         
         ///Compare two colors only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor
         [<EXT>]
-        static member AreEqualARGB (this:Drawing.Color)(other:Drawing.Color)=
+        static member inline AreEqualARGB (this:Drawing.Color)(other:Drawing.Color)=
             this.EqualsARGB(other)
     
 

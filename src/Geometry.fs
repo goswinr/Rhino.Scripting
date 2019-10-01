@@ -6,9 +6,7 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-open Rhino
-open System.Guid
-open  System.Array
+
 [<AutoOpen>]
 module ExtensionsGeometry =
   [<EXT>] 
@@ -93,7 +91,7 @@ module ExtensionsGeometry =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddPictureFrame(plane, filename, width=0.0, height=0.0, self_illumination=True, embed=False, use_alpha=False, make_mesh=False):
-        '''Creates a picture frame and adds it to the document.'''
+        '''Creates a picture frame and adds it to the document.
       Parameters:
         plane (plane): The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.
         filename (str): The path to a bitmap or image file.

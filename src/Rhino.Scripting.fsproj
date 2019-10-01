@@ -30,7 +30,7 @@
     <Compile Include="Curve.fs" />
     <Compile Include="Dimension.fs" />
     <Compile Include="Document.fs" />
-    <None Include="Geometry.fs" />
+    <Compile Include="Geometry.fs" />
     <Compile Include="Grips.fs" />
     <Compile Include="Group.fs" />
     <Compile Include="Hatch.fs" />
@@ -43,14 +43,14 @@
     <Compile Include="Object.fs" />
     <Compile Include="Plane.fs" />
     <Compile Include="Pointvector.fs" />
-    <None Include="Selection.fs" />
+    <Compile Include="Selection.fs" />
     <Compile Include="Surface.fs" />
     <Compile Include="Toolbar.fs" />
     <Compile Include="Transformation.fs" />
     <Compile Include="Userdata.fs" />
     <Compile Include="Userinterface.fs" />
-    <None Include="Utility.fs" />
-    <None Include="View.fs" />
+    <Compile Include="Utility.fs" />
+    <Compile Include="View.fs" />
   </ItemGroup>
 
   <ItemGroup>

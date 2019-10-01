@@ -143,8 +143,16 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<returns>Rhino.Geometry.Transform. Fails on bad input</returns>   
     static member CoerceXform(xform:'xform) =
         match box xform with
-        | :? Transform  as xform -> xform // TODO add more
-        //| :? seq<float>  as xs ->  let m = Seq.toArray sx
+        | :? Transform  as xform -> xform 
+        | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
+            let mutable t=Transform()
+            for c,xs in Seq.indexed xss do
+                for r,x in Seq.indexed xs do
+                    t.[c,r] <- x
+            t
+        | :? array2D  as xss -> // TODO verify row, column order !!
+            let mutable t=Transform()           
+            t
         | _ -> failwithf "*** could not coercexform %A can not be converted to a Transformation Matrix" xform
     
     ///<summary>attempt to get a Guids from input</summary>
@@ -177,8 +185,20 @@ type RhinoScriptSyntax private () = // no constructor?
     static member CoerceColor(color:'color) =
         match box color with
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
-        | :? (int*int*int) as rgb       -> let r,g,b    = rgb in Drawing.Color.FromArgb(r,g,b)
-        | :? (int*int*int*int) as argb  -> let a,r,g,b = argb in Drawing.Color.FromArgb(a,r,g,b)
+        | :? (int*int*int) as rgb       -> 
+            let red , green, blue   = rgb 
+            if red  <0 || red  >255 then failwithf " cannot create color form red %d, blue %d and green %d" red green blue
+            if green<0 || green>255 then failwithf " cannot create color form red %d, blue %d and green %d" red green blue
+            if blue <0 || blue >255 then failwithf " cannot create color form red %d, blue %d and green %d" red green blue
+            Drawing.Color.FromArgb(255  ,red, green, blue)
+            
+        | :? (int*int*int*int) as argb  -> 
+            let alpha, red , green, blue   = argb 
+            if red  <0 || red  >255 then failwithf " cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
+            if green<0 || green>255 then failwithf " cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
+            if blue <0 || blue >255 then failwithf " cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
+            if alpha <0 || alpha >255 then failwithf " cannot create color form red %d, blue %d and green %d aplpha %d" red green blue alpha
+            Drawing.Color.FromArgb(alpha  ,red, green, blue)        
         | :? string  as s -> 
             try 
                 let c = Drawing.Color.FromName(s)
