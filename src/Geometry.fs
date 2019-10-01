@@ -7,6 +7,7 @@ open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 
+
 [<AutoOpen>]
 module ExtensionsGeometry =
   [<EXT>] 
@@ -23,7 +24,18 @@ module ExtensionsGeometry =
     ///  view is used.</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
-        failNotImpl () // genreation temp disabled !!
+        let viewlist = 
+            if isNull views then [Doc.Views.ActiveView.ActiveViewportID]
+            else
+                [for item in Doc.Views.GetViewList(true, false) do
+                    for view in views do
+                        for item in modelviews do
+                            if item.ActiveViewport.Name = view then
+                                yield item.ActiveViewportID]
+        let rc = Doc.Objects.AddClippingPlane(plane, u_magnitude, vMagnitude, viewlist)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
+        Doc.Views.Redraw()
+        rc
     (*
     def AddClippingPlane(plane, u_magnitude, v_magnitude, views=None):
         '''Create a clipping plane for visibly clipping away geometry in a specific
@@ -37,6 +49,7 @@ module ExtensionsGeometry =
           guid: object identifier on success
           None: on failure
         '''
+    
         viewlist = []
         if views:
             if type(views) is System.Guid:
@@ -88,7 +101,12 @@ module ExtensionsGeometry =
     ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface.</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
-        failNotImpl () // genreation temp disabled !!
+      let plane = RhinoScriptSyntax.CoercePlane(plane)
+      if typ(filename) <> String || not <| IO.File.Exists(filename) then failwith("\"{0}\" does not <| exist || <> a file name".format(filename))
+      let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, self_illumination, embed)
+      if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
+      Doc.Views.Redraw()
+      rc
     (*
     def AddPictureFrame(plane, filename, width=0.0, height=0.0, self_illumination=True, embed=False, use_alpha=False, make_mesh=False):
         '''Creates a picture frame and adds it to the document.
@@ -105,9 +123,10 @@ module ExtensionsGeometry =
         guid: object identifier on success
         None: on failure
       '''
+    
       plane = rhutil.coerceplane(plane, True)
-      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception(' does not exist or is not a file name'.format(filename))
-      rc = scriptcontext.doc.Objects.AddPictureFrame(plane, filename, make_mesh, width, height, self_illumination, embed) 
+      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception( does not exist or is not a file name'.format(filename))
+      rc = scriptcontext.doc.Objects.AddPictureFrame(plane, filename, make_mesh, width, height, self_illumination, embed)
       if rc==System.Guid.Empty: raise Exception("unable to add picture frame to document")
       scriptcontext.doc.Views.Redraw()
       return rc
@@ -123,7 +142,12 @@ module ExtensionsGeometry =
     ///Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(pointOrX:float, [<OPT;DEF(7e89)>]y:float, [<OPT;DEF(7e89)>]z:float) : Guid =
-        failNotImpl () // genreation temp disabled !!
+        if y <> null then point <- Point3d(pointOrX, y, z || 0.0)
+        let point = RhinoScriptSyntax.Coerce3dPoint(point)
+        let rc = Doc.Objects.AddPoint(point)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point to document.  pointOrX:'%A' y:'%A' z:'%A'" pointOrX y z
+        Doc.Views.Redraw()
+        rc
     (*
     def AddPoint(pointOrX, y=None, z=None):
         '''Adds point object to the document.
@@ -134,6 +158,7 @@ module ExtensionsGeometry =
         Returns:
           guid: identifier for the object that was added to the doc
         '''
+    
         if y is not None: point = Rhino.Geometry.Point3d(pointOrX, y, z or 0.0)
         point = rhutil.coerce3dpoint(point, True)
         rc = scriptcontext.doc.Objects.AddPoint(point)
@@ -150,7 +175,17 @@ module ExtensionsGeometry =
     ///List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud on success</returns>
     static member AddPointCloud(points:Point3d seq, [<OPT;DEF(null:Drawing.Color seq)>]colors:Drawing.Color seq) : Guid =
-        failNotImpl () // genreation temp disabled !!
+        let points = RhinoScriptSyntax.Coerce3dPointList(points)
+        if colors && Seq.length(colors) = Seq.length(points) then
+            let pc = PointCloud()
+            for i in range(len(points)) do
+                let color = RhinoScriptSyntax.CoerceColor(colors.[i])
+                pc.Add(points.[i],color)
+            points <- pc
+        let rc = Doc.Objects.AddPointCloud(points)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
+        Doc.Views.Redraw()
+        rc
     (*
     def AddPointCloud(points, colors=None):
         '''Adds point cloud object to the document
@@ -160,6 +195,7 @@ module ExtensionsGeometry =
         Returns:
           guid: identifier of point cloud on success
         '''
+    
         points = rhutil.coerce3dpointlist(points, True)
         if colors and len(colors)==len(points):
             pc = Rhino.Geometry.PointCloud()
@@ -179,7 +215,10 @@ module ExtensionsGeometry =
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid seq) identifiers of the new objects on success</returns>
     static member AddPoints(points:Point3d seq) : Guid seq =
-        failNotImpl () // genreation temp disabled !!
+        let points = RhinoScriptSyntax.Coerce3dPointList(points)
+        let rc = [| for point in points do yield Doc.Objects.AddPoint(point) |]
+        Doc.Views.Redraw()
+        rc
     (*
     def AddPoints(points):
         '''Adds one or more point objects to the document
@@ -188,6 +227,7 @@ module ExtensionsGeometry =
         Returns:
           list(guid, ...): identifiers of the new objects on success
         '''
+    
         points = rhutil.coerce3dpointlist(points, True)
         rc = [scriptcontext.doc.Objects.AddPoint(point) for point in points]
         scriptcontext.doc.Views.Redraw()
@@ -220,7 +260,64 @@ module ExtensionsGeometry =
     ///  262144 = Top</param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
     static member AddText(text:string, pointOrPlane:Plane, [<OPT;DEF(1.0)>]height:float, [<OPT;DEF(null:string)>]font:string, [<OPT;DEF(0)>]fontStyle:int, [<OPT;DEF(987654321)>]justification:int) : Guid =
-        failNotImpl () // genreation temp disabled !!
+        if not <| text then failwithf "Rhino.Scripting: Text invalid.  text:'%A' pointOrPlane:'%A' height:'%A' font:'%A' fontStyle:'%A' justification:'%A'" text pointOrPlane height font fontStyle justification
+        if not <| isinstance(text, str) then text <- string(text)
+        let point = RhinoScriptSyntax.Coerce3dPoint(point_or_plane)
+        let plane = null
+        if not <| point then plane <- RhinoScriptSyntax.CoercePlane(point_or_plane)
+        if not <| plane then
+            plane <- Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+            let plane.Origin = point
+        if font <> null && typ(font) <> string then
+          failwithf "Rhino.Scripting: Font needs to be a quartet name.  text:'%A' pointOrPlane:'%A' height:'%A' font:'%A' fontStyle:'%A' justification:'%A'" text pointOrPlane height font fontStyle justification
+        let bold = (1 = fontStyle || 3 = fontStyle)
+        let italic = (2 = fontStyle || 3 = fontStyle)
+        let ds = Doc.DimStyles.Current
+        if font = null then
+          let qn = ds.Font.QuartetName
+          let quartetBoldProp = ds.Font.Bold
+          let quartetItalicProp = ds.Font.Bold
+        else 
+          qn <- font
+          quartetBoldProp <- false
+          quartetItalicProp <- false
+        let f = Rhino.DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
+        if f = null then
+            print("font error: there = a problem with the font {} && cannot <| be used to create a text entity".format(font))
+            failwithf "Rhino.Scripting: AddText failed.  text:'%A' pointOrPlane:'%A' height:'%A' font:'%A' fontStyle:'%A' justification:'%A'" text pointOrPlane height font fontStyle justification
+        let te = TextEntity.Create(text, plane, ds, false, 0, 0)
+        let te.TextHeight = height
+        if font <> null then
+          let te.Font = f
+        if bold <> quartetBoldProp then
+            if Rhino.DocObjects.Font.FromQuartetProperties(qn, bold, false) = null then
+              print(""{}" does not <| have a "bold" property so it will not <| be set.".format(qn))
+            else 
+              te.SetBold(bold)
+        if italic <> quartetItalicProp then
+            if Rhino.DocObjects.Font.FromQuartetProperties(qn, false, italic) = null then
+              print(""{}" does not <| have an "italic" property so it will not <| be set.".format(qn))
+            else 
+              te.SetItalic(italic)
+        if justification <> null then
+            let h_map = .[(1,0), (2,1), (4,2)]
+            let v_map = .[(65536,5), (131072,3), (262144,0)]
+            def getOneAlignFromMap(j, m, e):
+                let lst = ResizeArray()
+                for k, v in m do
+                    if j & k then
+                        lst.Add(v)
+                Enum.ToObject(e, lst.[0]) if lst else null
+            let h = getOneAlignFromMap(justification, h_map, Rhino.DocObjects.TextHorizontalAlignment)
+            if h <> null then
+                let te.TextHorizontalAlignment = h
+            let v = getOneAlignFromMap(justification, v_map, Rhino.DocObjects.TextVerticalAlignment)
+            if v <> null then
+                let te.TextVerticalAlignment = v
+        let id = Doc.Objects.Add(te);
+        if id = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text to document.  text:'%A' pointOrPlane:'%A' height:'%A' font:'%A' fontStyle:'%A' justification:'%A'" text pointOrPlane height font fontStyle justification
+        Doc.Views.Redraw()
+        id
     (*
     def AddText(text, point_or_plane, height=1.0, font=None, font_style=0, justification=None):
         '''Adds a text string to the document
@@ -246,6 +343,7 @@ module ExtensionsGeometry =
           guid: identifier for the object that was added to the doc on success
           None: on failure
         '''
+    
         if not text: raise ValueError("text invalid")
         if not isinstance(text, str): text = str(text)
         point = rhutil.coerce3dpoint(point_or_plane)
@@ -258,6 +356,7 @@ module ExtensionsGeometry =
           raise ValueError("font needs to be a quartet name")
         bold = (1==font_style or 3==font_style)
         italic = (2==font_style or 3==font_style)
+    
         ds = scriptcontext.doc.DimStyles.Current
         if font == None:
           qn = ds.Font.QuartetName
@@ -267,14 +366,18 @@ module ExtensionsGeometry =
           qn = font
           quartetBoldProp = False
           quartetItalicProp = False
+    
         f = Rhino.DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
         if f == None:
             print("font error: there is a problem with the font {} and cannot be used to create a text entity".format(font))
             return scriptcontext.errorhandler()
+    
         te = Rhino.Geometry.TextEntity.Create(text, plane, ds, False, 0, 0)
         te.TextHeight = height
+    
         if font != None:
           te.Font = f
+    
         if bold != quartetBoldProp:
             if Rhino.DocObjects.Font.FromQuartetProperties(qn, bold, False) == None:
               print("'{}' does not have a 'bold' property so it will not be set.".format(qn))
@@ -285,21 +388,25 @@ module ExtensionsGeometry =
               print("'{}' does not have an 'italic' property so it will not be set.".format(qn))
             else:
               te.SetItalic(italic)
+    
         if justification is not None:
             h_map = [(1,0), (2,1), (4,2)]
             v_map = [(65536,5), (131072,3), (262144,0)]
+    
             def getOneAlignFromMap(j, m, e):
                 lst = []
                 for k, v in m:
                     if j & k:
                         lst.append(v)
                 return System.Enum.ToObject(e, lst[0]) if lst else None
+    
             h = getOneAlignFromMap(justification, h_map, Rhino.DocObjects.TextHorizontalAlignment)
             if h != None:
                 te.TextHorizontalAlignment = h
             v = getOneAlignFromMap(justification, v_map, Rhino.DocObjects.TextVerticalAlignment)
             if v != None:
                 te.TextVerticalAlignment = v
+    
         id = scriptcontext.doc.Objects.Add(te);
         if id==System.Guid.Empty: raise ValueError("unable to add text to document")
         scriptcontext.doc.Views.Redraw()
@@ -313,7 +420,12 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d) A 3D point identifying the origin point.</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddTextDot(text:string, point:Point3d) : Guid =
-        failNotImpl () // genreation temp disabled !!
+        let point = RhinoScriptSyntax.Coerce3dPoint(point)
+        if not <| isinstance(text, str) then text <- string(text)
+        let rc = Doc.Objects.AddTextDot(text, point)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text dot to document.  text:'%A' point:'%A'" text point
+        Doc.Views.Redraw()
+        rc
     (*
     def AddTextDot(text, point):
         '''Add a text dot to the document.
@@ -323,6 +435,7 @@ module ExtensionsGeometry =
         Returns:
           guid: The identifier of the new object if successful
         '''
+    
         point = rhutil.coerce3dpoint(point, True)
         if not isinstance(text, str): text = str(text)
         rc = scriptcontext.doc.Objects.AddTextDot(text, point)
@@ -337,7 +450,10 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area</returns>
     static member Area(objectId:Guid) : float =
-        failNotImpl () // genreation temp disabled !!
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
+        let mp = AreaMassProperties.Compute(rhobj.Geometry)
+        if mp = null then failwithf "Rhino.Scripting: Unable to compute area mass properties.  objectId:'%A'" objectId
+        mp.Area
     (*
     def Area(object_id):
         '''Compute the area of a closed curve, hatch, surface, polysurface, or mesh
@@ -347,6 +463,7 @@ module ExtensionsGeometry =
           number: area if successful
           None: on error
         '''
+    
         rhobj = rhutil.coercerhinoobject(object_id, True, True)
         mp = Rhino.Geometry.AreaMassProperties.Compute(rhobj.Geometry)
         if mp is None: raise Exception("unable to compute area mass properties")
@@ -370,7 +487,44 @@ module ExtensionsGeometry =
     ///<returns>(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) Eight 3D points that define the bounding box.
     ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(objects:Guid seq, [<OPT;DEF(null:string)>]viewOrPlane:string, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d =
-        failNotImpl () // genreation temp disabled !!
+        def __objectbbox(object, xform):
+            let geom = RhinoScriptSyntax.CoerceGeometry(object)
+            if not <| geom then
+                let pt = RhinoScriptSyntax.Coerce3dPoint(object)
+                if notNull xform then pt <- xform * pt
+                BoundingBox(pt,pt)
+            if notNull xform then geom.GetBoundingBox(xform)
+            geom.GetBoundingBox(true)
+        let xform = null
+        let plane = RhinoScriptSyntax.CoercePlane(view_or_plane)
+        if plane = null && view_or_plane then
+            let view = view_or_plane
+            let modelviews = Doc.Views.GetStandardRhinoViews()
+            for item in modelviews do
+                let viewport = item.MainViewport
+                if typ(view) = string && viewport.Name = view then
+                    plane <- viewport.ConstructionPlane()
+                    break
+                elif typ(view) = Guid && viewport.Id = view then
+                    plane <- viewport.ConstructionPlane()
+                    break
+            if plane = null then failwithf "Rhino.Scripting: BoundingBox failed.  objects:'%A' viewOrPlane:'%A' inWorldCoords:'%A'" objects viewOrPlane inWorldCoords
+        if notNull plane then
+            xform <- Transform.ChangeBasis(Plane.WorldXY, plane)
+        let bbox = BoundingBox.Empty
+        if typ(objects) = list || typ(objects) = tuple then
+            for object in objects do
+                let objectbbox = __objectbbox(object, xform)
+                bbox <- BoundingBox.Union(bbox,objectbbox)
+        else 
+            objectbbox <- __objectbbox(objects, xform)
+            bbox <- BoundingBox.Union(bbox,objectbbox)
+        if not <| bbox.IsValid then failwithf "Rhino.Scripting: BoundingBox failed.  objects:'%A' viewOrPlane:'%A' inWorldCoords:'%A'" objects viewOrPlane inWorldCoords
+        let corners = list(bbox.GetCorners())
+        if inWorldCoords && plane <> null then
+            let plane_to_world = Transform.ChangeBasis(plane, Plane.WorldXY)
+            for pt in corners do pt.Transform(plane_to_world)
+        corners
     (*
     def BoundingBox(objects, view_or_plane=None, in_world_coords=True):
         '''Returns either world axis-aligned or a construction plane axis-aligned
@@ -389,6 +543,7 @@ module ExtensionsGeometry =
                Points returned in counter-clockwise order starting with the bottom rectangle of the box.
           None: on error
         '''
+    
         def __objectbbox(object, xform):
             geom = rhutil.coercegeometry(object, False)
             if not geom:
@@ -397,6 +552,7 @@ module ExtensionsGeometry =
                 return Rhino.Geometry.BoundingBox(pt,pt)
             if xform: return geom.GetBoundingBox(xform)
             return geom.GetBoundingBox(True)
+    
         xform = None
         plane = rhutil.coerceplane(view_or_plane)
         if plane is None and view_or_plane:
@@ -422,6 +578,7 @@ module ExtensionsGeometry =
             objectbbox = __objectbbox(objects, xform)
             bbox = Rhino.Geometry.BoundingBox.Union(bbox,objectbbox)
         if not bbox.IsValid: return scriptcontext.errorhandler()
+    
         corners = list(bbox.GetCorners())
         if in_world_coords and plane is not None:
             plane_to_world = Rhino.Geometry.Transform.ChangeBasis(plane, Rhino.Geometry.Plane.WorldXY)
@@ -436,7 +593,9 @@ module ExtensionsGeometry =
     ///<param name="second">(Guid) The identifier of the second object to compare.</param>
     ///<returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
     static member CompareGeometry(first:Guid, second:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let first_g = RhinoScriptSyntax.CoerceGeometry(first)
+        let second_g = RhinoScriptSyntax.CoerceGeometry(second)
+        GeometryBase.GeometryEquals(first_g, second_g)
     (*
     def CompareGeometry(first, second):
         '''Compares two objects to determine if they are geometrically identical.
@@ -446,8 +605,10 @@ module ExtensionsGeometry =
         Returns:
           bool: True if the objects are geometrically identical, otherwise False.
         '''
+    
         first_g = rhutil.coercegeometry(first, True)
         second_g = rhutil.coercegeometry(second, True)
+    
         return Rhino.Geometry.GeometryBase.GeometryEquals(first_g, second_g)
     *)
 
@@ -459,7 +620,13 @@ module ExtensionsGeometry =
     ///Delete the text object after the curves have been created</param>
     ///<returns>(Guid seq) of outline curves</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid seq =
-        failNotImpl () // genreation temp disabled !!
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId, true)
+        let curves = rhobj.Geometry.Explode()
+        let attr = rhobj.Attributes
+        let rc = [| for curve in curves do yield Doc.Objects.AddCurve(curve,attr) |]
+        if notNull delete then Doc.Objects.Delete(rhobj,true)
+        Doc.Views.Redraw()
+        rc
     (*
     def ExplodeText(text_id, delete=False):
         '''Creates outline curves for a given text entity
@@ -469,6 +636,7 @@ module ExtensionsGeometry =
         Returns:
           list(guid): of outline curves
         '''
+    
         rhobj = rhutil.coercerhinoobject(text_id, True, True)
         curves = rhobj.Geometry.Explode()
         attr = rhobj.Attributes
@@ -484,7 +652,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a clipping plane</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let cp = RhinoScriptSyntax.CoerceGeometry(objectId)
+        isinstance(cp, ClippingPlaneSurface)
     (*
     def IsClippingPlane(object_id):
         '''Verifies that an object is a clipping plane object
@@ -493,6 +662,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if the object with a given id is a clipping plane
         '''
+    
         cp = rhutil.coercegeometry(object_id)
         return isinstance(cp, Rhino.Geometry.ClippingPlaneSurface)
     *)
@@ -503,7 +673,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a point</returns>
     static member IsPoint(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let p = RhinoScriptSyntax.CoerceGeometry(objectId)
+        isinstance(p, Point)
     (*
     def IsPoint(object_id):
         '''Verifies an object is a point object.
@@ -512,6 +683,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if the object with a given id is a point
         '''
+    
         p = rhutil.coercegeometry(object_id)
         return isinstance(p, Rhino.Geometry.Point)
     *)
@@ -522,7 +694,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a point cloud</returns>
     static member IsPointCloud(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let pc = RhinoScriptSyntax.CoerceGeometry(objectId)
+        isinstance(pc, PointCloud)
     (*
     def IsPointCloud(object_id):
         '''Verifies an object is a point cloud object.
@@ -531,6 +704,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if the object with a given id is a point cloud
         '''
+    
         pc = rhutil.coercegeometry(object_id)
         return isinstance(pc, Rhino.Geometry.PointCloud)
     *)
@@ -541,7 +715,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a text object</returns>
     static member IsText(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let text = RhinoScriptSyntax.CoerceGeometry(objectId)
+        isinstance(text, TextEntity)
     (*
     def IsText(object_id):
         '''Verifies an object is a text object.
@@ -550,6 +725,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if the object with a given id is a text object
         '''
+    
         text = rhutil.coercegeometry(object_id)
         return isinstance(text, Rhino.Geometry.TextEntity)
     *)
@@ -560,7 +736,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a text dot object</returns>
     static member IsTextDot(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let td = RhinoScriptSyntax.CoerceGeometry(objectId)
+        isinstance(td, TextDot)
     (*
     def IsTextDot(object_id):
         '''Verifies an object is a text dot object.
@@ -569,6 +746,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if the object with a given id is a text dot object
         '''
+    
         td = rhutil.coercegeometry(object_id)
         return isinstance(td, Rhino.Geometry.TextDot)
     *)
@@ -579,7 +757,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(int) number of points</returns>
     static member PointCloudCount(objectId:Guid) : int =
-        failNotImpl () // genreation temp disabled !!
+        let pc = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then pc.Count
     (*
     def PointCloudCount(object_id):
         '''Returns the point count of a point cloud object
@@ -588,6 +767,7 @@ module ExtensionsGeometry =
         Returns:
           number: number of points if successful
         '''
+    
         pc = rhutil.coercegeometry(object_id, True)
         if isinstance(pc, Rhino.Geometry.PointCloud): return pc.Count
     *)
@@ -598,7 +778,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False</returns>
     static member PointCloudHasHiddenPoints(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let pc = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then pc.HiddenPointCount>0
     (*
     def PointCloudHasHiddenPoints(object_id):
         '''Verifies that a point cloud has hidden points
@@ -607,6 +788,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if cloud has hidden points, otherwise False
         '''
+    
         pc = rhutil.coercegeometry(object_id, True)
         if isinstance(pc, Rhino.Geometry.PointCloud): return pc.HiddenPointCount>0
     *)
@@ -617,7 +799,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False</returns>
     static member PointCloudHasPointColors(objectId:Guid) : bool =
-        failNotImpl () // genreation temp disabled !!
+        let pc = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then pc.ContainsColors
     (*
     def PointCloudHasPointColors(object_id):
         '''Verifies that a point cloud has point colors
@@ -626,6 +809,7 @@ module ExtensionsGeometry =
         Returns:
           bool: True if cloud has point colors, otherwise False
         '''
+    
         pc = rhutil.coercegeometry(object_id, True)
         if isinstance(pc, Rhino.Geometry.PointCloud): return pc.ContainsColors
     *)
@@ -636,7 +820,20 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool seq) List of point cloud hidden states</returns>
     static member PointCloudHidePoints(objectId:Guid) : bool seq = //GET
-        failNotImpl () // genreation temp disabled !!
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if notNull rhobj then pc <- rhobj.Geometry
+        else  pc <- RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then
+            let rc = null
+            if pc.ContainsHiddenFlags then rc <- [| for item in pc do yield item.Hidden |]
+            if hidden = null then
+                pc.ClearHiddenFlags()
+            elif Seq.length(hidden) = pc.Count then
+                for i in range(pc.Count) do pc.[i].Hidden = hidden.[i]
+            if notNull rhobj then
+                rhobj.CommitChanges()
+                Doc.Views.Redraw()
+            rc
     (*
     def PointCloudHidePoints(object_id, hidden=[]):
         '''Returns or modifies the hidden points of a point cloud object
@@ -647,6 +844,7 @@ module ExtensionsGeometry =
           list(bool, ....): List of point cloud hidden states
           list(bool, ....): List of point cloud hidden states
         '''
+    
         rhobj = rhutil.coercerhinoobject(object_id)
         if rhobj: pc = rhobj.Geometry
         else: pc = rhutil.coercegeometry(object_id, True)
@@ -668,7 +866,20 @@ module ExtensionsGeometry =
     ///<param name="hidden">(bool seq)List of booleans matched to the index of points to be hidden</param>
     ///<returns>(bool seq) List of point cloud hidden states</returns>
     static member PointCloudHidePoints(objectId:Guid, hidden:bool seq) : bool seq = //SET
-        failNotImpl () // genreation temp disabled !!
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if notNull rhobj then pc <- rhobj.Geometry
+        else  pc <- RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then
+            let rc = null
+            if pc.ContainsHiddenFlags then rc <- [| for item in pc do yield item.Hidden |]
+            if hidden = null then
+                pc.ClearHiddenFlags()
+            elif Seq.length(hidden) = pc.Count then
+                for i in range(pc.Count) do pc.[i].Hidden = hidden.[i]
+            if notNull rhobj then
+                rhobj.CommitChanges()
+                Doc.Views.Redraw()
+            rc
     (*
     def PointCloudHidePoints(object_id, hidden=[]):
         '''Returns or modifies the hidden points of a point cloud object
@@ -679,6 +890,7 @@ module ExtensionsGeometry =
           list(bool, ....): List of point cloud hidden states
           list(bool, ....): List of point cloud hidden states
         '''
+    
         rhobj = rhutil.coercerhinoobject(object_id)
         if rhobj: pc = rhobj.Geometry
         else: pc = rhutil.coercegeometry(object_id, True)
@@ -701,7 +913,20 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Drawing.Color seq) List of point cloud colors</returns>
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color seq = //GET
-        failNotImpl () // genreation temp disabled !!
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if notNull rhobj then pc <- rhobj.Geometry
+        else  pc <- RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then
+            let rc = null
+            if pc.ContainsColors then rc <- [| for item in pc do yield item.Color |]
+            if colors = null then
+                pc.ClearColors()
+            elif Seq.length(colors) = pc.Count then
+                for i in range(pc.Count) do pc.[i].Color = RhinoScriptSyntax.CoerceColor(colors.[i])
+            if notNull rhobj then
+                rhobj.CommitChanges()
+                Doc.Views.Redraw()
+            rc
     (*
     def PointCloudPointColors(object_id, colors=[]):
         '''Returns or modifies the point colors of a point cloud object
@@ -712,6 +937,7 @@ module ExtensionsGeometry =
           list(color, ...): List of point cloud colors
           list(color, ...): List of point cloud colors
         '''
+    
         rhobj = rhutil.coercerhinoobject(object_id)
         if rhobj: pc = rhobj.Geometry
         else: pc = rhutil.coercegeometry(object_id, True)
@@ -733,7 +959,20 @@ module ExtensionsGeometry =
     ///<param name="colors">(Drawing.Color seq)List of color values if you want to adjust colors</param>
     ///<returns>(Drawing.Color seq) List of point cloud colors</returns>
     static member PointCloudPointColors(objectId:Guid, colors:Drawing.Color seq) : Drawing.Color seq = //SET
-        failNotImpl () // genreation temp disabled !!
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if notNull rhobj then pc <- rhobj.Geometry
+        else  pc <- RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then
+            let rc = null
+            if pc.ContainsColors then rc <- [| for item in pc do yield item.Color |]
+            if colors = null then
+                pc.ClearColors()
+            elif Seq.length(colors) = pc.Count then
+                for i in range(pc.Count) do pc.[i].Color = RhinoScriptSyntax.CoerceColor(colors.[i])
+            if notNull rhobj then
+                rhobj.CommitChanges()
+                Doc.Views.Redraw()
+            rc
     (*
     def PointCloudPointColors(object_id, colors=[]):
         '''Returns or modifies the point colors of a point cloud object
@@ -744,6 +983,7 @@ module ExtensionsGeometry =
           list(color, ...): List of point cloud colors
           list(color, ...): List of point cloud colors
         '''
+    
         rhobj = rhutil.coercerhinoobject(object_id)
         if rhobj: pc = rhobj.Geometry
         else: pc = rhutil.coercegeometry(object_id, True)
@@ -766,7 +1006,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Guid seq) list of points</returns>
     static member PointCloudPoints(objectId:Guid) : Guid seq =
-        failNotImpl () // genreation temp disabled !!
+        let pc = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(pc, PointCloud) then pc.GetPoints()
     (*
     def PointCloudPoints(object_id):
         '''Returns the points of a point cloud object
@@ -775,6 +1016,7 @@ module ExtensionsGeometry =
         Returns:
           list(guid, ...): list of points if successful
         '''
+    
         pc = rhutil.coercegeometry(object_id, True)
         if isinstance(pc, Rhino.Geometry.PointCloud): return pc.GetPoints()
     *)
@@ -783,7 +1025,6 @@ module ExtensionsGeometry =
     [<EXT>]
     
     static member internal SimplifyPointCloudKNeighbors() : obj =
-        failNotImpl () // genreation temp disabled !!
     (*
     def __simplify_PointCloudKNeighbors(result, amount):
         ''''''
@@ -799,7 +1040,24 @@ module ExtensionsGeometry =
     ///<returns>(int seq) a list of indices of the found points, if amount equals 1.
     ///  [[int, ...], ...]: nested lists with amount items within a list, with the indices of the found points.</returns>
     static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : int seq =
-        failNotImpl () // genreation temp disabled !!
+        let needles = RhinoScriptSyntax.CoerceGeometry(needlePoints)
+        if isinstance(needles, PointCloud) then needles <- needles.AsReadOnlyListOfPoints()
+        else  needles <- RhinoScriptSyntax.Coerce3dPointList(needlePoints)
+        let pc_geom = RhinoScriptSyntax.CoerceGeometry(pt_cloud)
+        if isinstance(pc_geom, PointCloud) then
+            if Seq.length(needles) > 100 then
+                let search = RTree.PointCloudKNeighbors
+            else 
+                search <- Rhino.Collections.RhinoList.PointCloudKNeighbors
+            __simplify_PointCloudKNeighbors(search(pc_geom, needles, amount), amount)
+        if Seq.length(needles) > 100 then
+            search <- RTree.Point3dKNeighbors
+        else 
+            search <- Rhino.Collections.RhinoList.Point3dKNeighbors
+        if isinstance(pt_cloud, Collections.Generic.IEnumerable.[Point3d]) then
+            __simplify_PointCloudKNeighbors(search(pt_cloud, needles, amount), amount)
+        let pts = RhinoScriptSyntax.Coerce3dPointList(pt_cloud)
+        __simplify_PointCloudKNeighbors(search(pts, needles, amount), amount)
     (*
     def PointCloudKNeighbors(pt_cloud, needle_points, amount=1):
         '''Returns amount indices of points in a point cloud that are near needle_points.
@@ -811,20 +1069,25 @@ module ExtensionsGeometry =
           [int, int,...]: a list of indices of the found points, if amount equals 1.
             [[int, ...], ...]: nested lists with amount items within a list, with the indices of the found points.
         '''
+    
         needles = rhutil.coercegeometry(needle_points, False)
         if isinstance(needles, Rhino.Geometry.PointCloud): needles = needles.AsReadOnlyListOfPoints()
         else: needles = rhutil.coerce3dpointlist(needle_points, True)
+    
         pc_geom = rhutil.coercegeometry(pt_cloud, False)
         if isinstance(pc_geom, Rhino.Geometry.PointCloud):
             if len(needles) > 100:
                 search = Rhino.Geometry.RTree.PointCloudKNeighbors
             else:
                 search = Rhino.Collections.RhinoList.PointCloudKNeighbors
+    
             return __simplify_PointCloudKNeighbors(search(pc_geom, needles, amount), amount)
+    
         if len(needles) > 100:
             search = Rhino.Geometry.RTree.Point3dKNeighbors
         else:
             search = Rhino.Collections.RhinoList.Point3dKNeighbors
+    
         if isinstance(pt_cloud, System.Collections.Generic.IEnumerable[Rhino.Geometry.Point3d]):
             return __simplify_PointCloudKNeighbors(search(pt_cloud, needles, amount), amount)
         pts = rhutil.coerce3dpointlist(pt_cloud, True)
@@ -835,7 +1098,6 @@ module ExtensionsGeometry =
     [<EXT>]
     
     static member internal SimplifyPointCloudClosestPoints() : obj =
-        failNotImpl () // genreation temp disabled !!
     (*
     def __simplify_PointCloudClosestPoints(result):
         ''''''
@@ -850,7 +1112,16 @@ module ExtensionsGeometry =
     ///<param name="distance">(float) The included limit for listing points.</param>
     ///<returns>(int seq) a list of lists with the indices of the found points.</returns>
     static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : int seq =
-        failNotImpl () // genreation temp disabled !!
+        let needles = RhinoScriptSyntax.CoerceGeometry(needlePoints)
+        if isinstance(needles, PointCloud) then needles <- needles.AsReadOnlyListOfPoints()
+        else  needles <- RhinoScriptSyntax.Coerce3dPointList(needlePoints)
+        let pc_geom = RhinoScriptSyntax.CoerceGeometry(pt_cloud)
+        if isinstance(pc_geom, PointCloud) then
+            __simplify_PointCloudClosestPoints(RTree.PointCloudClosestPoints(pc_geom, needles, distance))
+        if isinstance(pt_cloud, Collections.Generic.IEnumerable.[Point3d]) then
+            __simplify_PointCloudClosestPoints(RTree.Point3dClosestPoints(pt_cloud, needles, distance))
+        let pts = RhinoScriptSyntax.Coerce3dPointList(pt_cloud)
+        __simplify_PointCloudClosestPoints(RTree.Point3dClosestPoints(pts, needles, distance))
     (*
     def PointCloudClosestPoints(pt_cloud, needle_points, distance):
         '''Returns a list of lists of point indices in a point cloud that are
@@ -862,6 +1133,7 @@ module ExtensionsGeometry =
         Returns:
           [[int, ...], ...]: a list of lists with the indices of the found points.
         '''
+    
         needles = rhutil.coercegeometry(needle_points, False)
         if isinstance(needles, Rhino.Geometry.PointCloud): needles = needles.AsReadOnlyListOfPoints()
         else: needles = rhutil.coerce3dpointlist(needle_points, True)
@@ -880,7 +1152,15 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<returns>(Point3d) The current 3-D point location</returns>
     static member PointCoordinates(objectId:Guid) : Point3d = //GET
-        failNotImpl () // genreation temp disabled !!
+        let point_geometry = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(point_geometry, Point) then
+            let rc = point_geometry.Location
+            if notNull point then
+                let point = RhinoScriptSyntax.Coerce3dPoint(point)
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, point)
+                Doc.Views.Redraw()
+            rc
     (*
     def PointCoordinates(object_id, point=None):
         '''Returns or modifies the X, Y, and Z coordinates of a point object
@@ -891,6 +1171,7 @@ module ExtensionsGeometry =
           point: If point is not specified, the current 3-D point location
           point: If point is specified, the previous 3-D point location
         '''
+    
         point_geometry = rhutil.coercegeometry(object_id, True)
         if isinstance(point_geometry, Rhino.Geometry.Point):
             rc = point_geometry.Location
@@ -907,7 +1188,15 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)A new 3D point location.</param>
     ///<returns>(unit) void, nothing</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let point_geometry = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(point_geometry, Point) then
+            let rc = point_geometry.Location
+            if notNull point then
+                let point = RhinoScriptSyntax.Coerce3dPoint(point)
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, point)
+                Doc.Views.Redraw()
+            rc
     (*
     def PointCoordinates(object_id, point=None):
         '''Returns or modifies the X, Y, and Z coordinates of a point object
@@ -918,6 +1207,7 @@ module ExtensionsGeometry =
           point: If point is not specified, the current 3-D point location
           point: If point is specified, the previous 3-D point location
         '''
+    
         point_geometry = rhutil.coercegeometry(object_id, True)
         if isinstance(point_geometry, Rhino.Geometry.Point):
             rc = point_geometry.Location
@@ -935,7 +1225,15 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(string) The current text dot font</returns>
     static member TextDotFont(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.FontFace
+            if notNull fontface then
+                let textdot.FontFace = fontface
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotFont(object_id, fontface=None):
         '''Returns or modifies the font of a text dot
@@ -947,6 +1245,7 @@ module ExtensionsGeometry =
           str: If font is specified, the previous text dot font
           None: on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.FontFace
@@ -963,7 +1262,15 @@ module ExtensionsGeometry =
     ///<param name="fontface">(string)New font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.FontFace
+            if notNull fontface then
+                let textdot.FontFace = fontface
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotFont(object_id, fontface=None):
         '''Returns or modifies the font of a text dot
@@ -975,6 +1282,7 @@ module ExtensionsGeometry =
           str: If font is specified, the previous text dot font
           None: on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.FontFace
@@ -992,7 +1300,15 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(float) The current text dot height</returns>
     static member TextDotHeight(objectId:Guid) : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.FontHeight
+            if height && height>0 then
+                let textdot.FontHeight = height
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotHeight(object_id, height=None):
         '''Returns or modifies the font height of a text dot
@@ -1004,6 +1320,7 @@ module ExtensionsGeometry =
           number: If height is specified, the previous text dot height
           None: on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.FontHeight
@@ -1020,7 +1337,15 @@ module ExtensionsGeometry =
     ///<param name="height">(float)New font height</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotHeight(objectId:Guid, height:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.FontHeight
+            if height && height>0 then
+                let textdot.FontHeight = height
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotHeight(object_id, height=None):
         '''Returns or modifies the font height of a text dot
@@ -1032,6 +1357,7 @@ module ExtensionsGeometry =
           number: If height is specified, the previous text dot height
           None: on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.FontHeight
@@ -1049,7 +1375,15 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(Point3d) The current 3-D text dot location</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.Point
+            if notNull point then
+                let textdot.Point = RhinoScriptSyntax.Coerce3dPoint(point)
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotPoint(object_id, point=None):
         '''Returns or modifies the location, or insertion point, on a text dot object
@@ -1061,6 +1395,7 @@ module ExtensionsGeometry =
           point: If point is specified, the previous 3-D text dot location
           None: if not successful, or on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.Point
@@ -1077,7 +1412,15 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)A new 3D point location.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.Point
+            if notNull point then
+                let textdot.Point = RhinoScriptSyntax.Coerce3dPoint(point)
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotPoint(object_id, point=None):
         '''Returns or modifies the location, or insertion point, on a text dot object
@@ -1089,6 +1432,7 @@ module ExtensionsGeometry =
           point: If point is specified, the previous 3-D text dot location
           None: if not successful, or on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.Point
@@ -1106,7 +1450,16 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<returns>(string) The current text dot text</returns>
     static member TextDotText(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.Text
+            if text <> null then
+                if not <| isinstance(text, str) then text <- string(text)
+                let textdot.Text = text
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotText(object_id, text=None):
         '''Returns or modifies the text on a text dot object
@@ -1118,6 +1471,7 @@ module ExtensionsGeometry =
           str: If text is specified, the previous text dot text
           None: if not successful, or on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.Text
@@ -1135,7 +1489,16 @@ module ExtensionsGeometry =
     ///<param name="text">(string)A new string for the dot</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if isinstance(textdot, TextDot) then
+            let rc = textdot.Text
+            if text <> null then
+                if not <| isinstance(text, str) then text <- string(text)
+                let textdot.Text = text
+                let id = RhinoScriptSyntax.CoerceGuid(objectId)
+                Doc.Objects.Replace(id, textdot)
+                Doc.Views.Redraw()
+            rc
     (*
     def TextDotText(object_id, text=None):
         '''Returns or modifies the text on a text dot object
@@ -1147,6 +1510,7 @@ module ExtensionsGeometry =
           str: If text is specified, the previous text dot text
           None: if not successful, or on error
         '''
+    
         textdot = rhutil.coercegeometry(object_id, True)
         if isinstance(textdot, Rhino.Geometry.TextDot):
             rc = textdot.Text
@@ -1165,7 +1529,18 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
+        let fontdata = annotation.Font
+        let rc = fontdata.FaceName
+        if notNull font then
+            let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
+            let annotation.Font = Doc.Fonts.[index]
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectFont(object_id, font=None):
         '''Returns or modifies the font used by a text object
@@ -1177,6 +1552,7 @@ module ExtensionsGeometry =
           str: if a font is specified, the previous font face name
           None: if not successful, or on error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1196,7 +1572,18 @@ module ExtensionsGeometry =
     ///<param name="font">(string)The new font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
+        let fontdata = annotation.Font
+        let rc = fontdata.FaceName
+        if notNull font then
+            let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
+            let annotation.Font = Doc.Fonts.[index]
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectFont(object_id, font=None):
         '''Returns or modifies the font used by a text object
@@ -1208,6 +1595,7 @@ module ExtensionsGeometry =
           str: if a font is specified, the previous font face name
           None: if not successful, or on error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1228,7 +1616,16 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(float) The current text height</returns>
     static member TextObjectHeight(objectId:Guid) : float = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
+        let rc = annotation.TextHeight
+        if notNull height then
+            let annotation.TextHeight = height
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectHeight(object_id, height=None):
         '''Returns or modifies the height of a text object
@@ -1240,6 +1637,7 @@ module ExtensionsGeometry =
           number: if height is specified, the previous text height
           None: if not successful, or on error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1257,7 +1655,16 @@ module ExtensionsGeometry =
     ///<param name="height">(float)The new text height.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
+        let rc = annotation.TextHeight
+        if notNull height then
+            let annotation.TextHeight = height
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectHeight(object_id, height=None):
         '''Returns or modifies the height of a text object
@@ -1269,6 +1676,7 @@ module ExtensionsGeometry =
           number: if height is specified, the previous text height
           None: if not successful, or on error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1287,7 +1695,16 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Plane) The current plane</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
+        let rc = annotation.Plane
+        if notNull plane then
+            let annotation.Plane = RhinoScriptSyntax.CoercePlane(plane)
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectPlane(object_id, plane=None):
         '''Returns or modifies the plane used by a text object
@@ -1299,6 +1716,7 @@ module ExtensionsGeometry =
           plane: if a plane is specified, the previous plane if successful
           None: if not successful, or on Error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1316,7 +1734,16 @@ module ExtensionsGeometry =
     ///<param name="plane">(Plane)The new text object plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
+        let rc = annotation.Plane
+        if notNull plane then
+            let annotation.Plane = RhinoScriptSyntax.CoercePlane(plane)
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectPlane(object_id, plane=None):
         '''Returns or modifies the plane used by a text object
@@ -1328,6 +1755,7 @@ module ExtensionsGeometry =
           plane: if a plane is specified, the previous plane if successful
           None: if not successful, or on Error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1346,7 +1774,18 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Point3d) The 3D point identifying the current location</returns>
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
-        failNotImpl () // genreation temp disabled !!
+        let text = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(text, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
+        let plane = text.Plane
+        let rc = plane.Origin
+        if notNull point then
+            let plane.Origin = RhinoScriptSyntax.Coerce3dPoint(point)
+            let text.Plane = plane
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, text)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectPoint(object_id, point=None):
         '''Returns or modifies the location of a text object
@@ -1358,6 +1797,7 @@ module ExtensionsGeometry =
           point: if point is specified, the 3D point identifying the previous location
           None: if not successful, or on Error
         '''
+    
         text = rhutil.coercegeometry(object_id, True)
         if not isinstance(text, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1377,7 +1817,18 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)The new text object location</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPoint(objectId:Guid, point:Point3d) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let text = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(text, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
+        let plane = text.Plane
+        let rc = plane.Origin
+        if notNull point then
+            let plane.Origin = RhinoScriptSyntax.Coerce3dPoint(point)
+            let text.Plane = plane
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, text)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectPoint(object_id, point=None):
         '''Returns or modifies the location of a text object
@@ -1389,6 +1840,7 @@ module ExtensionsGeometry =
           point: if point is specified, the 3D point identifying the previous location
           None: if not successful, or on Error
         '''
+    
         text = rhutil.coercegeometry(object_id, True)
         if not isinstance(text, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1412,7 +1864,21 @@ module ExtensionsGeometry =
     ///  1 = Bold
     ///  2 = Italic</returns>
     static member TextObjectStyle(objectId:Guid) : int = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
+        let fontdata = annotation.Font
+        if fontdata = null then failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
+        let rc = 0
+        if fontdata.Bold then rc +<- 1
+        if fontdata.Italic then rc +<- 2
+        if style <> null && style <> rc then
+            let index = Doc.Fonts.FindOrCreate( fontdata.FaceName, (style&1) = 1, (style&2) = 2 )
+            let annotation.Font = Doc.Fonts.[index]
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectStyle(object_id, style=None):
         '''Returns or modifies the font style of a text object
@@ -1427,6 +1893,7 @@ module ExtensionsGeometry =
           number: if style is specified, the previous font style
           None: if not successful, or on Error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1452,7 +1919,21 @@ module ExtensionsGeometry =
     ///  2 = Italic</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
+        let fontdata = annotation.Font
+        if fontdata = null then failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
+        let rc = 0
+        if fontdata.Bold then rc +<- 1
+        if fontdata.Italic then rc +<- 2
+        if style <> null && style <> rc then
+            let index = Doc.Fonts.FindOrCreate( fontdata.FaceName, (style&1) = 1, (style&2) = 2 )
+            let annotation.Font = Doc.Fonts.[index]
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectStyle(object_id, style=None):
         '''Returns or modifies the font style of a text object
@@ -1467,6 +1948,7 @@ module ExtensionsGeometry =
           number: if style is specified, the previous font style
           None: if not successful, or on Error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1490,7 +1972,17 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value</returns>
     static member TextObjectText(objectId:Guid) : string = //GET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
+        let rc = annotation.Text
+        if notNull text then
+            if not <| isinstance(text, str) then text <- string(text)
+            let annotation.Text = text
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectText(object_id, text=None):
         '''Returns or modifies the text string of a text object.
@@ -1502,6 +1994,7 @@ module ExtensionsGeometry =
           str: if text is specified, the previous string value if successful
           None: if not successful, or on error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
@@ -1520,7 +2013,17 @@ module ExtensionsGeometry =
     ///<param name="text">(string)A new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
-        failNotImpl () // genreation temp disabled !!
+        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
+        if not <| isinstance(annotation, TextEntity) then
+            failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
+        let rc = annotation.Text
+        if notNull text then
+            if not <| isinstance(text, str) then text <- string(text)
+            let annotation.Text = text
+            let id = RhinoScriptSyntax.CoerceGuid(objectId)
+            Doc.Objects.Replace(id, annotation)
+            Doc.Views.Redraw()
+        rc
     (*
     def TextObjectText(object_id, text=None):
         '''Returns or modifies the text string of a text object.
@@ -1532,6 +2035,7 @@ module ExtensionsGeometry =
           str: if text is specified, the previous string value if successful
           None: if not successful, or on error
         '''
+    
         annotation = rhutil.coercegeometry(object_id, True)
         if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
