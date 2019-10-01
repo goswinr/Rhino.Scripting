@@ -150,9 +150,12 @@ type RhinoScriptSyntax private () = // no constructor?
                 for r,x in Seq.indexed xs do
                     t.[c,r] <- x
             t
-        | :? array2D  as xss -> // TODO verify row, column order !!
+
+        | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
             let mutable t=Transform()           
+            xss|> Array2D.iteri (fun i j x -> t.[i,j]<-x)
             t
+
         | _ -> failwithf "*** could not coercexform %A can not be converted to a Transformation Matrix" xform
     
     ///<summary>attempt to get a Guids from input</summary>

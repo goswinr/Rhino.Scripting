@@ -113,14 +113,34 @@ module ExtensionsDimension =
 
     [<EXT>]  
     ///<summary>Adds a leader to the document. Leader objects are planar.
-    ///  The 3D points passed will define th eplane if no Plane given</summary>
+    ///  The 3D points passed will define the plane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text </param>
     ///<param name="plane">(string) Optional, Default Value: <c>defined by points arg</c>
     ///  If points will be projected to this plane</param>    
     ///<returns>(Guid) identifier of the new leader on success</returns>
     static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =
-        failNotImpl () //FIXME not done in 2018
+        let points2d = ResizeArray()
+        let plane0 = 
+            if plane.IsValid then plane 
+            else 
+                let ps=ResizeArray(points)
+                let o = ps.GetItem(-2)
+                let mutable x = ps.GetItem(-1)-o
+                let mutable y = ps.[0]-ps.[1]
+                if y.Z < 0.0 then y <- -y
+                if y.Y < 0.0 then y <- -y
+                if x.X < 0.0 then x <- -x
+                Plane(o,x,y)
+                |> fun pl-> 
+                    if not pl.IsValid then failwithf "AddLeader failed to find plane.  points %A, text:%s" points text 
+                    pl
+
+        for point in points do
+            let cprc, s, t = plane0.ClosestParameter( point )
+            if not cprc then  failwithf "AddLeader failed.  points %A, text:%s, plane %A" points text plane
+            points2d.Add( Rhino.Geometry.Point2d(s,t) )
+        Doc.Objects.AddLeader(text, plane0, points2d)
     (*
     def AddLeader(points, view_or_plane=None, text=None):
         '''Adds a leader to the document. Leader objects are planar.

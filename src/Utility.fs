@@ -578,11 +578,12 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Suspends execution of a running script for the specified interval</summary>
-    ///<param name="milliseconds">(float) Thousands of a second</param>
+    ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI</summary>
+    ///<param name="milliseconds">(int) Thousands of a second</param>
     ///<returns>(unit) </returns>
-    static member Sleep(milliseconds:float) : unit =
-        failNotImpl () // not done in 2018
+    static member Sleep(milliseconds:int) : unit =
+        Threading.Thread.Sleep(milliseconds)
+        RhinoApp.Wait()
     (*
     def Sleep(milliseconds):
         '''Suspends execution of a running script for the specified interval
@@ -599,12 +600,13 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Sorts list of points so they will be connected in a "reasonable" polyline order</summary>
     ///<param name="points">(Point3d seq) The points to sort</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///Minimum distance between points. Points that fall within this tolerance
     ///  will be discarded. If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(Point3d array) of sorted 3D points</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
-        Point3d.SortAndCullPointList(points, tolerance)
+        let tol = max RhinoMath.ZeroTolerance tolerance
+        Point3d.SortAndCullPointList(points, tol)
     (*
     def SortPointList(points, tolerance=None):
         '''Sorts list of points so they will be connected in a "reasonable" polyline order
