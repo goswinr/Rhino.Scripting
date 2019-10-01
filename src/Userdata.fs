@@ -31,7 +31,7 @@ module ExtensionsUserdata =
         Returns:
           bool: True or False indicating success or failure
         '''
-        return scriptcontext.doc.Strings.Delete(section, entry)
+        return Doc.Strings.Delete(section, entry)
     *)
 
 
@@ -51,7 +51,7 @@ module ExtensionsUserdata =
         Returns:
           number: the number of user data strings in the current document
         '''
-        return scriptcontext.doc.Strings.DocumentDataCount
+        return Doc.Strings.DocumentDataCount
     *)
 
 
@@ -66,21 +66,30 @@ module ExtensionsUserdata =
         Returns:
           number: the number of user text strings in the current document
         '''
-        return scriptcontext.doc.Strings.DocumentUserTextCount
+        return Doc.Strings.DocumentUserTextCount
     *)
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Returns a user data item from the current document</summary>
     ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
-    ///Section name. If omitted, all section names are returned</param>
-    ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
-    ///Entry name. If omitted, all entry names for section are returned</param>
-    ///<returns>(string seq) of all section names if section name is omitted
+    ///Section name. If omitted, all section names are returned</param
+    ///<returns>(string array) of all section names if section name is omitted
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
-    static member GetDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
-        Doc.Strings.GetSectionNames()
+    static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : string [] =
+        if notNull section then
+            Doc.Strings.GetSectionNames()        
+        else 
+            Doc.Strings.GetEntryNames(section)
+    
+    [<EXT>]
+    ///<summary>Returns a user data item  entry from the current document</summary>
+    ///<param name="section">(string) Section name.</param>
+    ///<param name="entry">(string) Entry name.</param>
+    ///<returns>(string) the entry value</returns>
+    static member GetDocumentDataEntry(section:string, entry:string) : string =
+        Doc.Strings.GetValue(section, entry)
+    
     (*
     def GetDocumentData(section=None, entry=None):
         '''Returns a user data item from the current document
@@ -94,24 +103,32 @@ module ExtensionsUserdata =
           None: if not successful
         '''
         if section is None:
-            rc = scriptcontext.doc.Strings.GetSectionNames()
+            rc = Doc.Strings.GetSectionNames()
             return list(rc) if rc else None
         if entry is None:
-            rc = scriptcontext.doc.Strings.GetEntryNames(section)
+            rc = Doc.Strings.GetEntryNames(section)
             return list(rc) if rc else None
-        val = scriptcontext.doc.Strings.GetValue(section, entry)
+        val = Doc.Strings.GetValue(section, entry)
         return val if val else None
     *)
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Returns user text stored in the document</summary>
-    ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
-    ///Key to use for retrieving user text. If empty, all keys are returned</param>
+    ///<param name="key">(string) Key to use for retrieving user text.</param>
     ///<returns>(string) If key is specified, then the associated value .</returns>
-    static member GetDocumentUserText([<OPT;DEF(null:string)>]key:string) : string =
+    static member GetDocumentUserText(key:string) : string =
         Doc.Strings.GetValue(key)
+
+    [<EXT>]
+    ///<summary>Returns all document user text keys</summary>
+    ///<returns>(string array) all document user text keys </returns>
+    static member GetDocumentUserTextKeys() : string array =
+        [| for i=0 to Doc.Strings.Count-1  do 
+              let k = Doc.Strings.GetKey(i) 
+              if not <| k.Contains "\\" then  yield k |]
+
+        
     (*
     def GetDocumentUserText(key=None):
         '''Returns user text stored in the document
@@ -123,24 +140,37 @@ module ExtensionsUserdata =
           None: If not successful, or on error.
         '''
         if key: 
-          val =  scriptcontext.doc.Strings.GetValue(key)
+          val =  Doc.Strings.GetValue(key)
           return val if val else None
         #todo: leaky abstraction: "\\" logic should be inside doc.Strings implementation
-        keys = [scriptcontext.doc.Strings.GetKey(i) for i in range(scriptcontext.doc.Strings.Count) if not "\\" in scriptcontext.doc.Strings.GetKey(i)]
+        keys = [Doc.Strings.GetKey(i) for i in range(Doc.Strings.Count) if not "\\" in Doc.Strings.GetKey(i)]
         return keys if keys else None
     *)
 
-
     [<EXT>]
-    //(FIXME) VarOutTypes
+    ///<summary>Returns all user text keys stored on an object.</summary>
+    ///<param name="objectId">(Guid) The object's identifies</param>
+    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///Location on the object to retrieve the user text</param>
+    ///<returns>(string array) all keys</returns>
+    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string array =
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if attachedToGeometry then
+            let uss = obj.Geometry.GetUserStrings()
+            [| for i=0 to uss.Count-1 do yield uss.GetKey(i)|]  
+        else
+            let uss = obj.Attributes.GetUserStrings()
+            [| for i=0 to uss.Count-1 do yield uss.GetKey(i)|]
+            
+    
+    [<EXT>]    
     ///<summary>Returns user text stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<param name="key">(string) Optional, Default Value: <c>null:string</c>
-    ///The key name. If omitted all key names for an object are returned</param>
+    ///<param name="key">The key name.</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value</returns>
-    static member GetUserText(objectId:Guid, [<OPT;DEF(null:string)>]key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
+    static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             obj.Geometry.GetUserString(key)
@@ -179,7 +209,7 @@ module ExtensionsUserdata =
         Returns:
           bool: True or False indicating the presence of Script user data
         '''
-        return scriptcontext.doc.Strings.DocumentDataCount > 0
+        return Doc.Strings.DocumentDataCount > 0
     *)
 
 
@@ -194,7 +224,7 @@ module ExtensionsUserdata =
         Returns:
           bool: True or False indicating the presence of Script user text
         '''
-        return scriptcontext.doc.Strings.DocumentUserTextCount > 0
+        return Doc.Strings.DocumentUserTextCount > 0
     *)
 
 
@@ -206,7 +236,7 @@ module ExtensionsUserdata =
     ///  1 = attribute user text
     ///  2 = geometry user text
     ///  3 = both attribute and geometry user text</returns>
-    static member IsUserText(objectId:Guid) : float =
+    static member IsUserText(objectId:Guid) : int =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable rc = 0
         if obj.Attributes.UserStringCount > 0 then  rc <- rc ||| 1
@@ -250,7 +280,7 @@ module ExtensionsUserdata =
         Returns:
           str: The previous value
         '''
-        val = scriptcontext.doc.Strings.SetString(section, entry, value)
+        val = Doc.Strings.SetString(section, entry, value)
         return val if val else None
     *)
 
@@ -261,8 +291,8 @@ module ExtensionsUserdata =
     ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
     ///The string value to set. If omitted the key/value pair
     ///  specified by key will be deleted</param>
-    ///<returns>(bool) True or False indicating success</returns>
-    static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : bool =
+    ///<returns>(unit) void, nothing</returns>
+    static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : unit =
         Doc.Strings.SetString(key,value) |> ignore
     (*
     def SetDocumentUserText(key, value=None):
@@ -274,8 +304,8 @@ module ExtensionsUserdata =
         Returns:
           bool: True or False indicating success
         '''
-        if value: scriptcontext.doc.Strings.SetString(key,value)
-        else: scriptcontext.doc.Strings.Delete(key)
+        if value: Doc.Strings.SetString(key,value)
+        else: Doc.Strings.Delete(key)
         return True
     *)
 
@@ -289,14 +319,14 @@ module ExtensionsUserdata =
     ///  specified by key will be deleted</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to store the user text</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
-    static member SetUserText(objectId:string, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : bool =
+    ///<returns>(unit) void, nothing</returns>
+    static member SetUserText(objectId:string, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
             obj.Geometry.SetUserString(key, value)|> ignore
         else
             obj.Attributes.SetUserString(key, value)|> ignore
-        objectId
+        
     (*
     def SetUserText(object_id, key, value=None, attach_to_geometry=False):
         '''Sets or removes user text stored on an object.

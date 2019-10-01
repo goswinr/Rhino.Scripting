@@ -93,7 +93,7 @@ module ExtensionsGeometry =
         failNotImpl () // genreation temp disabled !!
     (*
     def AddPictureFrame(plane, filename, width=0.0, height=0.0, self_illumination=True, embed=False, use_alpha=False, make_mesh=False):
-        '''Creates a picture frame and adds it to the document.
+        '''Creates a picture frame and adds it to the document.'''
       Parameters:
         plane (plane): The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.
         filename (str): The path to a bitmap or image file.
@@ -108,7 +108,7 @@ module ExtensionsGeometry =
         None: on failure
       '''
       plane = rhutil.coerceplane(plane, True)
-      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception('\"{0}\" does not exist or is not a file name'.format(filename))
+      if type(filename) is not System.String or not System.IO.File.Exists(filename): raise Exception(' does not exist or is not a file name'.format(filename))
       rc = scriptcontext.doc.Objects.AddPictureFrame(plane, filename, make_mesh, width, height, self_illumination, embed) 
       if rc==System.Guid.Empty: raise Exception("unable to add picture frame to document")
       scriptcontext.doc.Views.Redraw()
