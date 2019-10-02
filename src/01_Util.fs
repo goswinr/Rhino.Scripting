@@ -83,14 +83,15 @@ module internal Util =
     let inline t2 (a,b,c) = b
     let inline t3 (a,b,c) = c    
 
-    /// a typefull ignore function that shows errors if type changes
-    let inline ignoreString (s:string) = ()
-    /// a typefull ignore function that shows errors if type changes
-    let inline ignoreGuid   (g:Guid) = ()
+    // a typefull ignore function that shows errors if type changes
+    //let inline ignoreString (s:string) = ()
+    // a typefull ignore function that shows errors if type changes
+    //let inline ignoreGuid   (g:Guid) = ()
+
 
 
 module UtilMath =
-    let internal Rand = new System.Random () 
+    let internal Rand = System.Random () 
 
     ///allows ints to be multiplied by floats
     ///int(round(float(i) * f))
