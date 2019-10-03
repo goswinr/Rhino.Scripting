@@ -980,7 +980,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The grid state to set. If omitted, the current grid display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ShowGrid(view:string, [<OPT;DEF(null:bool)>]show:bool) : unit = //SET
+    static member ShowGrid(view:string, [<OPT;DEF(true:bool)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ShowGrid(view=None, show=None):
@@ -1030,7 +1030,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set. If omitted, the current grid axes display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ShowGridAxes(view:string, [<OPT;DEF(null:bool)>]show:bool) : unit = //SET
+    static member ShowGridAxes(view:string, [<OPT;DEF(true:bool)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ShowGridAxes(view=None, show=None):
@@ -1119,7 +1119,7 @@ module ExtensionsView =
     ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ShowWorldAxes(view:string, [<OPT;DEF(null:bool)>]show:bool) : unit = //SET
+    static member ShowWorldAxes(view:string, [<OPT;DEF(true:bool)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def ShowWorldAxes(view=None, show=None):
@@ -2058,7 +2058,7 @@ module ExtensionsView =
     ///  active view is used</param>
     ///<param name="grayscale">(bool)Display the wallpaper in gray(True) or color (False)</param>
     ///<returns>(unit) void, nothing</returns>
-    static member WallpaperGrayScale(view:string, [<OPT;DEF(null:bool)>]grayscale:bool) : unit = //SET
+    static member WallpaperGrayScale(view:string, [<OPT;DEF(true:bool)>]grayscale:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def WallpaperGrayScale(view=None, grayscale=None):
@@ -2113,7 +2113,7 @@ module ExtensionsView =
     ///  active view is used</param>
     ///<param name="hidden">(bool)Show or hide the wallpaper</param>
     ///<returns>(unit) void, nothing</returns>
-    static member WallpaperHidden(view:string, [<OPT;DEF(null:bool)>]hidden:bool) : unit = //SET
+    static member WallpaperHidden(view:string, [<OPT;DEF(true:bool)>]hidden:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
     (*
     def WallpaperHidden(view=None, hidden=None):
