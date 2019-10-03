@@ -23,6 +23,7 @@
     <Compile Include="01_Util.fs" />
     <Compile Include="02_TypeExtensions.fs" />
     <Compile Include="04_ComputationalExpressions.fs" />
+    <Compile Include="05_DefaultDict.fs" />
     <Compile Include="13_RhinoTypeExtensions.fs" />
     <Compile Include="19_ActiveDoc.fs" />
     <Compile Include="50_RhinoScriptingSyntax.fs" />

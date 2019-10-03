@@ -20,33 +20,33 @@ module TypeExtensions =
         
         /// get a value and remove it from Dictionary, like *.pop() in Python 
         [<EXT>] 
-        member inline d.PopValue k  =
+        member inline d.Pop k  =
             let v= d.[k]
             d.Remove(k)|> ignore
             v
 
     [<EXT>]       
     type Int32 with  
-        [<EXT>] member inline x.AsDouble = float(x)
-        [<EXT>] member inline x.AsByte = byte(x)
+        [<EXT>] member inline x.ToDouble = float(x)
+        [<EXT>] member inline x.ToByte = byte(x)
 
     [<EXT>]       
     type Byte with  
-        [<EXT>] member inline x.AsDouble = float(x)
-        [<EXT>] member inline x.AsInt = int(x)
+        [<EXT>] member inline x.ToDouble = float(x)
+        [<EXT>] member inline x.ToInt = int(x)
 
     [<EXT>]       
     type Double with  
         ///int(round(x)) converts int to float
-        [<EXT>] member inline x.AsInt = int(round(x))
+        [<EXT>] member inline x.ToInt = int(round(x))
 
-        [<EXT>] member x.AsNiceString = Util.floatToString x
+        [<EXT>] member x.ToNiceString = Util.floatToString x
         
         
 
     [<EXT>]       
     type Single with  
-        [<EXT>] member x.AsNiceString = Util.singleToString x
+        [<EXT>] member x.ToNiceString = Util.singleToString x
 
     [<EXT>]
     type Drawing.Color with

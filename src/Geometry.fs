@@ -617,8 +617,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given id is a clipping plane</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
-        let cp = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        cp :? ClippingPlaneSurface
+        let pc = RhinoScriptSyntax.TryCoerceGeometry(objectId)
+        if pc.IsNone then false else pc.Value :? ClippingPlaneSurface
     (*
     def IsClippingPlane(objectid):
         '''Verifies that an object is a clipping plane object
@@ -660,7 +660,7 @@ module ExtensionsGeometry =
     ///<returns>(bool) True if the object with a given id is a point cloud</returns>
     static member IsPointCloud(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        if p.IsNone then false else pc.Value :? PointCloud
+        if pc.IsNone then false else pc.Value :? PointCloud
     (*
     def IsPointCloud(objectid):
         '''Verifies an object is a point cloud object.

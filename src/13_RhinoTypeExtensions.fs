@@ -11,7 +11,7 @@ module TypeExtensionsRhino =
     [<Extension>]       
     type Point3d with  
         ///Like the ToString function but with appropiate precision formating
-        member pt.AsNiceString =
+        member pt.ToNiceString =
             if pt = Point3d.Unset then  
                 "Point3d.Unset"
             else
@@ -21,7 +21,7 @@ module TypeExtensionsRhino =
     [<Extension>]       
     type Point3f with  
         ///Like the ToString function but with appropiate precision formating
-        member pt.AsNiceString =
+        member pt.ToNiceString =
             if pt = Point3f.Unset then  
                 "Point3f.Unset"
             else
@@ -31,7 +31,7 @@ module TypeExtensionsRhino =
     [<Extension>]       
     type Vector3d with  
         ///Like the ToString function but with appropiate precision formating
-        member v.AsNiceString =
+        member v.ToNiceString =
             if v = Vector3d.Unset then  
                 "Vector3d.Unset"
             else
