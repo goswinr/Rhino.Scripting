@@ -966,8 +966,11 @@ module ExtensionsGeometry =
     static member internal SimplifyPointCloudKNeighbors()  =
         ()
     (*
-    def __simplifyPointCloudKNeighbors(result, amount):
-        ''''''
+    def __simplify_PointCloudKNeighbors(result, amount):
+    if amount == 1:
+        return [item[0] for item in result]
+    else:
+        return [list(item) for item in result]
     *)
 
 
@@ -1040,8 +1043,8 @@ module ExtensionsGeometry =
     static member internal SimplifyPointCloudClosestPoints()  =
         ()
     (*
-    def __simplifyPointCloudClosestPoints(result):
-        ''''''
+    def __simplify_PointCloudClosestPoints(result):
+    return [list(item) for item in result]
     *)
 
 
