@@ -1430,7 +1430,12 @@ module ExtensionsGeometry =
         Doc.Objects.Replace(id, annotation) |> ignore
         Doc.Views.Redraw()
         
-        
+        let f = DocObjects.Font(font) 
+        if isNull f then  failwithf "set TextObjectFont failed.  font:'%A'" font        
+        annotation.Font <- f
+        Doc.Views.Redraw()
+
+
     (*
     def TextObjectFont(objectid, font=None):
         '''Returns or modifies the font used by a text object
