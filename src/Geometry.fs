@@ -980,27 +980,15 @@ module ExtensionsGeometry =
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud.</param>
     ///<param name="amount">(int) Optional, Default Value: <c>1</c>
     ///The amount of required closest points. Defaults to 1.</param>
-    ///<returns>(int seq) a list of indices of the found points, if amount equals 1.
-    ///  [[int, ...], ...]: nested lists with amount items within a list, with the indices of the found points.</returns>
-    static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : int seq =
-        let needles = RhinoScriptSyntax.CoerceGeometry(needlePoints)
-        if needles :? PointCloud then needles <- needles.AsReadOnlyListOfPoints()
-        else  needles <- RhinoScriptSyntax.Coerce3dPointList(needlePoints)
-        let pcgeom = RhinoScriptSyntax.CoerceGeometry(ptcloud)
-        if pcgeom :? PointCloud then
-            if Seq.length(needles) > 100 then
-                let search = RTree.PointCloudKNeighbors
-            else 
-                search <- Collections.RhinoList.PointCloudKNeighbors
-            __simplifyPointCloudKNeighbors(search(pcgeom, needles, amount), amount)
-        if Seq.length(needles) > 100 then
-            search <- RTree.Point3dKNeighbors
+    ///<returns>(seq<int array>) nested lists with amount items within a list, with the indices of the found points.</returns>
+    static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
+        if Seq.length(needlePoints) > 100 then
+            RTree.Point3dKNeighbors(ptCloud, needlePoints, amount)
         else 
-            search <- Collections.RhinoList.Point3dKNeighbors
-        if isinstance(ptcloud, Collections.Generic.IEnumerable.[Point3d]) then
-            __simplifyPointCloudKNeighbors(search(ptcloud, needles, amount), amount)
-        let pts = RhinoScriptSyntax.Coerce3dPointList(ptcloud)
-        __simplifyPointCloudKNeighbors(search(pts, needles, amount), amount)
+            Collections.RhinoList.Point3dKNeighbors(ptCloud, needlePoints, amount)
+        
+        
+        
     (*
     def PointCloudKNeighbors(ptcloud, needlepoints, amount=1):
         '''Returns amount indices of points in a point cloud that are near needlepoints.
@@ -1038,15 +1026,6 @@ module ExtensionsGeometry =
     *)
 
 
-    [<EXT>]
-    
-    static member internal SimplifyPointCloudClosestPoints()  =
-        ()
-    (*
-    def __simplify_PointCloudClosestPoints(result):
-    return [list(item) for item in result]
-    *)
-
 
     [<EXT>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
@@ -1054,18 +1033,11 @@ module ExtensionsGeometry =
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points.</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud.</param>
     ///<param name="distance">(float) The included limit for listing points.</param>
-    ///<returns>(int seq) a list of lists with the indices of the found points.</returns>
-    static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : int seq =
-        let needles = RhinoScriptSyntax.CoerceGeometry(needlePoints)
-        if needles :? PointCloud then needles <- needles.AsReadOnlyListOfPoints()
-        else  needles <- RhinoScriptSyntax.Coerce3dPointList(needlePoints)
-        let pcgeom = RhinoScriptSyntax.CoerceGeometry(ptcloud)
-        if pcgeom :? PointCloud then
-            __simplifyPointCloudClosestPoints(RTree.PointCloudClosestPoints(pcgeom, needles, distance))
-        if isinstance(ptcloud, Collections.Generic.IEnumerable.[Point3d]) then
-            __simplifyPointCloudClosestPoints(RTree.Point3dClosestPoints(ptcloud, needles, distance))
-        let pts = RhinoScriptSyntax.Coerce3dPointList(ptcloud)
-        __simplifyPointCloudClosestPoints(RTree.Point3dClosestPoints(pts, needles, distance))
+    ///<returns>(seq<int array>) a seq of arrays with the indices of the found points.</returns>
+    static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
+        RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
+        
+
     (*
     def PointCloudClosestPoints(ptcloud, needlepoints, distance):
         '''Returns a list of lists of point indices in a point cloud that are
@@ -1096,15 +1068,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<returns>(Point3d) The current 3-D point location</returns>
     static member PointCoordinates(objectId:Guid) : Point3d = //GET
-        let pointgeometry = RhinoScriptSyntax.CoercePoint(objectId)
-        if pointgeometry :? Point then
-            let rc = pointgeometry.Location
-            if notNull point then
-                let point = RhinoScriptSyntax.Coerce3dPoint(point)
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, point)
-                Doc.Views.Redraw()
-            rc
+        RhinoScriptSyntax.Coerce3dPoint(objectId)
+
     (*
     def PointCoordinates(objectid, point=None):
         '''Returns or modifies the X, Y, and Z coordinates of a point object
@@ -1132,15 +1097,10 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)A new 3D point location.</param>
     ///<returns>(unit) void, nothing</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
-        let pointgeometry = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if pointgeometry :? Point then
-            let rc = pointgeometry.Location
-            if notNull point then
-                let point = RhinoScriptSyntax.Coerce3dPoint(point)
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, point)
-                Doc.Views.Redraw()
-            rc
+        let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
+        if not <| Doc.Objects.Replace(objectId, pt) then failwithf "PointCoordinates failed to change object %A to %A " objectId point
+        Doc.Views.Redraw()
+          
     (*
     def PointCoordinates(objectid, point=None):
         '''Returns or modifies the X, Y, and Z coordinates of a point object
@@ -1169,15 +1129,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(string) The current text dot font</returns>
     static member TextDotFont(objectId:Guid) : string = //GET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.FontFace
-            if notNull fontface then
-                let textdot.FontFace = fontface
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontFace
     (*
     def TextDotFont(objectid, fontface=None):
         '''Returns or modifies the font of a text dot
@@ -1206,16 +1158,12 @@ module ExtensionsGeometry =
     ///<param name="fontface">(string)New font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.FontFace
-            if notNull fontface then
-                let textdot.FontFace = fontface
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
-    (*
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+        textdot.FontFace <-  fontface
+        if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotFont failed to change object %A to %A " objectId fontface
+        Doc.Views.Redraw()
+        (*
+        
     def TextDotFont(objectid, fontface=None):
         '''Returns or modifies the font of a text dot
         Parameters:
@@ -1242,17 +1190,9 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Returns the font height of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<returns>(float) The current text dot height</returns>
-    static member TextDotHeight(objectId:Guid) : float = //GET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.FontHeight
-            if height && height>0 then
-                let textdot.FontHeight = height
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
+    ///<returns>(int) The current text dot height</returns>
+    static member TextDotHeight(objectId:Guid) : int = //GET
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontHeight
     (*
     def TextDotHeight(objectid, height=None):
         '''Returns or modifies the font height of a text dot
@@ -1278,19 +1218,15 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the font height of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="height">(float)New font height</param>
+    ///<param name="height">(int)New font height</param>
     ///<returns>(unit) void, nothing</returns>
-    static member TextDotHeight(objectId:Guid, height:float) : unit = //SET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.FontHeight
-            if height && height>0 then
-                let textdot.FontHeight = height
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
-    (*
+    static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+        textdot.FontHeight <- height
+        if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotHeight failed to change object %A to %A " objectId height
+        Doc.Views.Redraw()
+        
+        (*
     def TextDotHeight(objectid, height=None):
         '''Returns or modifies the font height of a text dot
         Parameters:
@@ -1319,15 +1255,8 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(Point3d) The current 3-D text dot location</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.Point
-            if notNull point then
-                let textdot.Point = RhinoScriptSyntax.Coerce3dPoint(point)
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).Point
+        
     (*
     def TextDotPoint(objectid, point=None):
         '''Returns or modifies the location, or insertion point, on a text dot object
@@ -1356,15 +1285,12 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)A new 3D point location.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.Point
-            if notNull point then
-                let textdot.Point = RhinoScriptSyntax.Coerce3dPoint(point)
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+        textdot.Point <-  point
+        if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotPoint failed to change object %A to %A " objectId point
+        Doc.Views.Redraw()
+        
+        
     (*
     def TextDotPoint(objectid, point=None):
         '''Returns or modifies the location, or insertion point, on a text dot object
@@ -1394,16 +1320,9 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<returns>(string) The current text dot text</returns>
     static member TextDotText(objectId:Guid) : string = //GET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.Text
-            if text |> notNull then
-                if not <| text :? str then text <- string(text)
-                let textdot.Text = text
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).Text
+
+
     (*
     def TextDotText(objectid, text=None):
         '''Returns or modifies the text on a text dot object
@@ -1433,16 +1352,12 @@ module ExtensionsGeometry =
     ///<param name="text">(string)A new string for the dot</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
-        let textdot = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if textdot :? TextDot then
-            let rc = textdot.Text
-            if text |> notNull then
-                if not <| text :? str then text <- string(text)
-                let textdot.Text = text
-                let id = RhinoScriptSyntax.CoerceGuid(objectId)
-                Doc.Objects.Replace(id, textdot)
-                Doc.Views.Redraw()
-            rc
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+        textdot.Text <-  text
+        if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotText failed to change object %A to %A " objectId text
+        Doc.Views.Redraw()
+        
+        
     (*
     def TextDotText(objectid, text=None):
         '''Returns or modifies the text on a text dot object
@@ -1473,18 +1388,9 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
-        let fontdata = annotation.Font
-        let rc = fontdata.FaceName
-        if notNull font then
-            let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
-            let annotation.Font = Doc.Fonts.[index]
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.FaceName
+
+
     (*
     def TextObjectFont(objectid, font=None):
         '''Returns or modifies the font used by a text object
@@ -1516,18 +1422,20 @@ module ExtensionsGeometry =
     ///<param name="font">(string)The new font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
-        let fontdata = annotation.Font
-        let rc = fontdata.FaceName
-        if notNull font then
-            let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
-            let annotation.Font = Doc.Fonts.[index]
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        let f = DocObjects.Font(font) 
+        if isNull f then  failwithf "set TextObjectFont failed.  font:'%A'" font        
+        annotation.Font <- f
+        Doc.Views.Redraw()
+
+        (*
+        let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
+        annotation.Font <-  Doc.Fonts.[index]
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        Doc.Objects.Replace(id, annotation)
+        Doc.Views.Redraw()
+        *)
+        
     (*
     def TextObjectFont(objectid, font=None):
         '''Returns or modifies the font used by a text object

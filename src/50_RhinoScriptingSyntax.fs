@@ -374,7 +374,28 @@ type RhinoScriptSyntax private () = // no constructor?
         match RhinoScriptSyntax.CoerceGeometry id with
         | :?  PointCloud as a -> a
         |_ -> failwithf "*** could not CoercePointCloud: %A =" id
-        
+                
+
+    ///<summary>attempt to get TextDot Geometry</summary>
+    ///<param name="id">(guid): id of TextDot object</param> 
+    ///<returns>a Geometry.TextDot. Fails on bad input.</returns>
+    static member CoerceTextDot (id:'id) : TextDot =
+        match RhinoScriptSyntax.CoerceGeometry id with
+        | :?  TextDot as a -> a
+        |_ -> failwithf "*** could not TextDot: %A =" id
+
+
+    ///<summary>attempt to get TextEntity Geometry</summary>
+    ///<param name="id">(guid): id of TextEntity object</param> 
+    ///<returns>a Geometry.TextEntity. Fails on bad input.</returns>
+    static member CoerceTextEntity (id:'id) : TextEntity =
+        match RhinoScriptSyntax.CoerceGeometry id with
+        | :?  TextEntity as a -> a
+        |_ -> failwithf "*** could not TextEntity: %A =" id
+
+
+    //------try----
+
 
     ///<summary>attempt to get GeometryBase class from given Guid</summary>
     ///<param name="id">geometry identifier (Guid)</param>
