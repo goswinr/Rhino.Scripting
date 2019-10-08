@@ -1423,18 +1423,13 @@ module ExtensionsGeometry =
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let f = DocObjects.Font(font) 
-        if isNull f then  failwithf "set TextObjectFont failed.  font:'%A'" font        
-        annotation.Font <- f
-        Doc.Views.Redraw()
-
-        (*
+        let fontdata = annotation.Font
         let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
         annotation.Font <-  Doc.Fonts.[index]
         let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        Doc.Objects.Replace(id, annotation)
+        Doc.Objects.Replace(id, annotation) |> ignore
         Doc.Views.Redraw()
-        *)
+        
         
     (*
     def TextObjectFont(objectid, font=None):
