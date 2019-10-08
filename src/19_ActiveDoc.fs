@@ -3,7 +3,7 @@
 
 open Rhino.Runtime
 
-
+[<AutoOpen>]
 module ActiceDocument =
 
     /// the current active Rhino document (= the file currently open)

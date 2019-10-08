@@ -1388,7 +1388,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.FaceName
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.FamilyPlusFaceName
 
 
     (*
