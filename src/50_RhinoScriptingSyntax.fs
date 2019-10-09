@@ -8,7 +8,8 @@ open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument 
 
-/// A static class with static mebres providing functions very similar to RhinoScript in Pyhton and VBscript 
+[<AbstractClass; Sealed>]
+/// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 
 type RhinoScriptSyntax private () = // no constructor?
     
     ///<summary>clamps a value between a lower and an upper bound</summary>
@@ -392,6 +393,10 @@ type RhinoScriptSyntax private () = // no constructor?
         match RhinoScriptSyntax.CoerceGeometry id with
         | :?  TextEntity as a -> a
         |_ -> failwithf "*** could not TextEntity: %A =" id
+
+
+
+
 
 
     //------try----

@@ -33,7 +33,7 @@ module ExtensionsGeometry =
                         if item.ActiveViewport.Name = view then
                             yield item.ActiveViewportID]
         let rc = Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
-        if rc = Guid.Empty then failwithf "Scripting: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
         Doc.Views.Redraw()
         rc
     (*
@@ -103,7 +103,7 @@ module ExtensionsGeometry =
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =      
       if not <| IO.File.Exists(filename) then failwithf "image %s does not exist" filename
       let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
-      if rc = Guid.Empty then failwithf "Scripting: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
+      if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
       Doc.Views.Redraw()
       rc
     (*
@@ -139,7 +139,7 @@ module ExtensionsGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid =
         let rc = Doc.Objects.AddPoint(Point3d(x,y,x))
-        if rc = Guid.Empty then failwithf "Scripting: Unable to add point to document.  x:'%A' y:'%A' z:'%A'" x y z
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point to document.  x:'%A' y:'%A' z:'%A'" x y z
         Doc.Views.Redraw()
         rc
 
@@ -149,7 +149,7 @@ module ExtensionsGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(point:Point3d) : Guid =
         let rc = Doc.Objects.AddPoint(point)
-        if rc = Guid.Empty then failwithf "Scripting: Unable to add point to document.  point:'%A' " point
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point to document.  point:'%A' " point
         Doc.Views.Redraw()
         rc
     (*
@@ -185,12 +185,12 @@ module ExtensionsGeometry =
                 let color = RhinoScriptSyntax.CoerceColor(colors.[i])
                 pc.Add(points.[i],color)            
             let rc = Doc.Objects.AddPointCloud(pc)
-            if rc = Guid.Empty then failwithf "Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
+            if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
             Doc.Views.Redraw()
             rc
         else
             let rc = Doc.Objects.AddPointCloud(points)
-            if rc = Guid.Empty then failwithf "Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
+            if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
             Doc.Views.Redraw()
             rc
     (*
@@ -266,7 +266,8 @@ module ExtensionsGeometry =
                             [<OPT;DEF(0)>]fontStyle:int, 
                             [<OPT;DEF(1)>]horizontalAlignment:DocObjects.TextHorizontalAlignment, 
                             [<OPT;DEF(1)>]verticalAlignment:DocObjects.TextVerticalAlignment) : Guid =
-        if isNull text || text = "" then failwithf "Scripting: Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+        
+        if isNull text || text = "" then failwithf "Rhino.Scripting: Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let bold = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = Doc.DimStyles.Current
@@ -279,26 +280,26 @@ module ExtensionsGeometry =
         let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
 
         if isNull f then
-            failwithf "Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+            failwithf "Rhino.Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let te = TextEntity.Create(text, plane, ds, false, 0.0, 0.0)
         te.TextHeight <- height
         if font |> notNull then
           te.Font <- f
         if bold <> quartetBoldProp then
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-              failwithf "Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+              failwithf "Rhino.Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
             else 
               te.SetBold(bold)|> ignore
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-              failwithf "Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+              failwithf "Rhino.Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
             else 
               te.SetItalic(italic)|> ignore
        
         te.TextHorizontalAlignment <- horizontalAlignment
         te.TextVerticalAlignment <- verticalAlignment
         let id = Doc.Objects.Add(te);
-        if id = Guid.Empty then failwithf "Scripting: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+        if id = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         Doc.Views.Redraw()
         id
     (*
@@ -404,7 +405,7 @@ module ExtensionsGeometry =
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddTextDot(text:string, point:Point3d) : Guid =
         let rc = Doc.Objects.AddTextDot(text, point)
-        if rc = Guid.Empty then failwithf "Scripting: Unable to add text dot to document.  text:'%A' point:'%A'" text point
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text dot to document.  text:'%A' point:'%A'" text point
         Doc.Views.Redraw()
         rc
     (*
@@ -433,7 +434,7 @@ module ExtensionsGeometry =
     static member Area(objectId:Guid) : float =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then failwithf "Scripting: Unable to compute area mass properties.  objectId:'%A'" objectId
+        if mp |> isNull then failwithf "Rhino.Scripting: Unable to compute area mass properties.  objectId:'%A'" objectId
         mp.Area
     (*
     def Area(objectid):
@@ -1388,7 +1389,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.FamilyPlusFaceName
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
 
 
     (*
@@ -1417,30 +1418,31 @@ module ExtensionsGeometry =
         return rc
     *)
 
-    ///<summary>Modifies the font used by a text object</summary>
-    ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="font">(string)The new font face name</param>
-    ///<returns>(unit) void, nothing</returns>
+
+
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
-        let index = Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
-        annotation.Font <-  Doc.Fonts.[index]
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        Doc.Objects.Replace(id, annotation) |> ignore
+        let f = 
+            DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
+            // normally calls will not  go further than FromQuartetProperties(font, false, false)
+            // but there are a few rare fonts that don"t have a regular font
+            |? DocObjects.Font.FromQuartetProperties(font, false, false)
+            |? DocObjects.Font.FromQuartetProperties(font, true, false)
+            |? DocObjects.Font.FromQuartetProperties(font, false, true)
+            |? DocObjects.Font.FromQuartetProperties(font, true, true)
+            |? failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
+        
+        annotation.Font <- f        
+        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
         Doc.Views.Redraw()
         
-        let f = DocObjects.Font(font) 
-        if isNull f then  failwithf "set TextObjectFont failed.  font:'%A'" font        
-        annotation.Font <- f
-        Doc.Views.Redraw()
-
-
     (*
-    def TextObjectFont(objectid, font=None):
+    def TextObjectFont(object_id, font=None):
         '''Returns or modifies the font used by a text object
         Parameters:
-          objectid (guid): the identifier of a text object
+          object_id (guid): the identifier of a text object
           font (str): the new font face name
         Returns:
           str: if a font is not specified, the current font face name
@@ -1448,36 +1450,37 @@ module ExtensionsGeometry =
           None: if not successful, or on error
         '''
     
-        annotation = rhutil.coercegeometry(objectid, True)
-        if not isinstance(annotation, Geometry.TextEntity):
+        annotation = rhutil.coercegeometry(object_id, True)
+        if not isinstance(annotation, Rhino.Geometry.TextEntity):
             return scriptcontext.errorhandler()
         fontdata = annotation.Font
-        rc = fontdata.FaceName
+        rc = fontdata.QuartetName
         if font:
-            index = scriptcontext.doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
-            annotation.Font = scriptcontext.doc.Fonts[index]
-            id = rhutil.coerceguid(objectid, True)
+            def q2f(qn, b, i):
+                return Rhino.DocObjects.Font.FromQuartetProperties(qn, b, i)
+            # normally calls will not go further than q2f(font, False, False)
+            # but there are a few rare fonts that don't have a regular font
+            f = q2f(font, fontdata.Bold, fontdata.Italic)\
+                or q2f(font, False, False)\
+                or q2f(font, True, False)\
+                or q2f(font, False, True)\
+                or q2f(font, True, True)
+            if f is None:
+                  return scriptcontext.errorhandler()
+            annotation.Font = f
+            id = rhutil.coerceguid(object_id, True)
             scriptcontext.doc.Objects.Replace(id, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
-
+       
 
     [<EXT>]
     ///<summary>Returns the height of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(float) The current text height</returns>
     static member TextObjectHeight(objectId:Guid) : float = //GET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
-        let rc = annotation.TextHeight
-        if notNull height then
-            let annotation.TextHeight = height
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).TextHeight
     (*
     def TextObjectHeight(objectid, height=None):
         '''Returns or modifies the height of a text object
@@ -1507,16 +1510,12 @@ module ExtensionsGeometry =
     ///<param name="height">(float)The new text height.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
-        let rc = annotation.TextHeight
-        if notNull height then
-            let annotation.TextHeight = height
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        annotation.TextHeight <-  height
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
+        Doc.Views.Redraw()
+        
     (*
     def TextObjectHeight(objectid, height=None):
         '''Returns or modifies the height of a text object
@@ -1547,16 +1546,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Plane) The current plane</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
-        let rc = annotation.Plane
-        if notNull plane then
-            let annotation.Plane = RhinoScriptSyntax.CoercePlane(plane)
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
     (*
     def TextObjectPlane(objectid, plane=None):
         '''Returns or modifies the plane used by a text object
@@ -1586,16 +1576,12 @@ module ExtensionsGeometry =
     ///<param name="plane">(Plane)The new text object plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
-        let rc = annotation.Plane
-        if notNull plane then
-            let annotation.Plane = RhinoScriptSyntax.CoercePlane(plane)
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        annotation.Plane <-  plane
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
+        Doc.Views.Redraw()
+        
     (*
     def TextObjectPlane(objectid, plane=None):
         '''Returns or modifies the plane used by a text object
@@ -1626,18 +1612,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Point3d) The 3D point identifying the current location</returns>
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
-        let text = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| text :? TextEntity then
-            failwithf "Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
-        let plane = text.Plane
-        let rc = plane.Origin
-        if notNull point then
-            let plane.Origin = RhinoScriptSyntax.Coerce3dPoint(point)
-            let text.Plane = plane
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, text)
-            Doc.Views.Redraw()
-        rc
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane.Origin
     (*
     def TextObjectPoint(objectid, point=None):
         '''Returns or modifies the location of a text object
@@ -1669,18 +1644,14 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)The new text object location</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPoint(objectId:Guid, point:Point3d) : unit = //SET
-        let text = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| text :? TextEntity then
-            failwithf "Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
-        let plane = text.Plane
-        let rc = plane.Origin
-        if notNull point then
-            let plane.Origin = RhinoScriptSyntax.Coerce3dPoint(point)
-            let text.Plane = plane
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, text)
-            Doc.Views.Redraw()
-        rc
+        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)            
+        let mutable plane = text.Plane
+        plane.Origin <-  point
+        text.Plane <-  plane
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(id, text) then failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
+        Doc.Views.Redraw()
+        
     (*
     def TextObjectPoint(objectid, point=None):
         '''Returns or modifies the location of a text object
@@ -1714,22 +1685,14 @@ module ExtensionsGeometry =
     ///<returns>(int) The current font style
     ///  0 = Normal
     ///  1 = Bold
-    ///  2 = Italic</returns>
+    ///  2 = Italic
+    ///  3 = Bold and Italic</returns>
     static member TextObjectStyle(objectId:Guid) : int = //GET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
-        if fontdata |> isNull then failwithf "Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
-        let rc = 0
-        if fontdata.Bold then rc +<- 1
-        if fontdata.Italic then rc +<- 2
-        if style |> notNull && style <> rc then
-            let index = Doc.Fonts.FindOrCreate( fontdata.FaceName, (style&1) = 1, (style&2) = 2 )
-            let annotation.Font = Doc.Fonts.[index]
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
+        let mutable rc = 0
+        if fontdata.Bold   then rc <- 1 + rc
+        if fontdata.Italic then rc <- 2 + rc
         rc
     (*
     def TextObjectStyle(objectid, style=None):
@@ -1768,24 +1731,25 @@ module ExtensionsGeometry =
     ///<param name="style">(int)The font style. Can be any of the following flags
     ///  0 = Normal
     ///  1 = Bold
-    ///  2 = Italic</param>
+    ///  2 = Italic
+    ///  3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
-        if fontdata |> isNull then failwithf "Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A'" objectId style
-        let rc = 0
-        if fontdata.Bold then rc +<- 1
-        if fontdata.Italic then rc +<- 2
-        if style |> notNull && style <> rc then
-            let index = Doc.Fonts.FindOrCreate( fontdata.FaceName, (style&1) = 1, (style&2) = 2 )
-            let annotation.Font = Doc.Fonts.[index]
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        let f = 
+            match style with 
+            |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, true)
+            |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
+            |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
+            |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
+            |_ -> failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
+            |?    failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A' not availabe for %s" objectId style fontdata.QuartetName
+
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
+        Doc.Views.Redraw()
+
     (*
     def TextObjectStyle(objectid, style=None):
         '''Returns or modifies the font style of a text object
@@ -1824,17 +1788,9 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value</returns>
     static member TextObjectText(objectId:Guid) : string = //GET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
-        let rc = annotation.Text
-        if notNull text then
-            if not <| text :? str then text <- string(text)
-            let annotation.Text = text
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        text.PlainText
+
     (*
     def TextObjectText(objectid, text=None):
         '''Returns or modifies the text string of a text object.
@@ -1865,17 +1821,12 @@ module ExtensionsGeometry =
     ///<param name="text">(string)A new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceGeometry(objectId)
-        if not <| annotation :? TextEntity then
-            failwithf "Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
-        let rc = annotation.Text
-        if notNull text then
-            if not <| text :? str then text <- string(text)
-            let annotation.Text = text
-            let id = RhinoScriptSyntax.CoerceGuid(objectId)
-            Doc.Objects.Replace(id, annotation)
-            Doc.Views.Redraw()
-        rc
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        annotation.PlainText <-  text
+        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
+        Doc.Views.Redraw()
+        
     (*
     def TextObjectText(objectid, text=None):
         '''Returns or modifies the text string of a text object.

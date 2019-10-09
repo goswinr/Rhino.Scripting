@@ -14,8 +14,8 @@ module internal Util =
 
     let inline notNull x = not (Object.ReferenceEquals(x,null))
     
-    /// returns the value on the left unless it is null, then returns the value on the right
-    let inline (|?) x b = if Object.ReferenceEquals(x,null) then b else x
+    /// Returns the value on the left unless it is null, then it returns the value on the right.
+    let inline (|?) a b = if Object.ReferenceEquals(a,null) then b else a // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs
 
     let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"
    
@@ -88,18 +88,18 @@ module internal Util =
     // a typefull ignore function that shows errors if type changes
     //let inline ignoreGuid   (g:Guid) = ()
 
-
+    
 
 module UtilMath =
     let internal Rand = System.Random () 
 
     ///allows ints to be multiplied by floats
     ///int(round(float(i) * f))
-    let inline ( *. ) (i:int) (f:float) = int(round(float(i) * f))
+    let inline ( *. ) (i:int) (f:float) = int(round(float(i) * f)) // or do it like this:https://stackoverflow.com/questions/2812084/overload-operator-in-f/2812306#2812306
     
     ///gives a float from int / int division
     ///(float(i)) / (float(j))
-    let inline ( /. ) (i:int) (j:int) = (float(i)) / (float(j))
+    let inline ( /. ) (i:int) (j:int) = (float(i)) / (float(j)) // or do it like this:https://stackoverflow.com/questions/2812084/overload-operator-in-f/2812306#2812306
 
 
     //gives a int from int / float division
