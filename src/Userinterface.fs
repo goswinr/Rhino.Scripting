@@ -9,7 +9,7 @@ open Rhino.Scripting.ActiceDocument
 open Rhino
 open Rhino.UI
 open System.Drawing
-open System.Windows.Forms
+//open System.Windows.Forms
 
 [<AutoOpen>]
 module ExtensionsUserinterface =
@@ -17,27 +17,31 @@ module ExtensionsUserinterface =
   [<EXT>] 
   type RhinoScriptSyntax with
     
+
+
     [<EXT>]
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
     ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
     ///A default folder</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
-    ///A dialog box title</param>
-    ///<returns>(string option) selected folder</returns>
-    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
-        let dlg = System.Windows.Forms.FolderBrowserDialog()
-        if notNull folder then
-            dlg.SelectedPath <-  folder
-        if notNull message then
-            dlg.Description <- message
-        if notNull title then
-            dlg.Title <- title 
-        if dlg.ShowDialog() = System.Windows.Forms.DialogResult.OK then 
-            Some(dlg.SelectedPath)
-        else
-            None
+    ///A prompt or message</param>   
+    ///<returns>(string option) selected folder option or None if selection was canceled</returns>
+    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string option =
+        async{
+            do! Async.SwitchToContext System.Windows.Forms.WindowsFormsSynchronizationContext.Current         
+            use dlg = new System.Windows.Forms.FolderBrowserDialog()
+            dlg.ShowNewFolderButton <- true
+            if notNull folder then
+                if IO.Directory.Exists(folder) then
+                    dlg.SelectedPath <-  folder
+            if notNull message then
+                dlg.Description <- message
+            if dlg.ShowDialog() = System.Windows.Forms.DialogResult.OK then 
+                return Some(dlg.SelectedPath)
+            else
+                return None
+        } 
+        |> Async.RunSynchronously
 
         //let dlg = Eto.Forms.SelectFolderDialog()
         //if notNull folder then
@@ -81,16 +85,31 @@ module ExtensionsUserinterface =
     ///A prompt or message</param>
     ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
-    ///<returns>(string seq) of tuples containing the input string in items along with their new boolean check value</returns>
-    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string seq =
+    ///<returns>((string*bool) [] option) Option of tuples containing the input string in items along with their new boolean check value</returns>
+    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : (string*bool) [] option=
         let checkstates = [| for item in items -> snd item |]
         let itemstrs = [|for item in items -> fst item|]
-        let newcheckstates = Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
+        let 
+        
+        RhinoApp.InvokeOnUiThread
+        
+        
+        let newcheckstates =
+            async{
+                //let currentContext = System.Threading.SynchronizationContext.Current 
+                //do! Async.SwitchToContext(guiContext)
+                do! Async.SwitchToContext System.Threading.SynchronizationContext.Current  
+                let res = Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
+                //do! Async.SwitchToContext(currentContext) 
+                return res
+                } 
+                |> Async.RunSynchronously
+
         if notNull newcheckstates then
-            let rc = zip(itemstrs, newcheckstates)
-            rc
+            Some (Array.zip itemstrs newcheckstates)
         else
-            failwithf "Rhino.Scripting: CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
+            //failwithf "Rhino.Scripting: CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
+            None
     (*
     def CheckListBox(items, message=None, title=None):
         '''Displays a list of items in a checkable-style list dialog box

@@ -17,6 +17,7 @@ module ActiceDocument =
     let redraw() = Doc.Views.Redraw()
     
 
+
     do
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
