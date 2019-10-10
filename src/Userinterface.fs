@@ -204,7 +204,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     /// A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
-    static member GetAngle([<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(Point3d())>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:float, [<OPT;DEF(null:string)>]message:string) : float =
+    static member GetAngle([<OPT;DEF(null)>]point:Point3d ref, [<OPT;DEF(null)>]referencePoint:Point3d ref, [<OPT;DEF(null)>]defaultValAngleDegrees:float ref, [<OPT;DEF(null:string)>]message:string) : float =
         async{
             do! Async.SwitchToContext syncContext 
             
