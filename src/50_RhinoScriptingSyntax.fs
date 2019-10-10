@@ -12,6 +12,66 @@ open Rhino.Scripting.ActiceDocument
 /// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 
 type RhinoScriptSyntax private () = // no constructor?
     
+
+    ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString() </summary>
+    ///<param name="x">('T): the value or object to represent as string</param>
+    ///<returns>(stirng) the string</returns>
+    static member ConvertToString (x:'T) : string =
+        match box x with
+        | :? Point3d    as p   -> p.ToNiceString
+        | :? Vector3d   as v   -> v.ToNiceString
+        | :? Point3f    as p   -> p.ToNiceString
+        | :? float      as v   -> v.ToNiceString
+        | :? single     as v   -> v.ToNiceString
+        | :? Char       as c   -> c.ToString()  // "'" + c.ToString() + "'"
+        | :? string     as s   -> s // to not have it in quotes
+        | _ ->          x.ToString()
+        
+
+    ///<summary>Prints an object or value to Rhino Command line </summary>
+    ///<param name="x">('T): the value or object to print</param>
+    ///<returns>(unit) void, nothing/returns>
+    static member Print (x:'T) : unit =
+        let s = RhinoScriptSyntax.ConvertToString(x)
+        RhinoApp.WriteLine s   
+        RhinoApp.Wait()
+    
+    ///<summary>Prints two objects or values to Rhino Command line, separated by a space character</summary>
+    ///<param name="x1">('T): the first value or object to print</param>
+    ///<param name="x2">('T): the second value or object to print</param>
+    ///<returns>(unit) void, nothing/returns>
+    static member Print (x1:'T, x2:'U) : unit =
+        let s1 = RhinoScriptSyntax.ConvertToString(x1)
+        let s2 = RhinoScriptSyntax.ConvertToString(x2)
+        RhinoApp.WriteLine (s1 + " " + s2)
+        RhinoApp.Wait()
+
+    ///<summary>Prints three objects or values to Rhino Command line, separated by a space character</summary>
+    ///<param name="x1">('T): the first value or object to print</param>
+    ///<param name="x2">('U): the second value or object to print</param>
+    ///<param name="x2">('V): the third value or object to print</param>
+    ///<returns>(unit) void, nothing/returns>
+    static member Print (x1:'T, x2:'U, x3:'v) : unit =
+        let s1 = RhinoScriptSyntax.ConvertToString(x1)
+        let s2 = RhinoScriptSyntax.ConvertToString(x2)
+        let s3 = RhinoScriptSyntax.ConvertToString(x3)
+        RhinoApp.WriteLine (s1 + " " + s2+ " " + s3)
+        RhinoApp.Wait()
+
+
+    ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value </summary>
+    ///<param name="xs">('T): the values or objects to print</param>
+    ///<param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
+    ///<returns>(unit) void, nothing/returns>
+    static member Print (xs:'T seq, [<OPT;DEF(null:string)>]separator:string) : unit =
+        xs
+        |> Seq.map RhinoScriptSyntax.ConvertToString
+        |> String.concat (separator |? " ")
+        |> RhinoApp.WriteLine 
+        RhinoApp.Wait()
+
+
+
     ///<summary>clamps a value between a lower and an upper bound</summary>
     ///<param name="minVal">(float): lower bound</param>
     ///<param name="maxVal">(float): upper bound</param>

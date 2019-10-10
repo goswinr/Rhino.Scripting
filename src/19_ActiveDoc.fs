@@ -6,6 +6,7 @@ open Rhino.Runtime
 [<AutoOpen>]
 module ActiceDocument =
 
+
     /// the current active Rhino document (= the file currently open)
     let mutable Doc = 
         if HostUtils.RunningInRhino then 
@@ -15,8 +16,7 @@ module ActiceDocument =
     
     /// redraws all Rhino viewports
     let redraw() = Doc.Views.Redraw()
-    
-
+   
 
     do
         if HostUtils.RunningInRhino then 

@@ -10,7 +10,7 @@ open System.Collections.Generic
 ///<param name="defaultFun">(unit->'V): The function to create a default Value</param>
 type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
     
-    let D = Dictionary<'K,'V>()
+    let D = Dictionary<'K,'V>() // the internal Dictionary
 
     let dGet(k) =
         let ok,v = D.TryGetValue(k)
@@ -34,6 +34,7 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
         else 
             failwithf "DefaultDict: Cannot pop key '%A' from %O " k dd
 
+    /// Returns a seq of key and value tuples
     member _.Items =
         seq { for KeyValue(k,v) in D -> k,v}
         
@@ -83,8 +84,11 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
     interface IEnumerable<KeyValuePair<'K ,'V>> with
         member _.GetEnumerator() = (D:>IDictionary<'K,'V>).GetEnumerator()
 
-    interface System.Collections.IEnumerable with
+    interface System.Collections.IEnumerable with // Non generic needed too ? 
         member __.GetEnumerator() = D.GetEnumerator():> System.Collections.IEnumerator
+    
+    //interface System.Collections.ICollection with // Non generic needed too ? 
+        
     
     interface ICollection<KeyValuePair<'K,'V>> with 
         member _.Add(x) = (D:>ICollection<KeyValuePair<'K,'V>>).Add(x)
@@ -117,6 +121,23 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
         member _.TryGetValue(k,r ) = D.TryGetValue(k,ref r) 
 
         member _.Remove(k) = D.Remove(k)
+
+    interface IReadOnlyCollection<KeyValuePair<'K,'V>> with 
+        member _.Count = D.Count
+
+    interface IReadOnlyDictionary<'K,'V> with 
+        member _.Item 
+            with get k = dGet k
+       
+        member _.Keys = (D:>IReadOnlyDictionary<'K,'V>).Keys 
+
+        member _.Values = (D:>IReadOnlyDictionary<'K,'V>).Values
+
+        member _.ContainsKey k = D.ContainsKey k
+
+        member _.TryGetValue(k,r ) = D.TryGetValue(k,ref r) 
+
+
 
 
     //member _.GetObjectData() = D.GetObjectData()

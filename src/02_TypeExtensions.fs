@@ -6,24 +6,27 @@ open Rhino.Scripting.Util
 [<AutoOpen>]
 module TypeExtensions =    
     
-
     [<EXT>] 
     type Collections.Generic.Dictionary<'K,'V> with
         
-        [<EXT>]
-        member inline  d.SetValue k v =
-            d.[k] <-v
         
-        [<EXT>] 
-        member inline d.GetValue k  =
-            d.[k]
+        [<EXT>] member inline  d.SetValue k v =
+                    d.[k] <-v
         
-        /// get a value and remove it from Dictionary, like *.pop() in Python 
-        [<EXT>] 
-        member inline d.Pop k  =
-            let v= d.[k]
-            d.Remove(k)|> ignore
-            v
+       
+        [<EXT>] member inline d.GetValue k  =
+                    d.[k]
+        
+        /// get a value and remove it from Dictionary, like *.pop() in Python         
+        [<EXT>] member inline d.Pop k  =
+                    let v= d.[k]
+                    d.Remove(k)|> ignore
+                    v
+
+        /// Returns a seq of key and value tuples
+        [<EXT>] member inline d.Items =
+                    seq { for KeyValue(k,v) in d -> k,v}
+
 
     [<EXT>]       
     type Int32 with  
@@ -37,20 +40,19 @@ module TypeExtensions =
 
     [<EXT>]       
     type Double with  
-        ///int(round(x)) converts int to float
+        ///converts int to float including rounding: int(round(x))
         [<EXT>] member inline x.ToInt = int(round(x))
-
-        [<EXT>] member x.ToNiceString = Util.floatToString x
-        
+        /// with automatic formating of display precision depending on float size
+        [<EXT>] member x.ToNiceString = Util.floatToString x        
         
 
     [<EXT>]       
     type Single with  
+        /// with automatic formating of display precision depending on float size
         [<EXT>] member x.ToNiceString = Util.singleToString x
 
     [<EXT>]
-    type Drawing.Color with
-        
+    type Drawing.Color with        
         ///Compare to another color only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor        
         [<EXT>] 
         member inline this.EqualsARGB(other:Drawing.Color)=

@@ -14,9 +14,19 @@ open System.Drawing
 [<AutoOpen>]
 module ExtensionsUserinterface =
   
+  ///of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
+  let mutable internal syncContext = System.Threading.SynchronizationContext.Current  
+
   [<EXT>] 
   type RhinoScriptSyntax with
     
+
+    [<EXT>]
+    ///<summary>The Synchronization Context of the Rhino UI Therad.
+    ///This MUST be set at the  beginning of every Script if using UI dialogs and not running on UI thread</summary>
+    static member SynchronizationContext 
+        with get() = syncContext
+        and set v  = syncContext <- v
 
 
     [<EXT>]
@@ -27,8 +37,8 @@ module ExtensionsUserinterface =
     ///A prompt or message</param>   
     ///<returns>(string option) selected folder option or None if selection was canceled</returns>
     static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string option =
-        async{
-            do! Async.SwitchToContext System.Windows.Forms.WindowsFormsSynchronizationContext.Current         
+        async{            
+            do! Async.SwitchToContext syncContext        
             use dlg = new System.Windows.Forms.FolderBrowserDialog()
             dlg.ShowNewFolderButton <- true
             if notNull folder then
@@ -40,9 +50,8 @@ module ExtensionsUserinterface =
                 return Some(dlg.SelectedPath)
             else
                 return None
-        } 
-        |> Async.RunSynchronously
-
+        }  |> Async.RunSynchronously
+        // or use ETO ??
         //let dlg = Eto.Forms.SelectFolderDialog()
         //if notNull folder then
         //    if not <| isinstance(folder, str) then folder <- string(folder)
@@ -52,8 +61,6 @@ module ExtensionsUserinterface =
         //    let dlg.Title = message
         //if dlg.ShowDialog(null) = Eto.Forms.DialogResult.Ok then
         //    dlg.Directory
-
-
     (*
     def BrowseForFolder(folder=None, message=None, title=None):
         '''Display browse-for-folder dialog allowing the user to select a folder
@@ -89,21 +96,12 @@ module ExtensionsUserinterface =
     static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : (string*bool) [] option=
         let checkstates = [| for item in items -> snd item |]
         let itemstrs = [|for item in items -> fst item|]
-        let 
-        
-        RhinoApp.InvokeOnUiThread
-        
-        
+                
         let newcheckstates =
             async{
-                //let currentContext = System.Threading.SynchronizationContext.Current 
-                //do! Async.SwitchToContext(guiContext)
-                do! Async.SwitchToContext System.Threading.SynchronizationContext.Current  
-                let res = Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
-                //do! Async.SwitchToContext(currentContext) 
-                return res
-                } 
-                |> Async.RunSynchronously
+                do! Async.SwitchToContext syncContext 
+                return Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
+                } |> Async.RunSynchronously
 
         if notNull newcheckstates then
             Some (Array.zip itemstrs newcheckstates)
