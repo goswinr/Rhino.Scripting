@@ -251,36 +251,36 @@ module ExtensionsUserinterface =
     ///  displayed as click-able command line option toggles</summary>
     ///<param name="message">(string) A prompt</param>
     ///<param name="items">(string seq) List or tuple of options. Each option is a tuple of three strings
-    ///  [n][1]    description of the boolean value. Must only consist of letters
-    ///    and numbers. (no characters like space, period, or dash
+    ///  [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
     ///  [n][2]    string identifying the false value
     ///  [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool seq) a list of values that represent the boolean values</returns>
-    static member GetBoolean(message:string, items:string seq, defaultVals:bool seq) : bool seq =
-        let go = Rhino.Input.Custom.GetOption()
-        go.AcceptNothing(true)
-        go.SetCommandPrompt( message )
-        if typ(defaultVals) = list || typ(defaultVals) = tuple then pass
-        else  defaultVals <- .[defaultVals]
-        // special case for single list. Wrap items into a list
-        if Seq.length(items) = 3 && Seq.length(defaultVals) = 1 then items <- .[items]
-        let count = Seq.length(items)
-        if count<1 || count <> Seq.length(defaultVals) then failwithf "Rhino.Scripting: GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
-        let toggles = ResizeArray()
-        for i in range(count) do
-            let initial = defaultVals.[i]
-            let item = items.[i]
-            let offVal = item.[1]
-            let t = Rhino.Input.Custom.OptionToggle( initial, item.[1], item.[2] )
-            toggles.Add(t)
-            go.AddOptionToggle(item.[0], t)
-        while true:
-            let getrc = go.Get()
-            if getrc = Rhino.Input.GetResult.Option then continue
-            if getrc <> Rhino.Input.GetResult.Nothing then null
-            break
-        [| for t in toggles do yield t.CurrentValue |]
+    static member GetBoolean(message:string, items:(string*string*string) seq, defaultVals:bool seq) : bool array option =
+        async{
+            do! Async.SwitchToContext syncContext             
+            let go = Rhino.Input.Custom.GetOption()
+            go.AcceptNothing(true)
+            go.SetCommandPrompt( message )
+            let count = Seq.length(items)
+            if count < 1 || count <> Seq.length(defaultVals) then failwithf "Rhino.Scripting: GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
+            let toggles = ResizeArray()
+            for i in range(count) do
+                let initial = defaultVals.[i]
+                let item = items.[i]
+                let offVal = item.[1]
+                let t = Rhino.Input.Custom.OptionToggle( initial, item.[1], item.[2] )
+                toggles.Add(t)
+                go.AddOptionToggle(item.[0], t)
+            
+            let mutable getrc = go.Get()
+            while getrc = Rhino.Input.GetResult.Option do
+            return 
+                if getrc <> Rhino.Input.GetResult.Nothing then 
+                    None
+                else
+                    Some [| for t in toggles do yield t.CurrentValue |]
+            } |> Async.RunSynchronously
     (*
     def GetBoolean(message, items, defaults):
         '''Pauses for user input of one or more boolean values. Boolean values are

@@ -88,7 +88,8 @@ module internal Util =
     // a typefull ignore function that shows errors if type changes
     //let inline ignoreGuid   (g:Guid) = ()
 
-    
+    /// so that python range expressions dont need top be translated to F#
+    let internal range(l) = seq{0..(l-1)} 
 
 module UtilMath =
     let internal Rand = System.Random () 
