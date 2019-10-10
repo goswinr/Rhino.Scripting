@@ -199,23 +199,23 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Pause for user input of an angle</summary>
-    ///<param name="point">(Point3d ref) Optional, Default Value: <c>null</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Origin</c>
     ///Starting, or base point</param>
-    ///<param name="referencePoint">(Point3d ref) Optional, Default Value: <c>null</c>
+    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Origin</c>
     ///If specified, the reference angle is calculated from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0.0</c>
     /// A default angle value specified</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
     /// A prompt to display</param>
     ///<returns>(float option)Option of angle in degree</returns>
-    static member GetAngle( [<OPT;DEF(null)>]point:Point3d ref, 
-                            [<OPT;DEF(null)>]referencePoint:Point3d ref, 
+    static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, 
+                            [<OPT;DEF(Point3d())>]referencePoint:Point3d, 
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float, 
                             [<OPT;DEF(null:string)>]message:string) : float option=
         async{
             do! Async.SwitchToContext syncContext 
-            let point = !(point|? ref Point3d.Unset)
-            let referencepoint = !(referencePoint|? ref Point3d.Unset)
+            let point = if point = Point3d.Origin then Point3d.Unset else point
+            let referencepoint = if referencePoint = Point3d.Origin then Point3d.Unset else referencePoint
             let defaultangle = toRadians(defaultValAngleDegrees)
             let rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             return 
@@ -256,10 +256,10 @@ module ExtensionsUserinterface =
     ///  [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool seq) a list of values that represent the boolean values</returns>
-    static member GetBoolean(message:string, items:(string*string*string) seq, defaultVals:bool seq) : bool array option =
+    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : (bool array) option =
         async{
             do! Async.SwitchToContext syncContext             
-            let go = Rhino.Input.Custom.GetOption()
+            let go = new Input.Custom.GetOption()
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
@@ -268,18 +268,20 @@ module ExtensionsUserinterface =
             for i in range(count) do
                 let initial = defaultVals.[i]
                 let item = items.[i]
-                let offVal = item.[1]
-                let t = Rhino.Input.Custom.OptionToggle( initial, item.[1], item.[2] )
+                let name,off,on = item
+                let t = new Input.Custom.OptionToggle( initial, off, on )
                 toggles.Add(t)
-                go.AddOptionToggle(item.[0], t)
-            
+                go.AddOptionToggle(name, ref t) |> ignore
             let mutable getrc = go.Get()
             while getrc = Rhino.Input.GetResult.Option do
-            return 
+                getrc <- go.Get()
+
+            let res =  
                 if getrc <> Rhino.Input.GetResult.Nothing then 
                     None
                 else
                     Some [| for t in toggles do yield t.CurrentValue |]
+            return res
             } |> Async.RunSynchronously
     (*
     def GetBoolean(message, items, defaults):

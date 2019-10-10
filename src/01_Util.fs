@@ -78,6 +78,7 @@ module internal Util =
                         prev := e.Current
             else failwithf "thisAndNext: Input Sequence only had one element: seq{%A}" (!prev)
         else failwith "thisAndNext: Empty Input Sequence"}
+
     
     let inline t1 (a,b,c) = a
     let inline t2 (a,b,c) = b
