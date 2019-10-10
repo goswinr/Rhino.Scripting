@@ -1521,7 +1521,7 @@ module ExtensionsApplication =
 
 
     [<EXT>]
-    ///<summary>Returns a list of registered Rhino plug-ins</summary>
+    ///<summary>Returns a array of registered Rhino plug-ins</summary>
     ///<param name="types">(int) Optional, Default Value: <c>0</c>
     ///The type of plug-ins to return.
     ///  0=all
@@ -1533,7 +1533,7 @@ module ExtensionsApplication =
     ///  If omitted, all are returned.</param>
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
     ///0=both loaded and unloaded, 1=loaded, 2=unloaded.  If omitted both status is returned.</param>
-    ///<returns>(string seq) list of registered Rhino plug-ins</returns>
+    ///<returns>(string array) array of registered Rhino plug-ins</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : string [] =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
         if types=1 then  filter <- Rhino.PlugIns.PlugInType.Render

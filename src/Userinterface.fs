@@ -343,7 +343,7 @@ module ExtensionsUserinterface =
     ///Prompt2 of 'optional prompts to set' </param>
     ///<param name="prompt3">(string) Optional, Default Value: <c>null</c>
     ///Prompt3 of 'optional prompts to set' </param>
-    ///<returns>(Point3d seq) list of eight Point3d that define the corners of the box on success</returns>
+    ///<returns>(Point3d []) option) array of eight Point3d that define the corners of the box on success</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int, 
                             [<OPT;DEF(Point3d())>]basisPoint:Point3d, 
                             [<OPT;DEF(null:string)>]prompt1:string, 
