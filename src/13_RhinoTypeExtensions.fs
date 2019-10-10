@@ -8,6 +8,9 @@ open Rhino.Scripting.Util
 [<AutoOpen>]
 module TypeExtensionsRhino =    
 
+    let (|??) a b = if a = Point3d.Origin then b else a 
+
+
     [<Extension>]       
     type Point3d with  
         ///Like the ToString function but with appropiate precision formating
@@ -36,3 +39,5 @@ module TypeExtensionsRhino =
                 "Vector3d.Unset"
             else
                 sprintf "Vector3d(%s, %s, %s)" (floatToString  v.X) (floatToString  v.Y) (floatToString  v.Z)
+
+
