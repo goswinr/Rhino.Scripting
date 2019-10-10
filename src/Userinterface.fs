@@ -401,3 +401,255 @@ module ExtensionsUserinterface =
         if rc==Rhino.Commands.Result.Success: return tuple(box.GetCorners())
     *)
 
+    [<EXT>]
+    ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color()</c>
+    ///Default RGB value. If omitted, the default color is black</param>
+    ///<returns>(option<Drawing.Color>) an Option of RGB color</returns>
+    static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let zero = Drawing.Color()
+            let col = ref(if color = zero then  Drawing.Color.Black else color)
+            let rc = Rhino.UI.Dialogs.ShowColorDialog(col)
+            return
+                if rc then Some (!col) else None
+        } |> Async.RunSynchronously
+    (*
+    def GetColor(color=None):
+        '''Display the Rhino color picker dialog allowing the user to select an RGB color
+        Parameters:
+          color (color, optional): default RGB value. If omitted, the default color is black
+        Returns:
+          color: RGB tuple of three numbers on success
+          None: on error
+        '''
+    
+        color = rhutil.coercecolor(color)
+        if color is None: color = System.Drawing.Color.Black
+        rc, color = Rhino.UI.Dialogs.ShowColorDialog(color)
+        if rc: return color.R, color.G, color.B
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Retrieves the cursor's position</summary>
+    ///<returns>(Point3d * Point3d * Guid * Point3d) a Tuple of containing the following information
+    ///  0  cursor position in world coordinates
+    ///  1  cursor position in screen coordinates
+    ///  2  id of the active viewport
+    ///  3  cursor position in client coordinates</returns>
+    static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
+        async{
+            do! Async.SwitchToContext syncContext
+            let view = Doc.Views.ActiveView
+            let screen_pt = Rhino.UI.MouseCursor.Location
+            let client_pt = view.ScreenToClient(screen_pt)
+            let viewport = view.ActiveViewport
+            let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
+            let world_pt = Point3d(client_pt.X, client_pt.Y, 0.0)
+            world_pt.Transform(xf)
+            return world_pt, screen_pt, viewport.Id, client_pt
+            } |> Async.RunSynchronously
+    (*
+    def GetCursorPos():
+        '''Retrieves the cursor's position
+        Returns:
+          tuple(point, point, guid, point): containing the following information
+            0  cursor position in world coordinates
+            1  cursor position in screen coordinates
+            2  id of the active viewport
+            3  cursor position in client coordinates
+        '''
+    
+        view = scriptcontext.doc.Views.ActiveView
+        screen_pt = Rhino.UI.MouseCursor.Location
+        client_pt = view.ScreenToClient(screen_pt)
+        viewport = view.ActiveViewport
+        xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
+        world_pt = Rhino.Geometry.Point3d(client_pt.X, client_pt.Y, 0)
+        world_pt.Transform(xf)
+        return world_pt, screen_pt, viewport.Id, client_pt
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pauses for user input of a distance.</summary>
+    ///<param name="firstPt">(Point3d) Optional, Default Value: <c>Point3d()</c>
+    ///First distance point</param>
+    ///<param name="distance">(float) Optional, Default Value: <c>7e89</c>
+    ///Default distance</param>
+    ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
+    ///Prompt for the first distance point</param>
+    ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
+    ///Prompt for the second distance point</param>
+    ///<returns>(option<float>) an Option of The distance between the two points .</returns>
+    static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d, 
+                                [<OPT;DEF(0.0)>]distance:float, 
+                                [<OPT;DEF("First distance point")>]firstPtMsg:string, 
+                                [<OPT;DEF("Second distance point")>]secondPtMsg:string) : option<float> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let pt1 = 
+                if firstPt = Point3d.Origin then 
+                    let gp1 = new Rhino.Input.Custom.GetPoint()            
+                    gp1.SetCommandPrompt(firstPtMsg)
+                    match gp1.Get() with 
+                    | Input.GetResult.Point -> Some (gp1.Point())
+                    | _ -> None
+                else
+                    Some firstPt
+            
+            return
+                match pt1 with 
+                | Some pt ->
+                    let gp2 = new Rhino.Input.Custom.GetPoint()
+                    if distance <> 0.0 then
+                        gp2.AcceptNothing(true)                        
+                        gp2.SetCommandPrompt(sprintf "%s<%f>" secondPtMsg distance)
+                    else
+                        gp2.SetCommandPrompt(secondPtMsg)
+                    gp2.DrawLineFromPoint(pt,true)
+                    gp2.EnableDrawLineFromPoint(true)
+                    match gp2.Get() with 
+                    | Input.GetResult.Point ->
+                        let d = gp2.Point().DistanceTo(pt)
+                        RhinoApp.WriteLine ("Distance: " + d.ToNiceString + " " + RhinoScriptSyntax.UnitSystemName() )
+                        Some d
+                    | _ -> None
+                | _ -> None
+                } |> Async.RunSynchronously
+    (*
+    def GetDistance(first_pt=None, distance=None, first_pt_msg="First distance point", second_pt_msg="Second distance point"):
+        '''Pauses for user input of a distance.
+        Parameters:
+          first_pt (point, optional): First distance point
+          distance (number, optional): Default distance
+          first_pt_msg (str, optional): Prompt for the first distance point
+          second_pt_msg (str, optional): Prompt for the second distance point
+        Returns:
+          number: The distance between the two points if successful.
+          None: if not successful, or on error.
+        '''
+    
+        if distance is not None and first_pt is None:
+            raise Exception("The 'first_pt' parameter needs a value if 'distance' is not None.")
+        if distance is not None and not (isinstance(distance, int) or isinstance(distance, float)): return None
+        if first_pt_msg is None or not isinstance(first_pt_msg, str): return None
+        if second_pt_msg is None or not isinstance(second_pt_msg, str): return None
+    
+        if first_pt is not None:
+          if first_pt == 0: first_pt = (0,0,0)
+          first_pt = rhutil.coerce3dpoint(first_pt)
+          if first_pt is None: return None
+    
+        if first_pt is None:
+          first_pt = GetPoint(first_pt_msg)
+          if first_pt is None: return None
+    
+        # cannot use GetPoint for 2nd point because of the need do differentiate
+        # between the user accepting none vs cancelling to exactly mimic RhinoScript
+        gp = Rhino.Input.Custom.GetPoint()
+        if distance is not None:
+          gp.AcceptNothing(True)
+          second_pt_msg = "{0}<{1}>".format(second_pt_msg, distance)
+        gp.SetCommandPrompt(second_pt_msg)
+        gp.DrawLineFromPoint(first_pt,True)
+        gp.EnableDrawLineFromPoint(True)
+        r = gp.Get()
+        if r not in [Rhino.Input.GetResult.Cancel, Rhino.Input.GetResult.Point,
+          Rhino.Input.GetResult.Nothing]: return scriptcontext.errorHandler()
+        if r == Rhino.Input.GetResult.Cancel: return None
+        if r == Rhino.Input.GetResult.Point:
+          second_pt = gp.Point()
+          distance = second_pt.DistanceTo(first_pt)
+        gp.Dispose()
+    
+        print "Distance: {0}".format(distance)
+        return distance
+    *)
+
+
+    [<EXT>]
+    ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
+    ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
+    ///A prompt or message.</param>
+    ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
+    ///Minimum number of edges to select.</param>
+    ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
+    ///Maximum number of edges to select.</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select the duplicated edge curves.</param>
+    ///<returns>(option<ResizeArray<Guid*Point3d*Point3d>>) an Option of a List of selection prompts (curve id, parent id, selection point)</returns>
+    static member GetEdgeCurves(    [<OPT;DEF("Select Edges":string)>]message:string, 
+                                    [<OPT;DEF(1)>]minCount:int, 
+                                    [<OPT;DEF(0)>]maxCount:int, 
+                                    [<OPT;DEF(false)>]select:bool) : option<ResizeArray<Guid*Guid*Point3d>> =
+        async{
+            do! Async.SwitchToContext syncContext
+            if maxCount > 0 && minCount > maxCount then failwithf "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
+            let go = new Rhino.Input.Custom.GetObject()
+            go.SetCommandPrompt(message)
+            go.GeometryFilter <- Rhino.DocObjects.ObjectType.Curve
+            go.GeometryAttributeFilter <- Rhino.Input.Custom.GeometryAttributeFilter.EdgeCurve
+            go.EnablePreSelect(false, true)
+            let rc = go.GetMultiple(minCount, maxCount)
+            return
+                if rc <> Rhino.Input.GetResult.Object then None
+                else
+                    let r = ResizeArray()
+                    for i in range(go.ObjectCount) do
+                        let edge = go.Object(i).Edge()
+                        if notNull edge then 
+                            let crv = edge.Duplicate() :?> NurbsCurve
+                            let curveid = Doc.Objects.AddCurve(crv)
+                            let parentid = go.Object(i).ObjectId
+                            let pt = go.Object(i).SelectionPoint()
+                            r.Add( (curveid, parentid, pt) )
+                    if  select then
+                        for item in r do
+                            let rhobj = Doc.Objects.Find(t1 item)
+                            rhobj.Select(true)|> ignore
+                        Doc.Views.Redraw()
+                    Some r
+            } |> Async.RunSynchronously
+    (*
+    def GetEdgeCurves(message=None, min_count=1, max_count=0, select=False):
+        '''Prompt the user to pick one or more surface or polysurface edge curves
+        Parameters:
+          message  (str, optional):  A prompt or message.
+          min_count (number, optional): minimum number of edges to select.
+          max_count (number, optional): maximum number of edges to select.
+          select (bool, optional): Select the duplicated edge curves.
+        Returns:
+          list(tuple[guid, point, point], ...): of selection prompts (curve id, parent id, selection point)
+          None: if not successful
+        '''
+    
+        if min_count<0 or (max_count>0 and min_count>max_count): return
+        if not message: message = "Select Edges"
+        go = Rhino.Input.Custom.GetObject()
+        go.SetCommandPrompt(message)
+        go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve
+        go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.EdgeCurve
+        go.EnablePreSelect(False, True)
+        rc = go.GetMultiple(min_count, max_count)
+        if rc!=Rhino.Input.GetResult.Object: return
+        rc = []
+        for i in range(go.ObjectCount):
+            edge = go.Object(i).Edge()
+            if not edge: continue
+            edge = edge.Duplicate()
+            curve_id = scriptcontext.doc.Objects.AddCurve(edge)
+            parent_id = go.Object(i).ObjectId
+            pt = go.Object(i).SelectionPoint()
+            rc.append( (curve_id, parent_id, pt) )
+        if select:
+            for item in rc:
+                rhobj = scriptcontext.doc.Objects.Find(item[0])
+                rhobj.Select(True)
+            scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+

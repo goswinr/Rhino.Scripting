@@ -34,7 +34,7 @@ type RhinoScriptSyntax private () = // no constructor?
     static member Print (x:'T) : unit =
         let s = RhinoScriptSyntax.ConvertToString(x)
         RhinoApp.WriteLine s   
-        RhinoApp.Wait()
+        RhinoApp.Wait() // no swith to UI Thread needed !
     
     ///<summary>Prints two objects or values to Rhino Command line, separated by a space character</summary>
     ///<param name="x1">('T): the first value or object to print</param>

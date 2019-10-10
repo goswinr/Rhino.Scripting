@@ -79,14 +79,16 @@ module internal Util =
             else failwithf "thisAndNext: Input Sequence only had one element: seq{%A}" (!prev)
         else failwith "thisAndNext: Empty Input Sequence"}
 
-    
-    let inline t1 (a,b,c) = a
-    let inline t2 (a,b,c) = b
-    let inline t3 (a,b,c) = c    
+    ///Get first element of triple (tuple of three element)
+    let inline t1 (a,_,_) = a
+    ///Get second element of triple (tuple of three element)
+    let inline t2 (_,b,_) = b
+    ///Get third element of triple (tuple of three element)
+    let inline t3 (_,_,c) = c    
 
-    // a typefull ignore function that shows errors if type changes
+    //a typefull ignore function that shows errors if type changes
     //let inline ignoreString (s:string) = ()
-    // a typefull ignore function that shows errors if type changes
+    //a typefull ignore function that shows errors if type changes
     //let inline ignoreGuid   (g:Guid) = ()
 
     /// so that python range expressions dont need top be translated to F#
