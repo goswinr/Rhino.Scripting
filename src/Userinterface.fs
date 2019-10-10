@@ -139,7 +139,10 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<returns>(string) The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string =
-        Rhino.UI.Dialogs.ShowComboListBox(title, message, items)
+        async{
+            do! Async.SwitchToContext syncContext 
+            return Rhino.UI.Dialogs.ShowComboListBox(title, message, items) :?> string
+            } |> Async.RunSynchronously
     (*
     def ComboListBox(items, message=None, title=None):
         '''Displays a list of items in a combo-style list box dialog.
@@ -167,8 +170,11 @@ module ExtensionsUserinterface =
     ///A dialog box title.</param>
     ///<returns>(string) Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string =
-        let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
-        text
+        async{
+            do! Async.SwitchToContext syncContext 
+            let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
+            return text
+            } |> Async.RunSynchronously
     (*
     def EditBox(default_string=None, message=None, title=None):
         '''Display dialog prompting the user to enter a string. The
@@ -192,21 +198,23 @@ module ExtensionsUserinterface =
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Starting, or base point</param>
     ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///If specified, the reference angle is calculated
-    ///  from it and the base point</param>
+    ///If specified, the reference angle is calculated from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0</c>
-    ///A default angle value specified</param>
+    /// A default angle value specified</param>
     ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt to display</param>
+    /// A prompt to display</param>
     ///<returns>(float) angle in degree</returns>
     static member GetAngle([<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(Point3d())>]referencePoint:Point3d, [<OPT;DEF(0)>]defaultValAngleDegrees:float, [<OPT;DEF(null:string)>]message:string) : float =
-        let point = RhinoScriptSyntax.Coerce3dPoint(point)
-        if not <| point then point <- Point3d.Unset
-        let reference_point = RhinoScriptSyntax.Coerce3dPoint(reference_point)
-        if not <| reference_point then reference_point <- Point3d.Unset
-        let default_angle = toRadians(defaultValAngleDegrees)
-        let rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, reference_point, default_angle)
-        if rc = Rhino.Commands.Result.Success then toDegrees(angle)
+        async{
+            do! Async.SwitchToContext syncContext 
+            
+            let point = RhinoScriptSyntax.Coerce3dPoint(point)
+            if not <| point then point <- Point3d.Unset
+            let reference_point = RhinoScriptSyntax.Coerce3dPoint(reference_point)
+            if not <| reference_point then reference_point <- Point3d.Unset
+            let default_angle = toRadians(defaultValAngleDegrees)
+            let rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, reference_point, default_angle)
+            if rc = Rhino.Commands.Result.Success then toDegrees(angle)
     (*
     def GetAngle(point=None, reference_point=None, default_angle_degrees=0, message=None):
         '''Pause for user input of an angle
