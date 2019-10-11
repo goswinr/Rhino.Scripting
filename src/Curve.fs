@@ -2784,8 +2784,7 @@ module ExtensionsCurve =
                 let r = dupe.ChangeClosedCurveSeam(parameter)
                 if not r then r
                 else
-                    let dupeObj = Doc.Objects.Replace(curveId, dupe)
-                    notNull dupeObj
+                    Doc.Objects.Replace(curveId, dupe)                    
             else
                 false
     (*

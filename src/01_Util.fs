@@ -12,7 +12,8 @@ module internal Util =
 
     let failNotImpl() = failwith "NOT IMPLEMENTED FAILURE"
 
-    let inline notNull x = not (Object.ReferenceEquals(x,null))
+    
+    let inline notNull (value : 'T) = match value with | null -> false   | _ -> true// Fsharp core does it like this too. dont use RefrenceEquals
     
     /// Returns the value on the left unless it is null, then it returns the value on the right.
     let inline (|?) a b = if Object.ReferenceEquals(a,null) then b else a // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs

@@ -590,7 +590,7 @@ module ExtensionsGeometry =
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
         let rc = [| for curve in curves do yield Doc.Objects.AddCurve(curve,attr) |]
-        if notNull delete then Doc.Objects.Delete(rhobj,true) |>ignore
+        if delete then Doc.Objects.Delete(rhobj,true) |>ignore
         Doc.Views.Redraw()
         rc
     (*

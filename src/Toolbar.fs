@@ -352,7 +352,7 @@ module ExtensionsToolbar =
     static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
-            if notNull groups then  tbfile.GroupCount
+            if groups then  tbfile.GroupCount
             else tbfile.ToolbarCount
         else
             -1
@@ -384,7 +384,7 @@ module ExtensionsToolbar =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         let rc = ResizeArray()
         if notNull tbfile then
-            if notNull groups then
+            if groups then
                 for i=0 to tbfile.GroupCount-1 do rc.Add(tbfile.GetGroup(i).Name)
             else
                 for i=0 to tbfile.ToolbarCount-1 do rc.Add(tbfile.GetToolbar(i).Name)
