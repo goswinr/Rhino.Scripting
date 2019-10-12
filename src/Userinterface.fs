@@ -179,11 +179,11 @@ module ExtensionsUserinterface =
             return if rc then Some text else None
             } |> Async.RunSynchronously
     (*
-    def EditBox(default_string=None, message=None, title=None):
+    def EditBox(defaultstring=None, message=None, title=None):
         '''Display dialog prompting the user to enter a string. The
         string value may span multiple lines
         Parameters:
-          default_string  (str, optional):  a default string value.
+          defaultstring  (str, optional):  a default string value.
           message (str, optional): a prompt message.
           title (str, optional): a dialog box title.
         Returns:
@@ -191,7 +191,7 @@ module ExtensionsUserinterface =
           None: if not successful
         '''
     
-        rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, default_string, True)
+        rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultstring, True)
         return text
     *)
 
@@ -222,13 +222,13 @@ module ExtensionsUserinterface =
                 else None
             } |> Async.RunSynchronously
     (*
-    def GetAngle(point=None, reference_point=None, default_angle_degrees=0, message=None):
+    def GetAngle(point=None, referencepoint=None, defaultangledegrees=0, message=None):
         '''Pause for user input of an angle
         Parameters:
           point (point): starting, or base point
-          reference_point (point, optional): if specified, the reference angle is calculated
+          referencepoint (point, optional): if specified, the reference angle is calculated
             from it and the base point
-          default_angle_degrees (number, optional): a default angle value specified
+          defaultangledegrees (number, optional): a default angle value specified
           message (str, optional): a prompt to display
         Returns:
           number: angle in degree if successful
@@ -237,10 +237,10 @@ module ExtensionsUserinterface =
     
         point = rhutil.coerce3dpoint(point)
         if not point: point = Rhino.Geometry.Point3d.Unset
-        reference_point = rhutil.coerce3dpoint(reference_point)
-        if not reference_point: reference_point = Rhino.Geometry.Point3d.Unset
-        default_angle = math.radians(default_angle_degrees)
-        rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, reference_point, default_angle)
+        referencepoint = rhutil.coerce3dpoint(referencepoint)
+        if not referencepoint: referencepoint = Rhino.Geometry.Point3d.Unset
+        defaultangle = math.radians(defaultangledegrees)
+        rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
         if rc==Rhino.Commands.Result.Success: return math.degrees(angle)
     *)
 
@@ -368,7 +368,7 @@ module ExtensionsUserinterface =
             } |> Async.RunSynchronously
 
     (*
-    def GetBox(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
+    def GetBox(mode=0, basepoint=None, prompt1=None, prompt2=None, prompt3=None):
         '''Pauses for user input of a box
         Parameters:
           mode (number): The box selection mode.
@@ -377,15 +377,15 @@ module ExtensionsUserinterface =
              2 = 3-Point. The base rectangle is created by picking three points
              3 = Vertical. The base vertical rectangle is created by picking three points.
              4 = Center. The base rectangle is created by picking a center point and a corner point
-          base_point (point, optional): optional 3D base point
+          basepoint (point, optional): optional 3D base point
           prompt1, prompt2, prompt3 (str, optional): optional prompts to set
         Returns:
           list(point, ...): list of eight Point3d that define the corners of the box on success
           None: is not successful, or on error
         '''
     
-        base_point = rhutil.coerce3dpoint(base_point)
-        if base_point is None: base_point = Rhino.Geometry.Point3d.Unset
+        basepoint = rhutil.coerce3dpoint(basepoint)
+        if basepoint is None: basepoint = Rhino.Geometry.Point3d.Unset
         def intToEnum(m):
           if m not in range(1,5):
             m = 0
@@ -396,7 +396,7 @@ module ExtensionsUserinterface =
             3 : Rhino.Input.GetBoxMode.Vertical,
             4 : Rhino.Input.GetBoxMode.Center
           }[m]
-        rc, box = Rhino.Input.RhinoGet.GetBox(intToEnum(mode), base_point, prompt1, prompt2, prompt3)
+        rc, box = Rhino.Input.RhinoGet.GetBox(intToEnum(mode), basepoint, prompt1, prompt2, prompt3)
         if rc==Rhino.Commands.Result.Success: return tuple(box.GetCorners())
     *)
 
@@ -443,13 +443,13 @@ module ExtensionsUserinterface =
         async{
             do! Async.SwitchToContext syncContext
             let view = Doc.Views.ActiveView
-            let screen_pt = Rhino.UI.MouseCursor.Location
-            let client_pt = view.ScreenToClient(screen_pt)
+            let screenpt = Rhino.UI.MouseCursor.Location
+            let clientpt = view.ScreenToClient(screenpt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
-            let world_pt = Point3d(client_pt.X, client_pt.Y, 0.0)
-            world_pt.Transform(xf)
-            return world_pt, screen_pt, viewport.Id, client_pt
+            let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
+            worldpt.Transform(xf)
+            return worldpt, screenpt, viewport.Id, clientpt
             } |> Async.RunSynchronously
     (*
     def GetCursorPos():
@@ -463,13 +463,13 @@ module ExtensionsUserinterface =
         '''
     
         view = scriptcontext.doc.Views.ActiveView
-        screen_pt = Rhino.UI.MouseCursor.Location
-        client_pt = view.ScreenToClient(screen_pt)
+        screenpt = Rhino.UI.MouseCursor.Location
+        clientpt = view.ScreenToClient(screenpt)
         viewport = view.ActiveViewport
         xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
-        world_pt = Rhino.Geometry.Point3d(client_pt.X, client_pt.Y, 0)
-        world_pt.Transform(xf)
-        return world_pt, screen_pt, viewport.Id, client_pt
+        worldpt = Rhino.Geometry.Point3d(clientpt.X, clientpt.Y, 0)
+        worldpt.Transform(xf)
+        return worldpt, screenpt, viewport.Id, clientpt
     *)
 
 
@@ -518,7 +518,7 @@ module ExtensionsUserinterface =
                     match gp2.Get() with 
                     | Input.GetResult.Point ->
                         let d = gp2.Point().DistanceTo(pt)
-                        RhinoApp.WriteLine ("Distance: " + d.ToNiceString + " " + RhinoScriptSyntax.UnitSystemName() )                        
+                        RhinoApp.WriteLine ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true,true,false,false) )                        
                         gp2.Dispose()
                         Some d
                     | _ -> 
@@ -527,49 +527,49 @@ module ExtensionsUserinterface =
                 | _ -> None
                 } |> Async.RunSynchronously
     (*
-    def GetDistance(first_pt=None, distance=None, first_pt_msg="First distance point", second_pt_msg="Second distance point"):
+    def GetDistance(firstpt=None, distance=None, firstptmsg="First distance point", secondptmsg="Second distance point"):
         '''Pauses for user input of a distance.
         Parameters:
-          first_pt (point, optional): First distance point
+          firstpt (point, optional): First distance point
           distance (number, optional): Default distance
-          first_pt_msg (str, optional): Prompt for the first distance point
-          second_pt_msg (str, optional): Prompt for the second distance point
+          firstptmsg (str, optional): Prompt for the first distance point
+          secondptmsg (str, optional): Prompt for the second distance point
         Returns:
           number: The distance between the two points if successful.
           None: if not successful, or on error.
         '''
     
-        if distance is not None and first_pt is None:
-            raise Exception("The 'first_pt' parameter needs a value if 'distance' is not None.")
+        if distance is not None and firstpt is None:
+            raise Exception("The 'firstpt' parameter needs a value if 'distance' is not None.")
         if distance is not None and not (isinstance(distance, int) or isinstance(distance, float)): return None
-        if first_pt_msg is None or not isinstance(first_pt_msg, str): return None
-        if second_pt_msg is None or not isinstance(second_pt_msg, str): return None
+        if firstptmsg is None or not isinstance(firstptmsg, str): return None
+        if secondptmsg is None or not isinstance(secondptmsg, str): return None
     
-        if first_pt is not None:
-          if first_pt == 0: first_pt = (0,0,0)
-          first_pt = rhutil.coerce3dpoint(first_pt)
-          if first_pt is None: return None
+        if firstpt is not None:
+          if firstpt == 0: firstpt = (0,0,0)
+          firstpt = rhutil.coerce3dpoint(firstpt)
+          if firstpt is None: return None
     
-        if first_pt is None:
-          first_pt = GetPoint(first_pt_msg)
-          if first_pt is None: return None
+        if firstpt is None:
+          firstpt = GetPoint(firstptmsg)
+          if firstpt is None: return None
     
         # cannot use GetPoint for 2nd point because of the need do differentiate
         # between the user accepting none vs cancelling to exactly mimic RhinoScript
         gp = Rhino.Input.Custom.GetPoint()
         if distance is not None:
           gp.AcceptNothing(True)
-          second_pt_msg = "{0}<{1}>".format(second_pt_msg, distance)
-        gp.SetCommandPrompt(second_pt_msg)
-        gp.DrawLineFromPoint(first_pt,True)
+          secondptmsg = "{0}<{1}>".format(secondptmsg, distance)
+        gp.SetCommandPrompt(secondptmsg)
+        gp.DrawLineFromPoint(firstpt,True)
         gp.EnableDrawLineFromPoint(True)
         r = gp.Get()
         if r not in [Rhino.Input.GetResult.Cancel, Rhino.Input.GetResult.Point,
           Rhino.Input.GetResult.Nothing]: return scriptcontext.errorHandler()
         if r == Rhino.Input.GetResult.Cancel: return None
         if r == Rhino.Input.GetResult.Point:
-          second_pt = gp.Point()
-          distance = second_pt.DistanceTo(first_pt)
+          secondpt = gp.Point()
+          distance = secondpt.DistanceTo(firstpt)
         gp.Dispose()
     
         print "Distance: {0}".format(distance)
@@ -621,36 +621,36 @@ module ExtensionsUserinterface =
                     Some r
             } |> Async.RunSynchronously
     (*
-    def GetEdgeCurves(message=None, min_count=1, max_count=0, select=False):
+    def GetEdgeCurves(message=None, mincount=1, maxcount=0, select=False):
         '''Prompt the user to pick one or more surface or polysurface edge curves
         Parameters:
           message  (str, optional):  A prompt or message.
-          min_count (number, optional): minimum number of edges to select.
-          max_count (number, optional): maximum number of edges to select.
+          mincount (number, optional): minimum number of edges to select.
+          maxcount (number, optional): maximum number of edges to select.
           select (bool, optional): Select the duplicated edge curves.
         Returns:
           list(tuple[guid, point, point], ...): of selection prompts (curve id, parent id, selection point)
           None: if not successful
         '''
     
-        if min_count<0 or (max_count>0 and min_count>max_count): return
+        if mincount<0 or (maxcount>0 and mincount>maxcount): return
         if not message: message = "Select Edges"
         go = Rhino.Input.Custom.GetObject()
         go.SetCommandPrompt(message)
         go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve
         go.GeometryAttributeFilter = Rhino.Input.Custom.GeometryAttributeFilter.EdgeCurve
         go.EnablePreSelect(False, True)
-        rc = go.GetMultiple(min_count, max_count)
+        rc = go.GetMultiple(mincount, maxcount)
         if rc!=Rhino.Input.GetResult.Object: return
         rc = []
         for i in range(go.ObjectCount):
             edge = go.Object(i).Edge()
             if not edge: continue
             edge = edge.Duplicate()
-            curve_id = scriptcontext.doc.Objects.AddCurve(edge)
-            parent_id = go.Object(i).ObjectId
+            curveid = scriptcontext.doc.Objects.AddCurve(edge)
+            parentid = go.Object(i).ObjectId
             pt = go.Object(i).SelectionPoint()
-            rc.append( (curve_id, parent_id, pt) )
+            rc.append( (curveid, parentid, pt) )
         if select:
             for item in rc:
                 rhobj = scriptcontext.doc.Objects.Find(item[0])
@@ -725,7 +725,7 @@ module ExtensionsUserinterface =
             let layerindex = ref Doc.Layers.CurrentLayerIndex
             if notNull layer then
                 let layerinstance = Doc.Layers.FindName(layer)
-                if layerinstance <> null then layerindex := layerinstance.Index
+                if notNull layerinstance then layerindex := layerinstance.Index
             let rc = Rhino.UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
             return 
                 if not rc then None
@@ -734,22 +734,22 @@ module ExtensionsUserinterface =
                     Some layer.FullPath
             } |> Async.RunSynchronously
     (*
-    def GetLayer(title="Select Layer", layer=None, show_new_button=False, show_set_current=False):
+    def GetLayer(title="Select Layer", layer=None, shownewbutton=False, showsetcurrent=False):
         '''Displays dialog box prompting the user to select a layer
         Parameters:
           title (str, optional): dialog box title
           layer (str, optional): name of a layer to preselect. If omitted, the current layer will be preselected
-          show_new_button, show_set_current (bool, optional): Optional buttons to show on the dialog
+          shownewbutton, showsetcurrent (bool, optional): Optional buttons to show on the dialog
         Returns:
           str: name of selected layer if successful
           None: on error
         '''
     
-        layer_index = scriptcontext.doc.Layers.CurrentLayerIndex
+        layerindex = scriptcontext.doc.Layers.CurrentLayerIndex
         if layer:
-            layer_instance = scriptcontext.doc.Layers.FindName(layer)
-            if layer_instance is not None: layer_index = layer_instance.Index
-        rc = Rhino.UI.Dialogs.ShowSelectLayerDialog(layer_index, title, show_new_button, show_set_current, True)
+            layerinstance = scriptcontext.doc.Layers.FindName(layer)
+            if layerinstance is not None: layerindex = layerinstance.Index
+        rc = Rhino.UI.Dialogs.ShowSelectLayerDialog(layerindex, title, shownewbutton, showsetcurrent, True)
         if rc[0]!=True: return None
         layer = scriptcontext.doc.Layers[rc[1]]
         return layer.FullPath
@@ -775,18 +775,18 @@ module ExtensionsUserinterface =
                     None
             } |> Async.RunSynchronously
     (*
-    def GetLayers(title="Select Layers", show_new_button=False):
+    def GetLayers(title="Select Layers", shownewbutton=False):
         '''Displays a dialog box prompting the user to select one or more layers
         Parameters:
             title (str, optional):  dialog box title
-            show_new_button (bool, optional): Optional button to show on the dialog
+            shownewbutton (bool, optional): Optional button to show on the dialog
         Returns:
             str: The names of selected layers if successful
         '''
         
-        rc, layer_indices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(None, title, show_new_button)
+        rc, layerindices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(None, title, shownewbutton)
         if rc:
-            return [scriptcontext.doc.Layers[index].FullPath for index in layer_indices]
+            return [scriptcontext.doc.Layers[index].FullPath for index in layerindices]
     *)
     
 
@@ -879,7 +879,7 @@ module ExtensionsUserinterface =
             let mutable ltinstance = Doc.Linetypes.CurrentLinetype
             if notNull defaultValLinetype then
                 let ltnew = Doc.Linetypes.FindName(defaultValLinetype)
-                if ltnew <> null then ltinstance <- ltnew
+                if notNull ltnew  then ltinstance <- ltnew
             return
                 try
                     let id = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", Doc) :?> Guid  // this fails if clicking in void          
@@ -889,19 +889,19 @@ module ExtensionsUserinterface =
                     None
             } |> Async.RunSynchronously
     (*
-    def GetLinetype(default_linetype=None, show_by_layer=False):
+    def GetLinetype(defaultlinetype=None, showbylayer=False):
         '''Displays a dialog box prompting the user to select one linetype
         Parameters:
-            default_linetype (str, optional):  Optional. The name of the linetype to select. If omitted, the current linetype will be selected.
-            show_by_layer (bool, optional): If True, the "by Layer" linetype will show. Defaults to False.
+            defaultlinetype (str, optional):  Optional. The name of the linetype to select. If omitted, the current linetype will be selected.
+            showbylayer (bool, optional): If True, the "by Layer" linetype will show. Defaults to False.
         Returns:
             str: The names of selected linetype if successful
         '''
         
-        lt_instance = scriptcontext.doc.Linetypes.CurrentLinetype
-        if default_linetype:
-            lt_new = scriptcontext.doc.Linetypes.FindName(default_linetype)
-            if lt_new is not None: lt_instance = lt_new
+        ltinstance = scriptcontext.doc.Linetypes.CurrentLinetype
+        if defaultlinetype:
+            ltnew = scriptcontext.doc.Linetypes.FindName(defaultlinetype)
+            if ltnew is not None: ltinstance = ltnew
         id = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "", scriptcontext.doc)
         if id == "": return None
         linetype = scriptcontext.doc.Linetypes.FindId(id)
@@ -941,15 +941,15 @@ module ExtensionsUserinterface =
                     Some rc
             } |> Async.RunSynchronously
     (*
-    def GetMeshFaces(object_id, message="", min_count=1, max_count=0):
+    def GetMeshFaces(objectid, message="", mincount=1, maxcount=0):
         '''Prompts the user to pick one or more mesh faces
         Parameters:
-            object_id (guid): the mesh object's identifier
+            objectid (guid): the mesh object's identifier
             message (str, optional): a prompt of message
-            min_count (number, optional): the minimum number of faces to select
-            max_count (number, optional): the maximum number of faces to select.
+            mincount (number, optional): the minimum number of faces to select
+            maxcount (number, optional): the maximum number of faces to select.
             If 0, the user must press enter to finish selection.
-            If -1, selection stops as soon as there are at least min_count faces selected.
+            If -1, selection stops as soon as there are at least mincount faces selected.
         Returns:
             list(number, ...): of mesh face indices on success
             None: on error
@@ -957,15 +957,15 @@ module ExtensionsUserinterface =
         
         scriptcontext.doc.Objects.UnselectAll()
         scriptcontext.doc.Views.Redraw()
-        object_id = rhutil.coerceguid(object_id, True)
-        def FilterById( rhino_object, geometry, component_index ):
-            return object_id == rhino_object.Id
+        objectid = rhutil.coerceguid(objectid, True)
+        def FilterById( rhinoobject, geometry, componentindex ):
+            return objectid == rhinoobject.Id
         go = Rhino.Input.Custom.GetObject()
         go.SetCustomGeometryFilter(FilterById)
         if message: go.SetCommandPrompt(message)
         go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshFace
         go.AcceptNothing(True)
-        if go.GetMultiple(min_count,max_count)!=Rhino.Input.GetResult.Object: return None
+        if go.GetMultiple(mincount,maxcount)!=Rhino.Input.GetResult.Object: return None
         objrefs = go.Objects()
         rc = [item.GeometryComponentIndex.Index for item in objrefs]
         go.Dispose()
@@ -1004,15 +1004,15 @@ module ExtensionsUserinterface =
                     Some rc
             } |> Async.RunSynchronously
     (*
-    def GetMeshVertices(object_id, message="", min_count=1, max_count=0):
+    def GetMeshVertices(objectid, message="", mincount=1, maxcount=0):
         '''Prompts the user to pick one or more mesh vertices
         Parameters:
-            object_id (guid): the mesh object's identifier
+            objectid (guid): the mesh object's identifier
             message (str, optional): a prompt of message
-            min_count (number, optional): the minimum number of vertices to select
-            max_count (number, optional): the maximum number of vertices to select. If 0, the user must
+            mincount (number, optional): the minimum number of vertices to select
+            maxcount (number, optional): the maximum number of vertices to select. If 0, the user must
             press enter to finish selection. If -1, selection stops as soon as there
-            are at least min_count vertices selected.
+            are at least mincount vertices selected.
         Returns:
             list(number, ...): of mesh vertex indices on success
             None: on error
@@ -1020,15 +1020,15 @@ module ExtensionsUserinterface =
         
         scriptcontext.doc.Objects.UnselectAll()
         scriptcontext.doc.Views.Redraw()
-        object_id = rhutil.coerceguid(object_id, True)
+        objectid = rhutil.coerceguid(objectid, True)
         class CustomGetObject(Rhino.Input.Custom.GetObject):
-            def CustomGeometryFilter( self, rhino_object, geometry, component_index ):
-                return object_id == rhino_object.Id
+            def CustomGeometryFilter( self, rhinoobject, geometry, componentindex ):
+                return objectid == rhinoobject.Id
         go = CustomGetObject()
         if message: go.SetCommandPrompt(message)
         go.GeometryFilter = Rhino.DocObjects.ObjectType.MeshVertex
         go.AcceptNothing(True)
-        if go.GetMultiple(min_count,max_count)!=Rhino.Input.GetResult.Object: return None
+        if go.GetMultiple(mincount,maxcount)!=Rhino.Input.GetResult.Object: return None
         objrefs = go.Objects()
         rc = [item.GeometryComponentIndex.Index for item in objrefs]
         go.Dispose()
@@ -1066,13 +1066,13 @@ module ExtensionsUserinterface =
                     Some pt
             } |> Async.RunSynchronously
     (*
-    def GetPoint(message=None, base_point=None, distance=None, in_plane=False):
+    def GetPoint(message=None, basepoint=None, distance=None, inplane=False):
         '''Pauses for user input of a point.
         Parameters:
             message (str, optional): A prompt or message.
-            base_point (point, optional): list of 3 numbers or Point3d identifying a starting, or base point
+            basepoint (point, optional): list of 3 numbers or Point3d identifying a starting, or base point
             distance  (number, optional): constraining distance. If distance is specified, basePoint must also be specified.
-            in_plane (bool, optional): constrains the point selections to the active construction plane.
+            inplane (bool, optional): constrains the point selections to the active construction plane.
         Returns:
             point: point on success
             None: if no point picked or user canceled
@@ -1080,12 +1080,12 @@ module ExtensionsUserinterface =
         
         gp = Rhino.Input.Custom.GetPoint()
         if message: gp.SetCommandPrompt(message)
-        base_point = rhutil.coerce3dpoint(base_point)
-        if base_point:
-            gp.DrawLineFromPoint(base_point,True)
+        basepoint = rhutil.coerce3dpoint(basepoint)
+        if basepoint:
+            gp.DrawLineFromPoint(basepoint,True)
             gp.EnableDrawLineFromPoint(True)
             if distance: gp.ConstrainDistanceFromBasePoint(distance)
-        if in_plane: gp.ConstrainToConstructionPlane(True)
+        if inplane: gp.ConstrainToConstructionPlane(True)
         gp.Get()
         if gp.CommandResult()!=Rhino.Commands.Result.Success:
             return scriptcontext.errorhandler()
@@ -1118,17 +1118,17 @@ module ExtensionsUserinterface =
                     Some pt
             } |> Async.RunSynchronously
     (*
-    def GetPointOnCurve(curve_id, message=None):
+    def GetPointOnCurve(curveid, message=None):
         '''Pauses for user input of a point constrainted to a curve object
         Parameters:
-          curve_id (guid): identifier of the curve to get a point on
+          curveid (guid): identifier of the curve to get a point on
           message (str, optional): a prompt of message
         Returns:
           point: 3d point if successful
           None: on error
         '''
     
-        curve = rhutil.coercecurve(curve_id, -1, True)
+        curve = rhutil.coercecurve(curveid, -1, True)
         gp = Rhino.Input.Custom.GetPoint()
         if message: gp.SetCommandPrompt(message)
         gp.Constrain(curve, False)
@@ -1156,19 +1156,19 @@ module ExtensionsUserinterface =
                 else None
             } |> Async.RunSynchronously
     (*
-    def GetPointOnMesh(mesh_id, message=None):
+    def GetPointOnMesh(meshid, message=None):
         '''Pauses for user input of a point constrained to a mesh object
         Parameters:
-          mesh_id (guid): identifier of the mesh to get a point on
+          meshid (guid): identifier of the mesh to get a point on
           message (str, optional): a prompt or message
         Returns:
           point: 3d point if successful
           None: on error
         '''
     
-        mesh_id = rhutil.coerceguid(mesh_id, True)
+        meshid = rhutil.coerceguid(meshid, True)
         if not message: message = "Point"
-        cmdrc, point = Rhino.Input.RhinoGet.GetPointOnMesh(mesh_id, message, False)
+        cmdrc, point = Rhino.Input.RhinoGet.GetPointOnMesh(meshid, message, False)
         if cmdrc==Rhino.Commands.Result.Success: return point
     *)
 
@@ -1204,20 +1204,20 @@ module ExtensionsUserinterface =
                     Some pt
             } |> Async.RunSynchronously
     (*
-    def GetPointOnSurface(surface_id, message=None):
+    def GetPointOnSurface(surfaceid, message=None):
         '''Pauses for user input of a point constrained to a surface or polysurface
         object
         Parameters:
-          surface_id (guid): identifier of the surface to get a point on
+          surfaceid (guid): identifier of the surface to get a point on
           message (str, optional): a prompt or message
         Returns:
           point: 3d point if successful
           None: on error
         '''
     
-        surfOrBrep = rhutil.coercesurface(surface_id)
+        surfOrBrep = rhutil.coercesurface(surfaceid)
         if not surfOrBrep:
-            surfOrBrep = rhutil.coercebrep(surface_id, True)
+            surfOrBrep = rhutil.coercebrep(surfaceid, True)
         gp = Rhino.Input.Custom.GetPoint()
         if message: gp.SetCommandPrompt(message)
         if isinstance(surfOrBrep,Rhino.Geometry.Surface):

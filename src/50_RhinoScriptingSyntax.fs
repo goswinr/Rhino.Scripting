@@ -7,6 +7,7 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument 
+open Rhino.Scripting.TypeExtensions
 
 [<AbstractClass; Sealed>]
 /// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 

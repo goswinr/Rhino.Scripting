@@ -6,8 +6,7 @@ open Rhino.Scripting.Util
 [<AutoOpen>]
 module TypeExtensions =    
     
-    type Collections.Generic.Dictionary<'K,'V> with
-        
+    type Collections.Generic.Dictionary<'K,'V> with   
         
         [<EXT>] member inline  d.SetValue k v =
                     d.[k] <-v
@@ -34,7 +33,8 @@ module TypeExtensions =
     type Byte with  
         [<EXT>] member inline x.ToDouble = float(x)
         [<EXT>] member inline x.ToInt = int(x)
-
+    
+   
     type Double with  
         ///converts int to float including rounding: int(round(x))
         [<EXT>] member inline x.ToInt = int(round(x))

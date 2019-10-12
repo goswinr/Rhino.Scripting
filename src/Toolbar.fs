@@ -82,10 +82,11 @@ module ExtensionsToolbar =
     static member IsToolbar(name:string, toolbar:string, [<OPT;DEF(false)>]group:bool) : bool =
        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
        if notNull tbfile then
-           if group then  tbfile.GetGroup(toolbar) <> null
+           if group then 
+              tbfile.GetGroup(toolbar) |> notNull
            else
-           seq { for i=0 to tbfile.ToolbarCount-1 do yield tbfile.GetToolbar(i).Name }
-           |> Seq.exists (fun n -> n=toolbar)
+              seq { for i=0 to tbfile.ToolbarCount-1 do yield tbfile.GetToolbar(i).Name }
+              |> Seq.exists (fun n -> n=toolbar)
            //tbfile.GetToolbar(toolbar) <> null // Fails in Rhino 5 with string
        else
            false

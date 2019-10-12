@@ -11,8 +11,7 @@ open System.IO
 
 [<AutoOpen>]
 module ExtensionsDocument =
-
-  [<EXT>] 
+  
   type RhinoScriptSyntax with
     
     [<EXT>]
