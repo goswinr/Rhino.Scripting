@@ -8,11 +8,9 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsView =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
-    [<EXT>]
-    
+    [<EXT>]    
     static member internal Viewhelper() : obj =
         failNotImpl () // genreation temp disabled !!
     (*

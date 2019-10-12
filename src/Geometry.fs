@@ -10,8 +10,7 @@ open Rhino.Scripting.ActiceDocument
 
 [<AutoOpen>]
 module ExtensionsGeometry =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
     [<EXT>]
     ///<summary>Create a clipping plane for visibly clipping away geometry in a specific

@@ -8,8 +8,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsUserdata =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
     [<EXT>]
     ///<summary>Removes user data strings from the current document</summary>

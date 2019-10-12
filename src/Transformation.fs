@@ -8,8 +8,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsTransformation =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
     [<EXT>]
     ///<summary>Verifies a matrix is the identity matrix</summary>

@@ -10,8 +10,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsUtility =
   
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
     [<EXT>]
     ///<summary>Return True if the script is being executed in the context of Rhino(currently always true)</summary>

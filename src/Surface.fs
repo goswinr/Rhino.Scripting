@@ -8,8 +8,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsSurface =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
     [<EXT>]
     ///<summary>Adds a box shaped polysurface to the document</summary>

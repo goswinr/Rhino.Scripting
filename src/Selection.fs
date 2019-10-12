@@ -8,8 +8,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsSelection =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+    type RhinoScriptSyntax with
     
     [<EXT>]
     ///<summary>Returns identifiers of all objects in the document.</summary>

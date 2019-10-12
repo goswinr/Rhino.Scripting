@@ -17,7 +17,6 @@ module ExtensionsUserinterface =
   ///of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
   let mutable internal syncContext = System.Threading.SynchronizationContext.Current  
 
-  [<EXT>] 
   type RhinoScriptSyntax with
     
 
@@ -137,7 +136,7 @@ module ExtensionsUserinterface =
     ///A prompt of message</param>
     ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title</param>
-    ///<returns>(string Option) Option of  The selected item</returns>
+    ///<returns>(string Option) Option of The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option=
         async{
             do! Async.SwitchToContext syncContext 
@@ -172,7 +171,7 @@ module ExtensionsUserinterface =
     ///A prompt message.</param>
     ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
     ///A dialog box title.</param>
-    ///<returns>(string Option) Option of  Multiple lines that are separated by carriage return-linefeed combinations</returns>
+    ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
         async{
             do! Async.SwitchToContext syncContext 
@@ -809,10 +808,9 @@ module ExtensionsUserinterface =
     ///  9  Extension - Defines a line that extends from a curve.</param>
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Optional starting point</param>
-    ///<param name="message1">(string) Optional, Default Value: <c>null:string</c>
-    ///Message1 of 'optional prompts' (FIXME 0)</param>
-    ///<param name="message2">(string) Optional, Message2 of 'optional prompts' (FIXME 0)</param>
-    ///<param name="message3">(string) Optional,Message3 of 'optional prompts' (FIXME 0)</param>
+    ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
+    ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
+    ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
     ///<returns>(option<Line>) an Option of A Line</returns>
     static member GetLine([<OPT;DEF(0)>]mode:int, [<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : option<Line> =
         async{

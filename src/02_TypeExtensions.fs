@@ -6,7 +6,6 @@ open Rhino.Scripting.Util
 [<AutoOpen>]
 module TypeExtensions =    
     
-    [<EXT>] 
     type Collections.Generic.Dictionary<'K,'V> with
         
         
@@ -28,17 +27,14 @@ module TypeExtensions =
                     seq { for KeyValue(k,v) in d -> k,v}
 
 
-    [<EXT>]       
     type Int32 with  
         [<EXT>] member inline x.ToDouble = float(x)
         [<EXT>] member inline x.ToByte = byte(x)
 
-    [<EXT>]       
     type Byte with  
         [<EXT>] member inline x.ToDouble = float(x)
         [<EXT>] member inline x.ToInt = int(x)
 
-    [<EXT>]       
     type Double with  
         ///converts int to float including rounding: int(round(x))
         [<EXT>] member inline x.ToInt = int(round(x))
@@ -46,12 +42,10 @@ module TypeExtensions =
         [<EXT>] member x.ToNiceString = Util.floatToString x        
         
 
-    [<EXT>]       
     type Single with  
         /// with automatic formating of display precision depending on float size
         [<EXT>] member x.ToNiceString = Util.singleToString x
 
-    [<EXT>]
     type Drawing.Color with        
         ///Compare to another color only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor        
         [<EXT>] 
@@ -69,7 +63,6 @@ module TypeExtensions =
 
 
    
-    [<EXT>]
     type Collections.Generic.List<'T>  with        
         [<EXT>] 
         /// Allows for negtive slice index too (-1 = last element), returns a shallow copy
@@ -88,7 +81,6 @@ module TypeExtensions =
         member this.SetItem index value = if index<0 then this.[this.Count+index]<-value   else this.[index]<-value 
     
     
-    [<EXT>]
     type ``[]``<'T>  with //Generic Array
         [<EXT>] 
         /// Allows for negtive index too (like python)
