@@ -2259,7 +2259,11 @@ module ExtensionsCurve =
     ///    [0]    A point on the first curve at which to cut (point).
     ///    [1]    A point on the second curve at which to cut (point).
     ///    [2]    The fillet plane </returns>
-    static member CurveFilletPoints(curveA:Guid, curveB:Guid, radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //  [<OPT;DEF(true)>]returnPoints:bool) // TODO not Implemented     //(FIXME) VarOutTypes
+    static member CurveFilletPoints(curveA:Guid, 
+                                    curveB:Guid, 
+                                    radius:float, 
+                                    [<OPT;DEF(Point3d())>]basePointA:Point3d, 
+                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //  [<OPT;DEF(true)>]returnPoints:bool) // TODO not Implemented     //(FIXME) VarOutTypes
         //<param name="returnPoints">(bool) Optional, Default Value: <c>true</c>
         //If True (Default), then fillet points are
         //  returned. Otherwise, a fillet curve is created and

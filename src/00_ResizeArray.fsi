@@ -140,6 +140,9 @@ module ResizeArray =
     /// Return a view of the array as an enumerable object.
     val toSeq : ResizeArray<'T> -> seq<'T>
 
+    /// Build a <c>ResizeArray</c> from the given elements.
+    val ofSeq : seq<'T> ->  ResizeArray<'T>
+
     /// Test elements of the two arrays pairwise to see if any pair of element satisfies the given predicate.
     /// Raise ArgumentException if the arrays have different lengths.
     val exists2 : ('T -> 'U -> bool) -> ResizeArray<'T> -> ResizeArray<'U> -> bool

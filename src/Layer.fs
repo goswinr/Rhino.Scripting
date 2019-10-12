@@ -8,8 +8,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsLayer =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+ type RhinoScriptSyntax with
     
     [<EXT>]
     

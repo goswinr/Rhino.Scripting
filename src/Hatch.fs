@@ -8,8 +8,7 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsHatch =
-  [<EXT>] 
-  type RhinoScriptSyntax with
+ type RhinoScriptSyntax with
     
     [<EXT>]
     

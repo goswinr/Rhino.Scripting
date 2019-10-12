@@ -30,10 +30,8 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
-    ///<param name="folder">(string) Optional, Default Value: <c>null:string</c>
-    ///A default folder</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message</param>   
+    ///<param name="folder">(string) Optional, A default folder</param>
+    ///<param name="message">(string) Optional, A prompt or message</param>   
     ///<returns>(string option) selected folder option or None if selection was canceled</returns>
     static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string option =
         async{            
@@ -87,10 +85,8 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Displays a list of items in a checkable-style list dialog box</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
-    ///A dialog box title</param>
+    ///<param name="message">(string) Optional, A prompt or message</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>((string*bool) [] option) Option of tuples containing the input string in items along with their new boolean check value</returns>
     static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : (string*bool) [] option=
         let checkstates = [| for item in items -> snd item |]
@@ -132,10 +128,8 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
     ///<param name="items">(string seq) A list of string</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt of message</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
-    ///A dialog box title</param>
+    ///<param name="message">(string) Optional, A prompt of message</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string Option) Option of The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option=
         async{
@@ -165,12 +159,9 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Display dialog prompting the user to enter a string. The
     ///  string value may span multiple lines</summary>
-    ///<param name="defaultValString">(string) Optional, Default Value: <c>null:string</c>
-    ///A default string value.</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt message.</param>
-    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
-    ///A dialog box title.</param>
+    ///<param name="defaultValString">(string) Optional, A default string value.</param>
+    ///<param name="message">(string) Optional, A prompt message.</param>
+    ///<param name="title">(string) Optional, A dialog box title.</param>
     ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
         async{
@@ -198,14 +189,13 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Pause for user input of an angle</summary>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Origin</c>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
     ///Starting, or base point</param>
-    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Origin</c>
+    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
     ///If specified, the reference angle is calculated from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0.0</c>
     /// A default angle value specified</param>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    /// A prompt to display</param>
+    ///<param name="message">(string) Optional,  A prompt to display</param>
     ///<returns>(float option)Option of angle in degree</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, 
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d, 
@@ -336,12 +326,9 @@ module ExtensionsUserinterface =
     ///  4 = Center. The base rectangle is created by picking a center point and a corner point</param>
     ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Optional 3D base point</param>
-    ///<param name="prompt1">(string) Optional, Default Value: <c>null</c>
-    ///Prompt1 of 'optional prompts to set' </param>
-    ///<param name="prompt2">(string) Optional, Default Value: <c>null</c>
-    ///Prompt2 of 'optional prompts to set' </param>
-    ///<param name="prompt3">(string) Optional, Default Value: <c>null</c>
-    ///Prompt3 of 'optional prompts to set' </param>
+    ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set' </param>
+    ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set' </param>
+    ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set' </param>
     ///<returns>(Point3d []) option) array of eight Point3d that define the corners of the box on success</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int, 
                             [<OPT;DEF(Point3d())>]basisPoint:Point3d, 
@@ -868,8 +855,7 @@ module ExtensionsUserinterface =
     
     [<EXT>]
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
-    ///<param name="defaultValLinetype">(string) Optional, Default Value: <c>null:string</c>
-    ///Optional. The name of the linetype to select. If omitted, the current linetype will be selected.</param>
+    ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected.</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///If True, the "by Layer" linetype will show. Defaults to False.</param>
     ///<returns>(option<string>) an Option of The names of selected linetype</returns>
@@ -1038,16 +1024,18 @@ module ExtensionsUserinterface =
     
     [<EXT>]
     ///<summary>Pauses for user input of a point.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message.</param>
+    ///<param name="message">(string) Optional, A prompt or message.</param>
     ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///List of 3 numbers or Point3d identifying a starting, or base point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>7e89</c>
+    ///Point3d identifying a starting, or base point</param>
+    ///<param name="distance">(float) Optional, Default Value: <c>0.0</c>
     ///Constraining distance. If distance is specified, basePoint must also be specified.</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrains the point selections to the active construction plane.</param>
     ///<returns>(option<Point3d>) an Option of point on success</returns>
-    static member GetPoint([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(Point3d())>]basisPoint:Point3d, [<OPT;DEF(7e89)>]distance:float, [<OPT;DEF(false)>]inPlane:bool) : option<Point3d> =
+    static member GetPoint( [<OPT;DEF(null:string)>]message:string, 
+                            [<OPT;DEF(Point3d())>]basisPoint:Point3d, 
+                            [<OPT;DEF(0.0)>]distance:float, 
+                            [<OPT;DEF(false)>]inPlane:bool) : option<Point3d> =
         async{
             do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()

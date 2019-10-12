@@ -19,6 +19,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<returns>(stirng) the string</returns>
     static member ConvertToString (x:'T) : string =
         match box x with
+        | null -> "NULL"
         | :? Point3d    as p   -> p.ToNiceString
         | :? Vector3d   as v   -> v.ToNiceString
         | :? Point3f    as p   -> p.ToNiceString
@@ -52,7 +53,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x2">('U): the second value or object to print</param>
     ///<param name="x2">('V): the third value or object to print</param>
     ///<returns>(unit) void, nothing/returns>
-    static member Print (x1:'T, x2:'U, x3:'v) : unit =
+    static member Print (x1:'T, x2:'U, x3:'V) : unit =
         let s1 = RhinoScriptSyntax.ConvertToString(x1)
         let s2 = RhinoScriptSyntax.ConvertToString(x2)
         let s3 = RhinoScriptSyntax.ConvertToString(x3)
@@ -95,7 +96,7 @@ type RhinoScriptSyntax private () = // no constructor?
         if isNanOrInf stop  then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         let range = stop - start 
                     |> BitConverter.DoubleToInt64Bits 
-                    |> (+) 5L // to make sure stop value is included in Range, will explicitly be removed below
+                    |> (+) 5L // to make sure stop value is included in Range, will explicitly be removed below to match python semantics
                     |> BitConverter.Int64BitsToDouble
         let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semanticsis diffrent from F# semantics on range expressions)
         if isNanOrInf steps then failwithf "*** range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
@@ -115,9 +116,9 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="start">(float): first value of range</param> 
     ///<param name="stop">(float): end of range( this last value will not be included in range,Python semantics)</param>    
     ///<param name="step">(float): step size between two values</param>
-    ///<returns> an array of floats </returns>
-    static member Frange (start:float, stop:float, step:float) : float [] =
-        RhinoScriptSyntax.Fxrange (start, stop, step) |> Array.ofSeq
+    ///<returns> aa RezizeArray of floats </returns>
+    static member Frange (start:float, stop:float, step:float) : float ResizeArray =
+        RhinoScriptSyntax.Fxrange (start, stop, step) |> ResizeArray.ofSeq
     
     
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>

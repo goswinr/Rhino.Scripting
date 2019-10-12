@@ -186,6 +186,8 @@ module ResizeArray =
 
     let toSeq (arr: ResizeArray<'T>) = Seq.readonly arr
 
+    let ofSeq (arr: 'T seq) = new ResizeArray<_>(arr)
+
     let sort f (arr: ResizeArray<'T>) = arr.Sort (System.Comparison(f))
 
     let sortBy f (arr: ResizeArray<'T>) = arr.Sort (System.Comparison(fun x y -> compare (f x) (f y)))

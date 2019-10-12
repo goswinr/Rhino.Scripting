@@ -8,8 +8,6 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsLinetype =
-
-  [<EXT>] 
   type RhinoScriptSyntax with 
 
     [<EXT>]

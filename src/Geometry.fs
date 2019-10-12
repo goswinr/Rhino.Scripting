@@ -16,8 +16,8 @@ module ExtensionsGeometry =
     ///<summary>Create a clipping plane for visibly clipping away geometry in a specific
     ///  view. Note, clipping planes are infinite</summary>
     ///<param name="plane">(Plane) The plane</param>
-    ///<param name="uMagnitude">(float) U magnitude of 'size of the plane' (FIXME 0)</param>
-    ///<param name="vMagnitude">(float) V magnitude of 'size of the plane' (FIXME 0)</param>
+    ///<param name="uMagnitude">(float) U magnitude of the plane</param>
+    ///<param name="vMagnitude">(float) V magnitude of the plane</param>
     ///<param name="views">(string seq) Optional, Default Value: <c>null:string seq</c>
     ///Titles or ids the the view(s) to clip. If omitted, the active
     ///  view is used.</param>
