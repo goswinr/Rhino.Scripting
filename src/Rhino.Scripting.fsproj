@@ -14,7 +14,8 @@
     <FileVersion>0.0.0.1</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Description>Rhino Script Syntax for F# and C#</Description>
-    <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>    
+    <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>
+    <somesthjing></somesthjing>
   </PropertyGroup>
   
   <ItemGroup>    

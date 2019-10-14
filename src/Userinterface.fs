@@ -9,6 +9,7 @@ open Rhino.Scripting.ActiceDocument
 open Rhino
 open Rhino.UI
 open System.Drawing
+open System.Collections.Generic
 //open System.Windows.Forms
 
 [<AutoOpen>]
@@ -1218,6 +1219,970 @@ module ExtensionsUserinterface =
         pt = gp.Point()
         gp.Dispose()
         return pt
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pauses for user input of one or more points</summary>
+    ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
+    ///Draw lines between points</param>
+    ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
+    ///Constrain point selection to the active construction plane</param>
+    ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
+    ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
+    ///<param name="maxPoints">(float) Optional, Default Value: <c>None</c>
+    ///  Maximum number of points to pick. If not specified, an
+    ///  unlimited number of points can be picked.</param>
+    ///<returns>(option<Point3d array>) an Option of of 3d points</returns>
+    static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool, 
+                                [<OPT;DEF(false)>]inPlane:bool, 
+                                [<OPT;DEF(null:string)>]message1:string, 
+                                [<OPT;DEF(null:string)>]message2:string, 
+                                [<OPT;DEF(2147482999)>]maxPoints:int) : option<Point3d ResizeArray> =
+                                //[<OPT;DEF(Point3d())>]basisPoint:Point3d) // Ignoredhere because ignored in python too TODO <param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>   A starting or base point</param>
+                                             
+        async{
+            do! Async.SwitchToContext syncContext
+            use gp = new Input.Custom.GetPoint()
+            if notNull message1 then gp.SetCommandPrompt(message1)
+            gp.EnableDrawLineFromPoint( drawLines )
+            if inPlane then
+                gp.ConstrainToConstructionPlane(true) |> ignore
+                let plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+                gp.Constrain(plane, false) |> ignore
+            let mutable getres = gp.Get()
+            return                
+                if gp.CommandResult() <> Rhino.Commands.Result.Success then None
+                else
+                    let mutable prevPoint = gp.Point()
+                    let rc = ResizeArray([prevPoint])
+                    if maxPoints = 2147482999 || maxPoints>1 then
+                        let mutable currentpoint = 1
+                        if notNull message2 then gp.SetCommandPrompt(message2)
+            
+                        if drawLines then 
+                            gp.DynamicDraw.Add (fun args  -> if rc.Count > 1 then
+                                                                let c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor
+                                                                args.Display.DrawPolyline(rc, c)
+                                                                |>  ignore)
+                        let mutable cont = true
+                        while cont do
+                            if maxPoints <> 2147482999 && currentpoint>=maxPoints then cont <- false
+                            if cont && drawLines then 
+                                gp.DrawLineFromPoint(prevPoint, true)
+                            if cont then 
+                                gp.SetBasePoint(prevPoint, true)
+                                currentpoint <- currentpoint + 1
+                                getres <- gp.Get()
+                                if getres = Rhino.Input.GetResult.Cancel then 
+                                    cont <- false
+                                    //RhinoApp.WriteLine "GetPoints canceled"
+                                if cont && gp.CommandResult() <> Rhino.Commands.Result.Success then 
+                                    rc.Clear()
+                                    cont <- false
+                                    RhinoApp.WriteLine "GetPoints no Success"
+                                if cont then 
+                                    prevPoint <- gp.Point()
+                                    rc.Add(prevPoint)
+                    if rc.Count>0 then 
+                        RhinoScriptSyntax.Print (rc.Count, "Points picked")
+                        Some rc
+                    else 
+                        None
+
+            } |> Async.RunSynchronously
+  
+
+    (*
+    def GetPoints(draw_lines=False, in_plane=False, message1=None, message2=None, max_points=None, base_point=None):
+        '''Pauses for user input of one or more points
+        Parameters:
+          draw_lines (bool, optional): Draw lines between points
+          in_plane (bool, optional): Constrain point selection to the active construction plane
+          message1 (str, optional): A prompt or message for the first point
+          message2 (str, optional): A prompt or message for the next points
+          max_points (number, optional): maximum number of points to pick. If not specified, an
+                            unlimited number of points can be picked.
+          base_point (point, optional): a starting or base point
+        Returns:
+          list(point, ...): of 3d points if successful
+          None: if not successful or on error
+        '''
+    
+        gp = Rhino.Input.Custom.GetPoint()
+        if message1: gp.SetCommandPrompt(message1)
+        gp.EnableDrawLineFromPoint( draw_lines )
+        if in_plane:
+            gp.ConstrainToConstructionPlane(True)
+            plane = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+            gp.Constrain(plane, False)
+        getres = gp.Get()
+        if gp.CommandResult()!=Rhino.Commands.Result.Success: return None
+        prevPoint = gp.Point()
+        rc = [prevPoint]
+        if max_points is None or max_points>1:
+            current_point = 1
+            if message2: gp.SetCommandPrompt(message2)
+            def GetPointDynamicDrawFunc( sender, args ):
+                if len(rc)>1:
+                    c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor
+                    args.Display.DrawPolyline(rc, c)
+            if draw_lines: gp.DynamicDraw += GetPointDynamicDrawFunc
+            while True:
+                if max_points and current_point>=max_points: break
+                if draw_lines: gp.DrawLineFromPoint(prevPoint, True)
+                gp.SetBasePoint(prevPoint, True)
+                current_point += 1
+                getres = gp.Get()
+                if getres==Rhino.Input.GetResult.Cancel: break
+                if gp.CommandResult()!=Rhino.Commands.Result.Success: return None
+                prevPoint = gp.Point()
+                rc.append(prevPoint)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Prompts the user to pick points that define a polyline.</summary>
+    ///<param name="flags">(int) Optional, Default Value: <c>3</c>
+    ///The options are bit coded flags. Values can be added together to specify more than one option. The default is 3.
+    ///  value description
+    ///  1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
+    ///  2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
+    ///  4     Force close. If specified, then the returned polyline is always closed. If specified, then intMax must be 0 or >= 4.
+    ///  Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False".</param>
+    ///<param name="message1">(string) Optional, A prompt or message for the first point.</param>
+    ///<param name="message2">(string) Optional, A prompt or message for the second point.</param>
+    ///<param name="message3">(string) Optional, A prompt or message for the third point.</param>
+    ///<param name="message4">(string) Optional, A prompt or message for the 'next' point.</param>
+    ///<param name="min">(int) Optional, Default Value: <c>2</c>
+    ///The minimum number of points to require. The default is 2.</param>
+    ///<param name="max">(int) Optional, Default Value: <c>0</c>
+    ///The maximum number of points to require; 0 for no limit.  The default is 0.</param>
+    ///<returns>(option<Polyline>) an Option of A  polyline .</returns>
+    static member GetPolyline(          [<OPT;DEF(3)>]flags:int, 
+                                        [<OPT;DEF(null:string)>]message1:string, 
+                                        [<OPT;DEF(null:string)>]message2:string, 
+                                        [<OPT;DEF(null:string)>]message3:string, 
+                                        [<OPT;DEF(null:string)>]message4:string, 
+                                        [<OPT;DEF(2147482999)>]min:int, 
+                                        [<OPT;DEF(0)>]max:int) : option<Polyline> =
+        async{
+            do! Async.SwitchToContext syncContext     
+            let gpl = new Input.Custom.GetPolyline()
+            if notNull message1 then gpl.FirstPointPrompt <- message1
+            if notNull message2 then gpl.SecondPointPrompt <- message2
+            if notNull message3 then gpl.ThirdPointPrompt <- message3
+            if notNull message4 then gpl.FourthPointPrompt <- message4
+            gpl.MinPointCount <- min
+            if max>min then gpl.MaxPointCount <- max
+            let rc, polyline = gpl.Get()
+            Doc.Views.Redraw()
+            return 
+              if rc = Rhino.Commands.Result.Success then Some polyline
+              else None
+            } |> Async.RunSynchronously
+    (*
+    def GetPolyline(flags=3, message1=None, message2=None, message3=None, message4=None, min=2, max=0):
+        '''Prompts the user to pick points that define a polyline.
+      Parameters:
+        flags (number, optional) The options are bit coded flags. Values can be added together to specify more than one option. The default is 3.
+          value description
+          1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
+          2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
+          4     Force close. If specified, then the returned polyline is always closed. If specified, then intMax must be 0 or >= 4.
+          Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False".
+        message1 (str, optional): A prompt or message for the first point.
+        message2 (str, optional): A prompt or message for the second point.
+        message3 (str, optional): A prompt or message for the third point.
+        message4 (str, optional): A prompt or message for the 'next' point.
+        min (number, optional): The minimum number of points to require. The default is 2.
+        max (number, optional): The maximum number of points to require; 0 for no limit.  The default is 0.
+      Returns:
+        list(point, ...): A list of 3-D points that define the polyline if successful.
+        None: if not successful or on error
+      '''
+    
+      gpl = Rhino.Input.Custom.GetPolyline()
+      if message1: gpl.FirstPointPrompt = message1
+      if message2: gpl.SecondPointPrompt = message2
+      if message3: gpl.ThirdPointPrompt = message3
+      if message4: gpl.FourthPointPrompt = message4
+      if min: gpl.MinPointCount = min
+      if max: gpl.MaxPointCount = max
+      rc, polyline = gpl.Get()
+      scriptcontext.doc.Views.Redraw()
+      if rc==Rhino.Commands.Result.Success: return polyline
+      return None
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pauses for user input of a number.</summary>
+    ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
+    ///A prompt or message.</param>
+    ///<param name="number">(float) Optional, A default number value.</param>
+    ///<param name="minimum">(float) Optional, A minimum allowable value.</param>
+    ///<param name="maximum">(float) Optional, A maximum allowable value.</param>
+    ///<returns>(option<float>) an Option of The number input by the user .</returns>
+    static member GetReal(              [<OPT;DEF("Number")>]message:string, 
+                                        [<OPT;DEF(7e89)>]number:float, 
+                                        [<OPT;DEF(7e89)>]minimum:float, 
+                                        [<OPT;DEF(7e89)>]maximum:float) : option<float> =
+        async{
+            do! Async.SwitchToContext syncContext          
+            let gn = new Input.Custom.GetNumber()
+            if notNull message then gn.SetCommandPrompt(message)
+            if number <> 7e89 then gn.SetDefaultNumber(number)
+            if minimum <> 7e89 then gn.SetLowerLimit(minimum, false)
+            if maximum <> 7e89 then gn.SetUpperLimit(maximum, false)
+            return
+                if gn.Get() <> Rhino.Input.GetResult.Number then None
+                else
+                    let rc = gn.Number()
+                    gn.Dispose()
+                    Some rc
+            } |> Async.RunSynchronously
+    (*
+    def GetReal(message="Number", number=None, minimum=None, maximum=None):
+        '''Pauses for user input of a number.
+        Parameters:
+          message (str, optional): A prompt or message.
+          number (number, optional): A default number value.
+          minimum (number, optional): A minimum allowable value.
+          maximum (number, optional): A maximum allowable value.
+        Returns:
+          number: The number input by the user if successful.
+          None: if not successful, or on error
+        '''
+    
+        gn = Rhino.Input.Custom.GetNumber()
+        if message: gn.SetCommandPrompt(message)
+        if number is not None: gn.SetDefaultNumber(number)
+        if minimum is not None: gn.SetLowerLimit(minimum, False)
+        if maximum is not None: gn.SetUpperLimit(maximum, False)
+        if gn.Get()!=Rhino.Input.GetResult.Number: return None
+        rc = gn.Number()
+        gn.Dispose()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pauses for user input of a rectangle</summary>
+    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
+    ///The rectangle selection mode. The modes are as follows
+    ///  0 = All modes
+    ///  1 = Corner - a rectangle is created by picking two corner points
+    ///  2 = 3Point - a rectangle is created by picking three points
+    ///  3 = Vertical - a vertical rectangle is created by picking three points
+    ///  4 = Center - a rectangle is created by picking a center point and a corner point</param>
+    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
+    ///A 3d base point</param>
+    ///<param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
+    ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
+    ///<param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
+    ///<returns>(option<Point3d * Point3d * Point3d * Point3d>) an Option of four 3d points that define the corners of the rectangle</returns>
+    static member GetRectangle(
+                                        [<OPT;DEF(0)>]mode:int, 
+                                        [<OPT;DEF(Point3d())>]basisPoint:Point3d, 
+                                        [<OPT;DEF(null:string)>]prompt1:string, 
+                                        [<OPT;DEF(null:string)>]prompt2:string, 
+                                        [<OPT;DEF(null:string)>]prompt3:string) : option<Point3d * Point3d * Point3d * Point3d> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
+   
+            let basisPoint = if basisPoint = Point3d.Origin then Point3d.Unset else basisPoint
+            let prompts = ResizeArray([""; ""; ""])
+            if notNull prompt1 then prompts.[0] <- prompt1
+            if notNull prompt2 then prompts.[1] <- prompt2
+            if notNull prompt3 then prompts.[2] <- prompt3
+            let rc, corners = Rhino.Input.RhinoGet.GetRectangle(mode, basisPoint, prompts)
+            return 
+                if rc = Rhino.Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
+                else None
+            } |> Async.RunSynchronously
+    (*
+    def GetRectangle(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
+        '''Pauses for user input of a rectangle
+        Parameters:
+          mode (number, optional): The rectangle selection mode. The modes are as follows
+              0 = All modes
+              1 = Corner - a rectangle is created by picking two corner points
+              2 = 3Point - a rectangle is created by picking three points
+              3 = Vertical - a vertical rectangle is created by picking three points
+              4 = Center - a rectangle is created by picking a center point and a corner point
+          base_point (point, optional): a 3d base point
+          prompt1, prompt2, prompt3 (str, optional): optional prompts
+        Returns:
+          tuple(point, point, point, point): four 3d points that define the corners of the rectangle
+          None: on error
+        '''
+    
+        mode = System.Enum.ToObject( Rhino.Input.GetBoxMode, mode )
+        base_point = rhutil.coerce3dpoint(base_point)
+        if( base_point==None ): base_point = Rhino.Geometry.Point3d.Unset
+        prompts = ["", "", ""]
+        if prompt1: prompts[0] = prompt1
+        if prompt2: prompts[1] = prompt2
+        if prompt3: prompts[2] = prompt3
+        rc, corners = Rhino.Input.RhinoGet.GetRectangle(mode, base_point, prompts)
+        if rc==Rhino.Commands.Result.Success: return corners
+        return None
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pauses for user input of a string value</summary>
+    ///<param name="message">(string) Optional, A prompt or message</param>
+    ///<param name="defaultValString">(string) Optional, A default value</param>
+    ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
+    ///  Note, strings cannot begin with a numeric character</param>
+    ///<returns>(option<string>) an Option of The string either input or selected by the user .
+    ///  If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
+    static member GetString(
+                                        [<OPT;DEF(null:string)>]message:string, 
+                                        [<OPT;DEF(null:string)>]defaultValString:string, 
+                                        [<OPT;DEF(null:string seq)>]strings:string seq) : option<string> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let gs = new Input.Custom.GetString()
+            gs.AcceptNothing(true)
+            if notNull message then gs.SetCommandPrompt(message)
+            if notNull defaultValString then gs.SetDefaultString(defaultValString)
+            if notNull strings then
+                for s in strings do gs.AddOption(s) |> ignore
+            let result = gs.Get()
+            return 
+                if result = Rhino.Input.GetResult.Cancel then 
+                    None
+                elif( result = Rhino.Input.GetResult.Option ) then
+                    Some <| gs.Option().EnglishName
+                else
+                    Some <| gs.StringResult()
+            } |> Async.RunSynchronously
+    (*
+    def GetString(message=None, defaultString=None, strings=None):
+        '''Pauses for user input of a string value
+        Parameters:
+          message (str, optional): a prompt or message
+          defaultString (str, optional): a default value
+          strings ([str, ...], optional): list of strings to be displayed as a click-able command options.
+                                          Note, strings cannot begin with a numeric character
+        Returns:
+          str: The string either input or selected by the user if successful.
+               If the user presses the Enter key without typing in a string, an empty string "" is returned.
+          None: if not successful, on error, or if the user pressed cancel.
+        '''
+    
+        gs = Rhino.Input.Custom.GetString()
+        gs.AcceptNothing(True)
+        if message: gs.SetCommandPrompt(message)
+        if defaultString: gs.SetDefaultString(defaultString)
+        if strings:
+            for s in strings: gs.AddOption(s)
+        result = gs.Get()
+        if result==Rhino.Input.GetResult.Cancel: return None
+        if( result == Rhino.Input.GetResult.Option ):
+            return gs.Option().EnglishName
+        return gs.StringResult()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Display a list of items in a list box dialog.</summary>
+    ///<param name="items">(string IList) A list of values to select</param>
+    ///<param name="message">(string) Optional, A prompt of message</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
+    ///<param name="defaultVal">(string) Optional, Selected item in the list</param>
+    ///<returns>(option<string>) an Option of he selected item</returns>
+    static member ListBox(              items:string IList, 
+                                        [<OPT;DEF(null:string)>]message:string, 
+                                        [<OPT;DEF(null:string)>]title:string, 
+                                        [<OPT;DEF(null:string)>]defaultVal:string) : option<string> =
+        async{
+            do! Async.SwitchToContext syncContext
+            return
+                match Rhino.UI.Dialogs.ShowListBox(title, message, Array.ofSeq items , defaultVal) with
+                | null ->  None
+                |  :? string as s -> Some s
+                | _ -> None
+            
+            } |> Async.RunSynchronously
+    (*
+    def ListBox(items, message=None, title=None, default=None):
+        '''Display a list of items in a list box dialog.
+        Parameters:
+          items ([str, ...]): a list of values to select
+          message (str, optional): a prompt of message
+          title (str, optional): a dialog box title
+          default (str, optional): selected item in the list
+        Returns:
+          str: he selected item if successful
+          None: if not successful or on error
+        '''
+    
+        return Rhino.UI.Dialogs.ShowListBox(title, message, items, default)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Displays a message box. A message box contains a message and
+    ///  title, plus any combination of predefined icons and push buttons.</summary>
+    ///<param name="message">(string) A prompt or message.</param>
+    ///<param name="buttons">(int) Optional, Default Value: <c>0</c>
+    ///Buttons and icon to display as a bit coded flag. Can be a combination of the
+    ///  following flags. If omitted, an OK button and no icon is displayed
+    ///  0      Display OK button only.
+    ///  1      Display OK and Cancel buttons.
+    ///  2      Display Abort, Retry, and Ignore buttons.
+    ///  3      Display Yes, No, and Cancel buttons.
+    ///  4      Display Yes and No buttons.
+    ///  5      Display Retry and Cancel buttons.
+    ///  16     Display Critical Message icon.
+    ///  32     Display Warning Query icon.
+    ///  48     Display Warning Message icon.
+    ///  64     Display Information Message icon.
+    ///  0      First button is the default.
+    ///  256    Second button is the default.
+    ///  512    Third button is the default.
+    ///  768    Fourth button is the default.
+    ///  0      Application modal. The user must respond to the message box
+    ///    before continuing work in the current application.
+    ///  4096   System modal. The user must respond to the message box
+    ///    before continuing work in any application.</param>
+    ///<param name="title">(string) Optional, Default Value: <c>""</c>
+    ///The dialog box title</param>
+    ///<returns>(option<int>) an Option of indicating which button was clicked:
+    ///  1      OK button was clicked.
+    ///  2      Cancel button was clicked.
+    ///  3      Abort button was clicked.
+    ///  4      Retry button was clicked.
+    ///  5      Ignore button was clicked.
+    ///  6      Yes button was clicked.
+    ///  7      No button was clicked.</returns>
+    static member MessageBox(           message:string, 
+                                        [<OPT;DEF(0)>]buttons:int, 
+                                        [<OPT;DEF("")>]title:string) : option<int> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let mutable buttontyp =  buttons &&& 0x00000007 //111 in binary
+            let mutable btn = Rhino.UI.ShowMessageButton.OK
+            if   buttontyp = 1 then btn <- Rhino.UI.ShowMessageButton.OKCancel
+            elif buttontyp = 2 then btn <- Rhino.UI.ShowMessageButton.AbortRetryIgnore
+            elif buttontyp = 3 then btn <- Rhino.UI.ShowMessageButton.YesNoCancel
+            elif buttontyp = 4 then btn <- Rhino.UI.ShowMessageButton.YesNo
+            elif buttontyp = 5 then btn <- Rhino.UI.ShowMessageButton.RetryCancel
+            let icontyp = buttons &&& 0x00000070
+            let mutable icon = Rhino.UI.ShowMessageIcon.None
+            if   icontyp = 16 then icon <- Rhino.UI.ShowMessageIcon.Error
+            elif icontyp = 32 then icon <- Rhino.UI.ShowMessageIcon.Question
+            elif icontyp = 48 then icon <- Rhino.UI.ShowMessageIcon.Warning
+            elif icontyp = 64 then icon <- Rhino.UI.ShowMessageIcon.Information
+            ////// 15 Sep 2014 Alain - default button not supported in new version of RC
+            ////// that isn"t tied to Windows.Forms but it probably will so I"m commenting
+            ////// the old code instead of deleting it.
+            //defbtntyp = buttons & 0x00000300
+            //defbtn = Windows.Forms.MessageDefaultButton.Button1
+            //if defbtntyp = 256:
+            //    defbtn = Windows.Forms.MessageDefaultButton.Button2
+            //elif defbtntyp = 512:
+            //    defbtn <- Windows.Forms.MessageDefaultButton.Button3            
+            let dlgresult = Rhino.UI.Dialogs.ShowMessage(message, title, btn, icon)            
+            return
+                if   dlgresult = Rhino.UI.ShowMessageResult.OK then     Some 1
+                elif dlgresult = Rhino.UI.ShowMessageResult.Cancel then Some 2
+                elif dlgresult = Rhino.UI.ShowMessageResult.Abort then  Some 3
+                elif dlgresult = Rhino.UI.ShowMessageResult.Retry then  Some 4
+                elif dlgresult = Rhino.UI.ShowMessageResult.Ignore then Some 5
+                elif dlgresult = Rhino.UI.ShowMessageResult.Yes then    Some 6
+                elif dlgresult = Rhino.UI.ShowMessageResult.No then     Some 7
+                else None
+            } |> Async.RunSynchronously
+    (*
+    def MessageBox(message, buttons=0, title=""):
+        '''Displays a message box. A message box contains a message and
+        title, plus any combination of predefined icons and push buttons.
+        Parameters:
+          message (str): A prompt or message.
+          buttons (number, optional): buttons and icon to display as a bit coded flag. Can be a combination of the
+            following flags. If omitted, an OK button and no icon is displayed
+            0      Display OK button only.
+            1      Display OK and Cancel buttons.
+            2      Display Abort, Retry, and Ignore buttons.
+            3      Display Yes, No, and Cancel buttons.
+            4      Display Yes and No buttons.
+            5      Display Retry and Cancel buttons.
+            16     Display Critical Message icon.
+            32     Display Warning Query icon.
+            48     Display Warning Message icon.
+            64     Display Information Message icon.
+            0      First button is the default.
+            256    Second button is the default.
+            512    Third button is the default.
+            768    Fourth button is the default.
+            0      Application modal. The user must respond to the message box
+                   before continuing work in the current application.
+            4096   System modal. The user must respond to the message box
+                   before continuing work in any application.
+          title(str, optional): the dialog box title
+        Returns:
+          number: indicating which button was clicked:
+            1      OK button was clicked.
+            2      Cancel button was clicked.
+            3      Abort button was clicked.
+            4      Retry button was clicked.
+            5      Ignore button was clicked.
+            6      Yes button was clicked.
+            7      No button was clicked.
+        '''
+    
+        buttontype = buttons & 0x00000007 #111 in binary
+        btn = Rhino.UI.ShowMessageButton.OK
+        if buttontype==1: btn = Rhino.UI.ShowMessageButton.OKCancel
+        elif buttontype==2: btn = Rhino.UI.ShowMessageButton.AbortRetryIgnore
+        elif buttontype==3: btn = Rhino.UI.ShowMessageButton.YesNoCancel
+        elif buttontype==4: btn = Rhino.UI.ShowMessageButton.YesNo
+        elif buttontype==5: btn = Rhino.UI.ShowMessageButton.RetryCancel
+    
+        icontype = buttons & 0x00000070
+        icon = Rhino.UI.ShowMessageIcon.None
+        if icontype==16: icon = Rhino.UI.ShowMessageIcon.Error
+        elif icontype==32: icon = Rhino.UI.ShowMessageIcon.Question
+        elif icontype==48: icon = Rhino.UI.ShowMessageIcon.Warning
+        elif icontype==64: icon = Rhino.UI.ShowMessageIcon.Information
+    
+        ### 15 Sep 2014 Alain - default button not supported in new version of RC
+        ### that isn't tied to Windows.Forms but it probably will so I'm commenting
+        ### the old code instead of deleting it.
+        #defbtntype = buttons & 0x00000300
+        #defbtn = System.Windows.Forms.MessageDefaultButton.Button1
+        #if defbtntype==256:
+        #    defbtn = System.Windows.Forms.MessageDefaultButton.Button2
+        #elif defbtntype==512:
+        #    defbtn = System.Windows.Forms.MessageDefaultButton.Button3
+    
+        if not isinstance(message, str): message = str(message)
+        dlg_result = Rhino.UI.Dialogs.ShowMessage(message, title, btn, icon)
+        if dlg_result==Rhino.UI.ShowMessageResult.OK:     return 1
+        if dlg_result==Rhino.UI.ShowMessageResult.Cancel: return 2
+        if dlg_result==Rhino.UI.ShowMessageResult.Abort:  return 3
+        if dlg_result==Rhino.UI.ShowMessageResult.Retry:  return 4
+        if dlg_result==Rhino.UI.ShowMessageResult.Ignore: return 5
+        if dlg_result==Rhino.UI.ShowMessageResult.Yes:    return 6
+        if dlg_result==Rhino.UI.ShowMessageResult.No:     return 7
+    *)
+
+
+    [<EXT>]
+    ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
+    ///<param name="items">(string IList) list of string items </param>
+    ///<param name="values">(string seq) the corresponding values to the items</param>
+    ///<param name="message">(string) Optional, A prompt or message</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
+    ///<returns>(option<string array>) an Option of of new values on success</returns>
+    static member PropertyListBox(  items:string IList, 
+                                    values:string seq, 
+                                    [<OPT;DEF(null:string)>]message:string, 
+                                    [<OPT;DEF(null:string)>]title:string) : option<string array> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let values = [| for v in values do yield v.ToString() |]
+            return
+                match Rhino.UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
+                | null ->  None
+                | s -> Some s                
+            } |> Async.RunSynchronously
+    (*
+    def PropertyListBox(items, values, message=None, title=None):
+        '''Displays list of items and their values in a property-style list box dialog
+        Parameters:
+          items, values ([str, ...]): list of string items and their corresponding values
+          message (str, optional): a prompt or message
+          title (str, optional): a dialog box title
+        Returns:
+          list(str, ..): of new values on success
+          None: on error
+        '''
+    
+        values = [v.ToString() for v in values]
+        return Rhino.UI.Dialogs.ShowPropertyListBox(title, message, items, values)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Displays a list of items in a multiple-selection list box dialog</summary>
+    ///<param name="items">(string IList) A zero-based list of string items</param>
+    ///<param name="message">(string) Optional, A prompt or message</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
+    ///<param name="defaultVals">(string seq) Optional, Either a string representing the pre-selected item in the list
+    ///  or a list if multiple items are pre-selected</param>
+    ///<returns>(option<string array>) an Option of containing the selected items</returns>
+    static member MultiListBox(     items:string IList, 
+                                    [<OPT;DEF(null:string)>]message:string, 
+                                    [<OPT;DEF(null:string)>]title:string, 
+                                    [<OPT;DEF(null:string IList)>]defaultVals:string IList) : option<string array> =
+        async{
+            do! Async.SwitchToContext syncContext            
+            let r =  Rhino.UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
+            return 
+                if notNull r then Some r else None
+            } |> Async.RunSynchronously
+    (*
+    def MultiListBox(items, message=None, title=None, defaults=None):
+        '''Displays a list of items in a multiple-selection list box dialog
+        Parameters:
+          items ([str, ...]) a zero-based list of string items
+          message (str, optional): a prompt or message
+          title (str, optional): a dialog box title
+          defaults (str|[str,...], optional): either a string representing the pre-selected item in the list
+                                              or a list if multiple items are pre-selected
+        Returns:
+          list(str, ...): containing the selected items if successful
+          None: on error
+        '''
+    
+        if isinstance(defaults, str):
+          defaults = [defaults]
+        return Rhino.UI.Dialogs.ShowMultiListBox(title, message, items, defaults)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Displays file open dialog box allowing the user to enter a file name.
+    ///  Note, this function does not open the file.</summary>
+    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
+    ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+    ///  If omitted, the filter (*.*) is used.</param>
+    ///<param name="folder">(string) Optional, A default folder.</param>
+    ///<param name="filename">(string) Optional, A default file name</param>
+    ///<param name="extension">(string) Optional, A default file extension</param>
+    ///<returns>(option<string>) an Option of file name is successful</returns>
+    static member OpenFileName(     [<OPT;DEF(null:string)>]title:string, 
+                                    [<OPT;DEF(null:string)>]filter:string, 
+                                    [<OPT;DEF(null:string)>]folder:string, 
+                                    [<OPT;DEF(null:string)>]filename:string, 
+                                    [<OPT;DEF(null:string)>]extension:string) : option<string> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let fd = Rhino.UI.OpenFileDialog()
+            if notNull title then fd.Title <- title
+            if notNull filter then fd.Filter <- filter
+            if notNull folder then fd.InitialDirectory <- folder
+            if notNull filename then fd.FileName <- filename
+            if notNull extension then fd.DefaultExt <- extension
+            return
+                if fd.ShowOpenDialog() then Some fd.FileName
+                else None
+            } |> Async.RunSynchronously
+    (*
+    def OpenFileName(title=None, filter=None, folder=None, filename=None, extension=None):
+        '''Displays file open dialog box allowing the user to enter a file name.
+        Note, this function does not open the file.
+        Parameters:
+          title (str, optional): A dialog box title.
+          filter (str, optional): A filter string. The filter must be in the following form:
+            "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+            If omitted, the filter (*.*) is used.
+          folder (str, optional): A default folder.
+          filename (str, optional): a default file name
+          extension (str, optional): a default file extension
+        Returns:
+          str: file name is successful
+          None: if not successful, or on error
+        '''
+    
+        fd = Rhino.UI.OpenFileDialog()
+        if title: fd.Title = title
+        if filter: fd.Filter = filter
+        if folder: fd.InitialDirectory = folder
+        if filename: fd.FileName = filename
+        if extension: fd.DefaultExt = extension
+        if fd.ShowOpenDialog(): return fd.FileName
+    *)
+
+
+    [<EXT>]
+    ///<summary>Displays file open dialog box allowing the user to select one or more file names.
+    ///  Note, this function does not open the file.</summary>
+    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
+    ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+    ///  If omitted, the filter (*.*) is used.</param>
+    ///<param name="folder">(string) Optional, A default folder.</param>
+    ///<param name="filename">(string) Optional, A default file name</param>
+    ///<param name="extension">(string) Optional, A default file extension</param>
+    ///<returns>(option<string array>) an Option of of selected file names</returns>
+    static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string, 
+                                    [<OPT;DEF(null:string)>]filter:string, 
+                                    [<OPT;DEF(null:string)>]folder:string, 
+                                    [<OPT;DEF(null:string)>]filename:string, 
+                                    [<OPT;DEF(null:string)>]extension:string) : option<string array> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let fd = Rhino.UI.OpenFileDialog()
+            if notNull title then fd.Title <- title
+            if notNull filter then fd.Filter <- filter
+            if notNull folder then fd.InitialDirectory <- folder
+            if notNull filename then fd.FileName <- filename
+            if notNull extension then fd.DefaultExt <- extension
+            fd.MultiSelect <- true
+            return
+                if fd.ShowOpenDialog() then Some fd.FileNames
+                else None
+            } |> Async.RunSynchronously
+    (*
+    def OpenFileNames(title=None, filter=None, folder=None, filename=None, extension=None):
+        '''Displays file open dialog box allowing the user to select one or more file names.
+        Note, this function does not open the file.
+        Parameters:
+          title (str, optional): A dialog box title.
+          filter (str, optional): A filter string. The filter must be in the following form:
+            "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+            If omitted, the filter (*.*) is used.
+          folder (str, optional): A default folder.
+          filename (str, optional): a default file name
+          extension (str, optional): a default file extension
+        Returns:
+          list(str, ...): of selected file names
+        '''
+    
+        fd = Rhino.UI.OpenFileDialog()
+        if title: fd.Title = title
+        if filter: fd.Filter = filter
+        if folder: fd.InitialDirectory = folder
+        if filename: fd.FileName = filename
+        if extension: fd.DefaultExt = extension
+        fd.MultiSelect = True
+        if fd.ShowOpenDialog(): return fd.FileNames
+        return []
+    *)
+
+
+    [<EXT>]
+    ///<summary>Display a context-style popup menu. The popup menu can appear almost
+    ///  anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
+    ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
+    ///  will create a separator</param>
+    ///<param name="modes">(int seq) Optional, List of numbers identifying the display modes. If omitted, all
+    ///  modes are enabled.
+    ///    0 = menu item is enabled
+    ///    1 = menu item is disabled
+    ///    2 = menu item is checked
+    ///    3 = menu item is disabled and checked</param>
+    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
+    ///A 3D point where the menu item will appear. If omitted, the menu
+    ///  will appear at the current cursor position</param>
+    ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
+    ///  If omitted, the active view is used</param>
+    ///<returns>(int) index of the menu item picked or -1 if no menu item was picked</returns>
+    static member PopupMenu(        items:string seq, 
+                                    [<OPT;DEF(null:int seq)>]modes:int seq, 
+                                    [<OPT;DEF(Point3d())>]point:Point3d, 
+                                    [<OPT;DEF(null:string)>]view:string) : int =
+        async{
+            do! Async.SwitchToContext syncContext
+            let mutable screenpoint = Windows.Forms.Cursor.Position
+            if Point3d.Origin <> point then
+                let view = RhinoScriptSyntax.CoerceView(view)
+                let viewport = view.ActiveViewport
+                let point2d = viewport.WorldToClient(point)
+                screenpoint <- viewport.ClientToScreen(point2d)              
+            return  Rhino.UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
+            } |> Async.RunSynchronously
+    (*
+    def PopupMenu(items, modes=None, point=None, view=None):
+        '''Display a context-style popup menu. The popup menu can appear almost
+        anywhere, and can be dismissed by clicking the left or right mouse buttons
+        Parameters:
+          items ([str, ...]): list of strings representing the menu items. An empty string or None
+            will create a separator
+          modes ([number, ...]): List of numbers identifying the display modes. If omitted, all
+            modes are enabled.
+              0 = menu item is enabled
+              1 = menu item is disabled
+              2 = menu item is checked
+              3 = menu item is disabled and checked
+          point (point, optional): a 3D point where the menu item will appear. If omitted, the menu
+            will appear at the current cursor position
+          view (str, optional): if point is specified, the view in which the point is computed.
+            If omitted, the active view is used
+        Returns:
+          number: index of the menu item picked or -1 if no menu item was picked
+        '''
+    
+        screen_point = System.Windows.Forms.Cursor.Position
+        if point:
+            point = rhutil.coerce3dpoint(point)
+            view = __viewhelper(view)
+            viewport = view.ActiveViewport
+            point2d = viewport.WorldToClient(point)
+            screen_point = viewport.ClientToScreen(point2d)
+        return Rhino.UI.Dialogs.ShowContextMenu(items, screen_point, modes);
+    *)
+
+
+    [<EXT>]
+    ///<summary>Display a dialog box prompting the user to enter a number</summary>
+    ///<param name="message">(string) Optional, Default Value: <c>""</c>
+    ///A prompt message.</param>
+    ///<param name="defaultValNumber">(float) Optional, Default Value: <c>7e89</c>
+    ///A default number.</param>
+    ///<param name="title">(string) Optional, Default Value: <c>""</c>
+    ///A dialog box title.</param>
+    ///<param name="minimum">(float) Optional, Default Value: <c>7e89</c>
+    ///A minimum allowable value.</param>
+    ///<param name="maximum">(float) Optional, Default Value: <c>7e89</c>
+    ///A maximum allowable value.</param>
+    ///<returns>(option<float>) an Option of The newly entered number on success</returns>
+    static member RealBox(          [<OPT;DEF("")>]message:string, 
+                                    [<OPT;DEF(7e89)>]defaultValNumber:float, 
+                                    [<OPT;DEF("")>]title:string, 
+                                    [<OPT;DEF(7e89)>]minimum:float, 
+                                    [<OPT;DEF(7e89)>]maximum:float) : option<float> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let defaultValNumber = ref <| if defaultValNumber = 7e89 then Rhino.RhinoMath.UnsetValue else defaultValNumber
+            let minimum = if minimum = 7e89 then Rhino.RhinoMath.UnsetValue else minimum
+            let maximum = if maximum = 7e89 then Rhino.RhinoMath.UnsetValue else maximum
+            
+            let rc = Rhino.UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
+            return 
+                if  rc then Some (!defaultValNumber)
+                else None
+
+            } |> Async.RunSynchronously
+    (*
+    def RealBox(message="", default_number=None, title="", minimum=None, maximum=None):
+        '''Display a dialog box prompting the user to enter a number
+        Parameters:
+          message (str, optional): a prompt message.
+          default_number (number, optional):  a default number.
+          title (str, optional):  a dialog box title.
+          minimum (number, optional):  a minimum allowable value.
+          maximum (number, optional):  a maximum allowable value.
+        Returns:
+          number: The newly entered number on success
+          None: on error
+        '''
+    
+        if default_number is None: default_number = Rhino.RhinoMath.UnsetValue
+        if minimum is None: minimum = Rhino.RhinoMath.UnsetValue
+        if maximum is None: maximum = Rhino.RhinoMath.UnsetValue
+        rc, number = Rhino.UI.Dialogs.ShowNumberBox(title, message, default_number, minimum, maximum)
+        if rc: return number
+    *)
+
+
+    [<EXT>]
+    ///<summary>Display a save dialog box allowing the user to enter a file name.
+    ///  Note, this function does not save the file.</summary>
+    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
+    ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+    ///  If omitted, the filter (*.*) is used.</param>
+    ///<param name="folder">(string) Optional, A default folder.</param>
+    ///<param name="filename">(string) Optional, A default file name</param>
+    ///<param name="extension">(string) Optional, A default file extension</param>
+    ///<returns>(option<string>) an Option of the file name is successful</returns>
+    static member SaveFileName(     [<OPT;DEF(null:string)>]title:string, 
+                                    [<OPT;DEF(null:string)>]filter:string, 
+                                    [<OPT;DEF(null:string)>]folder:string, 
+                                    [<OPT;DEF(null:string)>]filename:string, 
+                                    [<OPT;DEF(null:string)>]extension:string) : option<string> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let fd = Rhino.UI.SaveFileDialog()
+            if notNull title then fd.Title <- title
+            if notNull filter then fd.Filter <- filter
+            if notNull folder then fd.InitialDirectory <- folder
+            if notNull filename then fd.FileName <- filename
+            if notNull extension then fd.DefaultExt <- extension
+            return if fd.ShowSaveDialog() then Some fd.FileName else None
+            } |> Async.RunSynchronously
+    (*
+    def SaveFileName(title=None, filter=None, folder=None, filename=None, extension=None):
+        '''Display a save dialog box allowing the user to enter a file name.
+        Note, this function does not save the file.
+        Parameters:
+          title (str, optional): A dialog box title.
+          filter(str, optional): A filter string. The filter must be in the following form:
+            "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+            If omitted, the filter (*.*) is used.
+          folder (str, optional): A default folder.
+          filename (str, optional): a default file name
+          extension (str, optional):  a default file extension
+        Returns:
+          str: the file name is successful
+          None: if not successful, or on error
+        '''
+    
+        fd = Rhino.UI.SaveFileDialog()
+        if title: fd.Title = title
+        if filter: fd.Filter = filter
+        if folder: fd.InitialDirectory = folder
+        if filename: fd.FileName = filename
+        if extension: fd.DefaultExt = extension
+        if fd.ShowSaveDialog(): return fd.FileName
+    *)
+
+
+    [<EXT>]
+    ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
+    ///<param name="message">(string) Optional, A prompt message</param>
+    ///<param name="defaultValValue">(string) Optional, A default string value</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
+    ///<returns>(option<string>) an Option of the newly entered string value</returns>
+    static member StringBox(        [<OPT;DEF(null:string)>]message:string, 
+                                    [<OPT;DEF(null:string)>]defaultValValue:string, 
+                                    [<OPT;DEF(null:string)>]title:string) : option<string> =
+        async{
+            do! Async.SwitchToContext syncContext
+            let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
+            return if rc then Some text else None
+            } |> Async.RunSynchronously
+    (*
+    def StringBox(message=None, default_value=None, title=None):
+        '''Display a dialog box prompting the user to enter a string value.
+        Parameters:
+          message (str, optional): a prompt message
+          default_value (str, optional): a default string value
+          title (str, optional): a dialog box title
+        Returns:
+          str: the newly entered string value if successful
+          None: if not successful
+        '''
+    
+        rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, default_value, False)
+        if rc: return text
+    *)
+
+
+    [<EXT>]
+    ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
+    ///<param name="message">(string) Optional, A message</param>
+    ///<param name="title">(string) Optional, The message title</param>
+    ///<returns>(option<unit>) an Option of in any case</returns>
+    static member TextOut(
+                                    [<OPT;DEF(null:string)>]message:string, 
+                                    [<OPT;DEF(null:string)>]title:string) : unit =
+        async{
+            do! Async.SwitchToContext syncContext
+            return Rhino.UI.Dialogs.ShowTextDialog(message, title)
+            } |> Async.RunSynchronously
+    (*
+    def TextOut(message=None, title=None):
+        '''Display a text dialog box similar to the one used by the _What command.
+        Parameters:
+          message (str): a message
+          title (str, optional): the message title
+        Returns:
+          None: in any case
+        '''
+    
+        Rhino.UI.Dialogs.ShowTextDialog(message, title)
     *)
 
 
