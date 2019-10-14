@@ -469,10 +469,8 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Returns string from a specified section in a initialization file. NOT IMPLEMENTED YET</summary> 
     ///<param name="filename">(string) Name of the initialization file</param>
-    ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
-    ///Section containing the entry</param>
-    ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
-    ///Entry whose associated string is to be returned</param>
+    ///<param name="section">(string) Optional, Section containing the entry</param>
+    ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
     ///<returns>(string seq) A list containing all section names</returns>
     static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
         failwithf "getSettings is missing implementation" // TODO!

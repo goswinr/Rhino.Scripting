@@ -340,11 +340,9 @@ module ExtensionsCurve =
     ///<param name="curveB">(Guid) Identifier of the second curve object</param>
     ///<param name="radius">(float) Optional, Default Value: <c>1.0</c>
     ///Fillet radius</param>
-    ///<param name="basisPointA">(Point3d) Optional, Default Value: <c>null</c>
-    ///Base point of the first curve. If omitted,
+    ///<param name="basisPointA">(Point3d) Optional, Base point of the first curve. If omitted,
     ///  starting point of the curve is used</param>
-    ///<param name="basisPointB">(Point3d) Optional, Default Value: <c>null</c>
-    ///Base point of the second curve. If omitted,
+    ///<param name="basisPointB">(Point3d) Optional, Base point of the second curve. If omitted,
     ///  starting point of the curve is used</param>
     ///<returns>(Guid) id of the new curve object</returns>
     static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
@@ -513,11 +511,9 @@ module ExtensionsCurve =
     ///  3 Periodic with uniform spacing.
     ///  4 Periodic with chord length spacing.  Requires an odd degree value.
     ///  5 Periodic with sqrt (chord length) spacing.  Requires an odd degree value.</param>
-    ///<param name="startTangent">(Vector3d) Optional, Default Value: <c>null</c>
-    ///A vector that specifies a tangency condition at the
+    ///<param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
     ///  beginning of the curve. If the curve is periodic, this argument must be omitted.</param>
-    ///<param name="endTangent">(Vector3d) Optional, Default Value: <c>null</c>
-    ///3d vector that specifies a tangency condition at the
+    ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
     ///  end of the curve. If the curve is periodic, this argument must be omitted.</param>
     ///<returns>(Guid) id of the new curve object</returns>
     static member AddInterpCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0)>]knotstyle:int, [<OPT;DEF(Vector3d())>]startTangent:Vector3d, [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
@@ -600,12 +596,11 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Adds a NURBS curve object to the document</summary>
-    ///<param name="points">(Point3d IList) A list containing 3D control points</param>
-    ///<param name="knots">(float IList) Knot values for the curve. The number of elements in knots must
+    ///<param name="points">(Point3d seq) A list containing 3D control points</param>
+    ///<param name="knots">(float seq) Knot values for the curve. The number of elements in knots must
     ///  equal the number of elements in points plus degree minus 1</param>
     ///<param name="degree">(int) Degree of the curve. must be greater than of equal to 1</param>
-    ///<param name="weights">(float IList) Optional, Default Value: <c>null</c>
-    ///Weight values for the curve. Number of elements should
+    ///<param name="weights">(float seq) Optional, Weight values for the curve. Number of elements should
     ///  equal the number of elements in points. Values must be greater than 0</param>
     ///<returns>(Guid) the identifier of the new object , otherwise None</returns>
     static member AddNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : Guid =
@@ -1845,8 +1840,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Calculates intersection of two curve objects.</summary>
     ///<param name="curveA">(Guid) Identifier of the first curve object.</param>
-    ///<param name="curveB">(Guid) Optional, Default Value: <c>null</c>
-    ///Identifier of the second curve object. If omitted, then a
+    ///<param name="curveB">(Guid) Optional, Identifier of the second curve object. If omitted, then a
     ///  self-intersection test will be performed on curveA.</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///  Absolute tolerance in drawing units. If omitted,
@@ -2248,11 +2242,9 @@ module ExtensionsCurve =
     ///<param name="curveA">(Guid) Identifier of the first curve object.</param>
     ///<param name="curveB">(Guid) Identifier of the second curve object.</param>
     ///<param name="radius">(float) The fillet radius. </param>
-    ///<param name="basePointA">(Point3d) Optional, Default Value: <c>null</c>
-    ///The base point on the first curve.
+    ///<param name="basePointA">(Point3d) Optional, The base point on the first curve.
     ///  If omitted, the starting point of the curve is used.</param>
-    ///<param name="basePointB">(Point3d) Optional, Default Value: <c>null</c>
-    ///The base point on the second curve. If omitted,
+    ///<param name="basePointB">(Point3d) Optional, The base point on the second curve. If omitted,
     ///  the starting point of the curve is used.</param>   
     ///<returns>(Point3d * Point3d * Plane) 
     ///  . The list elements are as follows:
@@ -2470,8 +2462,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<param name="subDomain">(Interval) Optional, Default Value: <c>null</c>
-    ///  List of two numbers identifying the sub-domain of the
+    ///<param name="subDomain">(Interval) Optional,   List of two numbers identifying the sub-domain of the
     ///  curve on which the calculation will be performed. The two parameters
     ///  (sub-domain) must be non-decreasing. If omitted, the length of the
     ///  entire curve is returned.</param>
@@ -2820,8 +2811,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>null</c>
-    ///New start point</param>
+    ///<param name="point">(Point3d) Optional, New start point</param>
     ///<returns>(Point3d) The 3D starting point of the curve .</returns>
     static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)  

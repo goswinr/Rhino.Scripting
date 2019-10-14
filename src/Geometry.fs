@@ -18,8 +18,7 @@ module ExtensionsGeometry =
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uMagnitude">(float) U magnitude of the plane</param>
     ///<param name="vMagnitude">(float) V magnitude of the plane</param>
-    ///<param name="views">(string seq) Optional, Default Value: <c>null:string seq</c>
-    ///Titles or ids the the view(s) to clip. If omitted, the active
+    ///<param name="views">(string seq) Optional, Titles or ids the the view(s) to clip. If omitted, the active
     ///  view is used.</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
@@ -174,8 +173,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Adds point cloud object to the document</summary>
     ///<param name="points">(Point3d array) List of values where every multiple of three represents a point</param>
-    ///<param name="colors">(Drawing.Color array) Optional, Default Value: <c>null:Drawing.Color seq</c>
-    ///List of colors to apply to each point</param>
+    ///<param name="colors">(Drawing.Color array) Optional, List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud on success</returns>
     static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color seq)>]colors:Drawing.Color []) : Guid =
         if notNull colors && Seq.length(colors) = Seq.length(points) then
@@ -247,8 +245,7 @@ module ExtensionsGeometry =
     ///  The origin of the plane will be the origin point of the text</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
     ///The text height</param>
-    ///<param name="font">(string) Optional, Default Value: <c>null:string</c>
-    ///The text font</param>
+    ///<param name="font">(string) Optional, The text font</param>
     ///<param name="fontStyle">(int) Optional, Default Value: <c>0</c>
     ///Any of the following flags
     ///  0 = normal
