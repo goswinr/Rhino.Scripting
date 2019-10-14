@@ -283,11 +283,11 @@ module MinMaxSort =
       
         // Find a property that we can call and get the value
         let prop = typ.GetProperty(name, flags)
-        if prop = null && instance = null then 
+        if prop |> isNull && instance |> isNull then 
           // The syntax can be also used to access nested types of a type
           let nested = typ.Assembly.GetType(typ.FullName + "+" + name)
           // Return nested type if we found one
-          if nested = null then 
+          if nested |> isNull then 
             failwithf "Property or nested type '%s' not found in '%s'." name typ.Name 
           elif not ((typeof<'R>).IsAssignableFrom(typeof<System.Type>)) then
             let rname = (typeof<'R>.Name)
@@ -296,6 +296,6 @@ module MinMaxSort =
         else
           // Call property and return result if we found some
           let meth = prop.GetGetMethod(true)
-          if prop = null then failwithf "Property '%s' found, but doesn't have 'get' method." name
+          if prop |> isNull then failwithf "Property '%s' found, but doesn't have 'get' method." name
           try meth.Invoke(instance, [| |]) |> unbox<'R>
           with _ -> failwithf "Failed to get value of '%s' property (of type '%s')" name typ.Name
