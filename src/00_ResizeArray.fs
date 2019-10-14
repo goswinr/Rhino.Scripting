@@ -96,11 +96,11 @@ module ResizeArray =
         let rec loop i = i >= len || (f arr.[i] && loop (i+1))
         loop 0
 
-    let indexNotFound() = raise (new System.Collections.Generic.KeyNotFoundException("An index satisfying the predicate was not found in the collection"))
+    let indexNotFound(i) = raise (System.Collections.Generic.KeyNotFoundException(sprintf "The index %d was not found in the collection" i) )
 
     let find f (arr: ResizeArray<_>) = 
         let rec loop i = 
-            if i >= length arr then indexNotFound()
+            if i >= length arr then indexNotFound(i)
             elif f arr.[i] then arr.[i]
             else loop (i+1)
         loop 0
@@ -200,11 +200,11 @@ module ResizeArray =
         loop 0
 
     let findIndex f (arr: ResizeArray<_>) =
-        let rec go n = if n >= length arr then indexNotFound() elif f arr.[n] then n else go (n+1)
+        let rec go n = if n >= length arr then indexNotFound(n) elif f arr.[n] then n else go (n+1)
         go 0
 
     let findIndexi f (arr: ResizeArray<_>) =
-        let rec go n = if n >= length arr then indexNotFound() elif f n arr.[n] then n else go (n+1)
+        let rec go n = if n >= length arr then indexNotFound(n) elif f n arr.[n] then n else go (n+1)
         go 0
 
     let foldSub f acc (arr: ResizeArray<_>) start fin = 

@@ -10,7 +10,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsBlock =
   
-  [<Ext>] 
+  
   type RhinoScriptSyntax with
 
 

@@ -15,7 +15,7 @@ module ExtensionsApplication =
   
   let mutable internal commandSerialNumbers = None // to store last created object form executing a rs.Command(...)
   
-  [<Ext>] 
+  
   type RhinoScriptSyntax with
     
     [<EXT>]

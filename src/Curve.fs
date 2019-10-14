@@ -12,7 +12,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module ExtensionsCurve =
 
-  [<EXT>] 
+  
   type RhinoScriptSyntax with
     
     [<EXT>]

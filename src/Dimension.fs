@@ -12,7 +12,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module ExtensionsDimension =
   
-  [<EXT>]  
+   
   type RhinoScriptSyntax with
     
     
