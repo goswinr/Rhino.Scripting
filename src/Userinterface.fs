@@ -15,11 +15,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module ExtensionsUserinterface =
   
-  ///of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
-  let mutable internal syncContext = System.Threading.SynchronizationContext.Current  
-
-  type RhinoScriptSyntax with
-    
+  type RhinoScriptSyntax with    
 
     [<EXT>]
     ///<summary>The Synchronization Context of the Rhino UI Therad.

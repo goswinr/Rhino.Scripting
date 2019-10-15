@@ -6,29 +6,13 @@ open Rhino.Scripting.Util
 [<AutoOpen>]
 module TypeExtensions =    
     
-    type Collections.Generic.Dictionary<'K,'V> with   
-        
-        [<EXT>] member inline  d.SetValue k v =
-                    d.[k] <-v
-        
-       
-        [<EXT>] member inline d.GetValue k  =
-                    d.[k]
-        
-        /// get a value and remove it from Dictionary, like *.pop() in Python         
-        [<EXT>] member inline d.Pop k  =
-                    let v= d.[k]
-                    d.Remove(k)|> ignore
-                    v
 
-        /// Returns a seq of key and value tuples
-        [<EXT>] member inline d.Items =
-                    seq { for KeyValue(k,v) in d -> k,v}
 
 
     type Int32 with  
         [<EXT>] member inline x.ToDouble = float(x)
         [<EXT>] member inline x.ToByte = byte(x)
+
 
     type Byte with  
         [<EXT>] member inline x.ToDouble = float(x)
@@ -46,6 +30,7 @@ module TypeExtensions =
         /// with automatic formating of display precision depending on float size
         [<EXT>] member x.ToNiceString = Util.singleToString x
 
+
     type Drawing.Color with        
         ///Compare to another color only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor        
         [<EXT>] 
@@ -61,6 +46,26 @@ module TypeExtensions =
             this.EqualsARGB(other)
     
 
+    type Collections.Generic.Dictionary<'K,'V> with           
+        [<EXT>]
+        member inline  d.SetValue k v =
+                    d.[k] <-v        
+       
+        [<EXT>] 
+        member inline d.GetValue k  =
+                    d.[k]
+        
+        /// get a value and remove it from Dictionary, like *.pop() in Python         
+        [<EXT>] 
+        member inline d.Pop k  =
+                    let v= d.[k]
+                    d.Remove(k)|> ignore
+                    v
+
+        /// Returns a seq of key and value tuples
+        [<EXT>] 
+        member inline d.Items =
+                    seq { for KeyValue(k,v) in d -> k,v}
 
    
     type Collections.Generic.List<'T>  with        

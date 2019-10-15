@@ -9,6 +9,29 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument 
 open Rhino.Scripting.TypeExtensions
 
+/// An Integer Enum of Object types to be use in object selection functions
+[<RequireQualifiedAccess; AbstractClass; Sealed>]
+type Filter private () =  
+  static member AllObjects = 0
+  static member Point = 1
+  static member PointCloud = 2
+  static member Curve = 4
+  static member Surface = 8
+  static member PolySurface = 16
+  static member Mesh = 32
+  static member Light = 256
+  static member Annotation = 512
+  static member Instance = 4096
+  static member Textdot = 8192
+  static member Grip = 16384
+  static member Detail = 32768
+  static member Hatch = 65536
+  static member Morph = 131072
+  static member Cage = 134217728
+  static member Phantom = 268435456
+  static member ClippingPlane = 536870912
+  static member Extrusion = 1073741824
+
 [<AbstractClass; Sealed>]
 /// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 
 type RhinoScriptSyntax private () = // no constructor?
@@ -134,6 +157,7 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? Point3d    as pt               -> pt
         | :? Vector3d   as v                -> Point3d(v)
         | :? Point3f    as pt               -> Point3d(pt)
+        | :? DocObjects.PointObject as po   -> po.PointGeometry.Location
         | :? (float*float*float) as xyz     -> let x,y,z = xyz in Point3d(x,y,z)
         | :? (single*single*single) as xyz  -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))        
         | :? (int*int*int) as xyz           -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))

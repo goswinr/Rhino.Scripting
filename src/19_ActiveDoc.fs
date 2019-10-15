@@ -18,6 +18,9 @@ module ActiceDocument =
     let redraw() = Doc.Views.Redraw()
    
 
+    ///of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
+    let mutable internal syncContext = System.Threading.SynchronizationContext.Current  
+
     do
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
