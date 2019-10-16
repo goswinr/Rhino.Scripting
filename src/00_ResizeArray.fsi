@@ -221,3 +221,10 @@ module ResizeArray =
 
     /// Split an array of pairs into two arrays.
     val unzip : ResizeArray<'T * 'U> -> ResizeArray<'T> * ResizeArray<'U>
+
+    //---------------------------------------------------
+    // extensions by Goswin:
+    //----------------------------------------------------
+    
+    /// shift items poistion  towards the end of ResizeArray. refilling at start from end.
+    val rotate : int -> ResizeArray<'T> -> ResizeArray<'T>

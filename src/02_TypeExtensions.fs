@@ -67,6 +67,8 @@ module TypeExtensions =
         member inline d.Items =
                     seq { for KeyValue(k,v) in d -> k,v}
 
+
+
    
     type Collections.Generic.List<'T>  with        
         [<EXT>] 
@@ -84,6 +86,7 @@ module TypeExtensions =
         [<EXT>] 
         /// Allows for negtive index too (like python)
         member this.SetItem index value = if index<0 then this.[this.Count+index]<-value   else this.[index]<-value 
+
     
     
     type ``[]``<'T>  with //Generic Array

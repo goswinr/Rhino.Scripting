@@ -45,7 +45,7 @@ module ResizeArray =
         for i = start to start + len - 1 do 
             arr.[i] <- x
 
-    let copy      (arr: ResizeArray<'T>) = new ResizeArray<_>(arr)
+    let copy (arr: ResizeArray<'T>) = new ResizeArray<_>(arr)
 
     let toList (arr: ResizeArray<_>) =
         let mutable res = []
@@ -322,4 +322,8 @@ module ResizeArray =
             res2.Add(y)
         res1,res2
 
+    //---------------------------------------------------
+    // extensions by Goswin:
+    //----------------------------------------------------
 
+    let rotate k (xs: ResizeArray<_>)  =  init xs.Count (fun i -> xs.[if i-k < 0 then xs.Count+i-k  else i-k])
