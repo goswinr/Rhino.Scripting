@@ -1171,7 +1171,7 @@ module ExtensionsDocument =
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
         let rendersettings = Doc.RenderSettings
-        rendersettings.ShadowmapLevel <-    (settings &&& 1)
+        rendersettings.ShadowmapLevel <-    (settings &&& 1) 
         rendersettings.UseHiddenLights <-   (settings &&& 2) = 2
         rendersettings.RenderCurves <-      (settings &&& 4) = 4
         rendersettings.RenderAnnotations <- (settings &&& 8) = 8

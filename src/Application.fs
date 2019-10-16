@@ -13,9 +13,6 @@ open System.Windows.Forms
 [<AutoOpen>]
 module ExtensionsApplication =
   
-  let mutable internal commandSerialNumbers = None // to store last created object form executing a rs.Command(...)
-  
-  
   type RhinoScriptSyntax with
     
     [<EXT>]

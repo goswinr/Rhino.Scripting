@@ -8,6 +8,7 @@ open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument 
 open Rhino.Scripting.TypeExtensions
+open System.Collections.Generic
 
 /// An Integer Enum of Object types to be use in object selection functions
 [<RequireQualifiedAccess; AbstractClass; Sealed>]
@@ -41,16 +42,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x">('T): the value or object to represent as string</param>
     ///<returns>(stirng) the string</returns>
     static member ConvertToString (x:'T) : string =
-        match box x with
-        | null -> "NULL"
-        | :? Point3d    as p   -> p.ToNiceString
-        | :? Vector3d   as v   -> v.ToNiceString
-        | :? Point3f    as p   -> p.ToNiceString
-        | :? float      as v   -> v.ToNiceString
-        | :? single     as v   -> v.ToNiceString
-        | :? Char       as c   -> c.ToString()  // "'" + c.ToString() + "'"
-        | :? string     as s   -> s // to not have it in quotes
-        | _ ->          x.ToString()
+        NiceString.toNiceString(x)
         
 
     ///<summary>Prints an object or value to Rhino Command line </summary>

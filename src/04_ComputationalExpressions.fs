@@ -117,7 +117,7 @@ module ResizeArrayBuilder =
         member _.Delay f = 
             fun (r: ResizeArray<'T>) -> (f()) r
         
-        member _.Zero () = ignore
+        member _.Zero () =  ignore
         
         member _.For (xs: 'U seq, f: 'U -> ResizeArray<'T> -> unit) =
             fun (r: ResizeArray<'T>) ->
