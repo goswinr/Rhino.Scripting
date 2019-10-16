@@ -32,7 +32,7 @@ module ExtensionsUserinterface =
     ///<returns>(string option) selected folder option or None if selection was canceled</returns>
     static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string option =
         async{            
-            do! Async.SwitchToContext syncContext        
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext        
             use dlg = new System.Windows.Forms.FolderBrowserDialog()
             dlg.ShowNewFolderButton <- true
             if notNull folder then
@@ -91,9 +91,9 @@ module ExtensionsUserinterface =
                 
         let newcheckstates =
             async{
-                do! Async.SwitchToContext syncContext 
+                if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
                 return Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
-                } |> Async.RunSynchronously
+                } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
         if notNull newcheckstates then
             Some (Array.zip itemstrs newcheckstates)
@@ -130,13 +130,13 @@ module ExtensionsUserinterface =
     ///<returns>(string Option) Option of The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option=
         async{
-            do! Async.SwitchToContext syncContext 
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
             return 
                 match Rhino.UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
                 | null -> None
                 | :? string as s -> Some s
                 | _ -> None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def ComboListBox(items, message=None, title=None):
         '''Displays a list of items in a combo-style list box dialog.
@@ -162,10 +162,10 @@ module ExtensionsUserinterface =
     ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
         async{
-            do! Async.SwitchToContext syncContext 
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
             let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
             return if rc then Some text else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def EditBox(defaultstring=None, message=None, title=None):
         '''Display dialog prompting the user to enter a string. The
@@ -199,7 +199,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float, 
                             [<OPT;DEF(null:string)>]message:string) : float option=
         async{
-            do! Async.SwitchToContext syncContext 
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
             let point = if point = Point3d.Origin then Point3d.Unset else point
             let referencepoint = if referencePoint = Point3d.Origin then Point3d.Unset else referencePoint
             let defaultangle = toRadians(defaultValAngleDegrees)
@@ -207,7 +207,7 @@ module ExtensionsUserinterface =
             return 
                 if rc = Rhino.Commands.Result.Success then Some(toDegrees(angle))
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetAngle(point=None, referencepoint=None, defaultangledegrees=0, message=None):
         '''Pause for user input of an angle
@@ -244,7 +244,7 @@ module ExtensionsUserinterface =
     ///<returns>(bool seq) a list of values that represent the boolean values</returns>
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : (bool array) option =
         async{
-            do! Async.SwitchToContext syncContext             
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext             
             use go = new Input.Custom.GetOption()
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
@@ -268,7 +268,7 @@ module ExtensionsUserinterface =
                 else
                     Some [| for t in toggles do yield t.CurrentValue |]
             return res
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetBoolean(message, items, defaults):
         '''Pauses for user input of one or more boolean values. Boolean values are
@@ -333,7 +333,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(null:string)>]prompt2:string, 
                             [<OPT;DEF(null:string)>]prompt3:string) : (Point3d []) option=
         async{
-            do! Async.SwitchToContext syncContext 
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
             let basisPoint = basisPoint |?? Point3d.Unset 
             let m =
                 match mode with
@@ -349,7 +349,7 @@ module ExtensionsUserinterface =
             return 
                 if rc = Rhino.Commands.Result.Success then Some ((!box).GetCorners())
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
     (*
     def GetBox(mode=0, basepoint=None, prompt1=None, prompt2=None, prompt3=None):
@@ -391,13 +391,13 @@ module ExtensionsUserinterface =
     ///<returns>(option<Drawing.Color>) an Option of RGB color</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let zero = Drawing.Color()
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = Rhino.UI.Dialogs.ShowColorDialog(col)
             return
                 if rc then Some (!col) else None
-        } |> Async.RunSynchronously
+        } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetColor(color=None):
         '''Display the Rhino color picker dialog allowing the user to select an RGB color
@@ -425,7 +425,7 @@ module ExtensionsUserinterface =
     ///  3  cursor position in client coordinates</returns>
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let view = Doc.Views.ActiveView
             let screenpt = Rhino.UI.MouseCursor.Location
             let clientpt = view.ScreenToClient(screenpt)
@@ -434,7 +434,7 @@ module ExtensionsUserinterface =
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
             worldpt.Transform(xf)
             return worldpt, screenpt, viewport.Id, clientpt
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetCursorPos():
         '''Retrieves the cursor's position
@@ -473,7 +473,7 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string, 
                                 [<OPT;DEF("Second distance point")>]secondPtMsg:string) : option<float> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let pt1 = 
                 if firstPt = Point3d.Origin then 
                     let gp1 = new Rhino.Input.Custom.GetPoint()            
@@ -509,7 +509,7 @@ module ExtensionsUserinterface =
                         gp2.Dispose()
                         None
                 | _ -> None
-                } |> Async.RunSynchronously
+                } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetDistance(firstpt=None, distance=None, firstptmsg="First distance point", secondptmsg="Second distance point"):
         '''Pauses for user input of a distance.
@@ -577,7 +577,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(0)>]maxCount:int, 
                                     [<OPT;DEF(false)>]select:bool) : option<ResizeArray<Guid*Guid*Point3d>> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if maxCount > 0 && minCount > maxCount then failwithf "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Rhino.Input.Custom.GetObject()
             go.SetCommandPrompt(message)
@@ -603,7 +603,7 @@ module ExtensionsUserinterface =
                             rhobj.Select(true)|> ignore
                         Doc.Views.Redraw()
                     Some r
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetEdgeCurves(message=None, mincount=1, maxcount=0, select=False):
         '''Prompt the user to pick one or more surface or polysurface edge curves
@@ -653,7 +653,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<int>) an Option of The whole number input by the user .</returns>
     static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(2147482999)>]number:int, [<OPT;DEF(2147482999)>]minimum:int, [<OPT;DEF(2147482999)>]maximum:int) : option<int> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gi = new Rhino.Input.Custom.GetInteger()
             if notNull message then gi.SetCommandPrompt(message)
             if number  <> 2147482999 then gi.SetDefaultInteger(number)
@@ -667,7 +667,7 @@ module ExtensionsUserinterface =
                     let rc = gi.Number()
                     gi.Dispose()
                     Some rc
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetInteger(message=None, number=None, minimum=None, maximum=None):
         '''Pauses for user input of a whole number.
@@ -705,7 +705,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<string>) an Option of name of selected layer</returns>
     static member GetLayer([<OPT;DEF("Select Layer")>]title:string, [<OPT;DEF(null:string)>]layer:string, [<OPT;DEF(false)>]showNewButton:bool, [<OPT;DEF(false)>]showSetCurrent:bool) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let layerindex = ref Doc.Layers.CurrentLayerIndex
             if notNull layer then
                 let layerinstance = Doc.Layers.FindName(layer)
@@ -716,7 +716,7 @@ module ExtensionsUserinterface =
                 else
                     let layer = Doc.Layers.[!layerindex]
                     Some layer.FullPath
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetLayer(title="Select Layer", layer=None, shownewbutton=False, showsetcurrent=False):
         '''Displays dialog box prompting the user to select a layer
@@ -750,14 +750,14 @@ module ExtensionsUserinterface =
     ///<returns>(option<string array>) an Option of The names of selected layers</returns>
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string []> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let rc, layerindices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)            
             return 
                 if rc then
                     Some [| for index in layerindices do yield  Doc.Layers.[index].FullPath|]
                 else
                     None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetLayers(title="Select Layers", shownewbutton=False):
         '''Displays a dialog box prompting the user to select one or more layers
@@ -798,7 +798,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<Line>) an Option of A Line</returns>
     static member GetLine([<OPT;DEF(0)>]mode:int, [<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : option<Line> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gl = new Input.Custom.GetLine()
             if mode = 0 then gl.EnableAllVariations(true)
             else  gl.GetLineMode <- LanguagePrimitives.EnumOfValue( mode-1) 
@@ -813,7 +813,7 @@ module ExtensionsUserinterface =
                     Some line
                 else
                     None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetLine(mode=0, point=None, message1=None, message2=None, message3=None):
         '''Prompts the user to pick points that define a line
@@ -858,7 +858,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<string>) an Option of The names of selected linetype</returns>
     static member GetLinetype([<OPT;DEF(null:string)>]defaultValLinetype:string, [<OPT;DEF(false)>]showByLayer:bool) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable ltinstance = Doc.Linetypes.CurrentLinetype
             if notNull defaultValLinetype then
                 let ltnew = Doc.Linetypes.FindName(defaultValLinetype)
@@ -870,7 +870,7 @@ module ExtensionsUserinterface =
                     Some linetype.Name
                 with _ -> 
                     None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetLinetype(defaultlinetype=None, showbylayer=False):
         '''Displays a dialog box prompting the user to select one linetype
@@ -906,7 +906,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<int array>) an Option of of mesh face indices on success</returns>
     static member GetMeshFaces(objectId:Guid, [<OPT;DEF("Select Mesh Faces")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<int []> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             Doc.Objects.UnselectAll() |> ignore
             Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
@@ -922,7 +922,7 @@ module ExtensionsUserinterface =
                     let objrefs = go.Objects()
                     let rc = [| for item in objrefs do yield item.GeometryComponentIndex.Index |]                    
                     Some rc
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
     (*
     def GetMeshFaces(objectid, message="", mincount=1, maxcount=0):
         '''Prompts the user to pick one or more mesh faces
@@ -970,7 +970,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<int array>) an Option of of mesh vertex indices on success</returns>
     static member GetMeshVertices(objectId:Guid, [<OPT;DEF("Select Mesh Vertices")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<int array> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             Doc.Objects.UnselectAll() |> ignore
             Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
@@ -985,7 +985,7 @@ module ExtensionsUserinterface =
                     let objrefs = go.Objects()
                     let rc = [| for item in objrefs do yield item.GeometryComponentIndex.Index |]                    
                     Some rc
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetMeshVertices(objectid, message="", mincount=1, maxcount=0):
         '''Prompts the user to pick one or more mesh vertices
@@ -1034,7 +1034,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(0.0)>]distance:float, 
                             [<OPT;DEF(false)>]inPlane:bool) : option<Point3d> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()
             if notNull message then gp.SetCommandPrompt(message)            
             if basisPoint <> Point3d.Origin then
@@ -1049,7 +1049,7 @@ module ExtensionsUserinterface =
                 else
                     let pt = gp.Point()
                     Some pt
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetPoint(message=None, basepoint=None, distance=None, inplane=False):
         '''Pauses for user input of a point.
@@ -1089,7 +1089,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<Point3d>) an Option of 3d point</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve":string)>]message:string) : option<Point3d> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
@@ -1101,7 +1101,7 @@ module ExtensionsUserinterface =
                 else
                     let pt = gp.Point()
                     Some pt
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetPointOnCurve(curveid, message=None):
         '''Pauses for user input of a point constrainted to a curve object
@@ -1134,12 +1134,12 @@ module ExtensionsUserinterface =
     ///<returns>(option<Point3d>) an Option of 3d point</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : option<Point3d> =
         async{
-            do! Async.SwitchToContext syncContext 
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
             let cmdrc, point = Rhino.Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             return
                 if cmdrc = Rhino.Commands.Result.Success then Some point
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetPointOnMesh(meshid, message=None):
         '''Pauses for user input of a point constrained to a mesh object
@@ -1167,7 +1167,7 @@ module ExtensionsUserinterface =
     ///<returns>(option<Point3d>) an Option of 3d point</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface":string)>]message:string) : option<Point3d> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
@@ -1187,7 +1187,7 @@ module ExtensionsUserinterface =
                 else
                     let pt = gp.Point()                    
                     Some pt
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetPointOnSurface(surfaceid, message=None):
         '''Pauses for user input of a point constrained to a surface or polysurface
@@ -1238,7 +1238,7 @@ module ExtensionsUserinterface =
                                 //[<OPT;DEF(Point3d())>]basisPoint:Point3d) // Ignoredhere because ignored in python too TODO <param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>   A starting or base point</param>
                                              
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()
             if notNull message1 then gp.SetCommandPrompt(message1)
             gp.EnableDrawLineFromPoint( drawLines )
@@ -1286,7 +1286,7 @@ module ExtensionsUserinterface =
                     else 
                         None
 
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
   
 
     (*
@@ -1364,7 +1364,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(2147482999)>]min:int, 
                                         [<OPT;DEF(0)>]max:int) : option<Polyline> =
         async{
-            do! Async.SwitchToContext syncContext     
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext     
             let gpl = new Input.Custom.GetPolyline()
             if notNull message1 then gpl.FirstPointPrompt <- message1
             if notNull message2 then gpl.SecondPointPrompt <- message2
@@ -1377,7 +1377,7 @@ module ExtensionsUserinterface =
             return 
               if rc = Rhino.Commands.Result.Success then Some polyline
               else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetPolyline(flags=3, message1=None, message2=None, message3=None, message4=None, min=2, max=0):
         '''Prompts the user to pick points that define a polyline.
@@ -1426,7 +1426,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(7e89)>]minimum:float, 
                                         [<OPT;DEF(7e89)>]maximum:float) : option<float> =
         async{
-            do! Async.SwitchToContext syncContext          
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext          
             let gn = new Input.Custom.GetNumber()
             if notNull message then gn.SetCommandPrompt(message)
             if number <> 7e89 then gn.SetDefaultNumber(number)
@@ -1438,7 +1438,7 @@ module ExtensionsUserinterface =
                     let rc = gn.Number()
                     gn.Dispose()
                     Some rc
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetReal(message="Number", number=None, minimum=None, maximum=None):
         '''Pauses for user input of a number.
@@ -1486,7 +1486,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(null:string)>]prompt2:string, 
                                         [<OPT;DEF(null:string)>]prompt3:string) : option<Point3d * Point3d * Point3d * Point3d> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
    
             let basisPoint = if basisPoint = Point3d.Origin then Point3d.Unset else basisPoint
@@ -1498,7 +1498,7 @@ module ExtensionsUserinterface =
             return 
                 if rc = Rhino.Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetRectangle(mode=0, base_point=None, prompt1=None, prompt2=None, prompt3=None):
         '''Pauses for user input of a rectangle
@@ -1542,7 +1542,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(null:string)>]defaultValString:string, 
                                         [<OPT;DEF(null:string seq)>]strings:string seq) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let gs = new Input.Custom.GetString()
             gs.AcceptNothing(true)
             if notNull message then gs.SetCommandPrompt(message)
@@ -1557,7 +1557,7 @@ module ExtensionsUserinterface =
                     Some <| gs.Option().EnglishName
                 else
                     Some <| gs.StringResult()
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def GetString(message=None, defaultString=None, strings=None):
         '''Pauses for user input of a string value
@@ -1598,14 +1598,14 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(null:string)>]title:string, 
                                         [<OPT;DEF(null:string)>]defaultVal:string) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             return
                 match Rhino.UI.Dialogs.ShowListBox(title, message, Array.ofSeq items , defaultVal) with
                 | null ->  None
                 |  :? string as s -> Some s
                 | _ -> None
             
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def ListBox(items, message=None, title=None, default=None):
         '''Display a list of items in a list box dialog.
@@ -1662,7 +1662,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(0)>]buttons:int, 
                                         [<OPT;DEF("")>]title:string) : option<int> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable buttontyp =  buttons &&& 0x00000007 //111 in binary
             let mutable btn = Rhino.UI.ShowMessageButton.OK
             if   buttontyp = 1 then btn <- Rhino.UI.ShowMessageButton.OKCancel
@@ -1695,7 +1695,7 @@ module ExtensionsUserinterface =
                 elif dlgresult = Rhino.UI.ShowMessageResult.Yes then    Some 6
                 elif dlgresult = Rhino.UI.ShowMessageResult.No then     Some 7
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def MessageBox(message, buttons=0, title=""):
         '''Displays a message box. A message box contains a message and
@@ -1783,13 +1783,13 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]message:string, 
                                     [<OPT;DEF(null:string)>]title:string) : option<string array> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let values = [| for v in values do yield v.ToString() |]
             return
                 match Rhino.UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
                 | null ->  None
                 | s -> Some s                
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def PropertyListBox(items, values, message=None, title=None):
         '''Displays list of items and their values in a property-style list box dialog
@@ -1820,11 +1820,11 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]title:string, 
                                     [<OPT;DEF(null:string IList)>]defaultVals:string IList) : option<string array> =
         async{
-            do! Async.SwitchToContext syncContext            
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext            
             let r =  Rhino.UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             return 
                 if notNull r then Some r else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def MultiListBox(items, message=None, title=None, defaults=None):
         '''Displays a list of items in a multiple-selection list box dialog
@@ -1862,7 +1862,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]filename:string, 
                                     [<OPT;DEF(null:string)>]extension:string) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let fd = Rhino.UI.OpenFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
@@ -1872,7 +1872,7 @@ module ExtensionsUserinterface =
             return
                 if fd.ShowOpenDialog() then Some fd.FileName
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def OpenFileName(title=None, filter=None, folder=None, filename=None, extension=None):
         '''Displays file open dialog box allowing the user to enter a file name.
@@ -1917,7 +1917,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]filename:string, 
                                     [<OPT;DEF(null:string)>]extension:string) : option<string array> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let fd = Rhino.UI.OpenFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
@@ -1928,7 +1928,7 @@ module ExtensionsUserinterface =
             return
                 if fd.ShowOpenDialog() then Some fd.FileNames
                 else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def OpenFileNames(title=None, filter=None, folder=None, filename=None, extension=None):
         '''Displays file open dialog box allowing the user to select one or more file names.
@@ -1979,7 +1979,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(Point3d())>]point:Point3d, 
                                     [<OPT;DEF(null:string)>]view:string) : int =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable screenpoint = Windows.Forms.Cursor.Position
             if Point3d.Origin <> point then
                 let view = RhinoScriptSyntax.CoerceView(view)
@@ -1987,7 +1987,7 @@ module ExtensionsUserinterface =
                 let point2d = viewport.WorldToClient(point)
                 screenpoint <- viewport.ClientToScreen(point2d)              
             return  Rhino.UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def PopupMenu(items, modes=None, point=None, view=None):
         '''Display a context-style popup menu. The popup menu can appear almost
@@ -2039,7 +2039,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(7e89)>]minimum:float, 
                                     [<OPT;DEF(7e89)>]maximum:float) : option<float> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let defaultValNumber = ref <| if defaultValNumber = 7e89 then Rhino.RhinoMath.UnsetValue else defaultValNumber
             let minimum = if minimum = 7e89 then Rhino.RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then Rhino.RhinoMath.UnsetValue else maximum
@@ -2049,7 +2049,7 @@ module ExtensionsUserinterface =
                 if  rc then Some (!defaultValNumber)
                 else None
 
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def RealBox(message="", default_number=None, title="", minimum=None, maximum=None):
         '''Display a dialog box prompting the user to enter a number
@@ -2089,7 +2089,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]filename:string, 
                                     [<OPT;DEF(null:string)>]extension:string) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let fd = Rhino.UI.SaveFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
@@ -2097,7 +2097,7 @@ module ExtensionsUserinterface =
             if notNull filename then fd.FileName <- filename
             if notNull extension then fd.DefaultExt <- extension
             return if fd.ShowSaveDialog() then Some fd.FileName else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def SaveFileName(title=None, filter=None, folder=None, filename=None, extension=None):
         '''Display a save dialog box allowing the user to enter a file name.
@@ -2135,10 +2135,10 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]defaultValValue:string, 
                                     [<OPT;DEF(null:string)>]title:string) : option<string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
             return if rc then Some text else None
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def StringBox(message=None, default_value=None, title=None):
         '''Display a dialog box prompting the user to enter a string value.
@@ -2165,9 +2165,9 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]message:string, 
                                     [<OPT;DEF(null:string)>]title:string) : unit =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             return Rhino.UI.Dialogs.ShowTextDialog(message, title)
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     (*
     def TextOut(message=None, title=None):
         '''Display a text dialog box similar to the one used by the _What command.

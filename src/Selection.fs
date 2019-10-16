@@ -243,7 +243,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]preselect:bool, 
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * int * Point3d * float * string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -355,7 +355,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter, 
                                     [<OPT;DEF(false)>]subobjects:bool) : option<Guid> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not  preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -470,7 +470,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool, 
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<Guid * bool * int * Point3d * string> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -618,7 +618,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(0)>]maximumCount:int, 
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         async{
-            if Threading.SynchronizationContext.Current <> syncContext then do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -763,7 +763,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool, 
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<(Guid*bool*int*Point3d*string) ResizeArray> =
         async{
-            do! Async.SwitchToContext syncContext
+            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -872,29 +872,17 @@ module ExtensionsSelection =
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for the selection of pre-selected objects.  If omitted (False), pre-selected objects are not accepted.</param>
     ///<returns>(Point3d array) 3d coordinates of point objects on success</returns>
-    static member GetPointCoordinates( [<OPT;DEF("Select Point Objects")>]message, [<OPT;DEF(false)>]preselect:bool) : option<Point3d ResizeArray> =
-        async{
-            if Threading.SynchronizationContext.Current <> syncContext then do! Async.SwitchToContext syncContext // TODO THIS FAILS
-            let res = RhinoScriptSyntax.GetObjects(message, Filter.Point, preselect=preselect)
-            return 
-                match res  with
-                | None -> None
-                | Some ids ->
-                    let rc = ResizeArray()
-                    for id in ids do
-                        let pt = RhinoScriptSyntax.Coerce3dPoint(id)
-                        rc.Add(pt)
-                    Some rc
-
-                //maybe{
-                //    let! ids = RhinoScriptSyntax.GetObjects(message, int Filter.Point, preselect=preselect)
-                //    let rc = ResizeArray()
-                //    for id in ids do
-                //        let pt = RhinoScriptSyntax.Coerce3dPoint(id)
-                //        rc.Add(pt)
-                //    return! Some rc
-                //    }
-            }  |> Async.RunSynchronously
+    static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string, 
+                                        [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
+        maybe{
+            let! ids = RhinoScriptSyntax.GetObjects(message, Filter.Point, preselect=preselect)
+            let rc = ResizeArray()
+            for id in ids do
+                let pt = RhinoScriptSyntax.Coerce3dPoint(id)
+                rc.Add(pt)
+            return rc
+            }
+ 
     (*
     def GetPointCoordinates(message="Select points", preselect=False):
         '''Prompts the user to select one or more point objects.
