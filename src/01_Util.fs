@@ -4,7 +4,9 @@ open System
 open System.Globalization
 
 
-module internal Util = 
+
+
+module  Util = 
     
     type OPT = Runtime.InteropServices.OptionalAttribute
     type DEF = Runtime.InteropServices.DefaultParameterValueAttribute
@@ -18,6 +20,9 @@ module internal Util =
     /// Returns the value on the left unless it is null, then it returns the value on the right.
     let inline (|?) a b = if Object.ReferenceEquals(a,null) then b else a // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs
 
+    /// apply function ( like |> ) but ignore result. return original input
+    let inline (|>>) a f =  f a |> ignore ; a
+
     let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"
    
     let enUs = CultureInfo.GetCultureInfo("en-us")
@@ -26,22 +31,28 @@ module internal Util =
 
     /// with automatic formationg of precision
     let floatToString  (x:float) =
-        let a = abs x
-        if   a > 1000. then sprintf "%.0f" x
-        elif a > 100.  then sprintf "%.1f" x 
-        elif a > 10.   then sprintf "%.2f" x 
-        elif a > 1.    then sprintf "%.3f" x 
-        else                sprintf "%f"   x  
+        if Double.IsNaN x || Double.IsInfinity x then sprintf "%f"  x
+        elif x = Rhino.RhinoMath.UnsetValue then "RhinoMath.UnsetValue"
+        else
+            let  a = abs x
+            if   a > 1000. then sprintf "%.0f" x
+            elif a > 100.  then sprintf "%.1f" x 
+            elif a > 10.   then sprintf "%.2f" x 
+            elif a > 1.    then sprintf "%.3f" x 
+            else                sprintf "%f"   x  
 
     /// with automatic formationg of precision
     let singleToString  (x:float32) =
-        let a = abs x
-        if   a > 1000.f then sprintf "%.0f" x
-        elif a > 100.f  then sprintf "%.1f" x 
-        elif a > 10.f   then sprintf "%.2f" x 
-        elif a > 1.f    then sprintf "%.3f" x 
-        else                 sprintf "%f"   x  
-    
+        if Single.IsNaN x || Single.IsInfinity x then sprintf "%f"  x
+        elif x = Rhino.RhinoMath.UnsetSingle then "RhinoMath.UnsetSingle"
+        else
+            let  a = abs x
+            if   a > 1000.f then sprintf "%.0f" x
+            elif a > 100.f  then sprintf "%.1f" x 
+            elif a > 10.f   then sprintf "%.2f" x 
+            elif a > 1.f    then sprintf "%.3f" x 
+            else                 sprintf "%f"   x
+
     ///parses english and german style flaots, recognizes comma and period as decimal separator
     let parseFloatEnDe (x:string) =
         match Double.TryParse(x, NumberStyles.Float, enUs) with
