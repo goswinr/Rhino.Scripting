@@ -40,51 +40,78 @@ type RhinoScriptSyntax private () = // no constructor?
 
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString() </summary>
     ///<param name="x">('T): the value or object to represent as string</param>
-    ///<returns>(stirng) the string</returns>
-    static member ConvertToString (x:'T) : string =
-        NiceString.toNiceString(x)
-        
+    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
+    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    ///<returns>(stirng) the string </returns>
+    static member ToNiceString (x:'T,[<OPT;DEF(true)>]trim:bool) : string =
+        if trim then NiceString.toNiceString(x)
+        else         NiceString.toNiceStringFull(x)        
 
-    ///<summary>Prints an object or value to Rhino Command line </summary>
+    ///<summary>Prints an object or value to Rhino Command line. 
+    ///  If the value is a Seq the string will be no longer than 4 lines per Seq or per nested Seq </summary>
     ///<param name="x">('T): the value or object to print</param>
+    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
+    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
     ///<returns>(unit) void, nothing/returns>
     static member Print (x:'T) : unit =
-        let s = RhinoScriptSyntax.ConvertToString(x)
-        RhinoApp.WriteLine s   
+        RhinoScriptSyntax.ToNiceString(x,true)
+        |>> RhinoApp.WriteLine 
+        |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
-    
-    ///<summary>Prints two objects or values to Rhino Command line, separated by a space character</summary>
+
+    ///<summary>Prints two objects or value to Rhino Command line. 
+    ///  If the value is a Seq the string will be no longer than 4 lines Seq or per nested Seq </summary>
     ///<param name="x1">('T): the first value or object to print</param>
     ///<param name="x2">('T): the second value or object to print</param>
+    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
+    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
     ///<returns>(unit) void, nothing/returns>
     static member Print (x1:'T, x2:'U) : unit =
-        let s1 = RhinoScriptSyntax.ConvertToString(x1)
-        let s2 = RhinoScriptSyntax.ConvertToString(x2)
-        RhinoApp.WriteLine (s1 + " " + s2)
+        let s1 = RhinoScriptSyntax.ToNiceString(x1,true)
+        let s2 = RhinoScriptSyntax.ToNiceString(x2,true)
+        s1 + " " + s2
+        |>> RhinoApp.WriteLine 
+        |> printfn "%s"
         RhinoApp.Wait()
 
-    ///<summary>Prints three objects or values to Rhino Command line, separated by a space character</summary>
-    ///<param name="x1">('T): the first value or object to print</param>
-    ///<param name="x2">('U): the second value or object to print</param>
-    ///<param name="x2">('V): the third value or object to print</param>
+
+    ///<summary>Prints an object or value to Rhino Command line. 
+    ///  If the value is a Seq the string will conatain a line for each item and per nested item </summary>
+    ///<param name="x">('T): the value or object to print</param>
+    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
+    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
     ///<returns>(unit) void, nothing/returns>
-    static member Print (x1:'T, x2:'U, x3:'V) : unit =
-        let s1 = RhinoScriptSyntax.ConvertToString(x1)
-        let s2 = RhinoScriptSyntax.ConvertToString(x2)
-        let s3 = RhinoScriptSyntax.ConvertToString(x3)
-        RhinoApp.WriteLine (s1 + " " + s2+ " " + s3)
-        RhinoApp.Wait()
+    static member PrintFull (x:'T) : unit =
+        RhinoScriptSyntax.ToNiceString(x,false)
+        |>> RhinoApp.WriteLine 
+        |> printfn "%s"  
+        RhinoApp.Wait() // no swith to UI Thread needed !
 
+    ///<summary>Prints two objects or value to Rhino Command line. 
+    ///  If the value is a Seq the string will conatain a line for each item and per nested item </summary>
+    ///<param name="x1">('T): the first value or object to print</param>
+    ///<param name="x2">('T): the second value or object to print</param>
+    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
+    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    ///<returns>(unit) void, nothing/returns>
+    static member PrintFull (x1:'T, x2:'U) : unit =
+        let s1 = RhinoScriptSyntax.ToNiceString(x1,false)
+        let s2 = RhinoScriptSyntax.ToNiceString(x2,false)
+        s1 + " " + s2
+        |>> RhinoApp.WriteLine 
+        |> printfn "%s"
+        RhinoApp.Wait()
 
     ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value </summary>
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
     ///<returns>(unit) void, nothing/returns>
-    static member Print (xs:'T seq, [<OPT;DEF(null:string)>]separator:string) : unit =
+    static member PrintSeq (xs:'T seq, [<OPT;DEF(null:string)>]separator:string) : unit =
         xs
-        |> Seq.map RhinoScriptSyntax.ConvertToString
+        |> Seq.map RhinoScriptSyntax.ToNiceString
         |> String.concat (separator |? " ")
-        |> RhinoApp.WriteLine 
+        |>> RhinoApp.WriteLine 
+        |> printfn "%s"
         RhinoApp.Wait()
 
 

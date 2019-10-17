@@ -4,10 +4,7 @@ open System
 open Rhino.Scripting.Util
 
 [<AutoOpen>]
-module TypeExtensions =    
-    
-
-
+module TypeExtensions =   
 
     type Int32 with  
         [<EXT>] member inline x.ToDouble = float(x)
@@ -66,8 +63,6 @@ module TypeExtensions =
         [<EXT>] 
         member inline d.Items =
                     seq { for KeyValue(k,v) in d -> k,v}
-
-
 
    
     type Collections.Generic.List<'T>  with        

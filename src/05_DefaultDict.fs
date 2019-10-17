@@ -38,17 +38,17 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
     member _.Items =
         seq { for KeyValue(k,v) in DD -> k,v}
         
-    override dd.ToString() = 
-        stringBuffer {
-            yield "DefaultDict with "
-            yield DD.Count.ToString()
-            yield! "entries"
-            for k,v in dd.Items  |> Seq.truncate 3 do // add sorting ? print 3 lines??
-                yield  k.ToString()
-                yield " : "
-                yield! v.ToString()
-            yield "..."
-            }
+    //override dd.ToString() = // covered by NiceString Pretty printer ?
+        //stringBuffer {
+        //    yield "DefaultDict with "
+        //    yield DD.Count.ToString()
+        //    yield! "entries"
+        //    for k,v in dd.Items  |> Seq.truncate 3 do // add sorting ? print 3 lines??
+        //        yield  k.ToString()
+        //        yield " : "
+        //        yield! v.ToString()
+        //    yield "..."
+        //    }
             
 
     // TODO add XML doc str

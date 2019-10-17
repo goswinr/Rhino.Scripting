@@ -59,8 +59,8 @@ module internal NiceString=
     // -- generic pretty printer-----
     //-------------------------------
 
-    let maxDepth= 2
-    let maxItemsPerSeq = 4
+    let mutable maxDepth= 2
+    let mutable maxItemsPerSeq = 4
 
     let before (splitter:string) (s:string) = 
         let start = s.IndexOf(splitter) 
@@ -144,4 +144,22 @@ module internal NiceString=
     let toNiceString (x:'T) = 
         sb.Clear() |> ignore
         toNiceStringRec(box x,0)
-        sb.ToString()
+        let s = sb.ToString()
+        let st = s.Trim()
+        if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings
+
+    
+    let toNiceStringFull (x:'T) = 
+        let maxDepthP = maxDepth  
+        let maxItemsPerSeqP = maxItemsPerSeq 
+        maxDepth <- Int32.MaxValue
+        maxItemsPerSeq  <- Int32.MaxValue
+
+        sb.Clear() |> ignore
+        toNiceStringRec(box x,0)
+
+        maxDepth <- maxDepthP 
+        maxItemsPerSeq  <- maxItemsPerSeqP 
+        let s = sb.ToString()
+        let st = s.Trim()
+        if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings
