@@ -334,7 +334,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(null:string)>]prompt3:string) : (Point3d []) option=
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext 
-            let basisPoint = basisPoint |?? Point3d.Unset 
+            let basisPoint = if basisPoint <> Point3d.Origin then basisPoint else  Point3d.Unset 
             let m =
                 match mode with
                 |0 -> Rhino.Input.GetBoxMode.All

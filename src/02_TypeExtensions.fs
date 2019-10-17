@@ -23,12 +23,12 @@ module TypeExtensions =
         ///converts int to float including rounding: int(round(x))
         [<EXT>] member inline x.ToInt = int(round(x))
         /// with automatic formating of display precision depending on float size
-        [<EXT>] member x.ToNiceString = Util.floatToString x        
+        [<EXT>] member x.ToNiceString = NiceString.floatToString x        
         
 
     type Single with  
         /// with automatic formating of display precision depending on float size
-        [<EXT>] member x.ToNiceString = Util.singleToString x
+        [<EXT>] member x.ToNiceString = NiceString.singleToString x
 
 
     type Drawing.Color with        

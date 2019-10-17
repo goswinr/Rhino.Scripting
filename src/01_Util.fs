@@ -13,7 +13,6 @@ module  Util =
     type EXT = Runtime.CompilerServices.ExtensionAttribute
 
     let failNotImpl() = failwith "NOT IMPLEMENTED FAILURE"
-
     
     let inline notNull (value : 'T) = match value with | null -> false   | _ -> true// Fsharp core does it like this too. dont use RefrenceEquals
     
@@ -23,36 +22,23 @@ module  Util =
     /// apply function ( like |> ) but ignore result. return original input
     let inline (|>>) a f =  f a |> ignore ; a
 
-    let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"
-   
+    let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"   
+ 
+     ///Get first element of triple (tuple of three element)
+    let inline t1 (a,_,_) = a
+    ///Get second element of triple (tuple of three element)
+    let inline t2 (_,b,_) = b
+    ///Get third element of triple (tuple of three element)
+    let inline t3 (_,_,c) = c    
+    
+    /// so that python range expressions dont need top be translated to F#
+    let internal range(l) = seq{0..(l-1)} 
+
+module UtilMath =
+    
     let enUs = CultureInfo.GetCultureInfo("en-us")
-    let deAt = CultureInfo.GetCultureInfo("de-at")    
-
-
-    /// with automatic formationg of precision
-    let floatToString  (x:float) =
-        if Double.IsNaN x || Double.IsInfinity x then sprintf "%f"  x
-        elif x = Rhino.RhinoMath.UnsetValue then "RhinoMath.UnsetValue"
-        else
-            let  a = abs x
-            if   a > 1000. then sprintf "%.0f" x
-            elif a > 100.  then sprintf "%.1f" x 
-            elif a > 10.   then sprintf "%.2f" x 
-            elif a > 1.    then sprintf "%.3f" x 
-            else                sprintf "%f"   x  
-
-    /// with automatic formationg of precision
-    let singleToString  (x:float32) =
-        if Single.IsNaN x || Single.IsInfinity x then sprintf "%f"  x
-        elif x = Rhino.RhinoMath.UnsetSingle then "RhinoMath.UnsetSingle"
-        else
-            let  a = abs x
-            if   a > 1000.f then sprintf "%.0f" x
-            elif a > 100.f  then sprintf "%.1f" x 
-            elif a > 10.f   then sprintf "%.2f" x 
-            elif a > 1.f    then sprintf "%.3f" x 
-            else                 sprintf "%f"   x
-
+    let deAt = CultureInfo.GetCultureInfo("de-at")
+    
     ///parses english and german style flaots, recognizes comma and period as decimal separator
     let parseFloatEnDe (x:string) =
         match Double.TryParse(x, NumberStyles.Float, enUs) with
@@ -74,39 +60,8 @@ module  Util =
             try 
                 float(o)
             with _ -> 
-                failwithf "Could not convert object '%A' into a floating point number" o  
+                failwithf "Could not convert object '%A' into a floating point number" o   
     
-
-    ///Returns a Sequence(IEnumerable) of Tuples (this, next) from (first, second) upto (secondLast, last)
-    let thisAndNext (xs:seq<'T>) = seq{ 
-        use e = xs.GetEnumerator()        
-        if e.MoveNext() then
-            let prev = ref e.Current
-            if e.MoveNext() then
-                    yield !prev,e.Current 
-                    prev := e.Current 
-                    while e.MoveNext() do 
-                        yield  !prev, e.Current 
-                        prev := e.Current
-            else failwithf "thisAndNext: Input Sequence only had one element: seq{%A}" (!prev)
-        else failwith "thisAndNext: Empty Input Sequence"}
-
-    ///Get first element of triple (tuple of three element)
-    let inline t1 (a,_,_) = a
-    ///Get second element of triple (tuple of three element)
-    let inline t2 (_,b,_) = b
-    ///Get third element of triple (tuple of three element)
-    let inline t3 (_,_,c) = c    
-
-    //a typefull ignore function that shows errors if type changes
-    //let inline ignoreString (s:string) = ()
-    //a typefull ignore function that shows errors if type changes
-    //let inline ignoreGuid   (g:Guid) = ()
-
-    /// so that python range expressions dont need top be translated to F#
-    let internal range(l) = seq{0..(l-1)} 
-
-module UtilMath =
     let internal Rand = System.Random () 
 
     ///allows ints to be multiplied by floats
