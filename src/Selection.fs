@@ -880,7 +880,7 @@ module ExtensionsSelection =
         ids = GetObjects(message, filter.point, preselect=preselect)
         rc = []
         for id in ids:
-            rhobj = scriptcontext.doc.Objects.Find(id)
+            rhobj = scriptcontext.doc.Objects.FindId(id)
             rc.append(rhobj.Geometry.Location)
         return rc
     *)
@@ -1191,7 +1191,7 @@ module ExtensionsSelection =
         end = serial_numbers[1]
         rc = []
         while serial_number<end:
-            obj = scriptcontext.doc.Objects.Find(serial_number)
+            obj = scriptcontext.doc.Objects.FindId(serial_number)
             if obj and not obj.IsDeleted:
                 rc.append(obj.Id)
                 if select: obj.Select(True)

@@ -1532,7 +1532,7 @@ module ExtensionsDimension =
         '''
         annotation_object = __Coerceannotation(object_id)
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         if isinstance(geom, Rhino.Geometry.LinearDimension): return geom.Aligned
         return False
@@ -1560,7 +1560,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.AngularDimension)
     *)
@@ -1587,7 +1587,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         if isinstance(geom, Rhino.Geometry.RadialDimension):
             return geom.IsDiameterDimension
@@ -1616,7 +1616,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.AnnotationBase)
     *)
@@ -1687,7 +1687,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.Leader)
     *)
@@ -1714,7 +1714,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.LinearDimension)
     *)
@@ -1741,7 +1741,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.OrdinateDimension)
     *)
@@ -1768,7 +1768,7 @@ module ExtensionsDimension =
           None: on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         return isinstance(geom, Rhino.Geometry.RadialDimension)
     *)
@@ -1799,7 +1799,7 @@ module ExtensionsDimension =
           None on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         if not isinstance(geom, Rhino.Geometry.Leader):
             return scriptcontext.errorhandler()
@@ -1839,7 +1839,7 @@ module ExtensionsDimension =
           None on error
         '''
         id = rhutil.Coerceguid(object_id, True)
-        annotation_object = scriptcontext.doc.Objects.Find(id)
+        annotation_object = scriptcontext.doc.Objects.FindId(id)
         geom = annotation_object.Geometry
         if not isinstance(geom, Rhino.Geometry.Leader):
             return scriptcontext.errorhandler()

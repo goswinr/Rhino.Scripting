@@ -184,7 +184,7 @@ type RhinoScriptSyntax private () = // no constructor?
             try
                 match b with
                 | :? (string*string*string) as xyz  -> let x,y,z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
-                | :? Guid as g ->  ((Doc.Objects.Find(g).Geometry) :?> Point).Location 
+                | :? Guid as g ->  ((Doc.Objects.FindId(g).Geometry) :?> Point).Location 
                 | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
                 | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
                 | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
@@ -262,36 +262,36 @@ type RhinoScriptSyntax private () = // no constructor?
             xss|> Array2D.iteri (fun i j x -> t.[i,j]<-x)
             t
 
-        | _ -> failwithf "*** could not Coercexform %A can not be converted to a Transformation Matrix" xform
+        | _ -> failwithf "*** could not CoerceXform %A can not be converted to a Transformation Matrix" xform
     
     ///<summary>attempt to get a Guids from input</summary>
     ///<param name="id">objcts , guid or string</param>
     ///<returns>Guid. Fails on bad input</returns>
-    static member CoerceGuid(id:'id) =
+    static member CoerceGuid(id:'id):Guid =
         match box id with
-        | :? Guid  as g -> if Guid.Empty = g then fail() else g
-        | :? string  as s -> try Guid.Parse s with _ -> failwithf "*** could not Coerceguid: string '%s' can not be converted to a Guid" s
+        | :? Guid  as g -> if Guid.Empty = g then failwithf "*** CoerceGuid: Guid is Emty: %A" id else g
+        | :? string  as s -> try Guid.Parse s with _ -> failwithf "*** could not CoerceGuid: string '%s' can not be converted to a Guid" s
         | :? DocObjects.RhinoObject as o -> o.Id
         | :? DocObjects.ObjRef      as o -> o.ObjectId
-        | _ -> failwithf "*** could not Coerceguid:%A can not be converted to a Guid" id
+        | _ -> failwithf "*** could not CoerceGuid:%A can not be converted to a Guid" id
 
     ///<summary>attempt to get a Sequence of Guids from input</summary>
     ///<param name="ids">list of guids</param>
     ///<returns>Guid seq. Fails on bad input</returns>
-    static member CoerceGuidList(ids:'ids) =
+    static member CoerceGuidList(ids:'ids):seq<Guid> =
         match box ids with
         | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
         | :? seq<obj> as gs -> 
             try gs |> Seq.map RhinoScriptSyntax.CoerceGuid
-            with _ -> failwithf "*** could not Coerceguidlist: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
-        | _ -> failwithf "*** could not Coerceguidlist: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
+            with _ -> failwithf "*** could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
+        | _ -> failwithf "*** could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
     
    
     ///<summary>attempt to get a System.Drawing.Color also works on natrural language color strings see Drawing.ColorTranslator.FromHtml </summary>
     ///<param name="color">string, tuple with  or 3 or 4 items.</param>
     ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provide better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255,0,0) . Fails on bad input</returns>
-    static member CoerceColor(color:'color) =
+    static member CoerceColor(color:'col) : Drawing.Color =
         match box color with
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
         | :? (int*int*int) as rgb       -> 
@@ -324,11 +324,11 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get Rhino Line Geometry</summary>
     ///<param name="line">Line, two points or Guid</param>
     ///<returns>Geometry.Line. Fails on bad input</returns>
-    static member CoerceLine(line:'line) =
+    static member CoerceLine(line:'line) : Line=
         match box line with
         | :? Line as l -> l
         | :? Guid as g ->  
-            match Doc.Objects.Find(g).Geometry with
+            match Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
                 if crv.IsLinear() then Line(crv.PointAtStart,crv.PointAtEnd)
                 else failwithf "*** could not Coerce %A to a Line" line
@@ -342,12 +342,12 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get RhinoObject from the document with a given id</summary>
     ///<param name="objectId">object identifier (Guid or string)</param>
     ///<returns>a RhinoObject. Fails on bad input</returns>
-    static member CoerceRhinoObject(objectId:'id) =
+    static member CoerceRhinoObject(objectId:'id): DocObjects.RhinoObject =
         match box objectId with
         | :? Guid  as g -> 
             if Guid.Empty = g then failwith "*** could not CoerceObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
             else 
-                let o = Doc.Objects.Find(g) 
+                let o = Doc.Objects.FindId(g) 
                 if isNull o then failwithf "*** could not CoerceObject: Guid %A not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" g
                 else o        
         | :? DocObjects.RhinoObject as o -> o
@@ -356,7 +356,7 @@ type RhinoScriptSyntax private () = // no constructor?
                 let g = RhinoScriptSyntax.CoerceGuid(s)
                 if Guid.Empty = g then failwithf "*** could not CoerceObject: %s to a RhinoObject" s
                 else 
-                    let o = Doc.Objects.Find(g) 
+                    let o = Doc.Objects.FindId(g) 
                     if isNull o then failwithf "*** could not CoerceObject:Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
                     else o
         | _ -> failwithf "*** could not CoerceObject:  %A to a RhinoObject" objectId
@@ -506,6 +506,27 @@ type RhinoScriptSyntax private () = // no constructor?
 
     //------try----
 
+    ///<summary>attempt to get a Guids from input</summary>
+    ///<param name="id">objcts , guid or string</param>
+    ///<returns>Guid Option</returns>
+    static member TryCoerceGuid(id:'id):Guid option=
+        match box id with
+        | :? Guid  as g -> if Guid.Empty = g then None else Some g    
+        | :? DocObjects.RhinoObject as o -> Some o.Id
+        | :? DocObjects.ObjRef      as o -> Some o.ObjectId
+        | :? string  as s -> let ok,g= Guid.TryParse s in  if ok then Some g else None
+        | _ -> None
+
+    ///<summary>attempt to get RhinoObject from the document with a given id</summary>
+    ///<param name="objectId">object identifier (Guid or string)</param>
+    ///<returns>a RhinoObject Option</returns>
+    static member TryCoerceRhinoObject(objectId:Guid): DocObjects.RhinoObject option =     
+        if Guid.Empty = objectId then None 
+        else 
+            let o = Doc.Objects.FindId(objectId) 
+            if isNull o then None
+            else Some o     
+        
 
     ///<summary>attempt to get GeometryBase class from given Guid</summary>
     ///<param name="id">geometry identifier (Guid)</param>
@@ -513,7 +534,7 @@ type RhinoScriptSyntax private () = // no constructor?
     static member TryCoerceGeometry (id:Guid) :GeometryBase option =
         if id = Guid.Empty then None
         else
-            match Doc.Objects.Find(id) with 
+            match Doc.Objects.FindId(id) with 
             | null -> None
             | o -> Some o.Geometry 
 

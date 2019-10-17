@@ -599,7 +599,7 @@ module ExtensionsUserinterface =
                             r.Add( (curveid, parentid, pt) )
                     if  select then
                         for item in r do
-                            let rhobj = Doc.Objects.Find(t1 item)
+                            let rhobj = Doc.Objects.FindId(t1 item)
                             rhobj.Select(true)|> ignore
                         Doc.Views.Redraw()
                     Some r
@@ -637,7 +637,7 @@ module ExtensionsUserinterface =
             rc.append( (curveid, parentid, pt) )
         if select:
             for item in rc:
-                rhobj = scriptcontext.doc.Objects.Find(item[0])
+                rhobj = scriptcontext.doc.Objects.FindId(item[0])
                 rhobj.Select(True)
             scriptcontext.doc.Views.Redraw()
         return rc
