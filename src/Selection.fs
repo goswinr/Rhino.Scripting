@@ -1701,3 +1701,185 @@ module ExtensionsSelection =
     *)
 
 
+    [<EXT>]
+    ///<summary>Returns the identifiers of all objects that are currently selected</summary>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///Include grip objects</param>
+    ///<returns>(Guid ResizeArray) identifiers of selected objects</returns>
+    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+        let selobjects = Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
+        resizeArray {for obj in selobjects do obj.Id }
+    (*
+    def SelectedObjects(include_lights=False, include_grips=False):
+        '''Returns the identifiers of all objects that are currently selected
+        Parameters:
+          include_lights (bool, optional): include light objects
+          include_grips (bool, optional): include grip objects
+        Returns:
+          list(guid, ...): identifiers of selected objects
+        '''
+    
+        selobjects = scriptcontext.doc.Objects.GetSelectedObjects(include_lights, include_grips)
+        return [obj.Id for obj in selobjects]
+    *)
+
+
+    [<EXT>]
+    ///<summary>Unselects all objects in the document</summary>
+    ///<returns>(int) the number of objects that were unselected</returns>
+    static member UnselectAllObjects() : int =
+        let rc = Doc.Objects.UnselectAll() 
+        if rc>0 then Doc.Views.Redraw()
+        rc
+    (*
+    def UnselectAllObjects():
+        '''Unselects all objects in the document
+        Returns:
+          number: the number of objects that were unselected
+        '''
+    
+        rc = scriptcontext.doc.Objects.UnselectAll()
+        if rc>0: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Return identifiers of all objects that are visible in a specified view</summary>
+    ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select the objects</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///Include grip objects</param>
+    ///<returns>(Guid ResizeArray) identifiers of the visible objects</returns>
+    static member VisibleObjects( [<OPT;DEF(null:string)>]view:string, 
+                                  [<OPT;DEF(false)>]select:bool, 
+                                  [<OPT;DEF(false)>]includeLights:bool, 
+                                  [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+        let it = Rhino.DocObjects.ObjectEnumeratorSettings()
+        it.DeletedObjects <- false
+        it.ActiveObjects <- true
+        it.ReferenceObjects <- true
+        it.IncludeLights <- includeLights
+        it.IncludeGrips <- includeGrips
+        it.VisibleFilter <- true
+        let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
+        it.ViewportFilter <- viewport
+        let objectids = ResizeArray()
+        let e = Doc.Objects.GetObjectList(it)
+        for object in e do
+            let bbox = object.Geometry.GetBoundingBox(true)
+            if viewport.IsVisible(bbox) then
+                if select then object.Select(true) |> ignore
+                objectids.Add(object.Id)
+        if objectids.Count>0 && select then Doc.Views.Redraw()
+        objectids
+    (*
+    def VisibleObjects(view=None, select=False, include_lights=False, include_grips=False):
+        '''Return identifiers of all objects that are visible in a specified view
+        Parameters:
+          view (bool, optional): the view to use. If omitted, the current active view is used
+          select (bool, optional): Select the objects
+          include_lights (bool, optional): include light objects
+          include_grips (bool, optional): include grip objects
+        Returns:
+          list(guid, ...): identifiers of the visible objects
+        '''
+    
+        it = Rhino.DocObjects.ObjectEnumeratorSettings()
+        it.DeletedObjects = False
+        it.ActiveObjects = True
+        it.ReferenceObjects = True
+        it.IncludeLights = include_lights
+        it.IncludeGrips = include_grips
+        it.VisibleFilter = True
+        viewport = __viewhelper(view).MainViewport
+        it.ViewportFilter = viewport
+    
+        object_ids = []
+        e = scriptcontext.doc.Objects.GetObjectList(it)
+        for object in e:
+            bbox = object.Geometry.GetBoundingBox(True)
+            if viewport.IsVisible(bbox):
+                if select: object.Select(True)
+                object_ids.append(object.Id)
+    
+        if object_ids and select: scriptcontext.doc.Views.Redraw()
+        return object_ids
+    *)
+
+
+    [<EXT>]
+    ///<summary>Picks objects using either a window or crossing selection</summary>
+    ///<param name="corner1">(Point3d) Corner1 of 'corners of selection window' (FIXME 0)</param>
+    ///<param name="corner2">(Point3d) Corner2 of 'corners of selection window' (FIXME 0)</param>
+    ///<param name="view">(string) Optional, View to perform the selection in</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select picked objects</param>
+    ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
+    ///If False, then a crossing window selection is performed</param>
+    ///<returns>(Guid ResizeArray) identifiers of selected objects on success</returns>
+    static member WindowPick( corner1:Point3d, 
+                              corner2:Point3d, 
+                              [<OPT;DEF(null:string)>]view:string,  
+                              [<OPT;DEF(false)>]select:bool, 
+                              [<OPT;DEF(true)>]inWindow:bool) : Guid ResizeArray =
+        let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
+        let screen1 = Point2d(corner1)
+        let screen2 = Point2d(corner2)
+        let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Screen)
+        screen1.Transform(xf)
+        screen2.Transform(xf)
+        
+        let filter = Rhino.DocObjects.ObjectType.AnyObject
+        let objects =
+            if inWindow then
+                Doc.Objects.FindByWindowRegion(viewport, screen1, screen2, true, filter)
+            else 
+                Doc.Objects.FindByCrossingWindowRegion(viewport, screen1, screen2, true, filter)
+        let rc = ResizeArray()
+        if notNull objects then
+            let rc = ResizeArray()
+            for rhobj in objects do
+                rc.Add(rhobj.Id)
+                if select then rhobj.Select(true) |> ignore
+            if select then Doc.Views.Redraw()
+        rc
+    (*
+    def WindowPick(corner1, corner2, view=None, select=False, in_window=True):
+        '''Picks objects using either a window or crossing selection
+        Parameters:
+          corner1, corner2 (point): corners of selection window
+          view (bool, optional): view to perform the selection in
+          select (bool, optional): select picked objects
+          in_window (bool, optional): if False, then a crossing window selection is performed
+        Returns:
+          list(guid, ...): identifiers of selected objects on success
+        '''
+    
+        viewport = __viewhelper(view).MainViewport
+        screen1 = Rhino.Geometry.Point2d(rhutil.coerce3dpoint(corner1, True))
+        screen2 = Rhino.Geometry.Point2d(rhutil.coerce3dpoint(corner2, True))
+        xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Screen)
+        screen1.Transform(xf)
+        screen2.Transform(xf)
+        objects = None
+        filter = Rhino.DocObjects.ObjectType.AnyObject
+        if in_window:
+            objects = scriptcontext.doc.Objects.FindByWindowRegion(viewport, screen1, screen2, True, filter)
+        else:
+            objects = scriptcontext.doc.Objects.FindByCrossingWindowRegion(viewport, screen1, screen2, True, filter)
+        if objects:
+            rc = []
+            for rhobj in objects:
+                rc.append(rhobj.Id)
+                if select: rhobj.Select(True)
+            if select: scriptcontext.doc.Views.Redraw()
+            return rc
+    *)
+
+
