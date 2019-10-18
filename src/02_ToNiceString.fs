@@ -5,7 +5,7 @@ open System
 open Rhino.Geometry
 
 
-module internal NiceString=
+module internal NiceString =
     
     
     /// with automatic formationg of precision
@@ -82,9 +82,9 @@ module internal NiceString=
         let seqType = interfaces  |> Seq.tryFind( fun x -> x.IsGenericType && x.GetGenericTypeDefinition() = typedefof<IEnumerable<_>> )
         match seqType with
         |Some iet ->
-            let ICollType = interfaces  |> Seq.tryFind( fun x -> x.IsGenericType && x.GetGenericTypeDefinition() = typedefof<ICollection<_>> )
+            let iCollType = interfaces  |> Seq.tryFind( fun x -> x.IsGenericType && x.GetGenericTypeDefinition() = typedefof<ICollection<_>> )
             let count =
-                match ICollType with
+                match iCollType with
                 |None -> -1
                 |Some _ -> (xs :?> Collections.ICollection).Count
             

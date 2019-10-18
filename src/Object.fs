@@ -45,7 +45,7 @@ module ExtensionsObject =
             list(guid, ...): ids identifying the newly transformed objects
             '''
   
-            xform = rhutil.coercexform(matrix, True)
+            xform = rhutil.coercexform(matrix)
             id = rhutil.coerceguid(object_ids, False)
             if id: object_ids = [id]
             elif isinstance(object_ids;GeometryBase): object_ids = [object_ids]
@@ -132,7 +132,7 @@ module ExtensionsObject =
                 Transform.Translation(translation)
             else 
                 Transform.Identity
-        RhinoScriptSyntax.TransformObject(objectId, translation, true)
+        RhinoScriptSyntax.TransformObject(objectId, translation)
         
     (*
     def CopyObject(object_id, translation=None):
@@ -173,11 +173,11 @@ module ExtensionsObject =
         '''
     
         if translation:
-            translation = rhutil.coerce3dvector(translation, True)
+            translation = rhutil.coerce3dvector(translation)
             translation = Rhino.Geometry.Transform.Translation(translation)
         else:
             translation = Rhino.Geometry.Transform.Identity
-        return TransformObjects(object_ids, translation, True)
+        return TransformObjects(object_ids, translation)
     *)
 
 
@@ -187,7 +187,7 @@ module ExtensionsObject =
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member DeleteObject(objectId:Guid) : bool =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
-        let rc = Doc.Objects.Delete(objectId, true)
+        let rc = Doc.Objects.Delete(objectId)
         if rc then Doc.Views.Redraw()
         rc
     (*
@@ -199,8 +199,8 @@ module ExtensionsObject =
           bool: True of False indicating success or failure
         '''
     
-        object_id = rhutil.coerceguid(object_id, True)
-        rc = scriptcontext.doc.Objects.Delete(object_id, True)
+        object_id = rhutil.coerceguid(object_id)
+        rc = scriptcontext.doc.Objects.Delete(object_id)
         if rc: scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -215,7 +215,7 @@ module ExtensionsObject =
         //id = RhinoScriptSyntax.Coerceguid(objectIds)
         for id in objectIds do
             //id = RhinoScriptSyntax.Coerceguid(id)
-            if Doc.Objects.Delete(id, true) then rc <- rc + 1
+            if Doc.Objects.Delete(id) then rc <- rc + 1
         if rc > 0 then Doc.Views.Redraw()
         rc
     (*
@@ -231,8 +231,8 @@ module ExtensionsObject =
         id = rhutil.coerceguid(object_ids, False)
         if id: object_ids = [id]
         for id in object_ids:
-            id = rhutil.coerceguid(id, True)
-            if scriptcontext.doc.Objects.Delete(id, True): rc+=1
+            id = rhutil.coerceguid(id)
+            if scriptcontext.doc.Objects.Delete(id): rc+=1
         if rc: scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -266,7 +266,7 @@ module ExtensionsObject =
     
         id = rhutil.coerceguid(object_ids, False)
         if id: object_ids = [id]
-        rhobjs = [rhutil.coercerhinoobject(id, True, True) for id in object_ids]
+        rhobjs = [rhutil.coercerhinoobject(id, True) for id in object_ids]
         if rhobjs: scriptcontext.doc.Views.FlashObjects(rhobjs, style)
     *)
 
@@ -316,7 +316,7 @@ module ExtensionsObject =
         if id: object_ids = [id]
         rc = 0
         for id in object_ids:
-            id = rhutil.coerceguid(id, True)
+            id = rhutil.coerceguid(id)
             if scriptcontext.doc.Objects.Hide(id, False): rc += 1
         if rc: scriptcontext.doc.Views.Redraw()
         return rc
@@ -339,7 +339,7 @@ module ExtensionsObject =
           bool: True if the object is in page layout space, False if the object is in model space
         '''
     
-        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        rhobj = rhutil.coercerhinoobject(object_id, True)
         return rhobj.Attributes.Space == Rhino.DocObjects.ActiveSpace.PageSpace
     *)
 
@@ -360,6 +360,320 @@ module ExtensionsObject =
         '''
     
         return rhutil.coercerhinoobject(object_id, True, False) is not None
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object is hidden. Hidden objects are not visible, cannot
+    ///  be snapped to, and cannot be selected</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<returns>(bool) True if the object is hidden, False if the object is not hidden</returns>
+    static member IsObjectHidden(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.IsHidden
+    (*
+    def IsObjectHidden(object_id):
+        '''Verifies that an object is hidden. Hidden objects are not visible, cannot
+        be snapped to, and cannot be selected
+        Parameters:
+          object_id (guid): The identifier of an object to test
+        Returns:
+          bool: True if the object is hidden, False if the object is not hidden
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsHidden
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object's bounding box is inside of another bounding box</summary>
+    ///<param name="objectId">(Guid) Identifier of an object to be tested</param>
+    ///<param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
+    ///<param name="testMode">(bool) Optional, Default Value: <c>true</c>
+    ///If True, the object's bounding box must be contained by box
+    ///  If False, the object's bounding box must be contained by or intersect box</param>
+    ///<returns>(bool) True if object is inside box, False is object is not inside box</returns>
+    static member IsObjectInBox( objectId:Guid, 
+                                 box:BoundingBox, 
+                                 [<OPT;DEF(true)>]testMode:bool) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)        
+        let objbox = rhobj.Geometry.GetBoundingBox(true)
+        if testMode then 
+          box.Contains(objbox)
+        else
+          let union = BoundingBox.Intersection(box, objbox)
+          union.IsValid
+    (*
+    def IsObjectInBox(object_id, box, test_mode=True):
+        '''Verifies an object's bounding box is inside of another bounding box
+        Parameters:
+          object_id (guid): identifier of an object to be tested
+          box ([point, point, point, point, point, point, point, point]): bounding box to test for containment
+          test_mode (bool, optional): If True, the object's bounding box must be contained by box
+            If False, the object's bounding box must be contained by or intersect box
+        Returns:
+          bool: True if object is inside box, False is object is not inside box
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        box = rhutil.coerceboundingbox(box)
+        objbox = rhobj.Geometry.GetBoundingBox(True)
+        if test_mode: return box.Contains(objbox)
+        union = Rhino.Geometry.BoundingBox.Intersection(box, objbox)
+        return union.IsValid
+    *)
+
+
+    [<EXT>]
+    //(FIXME) VarOutTypes
+    ///<summary>Verifies that an object is a member of a group</summary>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function
+    ///  verifies that the object is a member of any group</param>
+    ///<returns>(bool) True if the object is a member of the specified group. If a group_name
+    ///  was not specified, the object is a member of some group.
+    ///  False if the object  is not a member of the specified group.
+    ///  If a group_name was not specified, the object is not a member of any group</returns>
+    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let count = rhobj.GroupCount
+        if count<1 then false
+        else
+          if isNull groupName then true
+          else
+            let index = Doc.Groups.Find(groupName)
+            if index<0 then failwith "%s group does not exist" groupName
+            let groupids = rhobj.GetGroupList()
+            groupids |> Seq.exists ((=) index )
+            
+    (*
+    def IsObjectInGroup(object_id, group_name=None):
+        '''Verifies that an object is a member of a group
+        Parameters:
+          object_id (guid): The identifier of an object
+          group_name (str, optional): The name of a group. If omitted, the function
+            verifies that the object is a member of any group
+        Returns:
+          bool: True if the object is a member of the specified group. If a group_name
+            was not specified, the object is a member of some group.
+            False if the object  is not a member of the specified group.
+            If a group_name was not specified, the object is not a member of any group
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        count = rhobj.GroupCount
+        if count<1: return False
+        if not group_name: return True
+        index = scriptcontext.doc.Groups.Find(group_name)
+        if index<0: raise ValueError("%s group does not exist"%group_name)
+        group_ids = rhobj.GetGroupList()
+        for id in group_ids:
+            if id==index: return True
+        return False
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object is locked. Locked objects are visible, and can
+    ///  be snapped to, but cannot be selected</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
+    ///<returns>(bool) True if the object is locked, False if the object is not locked</returns>
+    static member IsObjectLocked(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.IsLocked
+    (*
+    def IsObjectLocked(object_id):
+        '''Verifies that an object is locked. Locked objects are visible, and can
+        be snapped to, but cannot be selected
+        Parameters:
+          object_id (guid): The identifier of an object to be tested
+        Returns:
+          bool: True if the object is locked, False if the object is not locked
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsLocked
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object is normal. Normal objects are visible, can be
+    ///  snapped to, and can be selected</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
+    ///<returns>(bool) True if the object is normal, False if the object is not normal</returns>
+    static member IsObjectNormal(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.IsNormal
+    (*
+    def IsObjectNormal(object_id):
+        '''Verifies that an object is normal. Normal objects are visible, can be
+        snapped to, and can be selected
+        Parameters:
+          object_id (guid): The identifier of an object to be tested
+        Returns:
+          bool: True if the object is normal, False if the object is not normal
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsNormal
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object is a reference object. Reference objects are
+    ///  objects that are not part of the current document</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<returns>(bool) True if the object is a reference object, False if the object is not a reference object</returns>
+    static member IsObjectReference(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.IsReference
+    (*
+    def IsObjectReference(object_id):
+        '''Verifies that an object is a reference object. Reference objects are
+        objects that are not part of the current document
+        Parameters:
+          object_id (guid): The identifier of an object to test
+        Returns:
+          bool: True if the object is a reference object, False if the object is not a reference object
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsReference
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object can be selected</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<returns>(bool) True or False</returns>
+    static member IsObjectSelectable(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.IsSelectable(true,false,false,false)
+    (*
+    def IsObjectSelectable(object_id):
+        '''Verifies that an object can be selected
+        Parameters:
+          object_id (guid): The identifier of an object to test
+        Returns:
+          bool: True or False
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsSelectable(True,False,False,False)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object is currently selected.</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<returns>(int) 0, the object is not selected
+    ///  1, the object is selected
+    ///  2, the object is entirely persistently selected
+    ///  3, one or more proper sub-objects are selected</returns>
+    static member IsObjectSelected(objectId:Guid) : int =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.IsSelected(false)
+    (*
+    def IsObjectSelected(object_id):
+        '''Verifies that an object is currently selected.
+        Parameters:
+          object_id (guid): The identifier of an object to test
+        Returns:
+          int:
+            0, the object is not selected
+            1, the object is selected
+            2, the object is entirely persistently selected
+            3, one or more proper sub-objects are selected
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsSelected(False)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Determines if an object is closed, solid</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<returns>(bool) True if the object is solid, or a mesh is closed., False otherwise.</returns>
+    static member IsObjectSolid(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let geom = rhobj.Geometry
+        match geom with
+        | :? Mesh      as m -> m.IsClosed
+        | :? Extrusion as s -> s.IsSolid
+        | :? Surface   as s -> s.IsSolid              
+        | :? Brep      as s -> s.IsSolid
+        | _                 -> false
+    (*
+    def IsObjectSolid(object_id):
+        '''Determines if an object is closed, solid
+        Parameters:
+          object_id (guid): The identifier of an object to test
+        Returns:
+          bool: True if the object is solid, or a mesh is closed., False otherwise.
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        geom = rhobj.Geometry
+        geometry_type = geom.ObjectType
+    
+        if geometry_type == Rhino.DocObjects.ObjectType.Mesh:
+            return geom.IsClosed
+        if (geometry_type == Rhino.DocObjects.ObjectType.Surface or
+            geometry_type == Rhino.DocObjects.ObjectType.Brep or
+            geometry_type == Rhino.DocObjects.ObjectType.Extrusion):
+            return geom.IsSolid
+        return False
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object's geometry is valid and without error</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<returns>(bool) True if the object is valid</returns>
+    static member IsObjectValid(objectId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceRhinoObject(objectId) with
+        |None -> false
+        |Some rhobj ->  rhobj.IsValid
+    (*
+    def IsObjectValid(object_id):
+        '''Verifies an object's geometry is valid and without error
+        Parameters:
+          object_id (guid): The identifier of an object to test
+        Returns:
+          bool: True if the object is valid
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        return rhobj.IsValid
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object is visible in a view</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to test</param>
+    ///<param name="view">(string) Optional, Default Value: The title of the view.  If omitted, the current active view is used.</param>
+    ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
+    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport        
+        let bbox = rhobj.Geometry.GetBoundingBox(true)
+        rhobj.Visible && viewport.IsVisible(bbox)
+    (*
+    def IsVisibleInView(object_id, view=None):
+        '''Verifies an object is visible in a view
+        Parameters:
+          object_id (guid): the identifier of an object to test
+          view (str, optional): he title of the view.  If omitted, the current active view is used.
+        Returns:
+          bool: True if the object is visible in the specified view, otherwise False.  None on error
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True)
+        viewport = __viewhelper(view).MainViewport
+        bbox = rhobj.Geometry.GetBoundingBox(True)
+        return rhobj.Visible and viewport.IsVisible(bbox)
     *)
 
 

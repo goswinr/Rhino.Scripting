@@ -4,8 +4,6 @@ open System
 open System.Globalization
 
 
-
-
 module  Util = 
     
     type OPT = Runtime.InteropServices.OptionalAttribute
@@ -62,7 +60,7 @@ module UtilMath =
             with _ -> 
                 failwithf "Could not convert object '%A' into a floating point number" o   
     
-    let internal Rand = System.Random () 
+    let internal rand = System.Random () 
 
     ///allows ints to be multiplied by floats
     ///int(round(float(i) * f))
@@ -90,8 +88,8 @@ module UtilMath =
     ///given mean  and standardDeviation returns a random value from this Gaussian distribution
     ///if mean is 0 and stDev is 1 then 99% of values are  are within -2.3 to +2.3 ; 70% within -1 to +1
     let randomStandardDeviation mean standardDeviation =
-        let u1 = Rand.NextDouble()
-        let u2 = Rand.NextDouble()
+        let u1 = rand.NextDouble()
+        let u2 = rand.NextDouble()
         let randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2) //random normal(0,1)
         //random normal(mean,stdDev^2)
         mean + standardDeviation * randStdNormal 
