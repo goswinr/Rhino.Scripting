@@ -41,14 +41,14 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString() </summary>
     ///<param name="x">('T): the value or object to represent as string</param>
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
-    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string.</param>
     ///<returns>(stirng) the string </returns>
     static member ToNiceString (x:'T,[<OPT;DEF(true)>]trim:bool) : string =
         if trim then NiceString.toNiceString(x)
         else         NiceString.toNiceStringFull(x)        
 
     ///<summary>Prints an object or value to Rhino Command line. 
-    ///  If the value is a Seq the string will be no longer than 4 lines per Seq or per nested Seq </summary>
+    ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
     ///<param name="x">('T): the value or object to print</param>
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
     ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
@@ -60,11 +60,9 @@ type RhinoScriptSyntax private () = // no constructor?
         RhinoApp.Wait() // no swith to UI Thread needed !
 
     ///<summary>Prints two objects or value to Rhino Command line. 
-    ///  If the value is a Seq the string will be no longer than 4 lines Seq or per nested Seq </summary>
+    ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq </summary>
     ///<param name="x1">('T): the first value or object to print</param>
-    ///<param name="x2">('T): the second value or object to print</param>
-    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
-    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    ///<param name="x2">('T): the second value or object to print</param>    
     ///<returns>(unit) void, nothing/returns>
     static member Print (x1:'T, x2:'U) : unit =
         let s1 = RhinoScriptSyntax.ToNiceString(x1,true)
@@ -77,9 +75,7 @@ type RhinoScriptSyntax private () = // no constructor?
 
     ///<summary>Prints an object or value to Rhino Command line. 
     ///  If the value is a Seq the string will conatain a line for each item and per nested item </summary>
-    ///<param name="x">('T): the value or object to print</param>
-    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
-    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    ///<param name="x">('T): the value or object to print</param>   
     ///<returns>(unit) void, nothing/returns>
     static member PrintFull (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x,false)
@@ -90,9 +86,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Prints two objects or value to Rhino Command line. 
     ///  If the value is a Seq the string will conatain a line for each item and per nested item </summary>
     ///<param name="x1">('T): the first value or object to print</param>
-    ///<param name="x2">('T): the second value or object to print</param>
-    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
-    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    ///<param name="x2">('T): the second value or object to print</param>    
     ///<returns>(unit) void, nothing/returns>
     static member PrintFull (x1:'T, x2:'U) : unit =
         let s1 = RhinoScriptSyntax.ToNiceString(x1,false)
@@ -224,21 +218,21 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
     ///<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
     ///<returns>Rhino.Geometry.Point3d seq. Fails on bad input</returns>
-    static member Coerce3dPointList(points:'points) : Point3d seq=
+    static member Coerce3dPointList(points:'T) : Point3d seq=
         try Seq.map RhinoScriptSyntax.Coerce3dPoint points //|> Seq.cache
         with _ -> failwithf "*** could not Coerce: Could not convert %A to a list of 3d points"  points
         
     ///<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
     ///<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
     ///<returns>Rhino.Geometry.Point2d seq. Fails on bad input</returns>
-    static member Coerce2dPointList(points:'points) : Point2d seq=
+    static member Coerce2dPointList(points:'T) : Point2d seq=
         try Seq.map RhinoScriptSyntax.Coerce2dPoint points //|> Seq.cache
         with _ -> failwithf "*** could not Coerce: Could not convert %A to a list of 2d points"  points
 
     ///<summary>Convert input into a Rhino.Geometry.Plane if possible.</summary>
     ///<param name="plane">Plane,point, list, tuple</param>
     ///<returns>a Rhino.Geometry.Plane. Fails on bad input</returns>
-    static member CoercePlane(plane:'plane) =
+    static member CoercePlane(plane:'T) =
         match box plane with 
         | :? Plane  as plane -> plane // TODO add more
         | _ -> failwithf "*** could not Coerce: %A can not be converted to a Plane" plane
@@ -247,7 +241,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
     ///<param name="xform">object to convert</param>
     ///<returns>Rhino.Geometry.Transform. Fails on bad input</returns>   
-    static member CoerceXform(xform:'xform) =
+    static member CoerceXform(xform:'T) =
         match box xform with
         | :? Transform  as xform -> xform 
         | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
@@ -265,20 +259,20 @@ type RhinoScriptSyntax private () = // no constructor?
         | _ -> failwithf "*** could not CoerceXform %A can not be converted to a Transformation Matrix" xform
     
     ///<summary>attempt to get a Guids from input</summary>
-    ///<param name="id">objcts , guid or string</param>
+    ///<param name="objectId">objcts , guid or string</param>
     ///<returns>Guid. Fails on bad input</returns>
-    static member CoerceGuid(id:'id):Guid =
-        match box id with
-        | :? Guid  as g -> if Guid.Empty = g then failwithf "*** CoerceGuid: Guid is Emty: %A" id else g
+    static member CoerceGuid(objectId:'T):Guid =
+        match box objectId with
+        | :? Guid  as g -> if Guid.Empty = g then failwithf "*** CoerceGuid: Guid is Emty: %A" objectId else g
         | :? string  as s -> try Guid.Parse s with _ -> failwithf "*** could not CoerceGuid: string '%s' can not be converted to a Guid" s
         | :? DocObjects.RhinoObject as o -> o.Id
         | :? DocObjects.ObjRef      as o -> o.ObjectId
-        | _ -> failwithf "*** could not CoerceGuid:%A can not be converted to a Guid" id
+        | _ -> failwithf "*** could not CoerceGuid:%A can not be converted to a Guid" objectId
 
     ///<summary>attempt to get a Sequence of Guids from input</summary>
     ///<param name="ids">list of guids</param>
     ///<returns>Guid seq. Fails on bad input</returns>
-    static member CoerceGuidList(ids:'ids):seq<Guid> =
+    static member CoerceGuidList(ids:'T):seq<Guid> =
         match box ids with
         | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
         | :? seq<obj> as gs -> 
@@ -291,7 +285,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="color">string, tuple with  or 3 or 4 items.</param>
     ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provide better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255,0,0) . Fails on bad input</returns>
-    static member CoerceColor(color:'col) : Drawing.Color =
+    static member CoerceColor(color:'T) : Drawing.Color =
         match box color with
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
         | :? (int*int*int) as rgb       -> 
@@ -324,7 +318,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get Rhino Line Geometry</summary>
     ///<param name="line">Line, two points or Guid</param>
     ///<returns>Geometry.Line. Fails on bad input</returns>
-    static member CoerceLine(line:'line) : Line=
+    static member CoerceLine(line:'T) : Line=
         match box line with
         | :? Line as l -> l
         | :? Guid as g ->  
@@ -339,10 +333,10 @@ type RhinoScriptSyntax private () = // no constructor?
         |_ -> failwithf "*** could not Coerce %A to a Line" line
     
     
-    ///<summary>attempt to get RhinoObject from the document with a given id</summary>
+    ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>
     ///<param name="objectId">object identifier (Guid or string)</param>
     ///<returns>a RhinoObject. Fails on bad input</returns>
-    static member CoerceRhinoObject(objectId:'id): DocObjects.RhinoObject =
+    static member CoerceRhinoObject(objectId:'T): DocObjects.RhinoObject =
         match box objectId with
         | :? Guid  as g -> 
             if Guid.Empty = g then failwith "*** could not CoerceObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
@@ -363,71 +357,71 @@ type RhinoScriptSyntax private () = // no constructor?
 
 
     ///<summary>attempt to get GeometryBase class from given input</summary>
-    ///<param name="id">geometry identifier (Guid or string)</param>
+    ///<param name="objectId">geometry identifier (Guid or string)</param>
     ///<returns>Rhino.Geometry.GeometryBase. Fails on bad input</returns>
-    static member CoerceGeometry(id:'id) =
-        match box id with
+    static member CoerceGeometry(objectId:'T) =
+        match box objectId with
         | :? GeometryBase as g -> g
         | :? Guid  as g -> (RhinoScriptSyntax.CoerceRhinoObject g).Geometry        
         | :? DocObjects.ObjRef as r -> r.Geometry()
         | :? DocObjects.RhinoObject as o -> o.Geometry
         | :? string as s -> (RhinoScriptSyntax.CoerceRhinoObject s).Geometry
-        | _ -> failwithf "*** could not Coerce %A to a RhinoObject" id
+        | _ -> failwithf "*** could not Coerce %A to a RhinoObject" objectId
 
-    ///<summary>attempt to get polysurface geometry from the document with a given id</summary>
-    ///<param name="id">id (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
+    ///<summary>attempt to get polysurface geometry from the document with a given objectId</summary>
+    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
     ///<returns>a Rhino.Geometry.Brep. Fails on bad input</returns>
-    static member CoerceBrep(id:'id) =
-        match RhinoScriptSyntax.CoerceGeometry(id) with 
+    static member CoerceBrep(objectId:'T) =
+        match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Brep as b -> b
         | :? Extrusion as b -> b.ToBrep(true)
-        | _ -> failwithf "*** could not Coerce %A to a Brep" id
+        | _ -> failwithf "*** could not Coerce %A to a Brep" objectId
 
 
     
-    ///<summary>attempt to get curve geometry from the document with a given id.</summary>
-    ///<param name="id">id (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
+    ///<summary>attempt to get curve geometry from the document with a given objectId.</summary>
+    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
     ///<param name="segmentIndex">(int, optional) index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>Rhino.Geometry.Curve. Fails on bad input</returns>
-    static member CoerceCurve(id:'id, [<OPT;DEF(-1)>]segmentIndex:int): Curve = 
+    static member CoerceCurve(objectId:'T, [<OPT;DEF(-1)>]segmentIndex:int): Curve = 
         if segmentIndex < 0 then 
-            match RhinoScriptSyntax.CoerceGeometry(id) with 
+            match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? Curve as c -> c
-            | _ -> failwithf "*** could not Coerce %A to a Curve" id
+            | _ -> failwithf "*** could not Coerce %A to a Curve" objectId
         else
-            match RhinoScriptSyntax.CoerceGeometry(id) with 
+            match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? PolyCurve as c -> 
                 let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then failwithf "*** could not Coerce segment index %d from curve %A" segmentIndex id
+                if isNull crv then failwithf "*** could not Coerce segment index %d from curve %A" segmentIndex objectId
                 crv
             | :? Curve as c -> c
-            | _ -> failwithf "*** could not Coerce %A to a Curve with segment index %d" id segmentIndex
+            | _ -> failwithf "*** could not Coerce %A to a Curve with segment index %d" objectId segmentIndex
 
   
 
-    ///<summary>attempt to get surface geometry from the document with a given id</summary>
+    ///<summary>attempt to get surface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId = the object's identifier</param>
     ///<returns>a Rhino.Geometry.Surface. Fails on bad input</returns>
-    static member CoerceSurface(id:'id): Surface =
-        match RhinoScriptSyntax.CoerceGeometry(id) with 
+    static member CoerceSurface(objectId:'T): Surface =
+        match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Surface as c -> c
         | :? Brep as b -> 
             if b.Faces.Count = 1 then b.Faces.[0] :> Surface
-            else failwithf "*** could not Coerce %A to a Surface" id
-        | _ -> failwithf "*** could not Coerce %A to a Surface" id
+            else failwithf "*** could not Coerce %A to a Surface" objectId
+        | _ -> failwithf "*** could not Coerce %A to a Surface" objectId
 
-    ///<summary>attempt to get mesh geometry from the document with a given id</summary>
+    ///<summary>attempt to get mesh geometry from the document with a given objectId</summary>
     ///<param name="objectId">object identifier (Guid or string)</param>
     ///<returns>a Rhino.Geometry.Mesh. Fails on bad input</returns>    
-    static member CoerceMesh(id:'id) =
-        match RhinoScriptSyntax.CoerceGeometry(id) with 
+    static member CoerceMesh(objectId:'T) =
+        match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Mesh as m -> m        
-        | _ -> failwithf "*** could not Coerce %A to a Mesh" id
+        | _ -> failwithf "*** could not Coerce %A to a Mesh" objectId
 
-    ///<summary>attempt to get Rhino LayerObject from the document with a given id or fullame</summary>
+    ///<summary>attempt to get Rhino LayerObject from the document with a given objectId or fullame</summary>
     ///<param name="nameOrId">(string or guid or index): layers identifier name</param>
     ///<returns>DocObjectys.Layer  Fails on bad input</returns>
-    static member CoerceLayer (nameOrId:'nameOrId) : DocObjects.Layer=
+    static member CoerceLayer (nameOrId:'T) : DocObjects.Layer=
         try
             match box nameOrId with 
             | :? Guid as g   -> Doc.Layers.FindId(g)
@@ -437,13 +431,13 @@ type RhinoScriptSyntax private () = // no constructor?
         with _ ->
             failwithf "*** could not Coerce Layer from '%A'" nameOrId    
     
-    ///<summary>attempt to get Rhino LightObject from the document with a given id</summary>
-    ///<param name="id">(guid): light identifier </param>
+    ///<summary>attempt to get Rhino LightObject from the document with a given objectId</summary>
+    ///<param name="objectId">(guid): light identifier </param>
     ///<returns>a  Rhino.Geometry.Light. Fails on bad input</returns>
-    static member CoerceLight (id:'id) =
-        match RhinoScriptSyntax.CoerceGeometry id with
+    static member CoerceLight (objectId:'T) =
+        match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
-        |_ -> failwithf "*** could not CoerceLight: %A is not a Geometry.Light " id
+        |_ -> failwithf "*** could not CoerceLight: %A is not a Geometry.Light " objectId
     
     
     ///<summary>attempt to get Rhino View Object from the name of the view </summary>
@@ -458,46 +452,46 @@ type RhinoScriptSyntax private () = // no constructor?
     
     
     ///<summary>attempt to get Rhino Annotation Object</summary>
-    ///<param name="id">(guid): id of annotation object</param> 
+    ///<param name="objectId">(guid): objectId of annotation object</param> 
     ///<returns>a Rhino.DocObjects.AnnotationObjectBase. Fails on bad input.</returns>
-    static member CoerceAnnotation (id:'id): DocObjects.AnnotationObjectBase =
-        match RhinoScriptSyntax.CoerceRhinoObject id with
+    static member CoerceAnnotation (objectId:'T): DocObjects.AnnotationObjectBase =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        |_ -> failwithf "*** could not CoerceAnnotation: %A is not a Rhino.DocObjects.AnnotationObjectBase " id
+        |_ -> failwithf "*** could not CoerceAnnotation: %A is not a Rhino.DocObjects.AnnotationObjectBase " objectId
         
     ///<summary>Returns the Rhino Block instance object for a given Id</summary>
-    ///<param name="id">(Guid) Id of block instance</param>    
+    ///<param name="objectId">(Guid) Id of block instance</param>    
     ///<returns>(Rhino.DocObjects.InstanceObject) block instance object</returns>
-    static member CoerceBlockInstanceObject(id:Guid) : Rhino.DocObjects.InstanceObject =
-        match RhinoScriptSyntax.CoerceRhinoObject(id) with  
+    static member CoerceBlockInstanceObject(objectId:Guid) : Rhino.DocObjects.InstanceObject =
+        match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  
         | :? DocObjects.InstanceObject as b -> b
-        | _ -> failwithf "unable to find Block InstanceObject for '%A'" id
+        | _ -> failwithf "unable to find Block InstanceObject for '%A'" objectId
     
     ///<summary>attempt to get Rhino PointCloud Geometry</summary>
-    ///<param name="id">(guid): id of PointCloud object</param> 
+    ///<param name="objectId">(guid): objectId of PointCloud object</param> 
     ///<returns>a Geometry.PointCloud. Fails on bad input.</returns>
-    static member CoercePointCloud (id:'id) : PointCloud =
-        match RhinoScriptSyntax.CoerceGeometry id with
+    static member CoercePointCloud (objectId:'T) : PointCloud =
+        match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
-        |_ -> failwithf "*** could not CoercePointCloud: %A =" id
+        |_ -> failwithf "*** could not CoercePointCloud: %A =" objectId
                 
 
     ///<summary>attempt to get TextDot Geometry</summary>
-    ///<param name="id">(guid): id of TextDot object</param> 
+    ///<param name="objectId">(guid): objectId of TextDot object</param> 
     ///<returns>a Geometry.TextDot. Fails on bad input.</returns>
-    static member CoerceTextDot (id:'id) : TextDot =
-        match RhinoScriptSyntax.CoerceGeometry id with
+    static member CoerceTextDot (objectId:'T) : TextDot =
+        match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextDot as a -> a
-        |_ -> failwithf "*** could not TextDot: %A =" id
+        |_ -> failwithf "*** could not TextDot: %A =" objectId
 
 
     ///<summary>attempt to get TextEntity Geometry</summary>
-    ///<param name="id">(guid): id of TextEntity object</param> 
+    ///<param name="objectId">(guid): objectId of TextEntity object</param> 
     ///<returns>a Geometry.TextEntity. Fails on bad input.</returns>
-    static member CoerceTextEntity (id:'id) : TextEntity =
-        match RhinoScriptSyntax.CoerceGeometry id with
+    static member CoerceTextEntity (objectId:'T) : TextEntity =
+        match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
-        |_ -> failwithf "*** could not TextEntity: %A =" id
+        |_ -> failwithf "*** could not TextEntity: %A =" objectId
 
 
 
@@ -507,17 +501,17 @@ type RhinoScriptSyntax private () = // no constructor?
     //------try----
 
     ///<summary>attempt to get a Guids from input</summary>
-    ///<param name="id">objcts , guid or string</param>
+    ///<param name="objectId">objcts , guid or string</param>
     ///<returns>Guid Option</returns>
-    static member TryCoerceGuid(id:'id):Guid option=
-        match box id with
+    static member TryCoerceGuid(objectId:'T):Guid option=
+        match box objectId with
         | :? Guid  as g -> if Guid.Empty = g then None else Some g    
         | :? DocObjects.RhinoObject as o -> Some o.Id
         | :? DocObjects.ObjRef      as o -> Some o.ObjectId
         | :? string  as s -> let ok,g= Guid.TryParse s in  if ok then Some g else None
         | _ -> None
 
-    ///<summary>attempt to get RhinoObject from the document with a given id</summary>
+    ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>
     ///<param name="objectId">object identifier (Guid or string)</param>
     ///<returns>a RhinoObject Option</returns>
     static member TryCoerceRhinoObject(objectId:Guid): DocObjects.RhinoObject option =     
@@ -529,22 +523,22 @@ type RhinoScriptSyntax private () = // no constructor?
         
 
     ///<summary>attempt to get GeometryBase class from given Guid</summary>
-    ///<param name="id">geometry identifier (Guid)</param>
+    ///<param name="objectId">geometry identifier (Guid)</param>
     ///<returns>Rhino.Geometry.GeometryBase Option. </returns>
-    static member TryCoerceGeometry (id:Guid) :GeometryBase option =
-        if id = Guid.Empty then None
+    static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
+        if objectId = Guid.Empty then None
         else
-            match Doc.Objects.FindId(id) with 
+            match Doc.Objects.FindId(objectId) with 
             | null -> None
             | o -> Some o.Geometry 
 
 
-    ///<summary>attempt to get curve geometry from the document with a given id.</summary>
-    ///<param name="id">id (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
+    ///<summary>attempt to get curve geometry from the document with a given objectId.</summary>
+    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
     ///<param name="segmentIndex">(int, optional) index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>Rhino.Geometry.Curve. Option</returns>
-    static member TryCoerceCurve(id:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option= 
-        match RhinoScriptSyntax.TryCoerceGeometry id with 
+    static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option= 
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with 
         | None -> None
         | Some geo -> 
             if segmentIndex < 0 then 
