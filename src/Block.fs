@@ -151,7 +151,7 @@ module ExtensionsBlock =
         return len(BlockContainers(block_name))
     *)
 
-
+    
     [<EXT>]
     ///<summary>Returns the number of block definitions in the document</summary>
     ///<returns>(int) the number of block definitions in the document</returns>

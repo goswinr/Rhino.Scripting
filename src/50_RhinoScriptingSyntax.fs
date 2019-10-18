@@ -33,6 +33,8 @@ type Filter private () =
   static member ClippingPlane = 536870912
   static member Extrusion = 1073741824
 
+
+
 [<AbstractClass; Sealed>]
 /// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 
 type RhinoScriptSyntax private () = // no constructor?

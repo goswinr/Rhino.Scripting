@@ -1520,56 +1520,6 @@ module ExtensionsObject =
         return len(object_ids)
     *)
 
-    ///<summary>Modifies the linetype source of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object(s)</param>
-    ///<param name="source">(int)New linetype source. If omitted, the current source is returned.
-    ///  If objectId is a list of identifiers, this parameter is required
-    ///    0 = By Layer
-    ///    1 = By Object
-    ///    3 = By Parent</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET        
-        let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let oldsource = rhinoobject.Attributes.LinetypeSource
-        let source:  Rhino.DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue  source
-        rhinoobject.Attributes.LinetypeSource <- source
-        if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
-
-    (*
-    def ObjectLinetypeSource(object_ids, source=None):
-        '''Returns or modifies the linetype source of an object
-        Parameters:
-          object_ids ([guid, ...]): identifiers of object(s)
-          source (number, optional): new linetype source. If omitted, the current source is returned.
-            If object_ids is a list of identifiers, this parameter is required
-              0 = By Layer
-              1 = By Object
-              3 = By Parent
-        Returns:
-          number: If a source is not specified, the object's current linetype source
-          number: If source is specified, the object's previous linetype source
-          number: If object_ids is a list, the number of objects modified
-        '''
-    
-        objectId = rhutil.coerceguid(object_ids, False)
-        if objectId:
-            rhino_object = rhutil.coercerhinoobject(objectId, True, True)
-            oldsource = rhino_object.Attributes.LinetypeSource
-            if source is not None:
-                source = System.Enum.ToObject(Rhino.DocObjects.ObjectLinetypeSource, source)
-                rhino_object.Attributes.LinetypeSource = source
-                rhino_object.CommitChanges()
-                scriptcontext.doc.Views.Redraw()
-            return int(oldsource)
-        source = System.Enum.ToObject(Rhino.DocObjects.ObjectLinetypeSource, source)
-        for objectId in object_ids:
-            rhino_object = rhutil.coercerhinoobject(objectId, True, True)
-            rhino_object.Attributes.LinetypeSource = source
-            rhino_object.CommitChanges()
-        scriptcontext.doc.Views.Redraw()
-        return len(object_ids)
-    *)
-
 
     ///<summary>Modifies the linetype source of an object</summary>
     ///<param name="objectId">(Guid seq) Identifiers of object(s)</param>
