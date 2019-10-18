@@ -23,7 +23,7 @@ module ExtensionsUtility =
         Returns:
           bool: True if the script is being executed in the context of Rhino
         '''
-        return scriptcontext.id == 1
+        return scriptcontext.objectId == 1
     *)
 
 
@@ -38,7 +38,7 @@ module ExtensionsUtility =
         Returns:
           bool: True if the script is being executed in a grasshopper component
         '''
-        return scriptcontext.id == 2
+        return scriptcontext.objectId == 2
     *)
 
 

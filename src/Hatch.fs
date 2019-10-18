@@ -86,8 +86,8 @@ module ExtensionsHatch =
           None: on error
         '''
         __initHatchPatterns()
-        id = rhutil.coerceguid(curve_ids, False)
-        if id: curve_ids = [id]
+        objectId = rhutil.coerceguid(curve_ids, False)
+        if objectId: curve_ids = [objectId]
         index = scriptcontext.doc.HatchPatterns.CurrentHatchPatternIndex
         if hatch_pattern and hatch_pattern!=index:
             if isinstance(hatch_pattern, int):
@@ -96,7 +96,7 @@ module ExtensionsHatch =
                 pattern_instance = scriptcontext.doc.HatchPatterns.FindName(hatch_pattern)
                 index = Rhino.RhinoMath.UnsetIntIndex if pattern_instance is None else pattern_instance.Index
             if index<0: return scriptcontext.errorhandler()
-        curves = [rhutil.coercecurve(id, -1, True) for id in curve_ids]
+        curves = [rhutil.coercecurve(objectId, -1, True) for objectId in curve_ids]
         rotation = Rhino.RhinoMath.ToRadians(rotation)
         if tolerance is None or tolerance < 0:
             tolerance = scriptcontext.doc.ModelAbsoluteTolerance
@@ -104,9 +104,9 @@ module ExtensionsHatch =
         if not hatches: return scriptcontext.errorhandler()
         ids = []
         for hatch in hatches:
-            id = scriptcontext.doc.Objects.AddHatch(hatch)
-            if id==System.Guid.Empty: continue
-            ids.append(id)
+            objectId = scriptcontext.doc.Objects.AddHatch(hatch)
+            if objectId==System.Guid.Empty: continue
+            ids.append(objectId)
         if not ids: return scriptcontext.errorhandler()
         scriptcontext.doc.Views.Redraw()
         return ids
@@ -229,12 +229,12 @@ module ExtensionsHatch =
         attr = rhobj.Attributes
         rc = []
         for piece in pieces:
-            id = None
+            objectId = None
             if isinstance(piece, Rhino.Geometry.Curve):
-                id = scriptcontext.doc.Objects.AddCurve(piece, attr)
+                objectId = scriptcontext.doc.Objects.AddCurve(piece, attr)
             elif isinstance(piece, Rhino.Geometry.Brep):
-                id = scriptcontext.doc.Objects.AddBrep(piece, attr)
-            if id: rc.append(id)
+                objectId = scriptcontext.doc.Objects.AddBrep(piece, attr)
+            if objectId: rc.append(objectId)
         if delete: scriptcontext.doc.Objects.Delete(rhobj)
         return rc
     *)

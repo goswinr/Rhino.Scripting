@@ -253,7 +253,7 @@ module ExtensionsSelection =
                 if go.Get() <> Rhino.Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
-                    let id = objref.ObjectId
+                    let objectId = objref.ObjectId
                     let presel = go.ObjectsWerePreselected                    
                     let selmethod = objref.SelectionMethod()
                     let point = objref.SelectionPoint()
@@ -265,7 +265,7 @@ module ExtensionsSelection =
                         Doc.Objects.UnselectAll()|> ignore
                         Doc.Views.Redraw()
                     obj.Select(select)  |> ignore
-                    Some (id, presel, selmethod, point, curveparameter, viewname)
+                    Some (objectId, presel, selmethod, point, curveparameter, viewname)
             } |> Async.RunSynchronously
     (*
     def GetCurveObject(message=None, preselect=False, select=False):
@@ -302,7 +302,7 @@ module ExtensionsSelection =
         if go.Get()!=Rhino.Input.GetResult.Object: return None
     
         objref = go.Object(0)
-        id = objref.ObjectId
+        objectId = objref.ObjectId
         presel = go.ObjectsWerePreselected
         selmethod = 0
         sm = objref.SelectionMethod()
@@ -318,7 +318,7 @@ module ExtensionsSelection =
             scriptcontext.doc.Objects.UnselectAll()
             scriptcontext.doc.Views.Redraw()
         obj.Select(select)
-        return id, presel, selmethod, point, curve_parameter, viewname
+        return objectId, presel, selmethod, point, curve_parameter, viewname
     *)
 
 
@@ -481,7 +481,7 @@ module ExtensionsSelection =
                 if go.Get() <> Rhino.Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
-                    let id = objref.ObjectId
+                    let objectId = objref.ObjectId
                     let presel = go.ObjectsWerePreselected                    
                     let selmethod = objref.SelectionMethod()
                     let point = objref.SelectionPoint()
@@ -492,7 +492,7 @@ module ExtensionsSelection =
                         Doc.Objects.UnselectAll() |> ignore
                         Doc.Views.Redraw()
                     obj.Select(select) |> ignore
-                    Some (id, presel, selmethod, point, viewname)
+                    Some (objectId, presel, selmethod, point, viewname)
             } |> Async.RunSynchronously
     (*
     def GetObjectEx(message=None, filter=0, preselect=False, select=False, objects=None):
@@ -522,7 +522,7 @@ module ExtensionsSelection =
             scriptcontext.doc.Views.Redraw()
         go = None
         if objects:
-            ids = [rhutil.coerceguid(id, True) for id in objects]
+            ids = [rhutil.coerceguid(objectId, True) for objectId in objects]
             if ids: go = __CustomGetObjectEx(ids)
         if not go: go = Rhino.Input.Custom.GetObject()
         if message: go.SetCommandPrompt(message)
@@ -533,7 +533,7 @@ module ExtensionsSelection =
         go.AcceptNothing(True)
         if go.Get()!=Rhino.Input.GetResult.Object: return None
         objref = go.Object(0)
-        id = objref.ObjectId
+        objectId = objref.ObjectId
         presel = go.ObjectsWerePreselected
         selmethod = 0
         sm = objref.SelectionMethod()
@@ -548,7 +548,7 @@ module ExtensionsSelection =
             scriptcontext.doc.Objects.UnselectAll()
             scriptcontext.doc.Views.Redraw()
         obj.Select(select)
-        return id, presel, selmethod, point, viewname
+        return objectId, presel, selmethod, point, viewname
     *)
 
 
@@ -775,12 +775,12 @@ module ExtensionsSelection =
                     let count = go.ObjectCount
                     for i in range(count) do
                         let objref = go.Object(i)
-                        let id = objref.ObjectId
+                        let objectId = objref.ObjectId
                         let presel = go.ObjectsWerePreselected                        
                         let selmethod = objref.SelectionMethod()
                         let point = objref.SelectionPoint()
                         let viewname = go.View().ActiveViewport.Name
-                        rc.Add( (id, presel, selmethod, point, viewname) )
+                        rc.Add( (objectId, presel, selmethod, point, viewname) )
                         let obj = objref.Object()
                         if select && notNull obj then obj.Select(select) |> ignore                    
                     Some rc
@@ -815,7 +815,7 @@ module ExtensionsSelection =
             scriptcontext.doc.Views.Redraw()
         go = None
         if objects:
-            ids = [rhutil.coerceguid(id) for id in objects]
+            ids = [rhutil.coerceguid(objectId) for objectId in objects]
             if ids: go = __CustomGetObjectEx(ids)
         if not go: go = Rhino.Input.Custom.GetObject()
         go.SetCommandPrompt(message or "Select objects")
@@ -832,7 +832,7 @@ module ExtensionsSelection =
         count = go.ObjectCount
         for i in xrange(count):
             objref = go.Object(i)
-            id = objref.ObjectId
+            objectId = objref.ObjectId
             presel = go.ObjectsWerePreselected
             selmethod = 0
             sm = objref.SelectionMethod()
@@ -841,7 +841,7 @@ module ExtensionsSelection =
             elif Rhino.DocObjects.SelectionMethod.CrossingBox==sm: selmethod = 3
             point = objref.SelectionPoint()
             viewname = go.View().ActiveViewport.Name
-            rc.append( (id, presel, selmethod, point, viewname) )
+            rc.append( (objectId, presel, selmethod, point, viewname) )
             obj = objref.Object()
             if select and obj is not None: obj.Select(select)
         go.Dispose()
@@ -861,8 +861,8 @@ module ExtensionsSelection =
         maybe{
             let! ids = RhinoScriptSyntax.GetObjects(message, Filter.Point, preselect=preselect)
             let rc = ResizeArray()
-            for id in ids do
-                let pt = RhinoScriptSyntax.Coerce3dPoint(id)
+            for objectId in ids do
+                let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
                 rc.Add(pt)
             return rc
             }
@@ -879,8 +879,8 @@ module ExtensionsSelection =
     
         ids = GetObjects(message, filter.point, preselect=preselect)
         rc = []
-        for id in ids:
-            rhobj = scriptcontext.doc.Objects.FindId(id)
+        for objectId in ids:
+            rhobj = scriptcontext.doc.Objects.FindId(objectId)
             rc.append(rhobj.Geometry.Location)
         return rc
     *)
@@ -923,7 +923,7 @@ module ExtensionsSelection =
                     let rhobj = objref.Object()
                     rhobj.Select(select) |> ignore
                     Doc.Views.Redraw()
-                    let id = rhobj.Id
+                    let objectId = rhobj.Id
                     let prepicked = go.ObjectsWerePreselected
                     let selmethod = objref.SelectionMethod()
                     let mutable point = objref.SelectionPoint()
@@ -938,7 +938,7 @@ module ExtensionsSelection =
                     if not <| select && not <| prepicked then
                       Doc.Objects.UnselectAll() |> ignore
                       Doc.Views.Redraw()
-                    Some ( id, prepicked, selmethod, point, uv, name)
+                    Some ( objectId, prepicked, selmethod, point, uv, name)
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
     (*
     def GetSurfaceObject(message="Select surface", preselect=False, select=False):
@@ -974,7 +974,7 @@ module ExtensionsSelection =
         rhobj.Select(select)
         scriptcontext.doc.Views.Redraw()
     
-        id = rhobj.Id
+        objectId = rhobj.Id
         prepicked = go.ObjectsWerePreselected
         selmethod = objref.SelectionMethod()
         point = objref.SelectionPoint()
@@ -989,7 +989,7 @@ module ExtensionsSelection =
         if not select and not prepicked:
           scriptcontext.doc.Objects.UnselectAll()
           scriptcontext.doc.Views.Redraw()
-        return id, prepicked, selmethod, point, uv, name
+        return objectId, prepicked, selmethod, point, uv, name
     *)
 
 

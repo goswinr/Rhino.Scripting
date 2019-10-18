@@ -57,8 +57,8 @@ module ExtensionsGeometry =
                 rc = None
                 for item in modelviews:
                     if item.ActiveViewport.Name == views:
-                        id = item.ActiveViewportID
-                        rc = AddClippingPlane(plane, umagnitude, vmagnitude, id)
+                        objectId = item.ActiveViewportID
+                        rc = AddClippingPlane(plane, umagnitude, vmagnitude, objectId)
                         break
                 return rc
             else:
@@ -294,10 +294,10 @@ module ExtensionsGeometry =
        
         te.TextHorizontalAlignment <- horizontalAlignment
         te.TextVerticalAlignment <- verticalAlignment
-        let id = Doc.Objects.Add(te);
-        if id = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+        let objectId = Doc.Objects.Add(te);
+        if objectId = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         Doc.Views.Redraw()
-        id
+        objectId
     (*
     def AddText(text, point_orplane, height=1.0, font=None, fontstyle=0, justification=None):
         '''Adds a text string to the document
@@ -387,10 +387,10 @@ module ExtensionsGeometry =
             if v != None:
                 te.TextVerticalAlignment = v
     
-        id = scriptcontext.doc.Objects.Add(te);
-        if id==System.Guid.Empty: raise ValueError("unable to add text to document")
+        objectId = scriptcontext.doc.Objects.Add(te);
+        if objectId==System.Guid.Empty: raise ValueError("unable to add text to document")
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -493,7 +493,7 @@ module ExtensionsGeometry =
         bounding box of an object or of several objects
         Parameters:
           objects ([guid, ...]): The identifiers of the objects
-          view_orplane (str|guid): Title or id of the view that contains the
+          view_orplane (str|guid): Title or objectId of the view that contains the
               construction plane to which the bounding box should be aligned -or-
               user defined plane. If omitted, a world axis-aligned bounding box
               will be calculated
@@ -612,7 +612,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Verifies that an object is a clipping plane object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True if the object with a given id is a clipping plane</returns>
+    ///<returns>(bool) True if the object with a given objectId is a clipping plane</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.TryCoerceGeometry(objectId)
         if pc.IsNone then false else pc.Value :? ClippingPlaneSurface
@@ -622,7 +622,7 @@ module ExtensionsGeometry =
         Parameters:
           objectid (guid): the object's identifier
         Returns:
-          bool: True if the object with a given id is a clipping plane
+          bool: True if the object with a given objectId is a clipping plane
         '''
     
         cp = rhutil.TryCoerceGeometry(objectid)
@@ -633,7 +633,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Verifies an object is a point object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True if the object with a given id is a point</returns>
+    ///<returns>(bool) True if the object with a given objectId is a point</returns>
     static member IsPoint(objectId:Guid) : bool =
         let p = RhinoScriptSyntax.TryCoerceGeometry(objectId)
         if p.IsNone then false else p.Value :? Point
@@ -643,7 +643,7 @@ module ExtensionsGeometry =
         Parameters:
           objectid (guid): the object's identifier
         Returns:
-          bool: True if the object with a given id is a point
+          bool: True if the object with a given objectId is a point
         '''
     
         p = rhutil.coercegeometry(objectid)
@@ -654,7 +654,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Verifies an object is a point cloud object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True if the object with a given id is a point cloud</returns>
+    ///<returns>(bool) True if the object with a given objectId is a point cloud</returns>
     static member IsPointCloud(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.TryCoerceGeometry(objectId)
         if pc.IsNone then false else pc.Value :? PointCloud
@@ -664,7 +664,7 @@ module ExtensionsGeometry =
         Parameters:
           objectid (guid): the object's identifier
         Returns:
-          bool: True if the object with a given id is a point cloud
+          bool: True if the object with a given objectId is a point cloud
         '''
     
         pc = rhutil.coercegeometry(objectid)
@@ -675,7 +675,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Verifies an object is a text object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True if the object with a given id is a text object</returns>
+    ///<returns>(bool) True if the object with a given objectId is a text object</returns>
     static member IsText(objectId:Guid) : bool =
         let p = RhinoScriptSyntax.TryCoerceGeometry(objectId)
         if p.IsNone then false else p.Value :? TextEntity
@@ -685,7 +685,7 @@ module ExtensionsGeometry =
         Parameters:
           objectid (guid): the object's identifier
         Returns:
-          bool: True if the object with a given id is a text object
+          bool: True if the object with a given objectId is a text object
         '''
     
         text = rhutil.coercegeometry(objectid)
@@ -696,7 +696,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Verifies an object is a text dot object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True if the object with a given id is a text dot object</returns>
+    ///<returns>(bool) True if the object with a given objectId is a text dot object</returns>
     static member IsTextDot(objectId:Guid) : bool =
         let p = RhinoScriptSyntax.TryCoerceGeometry(objectId)
         if p.IsNone then false else p.Value :? TextDot
@@ -706,7 +706,7 @@ module ExtensionsGeometry =
         Parameters:
           objectid (guid): the object's identifier
         Returns:
-          bool: True if the object with a given id is a text dot object
+          bool: True if the object with a given objectId is a text dot object
         '''
     
         td = rhutil.coercegeometry(objectid)
@@ -1083,8 +1083,8 @@ module ExtensionsGeometry =
             rc = pointgeometry.Location
             if point:
                 point = rhutil.coerce3dpoint(point, True)
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, point)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, point)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1114,8 +1114,8 @@ module ExtensionsGeometry =
             rc = pointgeometry.Location
             if point:
                 point = rhutil.coerce3dpoint(point, True)
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, point)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, point)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1144,8 +1144,8 @@ module ExtensionsGeometry =
             rc = textdot.FontFace
             if fontface:
                 textdot.FontFace = fontface
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1177,8 +1177,8 @@ module ExtensionsGeometry =
             rc = textdot.FontFace
             if fontface:
                 textdot.FontFace = fontface
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1207,8 +1207,8 @@ module ExtensionsGeometry =
             rc = textdot.FontHeight
             if height and height>0:
                 textdot.FontHeight = height
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1240,8 +1240,8 @@ module ExtensionsGeometry =
             rc = textdot.FontHeight
             if height and height>0:
                 textdot.FontHeight = height
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1271,8 +1271,8 @@ module ExtensionsGeometry =
             rc = textdot.Point
             if point:
                 textdot.Point = rhutil.coerce3dpoint(point, True)
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1305,8 +1305,8 @@ module ExtensionsGeometry =
             rc = textdot.Point
             if point:
                 textdot.Point = rhutil.coerce3dpoint(point, True)
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1338,8 +1338,8 @@ module ExtensionsGeometry =
             if text is not None:
                 if not text :? str: text = str(text)
                 textdot.Text = text
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1373,8 +1373,8 @@ module ExtensionsGeometry =
             if text is not None:
                 if not text :? str: text = str(text)
                 textdot.Text = text
-                id = rhutil.coerceguid(objectid, True)
-                scriptcontext.doc.Objects.Replace(id, textdot)
+                objectId = rhutil.coerceguid(objectid, True)
+                scriptcontext.doc.Objects.Replace(objectId, textdot)
                 scriptcontext.doc.Views.Redraw()
             return rc
     *)
@@ -1408,8 +1408,8 @@ module ExtensionsGeometry =
         if font:
             index = scriptcontext.doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
             annotation.Font = scriptcontext.doc.Fonts[index]
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1417,7 +1417,7 @@ module ExtensionsGeometry =
 
 
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
+        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
         let f = 
@@ -1431,7 +1431,7 @@ module ExtensionsGeometry =
             |? failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
         
         annotation.Font <- f        
-        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
+        if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
         Doc.Views.Redraw()
         
     (*
@@ -1464,8 +1464,8 @@ module ExtensionsGeometry =
             if f is None:
                   return scriptcontext.errorhandler()
             annotation.Font = f
-            id = rhutil.coerceguid(object_id, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(object_id, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1495,8 +1495,8 @@ module ExtensionsGeometry =
         rc = annotation.TextHeight
         if height:
             annotation.TextHeight = height
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1508,8 +1508,8 @@ module ExtensionsGeometry =
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.TextHeight <-  height
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
+        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
         Doc.Views.Redraw()
         
     (*
@@ -1530,8 +1530,8 @@ module ExtensionsGeometry =
         rc = annotation.TextHeight
         if height:
             annotation.TextHeight = height
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1561,8 +1561,8 @@ module ExtensionsGeometry =
         rc = annotation.Plane
         if plane:
             annotation.Plane = rhutil.coerceplane(plane, True)
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1574,8 +1574,8 @@ module ExtensionsGeometry =
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.Plane <-  plane
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
+        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
         Doc.Views.Redraw()
         
     (*
@@ -1596,8 +1596,8 @@ module ExtensionsGeometry =
         rc = annotation.Plane
         if plane:
             annotation.Plane = rhutil.coerceplane(plane, True)
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1629,8 +1629,8 @@ module ExtensionsGeometry =
         if point:
             plane.Origin = rhutil.coerce3dpoint(point, True)
             text.Plane = plane
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, text)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, text)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1644,8 +1644,8 @@ module ExtensionsGeometry =
         let mutable plane = text.Plane
         plane.Origin <-  point
         text.Plane <-  plane
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        if not <| Doc.Objects.Replace(id, text) then failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
+        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(objectId, text) then failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
         Doc.Views.Redraw()
         
     (*
@@ -1668,8 +1668,8 @@ module ExtensionsGeometry =
         if point:
             plane.Origin = rhutil.coerce3dpoint(point, True)
             text.Plane = plane
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, text)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, text)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1716,8 +1716,8 @@ module ExtensionsGeometry =
         if style is not None and style!=rc:
             index = scriptcontext.doc.Fonts.FindOrCreate( fontdata.FaceName, (style&1)==1, (style&2)==2 )
             annotation.Font = scriptcontext.doc.Fonts[index]
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1742,8 +1742,8 @@ module ExtensionsGeometry =
             |_ -> failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
             |?    failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A' not availabe for %s" objectId style fontdata.QuartetName
 
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
+        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
         Doc.Views.Redraw()
 
     (*
@@ -1772,8 +1772,8 @@ module ExtensionsGeometry =
         if style is not None and style!=rc:
             index = scriptcontext.doc.Fonts.FindOrCreate( fontdata.FaceName, (style&1)==1, (style&2)==2 )
             annotation.Font = scriptcontext.doc.Fonts[index]
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1806,8 +1806,8 @@ module ExtensionsGeometry =
         if text:
             if not text :? str: text = str(text)
             annotation.Text = text
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1819,8 +1819,8 @@ module ExtensionsGeometry =
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
-        let id = RhinoScriptSyntax.CoerceGuid(objectId)
-        if not <| Doc.Objects.Replace(id, annotation) then failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
+        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
         Doc.Views.Redraw()
         
     (*
@@ -1842,8 +1842,8 @@ module ExtensionsGeometry =
         if text:
             if not text :? str: text = str(text)
             annotation.Text = text
-            id = rhutil.coerceguid(objectid, True)
-            scriptcontext.doc.Objects.Replace(id, annotation)
+            objectId = rhutil.coerceguid(objectid, True)
+            scriptcontext.doc.Objects.Replace(objectId, annotation)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)

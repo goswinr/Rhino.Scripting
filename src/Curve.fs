@@ -22,7 +22,7 @@ module ExtensionsCurve =
     ///  direction.</param>
     ///<param name="radius">(float) Radius of the arc</param>
     ///<param name="angleDegrees">(float) Interval of arc in degrees</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddArc(plane:Plane, radius:float, angleDegrees:float) : Guid =
         let radians = toRadians(angleDegrees)
         let arc = Arc(plane, radius, radians)
@@ -40,7 +40,7 @@ module ExtensionsCurve =
           radius(number): radius of the arc
           angle_degrees (number): interval of arc in degrees
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         plane = rhutil.coerceplane(plane, True)
         radians = math.radians(angle_degrees)
@@ -57,7 +57,7 @@ module ExtensionsCurve =
     ///<param name="start">(Point3d) Start of the arc </param>
     ///<param name="ende">(Point3d) Endpoint of the arc </param>
     ///<param name="pointOnArc">(Point3d) A point on the arc</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddArc3Pt(start:Point3d, ende:Point3d, pointOnArc:Point3d) : Guid =
         let arc = Arc(start, pointOnArc, ende)
         let rc = Doc.Objects.AddArc(arc)
@@ -71,7 +71,7 @@ module ExtensionsCurve =
           start, end (point|guid): endpoints of the arc
           point_on_arc (point|guid): a point on the arc
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         start = rhutil.coerce3dpoint(start, True)
         end = rhutil.coerce3dpoint(end, True)
@@ -90,7 +90,7 @@ module ExtensionsCurve =
     ///<param name="start">(Point3d) The starting point of the arc</param>
     ///<param name="direction">(Vector3d) The arc direction at start</param>
     ///<param name="ende">(Point3d) The ending point of the arc</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddArcPtTanPt(start:Point3d, direction:Vector3d, ende:Point3d) : Guid =
         let arc = Arc(start, direction, ende)
         let rc = Doc.Objects.AddArc(arc)
@@ -106,7 +106,7 @@ module ExtensionsCurve =
           direction (vector): the arc direction at start
           end (point): the ending point of the arc
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         start = rhutil.coerce3dpoint(start, True)
         direction = rhutil.coerce3dvector(direction, True)
@@ -170,7 +170,7 @@ module ExtensionsCurve =
     ///<param name="plane">(Plane) Plane on which the circle will lie. If a point is
     ///  passed, this will be the center of the circle on the active construction plane</param>
     ///<param name="radius">(float) The radius of the circle</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddCircle(plane:Plane, radius:float) : Guid = //(TODO add overload point)
         let circle = Circle(plane, radius)
         let rc = Doc.Objects.AddCircle(circle)
@@ -186,7 +186,7 @@ module ExtensionsCurve =
             construction plane
           radius (number): the radius of the circle
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         rc = None
         plane = rhutil.coerceplane(plane_or_center, False)
@@ -211,7 +211,7 @@ module ExtensionsCurve =
     ///<param name="first">(Point3d) First point on the circle' </param>
     ///<param name="second">(Point3d) Second point on the circle' </param>
     ///<param name="third">(Point3d) Third point on the circle' </param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddCircle3Pt(first:Point3d, second:Point3d, third:Point3d) : Guid =
         let circle = Circle(first, second, third)
         let rc = Doc.Objects.AddCircle(circle)
@@ -224,7 +224,7 @@ module ExtensionsCurve =
         Parameters:
           first, second, third (point|guid): points on the circle
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         start = rhutil.coerce3dpoint(first, True)
         end = rhutil.coerce3dpoint(second, True)
@@ -242,7 +242,7 @@ module ExtensionsCurve =
     ///<param name="points">(Point3d seq) A list of points</param>
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>
     ///Degree of the curve</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int) : Guid =
         let  curve = Curve.CreateControlPointCurve(points, degree)
         if isNull curve then failwithf "Unable to create control point curve from given points.  points:'%A' degree:'%A'" points degree
@@ -257,7 +257,7 @@ module ExtensionsCurve =
           points ([point|guid, ...]) a list of points
           degree (number): degree of the curve
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         points = rhutil.coerce3dpointlist(points, True)
         curve = Rhino.Geometry.Curve.CreateControlPointCurve(points, degree)
@@ -275,7 +275,7 @@ module ExtensionsCurve =
     ///  the plane will be the center of the ellipse</param>
     ///<param name="radiusX">(float) radius in the X axis direction</param>
     ///<param name="radiusY">(float) radius in the Y axis direction</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddEllipse(plane:Plane, radiusX:float, radiusY:float) : Guid =
         let ellipse = Ellipse(plane, radiusX, radiusY)
         let rc = Doc.Objects.AddEllipse(ellipse)
@@ -290,7 +290,7 @@ module ExtensionsCurve =
                   the plane will be the center of the ellipse
           radiusX, radiusY (number): radius in the X and Y axis directions
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         plane = rhutil.coerceplane(plane, True)
         ellipse = Rhino.Geometry.Ellipse(plane, radiusX, radiusY)
@@ -306,7 +306,7 @@ module ExtensionsCurve =
     ///<param name="center">(Point3d) Center point of the ellipse</param>
     ///<param name="second">(Point3d) End point of the x axis</param>
     ///<param name="third">(Point3d) End point of the y axis</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddEllipse3Pt(center:Point3d, second:Point3d, third:Point3d) : Guid =
         let  ellipse = Ellipse(center, second, third)
         let  rc = Doc.Objects.AddEllipse(ellipse)
@@ -321,7 +321,7 @@ module ExtensionsCurve =
           second (point|guid): end point of the x axis
           third  (point|guid): end point of the y axis
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         center = rhutil.coerce3dpoint(center, True)
         second = rhutil.coerce3dpoint(second, True)
@@ -344,7 +344,7 @@ module ExtensionsCurve =
     ///  starting point of the curve is used</param>
     ///<param name="basisPointB">(Point3d) Optional, Base point of the second curve. If omitted,
     ///  starting point of the curve is used</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA  
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB   
@@ -381,7 +381,7 @@ module ExtensionsCurve =
           base_point1 (point|guid, optional): base point of the second curve. If omitted,
                               starting point of the curve is used
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         if base_point0: base_point0 = rhutil.coerce3dpoint(base_point0, True)
         else: base_point0 = Rhino.Geometry.Point3d.Unset
@@ -418,7 +418,7 @@ module ExtensionsCurve =
     ///<param name="surfaceId">(Guid) Identifier of the surface to create the curve on</param>
     ///<param name="points">(Point3d seq) List of 3D points that lie on the specified surface.
     ///  The list must contain at least 2 points</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid =
         let  surface = RhinoScriptSyntax.CoerceSurface(surfaceId)  
         let  tolerance = Doc.ModelAbsoluteTolerance
@@ -438,7 +438,7 @@ module ExtensionsCurve =
           points ([point|guid, point|guid, ...])list of 3D points that lie on the specified surface.
                    The list must contain at least 2 points
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         surface = rhutil.coercesurface(surface_id, True)
         points = rhutil.coerce3dpointlist(points, True)
@@ -459,7 +459,7 @@ module ExtensionsCurve =
     ///<param name="surfaceId">(Guid) Identifier of the surface to create the curve on</param>
     ///<param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain
     ///  at least 2 sets of parameters</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid =
         let mutable surface = RhinoScriptSyntax.CoerceSurface(surfaceId)  
         let mutable tolerance = Doc.ModelAbsoluteTolerance
@@ -479,7 +479,7 @@ module ExtensionsCurve =
           points ([[number, number], [number,number], ...]): a list of 2D surface parameters. The list must contain
                                                              at least 2 sets of parameters
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         surface = rhutil.coercesurface(surface_id, True)
         points = rhutil.coerce2dpointlist(points)
@@ -515,7 +515,7 @@ module ExtensionsCurve =
     ///  beginning of the curve. If the curve is periodic, this argument must be omitted.</param>
     ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
     ///  end of the curve. If the curve is periodic, this argument must be omitted.</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0)>]knotstyle:int, [<OPT;DEF(Vector3d())>]startTangent:Vector3d, [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
         let endTangent   = if endTangent.IsZero then Vector3d.Unset else endTangent
         let startTangent = if startTangent.IsZero then Vector3d.Unset else startTangent
@@ -550,7 +550,7 @@ module ExtensionsCurve =
           end_tangent (vector, optional): 3d vector that specifies a tangency condition at the
               end of the curve. If the curve is periodic, this argument must be omitted.
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         points = rhutil.coerce3dpointlist(points, True)
         if not start_tangent: start_tangent = Rhino.Geometry.Vector3d.Unset
@@ -571,7 +571,7 @@ module ExtensionsCurve =
     ///<summary>Adds a line curve to the current model.</summary>
     ///<param name="start">(Point3d) Startpoint of the line</param>
     ///<param name="ende">(Point3d) Endpoint of the line</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddLine(start:Point3d, ende:Point3d) : Guid =
         let  rc = Doc.Objects.AddLine(start, ende)
         if rc = Guid.Empty then failwithf "Unable to add line to document.  start:'%A' ende:'%A'" start ende
@@ -583,7 +583,7 @@ module ExtensionsCurve =
         Parameters:
           start, end (point|guid) end points of the line
         Returns:
-          guid: id of the new curve object
+          guid: objectId of the new curve object
         '''
         start = rhutil.coerce3dpoint(start, True)
         end = rhutil.coerce3dpoint(end, True)
@@ -677,7 +677,7 @@ module ExtensionsCurve =
     ///  removed. The list must contain at least two points. If the
     ///  list contains less than four points, then the first point and
     ///  last point must be different.</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
         //pl.DeleteShortSegments(Doc.ModelAbsoluteTolerance) |>ignore
@@ -693,10 +693,10 @@ module ExtensionsCurve =
                    removed. The list must contain at least two points. If the
                    list contains less than four points, then the first point and
                    last point must be different.
-          replace_id (guid, optional): If set to the id of an existing object, the object
+          replace_id (guid, optional): If set to the objectId of an existing object, the object
                    will be replaced by this polyline
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         points = rhutil.coerce3dpointlist(points, True)
         if replace_id: replace_id = rhutil.coerceguid(replace_id, True)
@@ -721,7 +721,7 @@ module ExtensionsCurve =
     ///  x and y axes</param>
     ///<param name="height">(float) Height of rectangle as measured along the plane's
     ///  x and y axes</param>
-    ///<returns>(Guid) id of new rectangle</returns>
+    ///<returns>(Guid) objectId of new rectangle</returns>
     static member AddRectangle(plane:Plane, width:float, height:float) : Guid =
         let rect = Rectangle3d(plane, width, height)
         let poly = rect.ToPolyline()
@@ -737,7 +737,7 @@ module ExtensionsCurve =
           width, height (number): width and height of rectangle as measured along the plane's
             x and y axes
         Returns:
-          guid: id of new rectangle
+          guid: objectId of new rectangle
         '''
         plane = rhutil.coerceplane(plane, True)
         rect = Rhino.Geometry.Rectangle3d(plane, width, height)
@@ -759,7 +759,7 @@ module ExtensionsCurve =
     ///<param name="radius0">(float) Starting radius of spiral</param>
     ///<param name="radius1">(float) Optional, Default Value: <c>0.0</c>
     ///Ending radius of spiral. If omitted, the starting radius is used for the complete spiral.</param>
-    ///<returns>(Guid) id of new curve on success</returns>
+    ///<returns>(Guid) objectId of new curve on success</returns>
     static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid =
         let dir = point1 - point0
         let plane = Plane(point0, dir)
@@ -783,7 +783,7 @@ module ExtensionsCurve =
           radius0 (number): starting radius of spiral
           radius1 (number, optional): ending radius of spiral. If omitted, the starting radius is used for the complete spiral.
         Returns:
-          guid: id of new curve on success
+          guid: objectId of new curve on success
         '''
         if radius1 is None: radius1 = radius0
         point0 = rhutil.coerce3dpoint(point0, True)
@@ -805,7 +805,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a closed planar curve object</param>
     ///<param name="param0">(float) First parameters on the source curve</param>
     ///<param name="param1">(float) Second parameters on the source curve</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId)  
         let trimcurve = curve.Trim(param0, param1)
@@ -822,7 +822,7 @@ module ExtensionsCurve =
           curve_id (guid): identifier of a closed planar curve object
           param0, param1 (number): first and second parameters on the source curve
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         curve = rhutil.coercecurve(curve_id, -1, True)
         trimcurve = curve.Trim(param0, param1)
@@ -1058,7 +1058,7 @@ module ExtensionsCurve =
     ///<param name="tolerance">(float) Optional, Default Value: <c>-1.0</c>
     ///Maximum allowable distance between start and end
     ///  point. If omitted, the current absolute tolerance is used</param>
-    ///<returns>(Guid) id of the new curve object</returns>
+    ///<returns>(Guid) objectId of the new curve object</returns>
     static member CloseCurve(curveId:Guid, [<OPT;DEF(-1.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
         if curve.IsClosed then  curveId
@@ -1077,7 +1077,7 @@ module ExtensionsCurve =
           tolerance (number, optional): maximum allowable distance between start and end
                                         point. If omitted, the current absolute tolerance is used
         Returns:
-          guid: id of the new curve object if successful
+          guid: objectId of the new curve object if successful
         '''
         curve = rhutil.coercecurve(curve_id, -1, True)
         if curve.IsClosed: return curve_id
@@ -1157,11 +1157,11 @@ module ExtensionsCurve =
             else
                 failwithf "Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f,deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
         else
-            let id = Doc.Objects.AddCurve( polylineCurve )
-            if System.Guid.Empty=id then
+            let objectId = Doc.Objects.AddCurve( polylineCurve )
+            if System.Guid.Empty=objectId then
                 failwithf "Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f,deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
             else
-                id
+                objectId
     (*
     def ConvertCurveToPolyline(curve_id, angle_tolerance=5.0, tolerance=0.01, delete_input=False, min_edge_length=0, max_edge_length=0):
         '''Convert curve to a polyline curve
@@ -1182,13 +1182,13 @@ module ExtensionsCurve =
         if tolerance<=0.0: tolerance = 0.01;
         polyline_curve = curve.ToPolyline( 0, 0, angle_tolerance, 0.0, 0.0, tolerance, min_edge_length, max_edge_length, True)
         if not polyline_curve: return scriptcontext.errorhandler()
-        id = System.Guid.Empty
+        objectId = System.Guid.Empty
         if delete_input:
-            if scriptcontext.doc.Objects.Replace( curve_id, polyline_curve): id = curve_id
+            if scriptcontext.doc.Objects.Replace( curve_id, polyline_curve): objectId = curve_id
         else:
-            id = scriptcontext.doc.Objects.AddCurve( polyline_curve )
-        if System.Guid.Empty==id: return scriptcontext.errorhandler()
-        return id
+            objectId = scriptcontext.doc.Objects.AddCurve( polyline_curve )
+        if System.Guid.Empty==objectId: return scriptcontext.errorhandler()
+        return objectId
     *)
 
 
@@ -1359,8 +1359,8 @@ module ExtensionsCurve =
                 attr.ObjectDecoration = Rhino.DocObjects.ObjectDecoration.EndArrowhead
             elif arrow_style==3:
                 attr.ObjectDecoration = Rhino.DocObjects.ObjectDecoration.BothArrowhead
-            id = rhutil.coerceguid(curve_id, True)
-            scriptcontext.doc.Objects.ModifyAttributes(id, attr, True)
+            objectId = rhutil.coerceguid(curve_id, True)
+            scriptcontext.doc.Objects.ModifyAttributes(objectId, attr, True)
             scriptcontext.doc.Views.Redraw()
         if rc==Rhino.DocObjects.ObjectDecoration.None: return 0
         if rc==Rhino.DocObjects.ObjectDecoration.StartArrowhead: return 1
@@ -1422,8 +1422,8 @@ module ExtensionsCurve =
                 attr.ObjectDecoration = Rhino.DocObjects.ObjectDecoration.EndArrowhead
             elif arrow_style==3:
                 attr.ObjectDecoration = Rhino.DocObjects.ObjectDecoration.BothArrowhead
-            id = rhutil.coerceguid(curve_id, True)
-            scriptcontext.doc.Objects.ModifyAttributes(id, attr, True)
+            objectId = rhutil.coerceguid(curve_id, True)
+            scriptcontext.doc.Objects.ModifyAttributes(objectId, attr, True)
             scriptcontext.doc.Views.Redraw()
         if rc==Rhino.DocObjects.ObjectDecoration.None: return 0
         if rc==Rhino.DocObjects.ObjectDecoration.StartArrowhead: return 1
@@ -1548,7 +1548,7 @@ module ExtensionsCurve =
     ///A positive tolerance value, or None for the doc default.</param>
     ///<returns>(Guid seq) The identifiers of the new objects.</returns>
     static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
-        let inCurves = [| for id in curveIds -> RhinoScriptSyntax.CoerceCurve id |]  
+        let inCurves = [| for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId |]  
         if Array.length(inCurves) < 2 then failwithf "curveBooleanUnion:curveIds must have at least 2 curves %A" curveIds
         let tolerance = max Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanUnion(inCurves, tolerance)        
@@ -1572,7 +1572,7 @@ module ExtensionsCurve =
         Returns:
           list(guid, ...): The identifiers of the new objects.
         '''
-        in_curves = [rhutil.coercecurve(id,-1,True) for id in curve_id]
+        in_curves = [rhutil.coercecurve(objectId,-1,True) for objectId in curve_id]
         if len(in_curves)<2: raise ValueException("curve_id must have at least 2 curves")
         if tolerance is None or tolerance<0:
             tolerance = scriptcontext.doc.ModelAbsoluteTolerance
@@ -1701,8 +1701,8 @@ module ExtensionsCurve =
         '''
         curve = rhutil.coercecurve(curve_id,-1,True)
         geometry = []
-        id = rhutil.coerceguid(object_ids, False)
-        if id: object_ids = [id]
+        objectId = rhutil.coerceguid(object_ids, False)
+        if objectId: object_ids = [objectId]
         for object_id in object_ids:
             rhobj = rhutil.coercerhinoobject(object_id, True, True)
             geometry.append( rhobj.Geometry )
@@ -3234,15 +3234,15 @@ module ExtensionsCurve =
         if( type(curve_ids) is list or type(curve_ids) is tuple ): pass
         else: curve_ids = [curve_ids]
         rc = []
-        for id in curve_ids:
-            curve = rhutil.coercecurve(id, -1, True)
+        for objectId in curve_ids:
+            curve = rhutil.coercecurve(objectId, -1, True)
             pieces = curve.DuplicateSegments()
             if pieces:
                 for piece in pieces:
                     rc.append(scriptcontext.doc.Objects.AddCurve(piece))
                 if delete_input:
-                    id = rhutil.coerceguid(id, True)
-                    scriptcontext.doc.Objects.Delete(id, True)
+                    objectId = rhutil.coerceguid(objectId, True)
+                    scriptcontext.doc.Objects.Delete(objectId, True)
         if rc: scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -3275,7 +3275,7 @@ module ExtensionsCurve =
         elif side=2 then sidet <- CurveEnd.Both
         else failwithf "extendCurve Side must be 0, 1, || 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
 
-        let rhobjs = [| for id in boundarycurveIds -> RhinoScriptSyntax.CoerceRhinoObject(id) |]  
+        let rhobjs = [| for objectId in boundarycurveIds -> RhinoScriptSyntax.CoerceRhinoObject(objectId) |]  
         if isNull rhobjs then  failwithf "extendCurve BoundarycurveIds failed. they must contain at least one item.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
         let geometry = [| for obj in rhobjs -> obj.Geometry |]
         let newcurve = curve.Extend(sidet, extensionTypet, geometry)
@@ -3322,7 +3322,7 @@ module ExtensionsCurve =
         elif side==2: side = Rhino.Geometry.CurveEnd.Both
         else: raise ValueError("side must be 0, 1, or 2")
         
-        rhobjs = [rhutil.coercerhinoobject(id) for id in boundary_object_ids]
+        rhobjs = [rhutil.coercerhinoobject(objectId) for objectId in boundary_object_ids]
         if not rhobjs: raise ValueError("boundary_object_ids must contain at least one item")
         geometry = [obj.Geometry for obj in rhobjs]
         newcurve = curve.Extend(side, extension_type, geometry)
@@ -4084,12 +4084,12 @@ module ExtensionsCurve =
     ///<param name="tolerance">(float) Optional, Default Value: <c>2.1 * Doc.ModelAbsoluteTolerance</c>
     ///Join tolerance. If omitted, 2.1 * document absolute
     ///  tolerance is used</param>
-    ///<returns>(Guid []) Object id representing the new curves</returns>
+    ///<returns>(Guid []) Object objectId representing the new curves</returns>
     static member JoinCurves(curveIds:Guid [], [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid [] =
         if Seq.length(curveIds)<2 then
             failwithf "curveIds must contain at least 2 items.  curveIds:'%A' deleteInput:'%A' tolerance:'%A'" curveIds deleteInput tolerance
         
-        let curves = [| for id in curveIds -> RhinoScriptSyntax.CoerceCurve id |]  
+        let curves = [| for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId |]  
         let tolerance0 = max (tolerance)(2.1 * Doc.ModelAbsoluteTolerance)
         let newcurves = Curve.JoinCurves(curves, tolerance0)               
         if isNull newcurves then 
@@ -4097,8 +4097,8 @@ module ExtensionsCurve =
 
         let rc = [| for crv in newcurves -> Doc.Objects.AddCurve(crv) |]
         if deleteInput then
-            for id in curveIds do
-                Doc.Objects.Delete(id, false) |> ignore
+            for objectId in curveIds do
+                Doc.Objects.Delete(objectId, false) |> ignore
         Doc.Views.Redraw()
         rc
           
@@ -4111,10 +4111,10 @@ module ExtensionsCurve =
           tolerance (number, optional): join tolerance. If omitted, 2.1 * document absolute
               tolerance is used
         Returns:
-          list(guid, ...): Object id representing the new curves
+          list(guid, ...): Object objectId representing the new curves
         '''
         if len(object_ids)<2: raise ValueError("object_ids must contain at least 2 items")
-        curves = [rhutil.coercecurve(id, -1, True) for id in object_ids]
+        curves = [rhutil.coercecurve(objectId, -1, True) for objectId in object_ids]
         if tolerance is None:
             tolerance = 2.1 * scriptcontext.doc.ModelAbsoluteTolerance
         newcurves = Rhino.Geometry.Curve.JoinCurves(curves, tolerance)
@@ -4122,9 +4122,9 @@ module ExtensionsCurve =
         if newcurves:
             rc = [scriptcontext.doc.Objects.AddCurve(crv) for crv in newcurves]
         if rc and delete_input:
-            for id in object_ids:
-                id = rhutil.coerceguid(id, True)
-                scriptcontext.doc.Objects.Delete(id, False)
+            for objectId in object_ids:
+                objectId = rhutil.coerceguid(objectId, True)
+                scriptcontext.doc.Objects.Delete(objectId, False)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -4159,7 +4159,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Delete the input curve. If omitted, the input curve will not be deleted.</param>
-    ///<returns>(Guid) id of the new or modified curve</returns>
+    ///<returns>(Guid) objectId of the new or modified curve</returns>
     static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
         if not <| curve.IsPeriodic then  failwithf "makeCurveNonPeriodic failed.1  curveId:'%A' deleteInput:'%A'" curveId deleteInput
@@ -4185,7 +4185,7 @@ module ExtensionsCurve =
           curve_id (guid): identifier of the curve object
           delete_input (bool): delete the input curve. If omitted, the input curve will not be deleted.
         Returns:
-          guid: id of the new or modified curve if successful
+          guid: objectId of the new or modified curve if successful
           None: on error
         '''
         curve = rhutil.coercecurve(curve_id, -1, True)
@@ -4219,7 +4219,7 @@ module ExtensionsCurve =
     ///<param name="curve1">(Guid) identifiers of second curve.</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Angle tolerance used to match kinks between curves</param>
-    ///<returns>(Guid) id of the new or modified curve</returns>
+    ///<returns>(Guid) objectId of the new or modified curve</returns>
     static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve0 = RhinoScriptSyntax.CoerceCurve curve0  
         let curve1 = RhinoScriptSyntax.CoerceCurve curve1  
@@ -4238,7 +4238,7 @@ module ExtensionsCurve =
           curve0, curve1 (guid): identifiers of two curves
           tolerance (number, optional): angle tolerance used to match kinks between curves
         Returns:
-          guid: id of the new or modified curve if successful
+          guid: objectId of the new or modified curve if successful
           None: on error
         '''
         curve0 = rhutil.coercecurve(curve0, -1, True)
@@ -4619,8 +4619,8 @@ module ExtensionsCurve =
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid seq) list of identifiers for the resulting curves.</returns>
     static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid [] =
-        let curves = [| for id in curveIds -> RhinoScriptSyntax.CoerceCurve id |]  
-        let meshes = [| for id in meshIds -> RhinoScriptSyntax.CoerceMesh(id) |]  
+        let curves = [| for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId |]  
+        let meshes = [| for objectId in meshIds -> RhinoScriptSyntax.CoerceMesh(objectId) |]  
         let tolerance = Doc.ModelAbsoluteTolerance
         let newcurves = Curve.ProjectToMesh(curves, meshes, direction, tolerance)
         let ids = [| for curve in newcurves -> Doc.Objects.AddCurve(curve) |]
@@ -4639,8 +4639,8 @@ module ExtensionsCurve =
         curve_ids = rhutil.coerceguidlist(curve_ids)
         mesh_ids = rhutil.coerceguidlist(mesh_ids)
         direction = rhutil.coerce3dvector(direction, True)
-        curves = [rhutil.coercecurve(id, -1, True) for id in curve_ids]
-        meshes = [rhutil.coercemesh(id, True) for id in mesh_ids]
+        curves = [rhutil.coercecurve(objectId, -1, True) for objectId in curve_ids]
+        meshes = [rhutil.coercemesh(objectId, True) for objectId in mesh_ids]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         newcurves = Rhino.Geometry.Curve.ProjectToMesh(curves, meshes, direction, tolerance)
         ids = [scriptcontext.doc.Objects.AddCurve(curve) for curve in newcurves]
@@ -4656,8 +4656,8 @@ module ExtensionsCurve =
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid seq) list of identifiers</returns>
     static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid [] =
-        let curves = [| for id in curveIds -> RhinoScriptSyntax.CoerceCurve id |]  
-        let breps = [| for id in surfaceIds -> RhinoScriptSyntax.CoerceBrep(id) |]  
+        let curves = [| for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId |]  
+        let breps = [| for objectId in surfaceIds -> RhinoScriptSyntax.CoerceBrep(objectId) |]  
         let tolerance = Doc.ModelAbsoluteTolerance
         let newcurves = Curve.ProjectToBrep(curves, breps, direction, tolerance)
         let ids = [| for curve in newcurves -> Doc.Objects.AddCurve(curve) |]
@@ -4676,8 +4676,8 @@ module ExtensionsCurve =
         curve_ids = rhutil.coerceguidlist(curve_ids)
         surface_ids = rhutil.coerceguidlist(surface_ids)
         direction = rhutil.coerce3dvector(direction, True)
-        curves = [rhutil.coercecurve(id, -1, True) for id in curve_ids]
-        breps = [rhutil.coercebrep(id, True) for id in surface_ids]
+        curves = [rhutil.coercecurve(objectId, -1, True) for objectId in curve_ids]
+        breps = [rhutil.coercebrep(objectId, True) for objectId in surface_ids]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         newcurves = Rhino.Geometry.Curve.ProjectToBrep(curves, breps, direction, tolerance)
         ids = [scriptcontext.doc.Objects.AddCurve(curve) for curve in newcurves]
@@ -4944,8 +4944,8 @@ module ExtensionsCurve =
         if rhobj: att = rhobj.Attributes
         rc = [scriptcontext.doc.Objects.AddCurve(crv, att) for crv in newcurves]
         if rc and delete_input:
-            id = rhutil.coerceguid(curve_id, True)
-            scriptcontext.doc.Objects.Delete(id, True)
+            objectId = rhutil.coerceguid(curve_id, True)
+            scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -4997,8 +4997,8 @@ module ExtensionsCurve =
         if rhobj: att = rhobj.Attributes
         rc = scriptcontext.doc.Objects.AddCurve(newcurve, att)
         if delete_input:
-            id = rhutil.coerceguid(curve_id, True)
-            scriptcontext.doc.Objects.Delete(id, True)
+            objectId = rhutil.coerceguid(curve_id, True)
+            scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)

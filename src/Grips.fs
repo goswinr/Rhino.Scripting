@@ -114,10 +114,10 @@ module ExtensionsGrips =
             return scriptcontext.errorhandler()
         rc = []
         for grip in grips:
-            id = grip.OwnerId
+            objectId = grip.OwnerId
             index = grip.Index
             location = grip.CurrentLocation
-            rc.append((id, index, location))
+            rc.append((objectId, index, location))
             if select: grip.Select(True, True)
         if select: scriptcontext.doc.Views.Redraw()
         return rc

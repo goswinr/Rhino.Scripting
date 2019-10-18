@@ -77,7 +77,7 @@ module ExtensionsView =
     ///Title of new layout</param>
     ///<param name="size">(float * float) Optional, Default Value: <c>null:float * float</c>
     ///Width and height of paper for the new layout</param>
-    ///<returns>(Guid) id of new layout</returns>
+    ///<returns>(Guid) objectId of new layout</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null)>]size:float * float) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
@@ -87,7 +87,7 @@ module ExtensionsView =
           title (str, optional): title of new layout
           size ([number, number], optional): width and height of paper for the new layout
         Returns:
-          guid: id of new layout
+          guid: objectId of new layout
         '''
         page = None
         if size is None: page = scriptcontext.doc.Views.AddPageView(title)
@@ -157,7 +157,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Returns the current detail view in a page layout view</summary>
     ///<param name="layout">(string) Title or identifier of an existing page layout view</param>
-    ///<returns>(string) The title or id of the current detail view</returns>
+    ///<returns>(string) The title or objectId of the current detail view</returns>
     static member CurrentDetail(layout:string) : string = //GET
         failNotImpl () // genreation temp disabled !!
     (*
@@ -168,8 +168,8 @@ module ExtensionsView =
           detail (str|guid, optional): title or identifier the the detail view to set
           return_name (bool, optional): return title if True, else return identifier
         Returns:
-          str: if detail is not specified, the title or id of the current detail view
-          str: if detail is specified, the title or id of the previous detail view
+          str: if detail is not specified, the title or objectId of the current detail view
+          str: if detail is specified, the title or objectId of the previous detail view
           None: on error
         '''
         layout_id = rhutil.coerceguid(layout)
@@ -182,11 +182,11 @@ module ExtensionsView =
         if return_name: rc = active_viewport.Name
         else: rc = active_viewport.Id
         if detail:
-            id = rhutil.coerceguid(detail)
-            if( (id and id==page.MainViewport.Id) or (id is None and detail==page.MainViewport.Name) ):
+            objectId = rhutil.coerceguid(detail)
+            if( (objectId and objectId==page.MainViewport.Id) or (objectId is None and detail==page.MainViewport.Name) ):
                 page.SetPageAsActive()
             else:
-                if id: page.SetActiveDetail(id)
+                if objectId: page.SetActiveDetail(objectId)
                 else: page.SetActiveDetail(detail, False)
         scriptcontext.doc.Views.Redraw()
         return rc
@@ -207,8 +207,8 @@ module ExtensionsView =
           detail (str|guid, optional): title or identifier the the detail view to set
           return_name (bool, optional): return title if True, else return identifier
         Returns:
-          str: if detail is not specified, the title or id of the current detail view
-          str: if detail is specified, the title or id of the previous detail view
+          str: if detail is not specified, the title or objectId of the current detail view
+          str: if detail is specified, the title or objectId of the previous detail view
           None: on error
         '''
         layout_id = rhutil.coerceguid(layout)
@@ -221,11 +221,11 @@ module ExtensionsView =
         if return_name: rc = active_viewport.Name
         else: rc = active_viewport.Id
         if detail:
-            id = rhutil.coerceguid(detail)
-            if( (id and id==page.MainViewport.Id) or (id is None and detail==page.MainViewport.Name) ):
+            objectId = rhutil.coerceguid(detail)
+            if( (objectId and objectId==page.MainViewport.Id) or (objectId is None and detail==page.MainViewport.Name) ):
                 page.SetPageAsActive()
             else:
-                if id: page.SetActiveDetail(id)
+                if objectId: page.SetActiveDetail(objectId)
                 else: page.SetActiveDetail(detail, False)
         scriptcontext.doc.Views.Redraw()
         return rc
@@ -234,29 +234,29 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Returns the currently active view</summary>
-    ///<returns>(string) The title or id of the current view</returns>
+    ///<returns>(string) The title or objectId of the current view</returns>
     static member CurrentView() : string = //GET
         failNotImpl () // genreation temp disabled !!
     (*
     def CurrentView(view=None, return_name=True):
         '''Returns or sets the currently active view
         Parameters:
-          view (str|guid): Title or id of the view to set current.
+          view (str|guid): Title or objectId of the view to set current.
             If omitted, only the title or identifier of the current view is returned
           return_name (bool, optional): If True, then the name, or title, of the view is returned.
             If False, then the identifier of the view is returned
         Returns:
-          str: if the title is not specified, the title or id of the current view
-          str: if the title is specified, the title or id of the previous current view
+          str: if the title is not specified, the title or objectId of the current view
+          str: if the title is specified, the title or objectId of the previous current view
           None: on error
         '''
         rc = None
         if return_name: rc = scriptcontext.doc.Views.ActiveView.MainViewport.Name
         else: rc = scriptcontext.doc.Views.ActiveView.MainViewport.Id
         if view:
-            id = rhutil.coerceguid(view)
+            objectId = rhutil.coerceguid(view)
             rhview = None
-            if id: rhview = scriptcontext.doc.Views.Find(id)
+            if objectId: rhview = scriptcontext.doc.Views.Find(objectId)
             else: rhview = scriptcontext.doc.Views.Find(view, False)
             if rhview is None: return scriptcontext.errorhandler()
             scriptcontext.doc.Views.ActiveView = rhview
@@ -264,7 +264,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Sets the currently active view</summary>
-    ///<param name="view">(string)Title or id of the view to set current.
+    ///<param name="view">(string)Title or objectId of the view to set current.
     ///  If omitted, only the title or identifier of the current view is returned</param>
     ///<param name="returnName">(bool)If True, then the name, or title, of the view is returned.
     ///  If False, then the identifier of the view is returned</param>
@@ -275,22 +275,22 @@ module ExtensionsView =
     def CurrentView(view=None, return_name=True):
         '''Returns or sets the currently active view
         Parameters:
-          view (str|guid): Title or id of the view to set current.
+          view (str|guid): Title or objectId of the view to set current.
             If omitted, only the title or identifier of the current view is returned
           return_name (bool, optional): If True, then the name, or title, of the view is returned.
             If False, then the identifier of the view is returned
         Returns:
-          str: if the title is not specified, the title or id of the current view
-          str: if the title is specified, the title or id of the previous current view
+          str: if the title is not specified, the title or objectId of the current view
+          str: if the title is specified, the title or objectId of the previous current view
           None: on error
         '''
         rc = None
         if return_name: rc = scriptcontext.doc.Views.ActiveView.MainViewport.Name
         else: rc = scriptcontext.doc.Views.ActiveView.MainViewport.Id
         if view:
-            id = rhutil.coerceguid(view)
+            objectId = rhutil.coerceguid(view)
             rhview = None
-            if id: rhview = scriptcontext.doc.Views.Find(id)
+            if objectId: rhview = scriptcontext.doc.Views.Find(objectId)
             else: rhview = scriptcontext.doc.Views.Find(view, False)
             if rhview is None: return scriptcontext.errorhandler()
             scriptcontext.doc.Views.ActiveView = rhview
@@ -805,7 +805,7 @@ module ExtensionsView =
     ///<summary>Restores a named view to the specified view</summary>
     ///<param name="namedView">(string) Name of the named view to restore</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view to restore the named view.
+    ///Title or objectId of the view to restore the named view.
     ///  If omitted, the current active view is used</param>
     ///<param name="restoreBitmap">(bool) Optional, Default Value: <c>false</c>
     ///Restore the named view's background bitmap</param>
@@ -817,7 +817,7 @@ module ExtensionsView =
         '''Restores a named view to the specified view
         Parameters:
           named_view (str): name of the named view to restore
-          view (str|guid, optional):  title or id of the view to restore the named view.
+          view (str|guid, optional):  title or objectId of the view to restore the named view.
                If omitted, the current active view is used
           restore_bitmap: (bool, optional): restore the named view's background bitmap
         Returns:
@@ -839,7 +839,7 @@ module ExtensionsView =
     ///<summary>Rotates a perspective-projection view's camera. See the RotateCamera
     ///  command in the Rhino help file for more details</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, current active view is used</param>
+    ///Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
     ///The direction to rotate the camera where
     ///  0=right
@@ -858,7 +858,7 @@ module ExtensionsView =
         '''Rotates a perspective-projection view's camera. See the RotateCamera
         command in the Rhino help file for more details
         Parameters:
-          view (str|guid, optional):  title or id of the view. If omitted, current active view is used
+          view (str|guid, optional):  title or objectId of the view. If omitted, current active view is used
           direction(number, optional): the direction to rotate the camera where
             0=right
             1=left
@@ -903,7 +903,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Rotates a view. See RotateView command in Rhino help for more information</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, the current active view is used</param>
+    ///Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
     ///The direction to rotate the view where
     ///  0=right
@@ -921,7 +921,7 @@ module ExtensionsView =
     def RotateView(view=None, direction=0, angle=None):
         '''Rotates a view. See RotateView command in Rhino help for more information
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           direction (number, optional): the direction to rotate the view where
                 0=right
                 1=left
@@ -959,7 +959,7 @@ module ExtensionsView =
     def ShowGrid(view=None, show=None):
         '''Shows or hides a view's construction plane grid
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           show (bool, optional): The grid state to set. If omitted, the current grid display state is returned
         Returns:
           bool: If show is not specified, then the grid display state if successful
@@ -975,7 +975,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Shows or hides a view's construction plane grid</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The grid state to set. If omitted, the current grid display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowGrid(view:string, [<OPT;DEF(true:bool)>]show:bool) : unit = //SET
@@ -984,7 +984,7 @@ module ExtensionsView =
     def ShowGrid(view=None, show=None):
         '''Shows or hides a view's construction plane grid
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           show (bool, optional): The grid state to set. If omitted, the current grid display state is returned
         Returns:
           bool: If show is not specified, then the grid display state if successful
@@ -1009,7 +1009,7 @@ module ExtensionsView =
     def ShowGridAxes(view=None, show=None):
         '''Shows or hides a view's construction plane grid axes.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           show (bool, optional): The state to set. If omitted, the current grid axes display state is returned
         Returns:
           bool: If show is not specified, then the grid axes display state
@@ -1025,7 +1025,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Shows or hides a view's construction plane grid axes.</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set. If omitted, the current grid axes display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowGridAxes(view:string, [<OPT;DEF(true:bool)>]show:bool) : unit = //SET
@@ -1034,7 +1034,7 @@ module ExtensionsView =
     def ShowGridAxes(view=None, show=None):
         '''Shows or hides a view's construction plane grid axes.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           show (bool, optional): The state to set. If omitted, the current grid axes display state is returned
         Returns:
           bool: If show is not specified, then the grid axes display state
@@ -1059,7 +1059,7 @@ module ExtensionsView =
     def ShowViewTitle(view=None, show=True):
         '''Shows or hides the title window of a view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           show (bool, optional): The state to set.
         Returns:
           None
@@ -1070,7 +1070,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Shows or hides the title window of a view</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set.</param>
     static member ShowViewTitle(view:string, [<OPT;DEF(true)>]show:bool) : unit = //SET
         failNotImpl () // genreation temp disabled !!
@@ -1078,7 +1078,7 @@ module ExtensionsView =
     def ShowViewTitle(view=None, show=True):
         '''Shows or hides the title window of a view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           show (bool, optional): The state to set.
         Returns:
           None
@@ -1098,7 +1098,7 @@ module ExtensionsView =
     def ShowWorldAxes(view=None, show=None):
         '''Shows or hides a view's world axis icon
         Parameters:
-          view (str|guid, optional):  title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional):  title or objectId of the view. If omitted, the current active view is used
           show: (bool, optional): The state to set.
         Returns:
           bool: If show is not specified, then the world axes display state
@@ -1114,7 +1114,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Shows or hides a view's world axis icon</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowWorldAxes(view:string, [<OPT;DEF(true:bool)>]show:bool) : unit = //SET
@@ -1123,7 +1123,7 @@ module ExtensionsView =
     def ShowWorldAxes(view=None, show=None):
         '''Shows or hides a view's world axis icon
         Parameters:
-          view (str|guid, optional):  title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional):  title or objectId of the view. If omitted, the current active view is used
           show: (bool, optional): The state to set.
         Returns:
           bool: If show is not specified, then the world axes display state
@@ -1143,7 +1143,7 @@ module ExtensionsView =
     ///<summary>Tilts a view by rotating the camera up vector. See the TiltView command in
     ///  the Rhino help file for more details.</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, the current active view is used</param>
+    ///Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
     ///The direction to rotate the view where
     ///  0=right
@@ -1160,7 +1160,7 @@ module ExtensionsView =
         '''Tilts a view by rotating the camera up vector. See the TiltView command in
         the Rhino help file for more details.
         Parameters:
-          view (str|guid, optional):  title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional):  title or objectId of the view. If omitted, the current active view is used
           direction (number, optional): the direction to rotate the view where
             0=right
             1=left
@@ -1196,7 +1196,7 @@ module ExtensionsView =
     def ViewCamera(view=None, camera_location=None):
         '''Returns or sets the camera location of the specified view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           camera_location (point, optional): a 3D point identifying the new camera location.
             If omitted, the current camera location is returned
         Returns:
@@ -1215,7 +1215,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Sets the camera location of the specified view</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="cameraLocation">(Point3d)A 3D point identifying the new camera location.
     ///  If omitted, the current camera location is returned</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1225,7 +1225,7 @@ module ExtensionsView =
     def ViewCamera(view=None, camera_location=None):
         '''Returns or sets the camera location of the specified view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           camera_location (point, optional): a 3D point identifying the new camera location.
             If omitted, the current camera location is returned
         Returns:
@@ -1255,7 +1255,7 @@ module ExtensionsView =
         '''Returns or sets the 35mm camera lens length of the specified perspective
         projection view.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           length (number, optional): the new 35mm camera lens length. If omitted, the previous
             35mm camera lens length is returned
         Returns:
@@ -1272,7 +1272,7 @@ module ExtensionsView =
 
     ///<summary>Sets the 35mm camera lens length of the specified perspective
     /// projection view.</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="length">(float)The new 35mm camera lens length. If omitted, the previous
     ///  35mm camera lens length is returned</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1283,7 +1283,7 @@ module ExtensionsView =
         '''Returns or sets the 35mm camera lens length of the specified perspective
         projection view.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           length (number, optional): the new 35mm camera lens length. If omitted, the previous
             35mm camera lens length is returned
         Returns:
@@ -1302,7 +1302,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Returns the orientation of a view's camera.</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, the current active view is used</param>
+    ///Title or objectId of the view. If omitted, the current active view is used</param>
     ///<returns>(Plane) the view's camera plane</returns>
     static member ViewCameraPlane([<OPT;DEF(null:string)>]view:string) : Plane =
         failNotImpl () // genreation temp disabled !!
@@ -1310,7 +1310,7 @@ module ExtensionsView =
     def ViewCameraPlane(view=None):
         '''Returns the orientation of a view's camera.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
         Returns:
           plane: the view's camera plane if successful
           None: on error
@@ -1332,7 +1332,7 @@ module ExtensionsView =
     def ViewCameraTarget(view=None, camera=None, target=None):
         '''Returns or sets the camera and target positions of the specified view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           camera (point): 3d point identifying the new camera location. If camera and
              target are not specified, current camera and target locations are returned
           target (point): 3d point identifying the new target location. If camera and
@@ -1356,7 +1356,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Sets the camera and target positions of the specified view</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="camera">(Point3d)3d point identifying the new camera location. If camera and
     ///  target are not specified, current camera and target locations are returned</param>
     ///<param name="target">(Point3d)3d point identifying the new target location. If camera and
@@ -1368,7 +1368,7 @@ module ExtensionsView =
     def ViewCameraTarget(view=None, camera=None, target=None):
         '''Returns or sets the camera and target positions of the specified view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           camera (point): 3d point identifying the new camera location. If camera and
              target are not specified, current camera and target locations are returned
           target (point): 3d point identifying the new target location. If camera and
@@ -1401,7 +1401,7 @@ module ExtensionsView =
     def ViewCameraUp(view=None, up_vector=None):
         '''Returns or sets the camera up direction of a specified
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           up_vector (vector): 3D vector identifying the new camera up direction
         Returns:
           vector: if up_vector is not specified, then the current camera up direction
@@ -1416,7 +1416,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Sets the camera up direction of a specified</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, the current active view is used</param>
     ///<param name="upVector">(Vector3d)3D vector identifying the new camera up direction</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewCameraUp(view:string, [<OPT;DEF(Vector3d())>]upVector:Vector3d) : unit = //SET
@@ -1425,7 +1425,7 @@ module ExtensionsView =
     def ViewCameraUp(view=None, up_vector=None):
         '''Returns or sets the camera up direction of a specified
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, the current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, the current active view is used
           up_vector (vector): 3D vector identifying the new camera up direction
         Returns:
           vector: if up_vector is not specified, then the current camera up direction
@@ -1449,7 +1449,7 @@ module ExtensionsView =
     def ViewCPlane(view=None, plane=None):
         '''Return or set a view's construction plane
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used.
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used.
           plane (plane): the new construction plane if setting
         Returns:
           plane: If a construction plane is not specified, the current construction plane
@@ -1465,7 +1465,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Set a view's construction plane</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, current active view is used.</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, current active view is used.</param>
     ///<param name="plane">(Plane)The new construction plane if setting</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewCPlane(view:string, [<OPT;DEF(Plane())>]plane:Plane) : unit = //SET
@@ -1474,7 +1474,7 @@ module ExtensionsView =
     def ViewCPlane(view=None, plane=None):
         '''Return or set a view's construction plane
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used.
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used.
           plane (plane): the new construction plane if setting
         Returns:
           plane: If a construction plane is not specified, the current construction plane
@@ -1499,9 +1499,9 @@ module ExtensionsView =
     def ViewDisplayMode(view=None, mode=None, return_name=True):
         '''Return or set a view display mode
         Parameters:
-          view (str|guid, optional): Title or id of a view. If omitted, active view is used
-          mode (str|guid, optional): Name or id of a display mode
-          return_name (bool, optional): If true, return display mode name. If False, display mode id
+          view (str|guid, optional): Title or objectId of a view. If omitted, active view is used
+          mode (str|guid, optional): Name or objectId of a display mode
+          return_name (bool, optional): If true, return display mode name. If False, display mode objectId
         Returns:
           str: If mode is specified, the previous mode
           str: If mode is not specified, the current mode
@@ -1522,9 +1522,9 @@ module ExtensionsView =
     *)
 
     ///<summary>Set a view display mode</summary>
-    ///<param name="view">(string)Title or id of a view. If omitted, active view is used</param>
-    ///<param name="mode">(string)Name or id of a display mode</param>
-    ///<param name="returnName">(bool)If true, return display mode name. If False, display mode id</param>
+    ///<param name="view">(string)Title or objectId of a view. If omitted, active view is used</param>
+    ///<param name="mode">(string)Name or objectId of a display mode</param>
+    ///<param name="returnName">(bool)If true, return display mode name. If False, display mode objectId</param>
     ///<returns>(string) If mode is not specified, the current mode</returns>
     static member ViewDisplayMode(view:string, [<OPT;DEF(null:string)>]mode:string, [<OPT;DEF(true)>]returnName:bool) : string = //SET
         failNotImpl () // genreation temp disabled !!
@@ -1532,9 +1532,9 @@ module ExtensionsView =
     def ViewDisplayMode(view=None, mode=None, return_name=True):
         '''Return or set a view display mode
         Parameters:
-          view (str|guid, optional): Title or id of a view. If omitted, active view is used
-          mode (str|guid, optional): Name or id of a display mode
-          return_name (bool, optional): If true, return display mode name. If False, display mode id
+          view (str|guid, optional): Title or objectId of a view. If omitted, active view is used
+          mode (str|guid, optional): Name or objectId of a display mode
+          return_name (bool, optional): If true, return display mode name. If False, display mode objectId
         Returns:
           str: If mode is specified, the previous mode
           str: If mode is not specified, the current mode
@@ -1556,18 +1556,18 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Return id of a display mode given it's name</summary>
+    ///<summary>Return objectId of a display mode given it's name</summary>
     ///<param name="name">(string) Name of the display mode</param>
-    ///<returns>(Guid) The id of the display mode , otherwise None</returns>
+    ///<returns>(Guid) The objectId of the display mode , otherwise None</returns>
     static member ViewDisplayModeId(name:string) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewDisplayModeId(name):
-        '''Return id of a display mode given it's name
+        '''Return objectId of a display mode given it's name
         Parameters:
           name (str): name of the display mode
         Returns:
-          guid: The id of the display mode if successful, otherwise None
+          guid: The objectId of the display mode if successful, otherwise None
         '''
         desc = Rhino.Display.DisplayModeDescription.FindByName(name)
         if desc: return desc.Id
@@ -1575,14 +1575,14 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Return name of a display mode given it's id</summary>
+    ///<summary>Return name of a display mode given it's objectId</summary>
     ///<param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method.</param>
     ///<returns>(string) The name of the display mode , otherwise None</returns>
     static member ViewDisplayModeName(modeId:Guid) : string =
         failNotImpl () // genreation temp disabled !!
     (*
     def ViewDisplayModeName(mode_id):
-        '''Return name of a display mode given it's id
+        '''Return name of a display mode given it's objectId
         Parameters:
           mode_id (guid): The identifier of the display mode obtained from the ViewDisplayModes method.
         Returns:
@@ -1654,7 +1654,7 @@ module ExtensionsView =
     ///<summary>Return 3d corners of a view's near clipping plane rectangle. Useful
     ///  in determining the "real world" size of a parallel-projected view</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, current active view is used</param>
+    ///Title or objectId of the view. If omitted, current active view is used</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order)</returns>
     static member ViewNearCorners([<OPT;DEF(null:string)>]view:string) : Point3d * Point3d * Point3d * Point3d =
         failNotImpl () // genreation temp disabled !!
@@ -1663,7 +1663,7 @@ module ExtensionsView =
         '''Return 3d corners of a view's near clipping plane rectangle. Useful
         in determining the "real world" size of a parallel-projected view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
         Returns:
           list(point, point, point, point): Four Point3d that define the corners of the rectangle (counter-clockwise order)
         '''
@@ -1685,7 +1685,7 @@ module ExtensionsView =
     def ViewProjection(view=None, mode=None):
         '''Return or set a view's projection mode.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           mode (number, optional): the projection mode
             1 = parallel
             2 = perspective
@@ -1709,7 +1709,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Set a view's projection mode.</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="mode">(int)The projection mode
     ///  1 = parallel
     ///  2 = perspective
@@ -1721,7 +1721,7 @@ module ExtensionsView =
     def ViewProjection(view=None, mode=None):
         '''Return or set a view's projection mode.
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           mode (number, optional): the projection mode
             1 = parallel
             2 = perspective
@@ -1756,7 +1756,7 @@ module ExtensionsView =
         '''Returns or sets the radius of a parallel-projected view. Useful
         when you need an absolute zoom factor for a parallel-projected view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           radius (number): the view radius
           mode (bool, optional): perform a "dolly" magnification by moving the camera
             towards/away from the target so that the amount of the screen 
@@ -1783,7 +1783,7 @@ module ExtensionsView =
 
     ///<summary>Sets the radius of a parallel-projected view. Useful
     /// when you need an absolute zoom factor for a parallel-projected view</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="radius">(float)The view radius</param>
     ///<param name="mode">(bool)Perform a "dolly" magnification by moving the camera
     ///  towards/away from the target so that the amount of the screen
@@ -1797,7 +1797,7 @@ module ExtensionsView =
         '''Returns or sets the radius of a parallel-projected view. Useful
         when you need an absolute zoom factor for a parallel-projected view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           radius (number): the view radius
           mode (bool, optional): perform a "dolly" magnification by moving the camera
             towards/away from the target so that the amount of the screen 
@@ -1826,7 +1826,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Returns the width and height in pixels of the specified view</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, current active view is used</param>
+    ///Title or objectId of the view. If omitted, current active view is used</param>
     ///<returns>(float * float) of two numbers identifying width and height</returns>
     static member ViewSize([<OPT;DEF(null:string)>]view:string) : float * float =
         failNotImpl () // genreation temp disabled !!
@@ -1834,7 +1834,7 @@ module ExtensionsView =
     def ViewSize(view=None):
         '''Returns the width and height in pixels of the specified view
         Parameters:
-          view (str|guid): title or id of the view. If omitted, current active view is used
+          view (str|guid): title or objectId of the view. If omitted, current active view is used
         Returns:
           tuple(number, number): of two numbers identifying width and height
         '''
@@ -1895,7 +1895,7 @@ module ExtensionsView =
     def ViewTarget(view=None, target=None):
         '''Returns or sets the target location of the specified view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           target (point, optional): 3d point identifying the new target location. If omitted,
             the current target location is returned
         Returns:
@@ -1915,7 +1915,7 @@ module ExtensionsView =
     *)
 
     ///<summary>Sets the target location of the specified view</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string)Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="target">(Point3d)3d point identifying the new target location. If omitted,
     ///  the current target location is returned</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1925,7 +1925,7 @@ module ExtensionsView =
     def ViewTarget(view=None, target=None):
         '''Returns or sets the target location of the specified view
         Parameters:
-          view (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           target (point, optional): 3d point identifying the new target location. If omitted,
             the current target location is returned
         Returns:
@@ -2140,7 +2140,7 @@ module ExtensionsView =
     ///<param name="boundingBox">(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) Eight points that define the corners
     ///  of a bounding box or a BoundingBox class instance</param>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, current active view is used</param>
+    ///Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>
     ///<returns>(unit) </returns>
@@ -2152,7 +2152,7 @@ module ExtensionsView =
         Parameters:
           bounding_box ([point, point, point ,point, point, point, point, point]): eight points that define the corners
             of a bounding box or a BoundingBox class instance
-          view  (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view  (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           all (bool, optional): zoom extents in all views
         Returns:
           None
@@ -2172,7 +2172,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Zooms to extents of visible objects in the specified view</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, current active view is used</param>
+    ///Title or objectId of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>
     ///<returns>(unit) </returns>
@@ -2182,7 +2182,7 @@ module ExtensionsView =
     def ZoomExtents(view=None, all=False):
         '''Zooms to extents of visible objects in the specified view
         Parameters:
-          view  (str|guid, optional): title or id of the view. If omitted, current active view is used
+          view  (str|guid, optional): title or objectId of the view. If omitted, current active view is used
           all (bool, optional): zoom extents in all views
         Returns:
           None
@@ -2200,7 +2200,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Zoom to extents of selected objects in a view</summary>
     ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, active view is used</param>
+    ///Title or objectId of the view. If omitted, active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>
     ///<returns>(unit) </returns>
@@ -2210,7 +2210,7 @@ module ExtensionsView =
     def ZoomSelected(view=None, all=False):
         '''Zoom to extents of selected objects in a view
         Parameters:
-          view  (str|guid, optional): title or id of the view. If omitted, active view is used
+          view  (str|guid, optional): title or objectId of the view. If omitted, active view is used
           all (bool, optional): zoom extents in all views
         Returns:
           None

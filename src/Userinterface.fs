@@ -421,7 +421,7 @@ module ExtensionsUserinterface =
     ///<returns>(Point3d * Point3d * Guid * Point3d) a Tuple of containing the following information
     ///  0  cursor position in world coordinates
     ///  1  cursor position in screen coordinates
-    ///  2  id of the active viewport
+    ///  2  objectId of the active viewport
     ///  3  cursor position in client coordinates</returns>
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         async{
@@ -442,7 +442,7 @@ module ExtensionsUserinterface =
           tuple(point, point, guid, point): containing the following information
             0  cursor position in world coordinates
             1  cursor position in screen coordinates
-            2  id of the active viewport
+            2  objectId of the active viewport
             3  cursor position in client coordinates
         '''
     
@@ -571,7 +571,7 @@ module ExtensionsUserinterface =
     ///Maximum number of edges to select.</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the duplicated edge curves.</param>
-    ///<returns>(option<ResizeArray<Guid*Point3d*Point3d>>) an Option of a List of selection prompts (curve id, parent id, selection point)</returns>
+    ///<returns>(option<ResizeArray<Guid*Point3d*Point3d>>) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges":string)>]message:string, 
                                     [<OPT;DEF(1)>]minCount:int, 
                                     [<OPT;DEF(0)>]maxCount:int, 
@@ -613,7 +613,7 @@ module ExtensionsUserinterface =
           maxcount (number, optional): maximum number of edges to select.
           select (bool, optional): Select the duplicated edge curves.
         Returns:
-          list(tuple[guid, point, point], ...): of selection prompts (curve id, parent id, selection point)
+          list(tuple[guid, point, point], ...): of selection prompts (curve objectId, parent objectId, selection point)
           None: if not successful
         '''
     
@@ -865,8 +865,8 @@ module ExtensionsUserinterface =
                 if notNull ltnew  then ltinstance <- ltnew
             return
                 try
-                    let id = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", Doc) :?> Guid  // this fails if clicking in void          
-                    let linetype = Doc.Linetypes.FindId(id)
+                    let objectId = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", Doc) :?> Guid  // this fails if clicking in void          
+                    let linetype = Doc.Linetypes.FindId(objectId)
                     Some linetype.Name
                 with _ -> 
                     None
@@ -885,9 +885,9 @@ module ExtensionsUserinterface =
         if defaultlinetype:
             ltnew = scriptcontext.doc.Linetypes.FindName(defaultlinetype)
             if ltnew is not None: ltinstance = ltnew
-        id = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "", scriptcontext.doc)
-        if id == "": return None
-        linetype = scriptcontext.doc.Linetypes.FindId(id)
+        objectId = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "", scriptcontext.doc)
+        if objectId == "": return None
+        linetype = scriptcontext.doc.Linetypes.FindId(objectId)
         return linetype.Name
     *)
     

@@ -135,7 +135,7 @@ module ExtensionsLayer =
     ///  be empty, or contain no objects, before it can be removed. Any layers that
     ///  are children of the specified layer will also be removed if they are also
     ///  empty.</summary>
-    ///<param name="layer">(string) The name or id of an existing empty layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteLayer(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -147,7 +147,7 @@ module ExtensionsLayer =
         are children of the specified layer will also be removed if they are also
         empty.
         Parameters:
-          layer (str|guid): the name or id of an existing empty layer
+          layer (str|guid): the name or objectId of an existing empty layer
         Returns:
           bool: True or False indicating success or failure
         '''
@@ -181,7 +181,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies the existance of a layer in the document</summary>
-    ///<param name="layer">(string) The name or id of a layer to search for</param>
+    ///<param name="layer">(string) The name or objectId of a layer to search for</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayer(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -189,7 +189,7 @@ module ExtensionsLayer =
     def IsLayer(layer):
         '''Verifies the existance of a layer in the document
         Parameters:
-          layer (str|guid): the name or id of a layer to search for
+          layer (str|guid): the name or objectId of a layer to search for
         Returns:
           bool: True on success otherwise False
         '''
@@ -200,7 +200,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that the objects on a layer can be changed (normal)</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerChangeable(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -208,7 +208,7 @@ module ExtensionsLayer =
     def IsLayerChangeable(layer):
         '''Verifies that the objects on a layer can be changed (normal)
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -220,8 +220,8 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is a child of another layer</summary>
-    ///<param name="layer">(string) The name or id of the layer to test against</param>
-    ///<param name="test">(string) The name or id to the layer to test</param>
+    ///<param name="layer">(string) The name or objectId of the layer to test against</param>
+    ///<param name="test">(string) The name or objectId to the layer to test</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerChildOf(layer:string, test:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -229,8 +229,8 @@ module ExtensionsLayer =
     def IsLayerChildOf(layer, test):
         '''Verifies that a layer is a child of another layer
         Parameters:
-          layer (str|guid): the name or id of the layer to test against
-          test (str|guid): the name or id to the layer to test
+          layer (str|guid): the name or objectId of the layer to test against
+          test (str|guid): the name or objectId to the layer to test
         Returns:
           bool: True on success otherwise False
         '''
@@ -242,7 +242,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is the current layer</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerCurrent(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -250,7 +250,7 @@ module ExtensionsLayer =
     def IsLayerCurrent(layer):
         '''Verifies that a layer is the current layer
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -261,7 +261,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that an existing layer is empty, or contains no objects</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerEmpty(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -269,7 +269,7 @@ module ExtensionsLayer =
     def IsLayerEmpty(layer):
         '''Verifies that an existing layer is empty, or contains no objects
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -283,7 +283,7 @@ module ExtensionsLayer =
     [<EXT>]
     ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
     ///  Rhino's layer dialog</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerExpanded(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -292,7 +292,7 @@ module ExtensionsLayer =
         '''Verifies that a layer is expanded. Expanded layers can be viewed in
         Rhino's layer dialog
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -303,7 +303,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is locked.</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerLocked(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -311,7 +311,7 @@ module ExtensionsLayer =
     def IsLayerLocked(layer):
         '''Verifies that a layer is locked.
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -322,7 +322,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is on.</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerOn(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -330,7 +330,7 @@ module ExtensionsLayer =
     def IsLayerOn(layer):
         '''Verifies that a layer is on.
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -341,7 +341,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that an existing layer is selectable (normal and reference)</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerSelectable(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -349,7 +349,7 @@ module ExtensionsLayer =
     def IsLayerSelectable(layer):
         '''Verifies that an existing layer is selectable (normal and reference)
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -360,8 +360,8 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is a parent of another layer</summary>
-    ///<param name="layer">(string) The name or id of the layer to test against</param>
-    ///<param name="test">(string) The name or id to the layer to test</param>
+    ///<param name="layer">(string) The name or objectId of the layer to test against</param>
+    ///<param name="test">(string) The name or objectId to the layer to test</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerParentOf(layer:string, test:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -369,8 +369,8 @@ module ExtensionsLayer =
     def IsLayerParentOf(layer, test):
         '''Verifies that a layer is a parent of another layer
         Parameters:
-          layer (str|guid): the name or id of the layer to test against
-          test (str|guid): the name or id to the layer to test
+          layer (str|guid): the name or objectId of the layer to test against
+          test (str|guid): the name or objectId to the layer to test
         Returns:
           bool: True on success otherwise False
         '''
@@ -382,7 +382,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is from a reference file.</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerReference(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -390,7 +390,7 @@ module ExtensionsLayer =
     def IsLayerReference(layer):
         '''Verifies that a layer is from a reference file.
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -401,7 +401,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Verifies that a layer is visible (normal, locked, and reference)</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerVisible(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -409,7 +409,7 @@ module ExtensionsLayer =
     def IsLayerVisible(layer):
         '''Verifies that a layer is visible (normal, locked, and reference)
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           bool: True on success otherwise False
         '''
@@ -420,7 +420,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Returns the number of immediate child layers of a layer</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(int) the number of immediate child layers</returns>
     static member LayerChildCount(layer:string) : int =
         failNotImpl () // genreation temp disabled !!
@@ -428,7 +428,7 @@ module ExtensionsLayer =
     def LayerChildCount(layer):
         '''Returns the number of immediate child layers of a layer
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           number: the number of immediate child layers if successful
         '''
@@ -441,7 +441,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Returns the immediate child layers of a layer</summary>
-    ///<param name="layer">(string) The name or id of an existing layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing layer</param>
     ///<returns>(string seq) List of children layer names</returns>
     static member LayerChildren(layer:string) : string seq =
         failNotImpl () // genreation temp disabled !!
@@ -449,7 +449,7 @@ module ExtensionsLayer =
     def LayerChildren(layer):
         '''Returns the immediate child layers of a layer
         Parameters:
-          layer (str|guid): the name or id of an existing layer
+          layer (str|guid): the name or objectId of an existing layer
         Returns:
           list(str, ...): List of children layer names
         '''
@@ -462,7 +462,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Returns the color of a layer.</summary>
-    ///<param name="layer">(string) Name or id of an existing layer</param>
+    ///<param name="layer">(string) Name or objectId of an existing layer</param>
     ///<returns>(Drawing.Color) The current color value on success</returns>
     static member LayerColor(layer:string) : Drawing.Color = //GET
         failNotImpl () // genreation temp disabled !!
@@ -470,7 +470,7 @@ module ExtensionsLayer =
     def LayerColor(layer, color=None):
         '''Returns or changes the color of a layer.
         Parameters:
-          layer (str|guid): name or id of an existing layer
+          layer (str|guid): name or objectId of an existing layer
           color (color): the new color value. If omitted, the current layer color is returned.
         Returns:
           color: If a color value is not specified, the current color value on success
@@ -487,7 +487,7 @@ module ExtensionsLayer =
     *)
 
     ///<summary>Changes the color of a layer.</summary>
-    ///<param name="layer">(string) Name or id of an existing layer</param>
+    ///<param name="layer">(string) Name or objectId of an existing layer</param>
     ///<param name="color">(Drawing.Color)The new color value. If omitted, the current layer color is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerColor(layer:string, color:Drawing.Color) : unit = //SET
@@ -496,7 +496,7 @@ module ExtensionsLayer =
     def LayerColor(layer, color=None):
         '''Returns or changes the color of a layer.
         Parameters:
-          layer (str|guid): name or id of an existing layer
+          layer (str|guid): name or objectId of an existing layer
           color (color): the new color value. If omitted, the current layer color is returned.
         Returns:
           color: If a color value is not specified, the current color value on success
@@ -1051,7 +1051,7 @@ module ExtensionsLayer =
     ///  even if it contains geometry objects. The layer to be removed cannot be the
     ///  current layer
     ///  empty.</summary>
-    ///<param name="layer">(string) The name or id of an existing empty layer</param>
+    ///<param name="layer">(string) The name or objectId of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member PurgeLayer(layer:string) : bool =
         failNotImpl () // genreation temp disabled !!
@@ -1062,7 +1062,7 @@ module ExtensionsLayer =
         current layer
         empty.
         Parameters:
-          layer (str|guid): the name or id of an existing empty layer
+          layer (str|guid): the name or objectId of an existing empty layer
         Returns:
           bool: True or False indicating success or failure
         '''

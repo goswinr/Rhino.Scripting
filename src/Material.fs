@@ -169,8 +169,8 @@ module ExtensionsMaterial =
         if destination_id: destination = [destination]
         ids = [rhutil.coerceguid(d) for d in destination]
         rc = 0
-        for id in ids:
-            rhobj = scriptcontext.doc.Objects.FindId(id)
+        for objectId in ids:
+            rhobj = scriptcontext.doc.Objects.FindId(objectId)
             if rhobj:
                 rhobj.Attributes.MaterialIndex = source
                 rhobj.Attributes.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject

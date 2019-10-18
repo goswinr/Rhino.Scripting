@@ -183,13 +183,13 @@ module ExtensionsPointvector =
         object_ids = rhutil.coerceguidlist(object_ids)
         point = rhutil.coerce3dpoint(point, True)
         closest = None
-        for id in object_ids:
-            geom = rhutil.coercegeometry(id, True)
+        for objectId in object_ids:
+            geom = rhutil.coercegeometry(objectId, True)
             point_geometry = geom
             if isinstance(point_geometry, Rhino.Geometry.Point):
                 distance = point.DistanceTo( point_geometry.Location )
                 if closest is None or distance<closest[0]:
-                    closest = distance, id, point_geometry.Location
+                    closest = distance, objectId, point_geometry.Location
                 continue
             point_cloud = geom
             if isinstance(point_cloud, Rhino.Geometry.PointCloud):
@@ -197,7 +197,7 @@ module ExtensionsPointvector =
                 if index>=0:
                     distance = point.DistanceTo( point_cloud[index].Location )
                     if closest is None or distance<closest[0]:
-                        closest = distance, id, point_cloud[index].Location
+                        closest = distance, objectId, point_cloud[index].Location
                 continue
             curve = geom
             if isinstance(curve, Rhino.Geometry.Curve):
@@ -205,21 +205,21 @@ module ExtensionsPointvector =
                 if rc:
                     distance = point.DistanceTo( curve.PointAt(t) )
                     if closest is None or distance<closest[0]:
-                        closest = distance, id, curve.PointAt(t)
+                        closest = distance, objectId, curve.PointAt(t)
                 continue
             brep = geom
             if isinstance(brep, Rhino.Geometry.Brep):
                 brep_closest = brep.ClosestPoint(point)
                 distance = point.DistanceTo( brep_closest )
                 if closest is None or distance<closest[0]:
-                    closest = distance, id, brep_closest
+                    closest = distance, objectId, brep_closest
                 continue
             mesh = geom
             if isinstance(mesh, Rhino.Geometry.Mesh):
                 mesh_closest = mesh.ClosestPoint(point)
                 distance = point.DistanceTo( mesh_closest )
                 if closest is None or distance<closest[0]:
-                    closest = distance, id, mesh_closest
+                    closest = distance, objectId, mesh_closest
                 continue
         if closest: return closest[1], closest[2]
     *)
@@ -383,9 +383,9 @@ module ExtensionsPointvector =
         if pts is None:
             pts = [rhutil.coerce3dpoint(points, True)]
         direction = rhutil.coerce3dvector(direction, True)
-        id = rhutil.coerceguid(mesh_ids, False)
-        if id: mesh_ids = [id]
-        meshes = [rhutil.coercemesh(id, True) for id in mesh_ids]
+        objectId = rhutil.coerceguid(mesh_ids, False)
+        if objectId: mesh_ids = [objectId]
+        meshes = [rhutil.coercemesh(objectId, True) for objectId in mesh_ids]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         rc = Rhino.Geometry.Intersect.Intersection.ProjectPointsToMeshes(meshes, pts, direction, tolerance)
         return rc
@@ -414,9 +414,9 @@ module ExtensionsPointvector =
         if pts is None:
             pts = [rhutil.coerce3dpoint(points, True)]
         direction = rhutil.coerce3dvector(direction, True)
-        id = rhutil.coerceguid(surface_ids, False)
-        if id: surface_ids = [id]
-        breps = [rhutil.coercebrep(id, True) for id in surface_ids]
+        objectId = rhutil.coerceguid(surface_ids, False)
+        if objectId: surface_ids = [objectId]
+        breps = [rhutil.coercebrep(objectId, True) for objectId in surface_ids]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         return Rhino.Geometry.Intersect.Intersection.ProjectPointsToBreps(breps, pts, direction, tolerance)
     *)
@@ -440,13 +440,13 @@ module ExtensionsPointvector =
         Returns:
           list(point, ...): 3D points pulled onto surface or mesh
         '''
-        id = rhutil.coerceguid(object_id, True)
+        objectId = rhutil.coerceguid(object_id, True)
         points = rhutil.coerce3dpointlist(points, True)
-        mesh = rhutil.coercemesh(id, False)
+        mesh = rhutil.coercemesh(objectId, False)
         if mesh:
             points = mesh.PullPointsToMesh(points)
             return list(points)
-        brep = rhutil.coercebrep(id, False)
+        brep = rhutil.coercebrep(objectId, False)
         if brep and brep.Faces.Count==1:
             tolerance = scriptcontext.doc.ModelAbsoluteTolerance
             points = brep.Faces[0].PullPointsToFace(points, tolerance)
@@ -793,7 +793,7 @@ module ExtensionsPointvector =
     ///  bounding box of an array of 3-D point locations.</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
     ///<param name="viewOrPlane">(Plane) Optional, Default Value: <c>Plane()</c>
-    ///Title or id of the view that contains the
+    ///Title or objectId of the view that contains the
     ///  construction plane to which the bounding box should be aligned -or-
     ///  user defined plane. If omitted, a world axis-aligned bounding box
     ///  will be calculated</param>
@@ -811,7 +811,7 @@ module ExtensionsPointvector =
         bounding box of an array of 3-D point locations.
         Parameters:
           points ([point, ...]): A list of 3-D points
-          view_or_plane (str|plane, optional): Title or id of the view that contains the
+          view_or_plane (str|plane, optional): Title or objectId of the view that contains the
               construction plane to which the bounding box should be aligned -or-
               user defined plane. If omitted, a world axis-aligned bounding box
               will be calculated

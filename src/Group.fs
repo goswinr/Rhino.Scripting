@@ -298,11 +298,11 @@ module ExtensionsGroup =
         if not isinstance(group_name, str): group_name = str(group_name)
         index = scriptcontext.doc.Groups.Find(group_name)
         if index<0: return scriptcontext.errorhandler()
-        id = rhutil.coerceguid(object_ids, False)
-        if id: object_ids = [id]
+        objectId = rhutil.coerceguid(object_ids, False)
+        if objectId: object_ids = [objectId]
         objects_removed = 0
-        for id in object_ids:
-            rhinoobject = rhutil.coercerhinoobject(id, True, True)
+        for objectId in object_ids:
+            rhinoobject = rhutil.coercerhinoobject(objectId, True, True)
             attrs = rhinoobject.Attributes
             attrs.RemoveFromGroup(index)
             if scriptcontext.doc.Objects.ModifyAttributes(rhinoobject, attrs, True):

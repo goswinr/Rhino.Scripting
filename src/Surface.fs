@@ -113,8 +113,8 @@ module ExtensionsSurface =
         '''
         objects = []
         bbox = Rhino.Geometry.BoundingBox.Unset
-        for id in object_ids:
-            rhobj = rhutil.coercerhinoobject(id, True, True)
+        for objectId in object_ids:
+            rhobj = rhutil.coercerhinoobject(objectId, True, True)
             geometry = rhobj.Geometry
             bbox.Union( geometry.GetBoundingBox(True) )
         start_point = rhutil.coerce3dpoint(start_point, True)
@@ -125,10 +125,10 @@ module ExtensionsSurface =
         else: normal = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
         surface = Rhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, bbox)
         if surface is None: return scriptcontext.errorhandler()
-        id = scriptcontext.doc.Objects.AddSurface(surface)
-        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        objectId = scriptcontext.doc.Objects.AddSurface(surface)
+        if objectId==System.Guid.Empty: return scriptcontext.errorhandler()
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -177,10 +177,10 @@ module ExtensionsSurface =
             circle = Rhino.Geometry.Circle(base, radius)
             cylinder = Rhino.Geometry.Cylinder(circle, height)
         brep = cylinder.ToBrep(cap, cap)
-        id = scriptcontext.doc.Objects.AddBrep(brep)
-        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        objectId = scriptcontext.doc.Objects.AddBrep(brep)
+        if objectId==System.Guid.Empty: return scriptcontext.errorhandler()
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -199,13 +199,13 @@ module ExtensionsSurface =
           guid: identifier of new object if successful
           None: on error
         '''
-        curves = [rhutil.coercecurve(id, -1, True) for id in curve_ids]
+        curves = [rhutil.coercecurve(objectId, -1, True) for objectId in curve_ids]
         brep = Rhino.Geometry.Brep.CreateEdgeSurface(curves)
         if brep is None: return scriptcontext.errorhandler()
-        id = scriptcontext.doc.Objects.AddBrep(brep)
-        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        objectId = scriptcontext.doc.Objects.AddBrep(brep)
+        if objectId==System.Guid.Empty: return scriptcontext.errorhandler()
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -305,10 +305,10 @@ module ExtensionsSurface =
         for i in range(ns.KnotsU.Count): ns.KnotsU[i] = knots_u[i]
         for i in range(ns.KnotsV.Count): ns.KnotsV[i] = knots_v[i]
         if not ns.IsValid: return scriptcontext.errorhandler()
-        id = scriptcontext.doc.Objects.AddSurface(ns)
-        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        objectId = scriptcontext.doc.Objects.AddSurface(ns)
+        if objectId==System.Guid.Empty: return scriptcontext.errorhandler()
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -376,8 +376,8 @@ module ExtensionsSurface =
         u_span = 10
         v_span = 10
         rc = None
-        id = rhutil.coerceguid(object_ids, False)
-        if id: object_ids = [id]
+        objectId = rhutil.coerceguid(object_ids, False)
+        if objectId: object_ids = [objectId]
         for object_id in object_ids:
             rhobj = rhutil.coercerhinoobject(object_id, False, False)
             if not rhobj: return None
@@ -458,9 +458,9 @@ module ExtensionsSurface =
           list(guid, ...): identifiers of surfaces created on success
           None: on error
         '''
-        id = rhutil.coerceguid(object_ids, False)
-        if id: object_ids = [id]
-        curves = [rhutil.coercecurve(id,-1,True) for id in object_ids]
+        objectId = rhutil.coerceguid(object_ids, False)
+        if objectId: object_ids = [objectId]
+        curves = [rhutil.coercecurve(objectId,-1,True) for objectId in object_ids]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         breps = Rhino.Geometry.Brep.CreatePlanarBreps(curves, tolerance)
         if breps:
@@ -587,7 +587,7 @@ module ExtensionsSurface =
         if loft_type<0 or loft_type>5: raise ValueError("loft_type must be 0-4")
         if simplify_method<0 or simplify_method>2: raise ValueError("simplify_method must be 0-2")
         # get set of curves from object_ids
-        curves = [rhutil.coercecurve(id,-1,True) for id in object_ids]
+        curves = [rhutil.coercecurve(objectId,-1,True) for objectId in object_ids]
         if len(curves)<2: return scriptcontext.errorhandler()
         if start is None: start = Rhino.Geometry.Point3d.Unset
         if end is None: end = Rhino.Geometry.Point3d.Unset
@@ -613,8 +613,8 @@ module ExtensionsSurface =
         if not breps: return scriptcontext.errorhandler()
         idlist = []
         for brep in breps:
-            id = scriptcontext.doc.Objects.AddBrep(brep)
-            if id!=System.Guid.Empty: idlist.append(id)
+            objectId = scriptcontext.doc.Objects.AddBrep(brep)
+            if objectId!=System.Guid.Empty: idlist.append(objectId)
         if idlist: scriptcontext.doc.Views.Redraw()
         return idlist
     *)
@@ -730,8 +730,8 @@ module ExtensionsSurface =
             curves = Rhino.Geometry.Brep.CreateContourCurves(brep, start, end, interval)
         rc = []
         for crv in curves:
-            id = scriptcontext.doc.Objects.AddCurve(crv)
-            if id!=System.Guid.Empty: rc.append(id)
+            objectId = scriptcontext.doc.Objects.AddCurve(crv)
+            if objectId!=System.Guid.Empty: rc.append(objectId)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -760,10 +760,10 @@ module ExtensionsSurface =
         points = rhutil.coerce3dpointlist(points, True)
         surf = Rhino.Geometry.NurbsSurface.CreateFromPoints(points, count[0], count[1], degree[0], degree[1])
         if not surf: return scriptcontext.errorhandler()
-        id = scriptcontext.doc.Objects.AddSurface(surf)
-        if id!=System.Guid.Empty:
+        objectId = scriptcontext.doc.Objects.AddSurface(surf)
+        if objectId!=System.Guid.Empty:
             scriptcontext.doc.Views.Redraw()
-            return id
+            return objectId
     *)
 
 
@@ -822,10 +822,10 @@ module ExtensionsSurface =
         points = rhutil.coerce3dpointlist(points, True)
         surf = Rhino.Geometry.NurbsSurface.CreateThroughPoints(points, count[0], count[1], degree[0], degree[1], closed[0], closed[1])
         if not surf: return scriptcontext.errorhandler()
-        id = scriptcontext.doc.Objects.AddSurface(surf)
-        if id!=System.Guid.Empty:
+        objectId = scriptcontext.doc.Objects.AddSurface(surf)
+        if objectId!=System.Guid.Empty:
             scriptcontext.doc.Views.Redraw()
-            return id
+            return objectId
     *)
 
 
@@ -1003,16 +1003,16 @@ module ExtensionsSurface =
         
         if type(input1) is list or type(input1) is tuple: pass
         else: input1 = [input1]
-        breps0 = [rhutil.coercebrep(id, True) for id in input0]
-        breps1 = [rhutil.coercebrep(id, True) for id in input1]
+        breps0 = [rhutil.coercebrep(objectId, True) for objectId in input0]
+        breps1 = [rhutil.coercebrep(objectId, True) for objectId in input1]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         newbreps = Rhino.Geometry.Brep.CreateBooleanDifference(breps0, breps1, tolerance)
         if newbreps is None: return scriptcontext.errorhandler()
         
         rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in newbreps]
         if delete_input:
-            for id in input0: scriptcontext.doc.Objects.Delete(id, True)
-            for id in input1: scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in input0: scriptcontext.doc.Objects.Delete(objectId, True)
+            for objectId in input1: scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1047,15 +1047,15 @@ module ExtensionsSurface =
         
         if type(input1) is list or type(input1) is tuple: pass
         else: input1 = [input1]
-        breps0 = [rhutil.coercebrep(id, True) for id in input0]
-        breps1 = [rhutil.coercebrep(id, True) for id in input1]
+        breps0 = [rhutil.coercebrep(objectId, True) for objectId in input0]
+        breps1 = [rhutil.coercebrep(objectId, True) for objectId in input1]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         newbreps = Rhino.Geometry.Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
         if newbreps is None: return scriptcontext.errorhandler()
         rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in newbreps]
         if delete_input:
-            for id in input0: scriptcontext.doc.Objects.Delete(id, True)
-            for id in input1: scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in input0: scriptcontext.doc.Objects.Delete(objectId, True)
+            for objectId in input1: scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1084,14 +1084,14 @@ module ExtensionsSurface =
             None on error
         '''
         if len(input)<2: return scriptcontext.errorhandler()
-        breps = [rhutil.coercebrep(id, True) for id in input]
+        breps = [rhutil.coercebrep(objectId, True) for objectId in input]
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         newbreps = Rhino.Geometry.Brep.CreateBooleanUnion(breps, tolerance)
         if newbreps is None: return scriptcontext.errorhandler()
         
         rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in newbreps]
         if delete_input:
-            for id in input: scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in input: scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1335,17 +1335,17 @@ module ExtensionsSurface =
         Returns:
           list(guid, ...): of identifiers of exploded pieces on success
         '''
-        id = rhutil.coerceguid(object_ids, False)
-        if id: object_ids = [id]
+        objectId = rhutil.coerceguid(object_ids, False)
+        if objectId: object_ids = [objectId]
         ids = []
-        for id in object_ids:
-            brep = rhutil.coercebrep(id, True)
+        for objectId in object_ids:
+            brep = rhutil.coercebrep(objectId, True)
             if brep.Faces.Count>1:
                 for i in range(brep.Faces.Count):
                     copyface = brep.Faces[i].DuplicateFace(False)
                     face_id = scriptcontext.doc.Objects.AddBrep(copyface)
                     if face_id!=System.Guid.Empty: ids.append(face_id)
-                if delete_input: scriptcontext.doc.Objects.Delete(id, True)
+                if delete_input: scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return ids
     *)
@@ -1386,8 +1386,8 @@ module ExtensionsSurface =
                 curves = [surface.IsoCurve(0,parameter[1])]
             if curves:
                 for curve in curves:
-                    id = scriptcontext.doc.Objects.AddCurve(curve)
-                    if id!=System.Guid.Empty: ids.append(id)
+                    objectId = scriptcontext.doc.Objects.AddCurve(curve)
+                    if objectId!=System.Guid.Empty: ids.append(objectId)
         if direction==1 or direction==2:
             curves = None
             if type(surface) is Rhino.Geometry.BrepFace:
@@ -1396,8 +1396,8 @@ module ExtensionsSurface =
                 curves = [surface.IsoCurve(1,parameter[0])]
             if curves:
                 for curve in curves:
-                    id = scriptcontext.doc.Objects.AddCurve(curve)
-                    if id!=System.Guid.Empty: ids.append(id)
+                    objectId = scriptcontext.doc.Objects.AddCurve(curve)
+                    if objectId!=System.Guid.Empty: ids.append(objectId)
         scriptcontext.doc.Views.Redraw()
         return ids
     *)
@@ -1430,12 +1430,12 @@ module ExtensionsSurface =
         for index in face_indices:
             face = brep.Faces[index]
             newbrep = face.DuplicateFace(True)
-            id = scriptcontext.doc.Objects.AddBrep(newbrep)
-            rc.append(id)
+            objectId = scriptcontext.doc.Objects.AddBrep(newbrep)
+            rc.append(objectId)
         if not copy:
             for index in face_indices: brep.Faces.RemoveAt(index)
-            id = rhutil.coerceguid(object_id)
-            scriptcontext.doc.Objects.Replace(id, brep)
+            objectId = rhutil.coerceguid(object_id)
+            scriptcontext.doc.Objects.Replace(objectId, brep)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -2207,7 +2207,7 @@ module ExtensionsSurface =
           guid: identifier of newly created object on success
           None: on failure
         '''
-        breps = [rhutil.coercebrep(id, True) for id in object_ids]
+        breps = [rhutil.coercebrep(objectId, True) for objectId in object_ids]
         if len(breps)<2: return scriptcontext.errorhandler()
         tol = scriptcontext.doc.ModelAbsoluteTolerance * 2.1
         joinedbreps = Rhino.Geometry.Brep.JoinBreps(breps, tol)
@@ -2216,9 +2216,9 @@ module ExtensionsSurface =
         rc = scriptcontext.doc.Objects.AddBrep(joinedbreps[0])
         if rc==System.Guid.Empty: return scriptcontext.errorhandler()
         if delete_input:
-            for id in object_ids:
-                id = rhutil.coerceguid(id)
-                scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in object_ids:
+                objectId = rhutil.coerceguid(objectId)
+                scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -2249,13 +2249,13 @@ module ExtensionsSurface =
         surface = rhutil.coercesurface(surface_id, True)
         newsurf = Rhino.Geometry.Surface.CreatePeriodicSurface(surface, direction)
         if newsurf is None: return scriptcontext.errorhandler()
-        id = rhutil.coerceguid(surface_id)
+        objectId = rhutil.coerceguid(surface_id)
         if delete_input:
-            scriptcontext.doc.Objects.Replace(id, newsurf)
+            scriptcontext.doc.Objects.Replace(objectId, newsurf)
         else:
-            id = scriptcontext.doc.Objects.AddSurface(newsurf)
+            objectId = scriptcontext.doc.Objects.AddSurface(newsurf)
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -2469,15 +2469,15 @@ module ExtensionsSurface =
         '''
         start_point = rhutil.coerce3dpoint(start_point, True)
         direction = rhutil.coerce3dvector(direction, True)
-        id = rhutil.coerceguid(surface_ids, False)
-        if id: surface_ids = [id]
+        objectId = rhutil.coerceguid(surface_ids, False)
+        if objectId: surface_ids = [objectId]
         ray = Rhino.Geometry.Ray3d(start_point, direction)
         breps = []
-        for id in surface_ids:
-            brep = rhutil.coercebrep(id)
+        for objectId in surface_ids:
+            brep = rhutil.coercebrep(objectId)
             if brep: breps.append(brep)
             else:
-                surface = rhutil.coercesurface(id, True)
+                surface = rhutil.coercesurface(objectId, True)
                 breps.append(surface)
         if not breps: return scriptcontext.errorhandler()
         points = Rhino.Geometry.Intersect.Intersection.RayShoot(ray, breps, reflections)
@@ -2521,10 +2521,10 @@ module ExtensionsSurface =
         tolerance = scriptcontext.doc.ModelAbsoluteTolerance
         curve = surface.ShortPath(start, end, tolerance)
         if curve is None: return scriptcontext.errorhandler()
-        id = scriptcontext.doc.Objects.AddCurve(curve)
-        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        objectId = scriptcontext.doc.Objects.AddCurve(curve)
+        if objectId==System.Guid.Empty: return scriptcontext.errorhandler()
         scriptcontext.doc.Views.Redraw()
-        return id
+        return objectId
     *)
 
 
@@ -3586,22 +3586,22 @@ module ExtensionsSurface =
         unroll.AbsoluteTolerance = absolute_tolerance
         unroll.RelativeTolerance = relative_tolerance
         if following_geometry:
-            for id in following_geometry:
-                geom = rhutil.coercegeometry(id)
+            for objectId in following_geometry:
+                geom = rhutil.coercegeometry(objectId)
                 unroll.AddFollowingGeometry(geom)
         breps, curves, points, dots = unroll.PerformUnroll()
         if not breps: return None
         rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in breps]
         new_following = []
         for curve in curves:
-            id = scriptcontext.doc.Objects.AddCurve(curve)
-            new_following.append(id)
+            objectId = scriptcontext.doc.Objects.AddCurve(curve)
+            new_following.append(objectId)
         for point in points:
-            id = scriptcontext.doc.Objects.AddPoint(point)
-            new_following.append(id)
+            objectId = scriptcontext.doc.Objects.AddPoint(point)
+            new_following.append(objectId)
         for dot in dots:
-            id = scriptcontext.doc.Objects.AddTextDot(dot)
-            new_following.append(id)
+            objectId = scriptcontext.doc.Objects.AddTextDot(dot)
+            new_following.append(objectId)
         scriptcontext.doc.Views.Redraw()
         if following_geometry: return rc, new_following
         return rc

@@ -86,7 +86,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a closed, planar curve</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///If True, delete the input curve defined by objectId</param>
-    ///<returns>(Guid) id of the new mesh on success</returns>
+    ///<returns>(Guid) objectId of the new mesh on success</returns>
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         failNotImpl () // genreation temp disabled !!
     (*
@@ -96,7 +96,7 @@ module ExtensionsMesh =
           object_id (guid): identifier of a closed, planar curve
           delete_input (bool, optional) if True, delete the input curve defined by object_id
         Returns:
-          guid: id of the new mesh on success
+          guid: objectId of the new mesh on success
           None: on error
         '''
         curve = rhutil.coercecurve(object_id, -1, True)
@@ -104,8 +104,8 @@ module ExtensionsMesh =
         mesh = Rhino.Geometry.Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.Default, tolerance)
         if not mesh: return scriptcontext.errorhandler()
         if delete_input:
-            id = rhutil.coerceguid(delete_input, True)
-            rc = scriptcontext.doc.Objects.Replace(id, mesh)
+            objectId = rhutil.coerceguid(delete_input, True)
+            rc = scriptcontext.doc.Objects.Replace(objectId, mesh)
         else:
             rc = scriptcontext.doc.Objects.AddMesh(mesh)
         if rc==System.Guid.Empty: raise Exception("unable to add mesh to document")
@@ -197,8 +197,8 @@ module ExtensionsMesh =
         rc = []
         if polylines:
             for polyline in polylines:
-                id = scriptcontext.doc.Objects.AddPolyline(polyline)
-                if id!=System.Guid.Empty: rc.append(id)
+                objectId = scriptcontext.doc.Objects.AddPolyline(polyline)
+                if objectId!=System.Guid.Empty: rc.append(objectId)
         if rc: scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -229,8 +229,8 @@ module ExtensionsMesh =
         Returns:
           list(guid, ...): List of resulting objects after explode.
         '''
-        id = rhutil.coerceguid(mesh_ids)
-        if id: mesh_ids = [mesh_ids]
+        objectId = rhutil.coerceguid(mesh_ids)
+        if objectId: mesh_ids = [mesh_ids]
         rc = []
         for mesh_id in mesh_ids:
             mesh = rhutil.coercemesh(mesh_id, True)
@@ -238,8 +238,8 @@ module ExtensionsMesh =
                 submeshes = mesh.ExplodeAtUnweldedEdges()
                 if submeshes:
                     for submesh in submeshes:
-                        id = scriptcontext.doc.Objects.AddMesh(submesh)
-                        if id!=System.Guid.Empty: rc.append(id)
+                        objectId = scriptcontext.doc.Objects.AddMesh(submesh)
+                        if objectId!=System.Guid.Empty: rc.append(objectId)
                 if delete:
                     scriptcontext.doc.Objects.Delete(mesh_id, True)
                     
@@ -352,13 +352,13 @@ module ExtensionsMesh =
         Returns:
           guid: identifier of newly created mesh on success
         '''
-        meshes = [rhutil.coercemesh(id,True) for id in object_ids]
+        meshes = [rhutil.coercemesh(objectId,True) for objectId in object_ids]
         joined_mesh = Rhino.Geometry.Mesh()
         joined_mesh.Append(meshes)
         rc = scriptcontext.doc.Objects.AddMesh(joined_mesh)
         if delete_input:
-            for id in object_ids:
-                guid = rhutil.coerceguid(id)
+            for objectId in object_ids:
+                guid = rhutil.coerceguid(objectId)
                 scriptcontext.doc.Objects.Delete(guid,True)
         scriptcontext.doc.Views.Redraw()
         return rc
@@ -386,13 +386,13 @@ module ExtensionsMesh =
             [2] = the error estimate
           None: if not successful
         '''
-        id = rhutil.coerceguid(object_ids)
-        if id: object_ids = [object_ids]
+        objectId = rhutil.coerceguid(object_ids)
+        if objectId: object_ids = [object_ids]
         meshes_used = 0
         total_area = 0.0
         error_estimate = 0.0
-        for id in object_ids:
-            mesh = rhutil.coercemesh(id, True)
+        for objectId in object_ids:
+            mesh = rhutil.coercemesh(objectId, True)
             if mesh:
                 mp = Rhino.Geometry.AreaMassProperties.Compute(mesh)
                 if mp:
@@ -447,23 +447,23 @@ module ExtensionsMesh =
         Returns:
           list(guid, ...): identifiers of newly created meshes
         '''
-        id = rhutil.coerceguid(input0)
-        if id: input0 = [id]
-        id = rhutil.coerceguid(input1)
-        if id: input1 = [id]
-        meshes0 = [rhutil.coercemesh(id, True) for id in input0]
-        meshes1 = [rhutil.coercemesh(id, True) for id in input1]
+        objectId = rhutil.coerceguid(input0)
+        if objectId: input0 = [objectId]
+        objectId = rhutil.coerceguid(input1)
+        if objectId: input1 = [objectId]
+        meshes0 = [rhutil.coercemesh(objectId, True) for objectId in input0]
+        meshes1 = [rhutil.coercemesh(objectId, True) for objectId in input1]
         if not meshes0 or not meshes1: raise ValueError("no meshes to work with")
         newmeshes = Rhino.Geometry.Mesh.CreateBooleanDifference(meshes0, meshes1)
         rc = []
         for mesh in newmeshes:
-            id = scriptcontext.doc.Objects.AddMesh(mesh)
-            if id!=System.Guid.Empty: rc.append(id)
+            objectId = scriptcontext.doc.Objects.AddMesh(mesh)
+            if objectId!=System.Guid.Empty: rc.append(objectId)
         if rc and delete_input:
             input = input0 + input1
-            for id in input:
-                id = rhutil.coerceguid(id, True)
-                scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in input:
+                objectId = rhutil.coerceguid(objectId, True)
+                scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -487,23 +487,23 @@ module ExtensionsMesh =
         Returns:
           list(guid, ...): identifiers of new meshes on success
         '''
-        id = rhutil.coerceguid(input0)
-        if id: input0 = [id]
-        id = rhutil.coerceguid(input1)
-        if id: input1 = [id]
-        meshes0 = [rhutil.coercemesh(id, True) for id in input0]
-        meshes1 = [rhutil.coercemesh(id, True) for id in input1]
+        objectId = rhutil.coerceguid(input0)
+        if objectId: input0 = [objectId]
+        objectId = rhutil.coerceguid(input1)
+        if objectId: input1 = [objectId]
+        meshes0 = [rhutil.coercemesh(objectId, True) for objectId in input0]
+        meshes1 = [rhutil.coercemesh(objectId, True) for objectId in input1]
         if not meshes0 or not meshes1: raise ValueError("no meshes to work with")
         newmeshes = Rhino.Geometry.Mesh.CreateBooleanIntersection(meshes0, meshes1)
         rc = []
         for mesh in newmeshes:
-            id = scriptcontext.doc.Objects.AddMesh(mesh)
-            if id!=System.Guid.Empty: rc.append(id)
+            objectId = scriptcontext.doc.Objects.AddMesh(mesh)
+            if objectId!=System.Guid.Empty: rc.append(objectId)
         if rc and delete_input:
             input = input0 + input1
-            for id in input:
-                id = rhutil.coerceguid(id, True)
-                scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in input:
+                objectId = rhutil.coerceguid(objectId, True)
+                scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -528,23 +528,23 @@ module ExtensionsMesh =
           list(guid, ...): identifiers of new meshes on success
           None: on error
         '''
-        id = rhutil.coerceguid(input0)
-        if id: input0 = [id]
-        id = rhutil.coerceguid(input1)
-        if id: input1 = [id]
-        meshes0 = [rhutil.coercemesh(id, True) for id in input0]
-        meshes1 = [rhutil.coercemesh(id, True) for id in input1]
+        objectId = rhutil.coerceguid(input0)
+        if objectId: input0 = [objectId]
+        objectId = rhutil.coerceguid(input1)
+        if objectId: input1 = [objectId]
+        meshes0 = [rhutil.coercemesh(objectId, True) for objectId in input0]
+        meshes1 = [rhutil.coercemesh(objectId, True) for objectId in input1]
         if not meshes0 or not meshes1: raise ValueError("no meshes to work with")
         newmeshes = Rhino.Geometry.Mesh.CreateBooleanSplit(meshes0, meshes1)
         rc = []
         for mesh in newmeshes:
-            id = scriptcontext.doc.Objects.AddMesh(mesh)
-            if id!=System.Guid.Empty: rc.append(id)
+            objectId = scriptcontext.doc.Objects.AddMesh(mesh)
+            if objectId!=System.Guid.Empty: rc.append(objectId)
         if rc and delete_input:
             input = input0 + input1
-            for id in input:
-                id = rhutil.coerceguid(id, True)
-                scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in input:
+                objectId = rhutil.coerceguid(objectId, True)
+                scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -568,16 +568,16 @@ module ExtensionsMesh =
           list(guid, ...): identifiers of new meshes
         '''
         if len(mesh_ids)<2: raise ValueError("mesh_ids must contain at least 2 meshes")
-        meshes = [rhutil.coercemesh(id, True) for id in mesh_ids]
+        meshes = [rhutil.coercemesh(objectId, True) for objectId in mesh_ids]
         newmeshes = Rhino.Geometry.Mesh.CreateBooleanUnion(meshes)
         rc = []
         for mesh in newmeshes:
-            id = scriptcontext.doc.Objects.AddMesh(mesh)
-            if id!=System.Guid.Empty: rc.append(id)
+            objectId = scriptcontext.doc.Objects.AddMesh(mesh)
+            if objectId!=System.Guid.Empty: rc.append(objectId)
         if rc and delete_input:
-            for id in mesh_ids:
-                id = rhutil.coerceguid(id, True)
-                scriptcontext.doc.Objects.Delete(id, True)
+            for objectId in mesh_ids:
+                objectId = rhutil.coerceguid(objectId, True)
+                scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -947,14 +947,14 @@ module ExtensionsMesh =
         meshes = []
         mesh = rhutil.coercemesh(object_ids, False)
         if mesh: meshes.append(mesh)
-        else: meshes = [rhutil.coercemesh(id,True) for id in object_ids]
+        else: meshes = [rhutil.coercemesh(objectId,True) for objectId in object_ids]
         rc = []
         for mesh in meshes:
             polylines = mesh.GetOutlines(viewport)
             if not polylines: continue
             for polyline in polylines:
-                id = scriptcontext.doc.Objects.AddPolyline(polyline)
-                rc.append(id)
+                objectId = scriptcontext.doc.Objects.AddPolyline(polyline)
+                rc.append(objectId)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -998,8 +998,8 @@ module ExtensionsMesh =
         if mesh.Faces.QuadCount>0:
             rc = mesh.Faces.ConvertQuadsToTriangles()
             if rc:
-                id = rhutil.coerceguid(object_id, True)
-                scriptcontext.doc.Objects.Replace(id, mesh)
+                objectId = rhutil.coerceguid(object_id, True)
+                scriptcontext.doc.Objects.Replace(objectId, mesh)
                 scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1090,8 +1090,8 @@ module ExtensionsMesh =
             colors = [rhutil.coercecolor(c) for c in colors]
             mesh.VertexColors.Clear()
             for c in colors: mesh.VertexColors.Add(c)
-        id = rhutil.coerceguid(mesh_id, True)
-        scriptcontext.doc.Objects.Replace(id, mesh)
+        objectId = rhutil.coerceguid(mesh_id, True)
+        scriptcontext.doc.Objects.Replace(objectId, mesh)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1128,8 +1128,8 @@ module ExtensionsMesh =
             colors = [rhutil.coercecolor(c) for c in colors]
             mesh.VertexColors.Clear()
             for c in colors: mesh.VertexColors.Add(c)
-        id = rhutil.coerceguid(mesh_id, True)
-        scriptcontext.doc.Objects.Replace(id, mesh)
+        objectId = rhutil.coerceguid(mesh_id, True)
+        scriptcontext.doc.Objects.Replace(objectId, mesh)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1242,13 +1242,13 @@ module ExtensionsMesh =
                [2] = the error estimate
           None: if not successful
         '''
-        id = rhutil.coerceguid(object_ids)
-        if id: object_ids = [id]
+        objectId = rhutil.coerceguid(object_ids)
+        if objectId: object_ids = [objectId]
         meshes_used = 0
         total_volume = 0.0
         error_estimate = 0.0
-        for id in object_ids:
-            mesh = rhutil.coercemesh(id, True)
+        for objectId in object_ids:
+            mesh = rhutil.coercemesh(objectId, True)
             mp = Rhino.Geometry.VolumeMassProperties.Compute(mesh)
             if mp:
                 meshes_used += 1
@@ -1335,8 +1335,8 @@ module ExtensionsMesh =
         pieces = mesh.SplitDisjointPieces()
         rc = [scriptcontext.doc.Objects.AddMesh(piece) for piece in pieces]
         if rc and delete_input:
-            id = rhutil.coerceguid(object_id, True)
-            scriptcontext.doc.Objects.Delete(id, True)
+            objectId = rhutil.coerceguid(object_id, True)
+            scriptcontext.doc.Objects.Delete(objectId, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
@@ -1359,8 +1359,8 @@ module ExtensionsMesh =
         mesh = rhutil.coercemesh(object_id, True)
         rc = mesh.UnifyNormals()
         if rc>0:
-            id = rhutil.coerceguid(object_id, True)
-            scriptcontext.doc.Objects.Replace(id, mesh)
+            objectId = rhutil.coerceguid(object_id, True)
+            scriptcontext.doc.Objects.Replace(objectId, mesh)
             scriptcontext.doc.Views.Redraw()
         return rc
     *)

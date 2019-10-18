@@ -211,8 +211,8 @@ module ExtensionsLight =
         rc = light.IsEnabled
         if enable is not None and enable!=rc:
             light.IsEnabled = enable
-            id = rhutil.coerceguid(object_id)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -239,8 +239,8 @@ module ExtensionsLight =
         rc = light.IsEnabled
         if enable is not None and enable!=rc:
             light.IsEnabled = enable
-            id = rhutil.coerceguid(object_id)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -421,8 +421,8 @@ module ExtensionsLight =
             color = rhutil.coercecolor(color, True)
             if color!=rc:
                 light.Diffuse = color
-                id = rhutil.coerceguid(object_id, True)
-                if not scriptcontext.doc.Lights.Modify(id, light):
+                objectId = rhutil.coerceguid(object_id, True)
+                if not scriptcontext.doc.Lights.Modify(objectId, light):
                     return scriptcontext.errorhandler()
                 scriptcontext.doc.Views.Redraw()
         return rc
@@ -450,8 +450,8 @@ module ExtensionsLight =
             color = rhutil.coercecolor(color, True)
             if color!=rc:
                 light.Diffuse = color
-                id = rhutil.coerceguid(object_id, True)
-                if not scriptcontext.doc.Lights.Modify(id, light):
+                objectId = rhutil.coerceguid(object_id, True)
+                if not scriptcontext.doc.Lights.Modify(objectId, light):
                     return scriptcontext.errorhandler()
                 scriptcontext.doc.Views.Redraw()
         return rc
@@ -495,8 +495,8 @@ module ExtensionsLight =
             direction = rhutil.coerce3dvector(direction, True)
             if direction!=rc:
                 light.Direction = direction
-                id = rhutil.coerceguid(object_id, True)
-                if not scriptcontext.doc.Lights.Modify(id, light):
+                objectId = rhutil.coerceguid(object_id, True)
+                if not scriptcontext.doc.Lights.Modify(objectId, light):
                     return scriptcontext.errorhandler()
                 scriptcontext.doc.Views.Redraw()
         return rc
@@ -524,8 +524,8 @@ module ExtensionsLight =
             direction = rhutil.coerce3dvector(direction, True)
             if direction!=rc:
                 light.Direction = direction
-                id = rhutil.coerceguid(object_id, True)
-                if not scriptcontext.doc.Lights.Modify(id, light):
+                objectId = rhutil.coerceguid(object_id, True)
+                if not scriptcontext.doc.Lights.Modify(objectId, light):
                     return scriptcontext.errorhandler()
                 scriptcontext.doc.Views.Redraw()
         return rc
@@ -554,8 +554,8 @@ module ExtensionsLight =
             location = rhutil.coerce3dpoint(location, True)
             if location!=rc:
                 light.Location = location
-                id = rhutil.coerceguid(object_id, True)
-                if not scriptcontext.doc.Lights.Modify(id, light):
+                objectId = rhutil.coerceguid(object_id, True)
+                if not scriptcontext.doc.Lights.Modify(objectId, light):
                     return scriptcontext.errorhandler()
                 scriptcontext.doc.Views.Redraw()
         return rc
@@ -583,8 +583,8 @@ module ExtensionsLight =
             location = rhutil.coerce3dpoint(location, True)
             if location!=rc:
                 light.Location = location
-                id = rhutil.coerceguid(object_id, True)
-                if not scriptcontext.doc.Lights.Modify(id, light):
+                objectId = rhutil.coerceguid(object_id, True)
+                if not scriptcontext.doc.Lights.Modify(objectId, light):
                     return scriptcontext.errorhandler()
                 scriptcontext.doc.Views.Redraw()
         return rc
@@ -611,8 +611,8 @@ module ExtensionsLight =
         rc = light.Name
         if name and name!=rc:
             light.Name = name
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -638,8 +638,8 @@ module ExtensionsLight =
         rc = light.Name
         if name and name!=rc:
             light.Name = name
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -717,8 +717,8 @@ module ExtensionsLight =
         rc = light.HotSpot
         if hardness and hardness!=rc:
             light.HotSpot = hardness
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -748,8 +748,8 @@ module ExtensionsLight =
         rc = light.HotSpot
         if hardness and hardness!=rc:
             light.HotSpot = hardness
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -780,8 +780,8 @@ module ExtensionsLight =
         if radius and radius!=rc:
             radians = math.atan(radius/light.Direction.Length)
             light.SpotAngleRadians = radians
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -811,8 +811,8 @@ module ExtensionsLight =
         if radius and radius!=rc:
             radians = math.atan(radius/light.Direction.Length)
             light.SpotAngleRadians = radians
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -841,8 +841,8 @@ module ExtensionsLight =
         rc = light.SpotLightShadowIntensity
         if intensity and intensity!=rc:
             light.SpotLightShadowIntensity = intensity
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc
@@ -870,8 +870,8 @@ module ExtensionsLight =
         rc = light.SpotLightShadowIntensity
         if intensity and intensity!=rc:
             light.SpotLightShadowIntensity = intensity
-            id = rhutil.coerceguid(object_id, True)
-            if not scriptcontext.doc.Lights.Modify(id, light):
+            objectId = rhutil.coerceguid(object_id, True)
+            if not scriptcontext.doc.Lights.Modify(objectId, light):
                 return scriptcontext.errorhandler()
             scriptcontext.doc.Views.Redraw()
         return rc

@@ -606,9 +606,9 @@ module ExtensionsApplication =
     ///<summary>Returns the default render plug-in</summary>
     ///<returns>(string) Name of default renderer</returns>
     static member DefaultRenderer() : string = //GET
-        let mutable id = Render.Utilities.DefaultRenderPlugInId
+        let mutable objectId = Render.Utilities.DefaultRenderPlugInId
         let mutable plugins = PlugIns.PlugIn.GetInstalledPlugIns()
-        plugins.[id]
+        plugins.[objectId]
     (*
     def DefaultRenderer(renderer=None):
         '''Returns or changes the default render plug-in
@@ -618,12 +618,12 @@ module ExtensionsApplication =
           guid: Unique identifier of default renderer
           guid: Unique identifier of default renderer
         '''
-        id = Rhino.Render.Utilities.DefaultRenderPlugInId
+        objectId = Rhino.Render.Utilities.DefaultRenderPlugInId
         plugins = Rhino.PlugIns.PlugIn.GetInstalledPlugIns()
-        rc = plugins[id]
+        rc = plugins[objectId]
         if renderer:
-            id = Rhino.PlugIns.PlugIn.IdFromName(renderer)
-            Rhino.Render.Utilities.SetDefaultRenderPlugIn(id)
+            objectId = Rhino.PlugIns.PlugIn.IdFromName(renderer)
+            Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
         return rc
     *)
 
@@ -632,8 +632,8 @@ module ExtensionsApplication =
     ///<param name="renderer">(string)The name of the renderer to set as default renderer. </param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DefaultRenderer(renderer:string) : bool = //SET
-        let id = Rhino.PlugIns.PlugIn.IdFromName(renderer)
-        Rhino.Render.Utilities.SetDefaultRenderPlugIn(id)
+        let objectId = Rhino.PlugIns.PlugIn.IdFromName(renderer)
+        Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
     (*
     def DefaultRenderer(renderer=None):
         '''Returns or changes the default render plug-in
@@ -643,12 +643,12 @@ module ExtensionsApplication =
           guid: Unique identifier of default renderer
           guid: Unique identifier of default renderer
         '''
-        id = Rhino.Render.Utilities.DefaultRenderPlugInId
+        objectId = Rhino.Render.Utilities.DefaultRenderPlugInId
         plugins = Rhino.PlugIns.PlugIn.GetInstalledPlugIns()
-        rc = plugins[id]
+        rc = plugins[objectId]
         if renderer:
-            id = Rhino.PlugIns.PlugIn.IdFromName(renderer)
-            Rhino.Render.Utilities.SetDefaultRenderPlugIn(id)
+            objectId = Rhino.PlugIns.PlugIn.IdFromName(renderer)
+            Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
         return rc
     *)
 
@@ -834,8 +834,8 @@ module ExtensionsApplication =
     ///<param name="plugin">(string) The name of the plugin.</param>
     ///<returns>(bool) True if set to load silently otherwise False</returns>
     static member EnablePlugIn(plugin:string) : bool = //GET
-        let id = PlugIns.PlugIn.IdFromName(plugin)
-        let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(id)        
+        let objectId = PlugIns.PlugIn.IdFromName(plugin)
+        let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)        
         if rc then loadSilent 
         else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
     (*
@@ -847,11 +847,11 @@ module ExtensionsApplication =
           Returns:
             bool: True if set to load silently otherwise False
           '''
-        id = rhutil.coerceguid(plugin)
-        if not id: id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(id)
+        objectId = rhutil.coerceguid(plugin)
+        if not objectId: objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
         if enable is not None:
-            Rhino.PlugIns.PlugIn.SetLoadProtection(id, enable)
+            Rhino.PlugIns.PlugIn.SetLoadProtection(objectId, enable)
         return loadSilent
     *)
 
@@ -861,9 +861,9 @@ module ExtensionsApplication =
     ///<param name="enable">(bool) Load silently if True. </param>
     ///<returns>(unit) void, nothing</returns>
     static member EnablePlugIn(plugin:string, enable:bool) : unit = //SET
-        let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(id)
-        if rc then PlugIns.PlugIn.SetLoadProtection(id, enable)
+        let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
+        if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
         else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
         
 
@@ -876,11 +876,11 @@ module ExtensionsApplication =
           Returns:
             bool: True if set to load silently otherwise False
           '''
-        id = rhutil.coerceguid(plugin)
-        if not id: id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(id)
+        objectId = rhutil.coerceguid(plugin)
+        if not objectId: objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
         if enable is not None:
-            Rhino.PlugIns.PlugIn.SetLoadProtection(id, enable)
+            Rhino.PlugIns.PlugIn.SetLoadProtection(objectId, enable)
         return loadSilent
     *)
 
@@ -1100,26 +1100,26 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Verifies that a plug-in is registered</summary>
-    ///<param name="plugin">(string) The unique id of the plug-in</param>
+    ///<param name="plugin">(string) The unique objectId of the plug-in</param>
     ///<returns>(bool) True if the Guid is registered or False if it is not.</returns>
     static member IsPlugIn(plugin:string) : bool =
-        let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if id = Guid.Empty then false
+        let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        if objectId = Guid.Empty then false
         else
-            let rc, loaded, loadprot = Rhino.PlugIns.PlugIn.PlugInExists(id)
+            let rc, loaded, loadprot = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
             rc
     (*
     def IsPlugIn(plugin):
         '''Verifies that a plug-in is registered
         Parameters:
-          plugin (guid): The unique id of the plug-in
+          plugin (guid): The unique objectId of the plug-in
         Returns:
           bool: True if the Guid is registered or False if it is not.
         '''
-        id = rhutil.coerceguid(plugin)
-        if not id: id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if id:
-            rc, loaded, loadprot = Rhino.PlugIns.PlugIn.PlugInExists(id)
+        objectId = rhutil.coerceguid(plugin)
+        if not objectId: objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        if objectId:
+            rc, loaded, loadprot = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
             return rc
     *)
 
@@ -1143,16 +1143,16 @@ module ExtensionsApplication =
     ///<summary>Returns the name of the last executed command</summary>
     ///<returns>(string) the name of the last executed command</returns>
     static member LastCommandName() : string =
-        let mutable id = Rhino.Commands.Command.LastCommandId
-        Rhino.Commands.Command.LookupCommandName(id, true)
+        let mutable objectId = Rhino.Commands.Command.LastCommandId
+        Rhino.Commands.Command.LookupCommandName(objectId, true)
     (*
     def LastCommandName():
         '''Returns the name of the last executed command
         Returns:
           str: the name of the last executed command
         '''
-        id = rhcommand.LastCommandId
-        return rhcommand.LookupCommandName(id, True)
+        objectId = rhcommand.LastCommandId
+        return rhcommand.LookupCommandName(objectId, True)
     *)
 
 
@@ -1500,20 +1500,20 @@ module ExtensionsApplication =
     ///<param name="plugin">(string) the name  of the plug-in</param>
     ///<returns>(Guid)the  Unique Guid of the plug-in </returns>
     static member PlugInId(plugin:string) : Guid =
-        let id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if id<>Guid.Empty then  id 
+        let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        if objectId<>Guid.Empty then  objectId 
         else failwithf "Plugin %s not found" plugin
     (*
     def PlugInId(plugin):
         '''Returns the identifier of a plug-in given the plug-in name
         Parameters:
-          plugin (guid): Unique id of the plug-in
+          plugin (guid): Unique objectId of the plug-in
         Returns:
-          guid: the id of the plug-in
+          guid: the objectId of the plug-in
           None: None if the plug-in isn't valid
         '''
-        id = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if id!=System.Guid.Empty: return id
+        objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
+        if objectId!=System.Guid.Empty: return objectId
     *)
 
 

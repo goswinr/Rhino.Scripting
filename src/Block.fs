@@ -27,17 +27,17 @@ module ExtensionsBlock =
         let name = if name="" then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = Doc.InstanceDefinitions.Find(name)
         let objects = ResizeArray()
-        for id in objectIds do
-            let obj = RhinoScriptSyntax.CoerceRhinoObject(id)  //Coerce should not be needed
-            if obj.IsReference then  failwithf "AddBlock: cannt add Refrence Object %A to %s" id name
+        for objectId in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)  //Coerce should not be needed
+            if obj.IsReference then  failwithf "AddBlock: cannt add Refrence Object %A to %s" objectId name
             let ot = obj.ObjectType
-            if   ot=DocObjects.ObjectType.Light then  failwithf "AddBlock: cannot add Light Object %A to %s" id name
-            elif ot=DocObjects.ObjectType.Grip then  failwithf "AddBlock: cannot add Grip Object %A to %s" id name
-            elif ot=DocObjects.ObjectType.Phantom then failwithf "AddBlock: cannot add Phantom Object %A to %s" id name
+            if   ot=DocObjects.ObjectType.Light then  failwithf "AddBlock: cannot add Light Object %A to %s" objectId name
+            elif ot=DocObjects.ObjectType.Grip then  failwithf "AddBlock: cannot add Grip Object %A to %s" objectId name
+            elif ot=DocObjects.ObjectType.Phantom then failwithf "AddBlock: cannot add Phantom Object %A to %s" objectId name
             elif ot=DocObjects.ObjectType.InstanceReference && notNull found then
-                let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(id) // not obj ?
+                let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
-                if uses then failwithf "AddBlock: cannt add Instance Ref Object %A to %s" id name
+                if uses then failwithf "AddBlock: cannt add Instance Ref Object %A to %s" objectId name
             
             objects.Add(obj)
         if objects.Count>0 then
@@ -71,8 +71,8 @@ module ExtensionsBlock =
             name = scriptcontext.doc.InstanceDefinitions.GetUnusedInstanceDefinitionName()
         found = scriptcontext.doc.InstanceDefinitions.Find(name)
         objects = []
-        for id in object_ids:
-            obj = rhutil.coercerhinoobject(id, True)
+        for objectId in object_ids:
+            obj = rhutil.coercerhinoobject(objectId, True)
             if obj.IsReference: return
             ot = obj.ObjectType
             if ot==Rhino.DocObjects.ObjectType.Light: return
@@ -554,14 +554,14 @@ module ExtensionsBlock =
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="xform">(Transform) 4x4 transformation matrix to apply</param>
-    ///<returns>(Guid) id for the block that was added to the doc on success</returns>
+    ///<returns>(Guid) objectId for the block that was added to the doc on success</returns>
     static member InsertBlock2(blockName:string, xform:Transform) : Guid =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
-        let id = Doc.Objects.AddInstanceObject(idef.Index, xform )
-        if id<>System.Guid.Empty then
+        let objectId = Doc.Objects.AddInstanceObject(idef.Index, xform )
+        if objectId<>System.Guid.Empty then
             Doc.Views.Redraw()
-        id
+        objectId
     (*
     def InsertBlock2(block_name, xform):
         '''Inserts a block whose definition already exists in the document
@@ -569,15 +569,15 @@ module ExtensionsBlock =
           block_name (str): name of an existing block definition
           xform (transform): 4x4 transformation matrix to apply
         Returns:
-          guid: id for the block that was added to the doc on success
+          guid: objectId for the block that was added to the doc on success
         '''
         idef = scriptcontext.doc.InstanceDefinitions.Find(block_name)
         if not idef: raise ValueError("%s does not exist in InstanceDefinitionsTable"%block_name)
         xform = rhutil.coercexform(xform, True)
-        id = scriptcontext.doc.Objects.AddInstanceObject(idef.Index, xform )
-        if id!=System.Guid.Empty:
+        objectId = scriptcontext.doc.Objects.AddInstanceObject(idef.Index, xform )
+        if objectId!=System.Guid.Empty:
             scriptcontext.doc.Views.Redraw()
-            return id
+            return objectId
     *)
     
     
@@ -591,7 +591,7 @@ module ExtensionsBlock =
     ///  Rotation angle in degrees</param>
     ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c> Vector3d.ZAxis</c>
     ///  The axis of rotation.</param>
-    ///<returns>(Guid) id for the block that was added to the doc</returns>
+    ///<returns>(Guid) objectId for the block that was added to the doc</returns>
     static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
         let sc= if scale.IsZero then Vector3d(1. ,1. ,1.) else scale
@@ -611,7 +611,7 @@ module ExtensionsBlock =
           angle_degrees (number, optional): rotation angle in degrees
           rotation_normal (vector, optional): the axis of rotation.
         Returns:
-          guid: id for the block that was added to the doc
+          guid: objectId for the block that was added to the doc
         '''
         insertion_point = rhutil.coerce3dpoint(insertion_point, True)
         rotation_normal = rhutil.coerce3dvector(rotation_normal, True)
@@ -676,7 +676,7 @@ module ExtensionsBlock =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockInstance(objectId:Guid) : bool =
-         match RhinoScriptSyntax.CoerceRhinoObject(id) with  //Coerce should not be needed
+         match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  //Coerce should not be needed
          | :? DocObjects.InstanceObject as b -> true
          | _ -> false
     (*
