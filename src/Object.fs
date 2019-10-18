@@ -2112,3 +2112,601 @@ module ExtensionsObject =
         scriptcontext.doc.Views.Redraw()
         return len(object_ids)
     *)
+
+    [<EXT>]
+    ///<summary>Returns the print width source of an object</summary>
+    ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
+    ///<returns>(int) The object's current print width source
+    ///  0 = print width by layer
+    ///  1 = print width by object
+    ///  3 = print width by parent</returns>
+    static member ObjectPrintWidthSource(objectIds:Guid) : int = //GET
+        //id = RhinoScriptSyntax.Coerceguid(objectIds)
+        if notNull id then
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let rc = int(rhinoobject.Attributes.PlotWeightSource)
+            if source <> None then
+                rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+                rhinoobject.CommitChanges()
+                Doc.Views.Redraw()
+            rc
+        for id in objectIds do
+            rhinoobject <- RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+            rhinoobject.CommitChanges()
+        Doc.Views.Redraw()
+        Seq.length(objectIds)
+    (*
+    def ObjectPrintWidthSource(object_ids, source=None):
+        '''Returns or modifies the print width source of an object
+        Parameters:
+          object_ids ([guid, ...]): identifiers of object(s)
+          source (number, optional): new print width source
+            0 = print width by layer
+            1 = print width by object
+            3 = print width by parent
+        Returns:
+          number: If source is not specified, the object's current print width source
+          number: If source is specified, the object's previous print width source
+          number: If object_ids is a list or tuple, the number of objects modified
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id:
+            rhino_object = rhutil.coercerhinoobject(id, True, True)
+            rc = int(rhino_object.Attributes.PlotWeightSource)
+            if source is not None:
+                rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+                rhino_object.CommitChanges()
+                scriptcontext.doc.Views.Redraw()
+            return rc
+        for id in object_ids:
+            rhino_object = rhutil.coercerhinoobject(id, True, True)
+            rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+            rhino_object.CommitChanges()
+        scriptcontext.doc.Views.Redraw()
+        return len(object_ids)
+    *)
+
+    ///<summary>Modifies the print width source of an object</summary>
+    ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
+    ///<param name="source">(int)New print width source
+    ///  0 = print width by layer
+    ///  1 = print width by object
+    ///  3 = print width by parent</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectPrintWidthSource(objectIds:Guid, source:int) : unit = //SET
+        //id = RhinoScriptSyntax.Coerceguid(objectIds)
+        if notNull id then
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let rc = int(rhinoobject.Attributes.PlotWeightSource)
+            if source <> None then
+                rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+                rhinoobject.CommitChanges()
+                Doc.Views.Redraw()
+            rc
+        for id in objectIds do
+            rhinoobject <- RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+            rhinoobject.CommitChanges()
+        Doc.Views.Redraw()
+        Seq.length(objectIds)
+    (*
+    def ObjectPrintWidthSource(object_ids, source=None):
+        '''Returns or modifies the print width source of an object
+        Parameters:
+          object_ids ([guid, ...]): identifiers of object(s)
+          source (number, optional): new print width source
+            0 = print width by layer
+            1 = print width by object
+            3 = print width by parent
+        Returns:
+          number: If source is not specified, the object's current print width source
+          number: If source is specified, the object's previous print width source
+          number: If object_ids is a list or tuple, the number of objects modified
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id:
+            rhino_object = rhutil.coercerhinoobject(id, True, True)
+            rc = int(rhino_object.Attributes.PlotWeightSource)
+            if source is not None:
+                rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+                rhino_object.CommitChanges()
+                scriptcontext.doc.Views.Redraw()
+            return rc
+        for id in object_ids:
+            rhino_object = rhutil.coercerhinoobject(id, True, True)
+            rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+            rhino_object.CommitChanges()
+        scriptcontext.doc.Views.Redraw()
+        return len(object_ids)
+    *)
+
+
+    ///<summary>Modifies the print width source of an object</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of object(s)</param>
+    ///<param name="source">(int)New print width source
+    ///  0 = print width by layer
+    ///  1 = print width by object
+    ///  3 = print width by parent</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectPrintWidthSource(objectIds:Guid, source:int seq) : unit = //SET
+        //id = RhinoScriptSyntax.Coerceguid(objectIds)
+        if notNull id then
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let rc = int(rhinoobject.Attributes.PlotWeightSource)
+            if source <> None then
+                rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+                rhinoobject.CommitChanges()
+                Doc.Views.Redraw()
+            rc
+        for id in objectIds do
+            rhinoobject <- RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+            rhinoobject.CommitChanges()
+        Doc.Views.Redraw()
+        Seq.length(objectIds)
+    (*
+    def ObjectPrintWidthSource(object_ids, source=None):
+        '''Returns or modifies the print width source of an object
+        Parameters:
+          object_ids ([guid, ...]): identifiers of object(s)
+          source (number, optional): new print width source
+            0 = print width by layer
+            1 = print width by object
+            3 = print width by parent
+        Returns:
+          number: If source is not specified, the object's current print width source
+          number: If source is specified, the object's previous print width source
+          number: If object_ids is a list or tuple, the number of objects modified
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id:
+            rhino_object = rhutil.coercerhinoobject(id, True, True)
+            rc = int(rhino_object.Attributes.PlotWeightSource)
+            if source is not None:
+                rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+                rhino_object.CommitChanges()
+                scriptcontext.doc.Views.Redraw()
+            return rc
+        for id in object_ids:
+            rhino_object = rhutil.coercerhinoobject(id, True, True)
+            rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
+            rhino_object.CommitChanges()
+        scriptcontext.doc.Views.Redraw()
+        return len(object_ids)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the object type</summary>
+    ///<param name="objectId">(Guid) Identifier of an object</param>
+    ///<returns>(int) The object type .
+    ///  The valid object types are as follows:
+    ///  Value   Description
+    ///    0           Unknown object
+    ///    1           Point
+    ///    2           Point cloud
+    ///    4           Curve
+    ///    8           Surface or single-face brep
+    ///    16          Polysurface or multiple-face
+    ///    32          Mesh
+    ///    256         Light
+    ///    512         Annotation
+    ///    4096        Instance or block reference
+    ///    8192        Text dot object
+    ///    16384       Grip object
+    ///    32768       Detail
+    ///    65536       Hatch
+    ///    131072      Morph control
+    ///    134217728   Cage
+    ///    268435456   Phantom
+    ///    536870912   Clipping plane
+    ///    1073741824  Extrusion</returns>
+    static member ObjectType(objectId:Guid) : int =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let geom = rhobj.Geometry
+        if isinstance(geom, Brep) && geom.Faces.Count = 1 then
+            8 //surface
+        int(geom.ObjectType)
+    (*
+    def ObjectType(object_id):
+        '''Returns the object type
+        Parameters:
+          object_id (guid): identifier of an object
+        Returns:
+          number: The object type if successful.
+            The valid object types are as follows:
+            Value   Description
+              0           Unknown object
+              1           Point
+              2           Point cloud
+              4           Curve
+              8           Surface or single-face brep
+              16          Polysurface or multiple-face
+              32          Mesh
+              256         Light
+              512         Annotation
+              4096        Instance or block reference
+              8192        Text dot object
+              16384       Grip object
+              32768       Detail
+              65536       Hatch
+              131072      Morph control
+              134217728   Cage
+              268435456   Phantom
+              536870912   Clipping plane
+              1073741824  Extrusion
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        geom = rhobj.Geometry
+        if isinstance(geom, Rhino.Geometry.Brep) and geom.Faces.Count==1:
+            return 8 #surface
+        return int(geom.ObjectType)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Orients a single object based on input points.
+    ///  If two 3-D points are specified, then this method will function similar to Rhino's Orient command.  If more than two 3-D points are specified, then the function will orient similar to Rhino's Orient3Pt command.
+    ///  The orient flags values can be added together to specify multiple options.
+    ///    Value   Description
+    ///    1       Copy object.  The default is not to copy the object.
+    ///    2       Scale object.  The default is not to scale the object.  Note, the scale option only applies if both reference and target contain only two 3-D points.</summary>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<param name="reference">(Point3d seq) List of 3-D reference points.</param>
+    ///<param name="target">(Point3d seq) List of 3-D target points</param>
+    ///<param name="flags">(int) Optional, Default Value: <c>0</c>
+    ///1 = copy object
+    ///  2 = scale object
+    ///  3 = copy and scale</param>
+    ///<returns>(Guid) The identifier of the oriented object .</returns>
+    static member OrientObject( objectId:Guid, 
+                                reference:Point3d seq, 
+                                target:Point3d seq, 
+                                [<OPT;DEF(0)>]flags:int) : Guid =
+        //objectId = RhinoScriptSyntax.Coerceguid(objectId)
+        //fromarray = RhinoScriptSyntax.Coerce3dpointlist(reference)
+        //toarray = RhinoScriptSyntax.Coerce3dpointlist(target)
+        if fromarray = None || toarray = None then
+            failwithf "Rhino.Scripting: Could not convert reference || target to point list.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
+        let fromcount = Seq.length(fromarray)
+        let tocount = Seq.length(toarray)
+        if fromcount<2 || tocount<2 then failwithf "Rhino.Scripting: Point lists must have at least 2 values.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
+        let copy = ((flags &&& 1) = 1)
+        let scale = ((flags &&& 2) = 2)
+        let xformfinal = None
+        if fromcount>2 && tocount>2 then
+            //Orient3Pt
+            let fromplane = Plane(fromarray.[0], fromarray.[1], fromarray.[2])
+            let toplane = Plane(toarray.[0], toarray.[1], toarray.[2])
+            if not fromplane.IsValid || not toplane.IsValid then
+                failwithf "Rhino.Scripting: Unable to create valid planes from point lists.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
+            xformfinal <- Transform.PlaneToPlane(fromplane, toplane)
+        else 
+            //Orient2Pt
+            let xformmove = Transform.Translation( toarray.[0]-fromarray.[0] )
+            let xformscale = Transform.Identity
+            let v0 = fromarray.[1] - fromarray.[0]
+            let v1 = toarray.[1] - toarray.[0]
+            if notNull scale then
+                let len0 = v0.Length
+                let len1 = v1.Length
+                if len0<0.000001 || len1<0.000001 then failwithf "Rhino.Scripting: Vector lengths too short.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
+                scale <- len1 / len0
+                if abs(1.0-scale)>=0.000001 then
+                    let plane = Plane(fromarray.[0], v0)
+                    xformscale <- Transform.Scale(plane, scale, scale, scale)
+            v0.Unitize() |> ignore
+            v1.Unitize() |> ignore
+            let xformrotate = Transform.Rotation(v0, v1, fromarray.[0])
+            xformfinal <- xformmove * xformscale * xformrotate
+        let rc = Doc.Objects.Transform(objectId, xformfinal, not copy)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: OrientObject failed.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
+        Doc.Views.Redraw()
+        rc
+    (*
+    def OrientObject(object_id, reference, target, flags=0):
+        '''Orients a single object based on input points.
+    
+        If two 3-D points are specified, then this method will function similar to Rhino's Orient command.  If more than two 3-D points are specified, then the function will orient similar to Rhino's Orient3Pt command.
+    
+        The orient flags values can be added together to specify multiple options.
+            Value   Description
+            1       Copy object.  The default is not to copy the object.
+            2       Scale object.  The default is not to scale the object.  Note, the scale option only applies if both reference and target contain only two 3-D points.
+    
+        Parameters:
+            object_id (guid): The identifier of an object
+            reference ([point, point, ...]): list of 3-D reference points.
+            target  ([point, point, ...]): list of 3-D target points
+            flags (number):  1 = copy object
+                             2 = scale object
+                             3 = copy and scale
+        Returns:
+          guid: The identifier of the oriented object if successful.
+        '''
+    
+        object_id = rhutil.coerceguid(object_id, True)
+        from_array = rhutil.coerce3dpointlist(reference)
+        to_array = rhutil.coerce3dpointlist(target)
+        if from_array is None or to_array is None:
+            raise ValueError("Could not convert reference or target to point list")
+        from_count = len(from_array)
+        to_count = len(to_array)
+        if from_count<2 or to_count<2: raise Exception("point lists must have at least 2 values")
+    
+        copy = ((flags & 1) == 1)
+        scale = ((flags & 2) == 2)
+        xform_final = None
+        if from_count>2 and to_count>2:
+            #Orient3Pt
+            from_plane = Rhino.Geometry.Plane(from_array[0], from_array[1], from_array[2])
+            to_plane = Rhino.Geometry.Plane(to_array[0], to_array[1], to_array[2])
+            if not from_plane.IsValid or not to_plane.IsValid:
+                raise Exception("unable to create valid planes from point lists")
+            xform_final = Rhino.Geometry.Transform.PlaneToPlane(from_plane, to_plane)
+        else:
+            #Orient2Pt
+            xform_move = Rhino.Geometry.Transform.Translation( to_array[0]-from_array[0] )
+            xform_scale = Rhino.Geometry.Transform.Identity
+            v0 = from_array[1] - from_array[0]
+            v1 = to_array[1] - to_array[0]
+            if scale:
+                len0 = v0.Length
+                len1 = v1.Length
+                if len0<0.000001 or len1<0.000001: raise Exception("vector lengths too short")
+                scale = len1 / len0
+                if abs(1.0-scale)>=0.000001:
+                    plane = Rhino.Geometry.Plane(from_array[0], v0)
+                    xform_scale = Rhino.Geometry.Transform.Scale(plane, scale, scale, scale)
+            v0.Unitize()
+            v1.Unitize()
+            xform_rotate = Rhino.Geometry.Transform.Rotation(v0, v1, from_array[0])
+            xform_final = xform_move * xform_scale * xform_rotate
+        rc = scriptcontext.doc.Objects.Transform(object_id, xform_final, not copy)
+        if rc==System.Guid.Empty: return scriptcontext.errorhandler()
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Rotates a single object</summary>
+    ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
+    ///<param name="centerPoint">(Point3d) The center of rotation</param>
+    ///<param name="rotationAngle">(float) In degrees</param>
+    ///<param name="axis">(Vector3D) Optional, Default Value: <c>Vector3d.ZAxis</c>
+    ///Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the object</param>
+    ///<returns>(Guid) Identifier of the rotated object</returns>
+    static member RotateObject( objectId:Guid, 
+                                centerPoint:Point3d, 
+                                rotationAngle:float, 
+                                [<OPT;DEF(Plane())>]axis:Vector3d, 
+                                [<OPT;DEF(false)>]copy:bool) : Guid =
+        let axis = 
+            if not axis.IsZero then
+                Vector3d.ZAxis
+            else
+                axis        
+        let rotationAngle = Rhino.RhinoMath.ToRadians(rotationAngle)
+        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        RhinoScriptSyntax.TransformObject(objectId, xf, copy)
+        failwithf "Rhino.Scripting: RotateObject failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectId centerPoint rotationAngle axis copy
+    (*
+    def RotateObject(object_id, center_point, rotation_angle, axis=None, copy=False):
+        '''Rotates a single object
+        Parameters:
+          object_id (guid): The identifier of an object to rotate
+          center_point (point): the center of rotation
+          rotation_angle (number): in degrees
+          axis (plane, optional): axis of rotation, If omitted, the Z axis of the active
+            construction plane is used as the rotation axis
+          copy (bool, optional): copy the object
+        Returns:
+          guid: Identifier of the rotated object if successful
+          None: on error
+        '''
+    
+        rc = RotateObjects(object_id, center_point, rotation_angle, axis, copy)
+        if rc: return rc[0]
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Rotates multiple objects</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
+    ///<param name="centerPoint">(Point3d) The center of rotation</param>
+    ///<param name="rotationAngle">(float) In degrees</param>
+    ///<param name="axis">(Vector3D) Optional, Default Value: <c>Vector3d.ZAxis</c>
+    ///Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the object</param>
+    ///<returns>(Guid ResizeArray) identifiers of the rotated objects</returns>
+    static member RotateObjects( objectIds:Guid seq, 
+                                 centerPoint:Point3d, 
+                                 rotationAngle:float, 
+                                 [<OPT;DEF(Vector3d())>]axis:Vector3d, 
+                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =        
+        let axis = 
+            if not axis.IsZero then
+                Vector3d.ZAxis
+            else
+                axis        
+        let rotationAngle = Rhino.RhinoMath.ToRadians(rotationAngle)
+        let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
+        RhinoScriptSyntax.TransformObjects(objectIds, xf, copy)
+        
+    (*
+    def RotateObjects( object_ids, center_point, rotation_angle, axis=None, copy=False):
+        '''Rotates multiple objects
+        Parameters:
+          object_ids ([guid, ...]): Identifiers of objects to rotate
+          center_point (point): the center of rotation
+          rotation_angle (number): in degrees
+          axis (plane, optional): axis of rotation, If omitted, the Z axis of the active
+            construction plane is used as the rotation axis
+          copy (bool, optional): copy the object
+        Returns:
+          list(guid, ...): identifiers of the rotated objects if successful
+        '''
+    
+        center_point = rhutil.coerce3dpoint(center_point, True)
+        if not axis:
+            axis = scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
+        axis = rhutil.coerce3dvector(axis, True)
+        rotation_angle = Rhino.RhinoMath.ToRadians(rotation_angle)
+        xf = Rhino.Geometry.Transform.Rotation(rotation_angle, axis, center_point)
+        rc = TransformObjects(object_ids, xf, copy)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
+    ///  scale transformation. Scaling is based on the active construction plane.</summary>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
+    ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the object</param>
+    ///<returns>(Guid) Identifier of the scaled object</returns>
+    static member ScaleObject( objectId:Guid, 
+                               origin:Point3d, 
+                               scale:float*float*float, 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
+        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        plane.Origin <- origin
+        let x,y,z = scale
+        let xf = Transform.Scale(plane,x,y,z)
+        RhinoScriptSyntax.TransformObject(objectId, xf, copy)        
+        
+
+    [<EXT>]
+    ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
+    ///  scale transformation. Scaling is based on the active construction plane.</summary>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
+    ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the object</param>
+    ///<returns>(Guid) Identifier of the scaled object</returns>
+    static member ScaleObject( objectId:Guid, 
+                               origin:Point3d, 
+                               scale:float, 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
+        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        plane.Origin <- origin
+        let xf = Transform.Scale(plane,scale,scale,scale)
+        RhinoScriptSyntax.TransformObject(objectId, xf, copy)        
+        
+
+    [<EXT>]
+    ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
+    ///  uniform scale transformation. Scaling is based on the active construction plane.</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
+    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
+    ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the objects</param>
+    ///<returns>(Guid ResizeArray) identifiers of the scaled objects</returns>
+    static member ScaleObjects( objectIds:Guid seq, 
+                                origin:Point3d, 
+                                scale:float*float*float, 
+                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
+        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        plane.Origin <- origin
+        let x,y,z = scale
+        let xf = Transform.Scale(plane,x,y,z)
+        RhinoScriptSyntax.TransformObjects(objectIds, xf, copy)        
+        
+
+    [<EXT>]
+    ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
+    ///  uniform scale transformation. Scaling is based on the active construction plane.</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
+    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
+    ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the objects</param>
+    ///<returns>(Guid ResizeArray) identifiers of the scaled objects</returns>
+    static member ScaleObjects( objectIds:Guid seq, 
+                                origin:Point3d, 
+                                scale:float, 
+                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
+        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        plane.Origin <- origin        
+        let xf = Transform.Scale(plane,scale,scale,scale)
+        RhinoScriptSyntax.TransformObjects(objectIds, xf, copy)
+        
+   
+
+
+    [<EXT>]
+    ///<summary>Selects a single object</summary>
+    ///<param name="objectId">(Guid) The identifier of the object to select</param>
+    ///<param name="redraw">(bool) Optional, Default Value: <c>true</c>
+    ///Redraw view too</param>
+    ///<returns>(bool) True on success</returns>
+    static member SelectObject(objectId:Guid, [<OPT;DEF(true)>]redraw:bool) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let r = rhobj.Select(true) 
+        if redraw then Doc.Views.Redraw()
+        r>0
+        
+    (*
+    def SelectObject(object_id, redraw=True):
+        '''Selects a single object
+        Parameters:
+          object_id (guid): the identifier of the object to select
+          redraw (bool, optional): redraw view too
+        Returns:
+          bool: True on success
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        rhobj.Select(True)
+        if redraw: scriptcontext.doc.Views.Redraw()
+        return True
+    *)
+
+
+    [<EXT>]
+    ///<summary>Selects one or more objects</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
+    ///<returns>(int) number of selected objects</returns>
+    static member SelectObjects(objectIds:Guid seq) : int =
+        let mutable rc =0
+        for objectId in objectIds do
+            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let r = rhobj.Select(true) 
+            if r>1 then rc <- rc +   1
+        if rc > 0 then Doc.Views.Redraw()
+        rc
+    (*
+    def SelectObjects( object_ids):
+        '''Selects one or more objects
+        Parameters:
+          object_ids ([guid, ...]): identifiers of the objects to select
+        Returns:
+          number: number of selected objects
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id: object_ids = [id]
+        rc = 0
+        for id in object_ids:
+            if SelectObject(id, False)==True: rc += 1
+        if rc > 0: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+
+
