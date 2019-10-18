@@ -67,12 +67,26 @@ module TypeExtensions =
    
     type Collections.Generic.List<'T>  with        
         [<EXT>] 
-        /// Allows for negtive slice index too (-1 = last element), returns a shallow copy
-        member this.GetSlice = function
-            | None  , None   -> this
-            | Some a, None   -> this.GetRange(a,this.Count-a)
-            | None  , Some b -> if b<0 then this.GetRange(0,this.Count+b)   else this.GetRange(0,b+2)
-            | Some a, Some b -> if b<0 then this.GetRange(a,this.Count+b-a) else this.GetRange(a,b+2-a)
+        /// Allows for negtive slice index too ( -1 = last element), returns a shallow copy including the end index.
+        member this.GetSlice(startIdx,endIdx) =    
+            let count = this.Count
+            let st  = match startIdx with None -> 0        | Some i -> if i<0 then count+i      else i
+            let len = match endIdx   with None -> count-st | Some i -> if i<0 then count+i-st+1 else i-st+1
+    
+            if st < 0 || st > count-1 then 
+                let err = sprintf "GetSlice: Start Index %d is out of Range. Allowed values are -%d upto %d for List of %d items" startIdx.Value count (count-1) count
+                raise (IndexOutOfRangeException(err))
+    
+            if st+len > count then 
+                let err = sprintf "GetSlice: End Index %d is out of Range. Allowed values are -%d upto %d for List of %d items" endIdx.Value count (count-1) count
+                raise (IndexOutOfRangeException(err)) 
+                
+            if len < 0 then
+                let en =  match endIdx  with None -> count-1 | Some i -> if i<0 then count+i else i
+                let err = sprintf "GetSlice: Start Index '%A' (= %d) is bigger than End Index '%A'(= %d) for List of %d items" startIdx st startIdx en  count
+                raise (IndexOutOfRangeException(err)) 
+                
+            this.GetRange(st,len)
         
         [<EXT>] 
         /// Allows for negtive index too (like python)
@@ -92,3 +106,5 @@ module TypeExtensions =
         [<EXT>] 
         /// Allows for negtive index too (like python)
         member this.SetItem index value = if index<0 then this.[this.Length+index]<-value   else this.[index]<-value 
+
+        //member this.GetSlice(startIdx,endIdx) = // overides of existing methods are ignored / not possible

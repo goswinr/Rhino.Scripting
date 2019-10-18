@@ -1,16 +1,40 @@
 ﻿namespace Rhino.Scripting
 
+open System
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Seq =   
     
-    ///considers sequence cirular and move elements up or down
+    ///Allows for negtive slice index too ( -1 = last element), returns a shallow copy including the end index.
+    let slice startIdx endIdx (xs:seq<_>) =    
+        let count = Seq.length xs
+        let st  = if startIdx < 0 then count + startIdx        else startIdx
+        let len = if endIdx   < 0 then count + endIdx - st + 1 else endIdx - st + 1
+
+        if st < 0 || st > count-1 then 
+            let err = sprintf "Seq.slice: Start Index %d is out of Range. Allowed values are -%d upto %d for Seq of %d items" startIdx count (count-1) count
+            raise (IndexOutOfRangeException(err))
+        
+        if st+len > count then 
+            let err = sprintf "Seq.slice: End Index %d is out of Range. Allowed values are -%d upto %d for Seq of %d items" endIdx count (count-1) count
+            raise (IndexOutOfRangeException(err)) 
+            
+        if len < 0 then
+            let en =  if endIdx<0 then count + endIdx else endIdx
+            let err = sprintf "Seq.slice: Start Index '%d' (= %d) is bigger than End Index '%d'(= %d) for Seq of %d items" startIdx st startIdx en  count
+            raise (IndexOutOfRangeException(err))
+            
+        xs |> Seq.skip st |> Seq.take len
+        
+
+
+    ///Considers sequence cirular and move elements up or down
     /// e.g.: rotate +1 [a,b,c,d] = [d,a,b,c]
     /// e.g.: rotate -1 [a,b,c,d] = [b,c,d,a]
     let rotate r (xs:seq<_>) = xs |> ResizeArray.ofSeq |> ResizeArray.rotate r
 
     
-    ///* yields Seq of (this, next) from (first, second)  upto (second-last, last)
+    ///Yields Seq of (this, next) from (first, second)  upto (second-last, last)
     let thisAndNext (xs:seq<_>) = seq{ 
         use e = xs.GetEnumerator()        
         if e.MoveNext() then
@@ -26,7 +50,7 @@ module Seq =
         else
             failwith "thisNext: Empty Input Sequence"}
     
-    ///* yields Seq of (index this, this, next) from (first, second)  upto (second-last, last)
+    ///Yields Seq of (index this, this, next) from (first, second)  upto (second-last, last)
     let iThisAndNext (xs:seq<_>) = seq{
         use e = xs.GetEnumerator()
         let kk = ref 0              
@@ -45,7 +69,7 @@ module Seq =
             failwith "* thisNext: Empty Input Sequence"}
 
 
-    ///* yields looped Seq of (this, next) from (first, second)  upto (last, first)
+    ///Yields looped Seq of (this, next) from (first, second)  upto (last, first)
     let thisAndNextLooped (xs:seq<_>) =  seq{ 
         use e = xs.GetEnumerator()
         if e.MoveNext() then
@@ -63,7 +87,7 @@ module Seq =
         else
             failwith "thisNextLooped: Empty Input Sequence"}
     
-    ///* yields looped Seq of (this, next) from (first, second)  upto (last, first)
+    ///Yields looped Seq of (this, next) from (first, second)  upto (last, first)
     let iThisAndNextLooped (xs:seq<_>) =  seq{ 
         use e = xs.GetEnumerator()
         let kk = ref 0  
@@ -84,7 +108,7 @@ module Seq =
         else
             failwith "thisNextLooped: Empty Input Sequence"}
 
-    ///* yields Seq of (this, next, Nextafter): from (first, second, third)  upto (third-last, second-last, last)
+    ///Yields Seq of (this, next, Nextafter): from (first, second, third)  upto (third-last, second-last, last)
     let thisNextAndNextafter (xs:seq<_>) =  seq{ 
         use e = xs.GetEnumerator()
         if e.MoveNext() then
@@ -106,7 +130,7 @@ module Seq =
         else
             failwith "thisNextNextaftert: Empty Input Sequence"}
     
-    ///* yields looped Seq of (this, next, Nextafter): from (first, second, third)  upto (last, first, second)
+    ///Yields looped Seq of (this, next, Nextafter): from (first, second, third)  upto (last, first, second)
     let thisNextAndNextafterLooped (xs:seq<_>) =  seq{ 
         use e = xs.GetEnumerator()
         if e.MoveNext() then
@@ -132,7 +156,7 @@ module Seq =
         else
             failwithf "thisNextNextaftertLooped: Empty Input Sequence %A" xs}
     
-    ///* yields looped Seq of (Index of next, this, next, Nextafter): from (1,first, second, third)  upto (0,last, first, second)
+    ///Yields looped Seq of (Index of next, this, next, Nextafter): from (1,first, second, third)  upto (0,last, first, second)
     let iThisNextAndNextafterLooped (xs:seq<_>) =  seq{ 
         use e = xs.GetEnumerator()
         let kk = ref 2
@@ -160,8 +184,8 @@ module Seq =
         else
             failwithf "thisNextNextaftertLooped: Empty Input Sequence %A" xs}    
 
-    ///* yields looped Seq of (previous, this, next): from (last, first, second)  upto (second-last, last, first)
-    ///* Consider "thisNextNextafterLooped" as faster since the last element is not required from the start on.
+    ///Yields looped Seq of (previous, this, next): from (last, first, second)  upto (second-last, last, first)
+    ///Consider "thisNextNextafterLooped" as faster since the last element is not required from the start on.
     let prevThisNextLooped (xs:seq<_>) =  seq { 
         use e = xs.GetEnumerator()
         if e.MoveNext() then
@@ -186,8 +210,8 @@ module Seq =
         else
             failwithf "prevThisNextLooped: Empty Input Sequence %A" xs} 
 
-    ///* yields looped Seq of (index,previous, this, next): from (0,last, first, second)  upto (lastIndex, second-last, last, first)
-    ///* Consider "iThisNextNextafterLooped" as faster since the last element is not required from the start on.
+    ///Yields looped Seq of (index,previous, this, next): from (0,last, first, second)  upto (lastIndex, second-last, last, first)
+    ///Consider "iThisNextNextafterLooped" as faster since the last element is not required from the start on.
     let iPrevThisNextLooped (xs:seq<_>) =  seq { 
         use e = xs.GetEnumerator()
         let kk = ref 2
