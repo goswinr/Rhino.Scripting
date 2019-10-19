@@ -19,16 +19,16 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///  matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member.</summary>
-    ///<param name="objectId">(Guid seq) List of object identifiers.</param>
+    ///<param name="objectIds">(Guid seq) List of object identifiers.</param>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers).</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the objects</param>
     ///<returns>(Guid ResizeArray) ids identifying the newly transformed objects</returns>
-    static member TransformObjects( objectId:Guid seq, 
+    static member TransformObjectsTT( objectIds:Guid seq, 
                                     matrix:Transform, 
                                     [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =      // this is also called by Copy, Scale, Mirror, Move, and Rotate functions defined below 
         let rc = ResizeArray()
-        for objectid in objectId do
+        for objectid in objectIds do
             let objectId = Doc.Objects.Transform(objectid, matrix, not copy)
             if objectId = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply transform to object '%A' from objectId:'%A' matrix:'%A' copy:'%A'" objectid objectId matrix copy
             rc.Add objectId
@@ -86,12 +86,12 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object.</param>
     ///<returns>(Guid) The identifier of the transformed object</returns>
-    static member TransformObject(  objectId:Guid, 
+    static member TransformObjectTT(  objectId:Guid, 
                                     matrix:Transform, 
                                     [<OPT;DEF(false)>]copy:bool) : Guid =
-        let objectId = Doc.Objects.Transform(objectId, matrix, not copy)
-        if objectId = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply transform to object '%A'  matrix:'%A' copy:'%A'" objectId  matrix copy
-        objectId        
+        let res = Doc.Objects.Transform(objectId, matrix, not copy)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply transform to object '%A' from objectId:'%A' matrix:'%A' copy:'%A'" objectId objectId matrix copy
+        res        
 
         (*
         def TransformObject(object_id, matrix, copy=False):
@@ -129,11 +129,12 @@ module ExtensionsObject =
     static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
         let translation = 
             if not translation.IsZero then
-                //translation = RhinoScriptSyntax.Coerce3dvector(translation)
                 Transform.Translation(translation)
             else 
                 Transform.Identity
-        RhinoScriptSyntax.TransformObject(objectId, translation)
+        let res = Doc.Objects.Transform(objectId, translation, false)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: CopyObject failed.  objectId:'%A' translation:'%A'" objectId translation
+        res 
         
     (*
     def CopyObject(object_id, translation=None):
@@ -153,15 +154,23 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
-    ///<param name="objectId">(Guid seq) List of objects to copy</param>
+    ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///List of three numbers or Vector3d representing
     ///  translation vector to apply to copied set</param>
     ///<returns>(Guid ResizeArray) identifiers for the copies</returns>
-    static member CopyObjects(objectId:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray =
-        objectId
-        |> Seq.map  RhinoScriptSyntax.CopyObject 
-        |> ResizeArray.ofSeq
+    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray =
+        let translation = 
+            if not translation.IsZero then
+                Transform.Translation(translation)
+            else 
+                Transform.Identity
+        let rc = ResizeArray()
+        for objectid in objectIds do
+            let res = Doc.Objects.Transform(objectid, translation, false)
+            if res = Guid.Empty then failwithf "Rhino.Scripting: CopyObjectc failed.  objectId:'%A' translation:'%A'" objectid translation
+            rc.Add res
+        rc 
     (*
     def CopyObjects(object_ids, translation=None):
         '''Copies one or more objects from one location to another, or in-place.
@@ -209,12 +218,12 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Deletes one or more objects from the document, Fails if not all objects can be deleted</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of objects to delete</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DeleteObjects(objectId:Guid seq) : unit =
-        let k = Doc.Objects.Delete(objectId,true) 
-        let l = Seq.length objectId
-        if k <> l then failwithf "DeleteObjects failed on %d out of %A" (l-k) objectId
+    static member DeleteObjects(objectIds:Guid seq) : unit =
+        let k = Doc.Objects.Delete(objectIds,true) 
+        let l = Seq.length objectIds
+        if k <> l then failwithf "DeleteObjects failed on %d out of %A" (l-k) objectIds
         Doc.Views.Redraw()
         //let mutable rc = 0
         ////objectId = RhinoScriptSyntax.Coerceguid(objectId)
@@ -246,15 +255,15 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Causes the selection state of one or more objects to change momentarily
     ///  so the object appears to flash on the screen</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of objects to flash</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to flash</param>
     ///<param name="style">(bool) Optional, Default Value: <c>true</c>
     ///If True, flash between object color and selection color.
     ///  If False, flash between visible and invisible</param>
     ///<returns>(unit) </returns>
-    static member FlashObject(objectId:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
+    static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         //if notNull objectId then objectId <- .[objectId]
-        let rhobjs = resizeArray { for objectId in objectId do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
+        let rhobjs = resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.Count>0 then 
             Doc.Views.FlashObjects(rhobjs, style)
     (*
@@ -297,13 +306,13 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Hides one or more objects</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of objects to hide</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden</returns>
-    static member HideObjects(objectId:Guid seq) : int =
+    static member HideObjects(objectIds:Guid seq) : int =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         //if notNull objectId then objectId <- .[objectId]
         let mutable rc = 0
-        for objectId in objectId do
+        for objectId in objectIds do
             //objectId = RhinoScriptSyntax.Coerceguid(objectId)
             if Doc.Objects.Hide(objectId, false) then rc <- rc + 1
         if  rc>0 then Doc.Views.Redraw()
@@ -706,11 +715,11 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Locks one or more objects. Locked objects are visible, and they can be
     ///  snapped to. But, they cannot be selected.</summary>
-    ///<param name="objectId">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
+    ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
     ///<returns>(int) number of objects locked</returns>
-    static member LockObjects(objectId:Guid seq) : int =
+    static member LockObjects(objectIds:Guid seq) : int =
         let mutable rc = 0
-        for objectId in objectId do
+        for objectId in objectIds do
             if Doc.Objects.Lock(objectId, false) then rc <- rc +   1
         if 0<> rc then Doc.Views.Redraw()
         rc
@@ -783,7 +792,7 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Mirrors a single object</summary>
+    ///<summary>Mirrors a single object on World XY Plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
     ///<param name="endPoint">(Point3d) End of the mirror plane</param>
@@ -796,11 +805,13 @@ module ExtensionsObject =
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
         let vec = endPoint-startPoint
         if vec.IsTiny() then failwithf "Rhino.Scripting: Start and  end points are too close to each other.  objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
-        let normal = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
+        let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
-        RhinoScriptSyntax.TransformObject(objectId, xf, copy)
+        let res = Doc.Objects.Transform(objectId, xf, not copy)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply MirrorObject transform to objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
+        res
     (*
     def MirrorObject(object_id, start_point, end_point, copy=False):
         '''Mirrors a single object
@@ -820,24 +831,30 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Mirrors a list of objects</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of objects to mirror</param>
+    ///<summary>Mirrors a list of objects on World XY Plane</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
     ///<param name="endPoint">(Point3d) End of the mirror plane</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the objects</param>
     ///<returns>(Guid ResizeArray) List of identifiers of the mirrored objects</returns>
-    static member MirrorObjects( objectId:Guid seq, 
+    static member MirrorObjects( objectIds:Guid seq, 
                                  startPoint:Point3d, 
                                  endPoint:Point3d, 
                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
         let vec = endPoint-startPoint
-        if vec.IsTiny() then failwithf "Rhino.Scripting: Start and  end points are too close to each other.  objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
-        let normal = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
+        if vec.IsTiny() then failwithf "Rhino.Scripting: Start and  end points are too close to each other.  objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectIds startPoint endPoint copy
+        let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
-        RhinoScriptSyntax.TransformObjects(objectId, xf, copy)
+        let rc = ResizeArray()
+        for objectid in objectIds do
+            let objectId = Doc.Objects.Transform(objectid, xf, not copy)
+            if objectId = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply MirrorObjects to objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
+            rc.Add objectId
+        rc
+        
     (*
     def MirrorObjects(object_ids, start_point, end_point, copy=False):
         '''Mirrors a list of objects
@@ -870,8 +887,9 @@ module ExtensionsObject =
     ///<returns>(Guid) Identifier of the moved object</returns>
     static member MoveObject(objectId:Guid, translation:Vector3d) : Guid =
         let xf = Transform.Translation(translation)
-        let rc = RhinoScriptSyntax.TransformObject(objectId, xf)
-        rc
+        let res = Doc.Objects.Transform(objectId, xf, true)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply move to from objectId:'%A' translation:'%A'" objectId translation
+        res
     (*
     def MoveObject(object_id, translation):
         '''Moves a single object
@@ -890,14 +908,19 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Moves one or more objects</summary>
-    ///<param name="objectId">(Guid seq) The identifiers objects to move</param>
+    ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
     ///<returns>(Guid ResizeArray) identifiers of the moved objects</returns>
-    static member MoveObjects(objectId:Guid seq, translation:Vector3d) : Guid ResizeArray =
+    static member MoveObjects(objectIds:Guid seq, translation:Vector3d) : Guid ResizeArray =
         //translation = RhinoScriptSyntax.Coerce3dvector(translation)
         let xf = Transform.Translation(translation)
-        let rc = RhinoScriptSyntax.TransformObjects(objectId, xf)
+        let rc = ResizeArray()
+        for objectid in objectIds do
+            let objectId = Doc.Objects.Transform(objectid, xf, true)
+            if objectId = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply MoveObjects Transform to objectId:'%A'  translation:'%A'" objectId translation
+            rc.Add objectId
         rc
+        
     (*
     def MoveObjects(object_ids, translation):
         '''Moves one or more objects
@@ -1273,13 +1296,13 @@ module ExtensionsObject =
     *)
 
     ///<summary>Modifies the layer of an objects</summary>
-    ///<param name="objectId">(Guid seq) The identifiers of the objects</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string)Name of an existing layer</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ObjectsLayer(objectId:Guid seq, layer:string) : unit = //SET
+    static member ObjectsLayer(objectIds:Guid seq, layer:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let index = layer.Index
-        for objectId in objectId do
+        for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)        
             obj.Attributes.LayerIndex <- index
             if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
@@ -1374,7 +1397,7 @@ module ExtensionsObject =
    
     [<EXT>]
     ///<summary>Returns the linetype of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<returns>(string) The object's current linetype</returns>
     static member ObjectLinetype(objectId:Guid) : string = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1419,7 +1442,7 @@ module ExtensionsObject =
     *)
 
     ///<summary>Modifies the linetype of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<param name="linetype">(string)Name of an existing linetyp. If omitted, the current
     ///  linetyp is returned. If objectId is a list of identifiers, this parameter
     ///  is required</param>
@@ -1475,7 +1498,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the linetype source of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<returns>(int) The object's current linetype source
     ///    0 = By Layer
     ///    1 = By Object
@@ -1522,7 +1545,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the linetype source of an object</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of object(s)</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="source">(int)New linetype source. If omitted, the current source is returned.
     ///  If objectId is a list of identifiers, this parameter is required
     ///    0 = By Layer
@@ -1850,7 +1873,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print color of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<returns>(Drawing.Color) The object's current print color</returns>
     static member ObjectPrintColor(objectId:Guid) : Drawing.Color = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1890,7 +1913,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the print color of an object</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of object(s)</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="color">(Drawing.Color)New print color. If omitted, the current color is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET        
@@ -1934,7 +1957,7 @@ module ExtensionsObject =
     
     [<EXT>]
     ///<summary>Returns the print color source of an object</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of object(s)</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(int) The object's current print color source
     ///  0 = print color by layer
     ///  1 = print color by object
@@ -1976,7 +1999,7 @@ module ExtensionsObject =
     *)
 
     ///<summary>Modifies the print color source of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of object(s)</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="source">(int)New print color source
     ///  0 = print color by layer
     ///  1 = print color by object
@@ -2027,7 +2050,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print width of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<returns>(float) The object's current print width</returns>
     static member ObjectPrintWidth(objectId:Guid) : float = //GET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -2067,7 +2090,7 @@ module ExtensionsObject =
     *)
 
     ///<summary>Modifies the print width of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of object(s)</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="width">(float)New print width value in millimeters, where width=0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
     ///  but does not show on print). </param>
@@ -2115,27 +2138,15 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print width source of an object</summary>
-    ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<returns>(int) The object's current print width source
     ///  0 = print width by layer
     ///  1 = print width by object
     ///  3 = print width by parent</returns>
-    static member ObjectPrintWidthSource(objectIds:Guid) : int = //GET
-        //id = RhinoScriptSyntax.Coerceguid(objectIds)
-        if notNull id then
+    static member ObjectPrintWidthSource(objectId:Guid) : int = //GET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = int(rhinoobject.Attributes.PlotWeightSource)
-            if source <> None then
-                rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-                rhinoobject.CommitChanges()
-                Doc.Views.Redraw()
-            rc
-        for id in objectIds do
-            rhinoobject <- RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-            rhinoobject.CommitChanges()
-        Doc.Views.Redraw()
-        Seq.length(objectIds)
+            int(rhinoobject.Attributes.PlotWeightSource)
+            
     (*
     def ObjectPrintWidthSource(object_ids, source=None):
         '''Returns or modifies the print width source of an object
@@ -2169,28 +2180,18 @@ module ExtensionsObject =
     *)
 
     ///<summary>Modifies the print width source of an object</summary>
-    ///<param name="objectIds">(Guid) Identifiers of object(s)</param>
+    ///<param name="objectId">(Guid) Identifiers of object</param>
     ///<param name="source">(int)New print width source
     ///  0 = print width by layer
     ///  1 = print width by object
     ///  3 = print width by parent</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ObjectPrintWidthSource(objectIds:Guid, source:int) : unit = //SET
-        //id = RhinoScriptSyntax.Coerceguid(objectIds)
-        if notNull id then
-            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = int(rhinoobject.Attributes.PlotWeightSource)
-            if source <> None then
-                rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-                rhinoobject.CommitChanges()
-                Doc.Views.Redraw()
-            rc
-        for id in objectIds do
-            rhinoobject <- RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-            rhinoobject.CommitChanges()
+    static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET     
+        let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhinoobject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
+        if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
-        Seq.length(objectIds)
+      
     (*
     def ObjectPrintWidthSource(object_ids, source=None):
         '''Returns or modifies the print width source of an object
@@ -2222,63 +2223,7 @@ module ExtensionsObject =
         scriptcontext.doc.Views.Redraw()
         return len(object_ids)
     *)
-
-
-    ///<summary>Modifies the print width source of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of object(s)</param>
-    ///<param name="source">(int)New print width source
-    ///  0 = print width by layer
-    ///  1 = print width by object
-    ///  3 = print width by parent</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member ObjectPrintWidthSource(objectIds:Guid, source:int seq) : unit = //SET
-        //id = RhinoScriptSyntax.Coerceguid(objectIds)
-        if notNull id then
-            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = int(rhinoobject.Attributes.PlotWeightSource)
-            if source <> None then
-                rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-                rhinoobject.CommitChanges()
-                Doc.Views.Redraw()
-            rc
-        for id in objectIds do
-            rhinoobject <- RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.PlotWeightSource <- Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-            rhinoobject.CommitChanges()
-        Doc.Views.Redraw()
-        Seq.length(objectIds)
-    (*
-    def ObjectPrintWidthSource(object_ids, source=None):
-        '''Returns or modifies the print width source of an object
-        Parameters:
-          object_ids ([guid, ...]): identifiers of object(s)
-          source (number, optional): new print width source
-            0 = print width by layer
-            1 = print width by object
-            3 = print width by parent
-        Returns:
-          number: If source is not specified, the object's current print width source
-          number: If source is specified, the object's previous print width source
-          number: If object_ids is a list or tuple, the number of objects modified
-        '''
     
-        id = rhutil.coerceguid(object_ids, False)
-        if id:
-            rhino_object = rhutil.coercerhinoobject(id, True, True)
-            rc = int(rhino_object.Attributes.PlotWeightSource)
-            if source is not None:
-                rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-                rhino_object.CommitChanges()
-                scriptcontext.doc.Views.Redraw()
-            return rc
-        for id in object_ids:
-            rhino_object = rhutil.coercerhinoobject(id, True, True)
-            rhino_object.Attributes.PlotWeightSource = System.Enum.ToObject(Rhino.DocObjects.ObjectPlotWeightSource, source)
-            rhino_object.CommitChanges()
-        scriptcontext.doc.Views.Redraw()
-        return len(object_ids)
-    *)
-
 
     [<EXT>]
     ///<summary>Returns the object type</summary>
@@ -2308,9 +2253,11 @@ module ExtensionsObject =
     static member ObjectType(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry
-        if isinstance(geom, Brep) && geom.Faces.Count = 1 then
-            8 //surface
-        int(geom.ObjectType)
+        match geom with
+        | :? Brep as b -> 
+            if b.Faces.Count = 1 then 8 //surface //TODO extrusion too?
+            else int(geom.ObjectType)
+        |_ -> int(geom.ObjectType)
     (*
     def ObjectType(object_id):
         '''Returns the object type
@@ -2349,129 +2296,9 @@ module ExtensionsObject =
     *)
 
 
-    [<EXT>]
-    ///<summary>Orients a single object based on input points.
-    ///  If two 3-D points are specified, then this method will function similar to Rhino's Orient command.  If more than two 3-D points are specified, then the function will orient similar to Rhino's Orient3Pt command.
-    ///  The orient flags values can be added together to specify multiple options.
-    ///    Value   Description
-    ///    1       Copy object.  The default is not to copy the object.
-    ///    2       Scale object.  The default is not to scale the object.  Note, the scale option only applies if both reference and target contain only two 3-D points.</summary>
-    ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="reference">(Point3d seq) List of 3-D reference points.</param>
-    ///<param name="target">(Point3d seq) List of 3-D target points</param>
-    ///<param name="flags">(int) Optional, Default Value: <c>0</c>
-    ///1 = copy object
-    ///  2 = scale object
-    ///  3 = copy and scale</param>
-    ///<returns>(Guid) The identifier of the oriented object .</returns>
-    static member OrientObject( objectId:Guid, 
-                                reference:Point3d seq, 
-                                target:Point3d seq, 
-                                [<OPT;DEF(0)>]flags:int) : Guid =
-        //objectId = RhinoScriptSyntax.Coerceguid(objectId)
-        //fromarray = RhinoScriptSyntax.Coerce3dpointlist(reference)
-        //toarray = RhinoScriptSyntax.Coerce3dpointlist(target)
-        if fromarray = None || toarray = None then
-            failwithf "Rhino.Scripting: Could not convert reference || target to point list.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
-        let fromcount = Seq.length(fromarray)
-        let tocount = Seq.length(toarray)
-        if fromcount<2 || tocount<2 then failwithf "Rhino.Scripting: Point lists must have at least 2 values.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
-        let copy = ((flags &&& 1) = 1)
-        let scale = ((flags &&& 2) = 2)
-        let xformfinal = None
-        if fromcount>2 && tocount>2 then
-            //Orient3Pt
-            let fromplane = Plane(fromarray.[0], fromarray.[1], fromarray.[2])
-            let toplane = Plane(toarray.[0], toarray.[1], toarray.[2])
-            if not fromplane.IsValid || not toplane.IsValid then
-                failwithf "Rhino.Scripting: Unable to create valid planes from point lists.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
-            xformfinal <- Transform.PlaneToPlane(fromplane, toplane)
-        else 
-            //Orient2Pt
-            let xformmove = Transform.Translation( toarray.[0]-fromarray.[0] )
-            let xformscale = Transform.Identity
-            let v0 = fromarray.[1] - fromarray.[0]
-            let v1 = toarray.[1] - toarray.[0]
-            if notNull scale then
-                let len0 = v0.Length
-                let len1 = v1.Length
-                if len0<0.000001 || len1<0.000001 then failwithf "Rhino.Scripting: Vector lengths too short.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
-                scale <- len1 / len0
-                if abs(1.0-scale)>=0.000001 then
-                    let plane = Plane(fromarray.[0], v0)
-                    xformscale <- Transform.Scale(plane, scale, scale, scale)
-            v0.Unitize() |> ignore
-            v1.Unitize() |> ignore
-            let xformrotate = Transform.Rotation(v0, v1, fromarray.[0])
-            xformfinal <- xformmove * xformscale * xformrotate
-        let rc = Doc.Objects.Transform(objectId, xformfinal, not copy)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: OrientObject failed.  objectId:'%A' reference:'%A' target:'%A' flags:'%A'" objectId reference target flags
-        Doc.Views.Redraw()
-        rc
-    (*
-    def OrientObject(object_id, reference, target, flags=0):
-        '''Orients a single object based on input points.
-    
-        If two 3-D points are specified, then this method will function similar to Rhino's Orient command.  If more than two 3-D points are specified, then the function will orient similar to Rhino's Orient3Pt command.
-    
-        The orient flags values can be added together to specify multiple options.
-            Value   Description
-            1       Copy object.  The default is not to copy the object.
-            2       Scale object.  The default is not to scale the object.  Note, the scale option only applies if both reference and target contain only two 3-D points.
-    
-        Parameters:
-            object_id (guid): The identifier of an object
-            reference ([point, point, ...]): list of 3-D reference points.
-            target  ([point, point, ...]): list of 3-D target points
-            flags (number):  1 = copy object
-                             2 = scale object
-                             3 = copy and scale
-        Returns:
-          guid: The identifier of the oriented object if successful.
-        '''
-    
-        object_id = rhutil.coerceguid(object_id, True)
-        from_array = rhutil.coerce3dpointlist(reference)
-        to_array = rhutil.coerce3dpointlist(target)
-        if from_array is None or to_array is None:
-            raise ValueError("Could not convert reference or target to point list")
-        from_count = len(from_array)
-        to_count = len(to_array)
-        if from_count<2 or to_count<2: raise Exception("point lists must have at least 2 values")
-    
-        copy = ((flags & 1) == 1)
-        scale = ((flags & 2) == 2)
-        xform_final = None
-        if from_count>2 and to_count>2:
-            #Orient3Pt
-            from_plane = Rhino.Geometry.Plane(from_array[0], from_array[1], from_array[2])
-            to_plane = Rhino.Geometry.Plane(to_array[0], to_array[1], to_array[2])
-            if not from_plane.IsValid or not to_plane.IsValid:
-                raise Exception("unable to create valid planes from point lists")
-            xform_final = Rhino.Geometry.Transform.PlaneToPlane(from_plane, to_plane)
-        else:
-            #Orient2Pt
-            xform_move = Rhino.Geometry.Transform.Translation( to_array[0]-from_array[0] )
-            xform_scale = Rhino.Geometry.Transform.Identity
-            v0 = from_array[1] - from_array[0]
-            v1 = to_array[1] - to_array[0]
-            if scale:
-                len0 = v0.Length
-                len1 = v1.Length
-                if len0<0.000001 or len1<0.000001: raise Exception("vector lengths too short")
-                scale = len1 / len0
-                if abs(1.0-scale)>=0.000001:
-                    plane = Rhino.Geometry.Plane(from_array[0], v0)
-                    xform_scale = Rhino.Geometry.Transform.Scale(plane, scale, scale, scale)
-            v0.Unitize()
-            v1.Unitize()
-            xform_rotate = Rhino.Geometry.Transform.Rotation(v0, v1, from_array[0])
-            xform_final = xform_move * xform_scale * xform_rotate
-        rc = scriptcontext.doc.Objects.Transform(object_id, xform_final, not copy)
-        if rc==System.Guid.Empty: return scriptcontext.errorhandler()
-        scriptcontext.doc.Views.Redraw()
-        return rc
-    *)
+    // TODO, not implemented use Xform rotaion or scale instead
+    //static member OrientObject( objectId:Guid,   reference:Point3d seq,   target:Point3d seq,    [<OPT;DEF(0)>]flags:int) : Guid =
+     
 
 
     [<EXT>]
@@ -2496,8 +2323,10 @@ module ExtensionsObject =
                 axis        
         let rotationAngle = Rhino.RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
-        RhinoScriptSyntax.TransformObject(objectId, xf, copy)
-        failwithf "Rhino.Scripting: RotateObject failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectId centerPoint rotationAngle axis copy
+        let res = Doc.Objects.Transform(objectId, xf, not copy)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: RotateObject failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectId centerPoint rotationAngle axis copy
+        res 
+
     (*
     def RotateObject(object_id, center_point, rotation_angle, axis=None, copy=False):
         '''Rotates a single object
@@ -2541,7 +2370,12 @@ module ExtensionsObject =
                 axis        
         let rotationAngle = Rhino.RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
-        RhinoScriptSyntax.TransformObjects(objectIds, xf, copy)
+        let rc = ResizeArray()
+        for objectid in objectIds do
+            let res = Doc.Objects.Transform(objectid, xf, not copy)
+            if res = Guid.Empty then failwithf "Rhino.Scripting: RotateObjects failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectid centerPoint rotationAngle axis copy
+            rc.Add res
+        rc
         
     (*
     def RotateObjects( object_ids, center_point, rotation_angle, axis=None, copy=False):
@@ -2570,7 +2404,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
-    ///  scale transformation. Scaling is based on the active construction plane.</summary>
+    ///  scale transformation. Scaling is based on the WorldXY plane.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -2581,16 +2415,16 @@ module ExtensionsObject =
                                origin:Point3d, 
                                scale:float*float*float, 
                                [<OPT;DEF(false)>]copy:bool) : Guid =
-        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let x,y,z = scale
         let xf = Transform.Scale(plane,x,y,z)
-        RhinoScriptSyntax.TransformObject(objectId, xf, copy)        
-        
+        let res = Doc.Objects.Transform(objectId, xf, not copy)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
+        res  
 
     [<EXT>]
-    ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
-    ///  scale transformation. Scaling is based on the active construction plane.</summary>
+    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY plane.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -2601,15 +2435,16 @@ module ExtensionsObject =
                                origin:Point3d, 
                                scale:float, 
                                [<OPT;DEF(false)>]copy:bool) : Guid =
-        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let xf = Transform.Scale(plane,scale,scale,scale)
-        RhinoScriptSyntax.TransformObject(objectId, xf, copy)        
-        
+        let res = Doc.Objects.Transform(objectId, xf, not copy)
+        if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
+        res 
 
     [<EXT>]
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
-    ///  uniform scale transformation. Scaling is based on the active construction plane.</summary>
+    ///  uniform scale transformation. Scaling is based on the WorldXY plane.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -2620,16 +2455,19 @@ module ExtensionsObject =
                                 origin:Point3d, 
                                 scale:float*float*float, 
                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
-        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let x,y,z = scale
-        let xf = Transform.Scale(plane,x,y,z)
-        RhinoScriptSyntax.TransformObjects(objectIds, xf, copy)        
-        
+        let xf = Transform.Scale(plane,x,y,z)        
+        let rc = ResizeArray()
+        for objectid in objectIds do
+            let res = Doc.Objects.Transform(objectid, xf, not copy)
+            if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObjects failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectid origin scale  copy
+            rc.Add res
+        rc  
 
     [<EXT>]
-    ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
-    ///  uniform scale transformation. Scaling is based on the active construction plane.</summary>
+    ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY plane.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -2640,10 +2478,15 @@ module ExtensionsObject =
                                 origin:Point3d, 
                                 scale:float, 
                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
-        let mutable plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+        let mutable plane = Plane.WorldXY
         plane.Origin <- origin        
-        let xf = Transform.Scale(plane,scale,scale,scale)
-        RhinoScriptSyntax.TransformObjects(objectIds, xf, copy)
+        let xf = Transform.Scale(plane,scale,scale,scale)        
+        let rc = ResizeArray()
+        for objectid in objectIds do
+            let res = Doc.Objects.Transform(objectid, xf, not copy)
+            if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObjects failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectid origin scale  copy
+            rc.Add res
+        rc 
         
    
 
