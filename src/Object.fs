@@ -24,7 +24,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the objects</param>
     ///<returns>(Guid ResizeArray) ids identifying the newly transformed objects</returns>
-    static member TransformObjectsTT( objectIds:Guid seq, 
+    static member TransformObjects( objectIds:Guid seq, 
                                     matrix:Transform, 
                                     [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =      // this is also called by Copy, Scale, Mirror, Move, and Rotate functions defined below 
         let rc = ResizeArray()
@@ -86,7 +86,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object.</param>
     ///<returns>(Guid) The identifier of the transformed object</returns>
-    static member TransformObjectTT(  objectId:Guid, 
+    static member TransformObject(  objectId:Guid, 
                                     matrix:Transform, 
                                     [<OPT;DEF(false)>]copy:bool) : Guid =
         let res = Doc.Objects.Transform(objectId, matrix, not copy)
@@ -2525,7 +2525,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
     ///<returns>(int) number of selected objects</returns>
     static member SelectObjects(objectIds:Guid seq) : int =
-        let mutable rc =0
+        let mutable rc = 0
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let r = rhobj.Select(true) 
@@ -2550,6 +2550,291 @@ module ExtensionsObject =
         return rc
     *)
 
+    [<EXT>]
+    ///<summary>Perform a shear transformation on a single object</summary>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
+    ///<param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    ///<param name="angleDegrees">(float) The shear angle in degrees</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the objects</param>
+    ///<returns>(Guid) Identifier of the sheared object</returns>
+    static member ShearObject( objectId:Guid, 
+                               origin:Point3d, 
+                               referencePoint:Point3d, 
+                               angleDegrees:float, 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
+       if (origin-referencePoint).IsTiny() then failwithf "ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A " origin referencePoint
+       let plane = Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+       let mutable frame = Plane(plane)
+       frame.Origin <- origin
+       frame.ZAxis <- plane.Normal
+       let yaxis = referencePoint-origin
+       yaxis.Unitize() |> ignore
+       frame.YAxis <- yaxis
+       let xaxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+       xaxis.Unitize() |> ignore
+       frame.XAxis <- xaxis
+       let worldplane = Plane.WorldXY
+       let cob = Transform.ChangeBasis(worldplane, frame)
+       let mutable shear2d = Transform.Identity
+       shear2d.[0,1] <- tan(toRadians(angleDegrees))
+       let cobinv = Transform.ChangeBasis(frame, worldplane)
+       let xf = cobinv * shear2d * cob
+       let res = Doc.Objects.Transform(objectId, xf, not copy)
+       if res = Guid.Empty then failwithf "Rhino.Scripting: ShearObject failed for %A, origin %A, ref point  %A andangle  %A " objectId origin referencePoint angleDegrees
+       res 
+      
+       
+    (*
+    def ShearObject(object_id, origin, reference_point, angle_degrees, copy=False):
+        '''Perform a shear transformation on a single object
+        Parameters:
+          object_id (guid, ...): The identifier of an object
+          origin (point): origin point of the shear transformation
+          reference_point (point): reference point of the shear transformation
+          angle_degrees (number): the shear angle in degrees
+          copy (bool, optional): copy the objects
+        Returns:
+          guid: Identifier of the sheared object if successful
+          None: on error
+        '''
+    
+        rc = ShearObjects(object_id, origin, reference_point, angle_degrees, copy)
+        if rc: return rc[0]
+    *)
 
+
+    [<EXT>]
+    ///<summary>Shears one or more objects</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers objects to shear</param>
+    ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
+    ///<param name="referencePoint">(Point3d) Reference point of the shear transformation</param>
+    ///<param name="angleDegrees">(float) The shear angle in degrees</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
+    ///Copy the objects</param>
+    ///<returns>(Guid ResizeArray) identifiers of the sheared objects</returns>
+    static member ShearObjects( objectIds:Guid seq, 
+                                origin:Point3d, 
+                                referencePoint:Point3d, 
+                                angleDegrees:float, 
+                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
+        if (origin-referencePoint).IsTiny() then failwithf "ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A " origin referencePoint
+        let plane = Doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        let mutable frame = Plane(plane)
+        frame.Origin <- origin
+        frame.ZAxis <- plane.Normal
+        let yaxis = referencePoint-origin
+        yaxis.Unitize() |> ignore
+        frame.YAxis <- yaxis
+        let xaxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        xaxis.Unitize() |> ignore
+        frame.XAxis <- xaxis
+        let worldplane = Plane.WorldXY
+        let cob = Transform.ChangeBasis(worldplane, frame)
+        let mutable shear2d = Transform.Identity
+        shear2d.[0,1] <- tan(toRadians(angleDegrees))
+        let cobinv = Transform.ChangeBasis(frame, worldplane)
+        let xf = cobinv * shear2d * cob
+        resizeArray{
+            for ob in objectIds do
+                let res = Doc.Objects.Transform(ob, xf, not copy)
+                if res = Guid.Empty then failwithf "Rhino.Scripting: ShearObject failed for %A, origin %A, ref point  %A andangle  %A " ob origin referencePoint angleDegrees
+                res  }
+    (*
+    def ShearObjects(object_ids, origin, reference_point, angle_degrees, copy=False):
+        '''Shears one or more objects
+        Parameters:
+          object_ids ([guid, ...]): The identifiers objects to shear
+          origin (point): origin point of the shear transformation
+          reference_point (point): reference point of the shear transformation
+          angle_degrees (number): the shear angle in degrees
+          copy (bool, optional): copy the objects
+        Returns:
+          list(guid, ...]): identifiers of the sheared objects if successful
+        '''
+    
+        origin = rhutil.coerce3dpoint(origin, True)
+        reference_point = rhutil.coerce3dpoint(reference_point, True)
+        if (origin-reference_point).IsTiny(): return None
+        plane = scriptcontext.doc.Views.ActiveView.MainViewport.ConstructionPlane()
+        frame = Rhino.Geometry.Plane(plane)
+        frame.Origin = origin
+        frame.ZAxis = plane.Normal
+        yaxis = reference_point-origin
+        yaxis.Unitize()
+        frame.YAxis = yaxis
+        xaxis = Rhino.Geometry.Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        xaxis.Unitize()
+        frame.XAxis = xaxis
+    
+        world_plane = Rhino.Geometry.Plane.WorldXY
+        cob = Rhino.Geometry.Transform.ChangeBasis(world_plane, frame)
+        shear2d = Rhino.Geometry.Transform.Identity
+        shear2d[0,1] = math.tan(math.radians(angle_degrees))
+        cobinv = Rhino.Geometry.Transform.ChangeBasis(frame, world_plane)
+        xf = cobinv * shear2d * cob
+        rc = TransformObjects(object_ids, xf, copy)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Shows a previously hidden object. Hidden objects are not visible, cannot
+    ///  be snapped to and cannot be selected</summary>
+    ///<param name="objectId">(Guid) Representing id of object to show</param>
+    ///<returns>(bool) True of False indicating success or failure</returns>
+    static member ShowObject(objectId:Guid) : bool =
+        Doc.Objects.Show(objectId, false)
+    (*
+    def ShowObject(object_id):
+        '''Shows a previously hidden object. Hidden objects are not visible, cannot
+        be snapped to and cannot be selected
+        Parameters:
+          object_id (guid): representing id of object to show
+        Returns:
+          bool: True of False indicating success or failure
+        '''
+    
+        return ShowObjects(object_id)==1
+    *)
+
+
+    [<EXT>]
+    ///<summary>Shows one or more objects. Hidden objects are not visible, cannot be
+    ///  snapped to and cannot be selected</summary>
+    ///<param name="objectIds">(Guid seq) Ids of objects to show</param>
+    ///<returns>(int) Number of objects shown</returns>
+    static member ShowObjects(objectIds:Guid seq) : int =
+        let mutable rc = 0
+        for objectId in objectIds do            
+            if Doc.Objects.Show(objectId, false) then rc <- rc +   1
+        if 0<> rc then Doc.Views.Redraw()
+        rc
+    (*
+    def ShowObjects(object_ids):
+        '''Shows one or more objects. Hidden objects are not visible, cannot be
+        snapped to and cannot be selected
+        Parameters:
+          object_ids ([guid, ...]): ids of objects to show
+        Returns:
+          number: Number of objects shown
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id: object_ids = [id]
+        rc = 0
+        for id in object_ids:
+            id = rhutil.coerceguid(id, True)
+            if scriptcontext.doc.Objects.Show(id, False): rc += 1
+        if rc: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+
+
+    [<EXT>]
+    ///<summary>Unlocks an object. Locked objects are visible, and can be snapped to,
+    ///  but they cannot be selected.</summary>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
+    static member UnlockObject(objectId:Guid) : bool =
+        Doc.Objects.Unlock(objectId, false) 
+    (*
+    def UnlockObject(object_id):
+        '''Unlocks an object. Locked objects are visible, and can be snapped to,
+        but they cannot be selected.
+        Parameters:
+          object_id (guid): The identifier of an object
+        Returns:
+          bool: True or False indicating success or failure
+        '''
+    
+        return UnlockObjects(object_id)==1
+    *)
+
+
+    [<EXT>]
+    ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
+    ///  snapped to, but they cannot be selected.</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
+    ///<returns>(int) number of objects unlocked</returns>
+    static member UnlockObjects(objectIds:Guid seq) : int =        
+        let mutable rc = 0
+        for objectId in objectIds do
+            if Doc.Objects.Unlock(objectId, false) then rc <- rc +   1
+        if 0 <> rc then Doc.Views.Redraw()
+        rc
+    (*
+    def UnlockObjects(object_ids):
+        '''Unlocks one or more objects. Locked objects are visible, and can be
+        snapped to, but they cannot be selected.
+        Parameters:
+          object_ids ([guid, ...]): The identifiers of objects
+        Returns:
+          number: number of objects unlocked
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id: object_ids = [id]
+        rc = 0
+        for id in object_ids:
+            id = rhutil.coerceguid(id, True)
+            if scriptcontext.doc.Objects.Unlock(id, False): rc += 1
+        if rc: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Unselects a single selected object</summary>
+    ///<param name="objectId">(Guid) Id of object to unselect</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member UnselectObject(objectId:Guid) : unit =
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        obj.Select(false)
+        |> ignore
+        
+    (*
+    def UnselectObject(object_id):
+        '''Unselects a single selected object
+        Parameters:
+          object_id: (guid): id of object to unselect
+        Returns:
+          bool: True of False indicating success or failure
+        '''
+    
+        return UnselectObjects(object_id)==1
+    *)
+
+
+    [<EXT>]
+    ///<summary>Unselects one or more selected objects.</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member UnselectObjects(objectIds:Guid seq) : unit = 
+        for objectId in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            obj.Select(false)
+            |>ignore
+    (*
+    def UnselectObjects(object_ids):
+        '''Unselects one or more selected objects.
+        Parameters:
+          object_ids ([guid, ...]): identifiers of the objects to unselect.
+        Returns:
+          number: The number of objects unselected
+        '''
+    
+        id = rhutil.coerceguid(object_ids, False)
+        if id: object_ids = [id]
+        count = len(object_ids)
+        for id in object_ids:
+            obj = rhutil.coercerhinoobject(id, True, True)
+            obj.Select(False)
+        if count: scriptcontext.doc.Views.Redraw()
+        return count
+    *)
 
 
