@@ -190,13 +190,16 @@ module ExtensionsDimension =
 
     [<EXT>]  
     ///<summary>Adds a linear dimension to the document</summary>
-    ///<param name="plane">(Plane) The plane on which the dimension will lie.</param>
     ///<param name="startPoint">(Point3d) The origin, or first point of the dimension.</param>
     ///<param name="endPoint">(Point3d) The offset, or second point of the dimension.</param>
     ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line.</param>
+    ///<param name="plane">(Plane) Optional, The plane on which the dimension will lie. The default is World XY Plane.</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
-    static member AddLinearDimension(plane:Plane, startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d) : Guid =
-        let mutable plane0 = if plane = Plane.Unset then Doc.Views.ActiveView.ActiveViewport.ConstructionPlane() else Plane(plane) // copy
+    static member AddLinearDimension(   startPoint:Point3d, 
+                                        endPoint:Point3d,
+                                        pointOnDimensionLine:Point3d, 
+                                        [<OPT;DEF(Plane())>] plane:Plane ) : Guid =
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
