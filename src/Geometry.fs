@@ -257,11 +257,11 @@ module ExtensionsGeometry =
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
     ///Delete the text object after the curves have been created</param>
     ///<returns>(Guid array) of outline curves</returns>
-    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid [] =
+    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId, true)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = [| for curve in curves do yield Doc.Objects.AddCurve(curve,attr) |]
+        let rc = resizeArray { for curve in curves do yield Doc.Objects.AddCurve(curve,attr) }
         if delete then Doc.Objects.Delete(rhobj,true) |>ignore
         Doc.Views.Redraw()
         rc
@@ -343,9 +343,9 @@ module ExtensionsGeometry =
     ///<summary>Returns the hidden points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool []) List of point cloud hidden states</returns>
-    static member PointCloudHidePoints(objectId:Guid) : bool [] = //GET
+    static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)        
-        [| for item in pc do yield item.Hidden |] 
+        resizeArray { for item in pc do yield item.Hidden } 
         
             
 
@@ -372,10 +372,10 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Returns the point colors of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
-    ///<returns>(Drawing.Color array) List of point cloud colors</returns>
-    static member PointCloudPointColors(objectId:Guid) : Drawing.Color [] = //GET
+    ///<returns>(Drawing.Color ResizeArray) List of point cloud colors</returns>
+    static member PointCloudPointColors(objectId:Guid) : Drawing.Color ResizeArray = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
-        [| for item in pc do yield item.Color |]
+        resizeArray { for item in pc do yield item.Color }
            
 
     ///<summary>Modifies the point colors of a point cloud object</summary>
@@ -399,15 +399,12 @@ module ExtensionsGeometry =
     ///<summary>Returns the points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Point3d array) list of points</returns>
-    static member PointCloudPoints(objectId:Guid) : Point3d [] =
+    static member PointCloudPoints(objectId:Guid) : array<Point3d> =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.GetPoints()
 
 
-    [<EXT>]
     
-    static member internal SimplifyPointCloudKNeighbors()  =
-        ()
 
 
     [<EXT>]

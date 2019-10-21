@@ -62,10 +62,10 @@ module ExtensionsUserinterface =
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>((string*bool) [] option) Option of tuples containing the input string in items along with their new boolean check value</returns>
-    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : (string*bool) [] option=
-        let checkstates = [| for item in items -> snd item |]
-        let itemstrs = [|for item in items -> fst item|]
+    ///<returns>((string*bool) ResizeArray option) Option of tuples containing the input string in items along with their new boolean check value</returns>
+    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : option<ResizeArray<string*bool>> =
+        let checkstates = resizeArray { for  item in items -> snd item }
+        let itemstrs =    resizeArray { for item in items -> fst item}
                 
         let newcheckstates =
             async{
@@ -74,7 +74,7 @@ module ExtensionsUserinterface =
                 } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
         if notNull newcheckstates then
-            Some (Array.zip itemstrs newcheckstates)
+            Some (Seq.zip itemstrs newcheckstates |>  ResizeArray.ofSeq)
         else
             //failwithf "Rhino.Scripting: CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             None
@@ -147,8 +147,8 @@ module ExtensionsUserinterface =
     ///  [n][2]    string identifying the false value
     ///  [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
-    ///<returns>(bool seq) a list of values that represent the boolean values</returns>
-    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : (bool array) option =
+    ///<returns>(bool ResizeArray) a list of values that represent the boolean values</returns>
+    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<ResizeArray<bool>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext             
             use go = new Input.Custom.GetOption()
@@ -172,7 +172,7 @@ module ExtensionsUserinterface =
                 if getrc <> Rhino.Input.GetResult.Nothing then 
                     None
                 else
-                    Some [| for t in toggles do yield t.CurrentValue |]
+                    Some (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
             return res
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -191,7 +191,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set' </param>
     ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set' </param>
     ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set' </param>
-    ///<returns>(Point3d []) option) array of eight Point3d that define the corners of the box on success</returns>
+    ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box on success</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int, 
                             [<OPT;DEF(Point3d())>]basisPoint:Point3d, 
                             [<OPT;DEF(null:string)>]prompt1:string, 
@@ -414,13 +414,13 @@ module ExtensionsUserinterface =
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
     ///Optional button to show on the dialog</param>
     ///<returns>(option<string array>) an Option of The names of selected layers</returns>
-    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string []> =
+    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<ResizeArray<string>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let rc, layerindices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)            
             return 
                 if rc then
-                    Some [| for index in layerindices do yield  Doc.Layers.[index].FullPath|]
+                    Some (resizeArray { for index in layerindices do yield  Doc.Layers.[index].FullPath })
                 else
                     None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
@@ -502,8 +502,8 @@ module ExtensionsUserinterface =
     ///The maximum number of faces to select.
     ///  If 0, the user must press enter to finish selection.
     ///  If -1, selection stops as soon as there are at least minCount faces selected.</param>
-    ///<returns>(option<int array>) an Option of of mesh face indices on success</returns>
-    static member GetMeshFaces(objectId:Guid, [<OPT;DEF("Select Mesh Faces")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<int []> =
+    ///<returns>(option<int ResizeArray>) an Option of of mesh face indices on success</returns>
+    static member GetMeshFaces(objectId:Guid, [<OPT;DEF("Select Mesh Faces")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             Doc.Objects.UnselectAll() |> ignore
@@ -519,7 +519,7 @@ module ExtensionsUserinterface =
                     None
                 else
                     let objrefs = go.Objects()
-                    let rc = [| for item in objrefs do yield item.GeometryComponentIndex.Index |]                    
+                    let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }                    
                     Some rc
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
     
@@ -535,8 +535,8 @@ module ExtensionsUserinterface =
     ///The maximum number of vertices to select. If 0, the user must
     ///  press enter to finish selection. If -1, selection stops as soon as there
     ///  are at least minCount vertices selected.</param>
-    ///<returns>(option<int array>) an Option of of mesh vertex indices on success</returns>
-    static member GetMeshVertices(objectId:Guid, [<OPT;DEF("Select Mesh Vertices")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<int array> =
+    ///<returns>(option<int ResizeArray>) an Option of of mesh vertex indices on success</returns>
+    static member GetMeshVertices(objectId:Guid, [<OPT;DEF("Select Mesh Vertices")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             Doc.Objects.UnselectAll() |> ignore
@@ -551,7 +551,7 @@ module ExtensionsUserinterface =
                     None
                 else
                     let objrefs = go.Objects()
-                    let rc = [| for item in objrefs do yield item.GeometryComponentIndex.Index |]                    
+                    let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }                    
                     Some rc
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
     
@@ -982,7 +982,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]title:string) : option<string array> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let values = [| for v in values do yield v.ToString() |]
+            let values = resizeArray { for  v in values do yield v.ToString() }
             return
                 match Rhino.UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
                 | null ->  None

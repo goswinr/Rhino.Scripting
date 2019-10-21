@@ -156,11 +156,11 @@ module ExtensionsBlock =
     ///  1 = get top level and nested references in active document.
     ///  2 = check for references from other instance definitions</param>
     ///<returns>(Guid seq) Ids identifying the instances of a block in the model.</returns>
-    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Guid [] =
+    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
         let instances = idef.GetReferences(0)
-        [| for item in instances do yield item.Id |]
+        resizeArray { for item in instances do yield item.Id }
 
 
     [<EXT>]
@@ -178,9 +178,9 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Returns the names of all block definitions in the document</summary>
     ///<returns>(string seq) the names of all block definitions in the document</returns>
-    static member BlockNames() : string [] =
+    static member BlockNames() : ResizeArray<string> =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
-        [| for item in ideflist do yield item.Name|]
+        resizeArray { for item in ideflist do yield item.Name}
         
 
 
@@ -198,11 +198,11 @@ module ExtensionsBlock =
     ///<summary>Returns identifiers of the objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(Guid seq) list of identifiers on success</returns>
-    static member BlockObjects(blockName:string) : Guid [] =
+    static member BlockObjects(blockName:string) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
         let  rhobjs = idef.GetObjects()
-        [|for obj in rhobjs -> obj.Id|]
+        resizeArray { for obj in rhobjs -> obj.Id}
 
 
     [<EXT>]
@@ -253,8 +253,8 @@ module ExtensionsBlock =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
     ///By default nested blocks are not exploded.</param>
-    ///<returns>(Guid seq) identifiers for the newly exploded objects on success</returns>
-    static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : Guid [] =
+    ///<returns>(Guid array) identifiers for the newly exploded objects on success</returns>
+    static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  guids = Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance=true)
         if guids.Length > 0 then Doc.Views.Redraw()

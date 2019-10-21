@@ -45,7 +45,7 @@ module ExtensionsLine =
         if not <| cyl.IsValid then  failwithf "Unable to create valid cylinder with given circle && height.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
         let rc, pt1, pt2 = Geometry.Intersect.Intersection.LineCylinder(line, cyl)
         if rc=Geometry.Intersect.LineCylinderIntersection.None then
-            [||]
+            [| |]
         elif rc=Geometry.Intersect.LineCylinderIntersection.Single then
             [|pt1|]
         else

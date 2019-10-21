@@ -278,8 +278,10 @@ type RhinoScriptSyntax private () = // no constructor?
         match box ids with
         | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
         | :? seq<obj> as gs -> 
-            try gs |> Seq.map RhinoScriptSyntax.CoerceGuid
-            with _ -> failwithf "*** could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
+                            try    
+                                gs |> Seq.map RhinoScriptSyntax.CoerceGuid
+                            with _ -> 
+                                failwithf "*** could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
         | _ -> failwithf "*** could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
     
    

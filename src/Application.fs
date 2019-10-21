@@ -66,7 +66,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Returns a array of command alias names.</summary>
     ///<returns>(string array) a array of command alias names.</returns>
-    static member AliasNames() : string [] =
+    static member AliasNames() : array<string> =
         ApplicationSettings.CommandAliasList.GetNames()
 
 
@@ -647,7 +647,7 @@ module ExtensionsApplication =
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
     ///0=both loaded and unloaded, 1=loaded, 2=unloaded.  If omitted both status is returned.</param>
     ///<returns>(string array) array of registered Rhino plug-ins</returns>
-    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : string [] =
+    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
         if types=1 then  filter <- Rhino.PlugIns.PlugInType.Render
         if types=2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
@@ -706,8 +706,8 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Returns all of the path items in Rhino's search path list.
     ///  See "Options Files settings" in the Rhino help file for more details.</summary>
-    ///<returns>(string seq) list of search paths</returns>
-    static member SearchPathList() : string [] =
+    ///<returns>(string array) list of search paths</returns>
+    static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
 

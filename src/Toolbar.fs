@@ -157,9 +157,9 @@ module ExtensionsToolbar =
 
     [<EXT>]
     ///<summary>Returns names of all currently open toolbar collections</summary>
-    ///<returns>(string array) the names of all currently open toolbar collections</returns>
-    static member ToolbarCollectionNames() : string array =
-        [| for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name |]
+    ///<returns>(string ResizeArray) the names of all currently open toolbar collections</returns>
+    static member ToolbarCollectionNames() : string ResizeArray =
+        resizeArray { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
 
 
     [<EXT>]

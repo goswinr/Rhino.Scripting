@@ -236,12 +236,12 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
-    ///<returns>(float array) A one-dimensional list containing real numbers, , otherwise None</returns>
-    static member SimplifyArray(points:Point3d seq) : float array =
-        [| for p in points do
-                yield p.X
-                yield p.Y
-                yield p.Z |]
+    ///<returns>(float ResizeArray) A one-dimensional list containing real numbers, , otherwise None</returns>
+    static member SimplifyArray(points:Point3d seq) : float ResizeArray =
+        resizeArray { for  p in points do
+                            yield p.X
+                            yield p.Y
+                            yield p.Z }
 
 
     [<EXT>]

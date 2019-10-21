@@ -47,7 +47,7 @@ module ExtensionsUserdata =
     ///Section name. If omitted, all section names are returned</param
     ///<returns>(string array) of all section names if section name is omitted
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
-    static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : string [] =
+    static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> =
         if notNull section then
             Doc.Strings.GetSectionNames()        
         else 
@@ -73,10 +73,10 @@ module ExtensionsUserdata =
     [<EXT>]
     ///<summary>Returns all document user text keys</summary>
     ///<returns>(string array) all document user text keys </returns>
-    static member GetDocumentUserTextKeys() : string array =
-        [| for i=0 to Doc.Strings.Count-1  do 
-              let k = Doc.Strings.GetKey(i) 
-              if not <| k.Contains "\\" then  yield k |]
+    static member GetDocumentUserTextKeys() : string ResizeArray =
+        resizeArray { for  i=0 to Doc.Strings.Count-1  do 
+                          let k = Doc.Strings.GetKey(i) 
+                          if not <| k.Contains "\\" then  yield k }
 
         
 
@@ -85,15 +85,15 @@ module ExtensionsUserdata =
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
-    ///<returns>(string array) all keys</returns>
-    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string array =
+    ///<returns>(string ResizeArray) all keys</returns>
+    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string ResizeArray =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             let uss = obj.Geometry.GetUserStrings()
-            [| for i=0 to uss.Count-1 do yield uss.GetKey(i)|]  
+            resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}  
         else
             let uss = obj.Attributes.GetUserStrings()
-            [| for i=0 to uss.Count-1 do yield uss.GetKey(i)|]
+            resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}
             
     
     [<EXT>]    

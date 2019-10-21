@@ -15,9 +15,17 @@ module ResizeArray =
 
     let set (arr: ResizeArray<'T>) (n: int) (x:'T) =  arr.[n] <- x
 
-    let create  (n: int) x = new ResizeArray<_> (seq { for _ in 1 .. n -> x })
+    let create  (n: int) x = 
+        let r = new ResizeArray<'T>(n)
+        for i=0 to n-1 do
+            r.[i] <- x 
+        r       
 
-    let init (n: int) (f: int -> 'T) =  new ResizeArray<_> (seq { for i in 0 .. n-1 -> f i })
+    let init (n: int) (f: int -> 'T) =  
+        let r = new ResizeArray<'T>(n)
+        for i=0 to n-1 do
+            r.[i] <- f i 
+        r
 
     let blit (arr1: ResizeArray<'T>) start1 (arr2: ResizeArray<'T>) start2 len =
         if start1 < 0 then invalidArg "start1" "index must be positive"

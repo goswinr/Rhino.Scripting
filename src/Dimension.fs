@@ -343,7 +343,7 @@ module ExtensionsDimension =
     [<EXT>]  
     ///<summary>Gets all Available Font Face Names</summary>    
     ///<returns>(string array) array of all available font names</returns>
-    static member DimStyleAvailableFonts() :string[] = // not part of original rhinoscriptsyntax
+    static member DimStyleAvailableFonts() : array<string> = // not part of original rhinoscriptsyntax
         DocObjects.Font.AvailableFontFaceNames()
         
 
@@ -426,8 +426,8 @@ module ExtensionsDimension =
     [<EXT>]  
     ///<summary>Returns the names of all dimension styles in the document</summary>
     ///<returns>(string []) the names of all dimension styles in the document</returns>
-    static member DimStyleNames() : string [] =
-        [| for ds in Doc.DimStyles -> ds.Name |]
+    static member DimStyleNames() : ResizeArray<string> =
+        resizeArray {for  ds in Doc.DimStyles -> ds.Name }
 
 
     // [<EXT>]  
