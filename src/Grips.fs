@@ -440,3 +440,303 @@ module ExtensionsGrips =
     *)
 
 
+    [<EXT>]
+    ///<summary>Verifies that an object's grips are turned on</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<returns>(bool) True or False indicating Grips state</returns>
+    static member ObjectGripsOn(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        rhobj.GripsOn
+    (*
+    def ObjectGripsOn(object_id):
+        '''Verifies that an object's grips are turned on
+        Parameters:
+          object_id (guid): identifier of the object
+        Returns:
+          bool: True or False indicating Grips state
+          None: on error
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        return rhobj.GripsOn
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that an object's grips are turned on and at least one grip
+    ///  is selected</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
+    static member ObjectGripsSelected(objectId:Guid) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then false
+        else
+            let grips = rhobj.GetGrips()
+            if isNull grips then false
+            else
+                grips
+                |> Seq.exists (fun g -> g.IsSelected(false) > 0) 
+
+                (*
+    def ObjectGripsSelected(object_id):
+        '''Verifies that an object's grips are turned on and at least one grip
+        is selected
+        Parameters:
+          object_id (guid): identifier of the object
+        Returns:
+          bool: True or False indicating success or failure
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        if not rhobj.GripsOn: return False
+        grips = rhobj.GetGrips()
+        if grips is None: return False
+        for grip in grips:
+            if grip.IsSelected(False): return True
+        return False
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the previous grip index from a specified grip index of an object</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
+    ///<param name="direction">(int) Optional, Default Value: <c>0</c>
+    ///Direction to get the next grip index (0=U, 1=V)</param>
+    ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
+    ///If True, the next grip index found will be selected</param>
+    ///<returns>(int) index of the next grip on success</returns>
+    static member PrevObjectGrip( objectId:Guid, 
+                                  index:int, 
+                                  [<OPT;DEF(0)>]direction:int, 
+                                  [<OPT;DEF(true)>]enable:bool) : int =
+        match RhinoScriptSyntax.Neighborgrip(-1, objectId, index, direction, enable) with
+        |Ok r -> r.Index
+        |Error s -> failwithf "PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+    (*
+    def PrevObjectGrip(object_id, index, direction=0, enable=True):
+        '''Returns the previous grip index from a specified grip index of an object
+        Parameters:
+          object_id (guid): identifier of the object
+          index (number): zero based grip index from which to get the previous grip index
+          direction ([number, number], optional): direction to get the next grip index (0=U, 1=V)
+          enable (bool, optional): if True, the next grip index found will be selected
+        Returns:
+          number: index of the next grip on success
+          None: on failure
+        '''
+    
+        return __neighborgrip(-1, object_id, index, direction, enable)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns a list of grip indices indentifying an object's selected grips</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<returns>(int ResizeArray) list of indices on success</returns>
+    static member SelectedObjectGrips(objectId:Guid) : int ResizeArray =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let rc = ResizeArray()
+        if not rhobj.GripsOn then rc
+        else
+            let grips = rhobj.GetGrips()
+        
+            if notNull grips then
+                for i in range(grips.Length) do
+                    if grips.[i].IsSelected(false) > 0 then rc.Add(i)
+            rc
+    (*
+    def SelectedObjectGrips(object_id):
+        '''Returns a list of grip indices indentifying an object's selected grips
+        Parameters:
+          object_id (guid): identifier of the object
+        Returns:
+          list(int,...): list of indices on success
+          None: on failure or if no grips are selected
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        if not rhobj.GripsOn: return None
+        grips = rhobj.GetGrips()
+        rc = []
+        if grips:
+            for i in xrange(grips.Length):
+                if grips[i].IsSelected(False): rc.append(i)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Selects a single grip owned by an object. If the object's grips are
+    ///  not turned on, the grips will not be selected</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<param name="index">(int) Index of the grip to select</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
+    static member SelectObjectGrip(objectId:Guid, index:int) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then false
+        else
+            let grips = rhobj.GetGrips()
+            if isNull grips then false
+            else
+                if index<0 || index>=grips.Length then false
+                else
+                    let grip = grips.[index]
+                    if grip.Select(true,true) >0 then
+                        Doc.Views.Redraw()
+                        true
+                    else
+                        false
+    (*
+    def SelectObjectGrip(object_id, index):
+        '''Selects a single grip owned by an object. If the object's grips are
+        not turned on, the grips will not be selected
+        Parameters:
+          object_id (guid) identifier of the object
+          index (number): index of the grip to select
+        Returns:
+          bool: True or False indicating success or failure
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        if not rhobj.GripsOn: return False
+        grips = rhobj.GetGrips()
+        if grips is None: return False
+        if index<0 or index>=grips.Length: return False
+        grip = grips[index]
+        if grip.Select(True,True)>0:
+            scriptcontext.doc.Views.Redraw()
+            return True
+        return False
+    *)
+
+
+    [<EXT>]
+    ///<summary>Selects an object's grips. If the object's grips are not turned on,
+    ///  they will not be selected</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<returns>(int) Number of grips selected on success</returns>
+    static member SelectObjectGrips(objectId:Guid) : int =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
+        let grips = rhobj.GetGrips()
+        if isNull grips then failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
+        let mutable count = 0
+        for grip in grips do
+            if grip.Select(true,true)>0 then count<- count +  1
+        if count>0 then
+            Doc.Views.Redraw()
+            count
+        else
+            failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
+    (*
+    def SelectObjectGrips(object_id):
+        '''Selects an object's grips. If the object's grips are not turned on,
+        they will not be selected
+        Parameters:
+          object_id (guid): identifier of the object
+        Returns:
+          number: Number of grips selected on success
+          None: on failure
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        if not rhobj.GripsOn: return scriptcontext.errorhandler()
+        grips = rhobj.GetGrips()
+        if grips is None: return scriptcontext.errorhandler()
+        count = 0
+        for grip in grips:
+            if grip.Select(True,True)>0: count+=1
+        if count>0:
+            scriptcontext.doc.Views.Redraw()
+            return count
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Unselects a single grip owned by an object. If the object's grips are
+    ///  not turned on, the grips will not be unselected</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<param name="index">(int) Index of the grip to unselect</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
+    static member UnselectObjectGrip(objectId:Guid, index:int) : bool =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then false
+        else
+            let grips = rhobj.GetGrips()
+            if isNull grips then false
+            else
+                if index<0 || index>=grips.Length then false
+                else
+                    let grip = grips.[index]
+                    if grip.Select(false) = 0 then
+                        Doc.Views.Redraw()
+                        true
+                    else
+                        false
+    (*
+    def UnselectObjectGrip(object_id, index):
+        '''Unselects a single grip owned by an object. If the object's grips are
+        not turned on, the grips will not be unselected
+        Parameters:
+          object_id (guid): identifier of the object
+          index (number): index of the grip to unselect
+        Returns:
+          bool: True or False indicating success or failure
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        if not rhobj.GripsOn: return False
+        grips = rhobj.GetGrips()
+        if grips is None: return False
+        if index<0 or index>=grips.Length: return False
+        grip = grips[index]
+        if grip.Select(False)==0:
+            scriptcontext.doc.Views.Redraw()
+            return True
+        return False
+    *)
+
+
+    [<EXT>]
+    ///<summary>Unselects an object's grips. Note, the grips will not be turned off.</summary>
+    ///<param name="objectId">(Guid) Identifier of the object</param>
+    ///<returns>(int) Number of grips unselected on success</returns>
+    static member UnselectObjectGrips(objectId:Guid) : int =
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId
+        let grips = rhobj.GetGrips()
+        if isNull grips then failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId
+        let mutable count = 0
+        for grip in grips do
+            if grip.Select(false) = 0 then count <- count +   1
+        if count>0 then
+            Doc.Views.Redraw()
+            count
+        else
+            failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId
+    (*
+    def UnselectObjectGrips(object_id):
+        '''Unselects an object's grips. Note, the grips will not be turned off.
+        Parameters:
+          object_id (guid): identifier of the object
+        Returns:
+          number: Number of grips unselected on success
+          None: on failure
+        '''
+    
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        if not rhobj.GripsOn: return scriptcontext.errorhandler()
+        grips = rhobj.GetGrips()
+        if grips is None: return scriptcontext.errorhandler()
+        count = 0
+        for grip in grips:
+            if grip.Select(False)==0: count += 1
+        if count>0:
+            scriptcontext.doc.Views.Redraw()
+            return count
+        return scriptcontext.errorhandler()
+    *)
+
+
