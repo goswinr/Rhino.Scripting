@@ -9,19 +9,21 @@ open Rhino.Scripting.Util
 module TypeExtensionsRhino =    
 
    
-    [<Extension>]       
+      
     type Point3d with  
+        [<Extension>]     
         ///Like the ToString function but with appropiate precision formating
         member pt.ToNiceString = NiceString.point3dToString pt
 
-    [<Extension>]       
+         
     type Point3f with  
+        [<Extension>]  
         ///Like the ToString function but with appropiate precision formating
         member pt.ToNiceString = NiceString.point3fToString pt
 
-
-    [<Extension>]       
+          
     type Vector3d with  
+        [<Extension>] 
         ///Like the ToString function but with appropiate precision formating
         member v.ToNiceString =  NiceString.vector3dToString v
 

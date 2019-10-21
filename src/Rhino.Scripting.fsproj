@@ -10,12 +10,11 @@
     <Version>0.0.0.1</Version>
     <Authors>Goswin Rothenthal</Authors>
     <Product>Rhino.Scripting</Product>
-    <AssemblyVersion>0.0.0.1</AssemblyVersion>
-    <FileVersion>0.0.0.1</FileVersion>
+    <AssemblyVersion>0.1.0.1</AssemblyVersion>
+    <FileVersion>0.1.0.1</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
-    <Description>Rhino Script Syntax for F# and C#</Description>
+    <Description>Rhino Script Syntax for F# (and C#)</Description>
     <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>
-    <somesthjing></somesthjing>
   </PropertyGroup>
   
   <ItemGroup>    
@@ -24,6 +23,7 @@
     <Compile Include="01_Util.fs" />    
     <Compile Include="02_ToNiceString.fs" />
     <Compile Include="02_TypeExtensions.fs" />
+    <Compile Include="03_StringModule.fs" />  
     <Compile Include="03_SeqModuleExtensions.fs" />
     <Compile Include="04_ComputationalExpressions.fs" />
     <Compile Include="05_DefaultDict.fs" />

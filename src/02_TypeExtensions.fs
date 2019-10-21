@@ -17,8 +17,10 @@ module TypeExtensions =
     
    
     type Double with  
-        ///converts int to float including rounding: int(round(x))
+        ///converts int to float including rounding: 
+        ///int(round(x))
         [<EXT>] member inline x.ToInt = int(round(x))
+
         /// with automatic formating of display precision depending on float size
         [<EXT>] member x.ToNiceString = NiceString.floatToString x        
         

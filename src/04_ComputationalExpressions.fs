@@ -5,11 +5,13 @@ open System
 module OptionBuilder =
 
     
-    // This monad is my own and uses an 'T option. Others generally make their own Maybe<'T> type from Option<'T>.
-    // The builder approach is from Matthew Podwysocki's excellent Creating Extended Builders series http://codebetter.com/blogs/matthew.podwysocki/archive/2010/01/18/much-ado-about-monads-creating-extended-builders.aspx.
-    // from https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Option.fs
+    
     /// The maybe monad. 
     type MaybeBuilder() =
+        // This monad is my own and uses an 'T option. Others generally make their own Maybe<'T> type from Option<'T>.
+        // The builder approach is from Matthew Podwysocki's excellent Creating Extended Builders series http://codebetter.com/blogs/matthew.podwysocki/archive/2010/01/18/much-ado-about-monads-creating-extended-builders.aspx.
+        // from https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Option.fs
+        
         member this.Return(x) = Some x
 
         member this.ReturnFrom(m: 'T option) = m
@@ -97,7 +99,7 @@ module StringBufferBuilder =
             b.ToString()
     
     /// Computational Expression:  use 'yield' to append text and 'yield!' (with an exclamation mark)  to append text followed by a new line character.
-    let stringBuffer = new StringBufferBuilder ()
+    let stringBuffer = StringBufferBuilder ()
 
 
 
@@ -132,7 +134,8 @@ module ResizeArrayBuilder =
             let r = ResizeArray<'T>()
             do f r
             r  
-    // Computational Expression:  use 'yield' to add alements to a ResizeArray (= Collections.Generic.List).
+    
+    /// Computational Expression:  use 'yield' to add alements to a ResizeArray (= Collections.Generic.List).
     let resizeArray<'T> = new ResizeArrayBuilder<'T> ()
 
 

@@ -126,23 +126,20 @@ module Compare =
 
 module MinMaxSort = 
     
-    ///* if both are equal after Function is applied then the first is returned
+    ///* if both are equal then the first is returned
     let inline minBy f a b =  if f a > f b then b else a
-    ///* if both are equal after Function is applied then the first is returned
+    ///* if both are equal then the first is returned
     let inline maxBy f a b =  if f a < f b then b else a
     let inline min2By f (a,b) =  if f a > f b then b else a
     let inline max2By f (a,b) =  if f a < f b then b else a
     let inline min3 (a,b,c) = min a b |> min c
-    let inline min4 (a,b,c,d) = min a b |> min c |> min d
-    let inline min5 (a,b,c,d,e) = min a b |> min c |> min d |> min e
-    let inline min6 (a,b,c,d,e,f) = min a b |> min c |> min d |> min e |> min f
     let inline max3 (a,b,c) = max a b |> max c
+    let inline min4 (a,b,c,d) = min a b |> min c |> min d    
     let inline max4 (a,b,c,d) = max a b |> max c |> max d
-    let inline max5 (a,b,c,d,e) = max a b |> max c |> max d |> max e
-    let inline max6 (a,b,c,d,e,f) = max a b |> max c |> max d |> max e |> max f
-
-    let inline sort2 (a,b)      = if a <= b      then a,b else b,a
-    let inline sort2By f ((a,b):'T*'T)  = if f a <= f b  then a,b else b,a
+    ///* if they are equal then the the order is kept
+    let inline sort2 (a,b)  = if a <= b  then a,b else b,a
+    ///* if they equal then the the order is kept
+    let inline sort2By f (a,b) = if f a <= f b  then a,b else b,a
         
     ///* if any are equal then the the order is kept
     let inline sort3 (a,b,c) = 
@@ -175,7 +172,8 @@ module MinMaxSort =
         elif a<b then -1
         else           1 
         
-    /// gets the positiv differnce between 2 numbers, avoids the integer( or byte) overflow and underflow risk of "abs(a-b)"
+    /// gets the positiv differnce between 2 numbers, 
+    /// avoids the integer( or byte) overflow and underflow risk of "abs(a-b)"
     let inline diff a b =
         if   a<b then b-a
         else          a-b 

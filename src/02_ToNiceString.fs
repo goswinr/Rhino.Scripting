@@ -5,7 +5,7 @@ open System
 open Rhino.Geometry
 
 
-module internal NiceString =
+module NiceString =
     
     
     /// with automatic formationg of precision
@@ -59,15 +59,15 @@ module internal NiceString =
     // -- generic pretty printer-----
     //-------------------------------
 
-    let mutable maxDepth= 2
-    let mutable maxItemsPerSeq = 4
+    let mutable toNiceStringMaxDepth= 2
+    let mutable toNiceStringMaxItemsPerSeq = 4
 
-    let before (splitter:string) (s:string) = 
+    let private before (splitter:string) (s:string) = 
         let start = s.IndexOf(splitter) 
         if start = -1 then s
         else s.Substring(0,start )
     
-    let formatTypeName nameSpace name = 
+    let private formatTypeName nameSpace name = 
         let name = name |> before "`" // Collections.Generic.List`1  -> Collections.Generic.List
         let fullPath = nameSpace  + "." + name 
         if fullPath.StartsWith "System." then 
@@ -76,7 +76,7 @@ module internal NiceString =
             fullPath
     
 
-    let (|IsSeq|_|) (xs : obj) =
+    let private (|IsSeq|_|) (xs : obj) =
         let typ = xs.GetType() 
         let interfaces= typ.GetInterfaces()
         let seqType = interfaces  |> Seq.tryFind( fun x -> x.IsGenericType && x.GetGenericTypeDefinition() = typedefof<IEnumerable<_>> )
@@ -98,10 +98,10 @@ module internal NiceString =
                     let ics = xs :?> Collections.IEnumerable
                     let enum = ics.GetEnumerator()
                     let mutable k=0
-                    while enum.MoveNext() && k < maxItemsPerSeq do
+                    while enum.MoveNext() && k < toNiceStringMaxItemsPerSeq do
                         rs.Add (box enum.Current)
                         k <- k+1
-                    Some (count,  rs:>IEnumerable<_>, name, elName)                 
+                    Some (count,  rs:>IEnumerable<_>, name, elName)   // the retuened seq is trimmed!  to a length of maxItemsPerSeq              
                 else                
                     let ics = xs :?> IEnumerable<_> 
                     Some (count, ics, name, elName)
@@ -109,10 +109,10 @@ module internal NiceString =
                 None
         |None -> None
     
-    let sb = Text.StringBuilder()
+    let private sb = Text.StringBuilder()
 
 
-    let rec toNiceStringRec (x:obj,indent:int) : unit =
+    let rec private toNiceStringRec (x:obj,indent:int) : unit =
         let addn (s:string) =  sb.Append(String(' ', 4 *  indent )).AppendLine(s) |> ignore
         let add  (s:string) =  sb.Append(String(' ', 4 *  indent )).Append(s) |> ignore
         let adn  (s:string) =  sb.AppendLine(s) |> ignore
@@ -130,17 +130,19 @@ module internal NiceString =
         | IsSeq (count,xs,name,elName) ->  
                     if count <0 then    sprintf "%s of %s" name elName  |> add  
                     else                sprintf "%s with %d items of %s" name count elName |> add     
-                    if indent < maxDepth  then 
+                    if indent < toNiceStringMaxDepth  then 
                         adn ":"
-                        for x in xs  |> Seq.truncate maxItemsPerSeq do  
+                        for x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq do  
                             toNiceStringRec (x, indent+1)
-                        if count > maxItemsPerSeq then
+                        if count > toNiceStringMaxItemsPerSeq then
                             toNiceStringRec ("...", indent+1)
                     else 
-                        adn ""
-                
+                        adn ""                
         | _ ->  x.ToString() |> add
 
+    /// Nice formating for floats , some Rhino Objects and sequences of any kind, first four items are printed out.
+    /// set NiceString.toNiceStringMaxItemsPerSeq to other value if more or less shall be shown (default is 4)
+    /// set NiceString.toNiceStringMaxDepth to change how deep nested lists are printed (default is 2)
     let toNiceString (x:'T) = 
         sb.Clear() |> ignore
         toNiceStringRec(box x,0)
@@ -148,18 +150,18 @@ module internal NiceString =
         let st = s.Trim()
         if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings
 
-    
+    /// Nice formating for floats , some Rhino Objects and sequences of any kind, all items including nested items are printed out.
     let toNiceStringFull (x:'T) = 
-        let maxDepthP = maxDepth  
-        let maxItemsPerSeqP = maxItemsPerSeq 
-        maxDepth <- Int32.MaxValue
-        maxItemsPerSeq  <- Int32.MaxValue
+        let maxDepthP = toNiceStringMaxDepth  
+        let maxItemsPerSeqP = toNiceStringMaxItemsPerSeq 
+        toNiceStringMaxDepth <- Int32.MaxValue
+        toNiceStringMaxItemsPerSeq  <- Int32.MaxValue
 
         sb.Clear() |> ignore
         toNiceStringRec(box x,0)
 
-        maxDepth <- maxDepthP 
-        maxItemsPerSeq  <- maxItemsPerSeqP 
+        toNiceStringMaxDepth <- maxDepthP 
+        toNiceStringMaxItemsPerSeq  <- maxItemsPerSeqP 
         let s = sb.ToString()
         let st = s.Trim()
         if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings

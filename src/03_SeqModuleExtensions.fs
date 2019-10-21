@@ -29,8 +29,8 @@ module Seq =
 
 
     ///Considers sequence cirular and move elements up or down
-    /// e.g.: rotate +1 [a,b,c,d] = [d,a,b,c]
-    /// e.g.: rotate -1 [a,b,c,d] = [b,c,d,a]
+    /// e.g.: rotate +1 [ a, b, c, d] = [ d, a, b, c]
+    /// e.g.: rotate -1 [ a, b, c, d] = [ b, c, d, a]
     let rotate r (xs:seq<_>) = xs |> ResizeArray.ofSeq |> ResizeArray.rotate r
 
     
