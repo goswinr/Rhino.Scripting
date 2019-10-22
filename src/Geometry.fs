@@ -194,7 +194,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area</returns>
     static member Area(objectId:Guid) : float =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
         if mp |> isNull then failwithf "Rhino.Scripting: Unable to compute area mass properties.  objectId:'%A'" objectId
         mp.Area
@@ -258,7 +258,7 @@ module ExtensionsGeometry =
     ///Delete the text object after the curves have been created</param>
     ///<returns>(Guid array) of outline curves</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId, true)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
         let rc = resizeArray { for curve in curves do yield Doc.Objects.AddCurve(curve,attr) }

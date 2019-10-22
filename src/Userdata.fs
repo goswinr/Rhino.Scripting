@@ -164,7 +164,7 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Sets or removes user text stored on an object.</summary>
-    ///<param name="objectId">(string) The object's identifier</param>
+    ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
     ///  The string value to set. If omitted, the key/value pair
@@ -172,7 +172,7 @@ module ExtensionsUserdata =
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing</returns>
-    static member SetUserText(objectId:string, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
+    static member SetUserText(objectId:Guid, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
             obj.Geometry.SetUserString(key, value)|> ignore
