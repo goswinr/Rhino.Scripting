@@ -476,7 +476,7 @@ module ExtensionsObject =
     ///  2 = color from material
     ///  3 = color from parent</returns>
     static member ObjectColorSource(objectId:Guid) : int = //GET        
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhobj.Attributes.ColorSource)
 
     ///<summary>Modifies the color source of an object.</summary>
@@ -489,7 +489,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectColorSource(objectId:Guid, source:int) : unit = //SET
         let source : Rhino.DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectColorSource failed for '%A' and '%A'" objectId source
         Doc.Views.Redraw()
@@ -502,7 +502,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object .</returns>
     static member ObjectDescription(objectId:Guid) : string =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
 
 
@@ -787,7 +787,7 @@ module ExtensionsObject =
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
         if source <0 || source >3 || source=2 then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectId
         let source : Rhino.DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId, true)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
         Doc.Views.Redraw()
