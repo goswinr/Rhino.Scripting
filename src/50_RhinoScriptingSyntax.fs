@@ -11,34 +11,38 @@ open Rhino.Scripting.TypeExtensions
 open System.Collections.Generic
 
 /// An Integer Enum of Object types to be use in object selection functions
-[<RequireQualifiedAccess; AbstractClass; Sealed>]
-type Filter private () =  
-  static member AllObjects = 0
-  static member Point = 1
-  static member PointCloud = 2
-  static member Curve = 4
-  static member Surface = 8
-  static member PolySurface = 16
-  static member Mesh = 32
-  static member Light = 256
-  static member Annotation = 512
-  static member Instance = 4096
-  static member Textdot = 8192
-  static member Grip = 16384
-  static member Detail = 32768
-  static member Hatch = 65536
-  static member Morph = 131072
-  static member Cage = 134217728
-  static member Phantom = 268435456
-  static member ClippingPlane = 536870912
-  static member Extrusion = 1073741824
+[<Sealed>] //AbstractClass;
+type Filter internal () =  
+    member _.AllObjects = 0
+    member _.Point = 1
+    member _.PointCloud = 2
+    member _.Curve = 4
+    member _.Surface = 8
+    member _.PolySurface = 16
+    member _.Mesh = 32
+    member _.Light = 256
+    member _.Annotation = 512
+    member _.Instance = 4096
+    member _.Textdot = 8192
+    member _.Grip = 16384
+    member _.Detail = 32768
+    member _.Hatch = 65536
+    member _.Morph = 131072
+    member _.Cage = 134217728
+    member _.Phantom = 268435456
+    member _.ClippingPlane = 536870912
+    member _.Extrusion = 1073741824
 
-
+module private FilterModule =
+    // the singelton of this class
+    let filter = Filter()
 
 [<AbstractClass; Sealed>]
 /// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 
 type RhinoScriptSyntax private () = // no constructor?
-    
+     
+    /// An Integer Enum of Object types to be use in object selection functions
+    static member Filter:Filter = FilterModule.filter
 
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString() </summary>
     ///<param name="x">('T): the value or object to represent as string</param>
@@ -414,14 +418,21 @@ type RhinoScriptSyntax private () = // no constructor?
             if Seq.length allviews = 1 then Seq.head allviews
             else  failwithf "CoerceView: could not CoerceView '%s'" view
     
-    
+    ///<summary>attempt to get Rhino Hatch Object</summary>
+    ///<param name="objectId">(guid): objectId of Hatch object</param> 
+    ///<returns>a Rhino.DocObjects.HatchObject. Fails on bad input.</returns>
+    static member CoerceHatchObject (objectId:'T): DocObjects.HatchObject =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
+        | :?  DocObjects.HatchObject as a -> a
+        | o -> failwithf "CoerceHatchObject: failed on %A from %A " objectId o.ObjectType
+
     ///<summary>attempt to get Rhino Annotation Object</summary>
     ///<param name="objectId">(guid): objectId of annotation object</param> 
     ///<returns>a Rhino.DocObjects.AnnotationObjectBase. Fails on bad input.</returns>
     static member CoerceAnnotation (objectId:'T): DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        |_ -> failwithf "CoerceAnnotation: could not CoerceAnnotation: %A is not a Rhino.DocObjects.AnnotationObjectBase " objectId
+        | o -> failwithf "CoerceAnnotation: failed on: %A from %A " objectId o.ObjectType
         
     ///<summary>Returns the Rhino Block instance object for a given Id</summary>
     ///<param name="objectId">(Guid) Id of block instance</param>    
@@ -429,8 +440,11 @@ type RhinoScriptSyntax private () = // no constructor?
     static member CoerceBlockInstanceObject(objectId:Guid) : Rhino.DocObjects.InstanceObject =
         match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  
         | :? DocObjects.InstanceObject as b -> b
-        | _ -> failwithf "CoerceBlockInstanceObject:unable to find Block InstanceObject for '%A'" objectId
+        | o -> failwithf "CoerceBlockInstanceObject: unable to find Block InstanceObject from %A '%A'" o.ObjectType objectId
     
+
+
+
 
     //---------Geometry Base------------
 
