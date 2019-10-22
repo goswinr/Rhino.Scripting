@@ -456,7 +456,7 @@ module ExtensionsSelection =
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string, 
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{
-            let! ids = RhinoScriptSyntax.GetObjects(message, Filter.Point, preselect=preselect)
+            let! ids = RhinoScriptSyntax.GetObjects(message, FilterModule.filter.Point, preselect=preselect)
             let rc = ResizeArray()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)

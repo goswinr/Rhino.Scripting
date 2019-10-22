@@ -397,15 +397,20 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get Rhino LayerObject from the document with a given objectId or fullame</summary>
     ///<param name="nameOrId">(string or guid or index): layers identifier name</param>
     ///<returns>DocObjectys.Layer  Fails on bad input</returns>
-    static member CoerceLayer (nameOrId:'T) : DocObjects.Layer=
-        try
-            match box nameOrId with 
-            | :? Guid as g   -> Doc.Layers.FindId(g)
-            | :? string as s -> Doc.Layers.[Doc.Layers.FindByFullPath(s, RhinoMath.UnsetIntIndex)]
-            | :? int as ix   -> Doc.Layers.[ix]
-            | _ -> fail()            
-        with _ ->
-            failwithf "CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
+    static member CoerceLayer (nameOrId:'T) : DocObjects.Layer=       
+            match box nameOrId with
+            | :? string as s -> 
+                    let i = Doc.Layers.FindByFullPath(s, RhinoMath.UnsetIntIndex)
+                    if i = RhinoMath.UnsetIntIndex then failwithf "CoerceLayer: could not Coerce Layer from name'%A'" nameOrId  
+                    Doc.Layers.[i]
+            | :? Guid as g   -> 
+                    let l = Doc.Layers.FindId(g)            
+                    if isNull l then failwithf "CoerceLayer: could not Coerce Layer from ID '%A'" nameOrId  
+                    l
+            | :? int as ix  -> 
+                    if ix<0 || ix >= Doc.Layers.Count then failwithf "CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
+                    Doc.Layers.[ix]
+            | _ -> failwithf "CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
     
     
     ///<summary>attempt to get Rhino View Object from the name of the view </summary>
