@@ -55,6 +55,14 @@ module NiceString =
         else
             sprintf "Vector3d(%s, %s, %s)" (floatToString  v.X) (floatToString  v.Y) (floatToString  v.Z)
     
+    ///Like the ToString function but with appropiate precision formating       
+    let vector3fToString (v:Vector3f) =
+        if v = Vector3f.Unset then  
+            "Vector3f.Unset"
+        else
+            sprintf "Vector3f(%s, %s, %s)" (singleToString  v.X) (singleToString  v.Y) (singleToString  v.Z)
+
+    
     //--------------------------------
     // -- generic pretty printer-----
     //-------------------------------
@@ -122,6 +130,7 @@ module NiceString =
         | :? Point3d    as p   -> p |> point3dToString |> addn
         | :? Vector3d   as v   -> v |> vector3dToString |> addn
         | :? Point3f    as p   -> p |> point3fToString |> addn
+        | :? Vector3f    as p  -> p |> vector3fToString |> addn
         | :? float      as v   -> v |> floatToString |> addn
         | :? single     as v   -> v |> singleToString |> addn        
         | :? Char       as c   -> c.ToString()   |> addn // "'" + c.ToString() + "'" // or add qotes?
