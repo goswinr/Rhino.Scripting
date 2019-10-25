@@ -4271,6 +4271,217 @@ Hatch pattern rotation angle in degrees.</param>
 Tolerance for hatch fills.</param>
 <returns>(Guid ResizeArray) identifiers of the newly created hatch on success</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.RenameLayer.Static(System.String,System.String)">
+<summary>Renames an existing layer</summary>
+<param name="oldname">(string) Original layer name</param>
+<param name="newname">(string) New layer name</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.PurgeLayer.Static(System.String)">
+<summary>Removes an existing layer from the document. The layer will be removed
+  even if it contains geometry objects. The layer to be removed cannot be the
+  current layer
+  empty.</summary>
+<param name="layer">(string) The name or id of an existing empty layer</param>
+<returns>(bool) True or False indicating success or failure</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.ParentLayer.Static(System.String,System.String)">
+<summary>Modify the parent layer of a layer</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<param name="parent">(string)Name of new parent layer. To remove the parent layer,
+  thus making a root-level layer, specify an empty string</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.ParentLayer.Static(System.String)">
+<summary>Return the parent layer of a layer or mepty string if no parent present</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<returns>(string) The name of the current parent layer</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerVisible.Static(System.String,System.Boolean,System.Boolean)">
+<summary>Changes the visible property of a layer.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<param name="visible">(bool)New visible state</param>
+<param name="forcevisibleOrDonotpersist">(bool)If visible is True then turn parent layers on if True.  If visible is False then do not persist if True</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerVisible.Static(System.String)">
+<summary>Returns the visible property of a layer.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<returns>(bool) The current layer visibility</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerPrintWidth.Static(System.String,System.Double)">
+<summary>Changes the print width of a layer. Print width is specified
+ in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<param name="width">(float)New print width</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerPrintWidth.Static(System.String)">
+<summary>Returns the print width of a layer. Print width is specified
+ in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<returns>(float) The current layer print width</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerPrintColor.Static(System.String,System.Drawing.Color)">
+<summary>Changes the print color of a layer. Layer print colors are
+ represented as RGB colors.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<param name="color">(Drawing.Color)New print color</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerPrintColor.Static(System.String)">
+<summary>Returns the print color of a layer. Layer print colors are
+ represented as RGB colors.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<returns>(Drawing.Color) The current layer print color</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerOrder.Static(System.String)">
+<summary>Returns the current display order index of a layer as displayed in Rhino's
+  layer dialog box. A display order index of -1 indicates that the current
+  layer dialog filter does not allow the layer to appear in the layer list</summary>
+<param name="layer">(string) Name of existing layer</param>
+<returns>(int) 0 based index of layer</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerNames.Static">
+<summary>Returns the names of all layers in the document.</summary>
+<returns>(string ResizeArray) list of layer names</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerName.Static(System.Guid,System.Boolean)">
+<summary>Return the name of a layer given it's identifier</summary>
+<param name="layerId">(Guid) Layer identifier</param>
+<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
+Return the full path name `True` or short name `False`</param>
+<returns>(string) the layer's name</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerId.Static(System.String)">
+<summary>Returns the identifier of a layer given the layer's name.</summary>
+<param name="layer">(string) Name of existing layer</param>
+<returns>(Guid) The layer's identifier.</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerMaterialIndex.Static(System.String,System.Int32)">
+<summary>Changes the material index of a layer. A material index of -1
+ indicates that no material has been assigned to the layer. Thus, the layer
+ will use Rhino's default layer material</summary>
+<param name="layer">(string) Name of existing layer</param>
+<param name="index">(int)The new material index</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerMaterialIndex.Static(System.String)">
+<summary>Returns the material index of a layer. A material index of -1
+ indicates that no material has been assigned to the layer. Thus, the layer
+ will use Rhino's default layer material</summary>
+<param name="layer">(string) Name of existing layer</param>
+<returns>(int) a zero-based material index</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerLocked.Static(System.String,System.Boolean)">
+<summary>Changes the locked mode of a layer</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<param name="locked">(bool)New layer locked mode</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerLocked.Static(System.String)">
+<summary>Returns the locked mode of a layer</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<returns>(bool) The current layer locked mode</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerLinetype.Static(System.String,System.String)">
+<summary>Changes the linetype of a layer</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<param name="linetyp">(string)Name of a linetype</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerLinetype.Static(System.String)">
+<summary>Returns the linetype of a layer</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<returns>(string) Name of the current linetype</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerIds.Static">
+<summary>Return identifiers of all layers in the document</summary>
+<returns>(Guid ResizeArray) the identifiers of all layers in the document</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerCount.Static">
+<summary>Returns the number of layers in the document</summary>
+<returns>(int) the number of layers in the document</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerColor.Static(System.String,System.Drawing.Color)">
+<summary>Changes the color of a layer.</summary>
+<param name="layer">(string) Name or id of an existing layer</param>
+<param name="color">(Drawing.Color)The new color value. If omitted, the current layer color is returned.</param>
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerColor.Static(System.String)">
+<summary>Returns the color of a layer.</summary>
+<param name="layer">(string) Name or id of an existing layer</param>
+<returns>(Drawing.Color) The current color value on success</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerChildren.Static(System.String)">
+<summary>Returns the immediate child layers of a layer</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(string ResizeArray) List of children layer names</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.LayerChildCount.Static(System.String)">
+<summary>Returns the number of immediate child layers of a layer</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(int) the number of immediate child layers</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerVisible.Static(System.String)">
+<summary>Verifies that a layer is visible (normal, locked, and reference)</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerReference.Static(System.String)">
+<summary>Verifies that a layer is from a reference file.</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerParentOf.Static(System.String,System.String)">
+<summary>Verifies that a layer is a parent of another layer</summary>
+<param name="layer">(string) The name or id of the layer to test against</param>
+<param name="test">(string) The name or id to the layer to test</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerSelectable.Static(System.String)">
+<summary>Verifies that an existing layer is selectable (normal and reference)</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerOn.Static(System.String)">
+<summary>Verifies that a layer is on.</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerLocked.Static(System.String)">
+<summary>Verifies that a layer is locked.</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerExpanded.Static(System.String)">
+<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
+  Rhino's layer dialog</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerEmpty.Static(System.String)">
+<summary>Verifies that an existing layer is empty, or contains no objects</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerCurrent.Static(System.String)">
+<summary>Verifies that a layer is the current layer</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerChildOf.Static(System.String,System.String)">
+<summary>Verifies that a layer is a child of another layer</summary>
+<param name="layer">(string) The name or id of the layer to test against</param>
+<param name="test">(string) The name or id to the layer to test</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayerChangeable.Static(System.String)">
+<summary>Verifies that the objects on a layer can be changed (normal)</summary>
+<param name="layer">(string) The name or id of an existing layer</param>
+<returns>(bool) True on success otherwise False</returns>
+</member>
 <member name="M:Rhino.Scripting.ExtensionsLayer.RhinoScriptSyntax.IsLayer.Static(System.String)">
 <summary>Verifies the existance of a layer in the document</summary>
 <param name="layer">(string) The name or id of a layer to search for</param>
