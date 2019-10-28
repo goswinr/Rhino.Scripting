@@ -666,7 +666,7 @@ module ExtensionsMesh =
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
-        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' tolerance:'%A'" input0 input1 deleteInput tolerance
+        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -709,6 +709,354 @@ module ExtensionsMesh =
                 scriptcontext.doc.Objects.Delete(id, True)
         scriptcontext.doc.Views.Redraw()
         return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Performs boolean union operation on a set of input meshes</summary>
+    ///<param name="meshIds">(Guid seq) Identifiers of meshes</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
+    ///Delete the input meshes</param>
+    ///<returns>(Guid ResizeArray) identifiers of new meshes</returns>
+    static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
+        if Seq.length(meshIds)<2 then failwithf "Rhino.Scripting: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
+        let meshes =  resizeArray { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        let newmeshes = Mesh.CreateBooleanUnion(meshes)
+        let rc = ResizeArray()
+        for mesh in newmeshes do
+            let objectId = Doc.Objects.AddMesh(mesh)
+            if objectId <> Guid.Empty then rc.Add(objectId)
+        if rc.Count>0 && deleteInput then
+            for objectId in meshIds do
+                //id = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Delete(objectId, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+    (*
+    def MeshBooleanUnion(mesh_ids, delete_input=True):
+        '''Performs boolean union operation on a set of input meshes
+        Parameters:
+          mesh_ids ([guid, ...]): identifiers of meshes
+          delete_input (bool, optional): delete the input meshes
+        Returns:
+          list(guid, ...): identifiers of new meshes
+        '''
+    
+        if len(mesh_ids)<2: raise ValueError("mesh_ids must contain at least 2 meshes")
+        meshes = [rhutil.coercemesh(id, True) for id in mesh_ids]
+        newmeshes = Rhino.Geometry.Mesh.CreateBooleanUnion(meshes)
+        rc = []
+        for mesh in newmeshes:
+            id = scriptcontext.doc.Objects.AddMesh(mesh)
+            if id!=System.Guid.Empty: rc.append(id)
+        if rc and delete_input:
+            for id in mesh_ids:
+                id = rhutil.coerceguid(id, True)
+                scriptcontext.doc.Objects.Delete(id, True)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the point on a mesh that is closest to a test point</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<param name="point">(Point3d) Point to test</param>
+    ///<param name="maximumDistance">(float) Optional, Upper bound used for closest point calculation.
+    ///  If you are only interested in finding a point Q on the mesh when
+    ///  point.DistanceTo(Q) < maximumDistance, then set maximumDistance to
+    ///  that value</param>
+    ///<returns>(Point3d * float) containing the results of the calculation where
+    ///  [0] = the 3-D point on the mesh
+    ///  [1] = the index of the mesh face on which the 3-D point lies</returns>
+    static member MeshClosestPoint( objectId:Guid, 
+                                    point:Point3d, 
+                                    [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        //point = RhinoScriptSyntax.Coerce3dpoint(point)  
+        let pt = ref Point3d.Origin
+        let face = mesh.ClosestPoint(point, pt, maximumDistance)
+        if face<0 then failwithf "Rhino.Scripting: MeshClosestPoint failed.  objectId:'%A' point:'%A' maximumDistance:'%A'" objectId point maximumDistance
+        !pt, face
+    (*
+    def MeshClosestPoint(object_id, point, maximum_distance=None):
+        '''Returns the point on a mesh that is closest to a test point
+        Parameters:
+          object_id (guid): identifier of a mesh object
+          point (point): point to test
+          maximum_distance (number, optional): upper bound used for closest point calculation.
+            If you are only interested in finding a point Q on the mesh when
+            point.DistanceTo(Q) < maximum_distance, then set maximum_distance to
+            that value
+        Returns:
+          tuple(point, number): containing the results of the calculation where
+                                [0] = the 3-D point on the mesh
+                                [1] = the index of the mesh face on which the 3-D point lies
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        point = rhutil.coerce3dpoint(point, True)
+        tolerance=maximum_distance if maximum_distance else 0.0
+        face, closest_point = mesh.ClosestPoint(point, tolerance)
+        if face<0: return scriptcontext.errorhandler()
+        return closest_point, face
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the center of each face of the mesh object</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Point3d ResizeArray) points defining the center of each face</returns>
+    static member MeshFaceCenters(meshId:Guid) : Point3d ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        resizeArray {for i in range(mesh.Faces.Count) do mesh.Faces.GetFaceCenter(i) }
+    (*
+    def MeshFaceCenters(mesh_id):
+        '''Returns the center of each face of the mesh object
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+        Returns:
+          list(point, ...): points defining the center of each face
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        return [mesh.Faces.GetFaceCenter(i) for i in range(mesh.Faces.Count)]
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns total face count of a mesh object</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(int) the number of mesh faces</returns>
+    static member MeshFaceCount(objectId:Guid) : int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.Faces.Count
+    (*
+    def MeshFaceCount(object_id):
+        '''Returns total face count of a mesh object
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          number: the number of mesh faces if successful
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.Faces.Count
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the face unit normal for each face of a mesh object</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Vector3d ResizeArray) 3D vectors that define the face unit normals of the mesh</returns>
+    static member MeshFaceNormals(meshId:Guid) : Vector3d ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        if mesh.FaceNormals.Count <> mesh.Faces.Count then
+            mesh.FaceNormals.ComputeFaceNormals() |> ignore
+        let rc = ResizeArray()
+        for i in range(mesh.FaceNormals.Count) do
+            let normal = mesh.FaceNormals.[i]
+            rc.Add(Vector3d(normal))
+        rc
+    (*
+    def MeshFaceNormals(mesh_id):
+        '''Returns the face unit normal for each face of a mesh object
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+        Returns:
+          list(vector, ...): 3D vectors that define the face unit normals of the mesh
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        if mesh.FaceNormals.Count != mesh.Faces.Count:
+            mesh.FaceNormals.ComputeFaceNormals()
+        rc = []
+        for i in xrange(mesh.FaceNormals.Count):
+            normal = mesh.FaceNormals[i]
+            rc.append(Rhino.Geometry.Vector3d(normal))
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns face vertices of a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<param name="faceType">(bool) Optional, Default Value: <c>true</c>
+    ///The face type to be returned. True = both triangles
+    ///  and quads. False = Quads are broken down into triangles</param>
+    ///<returns>(Point3d ResizeArray) 3D points that define the face vertices of the mesh. If
+    ///  face_type is True, then faces are returned as both quads and triangles
+    ///  (4 3D points). For triangles, the third and fourth vertex will be
+    ///  identical. If face_type is False, then faces are returned as only
+    ///  triangles(3 3D points). Quads will be converted to triangles.</returns>
+    static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let rc = ResizeArray()
+        for i in range(mesh.Faces.Count) do
+            let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            let p0 = Point3d(p0)
+            let p1 = Point3d(p1)
+            let p2 = Point3d(p2)
+            let p3 = Point3d(p3)
+            rc.Add( p0 )
+            rc.Add( p1 )
+            rc.Add( p2 )
+            if faceType then
+                rc.Add(p3)
+            else 
+                if p2 <> p3 then
+                    rc.Add( p2 )
+                    rc.Add( p3 )
+                    rc.Add( p0 )
+        rc
+    (*
+    def MeshFaces(object_id, face_type=True):
+        '''Returns face vertices of a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+          face_type (bool, optional): The face type to be returned. True = both triangles
+            and quads. False = only triangles
+        Returns:
+          list([point, point, point, point], ...): 3D points that define the face vertices of the mesh. If
+          face_type is True, then faces are returned as both quads and triangles
+          (4 3D points). For triangles, the third and fourth vertex will be
+          identical. If face_type is False, then faces are returned as only
+          triangles(3 3D points). Quads will be converted to triangles.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        rc = []
+        for i in xrange(mesh.Faces.Count):
+            getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            p0 = Rhino.Geometry.Point3d(p0)
+            p1 = Rhino.Geometry.Point3d(p1)
+            p2 = Rhino.Geometry.Point3d(p2)
+            p3 = Rhino.Geometry.Point3d(p3)
+            rc.append( p0 )
+            rc.append( p1 )
+            rc.append( p2 )
+            if face_type:
+                rc.append(p3)
+            else:
+                if p2!=p3:
+                    rc.append( p2 )
+                    rc.append( p3 )
+                    rc.append( p0 )
+        return rc
+    *)
+
+
+    ///<summary>Returns the vertex indices of all faces of a Ngon mesh object</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(ResizeArray<ResizeArray<int>) containing a nested List that define the vertex indices for
+    ///  each face of the mesh. Ngons, quad and triangle faces are returned.</returns>
+    static member MeshNgonFaceVertices(objectId:Guid) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let rc = ResizeArray()
+        for ng in mesh.GetNgonAndFacesEnumerable() do            
+            let uixs = ng.BoundaryVertexIndexList()
+            let ixs= ResizeArray()
+            for ix in uixs do
+                ixs.Add(int(ix))
+            rc.Add(ixs)
+        rc
+
+
+    [<EXT>]
+    ///<summary>Returns the vertex indices of all faces of a mesh object</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(ResizeArray<int*int*int*int>) containing tuples of 4 numbers that define the vertex indices for
+    ///  each face of the mesh. Both quad and triangle faces are returned. If the
+    ///  third and fourth vertex indices are identical, the face is a triangle.</returns>
+    static member MeshFaceVertices(objectId:Guid) : ResizeArray<int*int*int*int> =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let rc = ResizeArray()
+        for i in range(mesh.Faces.Count) do
+            let face = mesh.Faces.GetFace(i)
+            rc.Add( (face.A, face.B, face.C, face.D) ) //TODO add ngon support
+        rc
+    (*
+    def MeshFaceVertices(object_id):
+        '''Returns the vertex indices of all faces of a mesh object
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          list((number, number, number, number), ...): containing tuples of 4 numbers that define the vertex indices for
+          each face of the mesh. Both quad and triangle faces are returned. If the
+          third and fourth vertex indices are identical, the face is a triangle.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        rc = []
+        for i in xrange(mesh.Faces.Count):
+            face = mesh.Faces.GetFace(i)
+            rc.append( (face.A, face.B, face.C, face.D) )
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a mesh object has face normals</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member MeshHasFaceNormals(objectId:Guid) : bool =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.FaceNormals.Count>0
+    (*
+    def MeshHasFaceNormals(object_id):
+        '''Verifies a mesh object has face normals
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.FaceNormals.Count>0
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a mesh object has texture coordinates</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member MeshHasTextureCoordinates(objectId:Guid) : bool =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.TextureCoordinates.Count>0
+    (*
+    def MeshHasTextureCoordinates(object_id):
+        '''Verifies a mesh object has texture coordinates
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.TextureCoordinates.Count>0
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a mesh object has vertex colors</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member MeshHasVertexColors(objectId:Guid) : bool =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.VertexColors.Count>0
+    (*
+    def MeshHasVertexColors(object_id):
+        '''Verifies a mesh object has vertex colors
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.VertexColors.Count>0
     *)
 
 

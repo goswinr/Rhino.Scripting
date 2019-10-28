@@ -23,10 +23,20 @@
  An Integer Enum of Object types to be use in object selection functions
 </summary>
 </member>
+<member name="M:Rhino.Scripting.RhinoScriptSyntax.TryCoerceSurface(System.Guid)">
+<summary>attempt to get Surface class from given Guid</summary>
+<param name="objectId">Surface identifier (Guid)</param>
+<returns>Rhino.Geometry.Mesh Option. </returns>
+</member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.TryCoerceRhinoObject(System.Guid)">
 <summary>attempt to get RhinoObject from the document with a given objectId</summary>
 <param name="objectId">object identifier (Guid or string)</param>
 <returns>a RhinoObject Option</returns>
+</member>
+<member name="M:Rhino.Scripting.RhinoScriptSyntax.TryCoerceMesh(System.Guid)">
+<summary>attempt to get Mesh class from given Guid</summary>
+<param name="objectId">Mesh identifier (Guid)</param>
+<returns>Rhino.Geometry.Surface Option. </returns>
 </member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.TryCoerceGuid``1(``0)">
 <summary>attempt to get a Guids from input</summary>
@@ -171,11 +181,6 @@ this last or stop value will NOT be included in range as per python semanticsis,
 <param name="objectId">(guid): objectId of Hatch object</param> 
 <returns>a Geometry.CoerceHatch. Fails on bad input.</returns>
 </member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.CoerceGuidList``1(``0)">
-<summary>attempt to get a Sequence of Guids from input</summary>
-<param name="ids">list of guids</param>
-<returns>Guid seq. Fails on bad input</returns>
-</member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.CoerceGuid``1(``0)">
 <summary>attempt to get a Guids from input</summary>
 <param name="objectId">objcts , guid or string</param>
@@ -218,20 +223,10 @@ this last or stop value will NOT be included in range as per python semanticsis,
 <param name="vector">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>    
 <returns>a Rhino.Geometry.Vector3d. Fails on bad input</returns>
 </member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.Coerce3dPointList``2(``0)">
-<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
-<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
-<returns>Rhino.Geometry.Point3d seq. Fails on bad input</returns>
-</member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.Coerce3dPoint``1(``0)">
 <summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>
 <param name="pt">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
 <returns>a Rhino.Geometry.Point3d. Fails on bad input</returns>
-</member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.Coerce2dPointList``2(``0)">
-<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
-<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
-<returns>Rhino.Geometry.Point2d seq. Fails on bad input</returns>
 </member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.Coerce2dPoint``1(``0)">
 <summary>Convert input into a Rhino.Geometry.Point2d if possible.</summary>
@@ -766,6 +761,11 @@ Get first element of triple (tuple of three element)
  set NiceString.toNiceStringMaxDepth to change how deep nested lists are printed (default is 2)
 </summary>
 </member>
+<member name="M:Rhino.Scripting.NiceString.vector3fToString(Rhino.Geometry.Vector3f)">
+<summary>
+Like the ToString function but with appropiate precision formating       
+</summary>
+</member>
 <member name="M:Rhino.Scripting.NiceString.vector3dToString(Rhino.Geometry.Vector3d)">
 <summary>
 Like the ToString function but with appropiate precision formating       
@@ -968,6 +968,11 @@ Allows for negtive slice index too ( -1 = last element), returns a shallow copy 
 <member name="P:Rhino.Scripting.OptionBuilder.maybe">
 <summary>
  A maybe monad. 
+</summary>
+</member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3f.get_ToNiceString(Rhino.Geometry.Vector3f)">
+<summary>
+Like the ToString function but with appropiate precision formating
 </summary>
 </member>
 <member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_ToNiceString(Rhino.Geometry.Vector3d)">
@@ -4964,137 +4969,6 @@ Width of the light</param>
 <param name="layer">(string) Name of an existing layer.</param>
 <returns>(float) Material index of the layer</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.UnifyMeshNormals.Static(System.Guid)">
-<summary>Fixes inconsistencies in the directions of faces of a mesh</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(float) the number of faces that were modified</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.SplitDisjointMesh.Static(System.Guid,System.Boolean)">
-<summary>Splits up a mesh into its unconnected pieces</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-Delete the input object</param>
-<returns>(Guid seq) identifiers for the new meshes</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.PullCurveToMesh.Static(System.Guid,System.Guid)">
-<summary>Pulls a curve to a mesh. The function makes a polyline approximation of
-  the input curve and gets the closest point on the mesh for each point on
-  the polyline. Then it "connects the points" to create a polyline on the mesh</summary>
-<param name="meshId">(Guid) Identifier of mesh that pulls</param>
-<param name="curveId">(Guid) Identifier of curve to pull</param>
-<returns>(Guid) identifier new curve on success</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVolumeCentroid.Static(System.Guid)">
-<summary>Calculates the volume centroid of a mesh</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(Point3d) Point3d representing the volume centroid</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVolume.Static(System.Collections.Generic.IEnumerable{System.Guid})">
-<summary>Returns the approximate volume of one or more closed meshes</summary>
-<param name="objectIds">(Guid seq) Identifiers of one or more mesh objects</param>
-<returns>(float * float * float) containing 3 velues  where
-  [0] = number of meshes used in volume calculation
-  [1] = total volume of all meshes
-  [2] = the error estimate</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertices.Static(System.Guid)">
-<summary>Returns the vertices of a mesh</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(Point3d seq) vertex points in the mesh</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexNormals.Static(System.Guid)">
-<summary>Returns the vertex unit normal for each vertex of a mesh</summary>
-<param name="meshId">(Guid) Identifier of a mesh object</param>
-<returns>(Vector3d seq) of vertex normals, (empty list if no normals exist)</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexFaces.Static(System.Guid,System.Int32)">
-<summary>Returns the mesh faces that share a specified mesh vertex</summary>
-<param name="meshId">(Guid) Identifier of a mesh object</param>
-<param name="vertexIndex">(int) Index of the mesh vertex to find faces for</param>
-<returns>(float seq) face indices on success</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexCount.Static(System.Guid)">
-<summary>Returns the vertex count of a mesh</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(int) The number of mesh vertices .</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexColors.Static(System.Guid,System.Collections.Generic.IEnumerable{System.Drawing.Color})">
-<summary>Modifies vertex colors of a mesh</summary>
-<param name="meshId">(Guid) Identifier of a mesh object</param>
-<param name="colors">(Drawing.Color seq), optional) A list of color values. Note, for each vertex, there must
-  be a corresponding vertex color. If the value is None, then any
-  existing vertex colors will be removed from the mesh</param>
-<returns>(unit) void, nothing</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexColors.Static(System.Guid)">
-<summary>Returns vertex colors of a mesh</summary>
-<param name="meshId">(Guid) Identifier of a mesh object</param>
-<returns>(Drawing.Color) The current vertex colors</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshTriangleCount.Static(System.Guid)">
-<summary>Returns number of triangular faces of a mesh</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(int) The number of triangular mesh faces</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshToNurb.Static(System.Guid,System.Boolean,System.Boolean)">
-<summary>Duplicates each polygon in a mesh with a NURBS surface. The resulting
-  surfaces are then joined into a polysurface and added to the document</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<param name="trimmedTriangles">(bool) Optional, Default Value: <c>true</c>
-If True, triangles in the mesh will be
-  represented by a trimmed plane</param>
-<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-Delete input object</param>
-<returns>(Guid seq) identifiers for the new breps on success</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshQuadsToTriangles.Static(System.Guid)">
-<summary>Converts a mesh object's quad faces to triangles</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(bool) True or False indicating success or failure</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshQuadCount.Static(System.Guid)">
-<summary>Returns the number of quad faces of a mesh object</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(int) the number of quad mesh faces</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshOutline.Static(System.Collections.Generic.IEnumerable{System.Guid},System.String)">
-<summary>Creates polyline curve outlines of mesh objects</summary>
-<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
-<param name="view">(string) Optional, Default Value: <c>null:string</c>
-View to use for outline direction</param>
-<returns>(Guid seq) polyline curve identifiers on success</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshOffset.Static(System.Guid,System.Double)">
-<summary>Makes a new mesh with vertices offset at a distance in the opposite
-  direction of the existing vertex normals</summary>
-<param name="meshId">(Guid) Identifier of a mesh object</param>
-<param name="distance">(float) The distance to offset</param>
-<returns>(Guid) identifier of the new mesh object</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshNakedEdgePoints.Static(System.Guid)">
-<summary>Identifies the naked edge points of a mesh object. This function shows
-  where mesh vertices are not completely surrounded by faces. Joined
-  meshes, such as are made by MeshBox, have naked mesh edge points where
-  the sub-meshes are joined</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(bool seq) of boolean values that represent whether or not a mesh vertex is
-  naked or not. The number of elements in the list will be equal to
-  the value returned by MeshVertexCount. In which case, the list will
-  identify the naked status for each vertex returned by MeshVertices</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshMeshIntersection.Static(System.Guid,System.Guid,System.Double)">
-<summary>Calculates the intersections of a mesh object with another mesh object</summary>
-<param name="mesh1">(Guid) Mesh1 of 'identifiers of meshes' (FIXME 0)</param>
-<param name="mesh2">(Guid) Mesh2 of 'identifiers of meshes' (FIXME 0)</param>
-<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-The intersection tolerance</param>
-<returns>(Point3d seq) of points that define the vertices of the intersection curves</returns>
-</member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshHasVertexNormals.Static(System.Guid)">
-<summary>Verifies a mesh object has vertex normals</summary>
-<param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(bool) True , otherwise False.</returns>
-</member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshHasVertexColors.Static(System.Guid)">
 <summary>Verifies a mesh object has vertex colors</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
@@ -5113,17 +4987,23 @@ The intersection tolerance</param>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshFaceVertices.Static(System.Guid)">
 <summary>Returns the vertex indices of all faces of a mesh object</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(float seq) containing tuples of 4 numbers that define the vertex indices for
+<returns>(ResizeArray<int*int*int*int>) containing tuples of 4 numbers that define the vertex indices for
   each face of the mesh. Both quad and triangle faces are returned. If the
   third and fourth vertex indices are identical, the face is a triangle.</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshNgonFaceVertices.Static(System.Guid)">
+<summary>Returns the vertex indices of all faces of a Ngon mesh object</summary>
+<param name="objectId">(Guid) Identifier of a mesh object</param>
+<returns>(ResizeArray<ResizeArray<int>) containing a nested List that define the vertex indices for
+  each face of the mesh. Ngons, quad and triangle faces are returned.</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshFaces.Static(System.Guid,System.Boolean)">
 <summary>Returns face vertices of a mesh</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
 <param name="faceType">(bool) Optional, Default Value: <c>true</c>
 The face type to be returned. True = both triangles
-  and quads. False = only triangles</param>
-<returns>(Point3d seq) 3D points that define the face vertices of the mesh. If
+  and quads. False = Quads are broken down into triangles</param>
+<returns>(Point3d ResizeArray) 3D points that define the face vertices of the mesh. If
   face_type is True, then faces are returned as both quads and triangles
   (4 3D points). For triangles, the third and fourth vertex will be
   identical. If face_type is False, then faces are returned as only
@@ -5132,7 +5012,7 @@ The face type to be returned. True = both triangles
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshFaceNormals.Static(System.Guid)">
 <summary>Returns the face unit normal for each face of a mesh object</summary>
 <param name="meshId">(Guid) Identifier of a mesh object</param>
-<returns>(Vector3d seq) 3D vectors that define the face unit normals of the mesh</returns>
+<returns>(Vector3d ResizeArray) 3D vectors that define the face unit normals of the mesh</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshFaceCount.Static(System.Guid)">
 <summary>Returns total face count of a mesh object</summary>
@@ -5142,14 +5022,13 @@ The face type to be returned. True = both triangles
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshFaceCenters.Static(System.Guid)">
 <summary>Returns the center of each face of the mesh object</summary>
 <param name="meshId">(Guid) Identifier of a mesh object</param>
-<returns>(Point3d seq) points defining the center of each face</returns>
+<returns>(Point3d ResizeArray) points defining the center of each face</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshClosestPoint.Static(System.Guid,Rhino.Geometry.Point3d,System.Double)">
 <summary>Returns the point on a mesh that is closest to a test point</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
 <param name="point">(Point3d) Point to test</param>
-<param name="maximumDistance">(float) Optional, Default Value: <c>7e89</c>
-Upper bound used for closest point calculation.
+<param name="maximumDistance">(float) Optional, Upper bound used for closest point calculation.
   If you are only interested in finding a point Q on the mesh when
   point.DistanceTo(Q) < maximumDistance, then set maximumDistance to
   that value</param>
@@ -5162,46 +5041,41 @@ Upper bound used for closest point calculation.
 <param name="meshIds">(Guid seq) Identifiers of meshes</param>
 <param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
 Delete the input meshes</param>
-<returns>(Guid seq) identifiers of new meshes</returns>
+<returns>(Guid ResizeArray) identifiers of new meshes</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshBooleanSplit.Static(System.Guid,System.Guid,System.Boolean)">
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshBooleanSplit.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Collections.Generic.IEnumerable{System.Guid},System.Boolean)">
 <summary>Performs boolean split operation on two sets of input meshes</summary>
-<param name="input0">(Guid) Input0 of 'identifiers of meshes' (FIXME 0)</param>
-<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
+<param name="input0">(Guid seq) Meshes to split from </param>
+<param name="input1">(Guid seq) Meshes to split with</param>
 <param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
 Delete the input meshes</param>
-<returns>(Guid seq) identifiers of new meshes on success</returns>
+<returns>(Guid ResizeArray) identifiers of new meshes on success</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshBooleanIntersection.Static(System.Guid,System.Guid,System.Boolean)">
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshBooleanIntersection.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Collections.Generic.IEnumerable{System.Guid},System.Boolean)">
 <summary>Performs boolean intersection operation on two sets of input meshes</summary>
-<param name="input0">(Guid) Input0 of 'identifiers of meshes' (FIXME 0)</param>
-<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
+<param name="input0">(Guid seq) Meshes to intersect </param>
+<param name="input1">(Guid seq) Meshes to intersect</param>
 <param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
 Delete the input meshes</param>
-<returns>(Guid seq) identifiers of new meshes on success</returns>
+<returns>(Guid ResizeArray) identifiers of new meshes on success</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshBooleanDifference.Static(System.Guid,System.Guid,System.Boolean,System.Double)">
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshBooleanDifference.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Collections.Generic.IEnumerable{System.Guid},System.Boolean)">
 <summary>Performs boolean difference operation on two sets of input meshes</summary>
-<param name="input0">(Guid) Input0 of 'identifiers of meshes' (FIXME 0)</param>
-<param name="input1">(Guid) Input1 of 'identifiers of meshes' (FIXME 0)</param>
+<param name="input0">(Guid seq) Meshes to subtract from </param>
+<param name="input1">(Guid seq) Meshes to subtract with</param>
 <param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
-Delete the input meshes</param>
-<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-A positive tolerance value, or None to use the default of the document.</param>
-<returns>(Guid seq) identifiers of newly created meshes</returns>
+Delete the input meshes</param>   
+<returns>(Guid ResizeArray) identifiers of newly created meshes</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshAreaCentroid.Static(System.Guid)">
 <summary>Calculates the area centroid of a mesh object</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
 <returns>(Point3d) representing the area centroid</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshArea.Static(System.Collections.Generic.IEnumerable{System.Guid})">
-<summary>Returns approximate area of one or more mesh objects</summary>
-<param name="objectIds">(Guid seq) Identifiers of one or more mesh objects</param>
-<returns>(float * float * float)   where
-    [0] = number of meshes used in calculation
-    [1] = total area of all meshes
-    [2] = the error estimate</returns>
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshArea.Static(System.Guid)">
+<summary>Returns approximate area of onemesh object</summary>
+<param name="objectId">(Guid seq) Identifiers of one or more mesh objects</param>
+<returns>(float) total area of mesh</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.JoinMeshes.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Boolean)">
 <summary>Joins two or or more mesh objects together</summary>
@@ -5210,10 +5084,12 @@ A positive tolerance value, or None to use the default of the document.</param>
 Delete input after joining</param>
 <returns>(Guid) identifier of newly created mesh on success</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.IsPointOnMesh.Static(System.Guid,Rhino.Geometry.Point3d)">
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.IsPointOnMesh.Static(System.Guid,Rhino.Geometry.Point3d,System.Double)">
 <summary>Verifies a point is on a mesh</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
 <param name="point">(Point3d) Test point</param>
+<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
+  The testing tolerance /param>
 <returns>(bool) True , otherwise False.</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.IsMeshManifold.Static(System.Guid)">
@@ -5221,7 +5097,7 @@ Delete input after joining</param>
   by at most two faces is called manifold. If a mesh has at least one edge
   that is shared by more than two faces, then that mesh is called non-manifold</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(bool) True , otherwise False.</returns>
+<returns>(bool) True, otherwise False.</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.IsMeshClosed.Static(System.Guid)">
 <summary>Verifies a mesh object is closed</summary>
@@ -5242,28 +5118,23 @@ Delete input after joining</param>
 <param name="meshIds">(Guid seq) List of mesh identifiers</param>
 <param name="delete">(bool) Optional, Default Value: <c>false</c>
 Delete the input meshes</param>
-<returns>(Guid seq) List of resulting objects after explode.</returns>
+<returns>(Guid ResizeArray) List of resulting objects after explode.</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.DuplicateMeshBorder.Static(System.Guid)">
 <summary>Creates curves that duplicates a mesh border</summary>
 <param name="meshId">(Guid) Identifier of a mesh object</param>
-<returns>(Guid seq) list of curve ids on success</returns>
+<returns>(Guid ResizeArray) list of curve ids on success</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.DisjointMeshCount.Static(System.Guid)">
 <summary>Returns number of meshes that could be created by calling SplitDisjointMesh</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
 <returns>(int) The number of meshes that could be created</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.CurveMeshIntersection.Static(System.Guid,System.Guid,System.Boolean)">
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.CurveMeshIntersection.Static(System.Guid,System.Guid)">
 <summary>Calculates the intersection of a curve object and a mesh object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="meshId">(Guid) Identifier or a mesh object</param>
-<param name="returnFaces">(bool) Optional, Default Value: <c>false</c>
-Return both intersection points and face indices.
-  If False, then just the intersection points are returned</param>
-<returns>(Point3d seq) if return_false is omitted or False, then a list of intersection points
-  list([point, number], ...): if return_false is True, the a one-dimensional list containing information
-    about each intersection. Each element contains the following two elements
+<returns>(array<Point3d>*array<int>) two arrays as tuple:
       [0] = point of intersection
       [1] = mesh face index where intersection lies</returns>
 </member>
@@ -5272,23 +5143,20 @@ Return both intersection points and face indices.
 <param name="objectId">(Guid) Identifier of a closed, planar curve</param>
 <param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
 If True, delete the input curve defined by objectId</param>
-<returns>(Guid) objectId of the new mesh on success</returns>
+<returns>(Guid) id of the new mesh on success</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.AddMesh.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Double},System.Collections.Generic.IEnumerable{Rhino.Geometry.Vector3d},System.Collections.Generic.IEnumerable{System.Double},System.Collections.Generic.IEnumerable{System.Drawing.Color})">
+<member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.AddMesh.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Collections.Generic.IList{System.Int32}},System.Collections.Generic.IEnumerable{Rhino.Geometry.Vector3f},System.Collections.Generic.IEnumerable{Rhino.Geometry.Point2f},System.Collections.Generic.IEnumerable{System.Drawing.Color})">
 <summary>Add a mesh object to the document</summary>
 <param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
-<param name="faceVertices">(float seq) List containing lists of 3 or 4 numbers that define the
+<param name="faceVertices">(seq<IList<int>>) List containing lists of 3 or 4 numbers that define the
   vertex indices for each face of the mesh. If the third a fourth vertex
     indices of a face are identical, a triangular face will be created.</param>
-<param name="vertexNormals">(Vector3d seq) Optional, Default Value: <c>null:Vector3d seq</c>
-List of 3D vectors defining the vertex normals of
+<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
   the mesh. Note, for every vertex, there must be a corresponding vertex
   normal</param>
-<param name="textureCoordinates">(float seq) Optional, Default Value: <c>null:float seq</c>
-List of 2D texture coordinates. For every
+<param name="textureCoordinates">(Point2f seq) Optional,List of 2D texture coordinates. For every
   vertex, there must be a corresponding texture coordinate</param>
-<param name="vertexColors">(Drawing.Color seq) Optional, Default Value: <c>null:Drawing.Color seq</c>
-A list of color values. For every vertex,
+<param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
   there must be a corresponding vertex color</param>
 <returns>(Guid) Identifier of the new object</returns>
 </member>
