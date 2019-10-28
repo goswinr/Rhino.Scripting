@@ -251,19 +251,19 @@ type RhinoScriptSyntax private () = // no constructor?
             with _ -> failwithf "Coerce3dVector: could not Coerce: Could not convert %A to a Vector3d" vector
         
             
-    ///<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
-    ///<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
-    ///<returns>Rhino.Geometry.Point3d seq. Fails on bad input</returns>
-    static member Coerce3dPointList(points:'T) : Point3d seq=
-        try Seq.map RhinoScriptSyntax.Coerce3dPoint points //|> Seq.cache
-        with _ -> failwithf "Coerce3dPointList: could not Coerce: Could not convert %A to a list of 3d points"  points
+    //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
+    //<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
+    //<returns>Rhino.Geometry.Point3d seq. Fails on bad input</returns>
+    //static member Coerce3dPointList(points:'T) : Point3d seq=
+    //    try Seq.map RhinoScriptSyntax.Coerce3dPoint points //|> Seq.cache
+    //    with _ -> failwithf "Coerce3dPointList: could not Coerce: Could not convert %A to a list of 3d points"  points
         
-    ///<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
-    ///<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
-    ///<returns>Rhino.Geometry.Point2d seq. Fails on bad input</returns>
-    static member Coerce2dPointList(points:'T) : Point2d seq=
-        try Seq.map RhinoScriptSyntax.Coerce2dPoint points //|> Seq.cache
-        with _ -> failwithf "Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
+    //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible.</summary>
+    //<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, guid, or seq </param>
+    //<returns>Rhino.Geometry.Point2d seq. Fails on bad input</returns>
+    //static member Coerce2dPointList(points:'T) : Point2d seq=
+    //    try Seq.map RhinoScriptSyntax.Coerce2dPoint points //|> Seq.cache
+    //    with _ -> failwithf "Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
 
     ///<summary>Convert input into a Rhino.Geometry.Plane if possible.</summary>
     ///<param name="plane">Plane,point, list, tuple</param>
@@ -304,18 +304,18 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? DocObjects.ObjRef      as o -> o.ObjectId
         | _ -> failwithf "CoerceGuid: could not CoerceGuid:%A can not be converted to a Guid" objectId
 
-    ///<summary>attempt to get a Sequence of Guids from input</summary>
-    ///<param name="ids">list of guids</param>
-    ///<returns>Guid seq. Fails on bad input</returns>
-    static member CoerceGuidList(ids:'T):seq<Guid> =
-        match box ids with
-        | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
-        | :? seq<obj> as gs -> 
-                            try    
-                                gs |> Seq.map RhinoScriptSyntax.CoerceGuid
-                            with _ -> 
-                                failwithf ": could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
-        | _ -> failwithf "CoerceGuidList: could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
+    //<summary>attempt to get a Sequence of Guids from input</summary>
+    //<param name="ids">list of guids</param>
+    //<returns>Guid seq. Fails on bad input</returns>
+    //static member CoerceGuidList(ids:'T):seq<Guid> =
+    //    match box ids with
+    //    | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
+    //    | :? seq<obj> as gs -> 
+    //                        try    
+    //                            gs |> Seq.map RhinoScriptSyntax.CoerceGuid
+    //                        with _ -> 
+    //                            failwithf ": could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
+    //    | _ -> failwithf "CoerceGuidList: could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" ids
     
    
     ///<summary>attempt to get a System.Drawing.Color also works on natrural language color strings see Drawing.ColorTranslator.FromHtml </summary>
@@ -585,6 +585,36 @@ type RhinoScriptSyntax private () = // no constructor?
             match Doc.Objects.FindId(objectId) with 
             | null -> None
             | o -> Some o.Geometry 
+
+
+    ///<summary>attempt to get Mesh class from given Guid</summary>
+    ///<param name="objectId">Mesh identifier (Guid)</param>
+    ///<returns>Rhino.Geometry.Surface Option. </returns>
+    static member TryCoerceMesh (objectId:Guid) :Mesh option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> 
+                match o.Geometry with 
+                | :? Mesh as m -> Some m
+                | _ -> None
+
+    ///<summary>attempt to get Surface class from given Guid</summary>
+    ///<param name="objectId">Surface identifier (Guid)</param>
+    ///<returns>Rhino.Geometry.Mesh Option. </returns>
+    static member TryCoerceSurface (objectId:Guid) :Surface option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> 
+                match o.Geometry with          
+                | :? Surface as c -> Some c
+                | :? Brep as b -> 
+                    if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
+                    else None
+                | _ -> None
 
 
     ///<summary>attempt to get curve geometry from the document with a given objectId.</summary>

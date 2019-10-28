@@ -131,7 +131,8 @@ module ExtensionsMesh =
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
         if isNull mesh then failwithf "Rhino.Scripting: AddPlanarMesh failed.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         if deleteInput then 
-            if not<| Doc.Objects.Delete(RhinoScriptSyntax.CoerceGuid(objectId),true)then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+            let ob = RhinoScriptSyntax.CoerceGuid(objectId)
+            if not<| Doc.Objects.Delete(ob,true)then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         let rc = Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         Doc.Views.Redraw()
@@ -157,6 +158,555 @@ module ExtensionsMesh =
         else:
             rc = scriptcontext.doc.Objects.AddMesh(mesh)
         if rc==System.Guid.Empty: raise Exception("unable to add mesh to document")
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates the intersection of a curve object and a mesh object</summary>
+    ///<param name="curveId">(Guid) Identifier of a curve object</param>
+    ///<param name="meshId">(Guid) Identifier or a mesh object</param>
+    ///<returns>(array<Point3d>*array<int>) two arrays as tuple:
+    ///      [0] = point of intersection
+    ///      [1] = mesh face index where intersection lies</returns>
+    static member CurveMeshIntersection( curveId:Guid, 
+                                         meshId:Guid) : array<Point3d>*array<int> =
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        let tolerance = Doc.ModelAbsoluteTolerance
+        let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
+        let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
+        if isNull pts then failwithf "Rhino.Scripting: CurveMeshIntersection failed.  curveId:'%A' meshId:'%A' " curveId meshId         
+        pts, faceids
+    (*
+    def CurveMeshIntersection(curve_id, mesh_id, return_faces=False):
+        '''Calculates the intersection of a curve object and a mesh object
+        Parameters:
+          curve_id (guid): identifier of a curve object
+          mesh_id (guid): identifier or a mesh object
+          return_faces (bool, optional): return both intersection points and face indices.
+            If False, then just the intersection points are returned
+        Returns:
+          list(point, ...): if return_false is omitted or False, then a list of intersection points
+            list([point, number], ...): if return_false is True, the a one-dimensional list containing information
+              about each intersection. Each element contains the following two elements
+                [0] = point of intersection
+                [1] = mesh face index where intersection lies
+          None: on error
+        '''
+    
+        curve = rhutil.coercecurve(curve_id, -1, True)
+        mesh = rhutil.coercemesh(mesh_id, True)
+        tolerance = scriptcontext.doc.ModelAbsoluteTolerance
+        polylinecurve = curve.ToPolyline(0,0,0,0,0.0,tolerance,0.0,0.0,True)
+        pts, faceids = Rhino.Geometry.Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
+        if not pts: return scriptcontext.errorhandler()
+        pts = list(pts)
+        if return_faces:
+            faceids = list(faceids)
+            return zip(pts, faceids)
+        return pts
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns number of meshes that could be created by calling SplitDisjointMesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(int) The number of meshes that could be created</returns>
+    static member DisjointMeshCount(objectId:Guid) : int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.DisjointMeshCount
+    (*
+    def DisjointMeshCount(object_id):
+        '''Returns number of meshes that could be created by calling SplitDisjointMesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          number: The number of meshes that could be created
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.DisjointMeshCount
+    *)
+
+
+    [<EXT>]
+    ///<summary>Creates curves that duplicates a mesh border</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Guid ResizeArray) list of curve ids on success</returns>
+    static member DuplicateMeshBorder(meshId:Guid) : Guid ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        let polylines = mesh.GetNakedEdges()
+        let rc = ResizeArray()
+        if notNull polylines then
+            for polyline in polylines do
+                let objectId = Doc.Objects.AddPolyline(polyline)
+                if objectId <> Guid.Empty then rc.Add(objectId)
+        if rc.Count <> 0 then Doc.Views.Redraw()
+        rc
+    (*
+    def DuplicateMeshBorder(mesh_id):
+        '''Creates curves that duplicates a mesh border
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+        Returns:
+          list(guid, ...): list of curve ids on success
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        polylines = mesh.GetNakedEdges()
+        rc = []
+        if polylines:
+            for polyline in polylines:
+                id = scriptcontext.doc.Objects.AddPolyline(polyline)
+                if id!=System.Guid.Empty: rc.append(id)
+        if rc: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Explodes a mesh object, or mesh objects int submeshes. A submesh is a
+    ///  collection of mesh faces that are contained within a closed loop of
+    ///  unwelded mesh edges. Unwelded mesh edges are where the mesh faces that
+    ///  share the edge have unique mesh vertices (not mesh topology vertices)
+    ///  at both ends of the edge</summary>
+    ///<param name="meshIds">(Guid seq) List of mesh identifiers</param>
+    ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
+    ///Delete the input meshes</param>
+    ///<returns>(Guid ResizeArray) List of resulting objects after explode.</returns>
+    static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
+        //id = RhinoScriptSyntax.Coerceguid(meshIds)        
+        let rc = ResizeArray()
+        for meshid in meshIds do
+            let mesh = RhinoScriptSyntax.CoerceMesh(meshid)
+            if notNull mesh then
+                let submeshes = mesh.ExplodeAtUnweldedEdges()
+                if notNull submeshes then
+                    for submesh in submeshes do
+                        let objectId = Doc.Objects.AddMesh(submesh)
+                        if objectId <> Guid.Empty then rc.Add(objectId)
+                if delete then
+                    Doc.Objects.Delete(meshid, true)|> ignore
+        if rc.Count>0 then Doc.Views.Redraw()
+        rc
+    (*
+    def ExplodeMeshes(mesh_ids, delete=False):
+        '''Explodes a mesh object, or mesh objects int submeshes. A submesh is a
+        collection of mesh faces that are contained within a closed loop of
+        unwelded mesh edges. Unwelded mesh edges are where the mesh faces that
+        share the edge have unique mesh vertices (not mesh topology vertices)
+        at both ends of the edge
+        Parameters:
+          mesh_ids ([guid, ...]): list of mesh identifiers
+          delete (bool, optional): delete the input meshes
+        Returns:
+          list(guid, ...): List of resulting objects after explode.
+        '''
+    
+        id = rhutil.coerceguid(mesh_ids)
+        if id: mesh_ids = [mesh_ids]
+        rc = []
+        for mesh_id in mesh_ids:
+            mesh = rhutil.coercemesh(mesh_id, True)
+            if mesh:
+                submeshes = mesh.ExplodeAtUnweldedEdges()
+                if submeshes:
+                    for submesh in submeshes:
+                        id = scriptcontext.doc.Objects.AddMesh(submesh)
+                        if id!=System.Guid.Empty: rc.append(id)
+                if delete:
+                    scriptcontext.doc.Objects.Delete(mesh_id, True)
+    
+        if rc: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies if an object is a mesh</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsMesh(objectId:Guid) : bool =
+        RhinoScriptSyntax.TryCoerceMesh(objectId)
+        |> Option.isSome
+    (*
+    def IsMesh(object_id):
+        '''Verifies if an object is a mesh
+        Parameters:
+          object_id (guid): the object's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        mesh = rhutil.coercemesh(object_id)
+        return mesh is not None
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a mesh object is closed</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member IsMeshClosed(objectId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceMesh(objectId) with 
+        | Some mesh -> mesh.IsClosed
+        | None -> false
+    (*
+    def IsMeshClosed(object_id):
+        '''Verifies a mesh object is closed
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.IsClosed
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a mesh object is manifold. A mesh for which every edge is shared
+    ///  by at most two faces is called manifold. If a mesh has at least one edge
+    ///  that is shared by more than two faces, then that mesh is called non-manifold</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True, otherwise False.</returns>
+    static member IsMeshManifold(objectId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceMesh(objectId) with 
+        | Some mesh -> mesh.IsManifold(true)  |> t1
+        | None -> false
+
+    (*
+    def IsMeshManifold(object_id):
+        '''Verifies a mesh object is manifold. A mesh for which every edge is shared
+        by at most two faces is called manifold. If a mesh has at least one edge
+        that is shared by more than two faces, then that mesh is called non-manifold
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        rc = mesh.IsManifold(True)
+        return rc[0]
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a point is on a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<param name="point">(Point3d) Test point</param>
+    ///<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
+    ///  The testing tolerance /param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member IsPointOnMesh(    objectId:Guid, 
+                                    point:Point3d,
+                                    [<OPT;DEF(0.0)>]tolerance:float): bool =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        //point = RhinoScriptSyntax.Coerce3dpoint(point)
+        let maxdistance = max tolerance Rhino.RhinoMath.SqrtEpsilon
+        let pt = ref Point3d.Origin
+        let face = mesh.ClosestPoint(point,pt, maxdistance)
+        face>=0
+    (*
+    def IsPointOnMesh(object_id, point):
+        '''Verifies a point is on a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+          point (point): test point
+        Returns:
+          bool: True if successful, otherwise False.
+          None: on error.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        point = rhutil.coerce3dpoint(point, True)
+        max_distance = Rhino.RhinoMath.SqrtEpsilon
+        face, pt = mesh.ClosestPoint(point, max_distance)
+        return face>=0
+    *)
+
+
+    [<EXT>]
+    ///<summary>Joins two or or more mesh objects together</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of two or more mesh objects</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete input after joining</param>
+    ///<returns>(Guid) identifier of newly created mesh on success</returns>
+    static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        let meshes =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        let joinedmesh = new Mesh()
+        joinedmesh.Append(meshes)
+        let rc = Doc.Objects.AddMesh(joinedmesh)
+        if deleteInput then
+            for objectId in objectIds do
+                //guid = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Delete(objectId,true) |> ignore
+        Doc.Views.Redraw()
+        rc
+    (*
+    def JoinMeshes(object_ids, delete_input=False):
+        '''Joins two or or more mesh objects together
+        Parameters:
+          object_ids ([guid, ...]): identifiers of two or more mesh objects
+          delete_input (bool, optional): delete input after joining
+        Returns:
+          guid: identifier of newly created mesh on success
+        '''
+    
+        meshes = [rhutil.coercemesh(id,True) for id in object_ids]
+        joined_mesh = Rhino.Geometry.Mesh()
+        joined_mesh.Append(meshes)
+        rc = scriptcontext.doc.Objects.AddMesh(joined_mesh)
+        if delete_input:
+            for id in object_ids:
+                guid = rhutil.coerceguid(id)
+                scriptcontext.doc.Objects.Delete(guid,True)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns approximate area of onemesh object</summary>
+    ///<param name="objectId">(Guid seq) Identifiers of one or more mesh objects</param>
+    ///<returns>(float) total area of mesh</returns>
+    static member MeshArea(objectId:Guid ) :float =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mp = AreaMassProperties.Compute(mesh)
+        if notNull mp then
+            mp.Area
+        else
+            failwithf "Rhino.Scripting: MeshArea failed.  objectId:'%A'" objectId
+        
+    (*
+    def MeshArea(object_ids):
+        '''Returns approximate area of one or more mesh objects
+        Parameters:
+          object_ids ([guid, ...]): identifiers of one or more mesh objects
+        Returns:
+          list(number, number, number): if successful where
+            [0] = number of meshes used in calculation
+            [1] = total area of all meshes
+            [2] = the error estimate
+          None: if not successful
+        '''
+    
+        id = rhutil.coerceguid(object_ids)
+        if id: object_ids = [object_ids]
+        meshes_used = 0
+        total_area = 0.0
+        error_estimate = 0.0
+        for id in object_ids:
+            mesh = rhutil.coercemesh(id, True)
+            if mesh:
+                mp = Rhino.Geometry.AreaMassProperties.Compute(mesh)
+                if mp:
+                    meshes_used += 1
+                    total_area += mp.Area
+                    error_estimate += mp.AreaError
+        if meshes_used==0: return scriptcontext.errorhandler()
+        return meshes_used, total_area, error_estimate
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates the area centroid of a mesh object</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Point3d) representing the area centroid</returns>
+    static member MeshAreaCentroid(objectId:Guid) : Point3d =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mp = AreaMassProperties.Compute(mesh)
+        if mp|> isNull  then failwithf "Rhino.Scripting: MeshAreaCentroid failed.  objectId:'%A'" objectId
+        mp.Centroid
+    (*
+    def MeshAreaCentroid(object_id):
+        '''Calculates the area centroid of a mesh object
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          point: representing the area centroid if successful
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        mp = Rhino.Geometry.AreaMassProperties.Compute(mesh)
+        if mp is None: return scriptcontext.errorhandler()
+        return mp.Centroid
+    *)
+
+
+    [<EXT>]
+    ///<summary>Performs boolean difference operation on two sets of input meshes</summary>
+    ///<param name="input0">(Guid seq) Meshes to subtract from </param>
+    ///<param name="input1">(Guid seq) Meshes to subtract with</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
+    ///Delete the input meshes</param>   
+    ///<returns>(Guid ResizeArray) identifiers of newly created meshes</returns>
+    static member MeshBooleanDifference( input0:Guid seq, 
+                                         input1:Guid seq, 
+                                         [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =        
+        let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput 
+        let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
+        let rc = ResizeArray()
+        for mesh in newmeshes do
+            let objectId = Doc.Objects.AddMesh(mesh)
+            if objectId <> Guid.Empty then rc.Add(objectId)
+        if deleteInput then            
+            for objectId in Seq.append input0 input1 do
+                //id = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Delete(objectId, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+    (*
+    def MeshBooleanDifference(input0, input1, delete_input=True, tolerance=None):
+        '''Performs boolean difference operation on two sets of input meshes
+        Parameters:
+          input0, input1 (guid): identifiers of meshes
+          delete_input (bool, optional): delete the input meshes
+          tolerance (float, optional): a positive tolerance value, or None to use the default of the document.
+        Returns:
+          list(guid, ...): identifiers of newly created meshes
+        '''
+    
+        id = rhutil.coerceguid(input0)
+        if id: input0 = [id]
+        id = rhutil.coerceguid(input1)
+        if id: input1 = [id]
+        meshes0 = [rhutil.coercemesh(id, True) for id in input0]
+        meshes1 = [rhutil.coercemesh(id, True) for id in input1]
+        if not meshes0 or not meshes1: raise ValueError("no meshes to work with")
+        newmeshes = Rhino.Geometry.Mesh.CreateBooleanDifference(meshes0, meshes1)
+        rc = []
+        for mesh in newmeshes:
+            id = scriptcontext.doc.Objects.AddMesh(mesh)
+            if id!=System.Guid.Empty: rc.append(id)
+        if rc and delete_input:
+            input = input0 + input1
+            for id in input:
+                id = rhutil.coerceguid(id, True)
+                scriptcontext.doc.Objects.Delete(id, True)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Performs boolean intersection operation on two sets of input meshes</summary>
+    ///<param name="input0">(Guid seq) Meshes to intersect </param>
+    ///<param name="input1">(Guid seq) Meshes to intersect</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
+    ///Delete the input meshes</param>
+    ///<returns>(Guid ResizeArray) identifiers of new meshes on success</returns>
+    static member MeshBooleanIntersection( input0:Guid seq, 
+                                           input1:Guid seq, 
+                                           [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
+        let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput 
+        let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
+        let rc = ResizeArray()
+        for mesh in newmeshes do
+            let objectId = Doc.Objects.AddMesh(mesh)
+            if objectId <> Guid.Empty then rc.Add(objectId)
+        if deleteInput then            
+            for objectId in Seq.append input0 input1 do
+                //id = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Delete(objectId, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+        
+    (*
+    def MeshBooleanIntersection(input0, input1, delete_input=True):
+        '''Performs boolean intersection operation on two sets of input meshes
+        Parameters:
+          input0, input1 (guid): identifiers of meshes
+          delete_input (bool, optional): delete the input meshes
+        Returns:
+          list(guid, ...): identifiers of new meshes on success
+        '''
+    
+        id = rhutil.coerceguid(input0)
+        if id: input0 = [id]
+        id = rhutil.coerceguid(input1)
+        if id: input1 = [id]
+        meshes0 = [rhutil.coercemesh(id, True) for id in input0]
+        meshes1 = [rhutil.coercemesh(id, True) for id in input1]
+        if not meshes0 or not meshes1: raise ValueError("no meshes to work with")
+        newmeshes = Rhino.Geometry.Mesh.CreateBooleanIntersection(meshes0, meshes1)
+        rc = []
+        for mesh in newmeshes:
+            id = scriptcontext.doc.Objects.AddMesh(mesh)
+            if id!=System.Guid.Empty: rc.append(id)
+        if rc and delete_input:
+            input = input0 + input1
+            for id in input:
+                id = rhutil.coerceguid(id, True)
+                scriptcontext.doc.Objects.Delete(id, True)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Performs boolean split operation on two sets of input meshes</summary>
+    ///<param name="input0">(Guid seq) Meshes to split from </param>
+    ///<param name="input1">(Guid seq) Meshes to split with</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
+    ///Delete the input meshes</param>
+    ///<returns>(Guid ResizeArray) identifiers of new meshes on success</returns>
+    static member MeshBooleanSplit( input0:Guid seq, 
+                                    input1:Guid seq, 
+                                    [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
+        let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' tolerance:'%A'" input0 input1 deleteInput tolerance
+        let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
+        let rc = ResizeArray()
+        for mesh in newmeshes do
+            let objectId = Doc.Objects.AddMesh(mesh)
+            if objectId <> Guid.Empty then rc.Add(objectId)
+        if deleteInput then            
+            for objectId in Seq.append input0 input1 do
+                //id = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Delete(objectId, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+
+    (*
+    def MeshBooleanSplit(input0, input1, delete_input=True):
+        '''Performs boolean split operation on two sets of input meshes
+        Parameters:
+          input0, input1 (guid): identifiers of meshes
+          delete_input (bool, optional): delete the input meshes
+        Returns:
+          list(guid, ...): identifiers of new meshes on success
+          None: on error
+        '''
+    
+        id = rhutil.coerceguid(input0)
+        if id: input0 = [id]
+        id = rhutil.coerceguid(input1)
+        if id: input1 = [id]
+        meshes0 = [rhutil.coercemesh(id, True) for id in input0]
+        meshes1 = [rhutil.coercemesh(id, True) for id in input1]
+        if not meshes0 or not meshes1: raise ValueError("no meshes to work with")
+        newmeshes = Rhino.Geometry.Mesh.CreateBooleanSplit(meshes0, meshes1)
+        rc = []
+        for mesh in newmeshes:
+            id = scriptcontext.doc.Objects.AddMesh(mesh)
+            if id!=System.Guid.Empty: rc.append(id)
+        if rc and delete_input:
+            input = input0 + input1
+            for id in input:
+                id = rhutil.coerceguid(id, True)
+                scriptcontext.doc.Objects.Delete(id, True)
         scriptcontext.doc.Views.Redraw()
         return rc
     *)
