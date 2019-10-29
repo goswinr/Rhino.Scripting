@@ -2,7 +2,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework> 
-    <LangVersion>preview</LangVersion> 
+    <LangVersion>preview</LangVersion>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!--to only have the english resources--> 
     <AssemblyName>Rhino.Scripting</AssemblyName>   
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
