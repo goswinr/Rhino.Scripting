@@ -927,7 +927,7 @@ module ExtensionsCurve =
         else
             rc <- Intersect.Intersection.CurveSelf(curve1, tolerance0)
 
-        if isNull rc then failwithf "curveCurveIntersection faile dor %A %A tolerance %f" curveB curveA tolerance
+        if isNull rc then failwithf "curveCurveIntersection faile dor %A; %A tolerance %f" curveB curveA tolerance
         let events = ResizeArray()
         for i =0 to rc.Count-1 do
             let mutable eventType = 1
@@ -967,7 +967,7 @@ module ExtensionsCurve =
         let curveB = RhinoScriptSyntax.CoerceCurve curveB  
         let tol = Doc.ModelAbsoluteTolerance
         let ok, maxa, maxb, maxd, mina, minb, mind = Curve.GetDistancesBetweenCurves(curveA, curveB, tol)
-        if not ok then  failwithf "curveDeviation failed for %A %A" curveB curveA
+        if not ok then  failwithf "curveDeviation failed for %A; %A" curveB curveA
         else
             maxa, maxb, maxd, mina, minb, mind
 

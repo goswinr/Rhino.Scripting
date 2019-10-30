@@ -462,7 +462,7 @@ module ExtensionsObject =
         let attr = rhobj.Attributes
         attr.ObjectColor <- color
         attr.ColorSource <- Rhino.DocObjects.ObjectColorSource.ColorFromObject
-        if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then failwithf "set ObjectColor faile for %A %A" objectId color
+        if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then failwithf "set ObjectColor faile for %A; %A" objectId color
         Doc.Views.Redraw()
 
 
