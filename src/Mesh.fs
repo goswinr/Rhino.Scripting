@@ -1060,3 +1060,677 @@ module ExtensionsMesh =
     *)
 
 
+    [<EXT>]
+    ///<summary>Verifies a mesh object has vertex normals</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member MeshHasVertexNormals(objectId:Guid) : bool =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.Normals.Count>0
+    (*
+    def MeshHasVertexNormals(object_id):
+        '''Verifies a mesh object has vertex normals
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.Normals.Count>0
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates the intersections of a mesh object with another mesh object</summary>
+    ///<param name="mesh1">(Guid) Mesh1 of 'identifiers of meshes' (FIXME 0)</param>
+    ///<param name="mesh2">(Guid) Mesh2 of 'identifiers of meshes' (FIXME 0)</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///The intersection tolerance</param>
+    ///<returns>(Polyline array) of points that define the vertices of the intersection curves</returns>
+    static member MeshMeshIntersection( mesh1:Guid, 
+                                        mesh2:Guid, 
+                                        [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
+        let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
+        let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
+        let tolerance = max tolerance Rhino.RhinoMath.ZeroTolerance
+        Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+    (*
+    def MeshMeshIntersection(mesh1, mesh2, tolerance=None):
+        '''Calculates the intersections of a mesh object with another mesh object
+        Parameters:
+          mesh1, mesh2 (guid): identifiers of meshes
+          tolerance (number, optional): the intersection tolerance
+        Returns:
+          list(point, ...): of points that define the vertices of the intersection curves
+        '''
+    
+        mesh1 = rhutil.coercemesh(mesh1, True)
+        mesh2 = rhutil.coercemesh(mesh2, True)
+        if tolerance is None: tolerance = Rhino.RhinoMath.ZeroTolerance
+        polylines = Rhino.Geometry.Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
+        if polylines: return list(polylines)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Identifies the naked edge points of a mesh object. This function shows
+    ///  where mesh vertices are not completely surrounded by faces. Joined
+    ///  meshes, such as are made by MeshBox, have naked mesh edge points where
+    ///  the sub-meshes are joined</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool array) of boolean values that represent whether or not a mesh vertex is
+    ///  naked or not. The number of elements in the list will be equal to
+    ///  the value returned by MeshVertexCount. In which case, the list will
+    ///  identify the naked status for each vertex returned by MeshVertices</returns>
+    static member MeshNakedEdgePoints(objectId:Guid) : bool array =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.GetNakedEdgePointStatus()
+        
+    (*
+    def MeshNakedEdgePoints(object_id):
+        '''Identifies the naked edge points of a mesh object. This function shows
+        where mesh vertices are not completely surrounded by faces. Joined
+        meshes, such as are made by MeshBox, have naked mesh edge points where
+        the sub-meshes are joined
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          list(bool, ...): of boolean values that represent whether or not a mesh vertex is
+          naked or not. The number of elements in the list will be equal to
+          the value returned by MeshVertexCount. In which case, the list will
+          identify the naked status for each vertex returned by MeshVertices
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        rc = mesh.GetNakedEdgePointStatus()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Makes a new mesh with vertices offset at a distance in the opposite
+    ///  direction of the existing vertex normals</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<param name="distance">(float) The distance to offset</param>
+    ///<returns>(Guid) identifier of the new mesh object</returns>
+    static member MeshOffset(meshId:Guid, distance:float) : Guid =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        let offsetmesh = mesh.Offset(distance)
+        if offsetmesh|> isNull  then failwithf "Rhino.Scripting: MeshOffset failed.  meshId:'%A' distance:'%A'" meshId distance
+        let rc = Doc.Objects.AddMesh(offsetmesh)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  meshId:'%A' distance:'%A'" meshId distance
+        Doc.Views.Redraw()
+        rc
+    (*
+    def MeshOffset(mesh_id, distance):
+        '''Makes a new mesh with vertices offset at a distance in the opposite
+        direction of the existing vertex normals
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+          distance (number, optional): the distance to offset
+        Returns:
+          guid: identifier of the new mesh object if successful
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        offsetmesh = mesh.Offset(distance)
+        if offsetmesh is None: return scriptcontext.errorhandler()
+        rc = scriptcontext.doc.Objects.AddMesh(offsetmesh)
+        if rc==System.Guid.Empty: raise Exception("unable to add mesh to document")
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Creates polyline curve outlines of mesh objects</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
+    ///<param name="view">(string) Optional, Default Value: <c>Top View</c>
+    ///View to use for outline direction</param>
+    ///<returns>(Guid ResizeArray) polyline curve identifiers on success</returns>
+    static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid ResizeArray =
+        let  meshes =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) } 
+        let rc = ResizeArray()        
+        if notNull view then 
+            let viewport = Doc.Views.Find(view,false).MainViewport
+            if isNull viewport then failwithf "Rhino.Scripting.MeshOutline: did not find view named '%A'" view
+            else 
+                for mesh in meshes do
+                    let polylines = mesh.GetOutlines(viewport)
+                    if notNull polylines then 
+                        for polyline in polylines do
+                            let objectId = Doc.Objects.AddPolyline(polyline)
+                            rc.Add(objectId)
+        else 
+            for mesh in meshes do
+                let polylines = mesh.GetOutlines(Plane.WorldXY)
+                if notNull polylines then 
+                    for polyline in polylines do
+                        let objectId = Doc.Objects.AddPolyline(polyline)
+                        rc.Add(objectId)
+        Doc.Views.Redraw()
+        rc
+    (*
+    def MeshOutline(object_ids, view=None):
+        '''Creates polyline curve outlines of mesh objects
+        Parameters:
+          object_ids ([guid, ...]): identifiers of meshes to outline
+          view (str, optional): view to use for outline direction
+        Returns:
+          list(guid, ...): polyline curve identifiers on success
+        '''
+    
+        viewport = __viewhelper(view).MainViewport
+        meshes = []
+        mesh = rhutil.coercemesh(object_ids, False)
+        if mesh: meshes.append(mesh)
+        else: meshes = [rhutil.coercemesh(id,True) for id in object_ids]
+        rc = []
+        for mesh in meshes:
+            polylines = mesh.GetOutlines(viewport)
+            if not polylines: continue
+            for polyline in polylines:
+                id = scriptcontext.doc.Objects.AddPolyline(polyline)
+                rc.append(id)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the number of quad faces of a mesh object</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(int) the number of quad mesh faces</returns>
+    static member MeshQuadCount(objectId:Guid) : int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.Faces.QuadCount
+    (*
+    def MeshQuadCount(object_id):
+        '''Returns the number of quad faces of a mesh object
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          number: the number of quad mesh faces if successful
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.Faces.QuadCount
+    *)
+
+
+    [<EXT>]
+    ///<summary>Converts a mesh object's quad faces to triangles</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
+    static member MeshQuadsToTriangles(objectId:Guid) : bool =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mutable rc = true
+        if mesh.Faces.QuadCount>0 then
+            rc <- mesh.Faces.ConvertQuadsToTriangles()
+            if rc  then
+                //id = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Replace(objectId, mesh) |> ignore
+                Doc.Views.Redraw()
+        rc
+    (*
+    def MeshQuadsToTriangles(object_id):
+        '''Converts a mesh object's quad faces to triangles
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          bool: True or False indicating success or failure
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        rc = True
+        if mesh.Faces.QuadCount>0:
+            rc = mesh.Faces.ConvertQuadsToTriangles()
+            if rc:
+                id = rhutil.coerceguid(object_id, True)
+                scriptcontext.doc.Objects.Replace(id, mesh)
+                scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Duplicates each polygon in a mesh with a NURBS surface. The resulting
+    ///  surfaces are then joined into a polysurface and added to the document</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<param name="trimmedTriangles">(bool) Optional, Default Value: <c>true</c>
+    ///If True, triangles in the mesh will be
+    ///  represented by a trimmed plane</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete input object</param>
+    ///<returns>(Guid ResizeArray) identifiers for the new breps on success</returns>
+    static member MeshToNurb( objectId:Guid, 
+                              [<OPT;DEF(true)>]trimmedTriangles:bool, 
+                              [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let pieces = mesh.SplitDisjointPieces()
+        let breps =  resizeArray { for piece in pieces do yield Brep.CreateFromMesh(piece,trimmedTriangles) } 
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let attr = rhobj.Attributes
+        let ids =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep, attr) } 
+        if deleteInput then Doc.Objects.Delete(rhobj, true)|> ignore
+        Doc.Views.Redraw()
+        ids
+    (*
+    def MeshToNurb(object_id, trimmed_triangles=True, delete_input=False):
+        '''Duplicates each polygon in a mesh with a NURBS surface. The resulting
+        surfaces are then joined into a polysurface and added to the document
+        Parameters:
+          object_id (guid): identifier of a mesh object
+          trimmed_triangles (bool, optional): if True, triangles in the mesh will be
+            represented by a trimmed plane
+          delete_input (bool, optional): delete input object
+        Returns:
+          list(guid, ...): identifiers for the new breps on success
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        pieces = mesh.SplitDisjointPieces()
+        breps = [Rhino.Geometry.Brep.CreateFromMesh(piece,trimmed_triangles) for piece in pieces]
+        rhobj = rhutil.coercerhinoobject(object_id, True, True)
+        attr = rhobj.Attributes
+        ids = [scriptcontext.doc.Objects.AddBrep(brep, attr) for brep in breps]
+        if delete_input: scriptcontext.doc.Objects.Delete(rhobj, True)
+        scriptcontext.doc.Views.Redraw()
+        return ids
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns number of triangular faces of a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(int) The number of triangular mesh faces</returns>
+    static member MeshTriangleCount(objectId:Guid) : int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.Faces.TriangleCount
+    (*
+    def MeshTriangleCount(object_id):
+        '''Returns number of triangular faces of a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          number: The number of triangular mesh faces if successful
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.Faces.TriangleCount
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns vertex colors of a mesh</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Drawing.Color ResizeArray) The current vertex colors</returns>
+    static member MeshVertexColors(meshId:Guid) : Drawing.Color ResizeArray= //GET
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        resizeArray { for i in range(mesh.VertexColors.Count) do mesh.VertexColors.[i] }
+        
+    (*
+    def MeshVertexColors(mesh_id, colors=0):
+        '''Returns or modifies vertex colors of a mesh
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+          colors [color, ...], optional) A list of color values. Note, for each vertex, there must
+            be a corresponding vertex color. If the value is None, then any
+            existing vertex colors will be removed from the mesh
+        Returns:
+          color: if colors is not specified, the current vertex colors
+          color: if colors is specified, the previous vertex colors
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        rc = [mesh.VertexColors[i] for i in range(mesh.VertexColors.Count)]
+        if colors==0: return rc
+        if colors is None:
+            mesh.VertexColors.Clear()
+        else:
+            color_count = len(colors)
+            if color_count!=mesh.Vertices.Count:
+                raise ValueError("length of colors must match vertex count")
+            colors = [rhutil.coercecolor(c) for c in colors]
+            mesh.VertexColors.Clear()
+            for c in colors: mesh.VertexColors.Add(c)
+        id = rhutil.coerceguid(mesh_id, True)
+        scriptcontext.doc.Objects.Replace(id, mesh)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+    ///<summary>Modifies vertex colors of a mesh</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<param name="colors">(Drawing.Color seq), optional) A list of color values. Note, for each vertex, there must
+    ///  be a corresponding vertex color. If the value is null or empty list , then any
+    ///  existing vertex colors will be removed from the mesh</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member MeshVertexColors(meshId:Guid, colors:Drawing.Color seq) : unit = //SET
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)       
+        if colors|> isNull || Seq.length colors = 0  then
+            mesh.VertexColors.Clear()
+        else 
+            let colorcount = Seq.length(colors)
+            if colorcount <> mesh.Vertices.Count then
+                failwithf "Rhino.Scripting: Length of colors must match vertex count.  meshId:'%A' colors:'%A'" meshId colors            
+            mesh.VertexColors.Clear()
+            for c in colors do mesh.VertexColors.Add(c) |> ignore
+        Doc.Objects.Replace(meshId, mesh) |> ignore
+        Doc.Views.Redraw()
+        
+    (*
+    def MeshVertexColors(mesh_id, colors=0):
+        '''Returns or modifies vertex colors of a mesh
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+          colors [color, ...], optional) A list of color values. Note, for each vertex, there must
+            be a corresponding vertex color. If the value is None, then any
+            existing vertex colors will be removed from the mesh
+        Returns:
+          color: if colors is not specified, the current vertex colors
+          color: if colors is specified, the previous vertex colors
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        rc = [mesh.VertexColors[i] for i in range(mesh.VertexColors.Count)]
+        if colors==0: return rc
+        if colors is None:
+            mesh.VertexColors.Clear()
+        else:
+            color_count = len(colors)
+            if color_count!=mesh.Vertices.Count:
+                raise ValueError("length of colors must match vertex count")
+            colors = [rhutil.coercecolor(c) for c in colors]
+            mesh.VertexColors.Clear()
+            for c in colors: mesh.VertexColors.Add(c)
+        id = rhutil.coerceguid(mesh_id, True)
+        scriptcontext.doc.Objects.Replace(id, mesh)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the vertex count of a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(int) The number of mesh vertices .</returns>
+    static member MeshVertexCount(objectId:Guid) : int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        mesh.Vertices.Count
+    (*
+    def MeshVertexCount(object_id):
+        '''Returns the vertex count of a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          number: The number of mesh vertices if successful.
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        return mesh.Vertices.Count
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the mesh faces that share a specified mesh vertex</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<param name="vertexIndex">(int) Index of the mesh vertex to find faces for</param>
+    ///<returns>(int array) face indices on success</returns>
+    static member MeshVertexFaces(meshId:Guid, vertexIndex:int) : int array =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        mesh.Vertices.GetVertexFaces(vertexIndex)
+    (*
+    def MeshVertexFaces(mesh_id, vertex_index):
+        '''Returns the mesh faces that share a specified mesh vertex
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+          vertex_index (number): index of the mesh vertex to find faces for
+        Returns:
+          list(number, ...): face indices on success
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        return mesh.Vertices.GetVertexFaces(vertex_index)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the vertex unit normal for each vertex of a mesh</summary>
+    ///<param name="meshId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Vector3d ResizeArray) of vertex normals, (empty list if no normals exist)</returns>
+    static member MeshVertexNormals(meshId:Guid) : Vector3d ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        let count = mesh.Normals.Count
+        if count<1 then resizeArray {()}
+        else resizeArray { for i in range(count) do Vector3d(mesh.Normals.[i])}
+    (*
+    def MeshVertexNormals(mesh_id):
+        '''Returns the vertex unit normal for each vertex of a mesh
+        Parameters:
+          mesh_id (guid): identifier of a mesh object
+        Returns:
+          list(vector, ...): of vertex normals, (empty list if no normals exist)
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        count = mesh.Normals.Count
+        if count<1: return []
+        return [Rhino.Geometry.Vector3d(mesh.Normals[i]) for i in xrange(count)]
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the vertices of a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Point3d ResizeArray) vertex points in the mesh</returns>
+    static member MeshVertices(objectId:Guid) : Point3d ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let count = mesh.Vertices.Count
+        let rc = ResizeArray()
+        for i in range(count) do
+            let vertex = mesh.Vertices.[i]
+            rc.Add(Point3d(vertex))
+        rc
+    (*
+    def MeshVertices(object_id):
+        '''Returns the vertices of a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          list(point, ...): vertex points in the mesh
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        count = mesh.Vertices.Count
+        rc = []
+        for i in xrange(count):
+            vertex = mesh.Vertices[i]
+            rc.append(Rhino.Geometry.Point3d(vertex))
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the approximate volume of one or more closed meshes</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of one or more mesh objects</param>
+    ///<returns>(float)  total volume of all meshes</returns>
+    static member MeshVolume(objectIds:Guid seq) : float =
+        let mutable totalvolume  = 0.0
+        for objectId in objectIds do
+            let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+            let mp = VolumeMassProperties.Compute(mesh)
+            if notNull mp then
+                totalvolume <- totalvolume + mp.Volume
+            else  
+                failwithf "Rhino.Scripting: MeshVolume failed on objectId:'%A'" objectId
+        totalvolume
+    (*
+    def MeshVolume(object_ids):
+        '''Returns the approximate volume of one or more closed meshes
+        Parameters:
+          object_ids ([guid, ...]): identifiers of one or more mesh objects
+        Returns:
+          tuple(number, number, number): containing 3 velues if successful where
+               [0] = number of meshes used in volume calculation
+               [1] = total volume of all meshes
+               [2] = the error estimate
+          None: if not successful
+        '''
+    
+        id = rhutil.coerceguid(object_ids)
+        if id: object_ids = [id]
+        meshes_used = 0
+        total_volume = 0.0
+        error_estimate = 0.0
+        for id in object_ids:
+            mesh = rhutil.coercemesh(id, True)
+            mp = Rhino.Geometry.VolumeMassProperties.Compute(mesh)
+            if mp:
+                meshes_used += 1
+                total_volume += mp.Volume
+                error_estimate += mp.VolumeError
+        if meshes_used==0: return scriptcontext.errorhandler()
+        return meshes_used, total_volume, error_estimate
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates the volume centroid of a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Point3d) Point3d representing the volume centroid</returns>
+    static member MeshVolumeCentroid(objectId:Guid) : Point3d =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let mp = VolumeMassProperties.Compute(mesh)
+        if notNull mp then mp.Centroid
+        else failwithf "Rhino.Scripting: MeshVolumeCentroid failed.  objectId:'%A'" objectId
+    (*
+    def MeshVolumeCentroid(object_id):
+        '''Calculates the volume centroid of a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          point: Point3d representing the volume centroid
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        mp = Rhino.Geometry.VolumeMassProperties.Compute(mesh)
+        if mp: return mp.Centroid
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pulls a curve to a mesh. The function makes a polyline approximation of
+    ///  the input curve and gets the closest point on the mesh for each point on
+    ///  the polyline. Then it "connects the points" to create a polyline on the mesh</summary>
+    ///<param name="meshId">(Guid) Identifier of mesh that pulls</param>
+    ///<param name="curveId">(Guid) Identifier of curve to pull</param>
+    ///<returns>(Guid) identifier new curve on success</returns>
+    static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
+        let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let tol = Doc.ModelAbsoluteTolerance
+        let polyline = curve.PullToMesh(mesh, tol)
+        if isNull polyline then failwithf "Rhino.Scripting: PullCurveToMesh failed.  meshId:'%A' curveId:'%A'" meshId curveId
+        let rc = Doc.Objects.AddCurve(polyline)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add polyline to document.  meshId:'%A' curveId:'%A'" meshId curveId
+        Doc.Views.Redraw()
+        rc
+    (*
+    def PullCurveToMesh(mesh_id, curve_id):
+        '''Pulls a curve to a mesh. The function makes a polyline approximation of
+        the input curve and gets the closest point on the mesh for each point on
+        the polyline. Then it "connects the points" to create a polyline on the mesh
+        Parameters:
+          mesh_id (guid): identifier of mesh that pulls
+          curve_id (guid): identifier of curve to pull
+        Returns:
+          guid: identifier new curve on success
+          None: on error
+        '''
+    
+        mesh = rhutil.coercemesh(mesh_id, True)
+        curve = rhutil.coercecurve(curve_id, -1, True)
+        tol = scriptcontext.doc.ModelAbsoluteTolerance
+        polyline = curve.PullToMesh(mesh, tol)
+        if not polyline: return scriptcontext.errorhandler()
+        rc = scriptcontext.doc.Objects.AddCurve(polyline)
+        if rc==System.Guid.Empty: raise Exception("unable to add polyline to document")
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Splits up a mesh into its unconnected pieces</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete the input object</param>
+    ///<returns>(Guid ResizeArray) identifiers for the new meshes</returns>
+    static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let pieces = mesh.SplitDisjointPieces()
+        let rc =  resizeArray { for piece in pieces do yield Doc.Objects.AddMesh(piece) } 
+        if rc.Count <> 0 && deleteInput then
+            //id = RhinoScriptSyntax.Coerceguid(objectId)
+            Doc.Objects.Delete(objectId, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+    (*
+    def SplitDisjointMesh(object_id, delete_input=False):
+        '''Splits up a mesh into its unconnected pieces
+        Parameters:
+          object_id (guid): identifier of a mesh object
+          delete_input (bool, optional): delete the input object
+        Returns:
+          list(guid, ...): identifiers for the new meshes
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        pieces = mesh.SplitDisjointPieces()
+        rc = [scriptcontext.doc.Objects.AddMesh(piece) for piece in pieces]
+        if rc and delete_input:
+            id = rhutil.coerceguid(object_id, True)
+            scriptcontext.doc.Objects.Delete(id, True)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Fixes inconsistencies in the directions of faces of a mesh</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(int) the number of faces that were modified</returns>
+    static member UnifyMeshNormals(objectId:Guid) : int =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let rc = mesh.UnifyNormals()
+        if rc>0 then
+            //id = RhinoScriptSyntax.Coerceguid(objectId)
+            Doc.Objects.Replace(objectId, mesh)|> ignore
+            Doc.Views.Redraw()
+        rc
+    (*
+    def UnifyMeshNormals(object_id):
+        '''Fixes inconsistencies in the directions of faces of a mesh
+        Parameters:
+          object_id (guid): identifier of a mesh object
+        Returns:
+          number: the number of faces that were modified
+        '''
+    
+        mesh = rhutil.coercemesh(object_id, True)
+        rc = mesh.UnifyNormals()
+        if rc>0:
+            id = rhutil.coerceguid(object_id, True)
+            scriptcontext.doc.Objects.Replace(id, mesh)
+            scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
