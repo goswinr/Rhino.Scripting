@@ -39,8 +39,8 @@ module ExtensionsSurface =
     ///  information, see the Rhino help file for the CutPlane command</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects that the cutting plane will
     ///  pass through</param>
-    ///<param name="startPoint">(Line) Start point of 'line that defines the cutting plane' (FIXME 0)</param>
-    ///<param name="endePoint">(Line) End point of 'line that defines the cutting plane' (FIXME 0)</param>
+    ///<param name="startPoint">(Line) Start point of line that defines the cutting plane' (FIXME 0)</param>
+    ///<param name="endePoint">(Line) End point of line that defines the cutting plane</param>
     ///<param name="normal">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///Vector that will be contained in the returned planar
     ///  surface. In the case of Rhino's CutPlane command, this is the
@@ -147,8 +147,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Creates a single walled surface with a circular profile around a curve</summary>
     ///<param name="curveId">(Guid) Identifier of rail curve</param>
-    ///<param name="parameters">(float seq) Parameters of 'list of radius values at normalized curve parameters' (FIXME 0)</param>
-    ///<param name="radii">(float seq) Radii of 'list of radius values at normalized curve parameters' (FIXME 0)</param>
+    ///<param name="parameters">(float seq) Parameters of list of radius values at normalized curve parameters' (FIXME 0)</param>
+    ///<param name="radii">(float seq) Radii of list of radius values at normalized curve parameters' (FIXME 0)</param>
     ///<param name="blendeType">(int) Optional, Default Value: <c>0</c>
     ///0(local) or 1(global)</param>
     ///<param name="cap">(float) Optional, Default Value: <c>0</c>
@@ -333,8 +333,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Adds a torus shaped revolved surface to the document</summary>
     ///<param name="basis">(Point3d) 3D origin point of the torus or the basis plane of the torus</param>
-    ///<param name="majorRadius">(float) Major radius of 'the two radii of the torus' (FIXME 0)</param>
-    ///<param name="minorRadius">(float) Minor radius of 'the two radii of the torus' (FIXME 0)</param>
+    ///<param name="majorRadius">(float) Major radius of the two radii of the torus' (FIXME 0)</param>
+    ///<param name="minorRadius">(float) Minor radius of the two radii of the torus' (FIXME 0)</param>
     ///<param name="direction">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///A point that defines the direction of the torus when basis is a point.
     ///  If omitted, a torus that is parallel to the world XY plane is created</param>
@@ -439,8 +439,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Evaluates a surface at a U,V parameter</summary>
     ///<param name="surfaceId">(Guid) The object's identifier.</param>
-    ///<param name="u">(float * float) U of 'u, v parameters to evaluate.' (FIXME 0)</param>
-    ///<param name="v">(float * float) V of 'u, v parameters to evaluate.' (FIXME 0)</param>
+    ///<param name="u">(float * float) U of u, v parameters to evaluate.' (FIXME 0)</param>
+    ///<param name="v">(float * float) V of u, v parameters to evaluate.' (FIXME 0)</param>
     ///<returns>(Point3d) a 3-D point</returns>
     static member EvaluateSurface(surfaceId:Guid, u:float * float, v:float * float) : Point3d =
         failNotImpl () // genreation temp disabled !!
@@ -517,8 +517,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Create surface by extruding a curve along two points that define a line</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
-    ///<param name="startPoint">(Point3d) Start point of '3D points that specify distance and direction' (FIXME 0)</param>
-    ///<param name="endePoint">(Point3d) End point of '3D points that specify distance and direction' (FIXME 0)</param>
+    ///<param name="startPoint">(Point3d) Start point of 3D points that specify distance and direction' (FIXME 0)</param>
+    ///<param name="endePoint">(Point3d) End point of 3D points that specify distance and direction' (FIXME 0)</param>
     ///<returns>(Guid) identifier of new surface on success</returns>
     static member ExtrudeCurveStraight(curveId:Guid, startPoint:Point3d, endePoint:Point3d) : Guid =
         failNotImpl () // genreation temp disabled !!
@@ -538,8 +538,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Create constant radius rolling ball fillets between two surfaces. Note,
     ///  this function does not trim the original surfaces of the fillets</summary>
-    ///<param name="surface0">(Guid) Surface0 of 'identifiers of first and second surface' (FIXME 0)</param>
-    ///<param name="surface1">(Guid) Surface1 of 'identifiers of first and second surface' (FIXME 0)</param>
+    ///<param name="surface0">(Guid) Surface0 of identifiers of first and second surface' (FIXME 0)</param>
+    ///<param name="surface1">(Guid) Surface1 of identifiers of first and second surface' (FIXME 0)</param>
     ///<param name="radius">(float) A positive fillet radius</param>
     ///<param name="uvparam0">(float * float) Optional, Default Value: <c>null:float * float</c>
     ///A u,v surface parameter of surface0 near where the fillet
@@ -867,8 +867,8 @@ module ExtensionsSurface =
     ///<summary>Creates the shortest possible curve(geodesic) between two points on a
     ///  surface. For more details, see the ShortPath command in Rhino help</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="startPoint">(Point3d) Start point of 'start/end points of the short curve' (FIXME 0)</param>
-    ///<param name="endePoint">(Point3d) End point of 'start/end points of the short curve' (FIXME 0)</param>
+    ///<param name="startPoint">(Point3d) Start point of start/end points of the short curve' (FIXME 0)</param>
+    ///<param name="endePoint">(Point3d) End point of start/end points of the short curve' (FIXME 0)</param>
     ///<returns>(Guid) identifier of the new surface on success</returns>
     static member ShortPath(surfaceId:Guid, startPoint:Point3d, endePoint:Point3d) : Guid =
         failNotImpl () // genreation temp disabled !!
