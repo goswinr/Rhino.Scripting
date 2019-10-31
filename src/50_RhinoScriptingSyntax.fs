@@ -202,16 +202,17 @@ type RhinoScriptSyntax private () = // no constructor?
         let b = box pt
         match b with
         | :? Point3d    as pt               -> pt
-        | :? Vector3d   as v                -> Point3d(v)
         | :? Point3f    as pt               -> Point3d(pt)
+        | :? Vector3d   as v                -> Point3d(v)
         | :? DocObjects.PointObject as po   -> po.PointGeometry.Location
+        | :? TextDot as td                  -> td.Point
         | :? (float*float*float) as xyz     -> let x,y,z = xyz in Point3d(x,y,z)
         | :? (single*single*single) as xyz  -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))        
         | :? (int*int*int) as xyz           -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))        
         | _ ->
             try
                 match b with
-                | :? option<Point3d> as pto   -> pto.Value
+                | :? option<Point3d> as pto   -> pto.Value // from UI function
                 | :? option<Guid> as go      -> ((Doc.Objects.FindId(go.Value).Geometry) :?> Point).Location
                 | :? (string*string*string) as xyz  -> let x,y,z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
                 | :? Guid as g ->  ((Doc.Objects.FindId(g).Geometry) :?> Point).Location 
@@ -461,6 +462,7 @@ type RhinoScriptSyntax private () = // no constructor?
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Brep as b -> b
         | :? Extrusion as b -> b.ToBrep(true)
+        | :? Surface as s -> s.ToBrep()
         | g -> failwithf "CoerceBrep failed on %A : %A " g.ObjectType objectId
 
 
