@@ -22,11 +22,11 @@
     <Compile Include="00_ResizeArray.fsi" />    
     <Compile Include="00_ResizeArray.fs" />    
     <Compile Include="01_Util.fs" />    
-    <Compile Include="02_ToNiceString.fs" />
+    <Compile Include="02_ToNiceString.fs" />    
+    <Compile Include="02_ComputationalExpressions.fs" />
     <Compile Include="02_TypeExtensions.fs" />
     <Compile Include="03_StringModule.fs" />  
     <Compile Include="03_SeqModuleExtensions.fs" />
-    <Compile Include="04_ComputationalExpressions.fs" />
     <Compile Include="05_DefaultDict.fs" />
     <Compile Include="13_RhinoTypeExtensions.fs" />
     <Compile Include="19_ActiveDoc.fs" />
