@@ -5,6 +5,12 @@ open Rhino.Scripting.Util
 
 [<AutoOpen>]
 module TypeExtensions =   
+    
+    type Object with 
+        [<EXT>]  
+        ///A property like the ToString() method, 
+        ///but with richer formationg for collections.
+        member obj.ToNiceString = NiceString.toNiceString obj
 
     type Int32 with  
         [<EXT>] member inline x.ToDouble = float(x)

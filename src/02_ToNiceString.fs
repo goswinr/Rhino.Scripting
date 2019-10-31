@@ -199,10 +199,5 @@ module NiceString =
         if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings
 
     
-    type Object with  
-    
-        [<Extension>]  
-        ///A property like the ToString() method, 
-        ///but with richer formationg for collections.
-        member obj.ToNiceString = toNiceString obj
+
     
