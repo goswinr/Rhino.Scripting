@@ -268,26 +268,23 @@ module ExtensionsSurface =
     ///  1 = position
     ///  2 = tangency
     ///  3 = curvature</param>
-    ///<param name="edgeTolerance">(float) Optional, Default Value: <c>0</c>
-    ///Edge tolerance</param>
-    ///<param name="interiorTolerance">(float) Optional, Default Value: <c>0</c>
-    ///Interior tolerance</param>
-    ///<param name="angleTolerance">(float) Optional, Default Value: <c>0</c>
-    ///Angle tolerance , in radians?</param>
+    ///<param name="edgeTolerance">(float) Optional, Edge tolerance</param>
+    ///<param name="interiorTolerance">(float) Optional, Interior tolerance</param>
+    ///<param name="angleTolerance">(float) Optional, Angle tolerance , in radians?</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddNetworkSrf( curves:Guid seq, 
                                  [<OPT;DEF(1)>]continuity:int, 
-                                 [<OPT;DEF(0)>]edgeTolerance:float, 
-                                 [<OPT;DEF(0)>]interiorTolerance:float, 
-                                 [<OPT;DEF(0)>]angleTolerance:float) : Guid =
+                                 [<OPT;DEF(0.0)>]edgeTolerance:float, 
+                                 [<OPT;DEF(0.0)>]interiorTolerance:float, 
+                                 [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
         let curves =  resizeArray { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) } 
-        let surf, err = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)
+        let surf, err = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             let rc = Doc.Objects.AddSurface(surf)
             Doc.Views.Redraw()
             rc
         else
-            failwithf "AddNetworkSrf failed on %s" curves.ToNiceString
+            failwithf "AddNetworkSrf failed on %A" curves
     (*
     def AddNetworkSrf(curves, continuity=1, edge_tolerance=0, interior_tolerance=0, angle_tolerance=0):
         '''Creates a surface from a network of crossing curves
@@ -313,4 +310,93 @@ module ExtensionsSurface =
             return rc
     *)
 
+
+    [<EXT>]
+    ///<summary>Adds a NURBS surface object to the document</summary>
+    ///<param name="pointCount">(int * int) Number of control points in the u and v direction</param>
+    ///<param name="points">(Point3d seq) List of 3D points</param>
+    ///<param name="knotsU">(float seq) Knot values for the surface in the u direction.
+    ///  Must contain pointCount[0]+degree[0]-1 elements</param>
+    ///<param name="knotsV">(float seq) Knot values for the surface in the v direction.
+    ///  Must contain pointCount[1]+degree[1]-1 elements</param>
+    ///<param name="degree">(int * int) Degree of the surface in the u and v directions.</param>
+    ///<param name="weights">(int seq) Optional, Default Value: <c>null:int seq</c>
+    ///Weight values for the surface. The number of elements in
+    ///  weights must equal the number of elements in points. Values must be
+    ///  greater than zero.</param>
+    ///<returns>(Guid) identifier of new object</returns>
+    static member AddNurbsSurface( pointCount:int * int, 
+                                   points:Point3d seq, 
+                                   knotsU:float seq, 
+                                   knotsV:float seq, 
+                                   degree:int * int, 
+                                   [<OPT;DEF(null:int seq)>]weights:int seq) : Guid =
+        let k0,k1 = pointCount
+        let d0,d1 = degree
+        if Seq.length points < k1*k0 then
+            failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+        let ns = NurbsSurface.Create(3, weights <> null, d0+1, d1+1, k0, k1)
+        //add the points && weights
+        let controlpoints = ns.Points
+        let index = 0
+        for i in range(pointCount.[0]) do
+            for j in range(pointCount.[1]) do
+                if notNull weights then
+                    let cp = ControlPoint(points.[index], weights.[index])
+                    controlpoints.SetControlPoint(i,j,cp)
+                else 
+                    cp <- ControlPoint(points.[index])
+                    controlpoints.SetControlPoint(i,j,cp)
+                index += 1
+        //add the knots
+        for i in range(ns.KnotsU.Count) do ns.KnotsU.[i] = knotsU.[i]
+        for i in range(ns.KnotsV.Count) do ns.KnotsV.[i] = knotsV.[i]
+        if not ns.IsValid then failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+        let objectId = Doc.Objects.AddSurface(ns)
+        if objectId = Guid.Empty then failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+        Doc.Views.Redraw()
+        id
+    (*
+    def AddNurbsSurface(point_count, points, knots_u, knots_v, degree, weights=None):
+        '''Adds a NURBS surface object to the document
+        Parameters:
+          point_count ([number, number]) number of control points in the u and v direction
+          points ([point, ...]): list of 3D points
+          knots_u ([number, ...]): knot values for the surface in the u direction.
+                    Must contain point_count[0]+degree[0]-1 elements
+          knots_v ([number, ...]): knot values for the surface in the v direction.
+                    Must contain point_count[1]+degree[1]-1 elements
+          degree ([number, number]): degree of the surface in the u and v directions.
+          weights ([(number, ...]): weight values for the surface. The number of elements in
+            weights must equal the number of elements in points. Values must be
+            greater than zero.
+        Returns:
+          guid: identifier of new object if successful
+          None on error
+        '''
+    
+        if len(points)<(point_count[0]*point_count[1]):
+            return scriptcontext.errorhandler()
+        ns = Rhino.Geometry.NurbsSurface.Create(3, weights!=None, degree[0]+1, degree[1]+1, point_count[0], point_count[1])
+        #add the points and weights
+        controlpoints = ns.Points
+        index = 0
+        for i in range(point_count[0]):
+            for j in range(point_count[1]):
+                if weights:
+                    cp = Rhino.Geometry.ControlPoint(points[index], weights[index])
+                    controlpoints.SetControlPoint(i,j,cp)
+                else:
+                    cp = Rhino.Geometry.ControlPoint(points[index])
+                    controlpoints.SetControlPoint(i,j,cp)
+                index += 1
+        #add the knots
+        for i in range(ns.KnotsU.Count): ns.KnotsU[i] = knots_u[i]
+        for i in range(ns.KnotsV.Count): ns.KnotsV[i] = knots_v[i]
+        if not ns.IsValid: return scriptcontext.errorhandler()
+        id = scriptcontext.doc.Objects.AddSurface(ns)
+        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        scriptcontext.doc.Views.Redraw()
+        return id
+    *)
 
