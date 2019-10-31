@@ -60,20 +60,21 @@ module StringBufferBuilder =
         
         member inline _.Yield (txt: string) =  fun (b: StringBuilder) -> b.Append  txt |> ignore
         member inline _.Yield (c: char) =      fun (b: StringBuilder) -> b.Append  c   |> ignore
-        member inline _.Yield (f: float) =     fun (b: StringBuilder) -> b.Append f.ToNiceString  |> ignore
+        member inline _.Yield (f: float) =     fun (b: StringBuilder) -> f |> NiceString.floatToString |> b.Append  |> ignore
         member inline _.Yield (i: int) =       fun (b: StringBuilder)  -> b.Append (i.ToString())  |> ignore
         //member inline _.Yield (x: 'T) =        fun (b: StringBuilder)  -> b.Append (x.ToString())  |> ignore
 
 
         member inline _.YieldFrom (txt: string) =  fun (b: StringBuilder) -> b.AppendLine txt |> ignore // 
-        
+        member inline _.YieldFrom (c: char) =      fun (b: StringBuilder) -> b.AppendLine  (c.ToString())   |> ignore
+        member inline _.YieldFrom (f: float) =     fun (b: StringBuilder) -> f |> NiceString.floatToString |> b.AppendLine  |> ignore
+        member inline _.YieldFrom (i: int) =       fun (b: StringBuilder)  -> b.AppendLine (i.ToString())  |> ignore
         //member inline _.YieldFrom (f: StringBuffer) = f // use for new line instead
         
-        member inline _.Yield (strings: #seq<string>) =
+        member inline _.Yield (strings: seq<string>) =
             fun (b: StringBuilder) -> 
                 for s in strings do 
-                    Printf.bprintf b "%s\n" s 
-
+                    Printf.bprintf b "%s%s" s Environment.NewLine 
         
         
         member _.Combine (f, g) = fun (b: StringBuilder) -> f b; g b
@@ -98,7 +99,10 @@ module StringBufferBuilder =
             do f b
             b.ToString()
     
-    /// Computational Expression:  use 'yield' to append text and 'yield!' (with an exclamation mark)  to append text followed by a new line character.
+    ///Computational Expression:  
+    ///use 'yield' to append text
+    ///and 'yield!' (with an exclamation mark)  to append text followed by a new line character.
+    ///accepts ints and floats too.(including nice Formating)
     let stringBuffer = StringBufferBuilder ()
 
 
