@@ -3,10 +3,31 @@
 open System.Collections.Generic
 open System
 open Rhino.Geometry
-
+open System.Runtime.CompilerServices
 
 module NiceString =
     
+    let mutable thousandSeparator = "'"
+
+    let internal formatThousands (s:string) =
+        let last = s.Length - 1         
+        let sb= Text.StringBuilder()
+        let inline add (c:char) = sb.Append(c) |> ignore
+        for i=0 to last do
+            if i=0 || i = last then 
+                add s.[i]
+            elif i=1 && s.[0] = '-' then 
+                add s.[i]
+            else
+                if (last - i + 1) % 3 = 0 then 
+                    sb.Append(thousandSeparator) |> ignore
+                    add s.[i]
+                else                
+                    add s.[i]
+        sb.ToString()
+           
+ 
+              
     
     /// with automatic formationg of precision
     let floatToString  (x:float) =
@@ -14,11 +35,12 @@ module NiceString =
         elif x = Rhino.RhinoMath.UnsetValue then "RhinoMath.UnsetValue"
         else
             let  a = abs x
-            if   a > 1000. then sprintf "%.0f" x
-            elif a > 100.  then sprintf "%.1f" x 
-            elif a > 10.   then sprintf "%.2f" x 
-            elif a > 1.    then sprintf "%.3f" x 
-            else                sprintf "%f"   x  
+            if   a > 10000. then sprintf "%.0f" x |> formatThousands
+            elif a > 1000.  then sprintf "%.0f" x
+            elif a > 100.   then sprintf "%.1f" x 
+            elif a > 10.    then sprintf "%.2f" x 
+            elif a > 1.     then sprintf "%.3f" x 
+            else                 sprintf "%f"   x  
 
     /// with automatic formationg of precision
     let singleToString  (x:float32) =
@@ -26,11 +48,12 @@ module NiceString =
         elif x = Rhino.RhinoMath.UnsetSingle then "RhinoMath.UnsetSingle"
         else
             let  a = abs x
-            if   a > 1000.f then sprintf "%.0f" x
-            elif a > 100.f  then sprintf "%.1f" x 
-            elif a > 10.f   then sprintf "%.2f" x 
-            elif a > 1.f    then sprintf "%.3f" x 
-            else                 sprintf "%f"   x
+            if   a > 10000.f then sprintf "%.0f" x |> formatThousands
+            elif a > 1000.f  then sprintf "%.0f" x
+            elif a > 100.f   then sprintf "%.1f" x 
+            elif a > 10.f    then sprintf "%.2f" x 
+            elif a > 1.f     then sprintf "%.3f" x 
+            else                  sprintf "%f"   x  
 
     ///Like the ToString function but with appropiate precision formating       
     let point3dToString (pt:Point3d) =
@@ -174,3 +197,12 @@ module NiceString =
         let s = sb.ToString()
         let st = s.Trim()
         if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings
+
+    
+    type Object with  
+    
+        [<Extension>]  
+        ///A property like the ToString() method, 
+        ///but with richer formationg for collections.
+        member obj.ToNiceString = toNiceString obj
+    
