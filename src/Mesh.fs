@@ -1083,8 +1083,8 @@ module ExtensionsMesh =
 
     [<EXT>]
     ///<summary>Calculates the intersections of a mesh object with another mesh object</summary>
-    ///<param name="mesh1">(Guid) Mesh1 of 'identifiers of meshes' (FIXME 0)</param>
-    ///<param name="mesh2">(Guid) Mesh2 of 'identifiers of meshes' (FIXME 0)</param>
+    ///<param name="mesh1">(Guid) Mesh1</param>
+    ///<param name="mesh2">(Guid) Mesh2</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///The intersection tolerance</param>
     ///<returns>(Polyline array) of points that define the vertices of the intersection curves</returns>

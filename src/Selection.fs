@@ -329,9 +329,9 @@ module ExtensionsSelection =
     ///  picked are not selected.</param>
     ///<param name="objects">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
-    ///Minimum count of 'limits on number of objects allowed to be selected' (FIXME 0)</param>
+    ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
-    ///Maximum count of 'limits on number of objects allowed to be selected' (FIXME 0)</param>
+    ///Maximum count of objects allowed to be selected</param>
     ///<param name="customFilter">(string) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid array) identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string, 
@@ -938,8 +938,8 @@ module ExtensionsSelection =
 
     [<EXT>]
     ///<summary>Picks objects using either a window or crossing selection</summary>
-    ///<param name="corner1">(Point3d) Corner1 of 'corners of selection window' (FIXME 0)</param>
-    ///<param name="corner2">(Point3d) Corner2 of 'corners of selection window' (FIXME 0)</param>
+    ///<param name="corner1">(Point3d) Corner1 of selection window</param>
+    ///<param name="corner2">(Point3d) Corner2 of selection window</param>
     ///<param name="view">(string) Optional, View to perform the selection in</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select picked objects</param>

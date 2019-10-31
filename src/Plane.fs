@@ -428,8 +428,8 @@ module ExtensionsPlane =
     [<EXT>]
     ///<summary>Creates a plane from three non-colinear points</summary>
     ///<param name="origin">(Point3d) Origin point of the plane</param>
-    ///<param name="x">(Point3d) X of 'points on the plane's x and y axes' (FIXME 0)</param>
-    ///<param name="y">(Point3d) Y of 'points on the plane's x and y axes' (FIXME 0)</param>
+    ///<param name="x">(Point3d) X point on the plane's x  axis</param>
+    ///<param name="y">(Point3d) Y point on the plane's y axis</param>
     ///<returns>(Plane) The plane , otherwise None</returns>
     static member PlaneFromPoints( origin:Point3d, 
                                    x:Point3d, 
