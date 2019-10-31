@@ -48,13 +48,13 @@
     <Compile Include="Mesh.fs" />
     <Compile Include="Object.fs" />
     <Compile Include="Plane.fs" />
-    <Compile Include="Pointvector.fs" />
+    <Compile Include="PointVector.fs" />
     <Compile Include="Selection.fs" />
     <Compile Include="Surface.fs" />
     <Compile Include="Toolbar.fs" />
     <Compile Include="Transformation.fs" />
-    <Compile Include="Userdata.fs" />
-    <Compile Include="Userinterface.fs" />
+    <Compile Include="UserData.fs" />
+    <Compile Include="UserInterface.fs" />
     <Compile Include="Utility.fs" />
     <Compile Include="View.fs" />
   </ItemGroup>
