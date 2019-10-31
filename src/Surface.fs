@@ -287,7 +287,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "AddNetworkSrf failed on %A" curves
+            failwithf "AddNetworkSrf failed on %s" curves.ToNiceString
     (*
     def AddNetworkSrf(curves, continuity=1, edge_tolerance=0, interior_tolerance=0, angle_tolerance=0):
         '''Creates a surface from a network of crossing curves

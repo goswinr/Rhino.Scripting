@@ -511,7 +511,7 @@ module ExtensionsPlane =
         elif rc = Intersect.PlaneSphereIntersection.Circle then
             1, circle.Plane, circle.Radius
         else 
-            failwithf "PlaneSphereIntersection failed for %A; %A " plane spherePlane sphereRadius
+            failwithf "PlaneSphereIntersection failed for %A; %A, %A " plane spherePlane sphereRadius
     (*
     def PlaneSphereIntersection(plane, sphere_plane, sphere_radius):
         '''Calculates the intersection of a plane and a sphere
