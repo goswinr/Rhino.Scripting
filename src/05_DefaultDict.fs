@@ -26,13 +26,13 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
         and  set k v = DD.[k] <- v
     
     /// Get a value and remove it from Dictionary, like *.pop() in Python 
-    member dd.Pop(k) =
+    member dd.Pop(k:'K) =
         let ok,v = DD.TryGetValue(k)
         if ok then
             DD.Remove k |>ignore
             v
         else 
-            failwithf "DefaultDict: Cannot pop key '%A' from %O " k dd
+            failwithf "DefaultDict: Cannot pop key '%A' from %s " k (NiceString.toNiceString dd)
 
     /// Returns a seq of key and value tuples
     member _.Items =
