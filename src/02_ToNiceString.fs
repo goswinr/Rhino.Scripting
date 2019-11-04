@@ -106,6 +106,7 @@ module NiceString =
         else 
             fullPath
     
+    type private Count = Length of int | MoreThan of int
 
     let private (|IsSeq|_|) (xs : obj) =
         let typ = xs.GetType() 
@@ -116,7 +117,7 @@ module NiceString =
             let iCollType = interfaces  |> Seq.tryFind( fun x -> x.IsGenericType && x.GetGenericTypeDefinition() = typedefof<ICollection<_>> )
             let count =
                 match iCollType with
-                |None -> -1
+                |None -> -1 // no count available on sequences that do not have ICollection interface
                 |Some _ -> (xs :?> Collections.ICollection).Count
             
             let args = iet.GetGenericArguments()
@@ -129,45 +130,69 @@ module NiceString =
                     let ics = xs :?> Collections.IEnumerable
                     let enum = ics.GetEnumerator()
                     let mutable k=0
-                    while enum.MoveNext() && k < toNiceStringMaxItemsPerSeq do
+                    while enum.MoveNext() && k < toNiceStringMaxItemsPerSeq do 
                         rs.Add (box enum.Current)
                         k <- k+1
-                    Some (count,  rs:>IEnumerable<_>, name, elName)   // the retuened seq is trimmed!  to a length of maxItemsPerSeq              
+                    if k=toNiceStringMaxItemsPerSeq && enum.MoveNext() then                         
+                        Some (MoreThan k,  rs:>IEnumerable<_>, name, elName)   // the retuened seq is trimmed!  to a length of maxItemsPerSeq
+                    else 
+                        Some (Length k,  rs:>IEnumerable<_>, name, elName)
                 else                
                     let ics = xs :?> IEnumerable<_> 
-                    Some (count, ics, name, elName)
+                    if count > 0 then 
+                        Some (Length count, ics, name, elName)
+                    else
+                        let enum = ics.GetEnumerator()
+                        let mutable k=0
+                        while enum.MoveNext() && k < toNiceStringMaxItemsPerSeq do 
+                            k <- k+1
+                        if k=toNiceStringMaxItemsPerSeq && enum.MoveNext() then                         
+                            Some (MoreThan k,  ics, name, elName)  
+                        else 
+                            Some (Length k,  ics, name, elName)
             else
                 None
         |None -> None
     
+    /// the internal stringbuilder for recursive function
     let private sb = Text.StringBuilder()
 
 
     let rec private toNiceStringRec (x:obj,indent:int) : unit =
-        let addn (s:string) =  sb.Append(String(' ', 4 *  indent )).AppendLine(s) |> ignore
-        let add  (s:string) =  sb.Append(String(' ', 4 *  indent )).Append(s) |> ignore
+        
+        let add  (s:string) =  sb.Append(String(' ', 4 *  indent )).Append(s)     |> ignore
         let adn  (s:string) =  sb.AppendLine(s) |> ignore
    
         match x with // boxed already
-        | null -> "-null-" |> add
-        | :? Point3d    as p   -> p |> point3dToString |> addn
-        | :? Vector3d   as v   -> v |> vector3dToString |> addn
-        | :? Point3f    as p   -> p |> point3fToString |> addn
-        | :? Vector3f    as p  -> p |> vector3fToString |> addn
-        | :? float      as v   -> v |> floatToString |> addn
-        | :? single     as v   -> v |> singleToString |> addn        
-        | :? Char       as c   -> c.ToString()   |> addn // "'" + c.ToString() + "'" // or add qotes?
-        | :? string     as s   -> s |> add // to not have it in quotes
-        | :? Guid       as g   -> sprintf "Guid[%O]" g |> addn
-        | IsSeq (count,xs,name,elName) ->  
-                    if count <0 then    sprintf "%s of %s" name elName  |> add  
-                    else                sprintf "%s with %d items of %s" name count elName |> add     
+        | null -> "'null'" |> add
+        | :? Point3d    as p   -> p |> point3dToString  |> add
+        | :? Vector3d   as v   -> v |> vector3dToString |> add
+        | :? Point3f    as p   -> p |> point3fToString  |> add
+        | :? Vector3f    as p  -> p |> vector3fToString |> add
+        | :? float      as v   -> v |> floatToString    |> add
+        | :? single     as v   -> v |> singleToString   |> add        
+        | :? Char       as c   -> c.ToString()          |> add // "'" + c.ToString() + "'" // or add qotes?
+        | :? string     as s   -> s                     |> add // to not have it in quotes, s.ToString() adds a " at start and end
+        | :? Guid       as g   -> sprintf "Guid[%O]" g  |> add
+        | IsSeq (leng,xs,name,elName) ->  
+                    match leng with
+                    |Length count -> sprintf "%s with %d items of %s" name count elName |> add // new line added below at    adn ":" 
+                    |MoreThan _ ->   sprintf "%s of %s" name elName  |> add 
+                    
                     if indent < toNiceStringMaxDepth  then 
                         adn ":"
-                        for x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq do  
-                            toNiceStringRec (x, indent+1)
-                        if count > toNiceStringMaxItemsPerSeq then
-                            toNiceStringRec ("...", indent+1)
+                        for i,x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq |> Seq.indexed do  
+                            if i > 0 then adn ""
+                            toNiceStringRec (x, indent+1)                            
+                        
+                        match leng with
+                        |Length count -> 
+                            if count > toNiceStringMaxItemsPerSeq then
+                                adn ""
+                                toNiceStringRec ("...", indent+1)                                
+                        |MoreThan _ ->  
+                            adn ""
+                            toNiceStringRec ("...", indent+1)                            
                     else 
                         adn ""                
         | _ ->  x.ToString() |> add
@@ -177,10 +202,9 @@ module NiceString =
     /// set NiceString.toNiceStringMaxDepth to change how deep nested lists are printed (default is 2)
     let toNiceString (x:'T) = 
         sb.Clear() |> ignore
-        toNiceStringRec(box x,0)
-        let s = sb.ToString()
-        let st = s.Trim()
-        if st.Contains (Environment.NewLine) then s else st // trim new line on one line strings
+        toNiceStringRec(box x , 0 ) //0 indent for start
+        sb.ToString()
+       
 
     /// Nice formating for floats , some Rhino Objects and sequences of any kind, all items including nested items are printed out.
     let toNiceStringFull (x:'T) = 
