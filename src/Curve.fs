@@ -521,7 +521,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
         if curve.IsClosed then  curveId
         else
-            if not <| curve.MakeClosed(max tolerance RhinoMath.ZeroTolerance) then  failwithf "Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
+            if not <| curve.MakeClosed(ifZero1 tolerance RhinoMath.ZeroTolerance) then  failwithf "Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
             let rc = Doc.Objects.AddCurve(curve)
             if rc = Guid.Empty then failwithf "Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
             Doc.Views.Redraw()
@@ -562,10 +562,10 @@ module ExtensionsCurve =
     ///<param name="maxEdgeLength">(float) Optional, Default Value: <c>0.0</c>
     ///Maximum segment length. Ignored if 0.0 ?</param>
     ///<returns>(Guid) The new curve .</returns>
-    static member ConvertCurveToPolyline(curveId:Guid, [<OPT;DEF(5.0)>]angleTolerance:float, [<OPT;DEF(0.01)>]tolerance:float, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]minEdgeLength:float, [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
+    static member ConvertCurveToPolyline(curveId:Guid, [<OPT;DEF(0.0)>]angleTolerance:float, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]minEdgeLength:float, [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
-        let angleTolerance0 = max (Doc.ModelAngleToleranceRadians*10.) (RhinoMath.ToRadians(angleTolerance))
-        let tolerance0 = max (Doc.ModelAbsoluteTolerance*10.) tolerance
+        let angleTolerance0 = toRadians (ifZero1 angleTolerance 0.5 )
+        let tolerance0 = ifZero1 tolerance 0.01
 
         let polylineCurve = curve.ToPolyline( 0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, true)
         if isNull polylineCurve then failwithf "Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f,deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
@@ -698,7 +698,7 @@ module ExtensionsCurve =
     static member CurveBooleanDifference(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA  
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB  
-        let tolerance = max Doc.ModelAbsoluteTolerance tolerance        
+        let tolerance = ifZero2 Doc.ModelAbsoluteTolerance tolerance        
         let outCurves = Curve.CreateBooleanDifference(curve0, curve1, tolerance)
         let curves = ResizeArray()
         if notNull outCurves then
@@ -725,7 +725,7 @@ module ExtensionsCurve =
     static member CurveBooleanIntersection(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA  
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB  
-        let tolerance = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanIntersection(curve0, curve1, tolerance)
         let curves = ResizeArray()
         if notNull outCurves then
@@ -751,7 +751,7 @@ module ExtensionsCurve =
     static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let inCurves = resizeArray { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }  
         if inCurves.Count < 2 then failwithf "curveBooleanUnion:curveIds must have at least 2 curves %A" curveIds
-        let tolerance = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let outCurves = Curve.CreateBooleanUnion(inCurves, tolerance)        
         let curves = ResizeArray()
         if notNull outCurves then
@@ -777,7 +777,7 @@ module ExtensionsCurve =
     static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray * Guid ResizeArray=
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)  
-        let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let rc, outCurves, outPoints = Intersect.Intersection.CurveBrep(curve, brep, tolerance0)
         if not <| rc then  failwithf "curveBrepIntersect: Unable to add curve to document.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
 
@@ -920,7 +920,7 @@ module ExtensionsCurve =
         let curve1 = RhinoScriptSyntax.CoerceCurve curveA 
         let curve2 = if curveB=Guid.Empty then curve1 else RhinoScriptSyntax.CoerceCurve curveB
           
-        let tolerance0 = max tolerance Doc.ModelAbsoluteTolerance
+        let tolerance0 = ifZero1 tolerance Doc.ModelAbsoluteTolerance
         let mutable rc = null
         if curveB<>curveA then
             rc <- Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, Doc.ModelAbsoluteTolerance)
@@ -1417,8 +1417,8 @@ module ExtensionsCurve =
     static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
         let surface = RhinoScriptSyntax.CoerceSurface surfaceId  
-        let tolerance0 = max tolerance Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = max (toRadians(angleTolerance)) Doc.ModelAngleToleranceRadians
+        let tolerance0 = ifZero1 tolerance Doc.ModelAbsoluteTolerance
+        let angleTolerance0 = ifZero1 (toRadians(angleTolerance)) Doc.ModelAngleToleranceRadians
         let  rc = Intersect.Intersection.CurveSurface(curve, surface, tolerance0, angleTolerance0)
         if isNull rc then failwithf "curveSurfaceIntersection failed. (surfaceId:%A) (curveId:%A) (angleTolerance:%f) (tolerance:%f) " surfaceId curveId angleTolerance tolerance
         let events = ResizeArray()
@@ -1749,8 +1749,8 @@ module ExtensionsCurve =
     ///<returns>(Guid) The identifier of the new object</returns>
     static member FitCurve(curveId:Guid, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0.0)>]distanceTolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId) 
-        let distanceTolerance0 = max distanceTolerance Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = max (toRadians angleTolerance) Doc.ModelAngleToleranceRadians
+        let distanceTolerance0 = ifZero1 distanceTolerance Doc.ModelAbsoluteTolerance
+        let angleTolerance0 = ifZero1 (toRadians angleTolerance) Doc.ModelAngleToleranceRadians
         let nc = curve.Fit(degree, distanceTolerance0, angleTolerance0)
         if notNull nc then
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)  
@@ -1807,7 +1807,7 @@ module ExtensionsCurve =
     ///  properties of a arc. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
     ///<returns>(bool) True or False</returns>
     static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        let tol = max RhinoMath.ZeroTolerance tolerance
+        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsArc(tol) && not curve.IsClosed
@@ -1822,7 +1822,7 @@ module ExtensionsCurve =
     ///  properties of a circle. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
     ///<returns>(bool) True or False</returns>
     static member IsCircle(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let tol = max RhinoMath.ZeroTolerance tolerance
+        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
         |Some curve  -> curve.IsCircle(tol)
@@ -1848,7 +1848,7 @@ module ExtensionsCurve =
     ///  point. If omitted, the document's current absolute tolerance is used</param>
     ///<returns>(bool) True or False</returns>
     static member IsCurveClosable(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
         |Some curve  -> curve.IsClosable(tolerance0)
@@ -1872,7 +1872,7 @@ module ExtensionsCurve =
     ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
     ///<returns>(bool) True or False</returns>
     static member IsCurveInPlane(curveId:Guid, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let tolerance0 = max RhinoMath.ZeroTolerance tolerance
+        let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
         |Some curve  -> curve.IsInPlane(plane, tolerance0)
@@ -1887,7 +1887,7 @@ module ExtensionsCurve =
     ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        let tolerance0 = max RhinoMath.ZeroTolerance tolerance
+        let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance
         match  RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsLinear(tolerance0)
@@ -1914,7 +1914,7 @@ module ExtensionsCurve =
     ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        let tol = max RhinoMath.ZeroTolerance tolerance
+        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsPlanar(tol)
@@ -1944,7 +1944,7 @@ module ExtensionsCurve =
     ///  The curve segment index if `curve_id` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        let tol = max RhinoMath.ZeroTolerance tolerance
+        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
         |Some curve  -> curve.IsEllipse(tol)
@@ -1959,7 +1959,7 @@ module ExtensionsCurve =
     ///  The curve segment index if `curve_id` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsLine(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        let tol = max RhinoMath.ZeroTolerance tolerance
+        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
         |None -> false
         |Some c  ->
@@ -1983,7 +1983,7 @@ module ExtensionsCurve =
     ///The curve segment index if `curve_id` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsPointOnCurve(curveId:Guid, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
-        let tol = max RhinoMath.SqrtEpsilon tolerance
+        let tol = ifZero2 RhinoMath.SqrtEpsilon tolerance
         let curve = RhinoScriptSyntax.CoerceCurve(curveId,segmentIndex) 
         let t = ref 0.0
         curve.ClosestPoint(point, t, tol)
@@ -2034,7 +2034,7 @@ module ExtensionsCurve =
             failwithf "curveIds must contain at least 2 items.  curveIds:'%A' deleteInput:'%A' tolerance:'%A'" curveIds deleteInput tolerance
         
         let curves = resizeArray { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }  
-        let tolerance0 = max (tolerance)(2.1 * Doc.ModelAbsoluteTolerance)
+        let tolerance0 = ifZero1 tolerance (2.1 * Doc.ModelAbsoluteTolerance)
         let newcurves = Curve.JoinCurves(curves, tolerance0)               
         if isNull newcurves then 
             failwithf "curveIds must contain at least 2 items.  curveIds:'%A' deleteInput:'%A' tolerance:'%A'" curveIds deleteInput tolerance
@@ -2201,7 +2201,7 @@ module ExtensionsCurve =
     static member PlanarClosedCurveContainment(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA  
         let curveB = RhinoScriptSyntax.CoerceCurve curveB  
-        let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         let rc = Curve.PlanarClosedCurveRelationship(curveA, curveB, plane0, tolerance0)
         int(rc)
@@ -2219,7 +2219,7 @@ module ExtensionsCurve =
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA  
         let curveB = RhinoScriptSyntax.CoerceCurve curveB  
-        let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         Curve.PlanarCurveCollision(curveA, curveB, plane0, tolerance0)
 
@@ -2239,7 +2239,7 @@ module ExtensionsCurve =
     ///  2 = point is on the curve</returns>
     static member PointInPlanarClosedCurve(point:Point3d, curve:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
         let curve = RhinoScriptSyntax.CoerceCurve curve  
-        let tolerance0 = max Doc.ModelAbsoluteTolerance tolerance
+        let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
         let rc = curve.Contains(point, plane0, tolerance0)
         if rc=PointContainment.Unset then
