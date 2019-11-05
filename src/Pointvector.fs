@@ -956,9 +956,10 @@ module ExtensionsPointvector =
     ///<param name="vector">(Vector3d) The vector to unitize</param>
     ///<returns>(unit) unitized vector on success</returns>
     static member VectorUnitize(vector:Vector3d) : Vector3d =
-        let l = vector.Length
-        if l < RhinoMath.ZeroTolerance then failwithf "VectorUnitize failed on zero length or very short Vector %A" vector
-        Vector3d(vector.X/l, vector.Y/l, vector.Z/l)
+        let ll = sqrt vector.SquareLength
+        if Double.IsInfinity ll || ll < RhinoMath.ZeroTolerance then failwithf "VectorUnitize failed on zero length or very short Vector %A" vector
+        let l = 1. / ll
+        Vector3d(vector.X*l, vector.Y*l, vector.Z*l)
     (*
     def VectorUnitize(vector):
         '''Unitizes, or normalizes a 3D vector. Note, zero vectors cannot be unitized
