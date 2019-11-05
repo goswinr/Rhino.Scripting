@@ -2366,3 +2366,209 @@ module ExtensionsSurface =
     *)
 
 
+    [<EXT>]
+    ///<summary>Calculates intersections of two spheres</summary>
+    ///<param name="spherePlane0">(Plane) An equatorial plane of the first sphere. The origin of the
+    ///  plane will be the center point of the sphere</param>
+    ///<param name="sphereRadius0">(float) Radius of the first sphere</param>
+    ///<param name="spherePlane1">(Plane) Plane for second sphere</param>
+    ///<param name="sphereRadius1">(float) Radius for second sphere</param>
+    ///<returns>(float * Point3d * float) of intersection results
+    ///  [0] = type of intersection (0=point, 1=circle, 2=spheres are identical)
+    ///  [1] = Point of intersection or plane of circle intersection
+    ///  [2] = radius of circle if circle intersection</returns>
+    static member IntersectSpheres( spherePlane0:Plane, 
+                                    sphereRadius0:float, 
+                                    spherePlane1:Plane, 
+                                    sphereRadius1:float) : int * Circle * float =
+        let sphere0 = Sphere(spherePlane0, sphereRadius0)
+        let sphere1 = Sphere(spherePlane1, sphereRadius1)
+        let rc, circle = Intersect.Intersection.SphereSphere(sphere0, sphere1)
+        if rc = Intersect.SphereSphereIntersection.Point then
+            0, circle, 0.0
+        elif rc = Intersect.SphereSphereIntersection.Circle then
+            1, circle, circle.Radius 
+        elif rc = Intersect.SphereSphereIntersection.Overlap then
+            2, circle, 0.0
+        else
+            failwithf "Rhino.Scripting: IntersectSpheres failed.  spherePlane0:'%A' sphereRadius0:'%A' spherePlane1:'%A' sphereRadius1:'%A'" spherePlane0 sphereRadius0 spherePlane1 sphereRadius1
+    (*
+    def IntersectSpheres(sphere_plane0, sphere_radius0, sphere_plane1, sphere_radius1):
+        '''Calculates intersections of two spheres
+        Parameters:
+          sphere_plane0 (plane): an equatorial plane of the first sphere. The origin of the
+            plane will be the center point of the sphere
+          sphere_radius0 (number): radius of the first sphere
+          sphere_plane1 (plane): plane for second sphere
+          sphere_radius1 (number): radius for second sphere
+        Returns:
+          list(number, point, number): of intersection results
+            [0] = type of intersection (0=point, 1=circle, 2=spheres are identical)
+            [1] = Point of intersection or plane of circle intersection
+            [2] = radius of circle if circle intersection
+          None: on error
+        '''
+    
+        plane0 = rhutil.coerceplane(sphere_plane0, True)
+        plane1 = rhutil.coerceplane(sphere_plane1, True)
+        sphere0 = Rhino.Geometry.Sphere(plane0, sphere_radius0)
+        sphere1 = Rhino.Geometry.Sphere(plane1, sphere_radius1)
+        rc, circle = Rhino.Geometry.Intersect.Intersection.SphereSphere(sphere0, sphere1)
+        if rc==Rhino.Geometry.Intersect.SphereSphereIntersection.Point:
+            return [0, circle.Center]
+        if rc==Rhino.Geometry.Intersect.SphereSphereIntersection.Circle:
+            return [1, circle.Plane, circle.Radius]
+        if rc==Rhino.Geometry.Intersect.SphereSphereIntersection.Overlap:
+            return [2]
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object is a Brep, or a boundary representation model, object.</summary>
+    ///<param name="objectId">(Guid) The object's identifier.</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member IsBrep(objectId:Guid) : bool =
+        (RhinoScriptSyntax.TryCoerceBrep(objectId)).IsSome
+    (*
+    def IsBrep(object_id):
+        '''Verifies an object is a Brep, or a boundary representation model, object.
+        Parameters:
+          object_id (guid): The object's identifier.
+        Returns:
+          bool: True if successful, otherwise False.
+          None: on error.
+        '''
+    
+        return rhutil.coercebrep(object_id)!=None
+    *)
+
+
+    [<EXT>]
+    ///<summary>Determines if a surface is a portion of a cone</summary>
+    ///<param name="objectId">(Guid) The surface object's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsCone(objectId:Guid) : bool =
+        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
+        surface.IsCone()
+    (*
+    def IsCone(object_id):
+        '''Determines if a surface is a portion of a cone
+        Parameters:
+          object_id (guid): the surface object's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        surface = rhutil.coercesurface(object_id, True)
+        return surface.IsCone()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Determines if a surface is a portion of a cone</summary>
+    ///<param name="objectId">(Guid) The cylinder object's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsCylinder(objectId:Guid) : bool =
+        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
+        surface.IsCylinder()
+    (*
+    def IsCylinder(object_id):
+        '''Determines if a surface is a portion of a cone
+        Parameters:
+          object_id (guid): the cylinder object's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        surface = rhutil.coercesurface(object_id, True)
+        return surface.IsCylinder()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object is a plane surface. Plane surfaces can be created by
+    ///  the Plane command. Note, a plane surface is not a planar NURBS surface</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsPlaneSurface(objectId:Guid) : bool =
+        let face = RhinoScriptSyntax.CoerceSurface(objectId)
+        match face with
+        | :? BrepFace  as bface -> 
+            if bface.IsSurface then
+                match bface.UnderlyingSurface()with
+                | :?  PlaneSurface -> true
+                | _ -> false 
+            else    
+                false
+        | _ -> false
+    (*
+    def IsPlaneSurface(object_id):
+        '''Verifies an object is a plane surface. Plane surfaces can be created by
+        the Plane command. Note, a plane surface is not a planar NURBS surface
+        Parameters:
+          object_id (guid): the object's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        face = rhutil.coercesurface(object_id, True)
+        if type(face) is Rhino.Geometry.BrepFace and face.IsSurface:
+            return type(face.UnderlyingSurface()) is Rhino.Geometry.PlaneSurface
+        return False
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies that a point is inside a closed surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<param name="point">(Point3d) The test, or sampling point</param>
+    ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
+    ///If true, the test point must be inside by at least tolerance</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///Distance tolerance used for intersection and determining
+    ///  strict inclusion. If omitted, Rhino's internal tolerance is used</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsPointInSurface( objectId:Guid, 
+                                    point:Point3d, 
+                                    [<OPT;DEF(false)>]strictlyIn:bool, 
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
+        //objectId = RhinoScriptSyntax.Coerceguid(objectId)
+        //point = RhinoScriptSyntax.Coerce3dpoint(point)
+        //if objectId|> isNull  || point|> isNull  then failwithf "Rhino.Scripting: IsPointInSurface failed.  objectId:'%A' point:'%A' strictlyIn:'%A' tolerance:'%A'" objectId point strictlyIn tolerance
+        let obj = Doc.Objects.FindId(objectId)
+        let  tolerance= ifZero1 tolerance Rhino.RhinoMath.SqrtEpsilon
+        let brep = 
+            match obj with
+            | :? DocObjects.ExtrusionObject -> obj.ExtrusionGeometry.ToBrep(false)
+            | :? DocObjects.BrepObject -> obj.BrepGeometry
+        elif hasattr(obj, "Geometry") then
+            brep <- obj.Geometry
+        brep.IsPointInside(point, tolerance, strictlyIn)
+    (*
+    def IsPointInSurface(object_id, point, strictly_in=False, tolerance=None):
+        '''Verifies that a point is inside a closed surface or polysurface
+        Parameters:
+          object_id (guid): the object's identifier
+          point (point): The test, or sampling point
+          strictly_in (bool, optional): If true, the test point must be inside by at least tolerance
+          tolerance (number, optional): distance tolerance used for intersection and determining
+            strict inclusion. If omitted, Rhino's internal tolerance is used
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        object_id = rhutil.coerceguid(object_id, True)
+        point = rhutil.coerce3dpoint(point, True)
+        if object_id==None or point==None: return scriptcontext.errorhandler()
+        obj = scriptcontext.doc.Objects.FindId(object_id)
+        if tolerance is None: tolerance = Rhino.RhinoMath.SqrtEpsilon
+        brep = None
+        if type(obj)==Rhino.DocObjects.ExtrusionObject:
+            brep = obj.ExtrusionGeometry.ToBrep(False)
+        elif type(obj)==Rhino.DocObjects.BrepObject:
+            brep = obj.BrepGeometry
+        elif hasattr(obj, "Geometry"):
+            brep = obj.Geometry
+        return brep.IsPointInside(point, tolerance, strictly_in)
+    *)

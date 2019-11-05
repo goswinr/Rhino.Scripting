@@ -34,7 +34,7 @@ type Filter internal () =
     member _.Extrusion = 1073741824
 
 module private FilterModule =
-    // the singelton of this class
+    // the singelton of this class oesed below
     let filter = Filter()
 
 [<AbstractClass; Sealed>]
@@ -469,7 +469,7 @@ type RhinoScriptSyntax private () = // no constructor?
     
     ///<summary>attempt to get curve geometry from the document with a given objectId.</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
-    ///<param name="segmentIndex">(int, optional) index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
+    ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>Rhino.Geometry.Curve. Fails on bad input</returns>
     static member CoerceCurve(objectId:'T, [<OPT;DEF(-1)>]segmentIndex:int): Curve = 
         if segmentIndex < 0 then 
@@ -604,7 +604,7 @@ type RhinoScriptSyntax private () = // no constructor?
 
     ///<summary>attempt to get Surface class from given Guid</summary>
     ///<param name="objectId">Surface identifier (Guid)</param>
-    ///<returns>Rhino.Geometry.Mesh Option. </returns>
+    ///<returns>Rhino.Geometry.Surface Option. </returns>
     static member TryCoerceSurface (objectId:Guid) :Surface option =
         if objectId = Guid.Empty then None
         else
@@ -618,10 +618,22 @@ type RhinoScriptSyntax private () = // no constructor?
                     else None
                 | _ -> None
 
+    ///<summary>attempt to get a Polysurface or Brep class from given Guid</summary>
+    ///<param name="objectId">Polysurface identifier (Guid)</param>
+    ///<returns>Rhino.Geometry.Mesh Option. </returns>
+    static member TryCoerceBrep (objectId:Guid) :Brep option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> 
+                match o.Geometry with
+                | :? Brep as b ->  Some b
+                | _ -> None
 
     ///<summary>attempt to get curve geometry from the document with a given objectId.</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
-    ///<param name="segmentIndex">(int, optional) index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
+    ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>Rhino.Geometry.Curve. Option</returns>
     static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option= 
         match RhinoScriptSyntax.TryCoerceGeometry objectId with 
