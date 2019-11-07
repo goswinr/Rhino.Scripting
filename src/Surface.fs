@@ -2520,7 +2520,7 @@ module ExtensionsSurface =
 
 
     [<EXT>]
-    ///<summary>Verifies that a point is inside a closed surface or polysurface</summary>
+    ///<summary>Verifies that a point is inside a closed mesh ,surface or polysurface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
@@ -2537,14 +2537,22 @@ module ExtensionsSurface =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         //if objectId|> isNull  || point|> isNull  then failwithf "Rhino.Scripting: IsPointInSurface failed.  objectId:'%A' point:'%A' strictlyIn:'%A' tolerance:'%A'" objectId point strictlyIn tolerance
         let obj = Doc.Objects.FindId(objectId)
-        let  tolerance= ifZero1 tolerance Rhino.RhinoMath.SqrtEpsilon
-        let brep = 
-            match obj with
-            | :? DocObjects.ExtrusionObject -> obj.ExtrusionGeometry.ToBrep(false)
-            | :? DocObjects.BrepObject -> obj.BrepGeometry
-        elif hasattr(obj, "Geometry") then
-            brep <- obj.Geometry
-        brep.IsPointInside(point, tolerance, strictlyIn)
+        let  tolerance= ifZero1 tolerance Rhino.RhinoMath.SqrtEpsilon       
+        match obj with
+        | :? DocObjects.ExtrusionObject as es-> 
+            let brep= es.ExtrusionGeometry.ToBrep(false)
+            if not brep.IsSolid then failwithf "IsPointInSurface failed on not closed Extrusion %A"  objectId
+            brep.IsPointInside(point, tolerance, strictlyIn)
+        | :? DocObjects.BrepObject as bo-> 
+            let br= bo.BrepGeometry
+            if not br.IsSolid then failwithf "IsPointInSurface failed on not closed Brep %A"  objectId
+            br.IsPointInside(point, tolerance, strictlyIn)
+        | :? DocObjects.MeshObject as mo -> 
+            let me = mo.MeshGeometry
+            if not me.IsClosed then failwithf "IsPointInSurface failed on not closed Mesh %A"  objectId
+            me.IsPointInside(point, tolerance, strictlyIn)
+        | _ -> failwithf "IsPointInSurface does not work  on %s %A" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+
     (*
     def IsPointInSurface(object_id, point, strictly_in=False, tolerance=None):
         '''Verifies that a point is inside a closed surface or polysurface
@@ -2572,3 +2580,935 @@ module ExtensionsSurface =
             brep = obj.Geometry
         return brep.IsPointInside(point, tolerance, strictly_in)
     *)
+    [<EXT>]
+    ///<summary>Verifies that a point lies on a surface</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<param name="point">(Point3d) The test, or sampling point</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsPointOnSurface(objectId:Guid, point:Point3d) : bool =
+        let surf = RhinoScriptSyntax.CoerceSurface(objectId)
+        //point = RhinoScriptSyntax.Coerce3dpoint(point)
+        let mutable rc, u, v = surf.ClosestPoint(point)
+        if rc  then
+            let srfpt = surf.PointAt(u,v)
+            if srfpt.DistanceTo(point) > Doc.ModelAbsoluteTolerance then
+                rc <- false
+            else 
+                match RhinoScriptSyntax.TryCoerceBrep(objectId) with 
+                | Some b -> 
+                    rc <- b.Faces.[0].IsPointOnFace(u,v) <> PointFaceRelation.Exterior
+                | _ -> () 
+        else
+            failwithf "IsPointOnSurface failed for surf.ClosestPoint on %A %A" objectId point
+        rc
+    (*
+    def IsPointOnSurface(object_id, point):
+        '''Verifies that a point lies on a surface
+        Parameters:
+          object_id (guid): the object's identifier
+          point (point): The test, or sampling point
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        surf = rhutil.coercesurface(object_id, True)
+        point = rhutil.coerce3dpoint(point, True)
+        rc, u, v = surf.ClosestPoint(point)
+        if rc:
+            srf_pt = surf.PointAt(u,v)
+            if srf_pt.DistanceTo(point)>scriptcontext.doc.ModelAbsoluteTolerance:
+                rc = False
+            else:
+                rc = surf.IsPointOnFace(u,v) != Rhino.Geometry.PointFaceRelation.Exterior
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object is a polysurface. Polysurfaces consist of two or more
+    ///  surfaces joined together. If the polysurface fully encloses a volume, it is
+    ///  considered a solid.</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True is successful, otherwise False</returns>
+    static member IsPolysurface(objectId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceBrep(objectId) with 
+        | Some b ->  b.Faces.Count > 1
+        | _ -> false
+    (*
+    def IsPolysurface(object_id):
+        '''Verifies an object is a polysurface. Polysurfaces consist of two or more
+        surfaces joined together. If the polysurface fully encloses a volume, it is
+        considered a solid.
+        Parameters:
+          object_id (guid): the object's identifier
+        Returns:
+          bool: True is successful, otherwise False
+        '''
+    
+        brep = rhutil.coercebrep(object_id)
+        if brep is None: return False
+        return brep.Faces.Count>1
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a Guid refers to a closed polysurface. If the polysurface fully encloses
+    ///  a volume, it is considered a solid.</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True is successful, otherwise False</returns>
+    static member IsPolysurfaceClosed(objectId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceBrep(objectId) with 
+        | Some b ->  b.IsSolid
+        | _ -> false
+    (*
+    def IsPolysurfaceClosed(object_id):
+        '''Verifies a polysurface object is closed. If the polysurface fully encloses
+        a volume, it is considered a solid.
+        Parameters:
+          object_id (guid): the object's identifier
+        Returns:
+          bool: True is successful, otherwise False
+        '''
+    
+        brep = rhutil.coercebrep(object_id, True)
+        return brep.IsSolid
+    *)
+
+
+    [<EXT>]
+    ///<summary>Determines if a surface is a portion of a sphere</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsSphere(objectId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceSurface(objectId) with 
+        | Some b ->  b.IsSphere()
+        | _ -> false
+        
+    (*
+    def IsSphere(object_id):
+        '''Determines if a surface is a portion of a sphere
+        Parameters:
+          object_id (guid): the object's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        surface = rhutil.coercesurface(object_id, True)
+        return surface.IsSphere()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies an object is a surface. Brep objects with only one face are
+    ///  also considered surfaces.</summary>
+    ///<param name="objectId">(Guid) The object's identifier.</param>
+    ///<returns>(bool) True , otherwise False.</returns>
+    static member IsSurface(objectId:Guid) : bool =
+        RhinoScriptSyntax.TryCoerceSurface(objectId).IsSome
+    (*
+    def IsSurface(object_id):
+        '''Verifies an object is a surface. Brep objects with only one face are
+        also considered surfaces.
+        Parameters:
+          object_id (guid): the object's identifier.
+        Returns:
+          bool: True if successful, otherwise False.
+        '''
+    
+        brep = rhutil.coercebrep(object_id)
+        if brep and brep.Faces.Count==1: return True
+        surface = rhutil.coercesurface(object_id)
+        return (surface!=None)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a surface object is closed in the specified direction.  If the
+    ///  surface fully encloses a volume, it is considered a solid</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<param name="direction">(int) 0=U direction check, 1=V direction check</param>
+    ///<returns>(bool) True or False</returns>
+    static member IsSurfaceClosed(surfaceId:Guid, direction:int) : bool =
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with 
+        | Some surface ->  surface.IsClosed(direction)
+        | _ -> false
+        
+    (*
+    def IsSurfaceClosed( surface_id, direction ):
+        '''Verifies a surface object is closed in the specified direction.  If the
+        surface fully encloses a volume, it is considered a solid
+        Parameters:
+          surface_id (guid): identifier of a surface
+          direction (number): 0=U direction check, 1=V direction check
+        Returns:
+          bool: True or False
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        return surface.IsClosed(direction)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a surface object is periodic in the specified direction.</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<param name="direction">(int) 0=U direction check, 1=V direction check</param>
+    ///<returns>(bool) True or False</returns>
+    static member IsSurfacePeriodic(surfaceId:Guid, direction:int) : bool =
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with 
+        | Some surface ->  surface.IsPeriodic(direction)
+        | _ -> false
+        
+    (*
+    def IsSurfacePeriodic(surface_id, direction):
+        '''Verifies a surface object is periodic in the specified direction.
+        Parameters:
+          surface_id (guid): identifier of a surface
+          direction (number): 0=U direction check, 1=V direction check
+        Returns:
+          bool: True or False
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        return surface.IsPeriodic(direction)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a surface object is planar</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///Tolerance used when checked. If omitted, the current absolute
+    ///  tolerance is used</param>
+    ///<returns>(bool) True or False</returns>
+    static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =        
+        let tolerance = ifZero1 tolerance Doc.ModelAbsoluteTolerance
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with 
+        | Some surface ->  surface.IsPlanar(tolerance)
+        | _ -> false
+   
+    (*
+    def IsSurfacePlanar(surface_id, tolerance=None):
+        '''Verifies a surface object is planar
+        Parameters:
+          surface_id (guid): identifier of a surface
+          tolerance (number): tolerance used when checked. If omitted, the current absolute
+            tolerance is used
+        Returns:
+          bool: True or False
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        if tolerance is None:
+            tolerance = scriptcontext.doc.ModelAbsoluteTolerance
+        return surface.IsPlanar(tolerance)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a surface object is rational</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsSurfaceRational(surfaceId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions 
+        | Some surface ->  
+            let ns = surface.ToNurbsSurface()
+            if ns|> isNull  then false
+            else ns.IsRational
+        | _ -> false
+        
+    (*
+    def IsSurfaceRational(surface_id):
+        '''Verifies a surface object is rational
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        ns = surface.ToNurbsSurface()
+        if ns is None: return False
+        return ns.IsRational
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a surface object is singular in the specified direction.
+    ///  Surfaces are considered singular if a side collapses to a point.</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="direction">(int) 0=south
+    ///  1=east
+    ///  2=north
+    ///  3=west</param>
+    ///<returns>(bool) True or False</returns>
+    static member IsSurfaceSingular(surfaceId:Guid, direction:int) : bool =
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with    //TODO better fail if input is not a surface ?? here and above functions 
+        | Some surface ->  
+            surface.IsSingular(direction)
+        | _ -> false
+    (*
+    def IsSurfaceSingular(surface_id, direction):
+        '''Verifies a surface object is singular in the specified direction.
+        Surfaces are considered singular if a side collapses to a point.
+        Parameters:
+          surface_id (guid): the surface's identifier
+          direction (number):
+            0=south
+            1=east
+            2=north
+            3=west
+        Returns:
+          bool: True or False
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        return surface.IsSingular(direction)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Verifies a surface object has been trimmed</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(bool) True or False</returns>
+    static member IsSurfaceTrimmed(surfaceId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceBrep(surfaceId) with 
+        | Some brep ->  not brep.IsSurface
+        | _ -> false //TODO better fail if input is not a surface ?? here and above functions 
+        
+    (*
+    def IsSurfaceTrimmed(surface_id):
+        '''Verifies a surface object has been trimmed
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          bool: True or False
+        '''
+    
+        brep = rhutil.coercebrep(surface_id, True)
+        return not brep.IsSurface
+    *)
+
+
+    [<EXT>]
+    ///<summary>Determines if a surface is a portion of a torus</summary>
+    ///<param name="surfaceId">(Guid) The surface object's identifier</param>
+    ///<returns>(bool) True , otherwise False</returns>
+    static member IsTorus(surfaceId:Guid) : bool =
+        match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions 
+        | Some surface ->  surface.IsTorus()
+        | _ -> false
+       
+    (*
+    def IsTorus(surface_id):
+        '''Determines if a surface is a portion of a torus
+        Parameters:
+          surface_id (guid): the surface object's identifier
+        Returns:
+          bool: True if successful, otherwise False
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        return surface.IsTorus()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Gets the sphere definition from a surface, if possible.</summary>
+    ///<param name="surfaceId">(Guid) The identifier of the surface object</param>
+    ///<returns>(Plane * float) The equatorial plane of the sphere, and its radius.</returns>
+    static member SurfaceSphere(surfaceId:Guid) : Plane * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let tol = Doc.ModelAbsoluteTolerance
+        let sphere = ref Sphere.Unset
+        let issphere = surface.TryGetSphere(sphere,tol)
+        if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
+        else failwithf "SurfaceSphere input is not a sphere %A"surfaceId
+    (*
+    def SurfaceSphere(surface_id):
+        '''Gets the sphere definition from a surface, if possible.
+        Parameters:
+          surface_id (guid): the identifier of the surface object
+        Returns:
+          (plane, number): The equatorial plane of the sphere, and its radius.
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        tol = scriptcontext.doc.ModelAbsoluteTolerance
+        is_sphere, sphere = surface.TryGetSphere(tol)
+        rc = None
+        if is_sphere: rc = (sphere.EquatorialPlane, sphere.Radius)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Joins two or more surface or polysurface objects together to form one
+    ///  polysurface object</summary>
+    ///<param name="objectIds">(Guid seq) List of object identifiers</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete the original surfaces</param>
+    ///<returns>(Guid) identifier of newly created object on success</returns>
+    static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        let breps =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) } 
+        if breps.Count<2 then failwithf "Rhino.Scripting: JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
+        let tol = Doc.ModelAbsoluteTolerance * 2.1
+        let joinedbreps = Brep.JoinBreps(breps, tol)
+        if joinedbreps|> isNull  then 
+            failwithf "Rhino.Scripting: JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput 
+        if joinedbreps.Length <> 1 then
+            failwithf "Rhino.Scripting: JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
+        let rc = Doc.Objects.AddBrep(joinedbreps.[0])
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
+        if  deleteInput then
+            for objectId in objectIds do
+                //id = RhinoScriptSyntax.Coerceguid(objectId)
+                Doc.Objects.Delete(objectId, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+    (*
+    def JoinSurfaces(object_ids, delete_input=False):
+        '''Joins two or more surface or polysurface objects together to form one
+        polysurface object
+        Parameters:
+          object_ids ([guid, ...]) list of object identifiers
+          delete_input (bool, optional): Delete the original surfaces
+        Returns:
+          guid: identifier of newly created object on success
+          None: on failure
+        '''
+    
+        breps = [rhutil.coercebrep(id, True) for id in object_ids]
+        if len(breps)<2: return scriptcontext.errorhandler()
+        tol = scriptcontext.doc.ModelAbsoluteTolerance * 2.1
+        joinedbreps = Rhino.Geometry.Brep.JoinBreps(breps, tol)
+        if joinedbreps is None or len(joinedbreps)!=1:
+            return scriptcontext.errorhandler()
+        rc = scriptcontext.doc.Objects.AddBrep(joinedbreps[0])
+        if rc==System.Guid.Empty: return scriptcontext.errorhandler()
+        if delete_input:
+            for id in object_ids:
+                id = rhutil.coerceguid(id)
+                scriptcontext.doc.Objects.Delete(id, True)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    //(FIXME) VarOutTypes
+    ///<summary>Makes an existing surface a periodic NURBS surface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="direction">(int) The direction to make periodic, either 0=U or 1=V</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete the input surface</param>
+    ///<returns>(Guid) if delete_input is False, identifier of the new surface</returns>
+    static member MakeSurfacePeriodic( surfaceId:Guid, 
+                                       direction:int, 
+                                       [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let newsurf = Surface.CreatePeriodicSurface(surface, direction)
+        if newsurf|> isNull  then failwithf "Rhino.Scripting: MakeSurfacePeriodic failed.  surfaceId:'%A' direction:'%A' deleteInput:'%A'" surfaceId direction deleteInput
+        //id = RhinoScriptSyntax.Coerceguid(surfaceId)
+        if deleteInput then
+            Doc.Objects.Replace(surfaceId, newsurf)|> ignore
+            Doc.Views.Redraw()
+            surfaceId
+        else 
+            let objectIdn = Doc.Objects.AddSurface(newsurf)
+            Doc.Views.Redraw()
+            objectIdn
+    (*
+    def MakeSurfacePeriodic(surface_id, direction, delete_input=False):
+        '''Makes an existing surface a periodic NURBS surface
+        Parameters:
+          surface_id (guid): the surface's identifier
+          direction (number): The direction to make periodic, either 0=U or 1=V
+          delete_input (bool, optional): delete the input surface
+        Returns:
+          guid: if delete_input is False, identifier of the new surface
+          guid: if delete_input is True, identifier of the modifier surface
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        newsurf = Rhino.Geometry.Surface.CreatePeriodicSurface(surface, direction)
+        if newsurf is None: return scriptcontext.errorhandler()
+        id = rhutil.coerceguid(surface_id)
+        if delete_input:
+            scriptcontext.doc.Objects.Replace(id, newsurf)
+        else:
+            id = scriptcontext.doc.Objects.AddSurface(newsurf)
+        scriptcontext.doc.Views.Redraw()
+        return id
+    *)
+
+
+    [<EXT>]
+    ///<summary>Offsets a trimmed or untrimmed surface by a distance. The offset surface
+    ///  will be added to Rhino.</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="distance">(float) The distance to offset</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
+    ///  document's absolute tolerance is usually sufficient.</param>
+    ///<param name="bothSides">(bool) Optional, Default Value: <c>false</c>
+    ///Offset to both sides of the input surface</param>
+    ///<param name="createSolid">(bool) Optional, Default Value: <c>false</c>
+    ///Make a solid object</param>
+    ///<returns>(Guid) identifier of the new object</returns>
+    static member OffsetSurface( surfaceId:Guid, 
+                                 distance:float, 
+                                 [<OPT;DEF(0.0)>]tolerance:float, 
+                                 [<OPT;DEF(false)>]bothSides:bool, 
+                                 [<OPT;DEF(false)>]createSolid:bool) : Guid =
+        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let mutable face = null
+        if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
+        if face|> isNull  then failwithf "Rhino.Scripting: OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
+        let tolerance= ifZero1 tolerance Doc.ModelAbsoluteTolerance
+        let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
+        if newbrep|> isNull  then failwithf "Rhino.Scripting: OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
+        let rc = Doc.Objects.AddBrep(newbrep)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
+        Doc.Views.Redraw()
+        rc
+    (*
+    def OffsetSurface(surface_id, distance, tolerance=None, both_sides=False, create_solid=False):
+        '''Offsets a trimmed or untrimmed surface by a distance. The offset surface
+        will be added to Rhino.
+        Parameters:
+          surface_id (guid): the surface's identifier
+          distance (number): the distance to offset
+          tolerance (number, optional): The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
+            document's absolute tolerance is usually sufficient.
+          both_sides (bool, optional): Offset to both sides of the input surface
+          create_solid (bool, optional): Make a solid object
+        Returns:
+          guid: identifier of the new object if successful
+          None: on error
+        '''
+    
+        brep = rhutil.coercebrep(surface_id, True)
+        face = None
+        if (1 == brep.Faces.Count): face = brep.Faces[0]
+        if face is None: return scriptcontext.errorhandler()
+        if tolerance is None: tolerance = scriptcontext.doc.ModelAbsoluteTolerance
+        newbrep = Rhino.Geometry.Brep.CreateFromOffsetFace(face, distance, tolerance, both_sides, create_solid)
+        if newbrep is None: return scriptcontext.errorhandler()
+        rc = scriptcontext.doc.Objects.AddBrep(newbrep)
+        if rc==System.Guid.Empty: return scriptcontext.errorhandler()
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Pulls a curve object to a surface object</summary>
+    ///<param name="surface">(Guid) The surface's identifier</param>
+    ///<param name="curve">(Guid) The curve's identifier</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Should the input items be deleted</param>
+    ///<returns>(Guid ResizeArray) of new curves</returns>
+    static member PullCurve( surface:Guid, 
+                             curve:Guid, 
+                             [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
+        let crvobj = RhinoScriptSyntax.CoerceRhinoObject(curve)
+        let brep = RhinoScriptSyntax.CoerceBrep(surface)
+        let curve = RhinoScriptSyntax.CoerceCurve(curve)
+        let tol = Doc.ModelAbsoluteTolerance
+        let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
+        let rc =  resizeArray { for curve in curves do yield Doc.Objects.AddCurve(curve) }         
+        if deleteInput  then
+            Doc.Objects.Delete(crvobj, true) |> ignore
+        Doc.Views.Redraw()
+        rc
+    (*
+    def PullCurve(surface, curve, delete_input=False):
+        '''Pulls a curve object to a surface object
+        Parameters:
+          surface (guid): the surface's identifier
+          curve (guid): the curve's identifier
+          delete_input (bool, optional) should the input items be deleted
+        Returns:
+          list(guid, ...): of new curves if successful
+          None: on error
+        '''
+    
+        crvobj = rhutil.coercerhinoobject(curve, True, True)
+        brep = rhutil.coercebrep(surface, True)
+        curve = rhutil.coercecurve(curve, -1, True)
+        tol = scriptcontext.doc.ModelAbsoluteTolerance
+        curves = Rhino.Geometry.Curve.PullToBrepFace(curve, brep.Faces[0], tol)
+        rc = [scriptcontext.doc.Objects.AddCurve(curve) for curve in curves]
+        if rc:
+            if delete_input and crvobj:
+                scriptcontext.doc.Objects.Delete(crvobj, True)
+            scriptcontext.doc.Views.Redraw()
+            return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Rebuilds a surface to a given degree and control point count. For more
+    ///  information see the Rhino help file for the Rebuild command</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="degree">(int * int) Optional, Default Value: <c>3*3</c>
+    ///Two numbers that identify surface degree in both U and V directions</param>
+    ///<param name="pointcount">(int * int) Optional, Default Value: <c>10*10</c>
+    ///Two numbers that identify the surface point count in both the U and V directions</param>
+    ///<returns>(bool) True of False indicating success or failure</returns>
+    static member RebuildSurface( objectId:Guid, 
+                                  [<OPT;DEF(null)>]degree:int * int, 
+                                  [<OPT;DEF(null)>]pointcount:int * int) : bool =
+        let degree = degree |? (3,3)
+        let pointcount = pointcount |? (10,10)
+        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
+        let newsurf = surface.Rebuild( degree|> fst, degree|> snd, pointcount|> fst, pointcount|> snd )
+        if newsurf|> isNull  then false
+        else
+            //objectId = RhinoScriptSyntax.Coerceguid(objectId)
+            let rc = Doc.Objects.Replace(objectId, newsurf)
+            if rc then Doc.Views.Redraw()
+            rc
+    (*
+    def RebuildSurface(object_id, degree=(3,3), pointcount=(10,10)):
+        '''Rebuilds a surface to a given degree and control point count. For more
+        information see the Rhino help file for the Rebuild command
+        Parameters:
+          object_id (guid): the surface's identifier
+          degree ([number, number], optional): two numbers that identify surface degree in both U and V directions
+          pointcount ([number, number], optional): two numbers that identify the surface point count in both the U and V directions
+        Returns:
+          bool: True of False indicating success or failure
+        '''
+    
+        surface = rhutil.coercesurface(object_id, True)
+        newsurf = surface.Rebuild( degree[0], degree[1], pointcount[0], pointcount[1] )
+        if newsurf is None: return False
+        object_id = rhutil.coerceguid(object_id)
+        rc = scriptcontext.doc.Objects.Replace(object_id, newsurf)
+        if rc: scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Deletes a knot from a surface object.</summary>
+    ///<param name="surface">(Guid) The reference of the surface object</param>
+    ///<param name="uvParameter">(float * float) ): An indexable item containing a U,V parameter on the surface. List, tuples and UVIntervals will work.
+    ///  Note, if the parameter is not equal to one of the existing knots, then the knot closest to the specified parameter will be removed.</param>
+    ///<param name="vDirection">(bool) If True, or 1, the V direction will be addressed. If False, or 0, the U direction.</param>
+    ///<returns>(bool) True of False indicating success or failure</returns>
+    static member RemoveSurfaceKnot( surface:Guid, 
+                                     uvParameter:float * float, 
+                                     vDirection:bool) : bool =
+        let srfinst = RhinoScriptSyntax.CoerceSurface(surface)
+        let uparam = uvParameter|> fst
+        let vparam = uvParameter|> snd
+        let success, nuparam, nvparam = srfinst.GetSurfaceParameterFromNurbsFormParameter(uparam, vparam)
+        if not success then false
+        else
+            let nsrf = srfinst.ToNurbsSurface()
+            if isNull nsrf then false
+            else
+                let knots = if vDirection then nsrf.KnotsV  else nsrf.KnotsU 
+                let success = knots.RemoveKnotsAt(nuparam, nvparam)
+                if not success then false
+                else 
+                    Doc.Objects.Replace(surface, nsrf)|> ignore
+                    Doc.Views.Redraw()
+                    true
+    (*
+    def RemoveSurfaceKnot(surface, uv_parameter, v_direction):
+        '''Deletes a knot from a surface object.
+        Parameters:
+          surface (guid): The reference of the surface object
+          uv_parameter (list(number, number)): An indexable item containing a U,V parameter on the surface. List, tuples and UVIntervals will work.
+            Note, if the parameter is not equal to one of the existing knots, then the knot closest to the specified parameter will be removed.
+          v_direction (bool): if True, or 1, the V direction will be addressed. If False, or 0, the U direction.
+        Returns:
+          bool: True of False indicating success or failure
+        '''
+    
+        srf_inst = rhutil.coercesurface(surface, True)
+        u_param = uv_parameter[0]
+        v_param = uv_parameter[1]
+        success, n_u_param, n_v_param = srf_inst.GetSurfaceParameterFromNurbsFormParameter(u_param, v_param)
+        if not success: return False
+        n_srf = srf_inst.ToNurbsSurface()
+        if not n_srf: return False
+        knots = n_srf.KnotsV if v_direction else n_srf.KnotsU
+        success = knots.RemoveKnotsAt(n_u_param, n_v_param)
+        if not success: return False
+        scriptcontext.doc.Objects.Replace(surface, n_srf)
+        scriptcontext.doc.Views.Redraw()
+        return True
+    *)
+
+
+    [<EXT>]
+    ///<summary>Reverses U or V directions of a surface, or swaps (transposes) U and V
+    ///  directions.</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<param name="direction">(int) As a bit coded flag to swap
+    ///  1 = reverse U
+    ///  2 = reverse V
+    ///  4 = transpose U and V (values can be combined)</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ReverseSurface(surfaceId:Guid, direction:int) : unit =
+        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        if brep.Faces.Count <> 1 then failwithf "Rhino.Scripting: ReverseSurface failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
+        let face = brep.Faces.[0]
+        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore
+        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore
+        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore
+        Doc.Objects.Replace(surfaceId, brep)|> ignore
+        Doc.Views.Redraw()
+        
+    (*
+    def ReverseSurface(surface_id, direction):
+        '''Reverses U or V directions of a surface, or swaps (transposes) U and V
+        directions.
+        Parameters:
+          surface_id (guid): identifier of a surface object
+          direction (number): as a bit coded flag to swap
+                1 = reverse U
+                2 = reverse V
+                4 = transpose U and V (values can be combined)
+        Returns:
+          bool: indicating success or failure
+          None: on error
+        '''
+    
+        brep = rhutil.coercebrep(surface_id, True)
+        if not brep.Faces.Count==1: return scriptcontext.errorhandler()
+        face = brep.Faces[0]
+        if direction & 1:
+            face.Reverse(0, True)
+        if direction & 2:
+            face.Reverse(1, True)
+        if direction & 4:
+            face.Transpose(True)
+        scriptcontext.doc.Objects.Replace(surface_id, brep)
+        scriptcontext.doc.Views.Redraw()
+        return True
+    *)
+
+
+    [<EXT>]
+    ///<summary>Shoots a ray at a collection of surfaces or Polysurfaces</summary>
+    ///<param name="surfaceIds">(Guid seq) One of more surface identifiers</param>
+    ///<param name="startPoint">(Point3d) Starting point of the ray</param>
+    ///<param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
+    ///<param name="reflections">(int) Optional, Default Value: <c>10</c>
+    ///The maximum number of times the ray will be reflected</param>
+    ///<returns>(Point3d array) of reflection points on success</returns>
+    static member ShootRay( surfaceIds:Guid seq, 
+                            startPoint:Point3d, 
+                            direction:Vector3d, 
+                            [<OPT;DEF(10)>]reflections:int) : Point3d array =
+        //startPoint = RhinoScriptSyntax.Coerce3dpoint(startPoint)
+        //direction = RhinoScriptSyntax.Coerce3dvector(direction)
+        //id = RhinoScriptSyntax.Coerceguid(surfaceIds)
+        //if notNull objectId then surfaceIds <- .[id]
+        let ray = Ray3d(startPoint, direction)
+        let breps = resizeArray{for objectId in surfaceIds do RhinoScriptSyntax.CoerceBrep(objectId)}
+        if breps.Count=0 then failwithf "Rhino.Scripting: ShootRay failed.  surfaceIds:'%A' startPoint:'%A' direction:'%A' reflections:'%A'" surfaceIds startPoint direction reflections
+        Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
+  
+    (*
+    def ShootRay(surface_ids, start_point, direction, reflections=10):
+        '''Shoots a ray at a collection of surfaces
+        Parameters:
+          surface_ids ([guid, ...]): one of more surface identifiers
+          start_point (point): starting point of the ray
+          direction (vector):  vector identifying the direction of the ray
+          reflections (number, optional): the maximum number of times the ray will be reflected
+        Returns:
+          list(point, ...): of reflection points on success
+          None: on error
+        '''
+    
+        start_point = rhutil.coerce3dpoint(start_point, True)
+        direction = rhutil.coerce3dvector(direction, True)
+        id = rhutil.coerceguid(surface_ids, False)
+        if id: surface_ids = [id]
+        ray = Rhino.Geometry.Ray3d(start_point, direction)
+        breps = []
+        for id in surface_ids:
+            brep = rhutil.coercebrep(id)
+            if brep: breps.append(brep)
+            else:
+                surface = rhutil.coercesurface(id, True)
+                breps.append(surface)
+        if not breps: return scriptcontext.errorhandler()
+        points = Rhino.Geometry.Intersect.Intersection.RayShoot(ray, breps, reflections)
+        if points:
+            rc = []
+            rc.append(start_point)
+            rc = rc + list(points)
+            return rc
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Creates the shortest possible curve(geodesic) between two points on a
+    ///  surface. For more details, see the ShortPath command in Rhino help</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<param name="startPoint">(Point3d) Start point of 'start/end points of the short curve' (FIXME 0)</param>
+    ///<param name="endPoint">(Point3d) End point of 'start/end points of the short curve' (FIXME 0)</param>
+    ///<returns>(Guid) identifier of the new surface on success</returns>
+    static member ShortPath( surfaceId:Guid, 
+                             startPoint:Point3d, 
+                             endPoint:Point3d) : Guid =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        //start = RhinoScriptSyntax.Coerce3dpoint(startPoint)
+        //end = RhinoScriptSyntax.Coerce3dpoint(endPoint)
+        let rcstart, ustart, vstart = surface.ClosestPoint(startPoint)
+        let rcend, uend, vend = surface.ClosestPoint(endPoint)
+        if not rcstart || not rcend then failwithf "Rhino.Scripting: ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
+        let start = Point2d(ustart, vstart)
+        let ende = Point2d(uend, vend)
+        let tolerance = Doc.ModelAbsoluteTolerance
+        let curve = surface.ShortPath(start, ende, tolerance)
+        if curve|> isNull  then failwithf "Rhino.Scripting: ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
+        let objectId = Doc.Objects.AddCurve(curve)
+        if objectId = Guid.Empty then failwithf "Rhino.Scripting: ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
+        Doc.Views.Redraw()
+        objectId
+    (*
+    def ShortPath(surface_id, start_point, end_point):
+        '''Creates the shortest possible curve(geodesic) between two points on a
+        surface. For more details, see the ShortPath command in Rhino help
+        Parameters:
+          surface_id (guid): identifier of a surface
+          start_point, end_point (point): start/end points of the short curve
+        Returns:
+          guid: identifier of the new surface on success
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        start = rhutil.coerce3dpoint(start_point, True)
+        end = rhutil.coerce3dpoint(end_point, True)
+        rc_start, u_start, v_start = surface.ClosestPoint(start)
+        rc_end, u_end, v_end = surface.ClosestPoint(end)
+        if not rc_start or not rc_end: return scriptcontext.errorhandler()
+        start = Rhino.Geometry.Point2d(u_start, v_start)
+        end = Rhino.Geometry.Point2d(u_end, v_end)
+        tolerance = scriptcontext.doc.ModelAbsoluteTolerance
+        curve = surface.ShortPath(start, end, tolerance)
+        if curve is None: return scriptcontext.errorhandler()
+        id = scriptcontext.doc.Objects.AddCurve(curve)
+        if id==System.Guid.Empty: return scriptcontext.errorhandler()
+        scriptcontext.doc.Views.Redraw()
+        return id
+    *)
+
+
+    [<EXT>]
+    //(FIXME) VarOutTypes
+    ///<summary>Shrinks the underlying untrimmed surfaces near to the trimming
+    ///  boundaries. See the ShrinkTrimmedSrf command in the Rhino help.</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="createCopy">(bool) Optional, Default Value: <c>false</c>
+    ///If True, the original surface is not deleted</param>
+    ///<returns>(bool) If create_copy is true the new Guid, else the input Guid</returns>
+    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
+        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
+        if brep.Faces.ShrinkFaces() then failwithf "Rhino.Scripting: ShrinkTrimmedSurface failed.  objectId:'%A' createCopy:'%A'" objectId createCopy               
+        if  createCopy then
+            let oldobj = Doc.Objects.FindId(objectId)
+            let attr = oldobj.Attributes
+            let rc = Doc.Objects.AddBrep(brep, attr)
+            Doc.Views.Redraw()
+            rc
+        else 
+            Doc.Objects.Replace(objectId, brep)|> ignore
+            Doc.Views.Redraw()
+            objectId
+    (*
+    def ShrinkTrimmedSurface(object_id, create_copy=False):
+        '''Shrinks the underlying untrimmed surfaces near to the trimming
+        boundaries. See the ShrinkTrimmedSrf command in the Rhino help.
+        Parameters:
+          object_id (guid): the surface's identifier
+          create_copy (bool, optional): If True, the original surface is not deleted
+        Returns:
+          bool: If create_copy is False, True or False indicating success or failure
+          bool: If create_copy is True, the identifier of the new surface
+          None: on error
+        '''
+    
+        brep = rhutil.coercebrep(object_id, True)
+        if not brep.Faces.ShrinkFaces(): return scriptcontext.errorhandler()
+        rc = None
+        object_id = rhutil.coerceguid(object_id)
+        if create_copy:
+            oldobj = scriptcontext.doc.Objects.FindId(object_id)
+            attr = oldobj.Attributes
+            rc = scriptcontext.doc.Objects.AddBrep(brep, attr)
+        else:
+            rc = scriptcontext.doc.Objects.Replace(object_id, brep)
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+
+  
+
+
+    [<EXT>]
+    ///<summary>Splits a brep</summary>
+    ///<param name="brepId">(Guid) Identifier of the brep to split</param>
+    ///<param name="cutterId">(Guid) Identifier of the brep to split with</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Delete input breps</param>
+    ///<returns>(Guid ResizeArray) identifiers of split pieces on success</returns>
+    static member SplitBrep( brepId:Guid, 
+                             cutterId:Guid, 
+                             [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
+        let brep = RhinoScriptSyntax.CoerceBrep(brepId)
+        let cutter = RhinoScriptSyntax.CoerceBrep(cutterId)
+        let tol = Doc.ModelAbsoluteTolerance
+        let pieces = brep.Split(cutter, tol)
+        if isNull pieces then failwithf "Rhino.Scripting: SplitBrep failed.  brepId:'%A' cutterId:'%A' deleteInput:'%A'" brepId cutterId deleteInput
+        if  deleteInput then
+            //brepId = RhinoScriptSyntax.Coerceguid(brepId)
+            Doc.Objects.Delete(brepId, true) |> ignore
+        let rc =  resizeArray { for piece in pieces do yield Doc.Objects.AddBrep(piece) } 
+        Doc.Views.Redraw()
+        rc
+    (*
+    def SplitBrep(brep_id, cutter_id, delete_input=False):
+        '''Splits a brep
+        Parameters:
+          brep_id (guid): identifier of the brep to split
+          cutter_id (guid): identifier of the brep to split with
+          delete_input(bool,optional): delete input breps
+        Returns:
+          list(guid, ...): identifiers of split pieces on success
+          None: on error
+        '''
+    
+        brep = rhutil.coercebrep(brep_id, True)
+        cutter = rhutil.coercebrep(cutter_id, True)
+        tol = scriptcontext.doc.ModelAbsoluteTolerance
+        pieces = brep.Split(cutter, tol)
+        if not pieces: return scriptcontext.errorhandler()
+        if delete_input:
+            brep_id = rhutil.coerceguid(brep_id)
+            scriptcontext.doc.Objects.Delete(brep_id, True)
+        rc = [scriptcontext.doc.Objects.AddBrep(piece) for piece in pieces]
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    
+    static member  GetMassProperties() : unit = () //TODO delete
+
