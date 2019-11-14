@@ -1,5 +1,5 @@
 ﻿namespace Rhino.Scripting
-
+open System
 
 open Rhino.Runtime
 
@@ -14,8 +14,8 @@ module ActiceDocument =
         else 
             failwith "failed to find the active Rhino document, is this dll running inside Rhino? " 
     
-    /// redraws all Rhino viewports
-    let redraw() = Doc.Views.Redraw()
+    // redraws all Rhino viewports
+    //let redraw() = Doc.Views.Redraw()
    
 
     ///of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
@@ -23,6 +23,14 @@ module ActiceDocument =
     
     /// to store last created object form executing a rs.Command(...)
     let mutable internal commandSerialNumbers : option<uint32*uint32> = None // to store last created object form executing a rs.Command(...)
+
+    /// gets a localised descritipn on rhino object type (curve , point, surface ....)
+    let internal rhtype (g:Guid)=
+        if g = Guid.Empty then "-Guid.Empty-"
+        else
+            let o = Doc.Objects.FindId(g) 
+            if isNull o then sprintf "Guid does not exits in current Rhino Document"
+            else o.ShortDescription(false)
 
     do
         if HostUtils.RunningInRhino then 

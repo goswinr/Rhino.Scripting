@@ -498,6 +498,19 @@ type RhinoScriptSyntax private () = // no constructor?
             else failwithf "CoerceSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
         | g -> failwithf "CoerceSurface failed on %A : %A " g.ObjectType objectId
 
+    ///<summary>attempt to get surface geometry from the document with a given objectId</summary>
+    ///<param name="objectId">objectId = the object's identifier</param>
+    ///<returns>a Rhino.Geometry.Surface. Fails on bad input</returns>
+    static member CoerceNurbsSurface(objectId:'T): NurbsSurface =
+        match RhinoScriptSyntax.CoerceGeometry(objectId) with 
+        | :? NurbsSurface as s -> s
+        | :? Surface as c -> c.ToNurbsSurface()
+        | :? Brep as b -> 
+            if b.Faces.Count = 1 then (b.Faces.[0] :> Surface).ToNurbsSurface()
+            else failwithf "CoerceNurbsSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
+        | g -> failwithf "CoerceNurbsSurface failed on %A : %A " g.ObjectType objectId
+
+
     ///<summary>attempt to get mesh geometry from the document with a given objectId</summary>
     ///<param name="objectId">object identifier (Guid or string)</param>
     ///<returns>a Rhino.Geometry.Mesh. Fails on bad input</returns>    
