@@ -3510,5 +3510,1493 @@ module ExtensionsSurface =
 
 
     
-    static member  GetMassProperties() : unit = () //TODO delete
+    static member GetMassProperties() : unit = () //TODO delete
+
+
+    [<EXT>]
+    ///<summary>Calculate the area of a surface or polysurface object. The results are
+    ///  based on the current drawing units</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<returns>(float) of area </returns>
+    static member SurfaceArea(objectId:Guid) : float  =
+        objectId
+        |> RhinoScriptSyntax.TryCoerceBrep
+        |> Option.map AreaMassProperties.Compute
+        |> Option.orElseWith (fun () ->
+            objectId
+            |> RhinoScriptSyntax.TryCoerceSurface
+            |> Option.map AreaMassProperties.Compute
+            )
+        |> Option.defaultWith (fun () -> failwithf "SurfaceArea failed on %A" objectId)
+        |> fun amp -> amp.Area
+
+
+    (*
+    def SurfaceArea(object_id):
+        '''Calculate the area of a surface or polysurface object. The results are
+        based on the current drawing units
+        Parameters:
+          object_id (guid): the surface's identifier
+        Returns:
+          list(number, number): of area information on success (area, absolute error bound)
+          None: on error
+        '''
+    
+        amp = __GetMassProperties(object_id, True)
+        if amp: return amp.Area, amp.AreaError
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates the area centroid of a surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<returns>(Point3d ) Area centroid </returns>
+    static member SurfaceAreaCentroid(objectId:Guid) : Point3d =
+        objectId
+        |> RhinoScriptSyntax.TryCoerceBrep
+        |> Option.map AreaMassProperties.Compute
+        |> Option.orElseWith (fun () ->
+            objectId
+            |> RhinoScriptSyntax.TryCoerceSurface
+            |> Option.map AreaMassProperties.Compute
+            )
+        |> Option.defaultWith (fun () -> failwithf "Rhino.Scripting: SurfaceAreaCentroid failed.  objectId:'%A'" objectId )
+        |> fun amp -> amp.Centroid
+        
+    (*
+    def SurfaceAreaCentroid(object_id):
+        '''Calculates the area centroid of a surface or polysurface
+        Parameters:
+          object_id (guid): the surface's identifier
+        Returns:
+          list(point, tuple(number, number, number)): Area centroid information (Area Centroid, Error bound in X, Y, Z)
+          None: on error
+        '''
+    
+        amp = __GetMassProperties(object_id, True)
+        if amp is None: return scriptcontext.errorhandler()
+        return amp.Centroid, amp.CentroidError
+    *)
+
+
+    [<EXT>]    
+    static member  AreaMomentsHelper() = () //TODO delete
+    (*
+    def __AreaMomentsHelper(surface_id, area):
+        ''''''
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates area moments of inertia of a surface or polysurface object.
+    ///  See the Rhino help for "Mass Properties calculation details"</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(float ResizeArray) of moments and error bounds in tuples(X, Y, Z) - see help topic
+    ///  Index   Description
+    ///  [0]     First Moments.
+    ///  [1]     The absolute (+/-) error bound for the First Moments.
+    ///  [2]     Second Moments.
+    ///  [3]     The absolute (+/-) error bound for the Second Moments.
+    ///  [4]     Product Moments.
+    ///  [5]     The absolute (+/-) error bound for the Product Moments.
+    ///  [6]     Area Moments of Inertia about the World Coordinate Axes.
+    ///  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+    ///  [8]     Area Radii of Gyration about the World Coordinate Axes.
+    ///  [9]     (Not impemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+    ///  [13]    (Not impemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
+    static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) ResizeArray =
+        surfaceId
+        |> RhinoScriptSyntax.TryCoerceBrep
+        |> Option.map AreaMassProperties.Compute
+        |> Option.orElseWith (fun () ->
+            surfaceId
+            |> RhinoScriptSyntax.TryCoerceSurface
+            |> Option.map AreaMassProperties.Compute
+            )
+        |> Option.defaultWith (fun () -> failwithf "SurfaceArea failed on %A" surfaceId)
+        |> fun mp -> 
+            resizeArray{                                                                                                                                           
+                yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.    
+                yield (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
+                yield (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
+                yield (mp.WorldCoordinatesSecondMomentsError.X, mp.WorldCoordinatesSecondMomentsError.Y, mp.WorldCoordinatesSecondMomentsError.Z)                   //  [3]     The absolute (+/-) error bound for the Second Moments.
+                yield (mp.WorldCoordinatesProductMoments.X, mp.WorldCoordinatesProductMoments.Y, mp.WorldCoordinatesProductMoments.Z)                               //  [4]     Product Moments.
+                yield (mp.WorldCoordinatesProductMomentsError.X, mp.WorldCoordinatesProductMomentsError.Y, mp.WorldCoordinatesProductMomentsError.Z)                //  [5]     The absolute (+/-) error bound for the Product Moments.
+                yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
+                yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+                yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
+                yield (0.,0.,0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+                yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+                yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+                yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+                yield (0.,0.,0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>    
+                }
+     
+    (*
+    def SurfaceAreaMoments(surface_id):
+        '''Calculates area moments of inertia of a surface or polysurface object.
+        See the Rhino help for "Mass Properties calculation details"
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          list(tuple(number, number,number), ...): of moments and error bounds in tuple(X, Y, Z) - see help topic
+            Index   Description
+            [0]     First Moments.
+            [1]     The absolute (+/-) error bound for the First Moments.
+            [2]     Second Moments.
+            [3]     The absolute (+/-) error bound for the Second Moments.
+            [4]     Product Moments.
+            [5]     The absolute (+/-) error bound for the Product Moments.
+            [6]     Area Moments of Inertia about the World Coordinate Axes.
+            [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+            [8]     Area Radii of Gyration about the World Coordinate Axes.
+            [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+            [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+            [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+            [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+            [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
+          None: on error
+        '''
+    
+        return __AreaMomentsHelper(surface_id, True)
+    *)
+
+    [<EXT>]
+    ///<summary>Returns the point on a surface that is closest to a test point</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<param name="testPoint">(Point3d) Sampling point</param>
+    ///<returns>(Point3d) The closest point on the surface .</returns>
+    static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
+        let rc, u, v = surface.ClosestPoint(testPoint)
+        if not rc then failwithf "SurfaceClosestPoint failed on %A and %A " surfaceId testPoint
+        surface.PointAt(u,v)
+
+    [<EXT>]
+    ///<summary>Returns U,V parameters of point on a surface that is closest to a test point</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<param name="testPoint">(Point3d) Sampling point</param>
+    ///<returns>(float * float) The U,V parameters of the closest point on the surface .</returns>
+    static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
+        let rc, u, v = surface.ClosestPoint(testPoint)
+        if not rc then failwithf "SurfaceClosestParameter failed on %A and %A " surfaceId testPoint
+        u,v
+    (*
+    def SurfaceClosestPoint(surface_id, test_point):
+        '''Returns U,V parameters of point on a surface that is closest to a test point
+        Parameters:
+          surface_id (guid): identifier of a surface object
+          test_point (point): sampling point
+        Returns:
+          list(number, number): The U,V parameters of the closest point on the surface if successful.
+          None: on error.
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        point = rhutil.coerce3dpoint(test_point, True)
+        rc, u, v = surface.ClosestPoint(point)
+        if not rc: return None
+        return u,v
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the definition of a surface cone</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(Plane * float * float) containing the definition of the cone
+    ///  [0]   the plane of the cone. The apex of the cone is at the
+    ///    plane's origin and the axis of the cone is the plane's z-axis
+    ///  [1]   the height of the cone
+    ///  [2]   the radius of the cone</returns>
+    static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let rc, cone = surface.TryGetCone()
+        if not rc then failwithf "Rhino.Scripting: SurfaceCone failed.  surfaceId:'%A'" surfaceId
+        cone.Plane, cone.Height, cone.Radius
+    (*
+    def SurfaceCone(surface_id):
+        '''Returns the definition of a surface cone
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          tuple(plane, number, number): containing the definition of the cone if successful
+            [0]   the plane of the cone. The apex of the cone is at the
+                  plane's origin and the axis of the cone is the plane's z-axis
+            [1]   the height of the cone
+            [2]   the radius of the cone
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        rc, cone = surface.TryGetCone()
+        if not rc: return scriptcontext.errorhandler()
+        return cone.Plane, cone.Height, cone.Radius
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the curvature of a surface at a U,V parameter. See Rhino help
+    ///  for details of surface curvature</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="parameter">(float * float) U,v parameter</param>
+    ///<returns>(Point3d * Vector3d * float * float * float * float * float* float) of curvature information
+    ///  [0]   point at specified U,V parameter
+    ///  [1]   normal direction
+    ///  [2]   maximum principal curvature
+    ///  [3]   maximum principal curvature direction
+    ///  [4]   minimum principal curvature
+    ///  [5]   minimum principal curvature direction
+    ///  [6]   gaussian curvature
+    ///  [7]   mean curvature</returns>
+    static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float=
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        //if Seq.length(parameter)<2 then failwithf "Rhino.Scripting: SurfaceCurvature failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+        let c = surface.CurvatureAt(parameter|> fst, parameter|> snd)
+        if c|> isNull  then failwithf "Rhino.Scripting: SurfaceCurvature failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+        c.Point, c.Normal, c.Kappa(0), c.Direction(0), c.Kappa(1), c.Direction(1), c.Gaussian, c.Mean
+    (*
+    def SurfaceCurvature(surface_id, parameter):
+        '''Returns the curvature of a surface at a U,V parameter. See Rhino help
+        for details of surface curvature
+        Parameters:
+          surface_id (guid): the surface's identifier
+          parameter (number, number): u,v parameter
+        Returns:
+          tuple(point, vector, number, number, number, number, number): of curvature information
+            [0]   point at specified U,V parameter
+            [1]   normal direction
+            [2]   maximum principal curvature
+            [3]   maximum principal curvature direction
+            [4]   minimum principal curvature
+            [5]   minimum principal curvature direction
+            [6]   gaussian curvature
+            [7]   mean curvature
+          None: if not successful, or on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        if len(parameter)<2: return scriptcontext.errorhandler()
+        c = surface.CurvatureAt(parameter[0], parameter[1])
+        if c is None: return scriptcontext.errorhandler()
+        return c.Point, c.Normal, c.Kappa(0), c.Direction(0), c.Kappa(1), c.Direction(1), c.Gaussian, c.Mean
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the definition of a cylinder surface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(Plane * float * float) of the cylinder plane, height, radius on success</returns>
+    static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let tol = Doc.ModelAbsoluteTolerance
+        let cy = ref Cylinder.Unset
+        let rc = surface.TryGetFiniteCylinder(cy,tol)
+        if rc  then
+            let cylinder = !cy
+            cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
+        else
+            failwithf "SurfaceCylinder failed on %A" surfaceId
+    (*
+    def SurfaceCylinder(surface_id):
+        '''Returns the definition of a cylinder surface
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          tuple(plane, number, number): of the cylinder plane, height, radius on success
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        tol = scriptcontext.doc.ModelAbsoluteTolerance
+        rc, cylinder = surface.TryGetFiniteCylinder(tol)
+        if rc:
+            return cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the U and V degrees of a surface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(int*int) The degree in U and V direction</returns>
+    static member SurfaceDegree(surfaceId:Guid ) : int*int =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        surface.Degree(0), surface.Degree(1)
+    (*
+    def SurfaceDegree(surface_id, direction=2):
+        '''Returns the degree of a surface object in the specified direction
+        Parameters:
+          surface_id (guid): the surface's identifier
+          direction (number, optional): The degree U, V direction
+                    0 = U
+                    1 = V
+                    2 = both
+        Returns:
+          number: Single number if `direction` = 0 or 1
+          tuple(number, number): of two values if `direction` = 2
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        if direction==0 or direction==1: return surface.Degree(direction)
+        if direction==2: return surface.Degree(0), surface.Degree(1)
+        return scriptcontext.errorhandler()
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the domain of a surface object in the specified direction.</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
+    ///<returns>(float * float) containing the domain interval in the specified direction</returns>
+    static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
+        if direction <> 0 && direction <> 1 then failwithf "Rhino.Scripting: SurfaceDomain failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let domain = surface.Domain(direction)
+        domain.T0, domain.T1
+    (*
+    def SurfaceDomain(surface_id, direction):
+        '''Returns the domain of a surface object in the specified direction.
+        Parameters:
+          surface_id (guid): the surface's identifier
+          direction (number): domain direction 0 = U, or 1 = V
+        Returns:
+          list(number, number): containing the domain interval in the specified direction
+          None: if not successful, or on error
+        '''
+    
+        if direction!=0 and direction!=1: return scriptcontext.errorhandler()
+        surface = rhutil.coercesurface(surface_id, True)
+        domain = surface.Domain(direction)
+        return domain.T0, domain.T1
+    *)
+
+
+    [<EXT>]    
+    ///<summary>Returns the edit, or Greville points of a surface object. For each
+    ///  surface control point, there is a corresponding edit point</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
+    ///If True, all surface edit points are returned. If False,
+    ///  the function will return surface edit points based on whether or not the
+    ///  surface is closed or periodic</param>
+    ///<returns>(Point3d ResizeArray) a list of 3D points</returns>
+    static member SurfaceEditPoints( surfaceId:Guid,  [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let nurb = surface.ToNurbsSurface()
+        if isNull nurb then failwithf "Rhino.Scripting: SurfaceEditPoints failed.  surfaceId:'%A'  returnAll:'%A'" surfaceId returnAll
+        let mutable ufirst = 0
+        let mutable ulast = nurb.Points.CountU
+        let mutable vfirst = 0
+        let mutable vlast = nurb.Points.CountV
+        let mutable degree = -1
+        if not returnAll then
+            if nurb.IsClosed(0) then ulast <- nurb.Points.CountU-1
+            if nurb.IsPeriodic(0) then
+                degree <- nurb.Degree(0)
+                ufirst <- degree/2
+                ulast <- nurb.Points.CountU-degree+ufirst
+            if nurb.IsClosed(1) then vlast <- nurb.Points.CountV-1
+            if nurb.IsPeriodic(1) then
+                degree <- nurb.Degree(1)
+                vfirst <- degree/2
+                vlast <- nurb.Points.CountV-degree+vfirst
+        resizeArray{
+            for u = ufirst to ulast-1 do
+                for v = vfirst to  vlast-1 do
+                    let pt = nurb.Points.GetGrevillePoint(u,v)
+                    nurb.PointAt(pt.X, pt.Y)
+                    }
+    [<EXT>]    
+    ///<summary>Returns the parameters at edit, or Greville points of a surface object. For each
+    ///  surface control point, there is a corresponding edit point</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
+    ///If True, all surface edit points are returned. If False,
+    ///  the function will return surface edit points based on whether or not the
+    ///  surface is closed or periodic</param>
+    ///<returns>((float*float) ResizeArray) a list of U and V parameters</returns>
+    static member SurfaceEditPointPrameters( surfaceId:Guid,  [<OPT;DEF(true)>]returnAll:bool) : (float*float) ResizeArray =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let nurb = surface.ToNurbsSurface()
+        if isNull nurb then failwithf "Rhino.Scripting: SurfaceEditPointParameterss failed.  surfaceId:'%A'  returnAll:'%A'" surfaceId returnAll
+        let mutable ufirst = 0
+        let mutable ulast = nurb.Points.CountU
+        let mutable vfirst = 0
+        let mutable vlast = nurb.Points.CountV
+        let mutable degree = -1
+        if not returnAll then
+            if nurb.IsClosed(0) then ulast <- nurb.Points.CountU-1
+            if nurb.IsPeriodic(0) then
+                degree <- nurb.Degree(0)
+                ufirst <- degree/2
+                ulast <- nurb.Points.CountU-degree+ufirst
+            if nurb.IsClosed(1) then vlast <- nurb.Points.CountV-1
+            if nurb.IsPeriodic(1) then
+                degree <- nurb.Degree(1)
+                vfirst <- degree/2
+                vlast <- nurb.Points.CountV-degree+vfirst
+        resizeArray{
+            for u = ufirst to ulast-1 do
+                for v = vfirst to  vlast-1 do
+                    let pt = nurb.Points.GetGrevillePoint(u,v)
+                    pt.X, pt.Y
+                    } 
+    
+    (*
+    def SurfaceEditPoints(surface_id, return_parameters=False, return_all=True):
+        '''Returns the edit, or Greville points of a surface object. For each
+        surface control point, there is a corresponding edit point
+        Parameters:
+          surface_id (guid): the surface's identifier
+          return_parameters (bool, optional): If False, edit points are returned as a list of
+            3D points. If True, edit points are returned as a list of U,V surface
+            parameters
+          return_all (bool, optional): If True, all surface edit points are returned. If False,
+            the function will return surface edit points based on whether or not the
+            surface is closed or periodic
+        Returns:
+          list(point, ...): if return_parameters is False, a list of 3D points
+          list((number, number), ...): if return_parameters is True, a list of U,V parameters
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        nurb = surface.ToNurbsSurface()
+        if not nurb: return scriptcontext.errorhandler()
+        ufirst = 0
+        ulast = nurb.Points.CountU
+        vfirst = 0
+        vlast = nurb.Points.CountV
+        if not return_all:
+            if nurb.IsClosed(0): ulast = nurb.Points.CountU-1
+            if nurb.IsPeriodic(0):
+                degree = nurb.Degree(0)
+                ufirst = degree/2
+                ulast = nurb.Points.CountU-degree+ufirst
+            if nurb.IsClosed(1): vlast = nurb.Points.CountV-1
+            if nurb.IsPeriodic(1):
+                degree = nurb.Degree(1)
+                vfirst = degree/2
+                vlast = nurb.Points.CountV-degree+vfirst
+        rc = []
+        for u in range(ufirst, ulast):
+            for v in range(vfirst, vlast):
+                pt = nurb.Points.GetGrevillePoint(u,v)
+                if not return_parameters: pt = nurb.PointAt(pt.X, pt.Y)
+                rc.append(pt)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>A general purpose surface evaluator</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="parameter">(float * float) U,v parameter to evaluate</param>
+    ///<param name="derivative">(int) Number of derivatives to evaluate</param>
+    ///<returns>(Point3d * Vector3d ResizeArray) list length (derivative+1)*(derivative+2)/2 .  The elements are as follows:
+    ///  firts Element of tuple 
+    ///  [fst]      The 3-D point.
+    ///  [snd]   Vectors in List:
+    ///          [0]      The first derivative.
+    ///          [1]      The first derivative.
+    ///          [2]      The second derivative.
+    ///          [3]      The second derivative.
+    ///          [4]      The second derivative.
+    ///          [5]      etc...
+    ///</returns>
+    static member SurfaceEvaluate( surfaceId:Guid, 
+                                   parameter:float * float, 
+                                   derivative:int) : Point3d * Vector3d ResizeArray =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
+        if not success then failwithf "Rhino.Scripting: SurfaceEvaluate failed.  surfaceId:'%A' parameter:'%A' derivative:'%A'" surfaceId parameter derivative
+        let rc = resizeArray{()}
+        if der.Length > 0 then
+          for d in der do rc.Add(d)
+        point,rc
+    (*
+    def SurfaceEvaluate(surface_id, parameter, derivative):
+        '''A general purpose surface evaluator
+        Parameters:
+          surface_id (guid): the surface's identifier
+          parameter ([number, number]): u,v parameter to evaluate
+          derivative (number): number of derivatives to evaluate
+        Returns:
+          list((point, vector, ...), ...): list length (derivative+1)*(derivative+2)/2 if successful.  The elements are as follows:
+          Element  Description
+          [0]      The 3-D point.
+          [1]      The first derivative.
+          [2]      The first derivative.
+          [3]      The second derivative.
+          [4]      The second derivative.
+          [5]      The second derivative.
+          [6]      etc...
+        None: If not successful, or on error.
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        success, point, der = surface.Evaluate(parameter[0], parameter[1], derivative)
+        if not success: return scriptcontext.errorhandler()
+        rc = [point]
+        if der:
+          for d in der: rc.append(d)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns a plane based on the normal, u, and v directions at a surface
+    ///  U,V parameter</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="uvParameter">(float * float) U,v parameter to evaluate</param>
+    ///<returns>(Plane) plane </returns>
+    static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let rc, frame = surface.FrameAt(uvParameter|> fst, uvParameter|> snd)
+        if rc  then frame
+        else failwithf "SurfaceFrame failed on %A at %A" surfaceId uvParameter
+    (*
+    def SurfaceFrame(surface_id, uv_parameter):
+        '''Returns a plane based on the normal, u, and v directions at a surface
+        U,V parameter
+        Parameters:
+          surface_id (guid): the surface's identifier
+          uv_parameter ([number, number]): u,v parameter to evaluate
+        Returns:
+          plane: plane on success
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        rc, frame = surface.FrameAt(uv_parameter[0], uv_parameter[1])
+        if rc: return frame
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the isocurve density of a surface or polysurface object.
+    /// An isoparametric curve is a curve of constant U or V value on a surface.
+    /// Rhino uses isocurves and surface edge curves to visualize the shape of a
+    /// NURBS surface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(int) The current isocurve density
+    ///  -1: Hides the surface isocurves
+    ///    0: Display boundary and knot wires
+    ///    1: Display boundary and knot wires and one interior wire if there
+    ///      are no interior knots
+    ///        >=2: Display boundary and knot wires and (N+1) interior wires</returns>
+    static member SurfaceIsocurveDensity(surfaceId:Guid) : int = //GET
+        match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with
+        | :?  Rhino.DocObjects.BrepObject as rhinoobject ->  
+                rhinoobject.Attributes.WireDensity
+        | :?  Rhino.DocObjects.SurfaceObject as rhinoobject ->  
+                rhinoobject.Attributes.WireDensity
+        | :?  Rhino.DocObjects.ExtrusionObject as rhinoobject ->  
+                rhinoobject.Attributes.WireDensity
+        | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' " surfaceId 
+        
+    (*
+    def SurfaceIsocurveDensity(surface_id, density=None):
+        '''Returns or sets the isocurve density of a surface or polysurface object.
+        An isoparametric curve is a curve of constant U or V value on a surface.
+        Rhino uses isocurves and surface edge curves to visualize the shape of a
+        NURBS surface
+        Parameters:
+          surface_id (guid): the surface's identifier
+          density (number, optional): the isocurve wireframe density. The possible values are
+              -1: Hides the surface isocurves
+               0: Display boundary and knot wires
+               1: Display boundary and knot wires and one interior wire if there
+                  are no interior knots
+             >=2: Display boundary and knot wires and (N+1) interior wires
+        Returns:
+          number: If density is not specified, then the current isocurve density if successful
+          number: If density is specified, the the previous isocurve density if successful
+          None: on error
+        '''
+    
+        rhino_object = rhutil.coercerhinoobject(surface_id, True, True)
+        if not isinstance(rhino_object, Rhino.DocObjects.BrepObject):
+            return scriptcontext.errorhandler()
+        rc = rhino_object.Attributes.WireDensity
+        if density is not None:
+            if density<0: density = -1
+            rhino_object.Attributes.WireDensity = density
+            rhino_object.CommitChanges()
+            scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+    ///<summary>Sets the isocurve density of a surface or polysurface object.
+    /// An isoparametric curve is a curve of constant U or V value on a surface.
+    /// Rhino uses isocurves and surface edge curves to visualize the shape of a
+    /// NURBS surface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="density">(int)The isocurve wireframe density. The possible values are
+    ///  -1: Hides the surface isocurves
+    ///    0: Display boundary and knot wires
+    ///    1: Display boundary and knot wires and one interior wire if there
+    ///      are no interior knots
+    ///        >=2: Display boundary and knot wires and (N+1) interior wires</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member SurfaceIsocurveDensity(surfaceId:Guid, density:int) : unit = //SET
+        match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with        
+        | :?  Rhino.DocObjects.BrepObject as rhinoobject ->  
+                let dens = if density<0 then -1 else density
+                rhinoobject.Attributes.WireDensity <- dens
+                rhinoobject.CommitChanges()|> ignore
+                Doc.Views.Redraw()     
+        | :?  Rhino.DocObjects.SurfaceObject as rhinoobject ->  
+                let dens = if density<0 then -1 else density
+                rhinoobject.Attributes.WireDensity <- dens
+                rhinoobject.CommitChanges()|> ignore
+                Doc.Views.Redraw()
+        | :?  Rhino.DocObjects.ExtrusionObject as rhinoobject ->  
+                let dens = if density<0 then -1 else density
+                rhinoobject.Attributes.WireDensity <- dens
+                rhinoobject.CommitChanges()|> ignore
+                Doc.Views.Redraw()
+        | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' density:'%A'" surfaceId density
+        
+
+    (*
+    def SurfaceIsocurveDensity(surface_id, density=None):
+        '''Returns or sets the isocurve density of a surface or polysurface object.
+        An isoparametric curve is a curve of constant U or V value on a surface.
+        Rhino uses isocurves and surface edge curves to visualize the shape of a
+        NURBS surface
+        Parameters:
+          surface_id (guid): the surface's identifier
+          density (number, optional): the isocurve wireframe density. The possible values are
+              -1: Hides the surface isocurves
+               0: Display boundary and knot wires
+               1: Display boundary and knot wires and one interior wire if there
+                  are no interior knots
+             >=2: Display boundary and knot wires and (N+1) interior wires
+        Returns:
+          number: If density is not specified, then the current isocurve density if successful
+          number: If density is specified, the the previous isocurve density if successful
+          None: on error
+        '''
+    
+        rhino_object = rhutil.coercerhinoobject(surface_id, True, True)
+        if not isinstance(rhino_object, Rhino.DocObjects.BrepObject):
+            return scriptcontext.errorhandler()
+        rc = rhino_object.Attributes.WireDensity
+        if density is not None:
+            if density<0: density = -1
+            rhino_object.Attributes.WireDensity = density
+            rhino_object.CommitChanges()
+            scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the control point count of a surface
+    ///  surfaceId = the surface's identifier</summary>
+    ///<param name="surfaceId">(Guid) The surface object's identifier</param>
+    ///<returns>(int * int) a list containing (U count, V count) on success</returns>
+    static member SurfaceKnotCount(surfaceId:Guid) : int * int =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let ns = surface.ToNurbsSurface()
+        ns.KnotsU.Count, ns.KnotsV.Count
+    (*
+    def SurfaceKnotCount(surface_id):
+        '''Returns the control point count of a surface
+          surface_id = the surface's identifier
+        Parameters:
+          surface_id (guid): the surface object's identifier
+        Returns:
+          list(number, number): a list containing (U count, V count) on success
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        ns = surface.ToNurbsSurface()
+        return ns.KnotsU.Count, ns.KnotsV.Count
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the knots, or knot vector, of a surface object.</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(NurbsSurfaceKnotList * NurbsSurfaceKnotList) knot values of the surface . The list will
+    ///  contain the following information:
+    ///  Element   Description
+    ///    [0]     Knot vectors in U direction
+    ///    [1]     Knot vectors in V direction</returns>
+    static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList=
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let nurbsurf = surface.ToNurbsSurface()
+        if nurbsurf|> isNull  then failwithf "Rhino.Scripting: SurfaceKnots failed.  surfaceId:'%A'" surfaceId
+        nurbsurf.KnotsU , nurbsurf.KnotsV
+        //let sknots =  resizeArray { for knot in nurbsurf.KnotsU do yield knot } 
+        //let tknots =  resizeArray { for knot in nurbsurf.KnotsV do yield knot } 
+        //if isNull sknots || not tknots then failwithf "Rhino.Scripting: SurfaceKnots failed.  surfaceId:'%A'" surfaceId
+        //sknots, tknots
+    (*
+    def SurfaceKnots(surface_id):
+        '''Returns the knots, or knot vector, of a surface object.
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+         list(number, number): knot values of the surface if successful. The list will
+          contain the following information:
+          Element   Description
+            [0]     Knot vector in U direction
+            [1]     Knot vector in V direction
+          None: if not successful, or on error.
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        nurb_surf = surface.ToNurbsSurface()
+        if nurb_surf is None: return scriptcontext.errorhandler()
+        s_knots = [knot for knot in nurb_surf.KnotsU]
+        t_knots = [knot for knot in nurb_surf.KnotsV]
+        if not s_knots or not t_knots: return scriptcontext.errorhandler()
+        return s_knots, t_knots
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns 3D vector that is the normal to a surface at a parameter</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="uvParameter">(float * float) The uv parameter to evaluate</param>
+    ///<returns>(Vector3d) Normal vector on success</returns>
+    static member SurfaceNormal(surfaceId:Guid, uvParameter:float * float) : Vector3d =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        surface.NormalAt(uvParameter|> fst, uvParameter|> snd)
+    (*
+    def SurfaceNormal(surface_id, uv_parameter):
+        '''Returns 3D vector that is the normal to a surface at a parameter
+        Parameters:
+          surface_id (guid): the surface's identifier
+          uv_parameter  ([number, number]): the uv parameter to evaluate
+        Returns:
+          vector: Normal vector on success
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        return surface.NormalAt(uv_parameter[0], uv_parameter[1])
+    *)
+
+
+    [<EXT>]
+    ///<summary>Converts surface parameter to a normalized surface parameter; one that
+    ///  ranges between 0.0 and 1.0 in both the U and V directions</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="parameter">(float * float) The surface parameter to convert</param>
+    ///<returns>(float * float) normalized surface parameter</returns>
+    static member SurfaceNormalizedParameter(surfaceId:Guid, parameter:float * float) : float * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let udomain = surface.Domain(0)
+        let vdomain = surface.Domain(1)
+        if parameter|> fst<udomain.Min || parameter|> fst>udomain.Max then
+            failwithf "Rhino.Scripting: SurfaceNormalizedParameter failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+        if parameter|> snd<vdomain.Min || parameter|> snd>vdomain.Max then
+            failwithf "Rhino.Scripting: SurfaceNormalizedParameter failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+        let u = udomain.NormalizedParameterAt(parameter|> fst)
+        let v = vdomain.NormalizedParameterAt(parameter|> snd)
+        u,v
+    (*
+    def SurfaceNormalizedParameter(surface_id, parameter):
+        '''Converts surface parameter to a normalized surface parameter; one that
+        ranges between 0.0 and 1.0 in both the U and V directions
+        Parameters:
+          surface_id (guid) the surface's identifier
+          parameter ([number, number]): the surface parameter to convert
+        Returns:
+          list(number, number): normalized surface parameter if successful
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        u_domain = surface.Domain(0)
+        v_domain = surface.Domain(1)
+        if parameter[0]<u_domain.Min or parameter[0]>u_domain.Max:
+            return scriptcontext.errorhandler()
+        if parameter[1]<v_domain.Min or parameter[1]>v_domain.Max:
+            return scriptcontext.errorhandler()
+        u = u_domain.NormalizedParameterAt(parameter[0])
+        v = v_domain.NormalizedParameterAt(parameter[1])
+        return u,v
+    *)
+
+
+    [<EXT>]
+    ///<summary>Converts normalized surface parameter to a surface parameter; or
+    ///  within the surface's domain</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="parameter">(float * float) The normalized parameter to convert</param>
+    ///<returns>(float * float) surface parameter on success</returns>
+    static member SurfaceParameter(surfaceId:Guid, parameter:float * float) : float * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let x = surface.Domain(0).ParameterAt(parameter|> fst)
+        let y = surface.Domain(1).ParameterAt(parameter|> snd)
+        x, y
+    (*
+    def SurfaceParameter(surface_id, parameter):
+        '''Converts normalized surface parameter to a surface parameter; or
+        within the surface's domain
+        Parameters:
+          surface_id (guid): the surface's identifier
+          parameter ([number, number]): the normalized parameter to convert
+        Returns:
+          tuple(number, number): surface parameter on success
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        x = surface.Domain(0).ParameterAt(parameter[0])
+        y = surface.Domain(1).ParameterAt(parameter[1])
+        return x, y
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the control point count of a surface
+    ///  surfaceId = the surface's identifier</summary>
+    ///<param name="surfaceId">(Guid) The surface object's identifier</param>
+    ///<returns>(int * int) THe number of control points in UV direction. (U count, V count)</returns>
+    static member SurfacePointCount(surfaceId:Guid) : int * int =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let ns = surface.ToNurbsSurface()
+        ns.Points.CountU, ns.Points.CountV
+    (*
+    def SurfacePointCount(surface_id):
+        '''Returns the control point count of a surface
+          surface_id = the surface's identifier
+        Parameters:
+          surface_id (guid): the surface object's identifier
+        Returns:
+          list(number, number): THe number of control points in UV direction. (U count, V count)
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        ns = surface.ToNurbsSurface()
+        return ns.Points.CountU, ns.Points.CountV
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the control points, or control vertices, of a surface object</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
+    ///If True all surface edit points are returned. If False,
+    ///  the function will return surface edit points based on whether or not
+    ///  the surface is closed or periodic</param>
+    ///<returns>(Point3d ResizeArray) the control points</returns>
+    static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let ns = surface.ToNurbsSurface()
+        if ns|> isNull  then failwithf "Rhino.Scripting: SurfacePoints failed.  surfaceId:'%A' returnAll:'%A'" surfaceId returnAll
+        let rc = ResizeArray()
+        for u in range(ns.Points.CountU) do
+            for v in range(ns.Points.CountV) do
+                let pt = ns.Points.GetControlPoint(u,v)
+                rc.Add(pt.Location)
+        rc
+    (*
+    def SurfacePoints(surface_id, return_all=True):
+        '''Returns the control points, or control vertices, of a surface object
+        Parameters:
+          surface_id (guid): the surface's identifier
+          return_all (bool, optional): If True all surface edit points are returned. If False,
+            the function will return surface edit points based on whether or not
+            the surface is closed or periodic
+        Returns:
+          list(point, ...): the control points if successful
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        ns = surface.ToNurbsSurface()
+        if ns is None: return scriptcontext.errorhandler()
+        rc = []
+        for u in range(ns.Points.CountU):
+            for v in range(ns.Points.CountV):
+                pt = ns.Points.GetControlPoint(u,v)
+                rc.append(pt.Location)
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns the definition of a surface torus</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(Plane * float * float) containing the definition of the torus
+    ///  [0]   the base plane of the torus
+    ///  [1]   the major radius of the torus
+    ///  [2]   the minor radius of the torus</returns>
+    static member SurfaceTorus(surfaceId:Guid) : Plane * float * float =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let rc, torus = surface.TryGetTorus()
+        if rc then torus.Plane, torus.MajorRadius, torus.MinorRadius
+        else failwithf "SurfaceTorus failed for %A" surfaceId
+    (*
+    def SurfaceTorus(surface_id):
+        '''Returns the definition of a surface torus
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          tuple(plane, number, number): containing the definition of the torus if successful
+            [0]   the base plane of the torus
+            [1]   the major radius of the torus
+            [2]   the minor radius of the torus
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        rc, torus = surface.TryGetTorus()
+        if rc: return torus.Plane, torus.MajorRadius, torus.MinorRadius
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates volume of a closed surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<returns>(float) the volume </returns>
+    static member SurfaceVolume(objectId:Guid) : float =
+        objectId
+        |> RhinoScriptSyntax.TryCoerceBrep
+        |> Option.map VolumeMassProperties.Compute
+        |> Option.orElseWith (fun () ->
+            objectId
+            |> RhinoScriptSyntax.TryCoerceSurface
+            |> Option.map VolumeMassProperties.Compute
+            )
+        |> Option.defaultWith (fun () -> failwithf "SurfaceVolume failed on %A" objectId)
+        |> fun amp -> amp.Volume
+    (*
+    def SurfaceVolume(object_id):
+        '''Calculates volume of a closed surface or polysurface
+        Parameters:
+          object_id (guid): the surface's identifier
+        Returns:
+          list[number, tuple(X, Y, Z)]: volume data returned (Volume, Error bound) on success
+          None: on error
+        '''
+    
+        vmp = __GetMassProperties(object_id, False)
+        if vmp: return vmp.Volume, vmp.VolumeError
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates volume centroid of a closed surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<returns>(Point3d) Volume Centriod</returns>
+    static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
+        objectId
+        |> RhinoScriptSyntax.TryCoerceBrep
+        |> Option.bind (fun b -> if b.IsSolid then Some b else failwithf "SurfaceVolumeCentroid failed on  open Brep %A" objectId)
+        |> Option.map VolumeMassProperties.Compute
+        |> Option.orElseWith (fun () ->
+            objectId
+            |> RhinoScriptSyntax.TryCoerceSurface
+            |> Option.bind (fun s -> if s.IsSolid then Some s else failwithf "SurfaceVolumeCentroid failed on  open Surface %A" objectId)
+            |> Option.map VolumeMassProperties.Compute
+            )
+        |> Option.defaultWith (fun () -> failwithf "SurfaceVolumeCentroid failed on %A" objectId)
+        |> fun amp -> amp.Centroid
+    (*
+    def SurfaceVolumeCentroid(object_id):
+        '''Calculates volume centroid of a closed surface or polysurface
+        Parameters:
+          object_id (guid): the surface's identifier
+        Returns:
+          list[point, tuple(X, Y, Z)]: volume data returned (Volume Centriod, Error bound) on success
+          None: on error
+        '''
+    
+        vmp = __GetMassProperties(object_id, False)
+        if vmp: return vmp.Centroid, vmp.CentroidError
+    *)
+
+
+    [<EXT>]
+    ///<summary>Calculates volume moments of inertia of a surface or polysurface object.
+    ///  For more information, see Rhino help for "Mass Properties calculation details"</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<returns>(float ResizeArray) of moments and error bounds in tuple(X, Y, Z) - see help topic
+    ///  Index   Description
+    ///  [0]     First Moments.
+    ///  [1]     The absolute (+/-) error bound for the First Moments.
+    ///  [2]     Second Moments.
+    ///  [3]     The absolute (+/-) error bound for the Second Moments.
+    ///  [4]     Product Moments.
+    ///  [5]     The absolute (+/-) error bound for the Product Moments.
+    ///  [6]     Area Moments of Inertia about the World Coordinate Axes.
+    ///  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+    ///  [8]     Area Radii of Gyration about the World Coordinate Axes.
+    ///  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+    ///  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+    ///  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
+    static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) ResizeArray =
+        objectId
+        |> RhinoScriptSyntax.TryCoerceBrep
+        |> Option.bind (fun b -> if b.IsSolid then Some b else failwithf "SurfaceVolumeMoments failed on  open Brep %A" objectId)
+        |> Option.map VolumeMassProperties.Compute
+        |> Option.orElseWith (fun () ->
+            objectId
+            |> RhinoScriptSyntax.TryCoerceSurface
+            |> Option.bind (fun s -> if s.IsSolid then Some s else failwithf "SurfaceVolumeMoments failed on  open Surface %A" objectId)
+            |> Option.map VolumeMassProperties.Compute
+            )
+        |> Option.defaultWith (fun () -> failwithf "SurfaceVolumeMoments failed on %A" objectId)
+        |> fun mp -> 
+            resizeArray{                                                                                                                                           
+                yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.    
+                yield (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
+                yield (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
+                yield (mp.WorldCoordinatesSecondMomentsError.X, mp.WorldCoordinatesSecondMomentsError.Y, mp.WorldCoordinatesSecondMomentsError.Z)                   //  [3]     The absolute (+/-) error bound for the Second Moments.
+                yield (mp.WorldCoordinatesProductMoments.X, mp.WorldCoordinatesProductMoments.Y, mp.WorldCoordinatesProductMoments.Z)                               //  [4]     Product Moments.
+                yield (mp.WorldCoordinatesProductMomentsError.X, mp.WorldCoordinatesProductMomentsError.Y, mp.WorldCoordinatesProductMomentsError.Z)                //  [5]     The absolute (+/-) error bound for the Product Moments.
+                yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
+                yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+                yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
+                yield (0.,0.,0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+                yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+                yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+                yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+                yield (0.,0.,0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>    
+                }
+     
+    (*
+    def SurfaceVolumeMoments(surface_id):
+        '''Calculates volume moments of inertia of a surface or polysurface object.
+        For more information, see Rhino help for "Mass Properties calculation details"
+        Parameters:
+          surface_id (guid): the surface's identifier
+        Returns:
+          list(tuple(number, number,number), ...): of moments and error bounds in tuple(X, Y, Z) - see help topic
+            Index   Description
+            [0]     First Moments.
+            [1]     The absolute (+/-) error bound for the First Moments.
+            [2]     Second Moments.
+            [3]     The absolute (+/-) error bound for the Second Moments.
+            [4]     Product Moments.
+            [5]     The absolute (+/-) error bound for the Product Moments.
+            [6]     Area Moments of Inertia about the World Coordinate Axes.
+            [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+            [8]     Area Radii of Gyration about the World Coordinate Axes.
+            [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+            [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
+            [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
+            [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
+            [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
+          None: on error
+        '''
+    
+        return __AreaMomentsHelper(surface_id, False)
+    *)
+
+
+    [<EXT>]
+    ///<summary>Returns list of weight values assigned to the control points of a surface.
+    ///  The number of weights returned will be equal to the number of control points
+    ///  in the U and V directions.</summary>
+    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<returns>(float ResizeArray) point weights.</returns>
+    static member SurfaceWeights(objectId:Guid) : float ResizeArray =
+        let surface = RhinoScriptSyntax.CoerceSurface(objectId)
+        let ns = surface.ToNurbsSurface()
+        if ns|> isNull  then failwithf "Rhino.Scripting: SurfaceWeights failed.  objectId:'%A'" objectId
+        let rc = ResizeArray()
+        for u in range(ns.Points.CountU) do
+            for v in range(ns.Points.CountV) do
+                let pt = ns.Points.GetControlPoint(u,v)
+                rc.Add(pt.Weight)
+        rc
+    (*
+    def SurfaceWeights(object_id):
+        '''Returns list of weight values assigned to the control points of a surface.
+        The number of weights returned will be equal to the number of control points
+        in the U and V directions.
+        Parameters:
+          object_id (guid): the surface's identifier
+        Returns:
+          list(number, ...): point weights.
+          None: on error
+        '''
+    
+        surface = rhutil.coercesurface(object_id, True)
+        ns = surface.ToNurbsSurface()
+        if ns is None: return scriptcontext.errorhandler()
+        rc = []
+        for u in range(ns.Points.CountU):
+            for v in range(ns.Points.CountV):
+                pt = ns.Points.GetControlPoint(u,v)
+                rc.append(pt.Weight)
+        return rc
+    *)
+
+    [<EXT>]
+    ///<summary>Trims a surface or polysurface using an oriented cutter brep or surface</summary>
+    ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
+    ///<param name="cutter">(Guid) Surface or polysurface  performing the trim</param>
+    ///<param name="tolerance">(float) Optional, If omitted, the document's absolute tolerance is used</param>
+    ///<returns>(Guid ResizeArray) identifiers of retained components on success</returns>
+    static member TrimBrep( objectId:Guid, 
+                            cutter:Guid, 
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
+        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
+        let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
+        let tolerance= ifZero1 tolerance  Doc.ModelAbsoluteTolerance
+        let breps = brep.Trim(cutter, tolerance)
+        let attrs = None
+        if breps.Length > 1 then
+            let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let attrs = rho.Attributes
+            let rc = ResizeArray()
+            for i in range(breps.Length) do
+                if i = 0 then
+                    Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    rc.Add(objectId)
+                else 
+                    rc.Add(Doc.Objects.AddBrep(breps.[i], attrs))
+            Doc.Views.Redraw()
+            rc
+        else 
+            let rc =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep) } 
+            Doc.Views.Redraw()
+            rc
+    
+    [<EXT>]
+    ///<summary>Trims a surface using an oriented cutter Plane</summary>
+    ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
+    ///<param name="cutter">(Plane) Plane performing the trim</param>
+    ///<param name="tolerance">(float) Optional, If omitted, the document's absolute tolerance is used</param>
+    ///<returns>(Guid ResizeArray) identifiers of retained components on success</returns>
+    static member TrimBrep( objectId:Guid, 
+                            cutter:Plane, 
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
+        let brep = RhinoScriptSyntax.CoerceBrep(objectId)
+        let tolerance= ifZero1 tolerance  Doc.ModelAbsoluteTolerance
+        let breps = brep.Trim(cutter, tolerance)
+        let attrs = None
+        if breps.Length > 1 then
+            let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let attrs = rho.Attributes
+            let rc = ResizeArray()
+            for i in range(breps.Length) do
+                if i = 0 then
+                    Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    rc.Add(objectId)
+                else 
+                    rc.Add(Doc.Objects.AddBrep(breps.[i], attrs))
+            Doc.Views.Redraw()
+            rc
+        else 
+            let rc =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep) } 
+            Doc.Views.Redraw()
+            rc
+    (*
+    def TrimBrep(object_id, cutter, tolerance=None):
+        '''Trims a surface using an oriented cutter
+        Parameters:
+          object_id (guid): surface or polysurface identifier
+          cutter (guid|plane): surface, polysurface, or plane performing the trim
+          tolerance (number, optional): trimming tolerance. If omitted, the document's absolute
+            tolerance is used
+        Returns:
+          list(guid, ...): identifiers of retained components on success
+        '''
+    
+        brep = rhutil.coercebrep(object_id, True)
+        brep_cutter = rhutil.coercebrep(cutter, False)
+        if brep_cutter: cutter = brep_cutter
+        else: cutter = rhutil.coerceplane(cutter, True)
+        if tolerance is None: tolerance = scriptcontext.doc.ModelAbsoluteTolerance
+        breps = brep.Trim(cutter, tolerance)
+        rhid = rhutil.coerceguid(object_id, False)
+    
+        attrs = None
+        if len(breps) > 1:
+          rho = rhutil.coercerhinoobject(object_id, False)
+          if rho: attrs = rho.Attributes
+    
+        if rhid:
+            rc = []
+            for i in range(len(breps)):
+                if i==0:
+                    scriptcontext.doc.Objects.Replace(rhid, breps[i])
+                    rc.append(rhid)
+                else:
+                    rc.append(scriptcontext.doc.Objects.AddBrep(breps[i], attrs))
+        else:
+            rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in breps]
+        scriptcontext.doc.Views.Redraw()
+        return rc
+    *)
+
+    [<EXT>]
+    ///<summary>Remove portions of the surface outside of the specified interval in U direction</summary>
+    ///<param name="surfaceId">(Guid) Surface identifier</param>
+    ///<param name="interval">(float*float) Sub section of the surface to keep.
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Should the input surface be deleted</param>
+    ///<returns>(Guid) new surface identifier on success</returns>
+    static member TrimSurfaceU( surfaceId:Guid,
+                               interval:float*float, 
+                               [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let mutable u = surface.Domain(0)
+        let mutable v = surface.Domain(1)  
+        u.[0] <-  interval|> fst
+        u.[1] <-  interval|> snd
+        let newsurface = surface.Trim(u,v)
+        if notNull newsurface then
+            let rc = Doc.Objects.AddSurface(newsurface)
+            if deleteInput then  Doc.Objects.Delete(surfaceId,true) |> ignore
+            Doc.Views.Redraw()
+            rc
+        else
+            failwithf "TrimSurfaceU faild on %A with domain %A" surfaceId interval
+    
+    [<EXT>]
+    ///<summary>Remove portions of the surface outside of the specified interval in V direction</summary>
+    ///<param name="surfaceId">(Guid) Surface identifier</param>
+    ///<param name="interval">(float*float) Sub section of the surface to keep.
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Should the input surface be deleted</param>
+    ///<returns>(Guid) new surface identifier on success</returns>
+    static member TrimSurfaceV( surfaceId:Guid,
+                               interval:float*float, 
+                               [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let mutable u = surface.Domain(0)
+        let mutable v = surface.Domain(1)  
+        v.[0] <-  interval|> fst
+        v.[1] <-  interval|> snd
+        let newsurface = surface.Trim(u,v)
+        if notNull newsurface then
+            let rc = Doc.Objects.AddSurface(newsurface)
+            if deleteInput then  Doc.Objects.Delete(surfaceId,true) |> ignore
+            Doc.Views.Redraw()
+            rc
+        else
+            failwithf "TrimSurfaceV faild on %A with domain %A" surfaceId interval
+
+
+    [<EXT>]
+    ///<summary>Remove portions of the surface outside of the specified interval ain U and V direction</summary>
+    ///<param name="surfaceId">(Guid) Surface identifier</param>
+    ///<param name="intervalU">(float*float) Sub section of the surface to keep in U direction.</param>
+    ///<param name="intervalU">(float*float) Sub section of the surface to keep in V direction.</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
+    ///Should the input surface be deleted</param>
+    ///<returns>(Guid) new surface identifier on success</returns>
+    static member TrimSurfaceUV( surfaceId:Guid, 
+                               intervalU:float*float, 
+                               intervalV:float*float, 
+                               [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let mutable u = surface.Domain(0)
+        let mutable v = surface.Domain(1)
+        u.[0]  <- intervalU|> fst
+        u.[1]  <- intervalU|> snd
+        v.[0]  <- intervalV|> fst
+        v.[1]  <- intervalV|> snd
+        let newsurface = surface.Trim(u,v)
+        if notNull newsurface then
+            let rc = Doc.Objects.AddSurface(newsurface)
+            if deleteInput then  Doc.Objects.Delete(surfaceId,true) |> ignore
+            Doc.Views.Redraw()
+            rc
+        else
+            failwithf "TrimSurfaceUV faild on %A with domain %A and %A" surfaceId intervalU intervalV
+    (*
+    def TrimSurface( surface_id, direction, interval, delete_input=False):
+        '''Remove portions of the surface outside of the specified interval
+        Parameters:
+          surface_id (guid): surface identifier
+          direction (number, optional): 0(U), 1(V), or 2(U and V)
+          interval (interval): sub section of the surface to keep.
+            If both U and V then a list or tuple of 2 intervals
+          delete_input (bool, optional): should the input surface be deleted
+        Returns:
+          guid: new surface identifier on success
+        '''
+    
+        surface = rhutil.coercesurface(surface_id, True)
+        u = surface.Domain(0)
+        v = surface.Domain(1)
+        if direction==0:
+            u[0] = interval[0]
+            u[1] = interval[1]
+        elif direction==1:
+            v[0] = interval[0]
+            v[1] = interval[1]
+        else:
+            u[0] = interval[0][0]
+            u[1] = interval[0][1]
+            v[0] = interval[1][0]
+            v[1] = interval[1][1]
+        new_surface = surface.Trim(u,v)
+        if new_surface:
+            rc = scriptcontext.doc.Objects.AddSurface(new_surface)
+            if delete_input: scriptcontext.doc.Objects.Delete(rhutil.coerceguid(surface_id), True)
+            scriptcontext.doc.Views.Redraw()
+            return rc
+    *)
+
+
+   
+    static member TrimSurface() =()
+
+
+    [<EXT>]
+    //(FIXME) VarOutTypes
+    ///<summary>Flattens a developable surface or polysurface</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
+    ///If True, the resulting surfaces ar not joined</param>
+    ///<param name="followingGeometry">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
+    ///List of curves, dots, and points which
+    ///  should be unrolled with the surface</param>
+    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///Absolute tolerance</param>
+    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///Relative tolerance</param>
+    ///<returns>(Guid ResizeArray) List of unrolled surface ids and List of following objects</returns>
+    static member UnrollSurface( surfaceId:Guid, 
+                                 [<OPT;DEF(false)>]explode:bool, 
+                                 [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq, 
+                                 [<OPT;DEF(0.0)>]absoluteTolerance:float, 
+                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid ResizeArray *Guid ResizeArray =
+        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let unroll = Unroller(brep)
+        unroll.ExplodeOutput <- explode
+        let relativeTolerance = ifZero1 relativeTolerance  Doc.ModelRelativeTolerance
+        let  absoluteTolerance = ifZero1 absoluteTolerance  Doc.ModelAbsoluteTolerance
+        unroll.AbsoluteTolerance <- absoluteTolerance
+        unroll.RelativeTolerance <- relativeTolerance
+        if notNull followingGeometry then
+            for objectId in followingGeometry do
+                let geom = RhinoScriptSyntax.CoerceGeometry(objectId)
+                match geom with
+                | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
+                | :? Point as g -> unroll.AddFollowingGeometry(g)
+                | :? TextDot as g -> unroll.AddFollowingGeometry(g)
+                | _ -> failwithf "UnrollSurface: cannot add %A (a %s) as following Geometry" objectId (rhtype objectId)
+
+        let breps, curves, points, dots = unroll.PerformUnroll()
+        if isNull breps then failwithf "UnrollSurface: failed on  %A " surfaceId
+        let rc =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep) } 
+        let newfollowing = ResizeArray()
+        for curve in curves do
+            let objectId = Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
+            newfollowing.Add(objectId)
+        for point in points do
+            let objectId = Doc.Objects.AddPoint(point)
+            newfollowing.Add(objectId)
+        for dot in dots do
+            let objectId = Doc.Objects.AddTextDot(dot)
+            newfollowing.Add(objectId)
+        Doc.Views.Redraw()
+        rc, newfollowing
+    (*
+    def UnrollSurface(surface_id, explode=False, following_geometry=None, absolute_tolerance=None, relative_tolerance=None):
+        '''Flattens a developable surface or polysurface
+        Parameters:
+          surface_id (guid): the surface's identifier
+          explode (bool, optional): If True, the resulting surfaces ar not joined
+          following_geometry ([guid, ...], optional): List of curves, dots, and points which
+            should be unrolled with the surface
+          absolute_tolerance(number,optional): absolute tolerance
+          relative_tolerance(number,optional): relative tolerance
+        Returns:
+          list(guid, ...): of unrolled surface ids
+          tuple((guid, ...),(guid, ...)): if following_geometry is not None, a tuple
+            [1] is the list of unrolled surface ids
+            [2] is the list of unrolled following geometry
+        '''
+    
+        brep = rhutil.coercebrep(surface_id, True)
+        unroll = Rhino.Geometry.Unroller(brep)
+        unroll.ExplodeOutput = explode
+        if relative_tolerance is None: relative_tolerance = scriptcontext.doc.ModelRelativeTolerance
+        if absolute_tolerance is None: absolute_tolerance = scriptcontext.doc.ModelAbsoluteTolerance
+        unroll.AbsoluteTolerance = absolute_tolerance
+        unroll.RelativeTolerance = relative_tolerance
+        if following_geometry:
+            for id in following_geometry:
+                geom = rhutil.coercegeometry(id)
+                unroll.AddFollowingGeometry(geom)
+        breps, curves, points, dots = unroll.PerformUnroll()
+        if not breps: return None
+        rc = [scriptcontext.doc.Objects.AddBrep(brep) for brep in breps]
+        new_following = []
+        for curve in curves:
+            id = scriptcontext.doc.Objects.AddCurve(curve)
+            new_following.append(id)
+        for point in points:
+            id = scriptcontext.doc.Objects.AddPoint(point)
+            new_following.append(id)
+        for dot in dots:
+            id = scriptcontext.doc.Objects.AddTextDot(dot)
+            new_following.append(id)
+        scriptcontext.doc.Views.Redraw()
+        if following_geometry: return rc, new_following
+        return rc
+    *)
+
+
+    [<EXT>]
+    ///<summary>Changes the degree of a surface object.  For more information see the Rhino help file for the ChangeDegree command.</summary>
+    ///<param name="objectId">(Guid) The object's identifier.</param>
+    ///<param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
+    ///<returns>(bool) True of False indicating success or failure.</returns>
+    static member ChangeSurfaceDegree(objectId:Guid, degree:int * int) : bool =
+        let surface = RhinoScriptSyntax.CoerceNurbsSurface(objectId)  
+        let u, v = degree
+        let maxnurbsdegree = 11
+        if u < 1 || u > maxnurbsdegree || v < 1 || v > maxnurbsdegree ||  (surface.Degree(0) = u && surface.Degree(1) = v) then failwithf "ChangeSurfaceDegree failed on %A" objectId
+        let mutable r = false
+        if surface.IncreaseDegreeU(u) then
+            if surface.IncreaseDegreeV(v) then
+                r <- Doc.Objects.Replace(objectId, surface) 
+        r
+    (*
+    def ChangeSurfaceDegree(object_id, degree):
+        '''Changes the degree of a surface object.  For more information see the Rhino help file for the ChangeDegree command.
+      Parameters:
+        object_id (guid): the object's identifier.
+        degree ([number, number]) two integers, specifying the degrees for the U  V directions
+      Returns:
+        bool: True of False indicating success or failure.
+        None: on failure.
+      '''
+    
+      object = rhutil.coercerhinoobject(object_id)
+      if not object: return None
+      obj_ref = Rhino.DocObjects.ObjRef(object)
+    
+      surface = obj_ref.Surface()
+      if not surface: return None
+    
+      if not isinstance(surface, Rhino.Geometry.NurbsSurface):
+        surface = surface.ToNurbsSurface() # could be a Surface or BrepFace
+    
+      max_nurbs_degree = 11
+      if degree[0] < 1 or degree[0] > max_nurbs_degree or \
+          degree[1] < 1 or degree[1] > max_nurbs_degree or \
+          (surface.Degree(0) == degree[0] and surface.Degree(1) == degree[1]):
+        return None
+    
+      r = False
+      if surface.IncreaseDegreeU(degree[0]):
+        if surface.IncreaseDegreeV(degree[1]):
+          r = scriptcontext.doc.Objects.Replace(object_id, surface)
+      return r
+    *)
+
 
