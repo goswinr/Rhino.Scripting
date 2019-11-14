@@ -580,7 +580,7 @@ module ExtensionsTransformation =
         let mutable point3d = Point3d(point.X, point.Y, 0.0)
         if  screenCoordinates then
             let screen = view.ScreenRectangle
-            point3d.X <- point.X - (float screen.Left)
+            point3d.X <- point.X - (float screen.Left) //TODO check if correct?
             point3d.Y <- point.Y - (float screen.Top)
         point3d <- xform * point3d
         point3d
