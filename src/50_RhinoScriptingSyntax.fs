@@ -11,6 +11,7 @@ open Rhino.Scripting.TypeExtensions
 open System.Collections.Generic
 
 /// An Integer Enum of Object types to be use in object selection functions
+/// Don't create an instance,  use the instance in RhinoScriptSyntax.Filter
 [<Sealed>] //AbstractClass;
 type Filter internal () =  
     member _.AllObjects = 0
@@ -34,13 +35,13 @@ type Filter internal () =
     member _.Extrusion = 1073741824
 
 module private FilterModule =
-    // the singelton of this class oesed below
+    // the singelton of this class to be used below
     let filter = Filter()
 
 [<AbstractClass; Sealed>]
-/// A static class with static members providing functions very similar to RhinoScript in Pyhton and VBscript 
-type RhinoScriptSyntax private () = // no constructor?
-     
+/// A static class with static members providing functions identical to RhinoScript in Pyhton or VBscript 
+type RhinoScriptSyntax private () = // no constructor?     
+
     /// An Integer Enum of Object types to be use in object selection functions
     static member Filter:Filter = FilterModule.filter
 
@@ -115,7 +116,6 @@ type RhinoScriptSyntax private () = // no constructor?
         RhinoApp.Wait()
 
 
-
     ///<summary>clamps a value between a lower and an upper bound</summary>
     ///<param name="minVal">(float): lower bound</param>
     ///<param name="maxVal">(float): upper bound</param>
@@ -158,11 +158,10 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="start">(float): first value of range</param> 
     ///<param name="stop">(float): end of range( this last value will not be included in range,Python semantics)</param>    
     ///<param name="step">(float): step size between two values</param>
-    ///<returns> aa RezizeArray of floats </returns>
+    ///<returns> a RezizeArray of floats </returns>
     static member Frange (start:float, stop:float, step:float) : float ResizeArray =
         RhinoScriptSyntax.Fxrange (start, stop, step) |> ResizeArray.ofSeq
     
-
 
     //-------------------------------------------------------
     //------------COERCE-------------------------------------
@@ -370,29 +369,33 @@ type RhinoScriptSyntax private () = // no constructor?
         // TODO parse 6 numbers, convert form polyline
         |_ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
     
-    
+
     ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>
     ///<param name="objectId">object identifier (Guid or string)</param>
     ///<returns>a RhinoObject. Fails on bad input</returns>
-    static member CoerceRhinoObject(objectId:'T): DocObjects.RhinoObject =
-        match box objectId with
-        | :? Guid  as g -> 
-            if Guid.Empty = g then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
-            else 
-                let o = Doc.Objects.FindId(g) 
-                if isNull o then failwithf "CoerceRhinoObject: Guid %A not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" g
-                else o        
-        | :? DocObjects.RhinoObject as o -> o
-        | :? DocObjects.ObjRef as r -> r.Object()        
-        | :? string as s -> 
-                let g = RhinoScriptSyntax.CoerceGuid(s)
-                if Guid.Empty = g then failwithf "CoerceRhinoObject: could not coerce %s to a RhinoObject" s
-                else 
-                    let o = Doc.Objects.FindId(g) 
-                    if isNull o then failwithf "CoerceRhinoObject: Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
-                    else o
-        | _ -> failwithf "CoerceRhinoObject: could not coerce %A to a RhinoObject" objectId
-
+    static member CoerceRhinoObject(objectId:Guid): DocObjects.RhinoObject =  
+        //match box objectId with
+        //| :? Guid  as g -> 
+        //    if Guid.Empty = g then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
+        //    else 
+        //        let o = Doc.Objects.FindId(g) 
+        //        if isNull o then failwithf "CoerceRhinoObject: Guid %A not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" g
+        //        else o        
+        //| :? DocObjects.RhinoObject as o -> o
+        //| :? DocObjects.ObjRef as r -> r.Object()        
+        //| :? string as s -> 
+        //        let g = RhinoScriptSyntax.CoerceGuid(s)
+        //        if Guid.Empty = g then failwithf "CoerceRhinoObject: could not coerce %s to a RhinoObject" s
+        //        else 
+        //            let o = Doc.Objects.FindId(g) 
+        //            if isNull o then failwithf "CoerceRhinoObject: Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
+        //            else o
+        //| _ -> failwithf "CoerceRhinoObject: could not coerce %A to a RhinoObject" objectId
+        if Guid.Empty = objectId then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
+        else 
+            let o = Doc.Objects.FindId(objectId) 
+            if isNull o then failwithf "CoerceRhinoObject: Guid %A not found in Object table." objectId
+            else o  
 
 
     ///<summary>attempt to get Rhino LayerObject from the document with a given objectId or fullame</summary>
@@ -408,16 +411,18 @@ type RhinoScriptSyntax private () = // no constructor?
                     let l = Doc.Layers.FindId(g)            
                     if isNull l then failwithf "CoerceLayer: could not Coerce Layer from ID '%A'" nameOrId  
                     l
-            | :? int as ix  -> 
-                    if ix<0 || ix >= Doc.Layers.Count then failwithf "CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
-                    Doc.Layers.[ix]
+            //| :? int as ix  -> 
+            //        if ix<0 || ix >= Doc.Layers.Count then failwithf "CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
+            //        Doc.Layers.[ix]
+
             | _ -> failwithf "CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
     
     
-    ///<summary>attempt to get Rhino View Object from the name of the view </summary>
-    ///<param name="view">(string): name of the view, empty string will return the Active view</param> 
+    ///<summary>Attempt to get Rhino View Object from the name of the view </summary>
+    ///<param name="view">(string): Name of the view, empty string will return the Active view</param> 
     ///<returns>a Doc.View object. Fails on bad input</returns>
-    static member CoerceView (view) =    
+    static member CoerceView (view:string) =    
+        if isNull view then failwithf "CoerceView: failed on null for view name input" // or Doc.Views.ActiveView
         if view = "" then Doc.Views.ActiveView
         else 
             let allviews = Doc.Views.GetViewList(true, true) |> Seq.filter (fun v-> v.MainViewport.Name = view)
@@ -427,7 +432,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get Rhino Hatch Object</summary>
     ///<param name="objectId">(guid): objectId of Hatch object</param> 
     ///<returns>a Rhino.DocObjects.HatchObject. Fails on bad input.</returns>
-    static member CoerceHatchObject (objectId:'T): DocObjects.HatchObject =
+    static member CoerceHatchObject (objectId:Guid): DocObjects.HatchObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
         | o -> failwithf "CoerceHatchObject: failed on %A from %A " objectId o.ObjectType
@@ -435,7 +440,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get Rhino Annotation Object</summary>
     ///<param name="objectId">(guid): objectId of annotation object</param> 
     ///<returns>a Rhino.DocObjects.AnnotationObjectBase. Fails on bad input.</returns>
-    static member CoerceAnnotation (objectId:'T): DocObjects.AnnotationObjectBase =
+    static member CoerceAnnotation (objectId:Guid): DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
         | o -> failwithf "CoerceAnnotation: failed on: %A from %A " objectId o.ObjectType
