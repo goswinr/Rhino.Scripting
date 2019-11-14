@@ -299,6 +299,7 @@ type RhinoScriptSyntax private () = // no constructor?
     static member CoerceGuid(objectId:'T):Guid =
         match box objectId with
         | :? Guid  as g -> if Guid.Empty = g then failwithf ": CoerceGuid: Guid is Emty: %A" objectId else g
+        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then failwithf ": CoerceGuid: Guid is Emty or None: %A" objectId else go.Value //from UI functions
         | :? string  as s -> try Guid.Parse s with _ -> failwithf ": could not CoerceGuid: string '%s' can not be converted to a Guid" s
         | :? DocObjects.RhinoObject as o -> o.Id
         | :? DocObjects.ObjRef      as o -> o.ObjectId
@@ -418,7 +419,7 @@ type RhinoScriptSyntax private () = // no constructor?
             | _ -> failwithf "CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
     
     
-    ///<summary>Attempt to get Rhino View Object from the name of the view </summary>
+    ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standart or page view </summary>
     ///<param name="view">(string or Guid): Name or Guid the view, empty string will return the Active view</param> 
     ///<returns>a Doc.View object. Fails on bad input</returns>
     static member CoerceView (view:'T) : Display.RhinoView =    
@@ -489,7 +490,14 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? DocObjects.InstanceObject as b -> b
         | o -> failwithf "CoerceBlockInstanceObject: unable to find Block InstanceObject from %A '%A'" o.ObjectType objectId
     
-       
+    ///<summary>attempt to get Detail view rectangle Object</summary>
+    ///<param name="objectId">(guid): objectId of Detail object</param> 
+    ///<returns>a DocObjects.DetailViewObject. Fails on bad input.</returns>
+    static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
+        | :?  DocObjects.DetailViewObject as a -> a
+        | g -> failwithf "CoerceDetailViewObject failed on %A : %A " g.ObjectType objectId
+   
 
     //---------Geometry Base------------
 
@@ -601,6 +609,14 @@ type RhinoScriptSyntax private () = // no constructor?
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
         | g -> failwithf "CoerceHatch failed on %A : %A " g.ObjectType objectId
+
+    ///<summary>attempt to get Detail view rectangle Geometry</summary>
+    ///<param name="objectId">(guid): objectId of Detail object</param> 
+    ///<returns>a Geometry.DetailView. Fails on bad input.</returns>
+    static member CoerceDetailView (objectId:'T) : DetailView =
+        match RhinoScriptSyntax.CoerceGeometry objectId with
+        | :?  DetailView as a -> a
+        | g -> failwithf "CoerceDetailView failed on %A : %A " g.ObjectType objectId
 
 
 
