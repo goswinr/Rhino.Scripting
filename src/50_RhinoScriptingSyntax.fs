@@ -411,7 +411,7 @@ type RhinoScriptSyntax private () = // no constructor?
                     let l = Doc.Layers.FindId(g)            
                     if isNull l then failwithf "CoerceLayer: could not Coerce Layer from ID '%A'" nameOrId  
                     l
-            //| :? int as ix  -> 
+            //| :? int as ix  -> // better not allow ints here ??
             //        if ix<0 || ix >= Doc.Layers.Count then failwithf "CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
             //        Doc.Layers.[ix]
 
@@ -419,15 +419,51 @@ type RhinoScriptSyntax private () = // no constructor?
     
     
     ///<summary>Attempt to get Rhino View Object from the name of the view </summary>
-    ///<param name="view">(string): Name of the view, empty string will return the Active view</param> 
+    ///<param name="view">(string or Guid): Name or Guid the view, empty string will return the Active view</param> 
     ///<returns>a Doc.View object. Fails on bad input</returns>
-    static member CoerceView (view:string) =    
-        if isNull view then failwithf "CoerceView: failed on null for view name input" // or Doc.Views.ActiveView
-        if view = "" then Doc.Views.ActiveView
-        else 
-            let allviews = Doc.Views.GetViewList(true, true) |> Seq.filter (fun v-> v.MainViewport.Name = view)
-            if Seq.length allviews = 1 then Seq.head allviews
-            else  failwithf "CoerceView: could not CoerceView '%s'" view
+    static member CoerceView (view:'T) : Display.RhinoView =    
+        match box view with
+        | :? Guid as g ->
+            let viewo = Doc.Views.Find(g)
+            if isNull viewo then failwithf "CoerceView: could not CoerceView  from '%A'" g
+            else viewo
+        
+        | :? string as view ->       
+            if isNull view then failwithf "CoerceView: failed on null for view name input" // or Doc.Views.ActiveView
+            elif view = "" then Doc.Views.ActiveView
+            else 
+                let allviews = Doc.Views.GetViewList(true, true) |> Array.filter (fun v-> v.MainViewport.Name = view)
+                if allviews.Length = 1 then allviews.[0]
+                else  failwithf "CoerceView: could not CoerceView '%s'" view
+        
+        | _ -> failwithf "Cannot get view from %A" view
+
+    
+    ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name or ID of the Layout </summary>
+    ///<param name="view">(string): Name of the Layout</param> 
+    ///<returns>a Doc.View object. Fails on bad input</returns>
+    static member CoercePageView (view:'T) : Display.RhinoPageView =    
+        match box view with
+        | :? Guid as g ->
+            let viewo = Doc.Views.Find(g)
+            if isNull viewo then failwithf "CoerceView: could not CoerceView  from '%A'" g
+            else 
+                try viewo :?> Display.RhinoPageView
+                with _  -> failwithf "CoerceView: the view found '%A' is not a page view" viewo.MainViewport.Name
+        
+        | :? string as view ->       
+            if isNull view then failwithf "CoercePageView: failed on null for view name input" // or Doc.Views.ActiveView
+            else 
+                let allviews = Doc.Views.GetPageViews()|> Array.filter (fun v-> v.PageName = view)
+                let l = allviews.Length
+                if allviews.Length = 1 then allviews.[0]
+                elif allviews.Length > 1 then failwithf "CoercePageView: more than one page called '%s'" view
+                else  failwithf "CoercePageView: Layout called '%s' not found" view
+        
+        | _ -> failwithf "Cannot get view from %A" view
+        
+    
+
     
     ///<summary>attempt to get Rhino Hatch Object</summary>
     ///<param name="objectId">(guid): objectId of Hatch object</param> 
@@ -453,9 +489,7 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? DocObjects.InstanceObject as b -> b
         | o -> failwithf "CoerceBlockInstanceObject: unable to find Block InstanceObject from %A '%A'" o.ObjectType objectId
     
-
-
-
+       
 
     //---------Geometry Base------------
 
