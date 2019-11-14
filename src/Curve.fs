@@ -831,12 +831,27 @@ module ExtensionsCurve =
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(float) The parameter of the closest point on the curve</returns>
-    static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
+    static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)  
         let t = ref 0.
         let rc = curve.ClosestPoint(point,t)
-        if not <| rc then failwithf "curveClosestPoint failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if not <| rc then failwithf "curveClosestParameter failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
         !t
+    
+    [<EXT>]
+    ///<summary>Returns the point on a curve that is closest to a test point.</summary>
+    ///<param name="curveId">(Guid) Identifier of a curve object</param>
+    ///<param name="point">(Point3d) Sampling point</param>
+    ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
+    ///Curve segment index if `curveId` identifies a polycurve</param>
+    ///<returns>(Point3d) The closest point on the curve</returns>
+    static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        let rc,t = curve.ClosestPoint(point)
+        if not <| rc then failwithf "curveClosestPoint failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        curve.PointAt(t)
+
+
 
 
     [<EXT>]
