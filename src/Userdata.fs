@@ -9,7 +9,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsUserdata =
     type RhinoScriptSyntax with
-    
+
     [<EXT>]
     ///<summary>Removes user data strings from the current document</summary>
     ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
@@ -26,7 +26,7 @@ module ExtensionsUserdata =
     ///<summary>Returns the number of user data strings in the current document</summary>
     ///<returns>(int) the number of user data strings in the current document</returns>
     static member DocumentDataCount() : int =
-        Doc.Strings.DocumentDataCount 
+        Doc.Strings.DocumentDataCount
 
 
     //<summary>Returns the number of user text strings in the current document</summary>
@@ -49,10 +49,10 @@ module ExtensionsUserdata =
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> =
         if notNull section then
-            Doc.Strings.GetSectionNames()        
-        else 
+            Doc.Strings.GetSectionNames()
+        else
             Doc.Strings.GetEntryNames(section)
-    
+
     [<EXT>]
     ///<summary>Returns a user data item  entry from the current document</summary>
     ///<param name="section">(string) Section name.</param>
@@ -60,7 +60,7 @@ module ExtensionsUserdata =
     ///<returns>(string) the entry value</returns>
     static member GetDocumentDataEntry(section:string, entry:string) : string =
         Doc.Strings.GetValue(section, entry)
-    
+
 
 
     [<EXT>]
@@ -74,11 +74,11 @@ module ExtensionsUserdata =
     ///<summary>Returns all document user text keys</summary>
     ///<returns>(string array) all document user text keys </returns>
     static member GetDocumentUserTextKeys() : string ResizeArray =
-        resizeArray { for  i=0 to Doc.Strings.Count-1  do 
-                          let k = Doc.Strings.GetKey(i) 
+        resizeArray { for  i=0 to Doc.Strings.Count-1  do
+                          let k = Doc.Strings.GetKey(i)
                           if not <| k.Contains "\\" then  yield k }
 
-        
+
 
     [<EXT>]
     ///<summary>Returns all user text keys stored on an object.</summary>
@@ -90,13 +90,13 @@ module ExtensionsUserdata =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             let uss = obj.Geometry.GetUserStrings()
-            resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}  
+            resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}
         else
             let uss = obj.Attributes.GetUserStrings()
             resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}
-            
-    
-    [<EXT>]    
+
+
+    [<EXT>]
     ///<summary>Returns user text stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">The key name.</param>
@@ -178,6 +178,6 @@ module ExtensionsUserdata =
             obj.Geometry.SetUserString(key, value)|> ignore
         else
             obj.Attributes.SetUserString(key, value)|> ignore
-        
+
 
 

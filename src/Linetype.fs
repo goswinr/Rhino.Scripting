@@ -8,14 +8,14 @@ open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsLinetype =
-  type RhinoScriptSyntax with 
+  type RhinoScriptSyntax with
 
     [<EXT>]
     ///<summary>Verifies the existance of a linetype in the document</summary>
     ///<param name="name">(string) The name of an existing linetype.</param>
     ///<returns>(bool) True or False</returns>
     static member IsLinetype(name:string) : bool =
-        notNull <| Doc.Linetypes.FindName(name)        
+        notNull <| Doc.Linetypes.FindName(name)
 
 
     [<EXT>]
@@ -43,7 +43,7 @@ module ExtensionsLinetype =
         let rc = ResizeArray()
         for i = 0 to count - 1 do
             let linetype = Doc.Linetypes.[i]
-            if not linetype.IsDeleted then  rc.Add(linetype.Name)        
+            if not linetype.IsDeleted then  rc.Add(linetype.Name)
         rc
 
 

@@ -9,8 +9,8 @@ open Rhino.Scripting.ActiceDocument
 
 [<AutoOpen>]
 module ExtensionsBlock =
-  
-  
+
+
   type RhinoScriptSyntax with
 
 
@@ -38,7 +38,7 @@ module ExtensionsBlock =
                 let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
                 if uses then failwithf "AddBlock: cannt add Instance Ref Object %A to %s" objectId name
-            
+
             objects.Add(obj)
         if objects.Count>0 then
             let geometry = [ for obj in objects -> obj.Geometry]
@@ -53,7 +53,7 @@ module ExtensionsBlock =
                     for obj in objects do Doc.Objects.Delete(obj, true) |>ignore
                 Doc.Views.Redraw()
         name
-        
+
 
 
 
@@ -81,7 +81,7 @@ module ExtensionsBlock =
     static member BlockContainerCount(blockName:string) : int =
         (RhinoScriptSyntax.BlockContainers(blockName)).Count
 
-    
+
     [<EXT>]
     ///<summary>Returns the number of block definitions in the document</summary>
     ///<returns>(int) the number of block definitions in the document</returns>
@@ -181,7 +181,7 @@ module ExtensionsBlock =
     static member BlockNames() : ResizeArray<string> =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
         resizeArray { for item in ideflist do yield item.Name}
-        
+
 
 
     [<EXT>]
@@ -274,8 +274,8 @@ module ExtensionsBlock =
         if objectId<>System.Guid.Empty then
             Doc.Views.Redraw()
         objectId
-    
-    
+
+
     [<EXT>]
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>

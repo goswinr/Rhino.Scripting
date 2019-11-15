@@ -9,9 +9,9 @@ open Rhino.Scripting.ActiceDocument
 
 [<AutoOpen>]
 module ExtensionsUtility =
-  
+
     type RhinoScriptSyntax with
-    
+
     [<EXT>]
     ///<summary>Return True if the script is being executed in the context of Rhino(currently always true)</summary>
     ///<returns>(bool) True if the script is being executed in the context of Rhino(currently always true)</returns>
@@ -39,7 +39,7 @@ module ExtensionsUtility =
     ///  element 3 = delta in the Y direction
     ///  element 4 = delta in the Z direction</returns>
     static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
-        let plane = if plane.IsValid then plane else Plane.WorldXY 
+        let plane = if plane.IsValid then plane else Plane.WorldXY
         let vector = point2 - point1
         let mutable x = vector.X
         let mutable y = vector.Y
@@ -204,7 +204,7 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Returns string from a specified section in a initialization file. NOT IMPLEMENTED YET</summary> 
+    ///<summary>Returns string from a specified section in a initialization file. NOT IMPLEMENTED YET</summary>
     ///<param name="filename">(string) Name of the initialization file</param>
     ///<param name="section">(string) Optional, Section containing the entry</param>
     ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
@@ -307,7 +307,7 @@ module ExtensionsUtility =
     ///<param name="point">something that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
     static member CreatePoint(point:'T ) : Point3d =
-        RhinoScriptSyntax.Coerce3dPoint point    
+        RhinoScriptSyntax.Coerce3dPoint point
     [<EXT>]
     ///<summary>Converts x,y and z into a Rhino.Geometry.Point3d if possible</summary>
     ///<param name="x">something that can be converted or parsed to X coordinate </param>
@@ -323,7 +323,7 @@ module ExtensionsUtility =
     ///<param name="vector">something that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
     static member CreateVector(vector:'T ) : Vector3d =
-        RhinoScriptSyntax.Coerce3dVector vector    
+        RhinoScriptSyntax.Coerce3dVector vector
     [<EXT>]
     ///<summary>Converts x,y and z into a Rhino.Geometry.Vector3d if possible</summary>
     ///<param name="x">something that can be converted or parsed to X coordinate </param>
@@ -332,7 +332,7 @@ module ExtensionsUtility =
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
     static member CreateVector(x:'T, y:'T,z:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector ((x,y,z))
-   
+
 
 
     [<EXT>]
@@ -344,7 +344,7 @@ module ExtensionsUtility =
     ///Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane</returns>
     static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
-        if xAxis.IsZero || yAxis.IsZero then 
+        if xAxis.IsZero || yAxis.IsZero then
             Plane(origin,Vector3d.XAxis,Vector3d.YAxis)
         else
             Plane(origin, xAxis, yAxis)

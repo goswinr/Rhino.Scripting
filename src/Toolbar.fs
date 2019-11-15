@@ -9,7 +9,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsToolbar =
     type RhinoScriptSyntax with
-    
+
     [<EXT>]
     ///<summary>Closes a currently open toolbar collection</summary>
     ///<param name="name">(string) Name of a currently open toolbar collection</param>
@@ -51,7 +51,7 @@ module ExtensionsToolbar =
     static member IsToolbar(name:string, toolbar:string, [<OPT;DEF(false)>]group:bool) : bool =
        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
        if notNull tbfile then
-           if group then 
+           if group then
               tbfile.GetGroup(toolbar) |> notNull
            else
               seq { for i=0 to tbfile.ToolbarCount-1 do yield tbfile.GetToolbar(i).Name }

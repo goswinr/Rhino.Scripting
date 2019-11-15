@@ -11,7 +11,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsGeometry =
     type RhinoScriptSyntax with
-    
+
     [<EXT>]
     ///<summary>Create a clipping plane for visibly clipping away geometry in a specific
     ///  view. Note, clipping planes are infinite</summary>
@@ -22,7 +22,7 @@ module ExtensionsGeometry =
     ///  view is used.</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
-        let viewlist = 
+        let viewlist =
             if isNull views then [Doc.Views.ActiveView.ActiveViewportID]
             else
                 let modelviews = Doc.Views.GetViewList(true, false)
@@ -53,7 +53,7 @@ module ExtensionsGeometry =
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
     ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface.</param>
     ///<returns>(Guid) object identifier on success</returns>
-    static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =      
+    static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
       if not <| IO.File.Exists(filename) then failwithf "image %s does not exist" filename
       let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
       if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
@@ -74,7 +74,7 @@ module ExtensionsGeometry =
 
     [<EXT>]
     ///<summary>Adds point object to the document.</summary>
-    ///<param name="point">(Point3d) point to draw</param>   
+    ///<param name="point">(Point3d) point to draw</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(point:Point3d) : Guid =
         let rc = Doc.Objects.AddPoint(point)
@@ -93,7 +93,7 @@ module ExtensionsGeometry =
             let pc = new PointCloud()
             for i = 0  to -1 + (Seq.length(points)) do
                 let color = RhinoScriptSyntax.CoerceColor(colors.[i])
-                pc.Add(points.[i],color)            
+                pc.Add(points.[i],color)
             let rc = Doc.Objects.AddPointCloud(pc)
             if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
             Doc.Views.Redraw()
@@ -132,24 +132,24 @@ module ExtensionsGeometry =
     ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) Optional, Default Value: <c>DocObjects.TextHorizontalAlignment.Left</c></param>
     ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) Optional, Default Value: <c>DocObjects.TextVerticalAlignment.Top</c></param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
-    static member AddText(  text:string, 
-                            plane:Plane, 
-                            [<OPT;DEF(1.0)>]height:float, 
+    static member AddText(  text:string,
+                            plane:Plane,
+                            [<OPT;DEF(1.0)>]height:float,
                             [<OPT;DEF(null:string)>]font:string,
-                            [<OPT;DEF(0)>]fontStyle:int, 
-                            [<OPT;DEF(1)>]horizontalAlignment:DocObjects.TextHorizontalAlignment, 
+                            [<OPT;DEF(0)>]fontStyle:int,
+                            [<OPT;DEF(1)>]horizontalAlignment:DocObjects.TextHorizontalAlignment,
                             [<OPT;DEF(1)>]verticalAlignment:DocObjects.TextVerticalAlignment) : Guid =
-        
+
         if isNull text || text = "" then failwithf "Rhino.Scripting: Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let bold = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = Doc.DimStyles.Current
         let qn, quartetBoldProp ,quartetItalicProp =
-            if isNull font then              
+            if isNull font then
               ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
-            else 
+            else
               font,false,false
-        
+
         let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
 
         if isNull f then
@@ -161,14 +161,14 @@ module ExtensionsGeometry =
         if bold <> quartetBoldProp then
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
               failwithf "Rhino.Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
-            else 
+            else
               te.SetBold(bold)|> ignore
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
               failwithf "Rhino.Scripting: AddText failed.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
-            else 
+            else
               te.SetItalic(italic)|> ignore
-       
+
         te.TextHorizontalAlignment <- horizontalAlignment
         te.TextVerticalAlignment <- verticalAlignment
         let objectId = Doc.Objects.Add(te);
@@ -216,18 +216,18 @@ module ExtensionsGeometry =
     ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d array =
         let mutable bbox = BoundingBox.Empty
-        
+
         if plane.IsValid then
             let xform = Transform.ChangeBasis(Plane.WorldXY, plane)
-            objects 
+            objects
             |> Seq.map RhinoScriptSyntax.CoerceGeometry
-            |> Seq.iter (fun g -> 
+            |> Seq.iter (fun g ->
                 bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(xform)) )
-            
+
             bbox.GetCorners()
         else
             let xform = Transform.ChangeBasis(Plane.WorldXY, plane)
-            objects 
+            objects
             |> Seq.map RhinoScriptSyntax.CoerceGeometry
             |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true)) )
 
@@ -344,10 +344,10 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool []) List of point cloud hidden states</returns>
     static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
-        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)        
-        resizeArray { for item in pc do yield item.Hidden } 
-        
-            
+        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
+        resizeArray { for item in pc do yield item.Hidden }
+
+
 
     ///<summary>Modifies the hidden points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -355,18 +355,18 @@ module ExtensionsGeometry =
     ///<returns>(unit) void, nothing</returns>
     static member PointCloudHidePoints(objectId:Guid, hidden:bool seq) : unit = //SET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
-        if Seq.isEmpty hidden then 
+        if Seq.isEmpty hidden then
             pc.ClearHiddenFlags()
-        
+
         elif Seq.length(hidden) = pc.Count then
-                for i,h in Seq.indexed hidden do 
+                for i,h in Seq.indexed hidden do
                     pc.[i].Hidden <- h
         else
             failwithf "PointCloudHidePoints length of hidden values does not match point cloud point count"
-            
+
         (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges()|> ignore
         Doc.Views.Redraw()
-        
+
 
 
     [<EXT>]
@@ -376,7 +376,7 @@ module ExtensionsGeometry =
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color ResizeArray = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
         resizeArray { for item in pc do yield item.Color }
-           
+
 
     ///<summary>Modifies the point colors of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -392,7 +392,7 @@ module ExtensionsGeometry =
             failwithf "PointCloudHidePoints length of hidden values does not match point cloud point count"
         (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges()|> ignore
         Doc.Views.Redraw()
-            
+
 
 
     [<EXT>]
@@ -404,7 +404,7 @@ module ExtensionsGeometry =
         pc.GetPoints()
 
 
-    
+
 
 
     [<EXT>]
@@ -417,11 +417,11 @@ module ExtensionsGeometry =
     static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
         if Seq.length(needlePoints) > 100 then
             RTree.Point3dKNeighbors(ptCloud, needlePoints, amount)
-        else 
+        else
             Collections.RhinoList.Point3dKNeighbors(ptCloud, needlePoints, amount)
-        
-        
-        
+
+
+
 
 
 
@@ -434,7 +434,7 @@ module ExtensionsGeometry =
     ///<returns>(seq<int array>) a seq of arrays with the indices of the found points.</returns>
     static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
         RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
-        
+
 
 
 
@@ -454,7 +454,7 @@ module ExtensionsGeometry =
         let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
         if not <| Doc.Objects.Replace(objectId, pt) then failwithf "PointCoordinates failed to change object %A to %A " objectId point
         Doc.Views.Redraw()
-          
+
 
 
     [<EXT>]
@@ -491,7 +491,7 @@ module ExtensionsGeometry =
         textdot.FontHeight <- height
         if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotHeight failed to change object %A to %A " objectId height
         Doc.Views.Redraw()
-        
+
 
 
     [<EXT>]
@@ -500,7 +500,7 @@ module ExtensionsGeometry =
     ///<returns>(Point3d) The current 3-D text dot location</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
         (RhinoScriptSyntax.CoerceTextDot(objectId)).Point
-        
+
 
     ///<summary>Modifies the location, or insertion point, on a text dot object</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
@@ -511,8 +511,8 @@ module ExtensionsGeometry =
         textdot.Point <-  point
         if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotPoint failed to change object %A to %A " objectId point
         Doc.Views.Redraw()
-        
-        
+
+
 
 
     [<EXT>]
@@ -533,8 +533,8 @@ module ExtensionsGeometry =
         textdot.Text <-  text
         if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotText failed to change object %A to %A " objectId text
         Doc.Views.Redraw()
-        
-        
+
+
 
 
     [<EXT>]
@@ -552,7 +552,7 @@ module ExtensionsGeometry =
         let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
-        let f = 
+        let f =
             DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
             // normally calls will not  go further than FromQuartetProperties(font, false, false)
             // but there are a few rare fonts that don"t have a regular font
@@ -561,12 +561,12 @@ module ExtensionsGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, false, true)
             |? DocObjects.Font.FromQuartetProperties(font, true, true)
             |? failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
-        
-        annotation.Font <- f        
+
+        annotation.Font <- f
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
         Doc.Views.Redraw()
-        
-       
+
+
 
     [<EXT>]
     ///<summary>Returns the height of a text object</summary>
@@ -585,7 +585,7 @@ module ExtensionsGeometry =
         let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
         Doc.Views.Redraw()
-        
+
 
 
     [<EXT>]
@@ -605,7 +605,7 @@ module ExtensionsGeometry =
         let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
         Doc.Views.Redraw()
-        
+
 
 
     [<EXT>]
@@ -620,14 +620,14 @@ module ExtensionsGeometry =
     ///<param name="point">(Point3d)The new text object location</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPoint(objectId:Guid, point:Point3d) : unit = //SET
-        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)            
+        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let mutable plane = text.Plane
         plane.Origin <-  point
         text.Plane <-  plane
         let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         if not <| Doc.Objects.Replace(objectId, text) then failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
         Doc.Views.Redraw()
-        
+
 
 
     [<EXT>]
@@ -657,8 +657,8 @@ module ExtensionsGeometry =
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
-        let f = 
-            match style with 
+        let f =
+            match style with
             |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, true)
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
@@ -691,6 +691,6 @@ module ExtensionsGeometry =
         let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
         Doc.Views.Redraw()
-        
+
 
 

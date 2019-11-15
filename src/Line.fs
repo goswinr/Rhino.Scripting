@@ -9,8 +9,8 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsLine =
   type RhinoScriptSyntax with
-    
-   
+
+
     [<EXT>]
     ///<summary>Finds the point on an FINITE line that is closest to a test point</summary>
     ///<param name="line">(Geometry.Line) the finite line.</param>
@@ -50,7 +50,7 @@ module ExtensionsLine =
             [|pt1|]
         else
             [|pt1; pt2|]
-    
+
 
 
 
@@ -171,6 +171,6 @@ module ExtensionsLine =
         let line = RhinoScriptSyntax.CoerceLine lineId
         let success = line.Transform(xform)
         if not <| success then  failwithf "lineTransform unable to transform line %A with  %A " line xform
-        
+
 
 

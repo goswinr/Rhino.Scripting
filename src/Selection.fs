@@ -12,7 +12,7 @@ module ExtensionsSelection =
 
   type RhinoScriptSyntax with
 
-    
+
     [<EXT>]
     ///<summary>Returns identifiers of all objects in the document.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -24,11 +24,11 @@ module ExtensionsSelection =
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers for all the objects in the document</returns>
-    static member AllObjects(       [<OPT;DEF(false)>]select:bool, 
-                                    [<OPT;DEF(false)>]includeLights:bool, 
-                                    [<OPT;DEF(false)>]includeGrips:bool, 
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =        
-            
+    static member AllObjects(       [<OPT;DEF(false)>]select:bool,
+                                    [<OPT;DEF(false)>]includeLights:bool,
+                                    [<OPT;DEF(false)>]includeGrips:bool,
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
+
             let it = Rhino.DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -43,7 +43,7 @@ module ExtensionsSelection =
                 objectids.Add(object.Id)
             if objectids.Count > 0 && select then Doc.Views.Redraw()
             objectids
-            
+
 
 
     [<EXT>]
@@ -56,10 +56,10 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips objects.  If omitted (False), grips objects are not returned.</param>
     ///<returns>(Guid) The identifier of the object .</returns>
-    static member FirstObject(      [<OPT;DEF(false)>]select:bool, 
-                                    [<OPT;DEF(false)>]includeLights:bool, 
+    static member FirstObject(      [<OPT;DEF(false)>]select:bool,
+                                    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid =
-        
+
             let it = Rhino.DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -69,7 +69,7 @@ module ExtensionsSelection =
             if isNull object then failwithf "FirstObject not found(null)"
             if select then object.Select(true) |> ignore
             object.Id
-            
+
 
 
     [<EXT>]
@@ -117,7 +117,7 @@ module ExtensionsSelection =
         if 0 <> (filter &&& 1073741824 ) then
             geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Extrusion
         geometryfilter
-           
+
 
 
     [<EXT>]
@@ -136,8 +136,8 @@ module ExtensionsSelection =
     ///  [3]  point    selection point
     ///  [4]  number   the curve parameter of the selection point
     ///  [5]  str      name of the view selection was made</returns>
-    static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string, 
-                                    [<OPT;DEF(false)>]preselect:bool, 
+    static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
+                                    [<OPT;DEF(false)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -155,7 +155,7 @@ module ExtensionsSelection =
                 else
                     let objref = go.Object(0)
                     let objectId = objref.ObjectId
-                    let presel = go.ObjectsWerePreselected                    
+                    let presel = go.ObjectsWerePreselected
                     let selmethod = objref.SelectionMethod()
                     let point = objref.SelectionPoint()
                     let crv, curveparameter = objref.CurveParameter()
@@ -188,11 +188,11 @@ module ExtensionsSelection =
     ///If True, subobjects can be selected. When this is the
     ///  case, for tracking  of the subobject go via the Object Ref</param>
     ///<returns>(Guid) Identifier of the picked object</returns>
-    static member GetObject(        [<OPT;DEF(null:string)>]message:string, 
-                                    [<OPT;DEF(0)>]filter:int, 
-                                    [<OPT;DEF(false)>]preselect:bool, 
-                                    [<OPT;DEF(false)>]select:bool, 
-                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter, 
+    static member GetObject(        [<OPT;DEF(null:string)>]message:string,
+                                    [<OPT;DEF(0)>]filter:int,
+                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(false)>]select:bool,
+                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
                                     [<OPT;DEF(false)>]subobjects:bool) : option<Guid> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -207,7 +207,7 @@ module ExtensionsSelection =
             go.SubObjectSelect <- subobjects
             go.GroupSelect <- false
             go.AcceptNothing(true)
-            return 
+            return
                 if go.Get() <> Rhino.Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
@@ -217,7 +217,7 @@ module ExtensionsSelection =
                     if not <| select && not <| preselect then
                         Doc.Objects.UnselectAll() |> ignore
                         Doc.Views.Redraw()
-                    
+
                     obj.Select(select)  |> ignore
                     Some obj.Id
 
@@ -244,16 +244,16 @@ module ExtensionsSelection =
     ///  [0] identifier of the object
     ///  [1] True if the object was preselected, otherwise False
     ///  [2] selection method Enum DocObjects.SelectionMethod
-    ///       (0) selected by non-mouse method (SelAll,etc.).    
-    ///       (1) selected by mouse click on theobject.    
-    ///       (2) selected by being inside of amouse window.    
-    ///       (3) selected by intersecting a mousecrossing window.    
+    ///       (0) selected by non-mouse method (SelAll,etc.).
+    ///       (1) selected by mouse click on theobject.
+    ///       (2) selected by being inside of amouse window.
+    ///       (3) selected by intersecting a mousecrossing window.
     ///  [3] selection point
     ///  [4] name of the view selection was made</returns>
-    static member GetObjectEx(      [<OPT;DEF(null:string)>]message:string, 
-                                    [<OPT;DEF(0)>]filter:int, 
-                                    [<OPT;DEF(false)>]preselect:bool, 
-                                    [<OPT;DEF(false)>]select:bool, 
+    static member GetObjectEx(      [<OPT;DEF(null:string)>]message:string,
+                                    [<OPT;DEF(0)>]filter:int,
+                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -264,19 +264,19 @@ module ExtensionsSelection =
             if notNull objects then
                 let s = System.Collections.Generic.HashSet(objects)
                 go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
-            if notNull message then 
-                go.SetCommandPrompt(message)            
-            if filter>0 then 
+            if notNull message then
+                go.SetCommandPrompt(message)
+            if filter>0 then
                 go.GeometryFilter <- RhinoScriptSyntax.FilterHelper(filter)
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)
-            return 
+            return
                 if go.Get() <> Rhino.Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
                     let objectId = objref.ObjectId
-                    let presel = go.ObjectsWerePreselected                    
+                    let presel = go.ObjectsWerePreselected
                     let selmethod = objref.SelectionMethod()
                     let point = objref.SelectionPoint()
                     let viewname = go.View().ActiveViewport.Name
@@ -334,14 +334,14 @@ module ExtensionsSelection =
     ///Maximum count of objects allowed to be selected</param>
     ///<param name="customFilter">(string) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid array) identifiers of the picked objects</returns>
-    static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string, 
-                                    [<OPT;DEF(0)>]filter:int, 
-                                    [<OPT;DEF(true)>]group:bool, 
-                                    [<OPT;DEF(false)>]preselect:bool, 
-                                    [<OPT;DEF(false)>]select:bool, 
-                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq, 
-                                    [<OPT;DEF(1)>]minimumCount:int, 
-                                    [<OPT;DEF(0)>]maximumCount:int, 
+    static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
+                                    [<OPT;DEF(0)>]filter:int,
+                                    [<OPT;DEF(true)>]group:bool,
+                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(false)>]select:bool,
+                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq,
+                                    [<OPT;DEF(1)>]minimumCount:int,
+                                    [<OPT;DEF(0)>]maximumCount:int,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -352,7 +352,7 @@ module ExtensionsSelection =
             if notNull objects then
                 let s = System.Collections.Generic.HashSet(objects)
                 go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
-            elif notNull customFilter then 
+            elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
             go.SetCommandPrompt(message )
             let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
@@ -372,7 +372,7 @@ module ExtensionsSelection =
                         let objref = go.Object(i)
                         rc.Add(objref.ObjectId)
                         let obj = objref.Object()
-                        if select && notNull obj then obj.Select(select) |> ignore            
+                        if select && notNull obj then obj.Select(select) |> ignore
                     Some rc
             } |> Async.RunSynchronously
 
@@ -403,11 +403,11 @@ module ExtensionsSelection =
     ///  [n][2]  selection method (DocObjects.SelectionMethod)
     ///  [n][3]  selection point
     ///  [n][4]  name of the view selection was made</returns>
-    static member GetObjectsEx(     [<OPT;DEF("Select objects":string)>]message:string, 
-                                    [<OPT;DEF(0)>]filter:int, 
-                                    [<OPT;DEF(true)>]group:bool, 
-                                    [<OPT;DEF(false)>]preselect:bool, 
-                                    [<OPT;DEF(false)>]select:bool, 
+    static member GetObjectsEx(     [<OPT;DEF("Select objects":string)>]message:string,
+                                    [<OPT;DEF(0)>]filter:int,
+                                    [<OPT;DEF(true)>]group:bool,
+                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -417,14 +417,14 @@ module ExtensionsSelection =
             use go = new Input.Custom.GetObject()
             if notNull objects then
                 let s = System.Collections.Generic.HashSet(objects)
-                go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))            
+                go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
             go.SetCommandPrompt(message)
             let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
             go.AcceptNothing(true)
-            return 
+            return
                 if go.GetMultiple(1,0) <> Rhino.Input.GetResult.Object then None
                 else
                     if not <| select && not <| go.ObjectsWerePreselected then
@@ -435,13 +435,13 @@ module ExtensionsSelection =
                     for i in range(count) do
                         let objref = go.Object(i)
                         let objectId = objref.ObjectId
-                        let presel = go.ObjectsWerePreselected                        
+                        let presel = go.ObjectsWerePreselected
                         let selmethod = objref.SelectionMethod()
                         let point = objref.SelectionPoint()
                         let viewname = go.View().ActiveViewport.Name
                         rc.Add( (objectId, presel, selmethod, point, viewname) )
                         let obj = objref.Object()
-                        if select && notNull obj then obj.Select(select) |> ignore                    
+                        if select && notNull obj then obj.Select(select) |> ignore
                     Some rc
             } |> Async.RunSynchronously
 
@@ -453,7 +453,7 @@ module ExtensionsSelection =
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for the selection of pre-selected objects.  If omitted (False), pre-selected objects are not accepted.</param>
     ///<returns>(Point3d array) 3d coordinates of point objects on success</returns>
-    static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string, 
+    static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{
             let! ids = RhinoScriptSyntax.GetObjects(message, FilterModule.filter.Point, preselect=preselect)
@@ -463,10 +463,10 @@ module ExtensionsSelection =
                 rc.Add(pt)
             return rc
             }
- 
 
 
-    [<EXT>] 
+
+    [<EXT>]
     ///<summary>Prompts the user to select a single surface</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select surface"</c>
     ///Prompt displayed</param>
@@ -477,12 +477,12 @@ module ExtensionsSelection =
     ///<returns>(Guid * bool * float * Point3d * (float * float) * string) of information on success
     ///  [0]  identifier of the surface
     ///  [1]  True if the surface was preselected, otherwise False
-    ///  [2]  selection method ( DocObjects.SelectionMethod ) 
+    ///  [2]  selection method ( DocObjects.SelectionMethod )
     ///  [3]  selection point
     ///  [4]  u,v surface parameter of the selection point
     ///  [5]  name of the view in which the selection was made</returns>
-    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add [2] selection method ( see help ) 
-                                    [<OPT;DEF(false)>]preselect:bool, 
+    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add [2] selection method ( see help )
+                                    [<OPT;DEF(false)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -495,7 +495,7 @@ module ExtensionsSelection =
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)
-            return 
+            return
                 if go.Get() <> Rhino.Input.GetResult.Object then
                     None
                 else
@@ -532,8 +532,8 @@ module ExtensionsSelection =
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers the locked objects .</returns>
-    static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool, 
-                                    [<OPT;DEF(false)>]includeGrips:bool, 
+    static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
+                                    [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) :Guid ResizeArray =
             let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
             settings.ActiveObjects <- true
@@ -547,7 +547,7 @@ module ExtensionsSelection =
                 for i in Doc.Objects.GetObjectList(settings) do
                     if i.IsLocked || (Doc.Layers.[i.Attributes.LayerIndex]).IsLocked then
                         yield i.Id }
-           
+
 
 
     [<EXT>]
@@ -560,8 +560,8 @@ module ExtensionsSelection =
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the hidden objects .</returns>
-    static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool, 
-                                    [<OPT;DEF(false)>]includeGrips:bool, 
+    static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
+                                    [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
         let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
         settings.ActiveObjects <- true
@@ -586,8 +586,8 @@ module ExtensionsSelection =
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the newly selected objects .</returns>
-    static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool, 
-                                        [<OPT;DEF(false)>]includeGrips:bool, 
+    static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
+                                        [<OPT;DEF(false)>]includeGrips:bool,
                                         [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
         let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
@@ -598,9 +598,9 @@ module ExtensionsSelection =
         let rc = ResizeArray()
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
-                rc.Add(obj.Id) 
+                rc.Add(obj.Id)
                 obj.Select(true) |> ignore
-            else 
+            else
                 obj.Select(false) |> ignore
         Doc.Views.Redraw()
         rc
@@ -617,7 +617,7 @@ module ExtensionsSelection =
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         match commandSerialNumbers with
         |None -> ResizeArray()
-        |Some (serialnum,ende) -> 
+        |Some (serialnum,ende) ->
             let mutable serialnumber = serialnum
             let rc = ResizeArray()
             while serialnumber < ende do
@@ -640,8 +640,8 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips in the potential set</param>
     ///<returns>(Guid) identifier of the object on success</returns>
-    static member LastObject( [<OPT;DEF(false)>]select:bool, 
-                              [<OPT;DEF(false)>]includeLights:bool, 
+    static member LastObject( [<OPT;DEF(false)>]select:bool,
+                              [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
         let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
@@ -667,9 +667,9 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips in the potential set</param>
     ///<returns>(Guid) identifier of the object on success</returns>
-    static member NextObject( objectId:Guid, 
-                              [<OPT;DEF(false)>]select:bool, 
-                              [<OPT;DEF(false)>]includeLights:bool, 
+    static member NextObject( objectId:Guid,
+                              [<OPT;DEF(false)>]select:bool,
+                              [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
         let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
@@ -680,7 +680,7 @@ module ExtensionsSelection =
         |> Seq.tryFind (fun (t,n) -> objectId = t.Id)
         |>  function
             |None ->failwithf "NextObject not found for %A" objectId
-            |Some (t,n) -> 
+            |Some (t,n) ->
                 if select then n.Select(true) |> ignore
                 n.Id
 
@@ -710,9 +710,9 @@ module ExtensionsSelection =
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///Include lights in the set</param>
     ///<returns>(Guid ResizeArray) identifiers of objects of the selected color.</returns>
-    static member ObjectsByColor( color:Drawing.Color, 
-                                  [<OPT;DEF(false)>]select:bool, 
-                                  [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =        
+    static member ObjectsByColor( color:Drawing.Color,
+                                  [<OPT;DEF(false)>]select:bool,
+                                  [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =
         let rhinoobjects = Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore
@@ -730,7 +730,7 @@ module ExtensionsSelection =
         let groupinstance = Doc.Groups.FindName(groupName)
         if isNull groupinstance  then failwithf "%s does not exist in GroupTable" groupName
         let rhinoobjects = Doc.Groups.GroupMembers(groupinstance.Index)
-        if isNull rhinoobjects then 
+        if isNull rhinoobjects then
             ResizeArray()
         else
             if select then
@@ -767,9 +767,9 @@ module ExtensionsSelection =
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers for objects with the specified name.</returns>
-    static member ObjectsByName( name:string, 
-                                 [<OPT;DEF(false)>]select:bool, 
-                                 [<OPT;DEF(false)>]includeLights:bool, 
+    static member ObjectsByName( name:string,
+                                 [<OPT;DEF(false)>]select:bool,
+                                 [<OPT;DEF(false)>]includeLights:bool,
                                  [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
         let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
         settings.HiddenObjects <- true
@@ -783,7 +783,7 @@ module ExtensionsSelection =
         let ids = resizeArray{ for rhobj in objects do yield rhobj.Id }
         if ids.Count>0 && select then
             for rhobj in objects do rhobj.Select(true) |> ignore
-            Doc.Views.Redraw() 
+            Doc.Views.Redraw()
         ids
 
     [<EXT>]
@@ -822,8 +822,8 @@ module ExtensionsSelection =
     ///    2         Locked objects
     ///    4         Hidden objects</param>
     ///<returns>(Guid ResizeArray) identifiers of object that fit the specified type(s).</returns>
-    static member ObjectsByType( geometryType:int, 
-                                 [<OPT;DEF(false)>]select:bool, 
+    static member ObjectsByType( geometryType:int,
+                                 [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(0)>]state:int) : Guid ResizeArray =
         let mutable state = state
         if state = 0 then state <- 7
@@ -862,7 +862,7 @@ module ExtensionsSelection =
                 if notNull brep then
                     if brep.Faces.Count = 1 then
                         if bSurface then bFound <- true
-                    else 
+                    else
                         if bPolySurface then bFound <- true
             elif objecttyp = Rhino.DocObjects.ObjectType.Extrusion && (bSurface || bPolySurface) then
                 let extrusion = object.Geometry :?> Extrusion
@@ -897,7 +897,7 @@ module ExtensionsSelection =
     ///<summary>Unselects all objects in the document</summary>
     ///<returns>(int) the number of objects that were unselected</returns>
     static member UnselectAllObjects() : int =
-        let rc = Doc.Objects.UnselectAll() 
+        let rc = Doc.Objects.UnselectAll()
         if rc>0 then Doc.Views.Redraw()
         rc
 
@@ -912,9 +912,9 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grip objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the visible objects</returns>
-    static member VisibleObjects( [<OPT;DEF(null:string)>]view:string, 
-                                  [<OPT;DEF(false)>]select:bool, 
-                                  [<OPT;DEF(false)>]includeLights:bool, 
+    static member VisibleObjects( [<OPT;DEF(null:string)>]view:string,
+                                  [<OPT;DEF(false)>]select:bool,
+                                  [<OPT;DEF(false)>]includeLights:bool,
                                   [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let it = Rhino.DocObjects.ObjectEnumeratorSettings()
         it.DeletedObjects <- false
@@ -946,10 +946,10 @@ module ExtensionsSelection =
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
     ///If False, then a crossing window selection is performed</param>
     ///<returns>(Guid ResizeArray) identifiers of selected objects on success</returns>
-    static member WindowPick( corner1:Point3d, 
-                              corner2:Point3d, 
-                              [<OPT;DEF(null:string)>]view:string,  
-                              [<OPT;DEF(false)>]select:bool, 
+    static member WindowPick( corner1:Point3d,
+                              corner2:Point3d,
+                              [<OPT;DEF(null:string)>]view:string,
+                              [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(true)>]inWindow:bool) : Guid ResizeArray =
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
         let screen1 = Point2d(corner1)
@@ -957,12 +957,12 @@ module ExtensionsSelection =
         let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Screen)
         screen1.Transform(xf)
         screen2.Transform(xf)
-        
+
         let filter = Rhino.DocObjects.ObjectType.AnyObject
         let objects =
             if inWindow then
                 Doc.Objects.FindByWindowRegion(viewport, screen1, screen2, true, filter)
-            else 
+            else
                 Doc.Objects.FindByCrossingWindowRegion(viewport, screen1, screen2, true, filter)
         let rc = ResizeArray()
         if notNull objects then

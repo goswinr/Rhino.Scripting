@@ -11,9 +11,9 @@ open System.IO
 
 [<AutoOpen>]
 module ExtensionsDocument =
-  
+
   type RhinoScriptSyntax with
-    
+
     [<EXT>]
      ///<summary>Create a bitmap preview image of the current model</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create</param>
@@ -38,12 +38,12 @@ module ExtensionsDocument =
         let rhsize =
             match width,height with
             | 0,0 -> rhview.ClientRectangle.Size
-            | x,0 -> 
+            | x,0 ->
                 let sc = x /. rhview.ClientRectangle.Size.Width
                 Drawing.Size(x, rhview.ClientRectangle.Size.Height *. sc)
-            | 0,y -> 
+            | 0,y ->
                 let sc = y /. rhview.ClientRectangle.Size.Height
-                Drawing.Size(rhview.ClientRectangle.Size.Width *. sc , y)   
+                Drawing.Size(rhview.ClientRectangle.Size.Width *. sc , y)
             | x,y -> Drawing.Size(x,y)
         let ignoreHighlights =  (flags &&& 1) <> 1
         let drawcplane =        (flags &&& 2)  = 2
@@ -74,7 +74,7 @@ module ExtensionsDocument =
         Doc.Modified <- modified
 
 
-  
+
     [<EXT>]
      ///<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the name of the currently loaded Rhino document (3DM file)</returns>
@@ -364,7 +364,7 @@ module ExtensionsDocument =
     static member RenderMeshMinInitialGridQuads() : int = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         current.GridMinCount
-        
+
 
     [<EXT>]
      ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
@@ -480,7 +480,7 @@ module ExtensionsDocument =
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
         let rendersettings = Doc.RenderSettings
-        rendersettings.ShadowmapLevel <-    (settings &&& 1) 
+        rendersettings.ShadowmapLevel <-    (settings &&& 1)
         rendersettings.UseHiddenLights <-   (settings &&& 2) = 2
         rendersettings.RenderCurves <-      (settings &&& 4) = 4
         rendersettings.RenderAnnotations <- (settings &&& 8) = 8
@@ -493,7 +493,7 @@ module ExtensionsDocument =
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current absolute tolerance</returns>
     static member UnitAbsoluteTolerance() : float = //GET
-        Doc.ModelAbsoluteTolerance 
+        Doc.ModelAbsoluteTolerance
 
     [<EXT>]
      ///<summary>Sets the document's absolute tolerance. Absolute tolerance
@@ -506,7 +506,7 @@ module ExtensionsDocument =
             Doc.ModelAbsoluteTolerance <- tolerance
         else
             failwithf "UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
-            
+
 
 
     [<EXT>]
@@ -515,7 +515,7 @@ module ExtensionsDocument =
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current angle tolerance</returns>
     static member UnitAngleTolerance() : float = //GET
-       Doc.ModelAngleToleranceDegrees 
+       Doc.ModelAngleToleranceDegrees
 
     [<EXT>]
      ///<summary>Set the document's angle tolerance. Angle tolerance is
@@ -534,7 +534,7 @@ module ExtensionsDocument =
      ///<summary>Return the document's distance display precision</summary>
     ///<returns>(int) The current distance display precision .</returns>
     static member UnitDistanceDisplayPrecision() : int = //GET
-        Doc.ModelDistanceDisplayPrecision 
+        Doc.ModelDistanceDisplayPrecision
 
     [<EXT>]
      ///<summary>Set the document's distance display precision</summary>
@@ -552,13 +552,13 @@ module ExtensionsDocument =
     /// (Units and Page Units Window) for details</summary>
     ///<returns>(float) The current tolerance in percent</returns>
     static member UnitRelativeTolerance() : float = //GET
-         Doc.ModelRelativeTolerance 
+         Doc.ModelRelativeTolerance
 
     [<EXT>]
      ///<summary>Set the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
-    ///<param name="relativeTolerance">(float)The relative tolerance in percent</param>    
+    ///<param name="relativeTolerance">(float)The relative tolerance in percent</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitRelativeTolerance(relativeTolerance:float) : unit = //SET
             if relativeTolerance > 0.0 then
@@ -634,7 +634,7 @@ module ExtensionsDocument =
     ///    23 - Astronomical (1.4959787e+11)
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</returns>
-    static member UnitSystem() : int = //GET        
+    static member UnitSystem() : int = //GET
             int(Doc.ModelUnitSystem)
 
     [<EXT>]
@@ -668,16 +668,16 @@ module ExtensionsDocument =
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</param>
     ///<param name="scale">(bool)Scale existing geometry based on the new unit system.
-    ///  If not specified, any existing geometry is not scaled (False)</param>    
+    ///  If not specified, any existing geometry is not scaled (False)</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
         if unitSystem < 1 || unitSystem > 25 then
-            failwithf "unitSystem value of %d is not  valid" unitSystem        
+            failwithf "unitSystem value of %d is not  valid" unitSystem
             let unitSystem : UnitSystem  = LanguagePrimitives.EnumOfValue (byte unitSystem)
             Doc.AdjustPageUnitSystem(unitSystem, scale)
 
 
-   
+
     [<EXT>]
      ///<summary>Returns the name of the current unit system</summary>
     ///<param name="capitalize">(bool) Optional, Default Value: <c>false</c>

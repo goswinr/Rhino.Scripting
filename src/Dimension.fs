@@ -11,12 +11,12 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ExtensionsDimension =
-  
-   
+
+
   type RhinoScriptSyntax with
-    
-    
-    [<EXT>]  
+
+
+    [<EXT>]
     ///<summary>Adds an aligned dimension object to the document. An aligned dimension
     ///  is a linear dimension lined up with two points</summary>
     ///<param name="startPoint">(Point3d) First point of dimension</param>
@@ -49,7 +49,7 @@ module ExtensionsDimension =
         rc
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Adds a new dimension style to the document. The new dimension style will
     ///  be initialized with the current default dimension style properties.</summary>
     ///<param name="dimStyleName">(string) Name of the new dimension style. </param>
@@ -57,23 +57,23 @@ module ExtensionsDimension =
     static member AddDimStyle(dimStyleName:string) : unit =
         let index = Doc.DimStyles.Add(dimStyleName)
         if index<0 then  failwithf "addDimStyle failed.  dimStyleName:'%A'" dimStyleName
-        
-        
 
 
-    [<EXT>]  
+
+
+    [<EXT>]
     ///<summary>Adds a leader to the document. Leader objects are planar.
     ///  The 3D points passed will define the plane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text </param>
     ///<param name="plane">(string) Optional, Default Value: <c>defined by points arg</c>
-    ///  If points will be projected to this plane</param>    
+    ///  If points will be projected to this plane</param>
     ///<returns>(Guid) identifier of the new leader on success</returns>
     static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points2d = ResizeArray()
-        let plane0 = 
-            if plane.IsValid then plane 
-            else 
+        let plane0 =
+            if plane.IsValid then plane
+            else
                 let ps=ResizeArray(points)
                 let o = ps.GetItem(-2)
                 let mutable x = ps.GetItem(-1)-o
@@ -82,8 +82,8 @@ module ExtensionsDimension =
                 if y.Y < 0.0 then y <- -y
                 if x.X < 0.0 then x <- -x
                 Plane(o,x,y)
-                |> fun pl-> 
-                    if not pl.IsValid then failwithf "AddLeader failed to find plane.  points %A, text:%s" points text 
+                |> fun pl->
+                    if not pl.IsValid then failwithf "AddLeader failed to find plane.  points %A, text:%s" points text
                     pl
 
         for point in points do
@@ -93,16 +93,16 @@ module ExtensionsDimension =
         Doc.Objects.AddLeader(text, plane0, points2d)
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Adds a linear dimension to the document</summary>
     ///<param name="startPoint">(Point3d) The origin, or first point of the dimension.</param>
     ///<param name="endPoint">(Point3d) The offset, or second point of the dimension.</param>
     ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line.</param>
     ///<param name="plane">(Plane) Optional, The plane on which the dimension will lie. The default is World XY Plane.</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
-    static member AddLinearDimension(   startPoint:Point3d, 
+    static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,
-                                        pointOnDimensionLine:Point3d, 
+                                        pointOnDimensionLine:Point3d,
                                         [<OPT;DEF(Plane())>] plane:Plane ) : Guid =
         let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy
         plane0.Origin <- startPoint // needed ?
@@ -124,13 +124,13 @@ module ExtensionsDimension =
         rc
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the current default dimension style</summary>
     ///<returns>(string) Name of the current dimension style</returns>
     static member CurrentDimStyle() : string = //GET
         Doc.DimStyles.Current.Name
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the current default dimension style</summary>
     ///<param name="dimStyleName">(string)Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing</returns>
@@ -139,10 +139,10 @@ module ExtensionsDimension =
         if notNull ds  then  failwithf "setCurrentDimStyle failed.  dimStyleName:'%A'" dimStyleName
         if not <| Doc.DimStyles.SetCurrent(ds.Index, false) then
             failwithf "setCurrentDimStyle failed.  dimStyleName:'%A'" dimStyleName
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Removes an existing dimension style from the document. The dimension style
     ///  to be removed cannot be referenced by any dimension objects.</summary>
     ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
@@ -156,19 +156,19 @@ module ExtensionsDimension =
             failwithf "deleteDimStyle failed. dimStyleName:' %A '" dimStyleName
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the dimension style of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The object's current dimension style name</returns>
     static member DimensionStyle(objectId:Guid) : string = //GET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-        let annotation = annotationObject.Geometry:?> AnnotationBase        
+        let annotation = annotationObject.Geometry:?> AnnotationBase
         let ds = annotationObject.AnnotationGeometry.ParentDimensionStyle
         ds.Name
         // this is how Rhino Python is doing it :
         // let ds:DocObjects.DimensionStyle = annotationObject?DimensionStyle //TODO verify Duck typing works ok
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Modifies the dimension style of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="dimStyleName">(string)The name of an existing dimension style</param>
@@ -180,10 +180,10 @@ module ExtensionsDimension =
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |>ignore // TODO verify this works ok
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the text displayed by a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) the text displayed by a dimension object</returns>
@@ -192,7 +192,7 @@ module ExtensionsDimension =
         annotationObject.DisplayText
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the user text string of a dimension object. The user
     /// text is the string that gets printed when the dimension is defined</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -202,7 +202,7 @@ module ExtensionsDimension =
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Modifies the user text string of a dimension object. The user
     /// text is the string that gets printed when the dimension is defined</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -214,10 +214,10 @@ module ExtensionsDimension =
         geo.PlainText <- usertext
         annotationObject.CommitChanges() |>ignore
         Doc.Views.Redraw()
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the value of a dimension object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(float) numeric value of the dimension</returns>
@@ -227,7 +227,7 @@ module ExtensionsDimension =
         geo.NumericValue
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the angle display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current angle precision</returns>
@@ -236,7 +236,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleAnglePrecision failed.  dimStyle:'%A'" dimStyle
         ds.AngleResolution
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the angle display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new angle precision value. If omitted, the current angle
@@ -250,10 +250,10 @@ module ExtensionsDimension =
             ds.AngleResolution <- precision
             if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleAnglePrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
             Doc.Views.Redraw()
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current arrow size</returns>
@@ -262,7 +262,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleArrowSize failed.  dimStyle:'%A'" dimStyle
         ds.ArrowLength
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="size">(float)The new arrow size.</param>
@@ -277,17 +277,17 @@ module ExtensionsDimension =
             Doc.Views.Redraw()
         else
             failwithf "set DimStyleArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
-       
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the number of dimension styles in the document</summary>
     ///<returns>(int) the number of dimension styles in the document</returns>
     static member DimStyleCount() : int =
         Doc.DimStyles.Count
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the extension line extension of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current extension line extension</returns>
@@ -296,7 +296,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleExtension failed.  dimStyle:'%A'" dimStyle
         ds.ExtensionLineExtension
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the extension line extension of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="extension">(float)The new extension line extension</param>
@@ -311,10 +311,10 @@ module ExtensionsDimension =
             Doc.Views.Redraw()
         else
             failwithf "set DimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
-       
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the font used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(string) The current font</returns>
@@ -324,7 +324,7 @@ module ExtensionsDimension =
         ds.Font.FaceName
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the font used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="font">(string)The new font face name</param>
@@ -332,23 +332,23 @@ module ExtensionsDimension =
     static member DimStyleFont(dimStyle:string, font:string) : unit = //SET
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  failwithf "set DimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
-        
+
         ds.Font <- DocObjects.Font(font) // TODO check if works OK !
         // let newindex = Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
         // ds.Font <- Doc.Fonts.[newindex]
         if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  failwithf "set DimStyleFont failed.  dimStyle:'%A' font:'%A'" dimStyle font
         Doc.Views.Redraw()
-        
 
-    [<EXT>]  
-    ///<summary>Gets all Available Font Face Names</summary>    
+
+    [<EXT>]
+    ///<summary>Gets all Available Font Face Names</summary>
     ///<returns>(string array) array of all available font names</returns>
     static member DimStyleAvailableFonts() : array<string> = // not part of original rhinoscriptsyntax
         DocObjects.Font.AvailableFontFaceNames()
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the leader arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current leader arrow size</returns>
@@ -357,7 +357,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleLeaderArrowSize failed.  dimStyle:'%A'" dimStyle
         ds.LeaderArrowLength
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the leader arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="size">(float)The new leader arrow size</param>
@@ -369,10 +369,10 @@ module ExtensionsDimension =
             ds.LeaderArrowLength <- size
             if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleLeaderArrowSize failed.  dimStyle:'%A' size:'%A'" dimStyle size
             Doc.Views.Redraw()
-       
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the length factor of a dimension style. Length factor
     /// is the conversion between Rhino units and dimension units</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -382,7 +382,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleLengthFactor failed.  dimStyle:'%A'" dimStyle
         ds.LengthFactor
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the length factor of a dimension style. Length factor
     /// is the conversion between Rhino units and dimension units</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -394,10 +394,10 @@ module ExtensionsDimension =
         ds.LengthFactor <- factor
         if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleLengthFactor failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
         Doc.Views.Redraw()
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the linear display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current linear precision value</returns>
@@ -406,7 +406,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleLinearPrecision failed.  dimStyle:'%A'" dimStyle
         ds.LengthResolution
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the linear display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="precision">(int)The new linear precision value</param>
@@ -420,17 +420,17 @@ module ExtensionsDimension =
             Doc.Views.Redraw()
         else
             failwithf "set DimStyleLinearPrecision failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
-        
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the names of all dimension styles in the document</summary>
     ///<returns>(string []) the names of all dimension styles in the document</returns>
     static member DimStyleNames() : ResizeArray<string> =
         resizeArray {for  ds in Doc.DimStyles -> ds.Name }
 
 
-    // [<EXT>]  
+    // [<EXT>]
     ///<summary>Returns the number display format of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<returns>(float) The current display format
@@ -442,7 +442,7 @@ module ExtensionsDimension =
     //     if isNull ds then  failwithf "get DimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
     //     int(ds.LengthFormat) FIXME
 
-    // [<EXT>]  
+    // [<EXT>]
     ///<summary>Changes the number display format of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<param name="format">(int)The new number format
@@ -458,10 +458,10 @@ module ExtensionsDimension =
     //     elif format=2 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.FeetAndInches
     //     else failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
     //     if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
-    //     Doc.Views.Redraw()        
+    //     Doc.Views.Redraw()
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the extension line offset of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current extension line offset</returns>
@@ -470,7 +470,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleOffset failed.  dimStyle:'%A'" dimStyle
         ds.ExtensionLineOffset
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the extension line offset of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="offset">(float)The new extension line offset</param>
@@ -481,10 +481,10 @@ module ExtensionsDimension =
         ds.ExtensionLineOffset <- offset
         if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleOffset failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
         Doc.Views.Redraw()
-   
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the prefix of a dimension style - the text to
     /// prefix to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -494,7 +494,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStylePrefix failed.  dimStyle:'%A'" dimStyle
         ds.Prefix
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the prefix of a dimension style - the text to
     /// prefix to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -506,10 +506,10 @@ module ExtensionsDimension =
         ds.Prefix <- prefix
         if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStylePrefix failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
         Doc.Views.Redraw()
-       
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the suffix of a dimension style - the text to
     /// append to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -519,7 +519,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleSuffix failed.  dimStyle:'%A'" dimStyle
         ds.Suffix
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the suffix of a dimension style - the text to
     /// append to the dimension text.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
@@ -531,10 +531,10 @@ module ExtensionsDimension =
         ds.Suffix <- suffix
         if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleSuffix failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
         Doc.Views.Redraw()
-        
 
 
-    // [<EXT>]  
+
+    // [<EXT>]
     ///<summary>Returns the text alignment mode of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<returns>(int) The current text alignment
@@ -547,7 +547,7 @@ module ExtensionsDimension =
     //     if isNull ds then  failwithf "get DimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
     //     int(ds.TextAlignment) //FIXME
 
-    // [<EXT>]  
+    // [<EXT>]
     ///<summary>Changes the text alignment mode of a dimension style</summary>
     // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     // ///<param name="alignment">(int)The new text alignment
@@ -565,10 +565,10 @@ module ExtensionsDimension =
     //     elif alignment=3 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.InLine
     //     else failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
     //     if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-    //     Doc.Views.Redraw()        
+    //     Doc.Views.Redraw()
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the text gap used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current text gap</returns>
@@ -577,7 +577,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleTextGap failed.  dimStyle:'%A'" dimStyle
         ds.TextGap
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the text gap used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="gap">(float)The new text gap</param>
@@ -588,13 +588,13 @@ module ExtensionsDimension =
         if gap >= 0.0 then
             ds.TextGap <- gap
             if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
-            Doc.Views.Redraw() 
+            Doc.Views.Redraw()
         else
             failwithf "set DimStyleTextGap failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
-     
 
 
-    [<EXT>]  
+
+    [<EXT>]
     ///<summary>Returns the text height used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(float) The current text height</returns>
@@ -603,7 +603,7 @@ module ExtensionsDimension =
         if isNull ds then  failwithf "get DimStyleTextHeight failed.  dimStyle:'%A'" dimStyle
         ds.TextHeight
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Changes the text height used by a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="height">(float)The new text height</param>
@@ -619,7 +619,7 @@ module ExtensionsDimension =
             failwithf "set DimStyleTextHeight failed.  dimStyle:'%A' height:'%A'" dimStyle height
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is an aligned dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -632,7 +632,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is an angular dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -645,7 +645,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is a diameter dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -658,7 +658,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is a dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -671,7 +671,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies the existance of a dimension style in the document</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
@@ -680,7 +680,7 @@ module ExtensionsDimension =
         notNull ds
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies that an existing dimension style is from a reference file</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
@@ -690,7 +690,7 @@ module ExtensionsDimension =
         else ds.IsReference
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -703,7 +703,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is a linear dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -716,7 +716,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is an ordinate dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -729,7 +729,7 @@ module ExtensionsDimension =
             | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Verifies an object is a radial dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
@@ -742,7 +742,7 @@ module ExtensionsDimension =
            | _ -> false
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Returns the text string of a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(string) The current text string</returns>
@@ -756,7 +756,7 @@ module ExtensionsDimension =
                 annotationObject.DisplayText
             | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Modifies the text string of a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="text">(string)The new text string</param>
@@ -770,11 +770,11 @@ module ExtensionsDimension =
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
                 annotationObject.CommitChanges()|> ignore
-                Doc.Views.Redraw()                
+                Doc.Views.Redraw()
             | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
 
 
-    [<EXT>]  
+    [<EXT>]
     ///<summary>Renames an existing dimension style</summary>
     ///<param name="oldstyle">(string) The name of an existing dimension style</param>
     ///<param name="newstyle">(string) The new dimension style name</param>

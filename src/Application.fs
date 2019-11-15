@@ -12,9 +12,9 @@ open System.Windows.Forms
 
 [<AutoOpen>]
 module ExtensionsApplication =
-  
+
   type RhinoScriptSyntax with
-    
+
     [<EXT>]
     ///<summary>Add new command alias to Rhino. Command aliases can be added manually by
     ///  using Rhino's Options command and modifying the contents of the Aliases tab.</summary>
@@ -31,8 +31,8 @@ module ExtensionsApplication =
     ///  using Rhino's Options command and modifying the contents of the files tab.</summary>
     ///<param name="folder">(string) A valid folder, or path, to add.</param>
     ///<param name="index">(int) Optional, Default Value: <c>-1</c>
-    ///  Zero-based position in the search path list to insert. 
-    ///  If omitted, path will be appended to the end of the search path list. 
+    ///  Zero-based position in the search path list to insert.
+    ///  If omitted, path will be appended to the end of the search path list.
     ///<returns>(int)The index where the item was inserted.
     ///  -1 on failure.</returns>
     static member AddSearchPath(folder:string, [<OPT;DEF(-1)>]index:int) : int =
@@ -103,20 +103,20 @@ module ExtensionsApplication =
     ///  12 = Text Background
     ///  13 = Text hover</returns>
     static member AppearanceColor(item:int) : Drawing.Color = //GET
-        if   item=0 then AppearanceSettings.ViewportBackgroundColor  
-        elif item=1 then AppearanceSettings.GridThickLineColor  
-        elif item=2 then AppearanceSettings.GridThinLineColor  
-        elif item=3 then AppearanceSettings.GridXAxisLineColor  
-        elif item=4 then AppearanceSettings.GridYAxisLineColor  
-        elif item=5 then AppearanceSettings.SelectedObjectColor  
-        elif item=6 then AppearanceSettings.LockedObjectColor  
-        elif item=7 then AppearanceSettings.DefaultLayerColor  
-        elif item=8 then AppearanceSettings.FeedbackColor  
-        elif item=9 then  AppearanceSettings.TrackingColor  
-        elif item=10 then AppearanceSettings.CrosshairColor  
-        elif item=11 then AppearanceSettings.CommandPromptTextColor  
-        elif item=12 then AppearanceSettings.CommandPromptBackgroundColor  
-        elif item=13 then AppearanceSettings.CommandPromptHypertextColor  
+        if   item=0 then AppearanceSettings.ViewportBackgroundColor
+        elif item=1 then AppearanceSettings.GridThickLineColor
+        elif item=2 then AppearanceSettings.GridThinLineColor
+        elif item=3 then AppearanceSettings.GridXAxisLineColor
+        elif item=4 then AppearanceSettings.GridYAxisLineColor
+        elif item=5 then AppearanceSettings.SelectedObjectColor
+        elif item=6 then AppearanceSettings.LockedObjectColor
+        elif item=7 then AppearanceSettings.DefaultLayerColor
+        elif item=8 then AppearanceSettings.FeedbackColor
+        elif item=9 then  AppearanceSettings.TrackingColor
+        elif item=10 then AppearanceSettings.CrosshairColor
+        elif item=11 then AppearanceSettings.CommandPromptTextColor
+        elif item=12 then AppearanceSettings.CommandPromptBackgroundColor
+        elif item=13 then AppearanceSettings.CommandPromptHypertextColor
         else failwithf "getAppearanceColor: item %d is out of range" item
 
     [<EXT>]
@@ -323,7 +323,7 @@ module ExtensionsApplication =
     ///  1 - display naked edges</param>
     ///<returns>(unit) void, nothing</returns>
     static member EdgeAnalysisMode(mode:int) : unit = //SET
-        if mode=1 || mode=2 then 
+        if mode=1 || mode=2 then
             ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
         else
             failwithf "bad edge analysisMode %d" mode
@@ -344,8 +344,8 @@ module ExtensionsApplication =
     ///<returns>(bool) True if set to load silently otherwise False</returns>
     static member EnablePlugIn(plugin:string) : bool = //GET
         let objectId = PlugIns.PlugIn.IdFromName(plugin)
-        let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)        
-        if rc then loadSilent 
+        let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)
+        if rc then loadSilent
         else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
 
     [<EXT>]
@@ -358,7 +358,7 @@ module ExtensionsApplication =
         let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
         if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
         else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
-        
+
 
 
 
@@ -422,7 +422,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Determines if Rhino is currently running a command. Because Rhino allows
     ///  for transparent commands (commands run from inside of other commands), this
-    ///  method returns the total number of active commands.</summary>    
+    ///  method returns the total number of active commands.</summary>
     ///<returns>(int) the number of active commands</returns>
     static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int =
         //<param name="ignoreRunners">(bool) Optional, Default Value: <c>true</c>
@@ -537,7 +537,7 @@ module ExtensionsApplication =
     ///  Object snaps are tools for specifying points on existing objects.</summary>
     ///<returns>(bool) The current osnap status</returns>
     static member Osnap() : bool = //GET
-        ModelAidSettings.Osnap 
+        ModelAidSettings.Osnap
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's object snap modeling aid.
@@ -629,7 +629,7 @@ module ExtensionsApplication =
     ///<returns>(Guid)the  Unique Guid of the plug-in </returns>
     static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-        if objectId<>Guid.Empty then  objectId 
+        if objectId<>Guid.Empty then  objectId
         else failwithf "Plugin %s not found" plugin
 
 
@@ -653,7 +653,7 @@ module ExtensionsApplication =
         if types=2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
         if types=4 then  filter <- Rhino.PlugIns.PlugInType.FileImport
         if types=8 then  filter <- Rhino.PlugIns.PlugInType.Digitizer
-        if types=16 then filter <- Rhino.PlugIns.PlugInType.Utility        
+        if types=16 then filter <- Rhino.PlugIns.PlugInType.Utility
         let loaded = status=0 || status=1
         let unloaded = status=0 || status=2
         Rhino.PlugIns.PlugIn.GetInstalledPlugInNames(filter, loaded, unloaded)
@@ -725,7 +725,7 @@ module ExtensionsApplication =
     ///<summary>Get status of Rhino's grid snap modeling aid</summary>
     ///<returns>(bool) the current grid snap status</returns>
     static member Snap() : bool = //GET
-        ModelAidSettings.GridSnap 
+        ModelAidSettings.GridSnap
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's grid snap modeling aid</summary>
