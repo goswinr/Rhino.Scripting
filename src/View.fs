@@ -48,8 +48,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Adds a new page layout view</summary>
-    ///<param name="title">(string) Optional, Default Value: <c>null:string</c>
-    ///Title of new layout</param>
+    ///<param name="title">(string) Optional, Title of new layout</param>
     ///<param name="size">(float * float) Optional, Width and height of paper for the new layout</param>
     ///<returns>(Guid*string) Id and Name of new layout</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null)>]size:float * float) : Guid*string =
@@ -75,7 +74,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Adds a new named view to the document</summary>
     ///<param name="name">(string) The name of the new named view</param>
-    ///<param name="view">(string) Optional, The title or identifier of the view to save. If omitted, the current
+    ///<param name="view">(string) Optional, The title of the view to save. If omitted, the current
     ///  active view is saved</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddNamedView(name:string, [<OPT;DEF("":string)>]view:string) : unit =
@@ -89,7 +88,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Returns the current detail view in a page layout view</summary>
-    ///<param name="layout">(string) Title or identifier of an existing page layout view</param>
+    ///<param name="layout">(string) Title of an existing page layout view</param>
     ///<returns>(string option) Option of The name  the current detail view, None if Page is current view</returns>
     static member CurrentDetail(layout:string) : string option = //GET
         let page = RhinoScriptSyntax.CoercePageView(layout)
@@ -97,8 +96,8 @@ module ExtensionsView =
         else  Some  page.ActiveViewport.Name
 
     ///<summary>Changes the current detail view in a page layout view</summary>
-    ///<param name="layout">(string) Title or identifier of an existing page layout view</param>
-    ///<param name="detail">(string)Title or identifier the the detail view to set</param>
+    ///<param name="layout">(string) Title of an existing page layout view</param>
+    ///<param name="detail">(string) Title of the detail view to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member CurrentDetail(layout:string, detail:string) : unit = //SET
         let page = RhinoScriptSyntax.CoercePageView(layout)
@@ -233,8 +232,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Verifies that the specified view is maximized (enlarged so as to fill
     ///  the entire Rhino window)</summary>
-    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or identifier of the view. If omitted, the current
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the current
     ///  view is used</param>
     ///<returns>(bool) True of False</returns>
     static member IsViewMaximized([<OPT;DEF("":string)>]view:string) : bool =
@@ -244,7 +242,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Verifies that the specified view's projection is set to perspective</summary>
-    ///<param name="view">(string) Title or identifier of the view</param>
+    ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False</returns>
     static member IsViewPerspective(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -253,7 +251,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Verifies that the specified view's title window is visible</summary>
-    ///<param name="view">(string) Optional, The title or identifier of the view. If omitted, the current
+    ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///  active view is used</param>
     ///<returns>(bool) True of False</returns>
     static member IsViewTitleVisible([<OPT;DEF("":string)>]view:string) : bool =
@@ -272,7 +270,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Toggles a view's maximized/restore window state of the specified view</summary>
-    ///<param name="view">(string) Optional, The title or identifier of the view. If omitted, the current
+    ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///  active view is used</param>
     ///<returns>(unit) </returns>
     static member MaximizeRestoreView([<OPT;DEF("":string)>]view:string) : unit =
@@ -367,7 +365,7 @@ module ExtensionsView =
     ///  2=down
     ///  3=up</param>
     ///<param name="angle">(float) The angle to rotate.</param>
-    ///<param name="view">(string) Optional, Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member RotateCamera( direction:int,
                                 angle:float,
@@ -399,7 +397,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Rotates a view. See RotateView command in Rhino help for more information</summary>
-    ///<param name="view">(string) Optional, Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) Optional, The direction to rotate the view where
     ///  0=right
     ///  1=left
@@ -479,7 +477,7 @@ module ExtensionsView =
         view.TitleVisible
 
     ///<summary>Shows or hides the title window of a view</summary>
-    ///<param name="view">(string)Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string)Title of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool)The state to set.</param>
     static member ShowViewTitle(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -513,7 +511,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Tilts a view by rotating the camera up vector. See the TiltView command in
     ///  the Rhino help file for more details.</summary>
-    ///<param name="view">(string) Optional, Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) The direction to rotate the view where
     ///  0=right
     ///  1=left</param>
@@ -577,7 +575,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Returns the orientation of a view's camera.</summary>
-    ///<param name="view">(string) Optional, Title or id of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(Plane) the view's camera plane</returns>
     static member ViewCameraPlane([<OPT;DEF("":string)>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -811,8 +809,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Test's Rhino's display performance</summary>
-    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///The title or identifier of the view.  If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, The title of the view.  If omitted, the current active view is used</param>
     ///<param name="frames">(int) Optional, Default Value: <c>100</c>
     ///The number of frames, or times to regenerate the view. If omitted, the view will be regenerated 100 times.</param>
     ///<param name="freeze">(bool) Optional, Default Value: <c>true</c>
@@ -900,8 +897,8 @@ module ExtensionsView =
 
     ///<summary>Sets the grayscale display option of the wallpaper bitmap in a
     /// specified view</summary>
-    ///<param name="view">(string)Title of the view. Use "" empty string for the current active view </param>
-    ///<param name="grayscale">(bool)Display the wallpaper in gray(True) or color (False)</param>
+    ///<param name="view">(string) Title of the view. Use "" empty string for the current active view </param>
+    ///<param name="grayscale">(bool) Display the wallpaper in gray(True) or color (False)</param>
     ///<returns>(unit) void, nothing</returns>
     static member WallpaperGrayScale(view:string, grayscale:bool) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
@@ -921,8 +918,8 @@ module ExtensionsView =
 
 
     ///<summary>Sets the visibility of the wallpaper bitmap in a specified view</summary>
-    ///<param name="view">(string)Title of the view. Use "" empty string for the current active view </param>
-    ///<param name="hidden">(bool)Show or hide the wallpaper</param>
+    ///<param name="view">(string) Title of the view. Use "" empty string for the current active view </param>
+    ///<param name="hidden">(bool) Show or hide the wallpaper</param>
     ///<returns>(unit) void, nothing</returns>
     static member WallpaperHidden(view:string, hidden:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -937,8 +934,7 @@ module ExtensionsView =
     ///<summary>Zooms to the extents of a specified bounding box in the specified view</summary>
     ///<param name="boundingBox">(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) Eight points that define the corners
     ///  of a bounding box or a BoundingBox class instance</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>
     ///<returns>(unit) </returns>
@@ -956,7 +952,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Zooms to extents of visible objects in the specified view</summary>
-    ///<param name="view">(string) Optional, Title or id of the view. If omitted, current active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>
     ///<returns>(unit) </returns>
@@ -972,8 +968,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Zoom to extents of selected objects in a view</summary>
-    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or id of the view. If omitted, active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>
     ///<returns>(unit) </returns>
