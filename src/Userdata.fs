@@ -12,14 +12,12 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Removes user data strings from the current document</summary>
-    ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
-    ///Section name. If omitted, all sections and their corresponding
+    ///<param name="section">(string) Optional, Section name. If omitted, all sections and their corresponding
     ///  entries are removed</param>
-    ///<param name="entry">(string) Optional, Default Value: <c>null:string</c>
-    ///Entry name. If omitted, all entries for section are removed</param>
+    ///<param name="entry">(string) Optional, Entry name. If omitted, all entries for section are removed</param>
     ///<returns>(unit) void, nothing</returns>
     static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit =
-        Doc.Strings.Delete(section, entry)
+        Doc.Strings.Delete(section, entry) //TODO check null case
 
 
     [<EXT>]
@@ -43,8 +41,7 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Returns a user data item from the current document</summary>
-    ///<param name="section">(string) Optional, Default Value: <c>null:string</c>
-    ///Section name. If omitted, all section names are returned</param
+    ///<param name="section">(string) Optional, Section name. If omitted, all section names are returned</param
     ///<returns>(string array) of all section names if section name is omitted
     ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> =
@@ -154,20 +151,19 @@ module ExtensionsUserdata =
     [<EXT>]
     ///<summary>Sets or removes user text stored in the document</summary>
     ///<param name="key">(string) Key name to set</param>
-    ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
-    ///The string value to set. If omitted the key/value pair
+    ///<param name="value">(string) Optional, The string value to set. If omitted the key/value pair
     ///  specified by key will be deleted</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : unit =
         Doc.Strings.SetString(key,value) |> ignore
+        //TODO check null case
 
 
     [<EXT>]
     ///<summary>Sets or removes user text stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
-    ///<param name="value">(string) Optional, Default Value: <c>null:string</c>
-    ///  The string value to set. If omitted, the key/value pair
+    ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair
     ///  specified by key will be deleted</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to store the user text</param>

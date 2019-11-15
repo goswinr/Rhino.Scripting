@@ -16,8 +16,7 @@ module ExtensionsLayer =
 
     [<EXT>]
     ///<summary>Add a new layer to the document</summary>
-    ///<param name="name">(string) Optional, Default Value: <c>null:string</c>
-    ///The name of the new layer. If omitted, Rhino automatically
+    ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
     ///  generates the layer name.</param>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color()</c>
     ///A Red-Green-Blue color value. If omitted, the color Black is assigned.</param>
@@ -25,8 +24,7 @@ module ExtensionsLayer =
     ///Layer's visibility</param>
     ///<param name="locked">(bool) Optional, Default Value: <c>false</c>
     ///Layer's locked state</param>
-    ///<param name="parent">(string) Optional, Default Value: <c>null:string</c>
-    ///Name of the new layer's parent layer. If omitted, the new
+    ///<param name="parent">(string) Optional, Name of the new layer's parent layer. If omitted, the new
     ///  layer will not have a parent layer.</param>
     ///<returns>(string) The full name of the new layer .</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,

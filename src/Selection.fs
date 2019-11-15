@@ -122,8 +122,7 @@ module ExtensionsSelection =
 
     [<EXT>]
     ///<summary>Prompts user to pick or select a single curve object</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message.</param>
+    ///<param name="message">(string) Optional, A prompt or message.</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for the selection of pre-selected objects.</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -172,8 +171,7 @@ module ExtensionsSelection =
 
     [<EXT>]
     ///<summary>Prompts user to pick, or select, a single object.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message.</param>
+    ///<param name="message">(string) Optional, A prompt or message.</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
@@ -226,8 +224,7 @@ module ExtensionsSelection =
     [<EXT>]
     //(FIXME) VarOutTypes
     ///<summary>Prompts user to pick, or select a single object</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///A prompt or message.</param>
+    ///<param name="message">(string) Optional, A prompt or message.</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter

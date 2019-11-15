@@ -263,8 +263,7 @@ module ExtensionsTransformation =
     ///  or screen coordinates to world coordinates. The resulting coordinates are represented
     ///  as a 3-D point</summary>
     ///<param name="point">(Point3d) 2D point</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or identifier of a view. If omitted, the active view is used</param>
+    ///<param name="view">(string) Optional, Title of a view. If omitted, the active view is used</param>
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
     ///If False, point is in client-area coordinates. If True,
     ///  point is in screen-area coordinates</param>
@@ -273,7 +272,7 @@ module ExtensionsTransformation =
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
         //point = RhinoScriptSyntax.Coerce2dpoint(point)
-        let view = RhinoScriptSyntax.CoerceView(view |? "")// to get active view
+        let view = RhinoScriptSyntax.CoerceView(view |? "") // ""to get active view
         let viewport = view.MainViewport
         let xform = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
         let mutable point3d = Point3d(point.X, point.Y, 0.0)
@@ -325,8 +324,7 @@ module ExtensionsTransformation =
     ///  the specified view or screen coordinates. The resulting coordinates are represented
     ///  as a 2D point</summary>
     ///<param name="point">(Point3d) 3D point in world coordinates</param>
-    ///<param name="view">(string) Optional, Default Value: <c>null:string</c>
-    ///Title or identifier of a view. If omitted, the active view is used</param>
+    ///<param name="view">(string) Optional, Title of a view. If omitted, the active view is used</param>
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
     ///If False, the function returns the results as
     ///  client-area coordinates. If True, the result is in screen-area coordinates</param>

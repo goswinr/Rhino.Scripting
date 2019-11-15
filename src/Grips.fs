@@ -28,8 +28,7 @@ module ExtensionsGrips =
 
     [<EXT>]
     ///<summary>Prompts the user to pick a single object grip</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///Prompt for picking</param>
+    ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for selection of pre-selected object grip.</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -47,10 +46,10 @@ module ExtensionsGrips =
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             let grip = ref null
-            let rc = Rhino.Input.RhinoGet.GetGrip(grip,message)
+            let rc = Input.RhinoGet.GetGrip(grip,message)
             let grip = !grip
             return
-                if rc <> Rhino.Commands.Result.Success || isNull grip then
+                if rc <> Commands.Result.Success || isNull grip then
                     None
                 else
                     if select then
@@ -64,8 +63,7 @@ module ExtensionsGrips =
 
     [<EXT>]
     ///<summary>Prompts user to pick one or more object grips from one or more objects.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>null:string</c>
-    ///Prompt for picking</param>
+    ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for selection of pre-selected object grips</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -83,10 +81,10 @@ module ExtensionsGrips =
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             let grips = ref null
-            let re = Rhino.Input.RhinoGet.GetGrips(grips,message)
+            let re = Input.RhinoGet.GetGrips(grips,message)
             let grips = !grips
             let rc = ResizeArray()
-            if re = Rhino.Commands.Result.Success && notNull grips then
+            if re = Commands.Result.Success && notNull grips then
                 for grip in grips do
                     let objectId = grip.OwnerId
                     let index = grip.Index

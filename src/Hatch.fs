@@ -86,8 +86,7 @@ module ExtensionsHatch =
     ///<summary>Creates a new hatch object from a closed planar curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar curve that defines the
     ///  boundary of the hatch object</param>
-    ///<param name="hatchPattern">(string) Optional, Default Value: <c>null:string</c>
-    ///Name of the hatch pattern to be used by the hatch
+    ///<param name="hatchPattern">(string) Optional, Name of the hatch pattern to be used by the hatch
     ///  object. If omitted, the current hatch pattern will be used</param>
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
     ///Hatch pattern scale factor</param>
@@ -98,7 +97,7 @@ module ExtensionsHatch =
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float) : Guid =
-        let rc = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation)
+        let rc = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation) //TODO Test ok with null
         if rc.Count=1 then rc.[0]
         else failwithf "Rhino.Scripting: AddHatch failed.  curveId:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A'" curveId hatchPattern scale rotation
 
