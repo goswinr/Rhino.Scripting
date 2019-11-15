@@ -153,16 +153,16 @@ module ExtensionsUtility =
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
     ///The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded.  If omitted, Rhino's internal zero tolerance is used.</param>
-    ///<returns>(float seq) numbers with duplicates removed .</returns>
-    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float seq =
-        if Seq.length numbers < 2 then numbers
+    ///<returns>(float ResizeArray) numbers with duplicates removed .</returns>
+    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
+        if Seq.length numbers < 2 then ResizeArray(numbers )
         else
-            let tol = max tolerance  RhinoMath.ZeroTolerance // or Doc.ModelAbsoluteTolerance
+            let tol = ifZero1 tolerance  RhinoMath.ZeroTolerance // or Doc.ModelAbsoluteTolerance
             let nums = numbers|> Seq.sort
             let first = Seq.head nums
             let second = (Seq.item 1 nums)
             let mutable lastOK = first
-            seq{
+            resizeArray{
                 if abs(first-second) > tol then
                     yield first
                     lastOK <- second
@@ -182,7 +182,7 @@ module ExtensionsUtility =
     ///  is used.</param>
     ///<returns>(Point3d array) of 3D points with duplicates removed .</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(-1)>]tolerance:float) : Point3d array =
-        let tol = max tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
+        let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
 
@@ -204,13 +204,13 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Returns string from a specified section in a initialization file. NOT IMPLEMENTED YET</summary>
+    ///<summary>NOT IMPLEMENTED YET.Returns string from a specified section in a initialization file. </summary>
     ///<param name="filename">(string) Name of the initialization file</param>
     ///<param name="section">(string) Optional, Section containing the entry</param>
     ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
-    ///<returns>(string seq) A list containing all section names</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string seq =
-        failwithf "getSettings is missing implementation" // TODO!
+    ///<returns>(string array) A list containing all section names</returns>
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string [] =
+        raise <| NotImplementedException( "getSettings is missing implementation") // TODO!
 
 
     [<EXT>]
@@ -261,7 +261,7 @@ module ExtensionsUtility =
     ///  will be discarded. If omitted, Rhino's internal zero tolerance is used.</param>
     ///<returns>(Point3d array) of sorted 3D points</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
-        let tol = max RhinoMath.ZeroTolerance tolerance
+        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         Point3d.SortAndCullPointList(points, tol)
 
 
@@ -290,8 +290,8 @@ module ExtensionsUtility =
             |4 -> fun (p:Point3d) -> p.Z, p.X, p.Y
             |5 -> fun (p:Point3d) -> p.Z, p.Y, p.X
             |_ -> failwithf "sortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
-        if ascending then points |>  Seq.sortBy           f
-        else              points |>  Seq.sortByDescending f
+        if ascending then points |>  Seq.sortBy           f 
+        else              points |>  Seq.sortByDescending f 
 
 
     [<EXT>]

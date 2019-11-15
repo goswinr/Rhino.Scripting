@@ -232,9 +232,9 @@ module ExtensionsMaterial =
     [<EXT>]
     ///<summary>Returns a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<returns>(int) The current material shine value
+    ///<returns>(float) The current material shine value
     ///  0.0 being matte and 255.0 being glossy</returns>
-    static member MaterialShine(materialIndex:int) : int = //GET
+    static member MaterialShine(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialShine failed.  materialIndex:'%A' " materialIndex
         let rc = mat.Shine

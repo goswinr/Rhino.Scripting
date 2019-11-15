@@ -174,7 +174,7 @@ module ExtensionsPointvector =
                                 [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //point1 = RhinoScriptSyntax.Coerce3dpoint(point1)
         //point2 = RhinoScriptSyntax.Coerce3dpoint(point2)
-        let tolerance = max RhinoMath.ZeroTolerance  tolerance
+        let tolerance = ifZero2 RhinoMath.ZeroTolerance  tolerance
         let vector = point2-point1
         vector.IsTiny(tolerance)
 
