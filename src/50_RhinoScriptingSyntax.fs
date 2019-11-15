@@ -644,8 +644,7 @@ type RhinoScriptSyntax private () = // no constructor?
             let o = Doc.Objects.FindId(objectId) 
             if isNull o then None
             else Some o     
-        
-
+    
     ///<summary>attempt to get GeometryBase class from given Guid</summary>
     ///<param name="objectId">geometry identifier (Guid)</param>
     ///<returns>Rhino.Geometry.GeometryBase Option. </returns>
@@ -654,7 +653,19 @@ type RhinoScriptSyntax private () = // no constructor?
         else
             match Doc.Objects.FindId(objectId) with 
             | null -> None
-            | o -> Some o.Geometry 
+            | o -> Some o.Geometry   
+            
+    ///<summary>attempt to get Rhino LightObject from the document with a given objectId</summary>
+    ///<param name="objectId">(guid): light identifier </param>
+    ///<returns>a  Rhino.Geometry.Light. Option</returns>
+    static member TryCoerceLight (objectId:Guid) : Light option =
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some g ->
+            match g with
+            | :? Geometry.Light as l -> Some l
+            | _ -> None
+        | None -> None
+
 
 
     ///<summary>attempt to get Mesh class from given Guid</summary>
