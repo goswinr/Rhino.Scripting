@@ -122,14 +122,14 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="filename">(string)The bump bitmap filename</param>
+    ///<param name="filename">(string) The bump bitmap filename</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let texture = mat.GetBumpTexture()
         if IO.File.Exists filename then
-            if not <| mat.SetBumpTexture(filename)then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetBumpTexture(filename) then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             mat.CommitChanges()|> ignore
             Doc.Views.Redraw()
         else
@@ -148,7 +148,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's diffuse color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="color">(Drawing.Color)The new color value</param>
+    ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialColor(materialIndex:int, color:Drawing.Color) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
@@ -170,7 +170,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's environment bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="filename">(string)The environment bitmap filename</param>
+    ///<param name="filename">(string) The environment bitmap filename</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
@@ -196,7 +196,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's user defined name</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="name">(string)The new name</param>
+    ///<param name="name">(string) The new name</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialName(materialIndex:int, name:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
@@ -218,7 +218,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's reflective color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="color">(Drawing.Color)The new color value</param>
+    ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialReflectiveColor(materialIndex:int, color:Drawing.Color) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
@@ -242,7 +242,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="shine">(float)The new shine value. A material's shine value ranges from 0.0 to 255.0, with
+    ///<param name="shine">(float) The new shine value. A material's shine value ranges from 0.0 to 255.0, with
     ///  0.0 being matte and 255.0 being glossy</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
@@ -267,7 +267,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's texture bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="filename">(string)The texture bitmap filename</param>
+    ///<param name="filename">(string) The texture bitmap filename</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
@@ -293,7 +293,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="transparency">(float)The new transparency value. A material's transparency value ranges from 0.0 to 1.0, with
+    ///<param name="transparency">(float) The new transparency value. A material's transparency value ranges from 0.0 to 1.0, with
     ///  0.0 being opaque and 1.0 being transparent</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTransparency(materialIndex:int, transparency:float) : unit = //SET
@@ -317,7 +317,7 @@ module ExtensionsMaterial =
 
     ///<summary>Modifies a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<param name="filename">(string)The transparency bitmap filename</param>
+    ///<param name="filename">(string) The transparency bitmap filename</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]

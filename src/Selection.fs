@@ -834,7 +834,7 @@ module ExtensionsSelection =
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Surface) then bSurface <- true // TODO verify this works OK !
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Brep ) then bPolySurface <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Light ) then bLights <- true
-        if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Grip )then bGrips <- true
+        if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Grip ) then bGrips <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Phantom ) then bPhantoms <- true
         let it = Rhino.DocObjects.ObjectEnumeratorSettings()
         it.DeletedObjects <- false

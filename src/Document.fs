@@ -68,7 +68,7 @@ module ExtensionsDocument =
     /// or not any changes to the current document have been made. NOTE: setting the
     /// document modified flag to False will prevent the "Do you want to save this
     /// file..." from displaying when you close Rhino.</summary>
-    ///<param name="modified">(bool)The modified state, either True or False</param>
+    ///<param name="modified">(bool) The modified state, either True or False</param>
     ///<returns>(unit) void, nothing</returns>
     static member DocumentModified(modified:bool) : unit = //SET
         Doc.Modified <- modified
@@ -140,7 +140,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
-    ///<param name="newnotes">(string)New notes to set</param>
+    ///<param name="newnotes">(string) New notes to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member Notes(newnotes:string) : unit = //SET
         Doc.Notes <- newnotes
@@ -175,7 +175,7 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Sets render antialiasing style</summary>
-    ///<param name="style">(int)Level of antialiasing (0=none, 1=normal, 2=best)</param>
+    ///<param name="style">(int) Level of antialiasing (0=none, 1=normal, 2=best)</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderAntialias(style:int) : unit = //SET
         if style=0 || style=1 || style=2 then
@@ -196,7 +196,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render ambient light or background color</summary>
     ///<param name="item">(int) 0=ambient light color, 1=background color</param>
-    ///<param name="color">(Drawing.Color)The new color value. If omitted, the current item color is returned</param>
+    ///<param name="color">(Drawing.Color) The new color value. If omitted, the current item color is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
         if item<>0 && item<>1 then  failwithf "Item must be 0 || 1.  item:'%A' color:'%A'" item color
@@ -237,7 +237,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="density">(float)The new render mesh density, which is a number between 0.0 and 1.0.</param>
+    ///<param name="density">(float) The new render mesh density, which is a number between 0.0 and 1.0.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshDensity(density:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -258,7 +258,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="angleDegrees">(float)The new maximum angle, which is a positive number in degrees.</param>
+    ///<param name="angleDegrees">(float) The new maximum angle, which is a positive number in degrees.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAngle(angleDegrees:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -280,7 +280,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="ratio">(float)The render mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100.</param>
+    ///<param name="ratio">(float) The render mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAspectRatio(ratio:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -302,7 +302,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="distance">(float)The render mesh maximum distance, edge to surface.</param>
+    ///<param name="distance">(float) The render mesh maximum distance, edge to surface.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -324,7 +324,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="distance">(float)The render mesh maximum edge length.</param>
+    ///<param name="distance">(float) The render mesh maximum edge length.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxEdgeLength(distance:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -346,7 +346,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="distance">(float)The render mesh minimum edge length.</param>
+    ///<param name="distance">(float) The render mesh minimum edge length.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -369,7 +369,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="quads">(int)The render mesh minimum initial grid quads. The suggested range is from 0 to 10000.</param>
+    ///<param name="quads">(int) The render mesh minimum initial grid quads. The suggested range is from 0 to 10000.</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinInitialGridQuads(quads:int) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -397,7 +397,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="quality">(int)The render mesh quality, either:
+    ///<param name="quality">(int) The render mesh quality, either:
     ///  0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
     ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
     ///  2: Custom.</param>
@@ -435,7 +435,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file.</summary>
-    ///<param name="settings">(int)The render mesh settings, which is a bit-coded number that allows or disallows certain features.
+    ///<param name="settings">(int) The render mesh settings, which is a bit-coded number that allows or disallows certain features.
     ///  The bits can be added together in any combination to form a value between 0 and 7.  The bit values are as follows:
     ///    0: No settings enabled.
     ///    1: Refine mesh enabled.
@@ -471,7 +471,7 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Sets render settings</summary>
-    ///<param name="settings">(int)Bit-coded flags of render settings to modify.
+    ///<param name="settings">(int) Bit-coded flags of render settings to modify.
     ///  0=none,
     ///  1=create shadows,
     ///  2=use lights on layers that are off,
@@ -499,7 +499,7 @@ module ExtensionsDocument =
      ///<summary>Sets the document's absolute tolerance. Absolute tolerance
     /// is measured in drawing units. See Rhino's document properties command
     /// (Units and Page Units Window) for details</summary>
-    ///<param name="tolerance">(float)The absolute tolerance to set</param>
+    ///<param name="tolerance">(float) The absolute tolerance to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitAbsoluteTolerance(tolerance:float) : unit = //SET
         if tolerance > 0.0 then
@@ -521,7 +521,7 @@ module ExtensionsDocument =
      ///<summary>Set the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
-    ///<param name="angleToleranceDegrees">(float)The angle tolerance to set</param>
+    ///<param name="angleToleranceDegrees">(float) The angle tolerance to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitAngleTolerance(angleToleranceDegrees:float) : unit = //SET
             if angleToleranceDegrees > 0. then
@@ -538,7 +538,7 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Set the document's distance display precision</summary>
-    ///<param name="precision">(int)The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
+    ///<param name="precision">(int) The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
     ///  If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
     ///  Use UnitDistanceDisplayMode to get the current distance display mode.</param>
     ///<returns>(unit) void, nothing</returns>
@@ -558,7 +558,7 @@ module ExtensionsDocument =
      ///<summary>Set the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
-    ///<param name="relativeTolerance">(float)The relative tolerance in percent</param>
+    ///<param name="relativeTolerance">(float) The relative tolerance in percent</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitRelativeTolerance(relativeTolerance:float) : unit = //SET
             if relativeTolerance > 0.0 then
@@ -640,7 +640,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Set the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
-    ///<param name="unitSystem">(int)The unit system to set the document to. The unit systems are:
+    ///<param name="unitSystem">(int) The unit system to set the document to. The unit systems are:
     ///  0 - No unit system
     ///  1 - Microns (1.0e-6 meters)
     ///  2 - Millimeters (1.0e-3 meters)
@@ -667,7 +667,7 @@ module ExtensionsDocument =
     ///    23 - Astronomical (1.4959787e+11)
     ///    24 - Lightyears (9.46073e+15 meters)
     ///    25 - Parsecs (3.08567758e+16)</param>
-    ///<param name="scale">(bool)Scale existing geometry based on the new unit system.
+    ///<param name="scale">(bool) Scale existing geometry based on the new unit system.
     ///  If not specified, any existing geometry is not scaled (False)</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET

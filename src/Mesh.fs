@@ -82,7 +82,7 @@ module ExtensionsMesh =
         if isNull mesh then failwithf "Rhino.Scripting: AddPlanarMesh failed.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         if deleteInput then
             let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| Doc.Objects.Delete(ob,true)then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+            if not<| Doc.Objects.Delete(ob,true) then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         let rc = Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         Doc.Views.Redraw()

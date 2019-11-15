@@ -63,7 +63,7 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Adds point object to the document.</summary>
     ///<param name="X">(float) X location of point to add</param>
-    ///<param name="y">(float)Y location of point to add</param>
+    ///<param name="y">(float) Y location of point to add</param>
     ///<param name="z">(float) Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid =
@@ -351,7 +351,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the hidden points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
-    ///<param name="hidden">(bool seq)List of booleans matched to the index of points to be hidden, On empty seq all point wil be shown</param>
+    ///<param name="hidden">(bool seq) List of booleans matched to the index of points to be hidden, On empty seq all point wil be shown</param>
     ///<returns>(unit) void, nothing</returns>
     static member PointCloudHidePoints(objectId:Guid, hidden:bool seq) : unit = //SET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
@@ -380,7 +380,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the point colors of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
-    ///<param name="colors">(Drawing.Color seq)List of color values if you want to adjust colors, empty Seq to clear colors</param>
+    ///<param name="colors">(Drawing.Color seq) List of color values if you want to adjust colors, empty Seq to clear colors</param>
     ///<returns>(unit) void, nothing</returns>
     static member PointCloudPointColors(objectId:Guid, colors:Drawing.Color seq) : unit = //SET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
@@ -448,7 +448,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the X, Y, and Z coordinates of a point object</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
-    ///<param name="point">(Point3d)A new 3D point location.</param>
+    ///<param name="point">(Point3d) A new 3D point location.</param>
     ///<returns>(unit) void, nothing</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
@@ -466,7 +466,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the font of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="fontface">(string)New font face name</param>
+    ///<param name="fontface">(string) New font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
@@ -484,7 +484,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the font height of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="height">(int)New font height</param>
+    ///<param name="height">(int) New font height</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
@@ -504,7 +504,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the location, or insertion point, on a text dot object</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="point">(Point3d)A new 3D point location.</param>
+    ///<param name="point">(Point3d) A new 3D point location.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
@@ -526,7 +526,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the text on a text dot object</summary>
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
-    ///<param name="text">(string)A new string for the dot</param>
+    ///<param name="text">(string) A new string for the dot</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
@@ -577,7 +577,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the height of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="height">(float)The new text height.</param>
+    ///<param name="height">(float) The new text height.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
@@ -597,7 +597,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="plane">(Plane)The new text object plane</param>
+    ///<param name="plane">(Plane) The new text object plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
@@ -617,7 +617,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the location of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="point">(Point3d)The new text object location</param>
+    ///<param name="point">(Point3d) The new text object location</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPoint(objectId:Guid, point:Point3d) : unit = //SET
         let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
@@ -648,7 +648,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the font style of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="style">(int)The font style. Can be any of the following flags
+    ///<param name="style">(int) The font style. Can be any of the following flags
     ///  0 = Normal
     ///  1 = Bold
     ///  2 = Italic
@@ -683,7 +683,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="text">(string)A new text string</param>
+    ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)

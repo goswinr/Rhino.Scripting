@@ -69,7 +69,7 @@ module ExtensionsLayer =
 
 
     ///<summary>Changes the current layer</summary>
-    ///<param name="layer">(string)The name or Guid of an existing layer to make current</param>
+    ///<param name="layer">(string) The name or Guid of an existing layer to make current</param>
     ///<returns>(unit) void, nothing</returns>
     static member CurrentLayer(layer:string) : unit = //SET
         let rc = Doc.Layers.CurrentLayer.FullPath
@@ -255,7 +255,7 @@ module ExtensionsLayer =
 
     ///<summary>Changes the color of a layer.</summary>
     ///<param name="layer">(string) Name or id of an existing layer</param>
-    ///<param name="color">(Drawing.Color)The new color value. If omitted, the current layer color is returned.</param>
+    ///<param name="color">(Drawing.Color) The new color value. If omitted, the current layer color is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -291,7 +291,7 @@ module ExtensionsLayer =
 
     ///<summary>Changes the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="linetyp">(string)Name of a linetype</param>
+    ///<param name="linetyp">(string) Name of a linetype</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerLinetype(layer:string, linetyp:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -318,7 +318,7 @@ module ExtensionsLayer =
 
     ///<summary>Changes the locked mode of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="locked">(bool)New layer locked mode</param>
+    ///<param name="locked">(bool) New layer locked mode</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerLocked(layer:string, locked:bool) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -341,7 +341,7 @@ module ExtensionsLayer =
     /// indicates that no material has been assigned to the layer. Thus, the layer
     /// will use Rhino's default layer material</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<param name="index">(int)The new material index</param>
+    ///<param name="index">(int) The new material index</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerMaterialIndex(layer:string, index:int) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -408,7 +408,7 @@ module ExtensionsLayer =
     ///<summary>Changes the print color of a layer. Layer print colors are
     /// represented as RGB colors.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<param name="color">(Drawing.Color)New print color</param>
+    ///<param name="color">(Drawing.Color) New print color</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerPrintColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -432,7 +432,7 @@ module ExtensionsLayer =
     ///<summary>Changes the print width of a layer. Print width is specified
     /// in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<param name="width">(float)New print width</param>
+    ///<param name="width">(float) New print width</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerPrintWidth(layer:string, width:float) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -454,8 +454,8 @@ module ExtensionsLayer =
 
     ///<summary>Changes the visible property of a layer.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<param name="visible">(bool)New visible state</param>
-    ///<param name="forcevisibleOrDonotpersist">(bool)If visible is True then turn parent layers on if True.  If visible is False then do not persist if True</param>
+    ///<param name="visible">(bool) New visible state</param>
+    ///<param name="forcevisibleOrDonotpersist">(bool) If visible is True then turn parent layers on if True.  If visible is False then do not persist if True</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer, true)
@@ -485,7 +485,7 @@ module ExtensionsLayer =
 
     ///<summary>Modify the parent layer of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="parent">(string)Name of new parent layer. To remove the parent layer,
+    ///<param name="parent">(string) Name of new parent layer. To remove the parent layer,
     ///  thus making a root-level layer, specify an empty string</param>
     ///<returns>(unit) void, nothing</returns>
     static member ParentLayer(layer:string, parent:string) : unit = //SET

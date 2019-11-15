@@ -82,7 +82,7 @@ module ExtensionsUtility =
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 
     ///<summary>Sets a text string to the Windows clipboard</summary>
-    ///<param name="text">(string)Text to set</param>
+    ///<param name="text">(string) Text to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member ClipboardText(text:string) : unit = //SET
         System.Windows.Forms.Clipboard.SetText(text)
@@ -368,7 +368,7 @@ module ExtensionsUtility =
     ///<param name="red">(int) Red Value</param>
     ///<param name="green">(int) Green value</param>
     ///<param name="blue">(int) Blue value</param>
-    ///<param name="alpha">(int)Optional, Default Value: <c>0</c>
+    ///<param name="alpha">(int) Optional, Default Value: <c>0</c>
     ///Alpha value</param>
     ///<returns>(Drawing.Color) a Color</returns>
     static member CreateColor(red:int, green:int,blue:int, [<OPT;DEF(0)>]alpha:int) : Drawing.Color =

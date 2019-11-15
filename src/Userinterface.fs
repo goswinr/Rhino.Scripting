@@ -121,7 +121,7 @@ module ExtensionsUserinterface =
     ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0.0</c>
     /// A default angle value specified</param>
     ///<param name="message">(string) Optional,  A prompt to display</param>
-    ///<returns>(float option)Option of angle in degree</returns>
+    ///<returns>(float option) Option of angle in degree</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d,
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float,

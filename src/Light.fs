@@ -148,7 +148,7 @@ module ExtensionsLight =
 
     ///<summary>Enables or disables a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="enable">(bool)The light's enabled status</param>
+    ///<param name="enable">(bool) The light's enabled status</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnableLight(objectId:Guid, enable:bool) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -244,7 +244,7 @@ module ExtensionsLight =
 
     ///<summary>Changes the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="color">(Drawing.Color)The light's new color</param>
+    ///<param name="color">(Drawing.Color) The light's new color</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -273,7 +273,7 @@ module ExtensionsLight =
 
     ///<summary>Changes the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="direction">(Vector3d)The light's new direction</param>
+    ///<param name="direction">(Vector3d) The light's new direction</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightDirection(objectId:Guid, direction:Vector3d) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -295,7 +295,7 @@ module ExtensionsLight =
 
     ///<summary>Changes the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="location">(Point3d)The light's new location</param>
+    ///<param name="location">(Point3d) The light's new location</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightLocation(objectId:Guid, location:Point3d) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -317,7 +317,7 @@ module ExtensionsLight =
 
     ///<summary>Changes the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="name">(string)The light's new name</param>
+    ///<param name="name">(string) The light's new name</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightName(objectId:Guid, name:string) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -370,7 +370,7 @@ module ExtensionsLight =
     ///<summary>Changes the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="hardness">(float)The light's new hardness</param>
+    ///<param name="hardness">(float) The light's new hardness</param>
     ///<returns>(unit) void, nothing</returns>
     static member SpotLightHardness(objectId:Guid, hardness:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -397,7 +397,7 @@ module ExtensionsLight =
 
     ///<summary>Changes the radius of a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="radius">(float)The light's new radius</param>
+    ///<param name="radius">(float) The light's new radius</param>
     ///<returns>(unit) void, nothing</returns>
     static member SpotLightRadius(objectId:Guid, radius:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -424,7 +424,7 @@ module ExtensionsLight =
 
     ///<summary>Changes the shadow intensity of a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<param name="intensity">(float)The light's new intensity</param>
+    ///<param name="intensity">(float) The light's new intensity</param>
     ///<returns>(unit) void, nothing</returns>
     static member SpotLightShadowIntensity(objectId:Guid, intensity:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)

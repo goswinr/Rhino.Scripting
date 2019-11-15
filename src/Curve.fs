@@ -661,7 +661,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Enables or disables a curve object's annotation arrows</summary>
     ///<param name="curveId">(Guid) Identifier of a curve</param>
-    ///<param name="arrowStyle">(int)The style of annotation arrow to be displayed. If omitted the current type is returned.
+    ///<param name="arrowStyle">(int) The style of annotation arrow to be displayed. If omitted the current type is returned.
     ///  0 = no arrows
     ///  1 = display arrow at start of curve
     ///  2 = display arrow at end of curve
@@ -2085,7 +2085,7 @@ module ExtensionsCurve =
         if not <| curve.IsPeriodic then  failwithf "makeCurveNonPeriodic failed.1  curveId:'%A' deleteInput:'%A'" curveId deleteInput
         let nc = curve.ToNurbsCurve()
         if isNull nc  then  failwithf "makeCurveNonPeriodic failed.2  curveId:'%A' deleteInput:'%A'" curveId deleteInput
-        if not <| nc.Knots.ClampEnd( CurveEnd.Both )then failwithf "makeCurveNonPeriodic failed.  curveId:'%A' deleteInput:'%A'" curveId deleteInput
+        if not <| nc.Knots.ClampEnd( CurveEnd.Both ) then failwithf "makeCurveNonPeriodic failed.  curveId:'%A' deleteInput:'%A'" curveId deleteInput
         if deleteInput then
             let rc = Doc.Objects.Replace(curveId, nc)
             if not <| rc then  failwithf "makeCurveNonPeriodic failed.3  curveId:'%A' deleteInput:'%A'" curveId deleteInput

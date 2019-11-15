@@ -33,7 +33,7 @@ module ExtensionsApplication =
     ///<param name="index">(int) Optional, Default Value: <c>-1</c>
     ///  Zero-based position in the search path list to insert.
     ///  If omitted, path will be appended to the end of the search path list.
-    ///<returns>(int)The index where the item was inserted.
+    ///<returns>(int) The index where the item was inserted.
     ///  -1 on failure.</returns>
     static member AddSearchPath(folder:string, [<OPT;DEF(-1)>]index:int) : int =
         ApplicationSettings.FileSettings.AddSearchPath(folder, index)
@@ -56,7 +56,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Modifies the macro of a command alias.</summary>
     ///<param name="alias">(string) The name of an existing command alias.</param>
-    ///<param name="macro">(string)The new macro to run when the alias is executed. If omitted, the current alias macro is returned.</param>
+    ///<param name="macro">(string) The new macro to run when the alias is executed. If omitted, the current alias macro is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member AliasMacro(alias:string, macro:string) : unit = //SET
         ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
@@ -136,7 +136,7 @@ module ExtensionsApplication =
     ///  11 = Text
     ///  12 = Text Background
     ///  13 = Text hover</param>
-    ///<param name="color">(Drawing.Color )The new color value as System.Drawing.Color . </param>
+    ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color . </param>
     ///<returns>(unit) void, nothing</returns>
     static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
         if item=0 then AppearanceSettings.ViewportBackgroundColor <- color
@@ -170,7 +170,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Changes the file name used by Rhino's automatic file saving</summary>
-    ///<param name="filename">(string)Name of the new autosave file</param>
+    ///<param name="filename">(string) Name of the new autosave file</param>
     ///<returns>(unit) void, nothing</returns>
     static member AutosaveFile(filename:string) : unit = //SET
         ApplicationSettings.FileSettings.AutoSaveFile <- filename
@@ -186,7 +186,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Changes how often the document will be saved when Rhino's
     /// automatic file saving mechanism is enabled</summary>
-    ///<param name="minutes">(float)The number of minutes between saves</param>
+    ///<param name="minutes">(float) The number of minutes between saves</param>
     ///<returns>(unit) void, nothing</returns>
     static member AutosaveInterval(minutes:float) : unit = //SET
         ApplicationSettings.FileSettings.AutoSaveInterval <- TimeSpan.FromMinutes(minutes)
@@ -261,7 +261,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Changes the default render plug-in</summary>
-    ///<param name="renderer">(string)The name of the renderer to set as default renderer. </param>
+    ///<param name="renderer">(string) The name of the renderer to set as default renderer. </param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DefaultRenderer(renderer:string) : bool = //SET
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(renderer)
@@ -318,7 +318,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Modifies edge analysis mode displayed by the ShowEdges command</summary>
-    ///<param name="mode">(int)The new display mode. The available modes are
+    ///<param name="mode">(int) The new display mode. The available modes are
     ///  0 - display all edges
     ///  1 - display naked edges</param>
     ///<returns>(unit) void, nothing</returns>
@@ -526,7 +526,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's ortho modeling aid.</summary>
-    ///<param name="enable">(bool)The new enabled status (True or False). If omitted the current state is returned.</param>
+    ///<param name="enable">(bool) The new enabled status (True or False). If omitted the current state is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member Ortho(enable:bool) : unit = //SET
         ModelAidSettings.Ortho <- enable
@@ -542,7 +542,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Enables or disables Rhino's object snap modeling aid.
     ///  Object snaps are tools for specifying points on existing objects.</summary>
-    ///<param name="enable">(bool)The new enabled status.</param>
+    ///<param name="enable">(bool) The new enabled status.</param>
     ///<returns>(unit) void, nothing</returns>
     static member Osnap(enable:bool) : unit = //SET
         ModelAidSettings.Osnap <- enable
@@ -556,7 +556,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Shows or hides Rhino's dockable object snap bar</summary>
-    ///<param name="visible">(bool)The new visibility state. If omitted then the current state is returned.</param>
+    ///<param name="visible">(bool) The new visibility state. If omitted then the current state is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member OsnapDialog(visible:bool) : unit = //SET
         ModelAidSettings.UseHorizontalDialog <- visible
@@ -586,7 +586,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets the object snap mode. Object snaps are tools for
     /// specifying points on existing objects</summary>
-    ///<param name="mode">(int)The object snap mode or modes to set.
+    ///<param name="mode">(int) The object snap mode or modes to set.
     ///  0          None
     ///  2          Near
     ///  8          Focus
@@ -617,7 +617,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's planar modeling aid</summary>
-    ///<param name="enable">(bool)The new enable status.  If omitted the current state is returned.</param>
+    ///<param name="enable">(bool) The new enable status.  If omitted the current state is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member Planar(enable:bool) : unit = //SET
         ModelAidSettings.Planar <- enable
@@ -626,7 +626,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Returns the identifier of a plug-in given the plug-in name</summary>
     ///<param name="plugin">(string) the name  of the plug-in</param>
-    ///<returns>(Guid)the  Unique Guid of the plug-in </returns>
+    ///<returns>(Guid) the  Unique Guid of the plug-in </returns>
     static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
@@ -667,7 +667,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables object snap projection</summary>
-    ///<param name="enable">(bool)The new enabled status.  If omitted the current status is returned.</param>
+    ///<param name="enable">(bool) The new enabled status.  If omitted the current status is returned.</param>
     static member ProjectOsnaps(enable:bool) : unit = //SET
         ModelAidSettings.ProjectSnapToCPlane <- enable
 
@@ -729,7 +729,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's grid snap modeling aid</summary>
-    ///<param name="enable">(bool)The new enabled status. If omitted the current status is returned.</param>
+    ///<param name="enable">(bool) The new enabled status. If omitted the current status is returned.</param>
     static member Snap(enable:bool) : unit = //SET
         ModelAidSettings.GridSnap <- enable
 
@@ -802,7 +802,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets Rhino's default template file. This is the file used
     /// when Rhino starts.</summary>
-    ///<param name="filename">(string)The name of the new default template file. If omitted the current default template name is returned.</param>
+    ///<param name="filename">(string) The name of the new default template file. If omitted the current default template name is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TemplateFile(filename:string) : unit = //SET
         ApplicationSettings.FileSettings.TemplateFile <- filename
@@ -816,7 +816,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Sets the location of Rhino's template folder</summary>
-    ///<param name="folder">(string)The location of Rhino's template files. Note, the location must exist.</param>
+    ///<param name="folder">(string) The location of Rhino's template files. Note, the location must exist.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TemplateFolder(folder:string) : unit = //SET
         ApplicationSettings.FileSettings.TemplateFolder <- folder
@@ -839,7 +839,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets Rhino's working folder (directory).
     /// The working folder is the default folder for all file operations.</summary>
-    ///<param name="folder">(string)The new working folder for the current Rhino session.</param>
+    ///<param name="folder">(string) The new working folder for the current Rhino session.</param>
     ///<returns>(unit) void, nothing</returns>
     static member WorkingFolder(folder:string) : unit = //SET
         ApplicationSettings.FileSettings.WorkingFolder <- folder

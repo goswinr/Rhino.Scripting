@@ -455,7 +455,7 @@ module ExtensionsObject =
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
     ///<param name="objectId">(Guid) Id or ids of object</param>
-    ///<param name="color">(Drawing.Color)The new color value.</param>
+    ///<param name="color">(Drawing.Color) The new color value.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -481,7 +481,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the color source of an object.</summary>
     ///<param name="objectId">(Guid) Single identifier of list of identifiers</param>
-    ///<param name="source">(int)New color source
+    ///<param name="source">(int) New color source
     ///  0 = color from layer
     ///  1 = color from object
     ///  2 = color from material
@@ -530,7 +530,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the layer of an object</summary>
     ///<param name="objectId">(Guid) The identifier of the objects</param>
-    ///<param name="layer">(string)Name of an existing layer</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLayer(objectId:Guid, layer:string) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -542,7 +542,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the layer of an objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
-    ///<param name="layer">(string)Name of an existing layer</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectsLayer(objectIds:Guid seq, layer:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
@@ -571,7 +571,7 @@ module ExtensionsObject =
 
     ///<summary>Changes the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<param name="layout">(string)To change, or move, an object from model space to page
+    ///<param name="layout">(string) To change, or move, an object from model space to page
     ///  layout space, or from one page layout to another, then specify the
     ///  title or identifier of an existing page layout view. To move an object
     ///  from page layout space to model space, just specify Empty String "" </param>
@@ -613,7 +613,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the linetype of an object</summary>
     ///<param name="objectId">(Guid) Identifiers of object</param>
-    ///<param name="linetype">(string)Name of an existing linetyp. If omitted, the current
+    ///<param name="linetype">(string) Name of an existing linetyp. If omitted, the current
     ///  linetyp is returned. If objectId is a list of identifiers, this parameter
     ///  is required</param>
     ///<returns>(unit) void, nothing</returns>
@@ -646,7 +646,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the linetype source of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="source">(int)New linetype source. If omitted, the current source is returned.
+    ///<param name="source">(int) New linetype source. If omitted, the current source is returned.
     ///  If objectId is a list of identifiers, this parameter is required
     ///    0 = By Layer
     ///    1 = By Object
@@ -681,7 +681,7 @@ module ExtensionsObject =
     /// materials associated with objects and layers are specified by zero based
     /// indices into this array.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<param name="materialIndex">(int)The new material index</param>
+    ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <=. materialIndex .< Doc.Materials.Count then failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
@@ -705,7 +705,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the rendering material source of an object.</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
-    ///<param name="source">(int)The new rendering material source. If omitted and a single
+    ///<param name="source">(int) The new rendering material source. If omitted and a single
     ///  object is provided in objectId, then the current material source is
     ///  returned. This parameter is required if multiple objects are passed in
     ///  objectId
@@ -734,7 +734,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the name of an object</summary>
     ///<param name="objectId">(Guid) Id or ids of object(s)</param>
-    ///<param name="name">(string)The new object name. If omitted, the current name is returned</param>
+    ///<param name="name">(string) The new object name. If omitted, the current name is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
         //id = RhinoScriptSyntax.Coerceguid(objectId)
@@ -755,7 +755,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="color">(Drawing.Color)New print color. If omitted, the current color is returned.</param>
+    ///<param name="color">(Drawing.Color) New print color. If omitted, the current color is returned.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -779,7 +779,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the print color source of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="source">(int)New print color source
+    ///<param name="source">(int) New print color source
     ///  0 = print color by layer
     ///  1 = print color by object
     ///  3 = print color by parent</param>
@@ -807,7 +807,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the print width of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="width">(float)New print width value in millimeters, where width=0 means use
+    ///<param name="width">(float) New print width value in millimeters, where width=0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
     ///  but does not show on print). </param>
     ///<returns>(unit) void, nothing</returns>
@@ -834,7 +834,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the print width source of an object</summary>
     ///<param name="objectId">(Guid) Identifiers of object</param>
-    ///<param name="source">(int)New print width source
+    ///<param name="source">(int) New print width source
     ///  0 = print width by layer
     ///  1 = print width by object
     ///  3 = print width by parent</param>

@@ -101,7 +101,7 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Sets the description of a block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<param name="description">(string)The new description.</param>
+    ///<param name="description">(string) The new description.</param>
     ///<returns>(unit) void, nothing</returns>
     static member BlockDescription(blockName:string, description:string) : unit = //SET
         let idef = Doc.InstanceDefinitions.Find(blockName)

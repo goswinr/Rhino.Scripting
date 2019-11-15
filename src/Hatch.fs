@@ -136,7 +136,7 @@ module ExtensionsHatch =
 
 
     ///<summary>Sets the current hatch pattern file</summary>
-    ///<param name="hatchPattern">(string)Name of an existing hatch pattern to make current</param>
+    ///<param name="hatchPattern">(string) Name of an existing hatch pattern to make current</param>
     ///<returns>(unit) void, nothing</returns>
     static member CurrentHatchPattern(hatchPattern:string) : unit = //SET
         let rc = Doc.HatchPatterns.CurrentHatchPatternIndex
@@ -186,7 +186,7 @@ module ExtensionsHatch =
 
     ///<summary>Changes a hatch object's hatch pattern</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
-    ///<param name="hatchPattern">(string)Name of an existing hatch pattern to replace the
+    ///<param name="hatchPattern">(string) Name of an existing hatch pattern to replace the
     ///  current hatch pattern</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchPattern(hatchId:Guid, hatchPattern:string) : unit = //SET
@@ -262,7 +262,7 @@ module ExtensionsHatch =
     ///<summary>Modifies the rotation applied to the hatch pattern when
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
-    ///<param name="rotation">(float)Rotation angle in degrees</param>
+    ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
@@ -289,7 +289,7 @@ module ExtensionsHatch =
     ///<summary>Modifies the scale applied to the hatch pattern when it is
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
-    ///<param name="scale">(float)Scale factor</param>
+    ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchScale(hatchId:Guid, scale:float) : unit = //SET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)

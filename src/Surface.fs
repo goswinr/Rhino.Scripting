@@ -1103,7 +1103,7 @@ module ExtensionsSurface =
     ///<summary>Changes the normal direction of a surface. This feature can
     /// also be found in Rhino's Dir command</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
-    ///<param name="flip">(bool)New normal orientation, either flipped(True) or not flipped (False).</param>
+    ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False).</param>
     ///<returns>(unit) void, nothing</returns>
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
@@ -1223,7 +1223,7 @@ module ExtensionsSurface =
         match face with
         | :? BrepFace  as bface ->
             if bface.IsSurface then
-                match bface.UnderlyingSurface()with
+                match bface.UnderlyingSurface() with
                 | :?  PlaneSurface -> true
                 | _ -> false
             else
@@ -2049,7 +2049,7 @@ module ExtensionsSurface =
     /// Rhino uses isocurves and surface edge curves to visualize the shape of a
     /// NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="density">(int)The isocurve wireframe density. The possible values are
+    ///<param name="density">(int) The isocurve wireframe density. The possible values are
     ///  -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
     ///    1: Display boundary and knot wires and one interior wire if there
