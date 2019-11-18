@@ -1106,10 +1106,11 @@ module ExtensionsCurve =
                                     curveB:Guid,
                                     radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
-                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //  [<OPT;DEF(true)>]returnPoints:bool) // TODO not Implemented     //(FIXME) VarOutTypes
+                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = 
+        //  [<OPT;DEF(true)>]returnPoints:bool)   
         //<param name="returnPoints">(bool) Optional, Default Value: <c>true</c>
         //If True (Default), then fillet points are
-        //  returned. Otherwise, a fillet curve is created and
+        //  returned. Otherwise, a fillet curve is created and                       // TODO not Implemented   
         //  it's identifier is returned</param>
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB

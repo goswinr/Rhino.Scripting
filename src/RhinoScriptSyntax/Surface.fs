@@ -1019,8 +1019,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Create surface by extruding a curve along two points that define a line</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
-    ///<param name="startPoint">(Point3d) Start point of '3D points that specify distance and direction' (FIXME 0)</param>
-    ///<param name="endPoint">(Point3d) End point of '3D points that specify distance and direction' (FIXME 0)</param>
+    ///<param name="startPoint">(Point3d) Start point</param>
+    ///<param name="endPoint">(Point3d) End point, that specifyies distance and direction</param>
     ///<returns>(Guid) identifier of new surface on success</returns>
     static member ExtrudeCurveStraight( curveId:Guid,
                                         startPoint:Point3d,
@@ -1060,8 +1060,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Create constant radius rolling ball fillets between two surfaces. Note,
     ///  this function does not trim the original surfaces of the fillets</summary>
-    ///<param name="surface0">(Guid) Surface0 of 'identifiers of first and second surface' (FIXME 0)</param>
-    ///<param name="surface1">(Guid) Surface1 of 'identifiers of first and second surface' (FIXME 0)</param>
+    ///<param name="surface0">(Guid) first surface</param>
+    ///<param name="surface1">(Guid) second surface</param>
     ///<param name="radius">(float) A positive fillet radius</param>
     ///<param name="uvparam0">(Point2d) Optional, A u,v surface parameter of surface0 near where the fillet
     ///  is expected to hit the surface</param>
@@ -1463,7 +1463,6 @@ module ExtensionsSurface =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Makes an existing surface a periodic NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="direction">(int) The direction to make periodic, either 0=U or 1=V</param>
@@ -1640,8 +1639,8 @@ module ExtensionsSurface =
     ///<summary>Creates the shortest possible curve(geodesic) between two points on a
     ///  surface. For more details, see the ShortPath command in Rhino help</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="startPoint">(Point3d) Start point of 'start/end points of the short curve' (FIXME 0)</param>
-    ///<param name="endPoint">(Point3d) End point of 'start/end points of the short curve' (FIXME 0)</param>
+    ///<param name="startPoint">(Point3d) Start point the short curve</param>
+    ///<param name="endPoint">(Point3d) End point of the short curve</param>
     ///<returns>(Guid) identifier of the new surface on success</returns>
     static member ShortPath( surfaceId:Guid,
                              startPoint:Point3d,
@@ -1664,13 +1663,12 @@ module ExtensionsSurface =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Shrinks the underlying untrimmed surfaces near to the trimming
     ///  boundaries. See the ShrinkTrimmedSrf command in the Rhino help</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<param name="createCopy">(bool) Optional, Default Value: <c>false</c>
     ///If True, the original surface is not deleted</param>
-    ///<returns>(bool) If create_copy is true the new Guid, else the input Guid</returns>
+    ///<returns>(bool) If createCopy is true the new Guid, else the input Guid</returns>
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         if brep.Faces.ShrinkFaces() then failwithf "Rhino.Scripting: ShrinkTrimmedSurface failed.  objectId:'%A' createCopy:'%A'" objectId createCopy
@@ -1684,8 +1682,6 @@ module ExtensionsSurface =
             Doc.Objects.Replace(objectId, brep)|> ignore
             Doc.Views.Redraw()
             objectId
-
-
 
 
 
@@ -1711,10 +1707,6 @@ module ExtensionsSurface =
         let rc =  resizeArray { for piece in pieces do yield Doc.Objects.AddBrep(piece) }
         Doc.Views.Redraw()
         rc
-
-
-
-    static member GetMassProperties() : unit = () //TODO delete
 
 
     [<EXT>]
@@ -1752,11 +1744,6 @@ module ExtensionsSurface =
             )
         |> Option.defaultWith (fun () -> failwithf "Rhino.Scripting: SurfaceAreaCentroid failed.  objectId:'%A'" objectId )
         |> fun amp -> amp.Centroid
-
-
-
-    [<EXT>]
-    static member  AreaMomentsHelper() = () //TODO delete
 
 
     [<EXT>]
@@ -2444,7 +2431,6 @@ module ExtensionsSurface =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Flattens a developable surface or polysurface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>

@@ -11,7 +11,7 @@ module ExtensionsHatch =
  type RhinoScriptSyntax with
 
     [<EXT>]
-    static member InitHatchPatterns() : unit = //TODO make private
+    static member private InitHatchPatterns() : unit = 
         if isNull <| Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Solid.Name) then
             Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore
 

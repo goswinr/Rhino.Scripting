@@ -28,7 +28,7 @@ module ExtensionsMesh =
     ///  there must be a corresponding vertex color</param>
     ///<returns>(Guid) Identifier of the new object</returns>
     static member AddMesh( vertices:Point3d seq, //TODO how to construct Ngon Mesh ???
-                           faceVertices:seq<IList<int>>, // TODO teset if nested arrays are accepted
+                           faceVertices:seq<IList<int>>, // TODO test if nested arrays are accepted
                            [<OPT;DEF(null:Vector3f seq)>]vertexNormals:Vector3f seq,
                            [<OPT;DEF(null:Point2f seq)>]textureCoordinates:Point2f seq,
                            [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
@@ -663,7 +663,7 @@ module ExtensionsMesh =
     ///<returns>(unit) void, nothing</returns>
     static member MeshVertexColors(meshId:Guid, colors:Drawing.Color seq) : unit = //SET
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        if colors|> isNull || Seq.length colors = 0  then
+        if colors|> isNull || Seq.isEmpty colors   then
             mesh.VertexColors.Clear()
         else
             let colorcount = Seq.length(colors)

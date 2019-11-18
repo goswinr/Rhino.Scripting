@@ -206,7 +206,6 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Verifies that an object is a member of a group</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function

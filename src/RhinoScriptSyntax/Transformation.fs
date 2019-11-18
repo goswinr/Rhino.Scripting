@@ -55,12 +55,12 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Returns a change of basis transformation matrix of None on error</summary>
-    ///<param name="x0">(Vector3d) X0 of 'initial basis' (FIXME 0)</param>
-    ///<param name="y0">(Vector3d) Y0 of 'initial basis' (FIXME 0)</param>
-    ///<param name="z0">(Vector3d) Z0 of 'initial basis' (FIXME 0)</param>
-    ///<param name="x1">(Vector3d) X1 of 'final basis' (FIXME 0)</param>
-    ///<param name="y1">(Vector3d) Y1 of 'final basis' (FIXME 0)</param>
-    ///<param name="z1">(Vector3d) Z1 of 'final basis' (FIXME 0)</param>
+    ///<param name="x0">(Vector3d) X of initial basis</param>
+    ///<param name="y0">(Vector3d) Y of initial basis</param>
+    ///<param name="z0">(Vector3d) Z of initial basis</param>
+    ///<param name="x1">(Vector3d) X of final basis</param>
+    ///<param name="y1">(Vector3d) Y of final basis</param>
+    ///<param name="z1">(Vector3d) Z of final basis</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformChangeBasis2( x0:Vector3d,
                                      y0:Vector3d,
@@ -206,8 +206,8 @@ module ExtensionsTransformation =
     [<EXT>]
     ///<summary>Calculate the minimal transformation that rotates startDirection to
     ///  endDirection while fixing centerPoint</summary>
-    ///<param name="startDirection">(Vector3d) Start direction of '3d vectors' (FIXME 0)</param>
-    ///<param name="endDirection">(Vector3d) End direction of '3d vectors' (FIXME 0)</param>
+    ///<param name="startDirection">(Vector3d) Start direction</param>
+    ///<param name="endDirection">(Vector3d) End direction</param>
     ///<param name="centerPoint">(Point3d) The rotation center</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformRotation3( startDirection:Vector3d,
@@ -223,12 +223,12 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Returns a rotation transformation</summary>
-    ///<param name="x0">(Vector3d) X0 of 'Vectors defining the initial orthonormal frame' (FIXME 0)</param>
-    ///<param name="y0">(Vector3d) Y0 of 'Vectors defining the initial orthonormal frame' (FIXME 0)</param>
-    ///<param name="z0">(Vector3d) Z0 of 'Vectors defining the initial orthonormal frame' (FIXME 0)</param>
-    ///<param name="x1">(Vector3d) X1 of 'Vectors defining the final orthonormal frame' (FIXME 0)</param>
-    ///<param name="y1">(Vector3d) Y1 of 'Vectors defining the final orthonormal frame' (FIXME 0)</param>
-    ///<param name="z1">(Vector3d) Z1 of 'Vectors defining the final orthonormal frame' (FIXME 0)</param>
+    ///<param name="x0">(Vector3d) X of Vector defining the initial orthonormal frame</param>
+    ///<param name="y0">(Vector3d) Y of Vector defining the initial orthonormal frame</param>
+    ///<param name="z0">(Vector3d) Z of Vector defining the initial orthonormal frame</param>
+    ///<param name="x1">(Vector3d) X of Vector defining the final orthonormal frame</param>
+    ///<param name="y1">(Vector3d) Y of Vector defining the final orthonormal frame</param>
+    ///<param name="z1">(Vector3d) Z of Vector defining the final orthonormal frame</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformRotation4( x0:Vector3d,
                                   y0:Vector3d,

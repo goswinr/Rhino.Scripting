@@ -13,17 +13,17 @@ module ExtensionsUtility =
     type RhinoScriptSyntax with
 
     [<EXT>]
-    ///<summary>Return True if the script is being executed in the context of Rhino(currently always true)</summary>
-    ///<returns>(bool) True if the script is being executed in the context of Rhino(currently always true)</returns>
+    ///<summary>Return true if the script is being executed in the context of Rhino(currently always true)</summary>
+    ///<returns>(bool) true if the script is being executed in the context of Rhino(currently always true)</returns>
     static member ContextIsRhino() : bool =
         true //TODO implement correctly
 
 
     [<EXT>]
-    ///<summary>Return True if the script is being executed in a grasshopper component(currently always true)</summary>
-    ///<returns>(bool) True if the script is being executed in a grasshopper component(currently always true)</returns>
+    ///<summary>Return true if the script is being executed in a grasshopper component(currently always false)</summary>
+    ///<returns>(bool) true if the script is being executed in a grasshopper component(currently always false)</returns>
     static member ContextIsGrasshopper() : bool =
-        true //TODO implement correctly
+        false //TODO implement correctly
 
 
     [<EXT>]

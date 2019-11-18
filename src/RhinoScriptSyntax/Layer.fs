@@ -10,10 +10,7 @@ open Rhino.Scripting.ActiceDocument
 module ExtensionsLayer =
  type RhinoScriptSyntax with
 
-    [<EXT>]
-
-    static member Getlayer() : obj =  failNotImpl () // genreation temp disabled !! //TODO remove !!
-
+    
     [<EXT>]
     ///<summary>Add a new layer to the document</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
@@ -114,7 +111,7 @@ module ExtensionsLayer =
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayer(layer:string) : bool =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then false else true
+        i <> RhinoMath.UnsetIntIndex 
 
 
     [<EXT>]

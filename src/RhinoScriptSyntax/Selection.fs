@@ -76,7 +76,7 @@ module ExtensionsSelection =
     ///<summary>A helper Function for Rhino.DocObjects.ObjectType Enum</summary>
     ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types</param>
     ///<returns>(Rhino.DocObjects.ObjectType) translated Rhino.DocObjects.ObjectType Enum</returns>
-    static member FilterHelper(filter:int) : Rhino.DocObjects.ObjectType =        //TODO make internal ?
+    static member private FilterHelper(filter:int) : Rhino.DocObjects.ObjectType =        
         let mutable geometryfilter = Rhino.DocObjects.ObjectType.None
         if 0 <> (filter &&& 1 ) then
             geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Point
@@ -222,7 +222,6 @@ module ExtensionsSelection =
             } |> Async.RunSynchronously
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Prompts user to pick, or select a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
@@ -623,7 +622,7 @@ module ExtensionsSelection =
                     rc.Add(obj.Id)
                 if select then obj.Select(true) |> ignore
                 serialnumber <- serialnumber + 1u
-                if select = true && rc.Count > 1 then Doc.Views.Redraw()
+                if select && rc.Count > 1 then Doc.Views.Redraw()
             rc
 
 

@@ -53,8 +53,8 @@ module ExtensionsMaterial =
 
     [<EXT>]
     ///<summary>Copies definition of a source material to a destination material</summary>
-    ///<param name="sourceIndex">(int) Source index of 'indices of materials to copy' (FIXME 0)</param>
-    ///<param name="destinationIndex">(int) Destination index of 'indices of materials to copy' (FIXME 0)</param>
+    ///<param name="sourceIndex">(int) Source index of materials to copy</param>
+    ///<param name="destinationIndex">(int) Destination index materials to copy</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool =
         if sourceIndex = destinationIndex then true // orignaly false

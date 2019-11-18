@@ -105,10 +105,9 @@ module ExtensionsGroup =
 
 
     [<EXT>]
-    //(FIXME) VarOutTypes
     ///<summary>Verifies that an existing group is empty, or contains no object members</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(bool) True or False if group_name exists</returns>
+    ///<returns>(bool) True or False if groupName is empty</returns>
     static member IsGroupEmpty(groupName:string) : bool =
         //if not isinstance(groupName, str) then groupName <- string(groupName)
         let index = Doc.Groups.Find(groupName)

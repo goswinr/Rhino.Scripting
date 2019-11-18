@@ -11,11 +11,6 @@ module ExtensionsView =
     type RhinoScriptSyntax with
 
     [<EXT>]
-    static member  Viewhelper() =() //TODO delete
-
-
-
-    [<EXT>]
     ///<summary>Add new detail view to an existing layout view</summary>
     ///<param name="layoutName">(string) Identifier of an existing layout</param>
     ///<param name="corner1">(Point2d) Corner1 of the detail in the layout's unit system</param>
