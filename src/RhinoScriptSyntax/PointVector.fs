@@ -107,7 +107,7 @@ module ExtensionsPointvector =
     ///<returns>(Guid * Point3d * float) Tuple of 3 values
     ///    [0] Guid, closest  objectId
     ///    [1] the point on object
-    ///    [2] the distance </returns>
+    ///    [2] the distance</returns>
     static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d =
         //objectIds = RhinoScriptSyntax.Coerceguidlist(objectIds)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
@@ -472,7 +472,7 @@ module ExtensionsPointvector =
     ///  Plane to which the bounding box should be aligned,
     /// If omitted, a world axis-aligned bounding box
     ///  will be calculated</param>
-    ///<returns>(Box) A Rhino.Geometry.Box </returns>
+    ///<returns>(Box) A Rhino.Geometry.Box</returns>
     static member PointArrayBoundingBox( points:Point3d seq,  [<OPT;DEF(Plane())>]plane:Plane) : Box = // TODO verify this works the same way as python !!
         if plane.IsValid then
             Box(plane,points)

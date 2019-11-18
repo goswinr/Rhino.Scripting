@@ -1721,7 +1721,7 @@ module ExtensionsSurface =
     ///<summary>Calculate the area of a surface or polysurface object. The results are
     ///  based on the current drawing units</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
-    ///<returns>(float) of area </returns>
+    ///<returns>(float) of area</returns>
     static member SurfaceArea(objectId:Guid) : float  =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
@@ -1740,7 +1740,7 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Calculates the area centroid of a surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
-    ///<returns>(Point3d ) Area centroid </returns>
+    ///<returns>(Point3d ) Area centroid</returns>
     static member SurfaceAreaCentroid(objectId:Guid) : Point3d =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
@@ -2013,7 +2013,7 @@ module ExtensionsSurface =
     ///  U,V parameter</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="uvParameter">(float * float) U,v parameter to evaluate</param>
-    ///<returns>(Plane) plane </returns>
+    ///<returns>(Plane) plane</returns>
     static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, frame = surface.FrameAt(uvParameter|> fst, uvParameter|> snd)
@@ -2198,7 +2198,7 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Calculates volume of a closed surface or polysurface</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
-    ///<returns>(float) the volume </returns>
+    ///<returns>(float) the volume</returns>
     static member SurfaceVolume(objectId:Guid) : float =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep

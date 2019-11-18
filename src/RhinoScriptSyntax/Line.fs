@@ -59,7 +59,7 @@ module ExtensionsLine =
     ///  line is greater than a specified distance</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line.</param>
     ///<param name="distance">(float) The distance</param>
-    ///<param name="point">(Point3d) The test point </param>
+    ///<param name="point">(Point3d) The test point</param>
     ///<returns>(bool) True if the shortest distance from the line to the other project is
     ///  greater than distance, False otherwise</returns>
     static member LineIsFartherThan(line:Line, distance:float, point:Point3d) : bool =

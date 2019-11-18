@@ -255,7 +255,7 @@ module ExtensionsMesh =
 
     [<EXT>]
     ///<summary>Performs boolean difference operation on two sets of input meshes</summary>
-    ///<param name="input0">(Guid seq) Meshes to subtract from </param>
+    ///<param name="input0">(Guid seq) Meshes to subtract from</param>
     ///<param name="input1">(Guid seq) Meshes to subtract with</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///Delete the input meshes</param>
@@ -281,7 +281,7 @@ module ExtensionsMesh =
 
     [<EXT>]
     ///<summary>Performs boolean intersection operation on two sets of input meshes</summary>
-    ///<param name="input0">(Guid seq) Meshes to intersect </param>
+    ///<param name="input0">(Guid seq) Meshes to intersect</param>
     ///<param name="input1">(Guid seq) Meshes to intersect</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///Delete the input meshes</param>
@@ -308,7 +308,7 @@ module ExtensionsMesh =
 
     [<EXT>]
     ///<summary>Performs boolean split operation on two sets of input meshes</summary>
-    ///<param name="input0">(Guid seq) Meshes to split from </param>
+    ///<param name="input0">(Guid seq) Meshes to split from</param>
     ///<param name="input1">(Guid seq) Meshes to split with</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///Delete the input meshes</param>

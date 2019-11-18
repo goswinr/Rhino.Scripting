@@ -188,9 +188,9 @@ module ExtensionsUserinterface =
     ///  4 = Center. The base rectangle is created by picking a center point and a corner point</param>
     ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Optional 3D base point</param>
-    ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set' </param>
-    ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set' </param>
-    ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set' </param>
+    ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
+    ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
+    ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
     ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box on success</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]basisPoint:Point3d,
@@ -971,7 +971,7 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
-    ///<param name="items">(string IList) list of string items </param>
+    ///<param name="items">(string IList) list of string items</param>
     ///<param name="values">(string seq) the corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>

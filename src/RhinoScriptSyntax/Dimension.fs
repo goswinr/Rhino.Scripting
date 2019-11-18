@@ -52,7 +52,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Adds a new dimension style to the document. The new dimension style will
     ///  be initialized with the current default dimension style properties.</summary>
-    ///<param name="dimStyleName">(string) Name of the new dimension style. </param>
+    ///<param name="dimStyleName">(string) Name of the new dimension style.</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddDimStyle(dimStyleName:string) : unit =
         let index = Doc.DimStyles.Add(dimStyleName)
@@ -65,7 +65,7 @@ module ExtensionsDimension =
     ///<summary>Adds a leader to the document. Leader objects are planar.
     ///  The 3D points passed will define the plane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
-    ///<param name="text">(string) Leader's text </param>
+    ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(string) Optional, Default Value: <c>defined by points arg</c>
     ///  If points will be projected to this plane</param>
     ///<returns>(Guid) identifier of the new leader on success</returns>

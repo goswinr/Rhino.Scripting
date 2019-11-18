@@ -109,7 +109,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Retrieves intensity value for the blue component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(int) The blue component </returns>
+    ///<returns>(int) The blue component</returns>
     static member ColorBlueValue(rgb:Drawing.Color) : int =
        int rgb.B
 
@@ -134,7 +134,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Retrieves intensity value for the red component of an RGB color</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(int) The red color value </returns>
+    ///<returns>(int) The red color value</returns>
     static member ColorRedValue(rgb:Drawing.Color) : int =
         int rgb.R
 
@@ -142,7 +142,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance)</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(Rhino.Display.ColorHSL) The HLS color value </returns>
+    ///<returns>(Rhino.Display.ColorHSL) The HLS color value</returns>
     static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
         let hsl = Rhino.Display.ColorHSL(rgb)
         hsl
@@ -187,9 +187,9 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Measures Square distance between two 3D points. Does not validate input. </summary>
+    ///<summary>Measures Square distance between two 3D points. Does not validate input.</summary>
     ///<param name="point1">(Point3d) The first 3D point.</param>
-    ///<param name="point2">(Point3d) The second 3D point </param>
+    ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) the square distance.</returns>
     static member DistanceSquare(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).SquareLength
@@ -197,14 +197,14 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Measures distance between two 3D points</summary>
     ///<param name="point1">(Point3d) The first 3D point.</param>
-    ///<param name="point2">(Point3d) The second 3D point </param>
+    ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) the distance .</returns>
     static member Distance(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).Length
 
 
     [<EXT>]
-    ///<summary>NOT IMPLEMENTED YET.Returns string from a specified section in a initialization file. </summary>
+    ///<summary>NOT IMPLEMENTED YET.Returns string from a specified section in a initialization file.</summary>
     ///<param name="filename">(string) Name of the initialization file</param>
     ///<param name="section">(string) Optional, Section containing the entry</param>
     ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
@@ -247,7 +247,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI</summary>
     ///<param name="milliseconds">(int) Thousands of a second</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit)</returns>
     static member Sleep(milliseconds:int) : unit =
         Threading.Thread.Sleep(milliseconds)
         RhinoApp.Wait()
@@ -310,7 +310,7 @@ module ExtensionsUtility =
         RhinoScriptSyntax.Coerce3dPoint point
     [<EXT>]
     ///<summary>Converts x,y and z into a Rhino.Geometry.Point3d if possible</summary>
-    ///<param name="x">something that can be converted or parsed to X coordinate </param>
+    ///<param name="x">something that can be converted or parsed to X coordinate</param>
     ///<param name="y">something that can be converted or parsed to Y coordinate</param>
     ///<param name="z">something that can be converted or parsed to Z coordinate</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
@@ -326,7 +326,7 @@ module ExtensionsUtility =
         RhinoScriptSyntax.Coerce3dVector vector
     [<EXT>]
     ///<summary>Converts x,y and z into a Rhino.Geometry.Vector3d if possible</summary>
-    ///<param name="x">something that can be converted or parsed to X coordinate </param>
+    ///<param name="x">something that can be converted or parsed to X coordinate</param>
     ///<param name="y">something that can be converted or parsed to Y coordinate</param>
     ///<param name="z">something that can be converted or parsed to Z coordinate</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
@@ -337,7 +337,7 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.</summary>
-    ///<param name="origin">(Point3d) the Plane Center or Origin </param>
+    ///<param name="origin">(Point3d) the Plane Center or Origin</param>
     ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d.XAxis</c>
     ///Direction of X-Axis</param>
     ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>Vector3d.YAxis</c>

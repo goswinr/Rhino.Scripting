@@ -37,7 +37,7 @@ module ExtensionsLinetype =
 
     [<EXT>]
     ///<summary>Returns names of all linetypes in the document</summary>
-    ///<returns>(string seq) list of linetype names</returns>
+    ///<returns>(string ResizeArray) list of linetype names</returns>
     static member LinetypeNames() : string ResizeArray =
         let count = Doc.Linetypes.Count
         let rc = ResizeArray()

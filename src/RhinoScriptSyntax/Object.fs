@@ -126,7 +126,7 @@ module ExtensionsObject =
     ///<param name="style">(bool) Optional, Default Value: <c>true</c>
     ///If True, flash between object color and selection color.
     ///  If False, flash between visible and invisible</param>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit)</returns>
     static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         //if notNull objectId then objectId <- .[objectId]
@@ -574,7 +574,7 @@ module ExtensionsObject =
     ///<param name="layout">(string) To change, or move, an object from model space to page
     ///  layout space, or from one page layout to another, then specify the
     ///  title or identifier of an existing page layout view. To move an object
-    ///  from page layout space to model space, just specify Empty String "" </param>
+    ///  from page layout space to model space, just specify Empty String ""</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLayout(objectId:Guid, layout:string, [<OPT;DEF(true)>]returnName:bool) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -809,7 +809,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="width">(float) New print width value in millimeters, where width=0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
-    ///  but does not show on print). </param>
+    ///  but does not show on print).</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)

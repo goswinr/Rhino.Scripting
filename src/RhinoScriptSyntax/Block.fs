@@ -63,7 +63,7 @@ module ExtensionsBlock =
     ///<summary>Returns names of the block definitions that contain a specified block
     ///  definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<returns>(string List/ResizeArray) A list of block definition names</returns>
+    ///<returns>(string ResizeArray) A list of block definition names</returns>
     static member BlockContainers(blockName:string) : string ResizeArray =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
@@ -155,7 +155,7 @@ module ExtensionsBlock =
     ///0 = get top level references in active document.
     ///  1 = get top level and nested references in active document.
     ///  2 = check for references from other instance definitions</param>
-    ///<returns>(Guid seq) Ids identifying the instances of a block in the model.</returns>
+    ///<returns>(Guid ResizeArray) Ids identifying the instances of a block in the model.</returns>
     static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
@@ -177,7 +177,7 @@ module ExtensionsBlock =
 
     [<EXT>]
     ///<summary>Returns the names of all block definitions in the document</summary>
-    ///<returns>(string seq) the names of all block definitions in the document</returns>
+    ///<returns>(string ResizeArray) the names of all block definitions in the document</returns>
     static member BlockNames() : ResizeArray<string> =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
         resizeArray { for item in ideflist do yield item.Name}
@@ -197,7 +197,7 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Returns identifiers of the objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<returns>(Guid seq) list of identifiers on success</returns>
+    ///<returns>(Guid ResizeArray) list of identifiers on success</returns>
     static member BlockObjects(blockName:string) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName

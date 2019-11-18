@@ -158,7 +158,7 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Redraws all views</summary>
-    ///<returns>(unit) </returns>
+    ///<returns>(unit)</returns>
     static member Redraw() : unit =
         let old = Doc.Views.RedrawEnabled
         Doc.Views.RedrawEnabled <- true

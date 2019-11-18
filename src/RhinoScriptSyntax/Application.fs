@@ -136,7 +136,7 @@ module ExtensionsApplication =
     ///  11 = Text
     ///  12 = Text Background
     ///  13 = Text hover</param>
-    ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color . </param>
+    ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color .</param>
     ///<returns>(unit) void, nothing</returns>
     static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
         if item=0 then AppearanceSettings.ViewportBackgroundColor <- color
@@ -261,7 +261,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Changes the default render plug-in</summary>
-    ///<param name="renderer">(string) The name of the renderer to set as default renderer. </param>
+    ///<param name="renderer">(string) The name of the renderer to set as default renderer.</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DefaultRenderer(renderer:string) : bool = //SET
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(renderer)
@@ -351,7 +351,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Enables or disables a Rhino plug-in</summary>
     ///<param name="plugin">(string) The name of the plugin.</param>
-    ///<param name="enable">(bool) Load silently if True. </param>
+    ///<param name="enable">(bool) Load silently if True.</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnablePlugIn(plugin:string, enable:bool) : unit = //SET
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
@@ -626,7 +626,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Returns the identifier of a plug-in given the plug-in name</summary>
     ///<param name="plugin">(string) the name  of the plug-in</param>
-    ///<returns>(Guid) the  Unique Guid of the plug-in </returns>
+    ///<returns>(Guid) the  Unique Guid of the plug-in</returns>
     static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
@@ -767,7 +767,7 @@ module ExtensionsApplication =
     ///  If true, the label will show inside the meter.
     ///  If false, the label will show to the left of the meter.</param>
     ///<param name="showPercent">(bool) Optional, Default Value: <c>true</c>
-    ///  Show the percent complete if True. </param>
+    ///  Show the percent complete if True.</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         let mutable rc = Rhino.UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
