@@ -91,7 +91,7 @@ module ExtensionsMaterial =
     ///<summary>Copies the material definition from one material to one or more objects</summary>
     ///<param name="source">(Guid) Source material index -or- identifier of the source object.
     ///  The object must have a material assigned</param>
-    ///<param name="destination">(Guid seq) Identifiers(s) of the destination object(s)</param>
+    ///<param name="destination">(Guid seq) Id of the destination object</param>
     ///<returns>(unit) void, nothing</returns>
     static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)

@@ -453,7 +453,7 @@ module ExtensionsObject =
     ///<summary>Modifies the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
-    ///<param name="objectId">(Guid) Id or ids of object</param>
+    ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectColor(objectId:Guid, color:Drawing.Color) : unit = //SET
@@ -725,14 +725,14 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the name of an object</summary>
-    ///<param name="objectId">(Guid) Id or ids of object(s)</param>
+    ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(string) The current object name</returns>
     static member ObjectName(objectId:Guid) : string = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.Name
 
     ///<summary>Modifies the name of an object</summary>
-    ///<param name="objectId">(Guid) Id or ids of object(s)</param>
+    ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name. If omitted, the current name is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
