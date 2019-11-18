@@ -108,16 +108,16 @@ module ExtensionsDocument =
     ///<param name="fileName">(string) Name of the bitmap file to create. The extension of
     ///  the fileName controls the format of the bitmap file created.
     ///  (.bmp, .tga, .jpg, .jpeg, .pcx, .png, .tif, .tiff)</param>
-    ///<param name="modelname">(string) Optional, The model (.3dm) from which to extract the
+    ///<param name="modelName">(string) Optional, The model (.3dm) from which to extract the
     ///  preview image. If omitted, the currently loaded model is used</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelname:string) : unit =
+    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit =
         let bmp =
-            if notNull modelname  then
+            if notNull modelName  then
                 if notNull Doc.Path then RhinoDoc.ExtractPreviewImage(Doc.Path) // TODO test this works ok
                 else failwithf "extractPreviewImage failed on unsaved file"
             else
-                RhinoDoc.ExtractPreviewImage(modelname)
+                RhinoDoc.ExtractPreviewImage(modelName)
         bmp.Save(fileName)
 
 

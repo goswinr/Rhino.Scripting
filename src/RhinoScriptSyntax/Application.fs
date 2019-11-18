@@ -738,7 +738,7 @@ module ExtensionsApplication =
     ///<param name="distance">(float) The distance to set the status bar</param>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarDistance(distance:float) : unit =
-        Rhino.UI.StatusBar.SetDistancePane(distance)
+        UI.StatusBar.SetDistancePane(distance)
 
 
     [<EXT>]
@@ -746,7 +746,7 @@ module ExtensionsApplication =
     ///<param name="message">(string) The message to display</param>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarMessage(message:string) : unit =
-        Rhino.UI.StatusBar.SetMessagePane(message)
+        UI.StatusBar.SetMessagePane(message)
 
 
     [<EXT>]
@@ -754,7 +754,7 @@ module ExtensionsApplication =
     ///<param name="point">(Point3d) The 3d coordinates of the status bar</param>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarPoint(point:Point3d) : unit =
-        Rhino.UI.StatusBar.SetPointPane(point)
+        UI.StatusBar.SetPointPane(point)
 
 
     [<EXT>]
@@ -769,7 +769,7 @@ module ExtensionsApplication =
     ///  Show the percent complete if True</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
-        let mutable rc = Rhino.UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
+        let mutable rc = UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
         rc = 1
 
 
@@ -780,7 +780,7 @@ module ExtensionsApplication =
     ///The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
-        Rhino.UI.StatusBar.UpdateProgressMeter(position, absolute)
+        UI.StatusBar.UpdateProgressMeter(position, absolute)
         |> ignore
 
 
@@ -788,7 +788,7 @@ module ExtensionsApplication =
     ///<summary>Hide the progress meter</summary>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarProgressMeterHide() : unit =
-        Rhino.UI.StatusBar.HideProgressMeter()
+        UI.StatusBar.HideProgressMeter()
 
 
     [<EXT>]

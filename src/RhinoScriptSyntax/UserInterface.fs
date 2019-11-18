@@ -7,7 +7,7 @@ open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 open Rhino
-open Rhino.UI
+open UI
 open System.Drawing
 open System.Collections.Generic
 //open System.Windows.Forms
@@ -70,7 +70,7 @@ module ExtensionsUserinterface =
         let newcheckstates =
             async{
                 if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-                return Rhino.UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
+                return UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
                 } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
         if notNull newcheckstates then
@@ -90,7 +90,7 @@ module ExtensionsUserinterface =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             return
-                match Rhino.UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
+                match UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
                 | null -> None
                 | :? string as s -> Some s
                 | _ -> None
@@ -107,7 +107,7 @@ module ExtensionsUserinterface =
     static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
+            let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
             return if rc then Some text else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -130,7 +130,7 @@ module ExtensionsUserinterface =
             let point = if point = Point3d.Origin then Point3d.Unset else point
             let referencepoint = if referencePoint = Point3d.Origin then Point3d.Unset else referencePoint
             let defaultangle = toRadians(defaultValAngleDegrees)
-            let rc, angle = Rhino.Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
+            let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             return
                 if rc = Rhino.Commands.Result.Success then Some(toDegrees(angle))
                 else None
@@ -164,11 +164,11 @@ module ExtensionsUserinterface =
                 toggles.Add(t)
                 go.AddOptionToggle(name, ref t) |> ignore
             let mutable getrc = go.Get()
-            while getrc = Rhino.Input.GetResult.Option do
+            while getrc = Input.GetResult.Option do
                 getrc <- go.Get()
 
             let res =
-                if getrc <> Rhino.Input.GetResult.Nothing then
+                if getrc <> Input.GetResult.Nothing then
                     None
                 else
                     Some (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
@@ -200,15 +200,15 @@ module ExtensionsUserinterface =
             let basePoint = if basePoint <> Point3d.Origin then basePoint else  Point3d.Unset
             let m =
                 match mode with
-                |0 -> Rhino.Input.GetBoxMode.All
-                |1 -> Rhino.Input.GetBoxMode.Corner
-                |2 -> Rhino.Input.GetBoxMode.ThreePoint
-                |3 -> Rhino.Input.GetBoxMode.Vertical
-                |4 -> Rhino.Input.GetBoxMode.Center
+                |0 -> Input.GetBoxMode.All
+                |1 -> Input.GetBoxMode.Corner
+                |2 -> Input.GetBoxMode.ThreePoint
+                |3 -> Input.GetBoxMode.Vertical
+                |4 -> Input.GetBoxMode.Center
                 |_ -> failwithf "GetBox:Bad mode %A" mode
 
             let box = ref (Box())
-            let rc= Rhino.Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
+            let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             return
                 if rc = Rhino.Commands.Result.Success then Some ((!box).GetCorners())
                 else None
@@ -224,7 +224,7 @@ module ExtensionsUserinterface =
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let zero = Drawing.Color()
             let col = ref(if color = zero then  Drawing.Color.Black else color)
-            let rc = Rhino.UI.Dialogs.ShowColorDialog(col)
+            let rc = UI.Dialogs.ShowColorDialog(col)
             return
                 if rc then Some (!col) else None
         } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
@@ -241,7 +241,7 @@ module ExtensionsUserinterface =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let view = Doc.Views.ActiveView
-            let screenpt = Rhino.UI.MouseCursor.Location
+            let screenpt = UI.MouseCursor.Location
             let clientpt = view.ScreenToClient(screenpt)
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
@@ -268,7 +268,7 @@ module ExtensionsUserinterface =
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let pt1 =
                 if firstPt = Point3d.Origin then
-                    let gp1 = new Rhino.Input.Custom.GetPoint()
+                    let gp1 = new Input.Custom.GetPoint()
                     gp1.SetCommandPrompt(firstPtMsg)
                     match gp1.Get() with
                     | Input.GetResult.Point ->
@@ -283,7 +283,7 @@ module ExtensionsUserinterface =
             return
                 match pt1 with
                 | Some pt ->
-                    let gp2 = new Rhino.Input.Custom.GetPoint()
+                    let gp2 = new Input.Custom.GetPoint()
                     if distance <> 0.0 then
                         gp2.AcceptNothing(true)
                         gp2.SetCommandPrompt(sprintf "%s<%f>" secondPtMsg distance)
@@ -322,14 +322,14 @@ module ExtensionsUserinterface =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if maxCount > 0 && minCount > maxCount then failwithf "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
-            use go = new Rhino.Input.Custom.GetObject()
+            use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
             go.GeometryFilter <- Rhino.DocObjects.ObjectType.Curve
-            go.GeometryAttributeFilter <- Rhino.Input.Custom.GeometryAttributeFilter.EdgeCurve
+            go.GeometryAttributeFilter <- Input.Custom.GeometryAttributeFilter.EdgeCurve
             go.EnablePreSelect(false, true)
             let rc = go.GetMultiple(minCount, maxCount)
             return
-                if rc <> Rhino.Input.GetResult.Object then None
+                if rc <> Input.GetResult.Object then None
                 else
                     let r = ResizeArray()
                     for i in range(go.ObjectCount) do
@@ -359,13 +359,13 @@ module ExtensionsUserinterface =
     static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(2147482999)>]number:int, [<OPT;DEF(2147482999)>]minimum:int, [<OPT;DEF(2147482999)>]maximum:int) : option<int> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            use gi = new Rhino.Input.Custom.GetInteger()
+            use gi = new Input.Custom.GetInteger()
             if notNull message then gi.SetCommandPrompt(message)
             if number  <> 2147482999 then gi.SetDefaultInteger(number)
             if minimum <> 2147482999 then gi.SetLowerLimit(minimum, false)
             if maximum <> 2147482999 then gi.SetUpperLimit(maximum, false)
             return
-                if gi.Get() <> Rhino.Input.GetResult.Number then
+                if gi.Get() <> Input.GetResult.Number then
                     gi.Dispose()
                     None
                 else
@@ -392,7 +392,7 @@ module ExtensionsUserinterface =
             if notNull layer then
                 let layerinstance = Doc.Layers.FindName(layer)
                 if notNull layerinstance then layerindex := layerinstance.Index
-            let rc = Rhino.UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
+            let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
             return
                 if not rc then None
                 else
@@ -412,7 +412,7 @@ module ExtensionsUserinterface =
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<ResizeArray<string>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let rc, layerindices = Rhino.UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
+            let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
             return
                 if rc then
                     Some (resizeArray { for index in layerindices do yield  Doc.Layers.[index].FullPath })
@@ -477,7 +477,7 @@ module ExtensionsUserinterface =
                 if notNull ltnew  then ltinstance <- ltnew
             return
                 try
-                    let objectId = Rhino.UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", Doc) :?> Guid  // this fails if clicking in void
+                    let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", Doc) :?> Guid  // this fails if clicking in void
                     let linetype = Doc.Linetypes.FindId(objectId)
                     Some linetype.Name
                 with _ ->
@@ -509,7 +509,7 @@ module ExtensionsUserinterface =
             go.AcceptNothing(true)
 
             return
-                if go.GetMultiple(minCount, maxCount) <> Rhino.Input.GetResult.Object then
+                if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
                     None
                 else
                     let objrefs = go.Objects()
@@ -541,7 +541,7 @@ module ExtensionsUserinterface =
             go.GeometryFilter <-  Rhino.DocObjects.ObjectType.MeshVertex
             go.AcceptNothing(true)
             return
-                if go.GetMultiple(minCount, maxCount) <> Rhino.Input.GetResult.Object then
+                if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
                     None
                 else
                     let objrefs = go.Objects()
@@ -614,7 +614,7 @@ module ExtensionsUserinterface =
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : option<Point3d> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let cmdrc, point = Rhino.Input.RhinoGet.GetPointOnMesh(meshId, message, false)
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             return
                 if cmdrc = Rhino.Commands.Result.Success then Some point
                 else None
@@ -705,7 +705,7 @@ module ExtensionsUserinterface =
                                 gp.SetBasePoint(prevPoint, true)
                                 currentpoint <- currentpoint + 1
                                 getres <- gp.Get()
-                                if getres = Rhino.Input.GetResult.Cancel then
+                                if getres = Input.GetResult.Cancel then
                                     cont <- false
                                     //RhinoApp.WriteLine "GetPoints canceled"
                                 if cont && gp.CommandResult() <> Rhino.Commands.Result.Success then
@@ -788,7 +788,7 @@ module ExtensionsUserinterface =
             if minimum <> 7e89 then gn.SetLowerLimit(minimum, false)
             if maximum <> 7e89 then gn.SetUpperLimit(maximum, false)
             return
-                if gn.Get() <> Rhino.Input.GetResult.Number then None
+                if gn.Get() <> Input.GetResult.Number then None
                 else
                     let rc = gn.Number()
                     gn.Dispose()
@@ -825,7 +825,7 @@ module ExtensionsUserinterface =
             if notNull prompt1 then prompts.[0] <- prompt1
             if notNull prompt2 then prompts.[1] <- prompt2
             if notNull prompt3 then prompts.[2] <- prompt3
-            let rc, corners = Rhino.Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
+            let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             return
                 if rc = Rhino.Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
                 else None
@@ -854,9 +854,9 @@ module ExtensionsUserinterface =
                 for s in strings do gs.AddOption(s) |> ignore
             let result = gs.Get()
             return
-                if result = Rhino.Input.GetResult.Cancel then
+                if result = Input.GetResult.Cancel then
                     None
-                elif( result = Rhino.Input.GetResult.Option ) then
+                elif( result = Input.GetResult.Option ) then
                     Some <| gs.Option().EnglishName
                 else
                     Some <| gs.StringResult()
@@ -877,7 +877,7 @@ module ExtensionsUserinterface =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             return
-                match Rhino.UI.Dialogs.ShowListBox(title, message, Array.ofSeq items , defaultVal) with
+                match UI.Dialogs.ShowListBox(title, message, Array.ofSeq items , defaultVal) with
                 | null ->  None
                 |  :? string as s -> Some s
                 | _ -> None
@@ -926,18 +926,18 @@ module ExtensionsUserinterface =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable buttontyp =  buttons &&& 0x00000007 //111 in binary
-            let mutable btn = Rhino.UI.ShowMessageButton.OK
-            if   buttontyp = 1 then btn <- Rhino.UI.ShowMessageButton.OKCancel
-            elif buttontyp = 2 then btn <- Rhino.UI.ShowMessageButton.AbortRetryIgnore
-            elif buttontyp = 3 then btn <- Rhino.UI.ShowMessageButton.YesNoCancel
-            elif buttontyp = 4 then btn <- Rhino.UI.ShowMessageButton.YesNo
-            elif buttontyp = 5 then btn <- Rhino.UI.ShowMessageButton.RetryCancel
+            let mutable btn = UI.ShowMessageButton.OK
+            if   buttontyp = 1 then btn <- UI.ShowMessageButton.OKCancel
+            elif buttontyp = 2 then btn <- UI.ShowMessageButton.AbortRetryIgnore
+            elif buttontyp = 3 then btn <- UI.ShowMessageButton.YesNoCancel
+            elif buttontyp = 4 then btn <- UI.ShowMessageButton.YesNo
+            elif buttontyp = 5 then btn <- UI.ShowMessageButton.RetryCancel
             let icontyp = buttons &&& 0x00000070
-            let mutable icon = Rhino.UI.ShowMessageIcon.None
-            if   icontyp = 16 then icon <- Rhino.UI.ShowMessageIcon.Error
-            elif icontyp = 32 then icon <- Rhino.UI.ShowMessageIcon.Question
-            elif icontyp = 48 then icon <- Rhino.UI.ShowMessageIcon.Warning
-            elif icontyp = 64 then icon <- Rhino.UI.ShowMessageIcon.Information
+            let mutable icon = UI.ShowMessageIcon.None
+            if   icontyp = 16 then icon <- UI.ShowMessageIcon.Error
+            elif icontyp = 32 then icon <- UI.ShowMessageIcon.Question
+            elif icontyp = 48 then icon <- UI.ShowMessageIcon.Warning
+            elif icontyp = 64 then icon <- UI.ShowMessageIcon.Information
             ////// 15 Sep 2014 Alain - default button not supported in new version of RC
             ////// that isn"t tied to Windows.Forms but it probably will so I"m commenting
             ////// the old code instead of deleting it.
@@ -947,15 +947,15 @@ module ExtensionsUserinterface =
             //    defbtn = Windows.Forms.MessageDefaultButton.Button2
             //elif defbtntyp = 512:
             //    defbtn <- Windows.Forms.MessageDefaultButton.Button3
-            let dlgresult = Rhino.UI.Dialogs.ShowMessage(message, title, btn, icon)
+            let dlgresult = UI.Dialogs.ShowMessage(message, title, btn, icon)
             return
-                if   dlgresult = Rhino.UI.ShowMessageResult.OK then     Some 1
-                elif dlgresult = Rhino.UI.ShowMessageResult.Cancel then Some 2
-                elif dlgresult = Rhino.UI.ShowMessageResult.Abort then  Some 3
-                elif dlgresult = Rhino.UI.ShowMessageResult.Retry then  Some 4
-                elif dlgresult = Rhino.UI.ShowMessageResult.Ignore then Some 5
-                elif dlgresult = Rhino.UI.ShowMessageResult.Yes then    Some 6
-                elif dlgresult = Rhino.UI.ShowMessageResult.No then     Some 7
+                if   dlgresult = UI.ShowMessageResult.OK then     Some 1
+                elif dlgresult = UI.ShowMessageResult.Cancel then Some 2
+                elif dlgresult = UI.ShowMessageResult.Abort then  Some 3
+                elif dlgresult = UI.ShowMessageResult.Retry then  Some 4
+                elif dlgresult = UI.ShowMessageResult.Ignore then Some 5
+                elif dlgresult = UI.ShowMessageResult.Yes then    Some 6
+                elif dlgresult = UI.ShowMessageResult.No then     Some 7
                 else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -975,7 +975,7 @@ module ExtensionsUserinterface =
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let values = resizeArray { for  v in values do yield v.ToString() }
             return
-                match Rhino.UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
+                match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
                 | null ->  None
                 | s -> Some s
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
@@ -995,7 +995,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string IList)>]defaultVals:string IList) : option<string array> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let r =  Rhino.UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
+            let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             return
                 if notNull r then Some r else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
@@ -1019,7 +1019,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]extension:string) : option<string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let fd = Rhino.UI.OpenFileDialog()
+            let fd = UI.OpenFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
             if notNull folder then fd.InitialDirectory <- folder
@@ -1049,7 +1049,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]extension:string) : option<string array> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let fd = Rhino.UI.OpenFileDialog()
+            let fd = UI.OpenFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
             if notNull folder then fd.InitialDirectory <- folder
@@ -1090,7 +1090,7 @@ module ExtensionsUserinterface =
                 let viewport = view.ActiveViewport
                 let point2d = viewport.WorldToClient(point)
                 screenpoint <- viewport.ClientToScreen(point2d)
-            return  Rhino.UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
+            return  UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -1115,7 +1115,7 @@ module ExtensionsUserinterface =
             let minimum = if minimum = 7e89 then Rhino.RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then Rhino.RhinoMath.UnsetValue else maximum
 
-            let rc = Rhino.UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
+            let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
             return
                 if  rc then Some (!defaultValNumber)
                 else None
@@ -1141,7 +1141,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]extension:string) : option<string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let fd = Rhino.UI.SaveFileDialog()
+            let fd = UI.SaveFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
             if notNull folder then fd.InitialDirectory <- folder
@@ -1162,7 +1162,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]title:string) : option<string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let rc, text = Rhino.UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
+            let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
             return if rc then Some text else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -1177,7 +1177,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]title:string) : unit =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            return Rhino.UI.Dialogs.ShowTextDialog(message, title)
+            return UI.Dialogs.ShowTextDialog(message, title)
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 

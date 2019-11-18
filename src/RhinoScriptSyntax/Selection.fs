@@ -50,11 +50,11 @@ module ExtensionsSelection =
     ///<summary>Returns identifier of the first object in the document. The first
     ///  object is the last object created by the user</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object.  If omitted (False), the object is not selected</param>
+    ///Select the object.  If omitted, the object is not selected</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted (False), light objects are not returned</param>
+    ///Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted (False), grips objects are not returned</param>
+    ///Include grips objects.  If omitted, grips objects are not returned</param>
     ///<returns>(Guid) The identifier of the object </returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
@@ -73,49 +73,49 @@ module ExtensionsSelection =
 
 
     [<EXT>]
-    ///<summary>A helper Function for Rhino.DocObjects.ObjectType Enum</summary>
+    ///<summary>A helper Function for DocObjects.ObjectType Enum</summary>
     ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types</param>
-    ///<returns>(Rhino.DocObjects.ObjectType) translated Rhino.DocObjects.ObjectType Enum</returns>
-    static member private FilterHelper(filter:int) : Rhino.DocObjects.ObjectType =        
-        let mutable geometryfilter = Rhino.DocObjects.ObjectType.None
+    ///<returns>(DocObjects.ObjectType) translated DocObjects.ObjectType Enum</returns>
+    static member private FilterHelper(filter:int) : DocObjects.ObjectType =        
+        let mutable geometryfilter = DocObjects.ObjectType.None
         if 0 <> (filter &&& 1 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Point
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Point
         if 0 <> (filter &&& 16384 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Grip
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Grip
         if 0 <> (filter &&& 2 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.PointSet
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.PointSet
         if 0 <> (filter &&& 4 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Curve
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Curve
         if 0 <> (filter &&& 8 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Surface
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Surface
         if 0 <> (filter &&& 16 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Brep
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Brep
         if 0 <> (filter &&& 32 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Mesh
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Mesh
         if 0 <> (filter &&& 512 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Annotation
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Annotation
         if 0 <> (filter &&& 256 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Light
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Light
         if 0 <> (filter &&& 4096 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.InstanceReference
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.InstanceReference
         if 0 <> (filter &&& 134217728 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Cage
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Cage
         if 0 <> (filter &&& 65536 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Hatch
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Hatch
         if 0 <> (filter &&& 131072 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.MorphControl
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.MorphControl
         if 0 <> (filter &&& 2097152 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.PolysrfFilter
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.PolysrfFilter
         if 0 <> (filter &&& 268435456 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Phantom
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Phantom
         if 0 <> (filter &&& 8192 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.TextDot
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.TextDot
         if 0 <> (filter &&& 32768 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Detail
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Detail
         if 0 <> (filter &&& 536870912 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.ClipPlane
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.ClipPlane
         if 0 <> (filter &&& 1073741824 ) then
-            geometryfilter  <- geometryfilter ||| Rhino.DocObjects.ObjectType.Extrusion
+            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Extrusion
         geometryfilter
 
 
@@ -150,7 +150,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             return
-                if go.Get() <> Rhino.Input.GetResult.Object then None
+                if go.Get() <> Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
                     let objectId = objref.ObjectId
@@ -206,7 +206,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             return
-                if go.Get() <> Rhino.Input.GetResult.Object then None
+                if go.Get() <> Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
                     let obj = objref.Object()
@@ -267,7 +267,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             return
-                if go.Get() <> Rhino.Input.GetResult.Object then None
+                if go.Get() <> Input.GetResult.Object then None
                 else
                     let objref = go.Object(0)
                     let objectId = objref.ObjectId
@@ -356,7 +356,7 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             return
-                if go.GetMultiple(minimumCount, maximumCount) <> Rhino.Input.GetResult.Object then None
+                if go.GetMultiple(minimumCount, maximumCount) <> Input.GetResult.Object then None
                 else
                     if not <| select && not <| go.ObjectsWerePreselected then
                         Doc.Objects.UnselectAll() |> ignore
@@ -419,7 +419,7 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             return
-                if go.GetMultiple(1, 0) <> Rhino.Input.GetResult.Object then None
+                if go.GetMultiple(1, 0) <> Input.GetResult.Object then None
                 else
                     if not <| select && not <| go.ObjectsWerePreselected then
                         Doc.Objects.UnselectAll() |> ignore
@@ -445,7 +445,7 @@ module ExtensionsSelection =
     ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
     ///A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
-    ///Allow for the selection of pre-selected objects.  If omitted (False), pre-selected objects are not accepted</param>
+    ///Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d array) 3d coordinates of point objects on success</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
@@ -490,7 +490,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             return
-                if go.Get() <> Rhino.Input.GetResult.Object then
+                if go.Get() <> Input.GetResult.Object then
                     None
                 else
                     let objref = go.Object(0)
@@ -574,9 +574,9 @@ module ExtensionsSelection =
     ///<summary>Inverts the current object selection. The identifiers of the newly
     ///  selected objects are returned</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted (False), light objects are not returned</param>
+    ///Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted (False), grips objects are not returned</param>
+    ///Include grips objects.  If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the newly selected objects </returns>
@@ -606,7 +606,7 @@ module ExtensionsSelection =
     ///  call this function immediately after calling the Command function as only the
     ///  most recently created or changed object identifiers will be returned</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object.  If omitted (False), the object is not selected</param>
+    ///Select the object.  If omitted, the object is not selected</param>
     ///<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects </returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         match commandSerialNumbers with
@@ -683,9 +683,9 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
     ///  are visible, can be snapped to, and are independent of selection state</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted (False), light objects are not returned</param>
+    ///Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted (False), grips objects are not returned</param>
+    ///Include grips objects.  If omitted, grips objects are not returned</param>
     ///<returns>(Guid ResizeArray) identifier of normal objects </returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let iter = Rhino.DocObjects.ObjectEnumeratorSettings()
