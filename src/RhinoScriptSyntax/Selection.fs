@@ -4,7 +4,6 @@ open System
 open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.Util
-open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
 
 [<AutoOpen>]
@@ -176,7 +175,7 @@ module ExtensionsSelection =
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
@@ -188,7 +187,7 @@ module ExtensionsSelection =
     ///<returns>(Guid) Identifier of the picked object</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
-                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
                                     [<OPT;DEF(false)>]subobjects:bool) : option<Guid> =
@@ -228,7 +227,7 @@ module ExtensionsSelection =
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the filter class to get values</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
@@ -247,7 +246,7 @@ module ExtensionsSelection =
     ///  [4] name of the view selection was made</returns>
     static member GetObjectEx(      [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
-                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * string> =
         async{
@@ -317,7 +316,7 @@ module ExtensionsSelection =
     ///Honor object grouping.  If omitted and the user picks a group,
     ///  the entire group will be picked (True). Note, if filter is set to a
     ///  value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
@@ -332,7 +331,7 @@ module ExtensionsSelection =
     static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
-                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq,
                                     [<OPT;DEF(1)>]minimumCount:int,
@@ -370,6 +369,72 @@ module ExtensionsSelection =
                         if select && notNull obj then obj.Select(select) |> ignore
                     Some rc
             } |> Async.RunSynchronously
+
+
+    [<EXT>]
+    ///<summary>Returns the same objects as in the last user interaction with the same prompt message
+    /// If none found Prompts user to pick or select one or more objects and remembers them.</summary>
+    ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
+    ///A prompt or message</param>
+    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
+    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///  that can be selected. Object types can be added together to filter
+    ///  several different kinds of geometry. use the filter class to get values
+    ///    Value         Description
+    ///    0             All objects (default)
+    ///    1             Point
+    ///    2             Point cloud
+    ///    4             Curve
+    ///    8             Surface or single-face brep
+    ///    16            Polysurface or multiple-face
+    ///    32            Mesh
+    ///    256           Light
+    ///    512           Annotation
+    ///    4096          Instance or block reference
+    ///    8192          Text dot object
+    ///    16384         Grip object
+    ///    32768         Detail
+    ///    65536         Hatch
+    ///    131072        Morph control
+    ///    134217728     Cage
+    ///    268435456     Phantom
+    ///    536870912     Clipping plane
+    ///    1073741824    Extrusion</param>
+    ///<param name="group">(bool) Optional, Default Value: <c>true</c>
+    ///Honor object grouping.  If omitted and the user picks a group,
+    ///  the entire group will be picked (True). Note, if filter is set to a
+    ///  value other than 0 (All objects), then group selection will be disabled</param>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///Allow for the selection of pre-selected objects</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select the picked objects.  If False, the objects that are
+    ///  picked are not selected</param>
+    ///<param name="objects">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
+    ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
+    ///Minimum count of objects allowed to be selected</param>
+    ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
+    ///Maximum count of objects allowed to be selected</param>
+    ///<param name="customFilter">(string) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
+    ///<returns>(Guid array) identifiers of the picked objects</returns>
+    static member GetObjectsAndRemeber( message:string,
+                                        [<OPT;DEF(0)>]filter:int,
+                                        [<OPT;DEF(true)>]group:bool,
+                                        [<OPT;DEF(false)>]preselect:bool,
+                                        [<OPT;DEF(false)>]select:bool,
+                                        [<OPT;DEF(null:Guid seq)>]objects:Guid seq,
+                                        [<OPT;DEF(1)>]minimumCount:int,
+                                        [<OPT;DEF(0)>]maximumCount:int,
+                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
+        if Internals.sticky.ContainsKey message then 
+            try Some(Internals.sticky.[message] :?> ResizeArray<Guid>)
+            with |_ -> failwithf "found stored obejcts for '%s' but cast to ResizeArray<Guid> failed" message
+        else
+            match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,customFilter) with
+            |Some ids ->
+                Internals.sticky.[message] <- ids 
+                Some ids
+            | None -> None
+
 
 
     [<EXT>]
@@ -450,7 +515,7 @@ module ExtensionsSelection =
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{
-            let! ids = RhinoScriptSyntax.GetObjects(message, FilterModule.filter.Point, preselect= preselect)
+            let! ids = RhinoScriptSyntax.GetObjects(message, Internals.filter.Point, preselect= preselect)
             let rc = ResizeArray()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)

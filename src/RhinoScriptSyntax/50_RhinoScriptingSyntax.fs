@@ -34,16 +34,21 @@ type Filter internal () =
     member _.ClippingPlane = 536870912
     member _.Extrusion = 1073741824
 
-module private FilterModule =
+module private Internals =
     // the singelton of this class to be used below
     let filter = Filter()
+    /// A Dictionary to store state between scripting session
+    let sticky = new Dictionary<string,obj>()
 
 [<AbstractClass; Sealed>]
 /// A static class with static members provIding functions Identical to RhinoScript in Pyhton or VBscript 
 type RhinoScriptSyntax private () = // no constructor?     
 
+    /// A Dictionary to store state between scripting session
+    static member Sticky:Dictionary<string,obj> = Internals.sticky
+    
     /// An Integer Enum of Object types to be use in object selection functions
-    static member Filter:Filter = FilterModule.filter
+    static member Filter:Filter = Internals.filter
 
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
