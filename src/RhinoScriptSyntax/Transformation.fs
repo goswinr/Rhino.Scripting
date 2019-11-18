@@ -74,7 +74,7 @@ module ExtensionsTransformation =
         //x1 = RhinoScriptSyntax.Coerce3dvector(x1)
         //y1 = RhinoScriptSyntax.Coerce3dvector(y1)
         //z1 = RhinoScriptSyntax.Coerce3dvector(z1)
-        let xform = Transform.ChangeBasis(x0,y0,z0,x1,y1,z1)
+        let xform = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
         if not xform.IsValid   then failwithf "Rhino.Scripting: XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xform
 
@@ -85,7 +85,7 @@ module ExtensionsTransformation =
     ///<param name="xform2">(Transform) Second matrix to compare</param>
     ///<returns>(int) -1 if xform1<xform2
     ///  1 if xform1>xform2
-    ///  0 if xform1=xform2</returns>
+    ///  0 if xform1= xform2</returns>
     static member XformCompare(xform1:Transform, xform2:Transform) : int =
         //xform1 = RhinoScriptSyntax.Coercexform(xform1)
         //xform2 = RhinoScriptSyntax.Coercexform(xform2)
@@ -116,7 +116,7 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Returns a diagonal transformation matrix. Diagonal matrices are 3x3 with
-    ///  the bottom row [0,0,0,1]</summary>
+    ///  the bottom row [0, 0, 0, 1]</summary>
     ///<param name="diagonalValue">(float) The diagonal value</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformDiagonal(diagonalValue:float) : Transform =
@@ -242,7 +242,7 @@ module ExtensionsTransformation =
         //x1 = RhinoScriptSyntax.Coerce3dvector(x1)
         //y1 = RhinoScriptSyntax.Coerce3dvector(y1)
         //z1 = RhinoScriptSyntax.Coerce3dvector(z1)
-        let xform = Transform.Rotation(x0,y0,z0,x1,y1,z1)
+        let xform = Transform.Rotation(x0, y0, z0, x1, y1, z1)
         if not xform.IsValid   then failwithf "Rhino.Scripting: XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xform
 
@@ -295,7 +295,7 @@ module ExtensionsTransformation =
                               x:Vector3d,
                               y:Vector3d,
                               z:Vector3d) : Transform =
-        Transform.Shear(plane,x,y,z)
+        Transform.Shear(plane, x, y, z)
 
 
     [<EXT>]
@@ -334,7 +334,7 @@ module ExtensionsTransformation =
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d =
         let view = RhinoScriptSyntax.CoerceView(view |? "")// to get active view
         let viewport = view.MainViewport
-        let xform = viewport.GetTransform(DocObjects.CoordinateSystem.World,DocObjects.CoordinateSystem.Screen)
+        let xform = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
         let mutable point3 = xform * point
         let mutable point = Point2d(point3.X, point3.Y)
         if  screenCoordinates then

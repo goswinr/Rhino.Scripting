@@ -27,8 +27,8 @@ module ExtensionsPointvector =
                                         [<OPT;DEF(0.0)>]toleranceDegree:float) : int =
         //vector1 = RhinoScriptSyntax.Coerce3dvector(vector1)
         //vector2 = RhinoScriptSyntax.Coerce3dvector(vector2)
-        if toleranceDegree=0.0 then vector1.IsParallelTo(vector2)
-        else vector1.IsParallelTo(vector2,toRadians(toleranceDegree))
+        if toleranceDegree = 0.0 then vector1.IsParallelTo(vector2)
+        else vector1.IsParallelTo(vector2, toRadians(toleranceDegree))
 
 
     [<EXT>]
@@ -43,13 +43,13 @@ module ExtensionsPointvector =
                                             [<OPT;DEF(0.0)>]toleranceDegree:float) : bool =
         //vector1 = RhinoScriptSyntax.Coerce3dvector(vector1)
         //vector2 = RhinoScriptSyntax.Coerce3dvector(vector2)
-        if toleranceDegree=0.0 then vector1.IsPerpendicularTo(vector2)
-        else vector1.IsPerpendicularTo(vector2,toRadians(toleranceDegree))
+        if toleranceDegree = 0.0 then vector1.IsPerpendicularTo(vector2)
+        else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegree))
 
 
 
     [<EXT>]
-    ///<summary>Verifies that a vector is very short. The X,Y,Z elements are smaler than 1.0e-12</summary>
+    ///<summary>Verifies that a vector is very short. The X, Y, Z elements are smaler than 1.0e-12</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is tiny, otherwise False</returns>
     static member IsVectorTiny(vector:Vector3d) : bool =
@@ -58,7 +58,7 @@ module ExtensionsPointvector =
 
 
     [<EXT>]
-    ///<summary>Verifies that a vector is zero, or tiny. The X,Y,Z elements are equal to 0.0</summary>
+    ///<summary>Verifies that a vector is zero, or tiny. The X, Y, Z elements are equal to 0.0</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is zero, otherwise False</returns>
     static member IsVectorZero(vector:Vector3d) : bool =
@@ -136,9 +136,9 @@ module ExtensionsPointvector =
                         closest <- distance, objectId, curve.PointAt(t)
 
             | :?  Surface as srf ->
-                let ok,u,v = srf.ClosestPoint(point)
+                let ok, u, v = srf.ClosestPoint(point)
                 if ok then
-                    let srfclosest = srf.PointAt(u,v)
+                    let srfclosest = srf.PointAt(u, v)
                     distance <- point.DistanceTo( srfclosest )
                     if distance < t1 closest then
                         closest <- distance, objectId, srfclosest
@@ -155,7 +155,7 @@ module ExtensionsPointvector =
                 if distance < t1 closest then
                     closest <- distance, objectId, meshclosest
 
-            | _ -> failwithf "PointClosestObject: non supported object type %A %A ose Point, Pointcloud,Curve,Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+            | _ -> failwithf "PointClosestObject: non supported object type %A %A ose Point, Pointcloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
         if t2 closest <> Guid.Empty then t2 closest, t3 closest
         else failwithf "PointClosestObject failed on %A and %A " point objectIds
@@ -474,9 +474,9 @@ module ExtensionsPointvector =
     /// If omitted, a world axis-aligned bounding box
     ///  will be calculated</param>
     ///<returns>(Box) A Rhino.Geometry.Box</returns>
-    static member PointArrayBoundingBox( points:Point3d seq,  [<OPT;DEF(Plane())>]plane:Plane) : Box = // TODO verify this works the same way as python !!
+    static member PointArrayBoundingBox( points:Point3d seq, [<OPT;DEF(Plane())>]plane:Plane) : Box = // TODO verify this works the same way as python !!
         if plane.IsValid then
-            Box(plane,points)
+            Box(plane, points)
         else
             Box(BoundingBox(points))
 

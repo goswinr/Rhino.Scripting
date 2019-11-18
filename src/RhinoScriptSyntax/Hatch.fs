@@ -78,7 +78,7 @@ module ExtensionsHatch =
             let objectId = Doc.Objects.AddHatch(hatch)
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
-        if ids.Count=0 then failwithf "Rhino.Scripting: AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+        if ids.Count = 0 then failwithf "Rhino.Scripting: AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
         Doc.Views.Redraw()
         ids
 
@@ -98,7 +98,7 @@ module ExtensionsHatch =
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float) : Guid =
         let rc = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation) //TODO Test ok with null
-        if rc.Count=1 then rc.[0]
+        if rc.Count = 1 then rc.[0]
         else failwithf "Rhino.Scripting: AddHatch failed.  curveId:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A'" curveId hatchPattern scale rotation
 
 
@@ -121,7 +121,7 @@ module ExtensionsHatch =
              if index>=0 then
                  let pattern = Doc.HatchPatterns.[index]
                  rc.Add(pattern.Name)
-        if  rc.Count=0 then failwithf "Rhino.Scripting: AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if  rc.Count = 0 then failwithf "Rhino.Scripting: AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         rc
 
 

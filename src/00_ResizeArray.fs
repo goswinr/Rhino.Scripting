@@ -17,13 +17,13 @@ module ResizeArray =
 
     let create  (n: int) x = 
         let r = new ResizeArray<'T>(n)
-        for i=0 to n-1 do
+        for i = 0 to n-1 do
             r.[i] <- x 
         r       
 
     let init (n: int) (f: int -> 'T) =  
         let r = new ResizeArray<'T>(n)
-        for i=0 to n-1 do
+        for i = 0 to n-1 do
             r.[i] <- f i 
         r
 
@@ -243,7 +243,7 @@ module ResizeArray =
         let len = length arr1
         if len <> length arr2 then invalidArg "arr2" "the arrays have different lengths"
         for i = 0 to len - 1 do
-            res <- f.Invoke(res,arr1.[i],arr2.[i])
+            res <- f.Invoke(res, arr1.[i],arr2.[i])
         res
 
     let foldBack2 f (arr1: ResizeArray<'T1>) (arr2: ResizeArray<'T2>) (acc: 'b) =
@@ -268,7 +268,7 @@ module ResizeArray =
         let len1 = length arr1
         if len1 <> length arr2 then invalidArg "arr2" "the arrays have different lengths"
         for i = 0 to len1 - 1 do 
-            f.Invoke(i,arr1.[i], arr2.[i])
+            f.Invoke(i, arr1.[i], arr2.[i])
 
     let mapi2 (f: int -> 'T -> 'b -> 'c) (arr1: ResizeArray<'T>) (arr2: ResizeArray<'b>) = 
         let f = FSharpFunc<_,_,_,_>.Adapt(f)
@@ -325,10 +325,10 @@ module ResizeArray =
         let res1 = new ResizeArray<_>(len)
         let res2 = new ResizeArray<_>(len)
         for i = 0 to len - 1 do 
-            let x,y = arr.[i] 
+            let x, y = arr.[i] 
             res1.Add(x)
             res2.Add(y)
-        res1,res2
+        res1, res2
 
     //---------------------------------------------------
     // extensions by Goswin:

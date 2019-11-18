@@ -67,7 +67,7 @@ module ExtensionsGeometry =
     ///<param name="z">(float) Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid =
-        let rc = Doc.Objects.AddPoint(Point3d(x,y,x))
+        let rc = Doc.Objects.AddPoint(Point3d(x, y, x))
         if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point to document.  x:'%A' y:'%A' z:'%A'" x y z
         Doc.Views.Redraw()
         rc
@@ -148,7 +148,7 @@ module ExtensionsGeometry =
             if isNull font then
               ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
             else
-              font,false,false
+              font, false, false
 
         let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
 
@@ -261,8 +261,8 @@ module ExtensionsGeometry =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = resizeArray { for curve in curves do yield Doc.Objects.AddCurve(curve,attr) }
-        if delete then Doc.Objects.Delete(rhobj,true) |>ignore
+        let rc = resizeArray { for curve in curves do yield Doc.Objects.AddCurve(curve, attr) }
+        if delete then Doc.Objects.Delete(rhobj, true) |>ignore
         Doc.Views.Redraw()
         rc
 
@@ -359,7 +359,7 @@ module ExtensionsGeometry =
             pc.ClearHiddenFlags()
 
         elif Seq.length(hidden) = pc.Count then
-                for i,h in Seq.indexed hidden do
+                for i, h in Seq.indexed hidden do
                     pc.[i].Hidden <- h
         else
             failwithf "PointCloudHidePoints length of hidden values does not match point cloud point count"
@@ -387,7 +387,7 @@ module ExtensionsGeometry =
         if colors |> Seq.isEmpty then
             pc.ClearColors()
         elif Seq.length(colors) = pc.Count then
-            for i,c in Seq.indexed colors do pc.[i].Color <- c
+            for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             failwithf "PointCloudHidePoints length of hidden values does not match point cloud point count"
         (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges()|> ignore

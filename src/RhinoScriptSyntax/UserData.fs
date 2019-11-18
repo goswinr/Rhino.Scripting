@@ -71,7 +71,7 @@ module ExtensionsUserdata =
     ///<summary>Returns all document user text keys</summary>
     ///<returns>(string array) all document user text keys</returns>
     static member GetDocumentUserTextKeys() : string ResizeArray =
-        resizeArray { for  i=0 to Doc.Strings.Count-1  do
+        resizeArray { for  i = 0 to Doc.Strings.Count-1  do
                           let k = Doc.Strings.GetKey(i)
                           if not <| k.Contains "\\" then  yield k }
 
@@ -87,10 +87,10 @@ module ExtensionsUserdata =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             let uss = obj.Geometry.GetUserStrings()
-            resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}
+            resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
         else
             let uss = obj.Attributes.GetUserStrings()
-            resizeArray { for  i=0 to uss.Count-1 do yield uss.GetKey(i)}
+            resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
 
 
     [<EXT>]
@@ -155,7 +155,7 @@ module ExtensionsUserdata =
     ///  specified by key will be deleted</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : unit =
-        Doc.Strings.SetString(key,value) |> ignore
+        Doc.Strings.SetString(key, value) |> ignore
         //TODO check null case
 
 

@@ -13,7 +13,7 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
     let dd = Dictionary<'K,'V>() // the internal Dictionary
 
     let dGet(k) =
-        let ok,v = dd.TryGetValue(k)
+        let ok, v = dd.TryGetValue(k)
         if ok then 
             v
         else 
@@ -27,7 +27,7 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
     
     /// Get a value and remove it from Dictionary, like *.pop() in Python 
     member dd.Pop(k:'K) =
-        let ok,v = dd.TryGetValue(k)
+        let ok, v = dd.TryGetValue(k)
         if ok then
             dd.Remove k |>ignore
             v
@@ -36,14 +36,14 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
 
     /// Returns a seq of key and value tuples
     member _.Items =
-        seq { for KeyValue(k,v) in dd -> k,v}
+        seq { for KeyValue(k, v) in dd -> k, v}
         
     //override dd.ToString() = // covered by NiceString Pretty printer ?
         //stringBuffer {
         //    yield "DefaultDict with "
         //    yield dd.Count.ToString()
         //    yield! "entries"
-        //    for k,v in dd.Items  |> Seq.truncate 3 do // add sorting ? print 3 lines??
+        //    for k, v in dd.Items  |> Seq.truncate 3 do // add sorting ? print 3 lines??
         //        yield  k.ToString()
         //        yield " : "
         //        yield! v.ToString()
@@ -65,7 +65,7 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
 
     // methods
 
-    member _.Add(k,v) = dd.Add(k,v)
+    member _.Add(k, v) = dd.Add(k, v)
 
     member _.Clear() = dd.Clear()
 
@@ -114,11 +114,11 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
 
         member _.Values = (dd:>IDictionary<'K,'V>).Values
 
-        member _.Add(k, v) = dd.Add(k,v)
+        member _.Add(k, v) = dd.Add(k, v)
 
         member _.ContainsKey k = dd.ContainsKey k
 
-        member _.TryGetValue(k,r ) = dd.TryGetValue(k,ref r) 
+        member _.TryGetValue(k, r ) = dd.TryGetValue(k, ref r) 
 
         member _.Remove(k) = dd.Remove(k)
 
@@ -135,7 +135,7 @@ type DefaultDict< 'K,'V when 'K:equality > (defaultFun: unit->'V) =
 
         member _.ContainsKey k = dd.ContainsKey k
 
-        member _.TryGetValue(k,r ) = dd.TryGetValue(k,ref r) 
+        member _.TryGetValue(k, r ) = dd.TryGetValue(k, ref r) 
 
 
 

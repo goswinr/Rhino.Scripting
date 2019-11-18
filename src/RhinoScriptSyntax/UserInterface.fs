@@ -160,7 +160,7 @@ module ExtensionsUserinterface =
             for i in range(count) do
                 let initial = defaultVals.[i]
                 let item = items.[i]
-                let name,off,on = item
+                let name, off, on = item
                 let t = new Input.Custom.OptionToggle( initial, off, on )
                 toggles.Add(t)
                 go.AddOptionToggle(name, ref t) |> ignore
@@ -255,7 +255,7 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Pauses for user input of a distance</summary>
     ///<param name="firstPt">(Point3d) Optional, First distance point</param>
-    ///<param name="distance">(float) Optional,Default distance</param>
+    ///<param name="distance">(float) Optional, Default distance</param>
     ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
@@ -290,12 +290,12 @@ module ExtensionsUserinterface =
                         gp2.SetCommandPrompt(sprintf "%s<%f>" secondPtMsg distance)
                     else
                         gp2.SetCommandPrompt(secondPtMsg)
-                    gp2.DrawLineFromPoint(pt,true)
+                    gp2.DrawLineFromPoint(pt, true)
                     gp2.EnableDrawLineFromPoint(true)
                     match gp2.Get() with
                     | Input.GetResult.Point ->
                         let d = gp2.Point().DistanceTo(pt)
-                        RhinoApp.WriteLine ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true,true,false,false) )
+                        RhinoApp.WriteLine ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true, true, false, false) )
                         gp2.Dispose()
                         Some d
                     | _ ->
@@ -510,7 +510,7 @@ module ExtensionsUserinterface =
             go.AcceptNothing(true)
 
             return
-                if go.GetMultiple(minCount,maxCount) <> Rhino.Input.GetResult.Object then
+                if go.GetMultiple(minCount, maxCount) <> Rhino.Input.GetResult.Object then
                     None
                 else
                     let objrefs = go.Objects()
@@ -542,7 +542,7 @@ module ExtensionsUserinterface =
             go.GeometryFilter <-  Rhino.DocObjects.ObjectType.MeshVertex
             go.AcceptNothing(true)
             return
-                if go.GetMultiple(minCount,maxCount) <> Rhino.Input.GetResult.Object then
+                if go.GetMultiple(minCount, maxCount) <> Rhino.Input.GetResult.Object then
                     None
                 else
                     let objrefs = go.Objects()
@@ -569,7 +569,7 @@ module ExtensionsUserinterface =
             use gp = new Input.Custom.GetPoint()
             if notNull message then gp.SetCommandPrompt(message)
             if basePoint <> Point3d.Origin then
-                gp.DrawLineFromPoint(basePoint,true)
+                gp.DrawLineFromPoint(basePoint, true)
                 gp.EnableDrawLineFromPoint(true)
                 if distance<>0.0 then gp.ConstrainDistanceFromBasePoint(distance)
             if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore
@@ -637,7 +637,7 @@ module ExtensionsUserinterface =
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
             | :? Surface as srf ->
-                gp.Constrain(srf,false) |> ignore
+                gp.Constrain(srf, false) |> ignore
 
             | :? Brep as brep ->
                 gp.Constrain(brep, -1, -1, false) |> ignore

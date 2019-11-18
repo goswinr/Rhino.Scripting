@@ -11,7 +11,7 @@ open Rhino.Scripting.TypeExtensions
 open System.Collections.Generic
 
 /// An Integer Enum of Object types to be use in object selection functions
-/// Don't create an instance,  use the instance in RhinoScriptSyntax.Filter
+/// Don't create an instance, use the instance in RhinoScriptSyntax.Filter
 [<Sealed>] //AbstractClass;
 type Filter internal () =  
     member _.AllObjects = 0
@@ -61,7 +61,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
     ///<returns>(unit) voId, nothing/returns>
     static member Print (x:'T) : unit =
-        RhinoScriptSyntax.ToNiceString(x,true)
+        RhinoScriptSyntax.ToNiceString(x, true)
         |>> RhinoApp.WriteLine 
         |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
@@ -72,8 +72,8 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x2">('T): the second value or object to print</param>    
     ///<returns>(unit) voId, nothing/returns>
     static member Print (x1:'T, x2:'U) : unit =
-        let s1 = RhinoScriptSyntax.ToNiceString(x1,true)
-        let s2 = RhinoScriptSyntax.ToNiceString(x2,true)
+        let s1 = RhinoScriptSyntax.ToNiceString(x1, true)
+        let s2 = RhinoScriptSyntax.ToNiceString(x2, true)
         s1 + " " + s2
         |>> RhinoApp.WriteLine 
         |> printfn "%s"
@@ -85,7 +85,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x">('T): the value or object to print</param>   
     ///<returns>(unit) voId, nothing/returns>
     static member PrintFull (x:'T) : unit =
-        RhinoScriptSyntax.ToNiceString(x,false)
+        RhinoScriptSyntax.ToNiceString(x, false)
         |>> RhinoApp.WriteLine 
         |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
@@ -96,8 +96,8 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x2">('T): the second value or object to print</param>    
     ///<returns>(unit) voId, nothing/returns>
     static member PrintFull (x1:'T, x2:'U) : unit =
-        let s1 = RhinoScriptSyntax.ToNiceString(x1,false)
-        let s2 = RhinoScriptSyntax.ToNiceString(x2,false)
+        let s1 = RhinoScriptSyntax.ToNiceString(x1, false)
+        let s2 = RhinoScriptSyntax.ToNiceString(x2, false)
         s1 + " " + s2
         |>> RhinoApp.WriteLine 
         |> printfn "%s"
@@ -121,7 +121,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="maxVal">(float): upper bound</param>
     ///<param name="value">(float): the value to clamp</param>
     ///<returns>(float):clamped value</returns>
-    static member Clamp (minVal:float,maxVal:float,value:float) : float =
+    static member Clamp (minVal:float, maxVal:float, value:float) : float =
         if minVal > maxVal then  failwithf "Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
         max minVal (min maxVal value) 
 
@@ -129,7 +129,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Like the Python 'xrange' function for integers this creates a range of floating point values.
     ///The last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions</summary>
     ///<param name="start">(float): first value of range</param> 
-    ///<param name="stop">(float): end of range( this last value will not be included in range,Python semantics)</param>    
+    ///<param name="stop">(float): end of range( this last value will not be included in range, Python semantics)</param>    
     ///<param name="step">(float): step size between two values</param>
     ///<returns>(float seq) a lazy seq of loats</returns>
     static member  Fxrange (start:float, stop:float, step:float) : float seq =
@@ -156,7 +156,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
     ///This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions</summary>
     ///<param name="start">(float): first value of range</param> 
-    ///<param name="stop">(float): end of range( this last value will not be included in range,Python semantics)</param>    
+    ///<param name="stop">(float): end of range( this last value will not be included in range, Python semantics)</param>    
     ///<param name="step">(float): step size between two values</param>
     ///<returns>(float ResizeArray)</returns>
     static member Frange (start:float, stop:float, step:float) : float ResizeArray =
@@ -205,19 +205,19 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? Vector3d   as v                -> Point3d(v)
         | :? DocObjects.PointObject as po   -> po.PointGeometry.Location
         | :? TextDot as td                  -> td.Point
-        | :? (float*float*float) as xyz     -> let x,y,z = xyz in Point3d(x,y,z)
-        | :? (single*single*single) as xyz  -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))        
-        | :? (int*int*int) as xyz           -> let x,y,z = xyz in Point3d(float(x),float(y),float(z))        
+        | :? (float*float*float) as xyz     -> let x, y, z = xyz in Point3d(x, y, z)
+        | :? (single*single*single) as xyz  -> let x, y, z = xyz in Point3d(float(x),float(y),float(z))        
+        | :? (int*int*int) as xyz           -> let x, y, z = xyz in Point3d(float(x),float(y),float(z))        
         | _ ->
             try
                 match b with
                 | :? option<Point3d> as pto   -> pto.Value // from UI function
                 | :? option<Guid> as go      -> ((Doc.Objects.FindId(go.Value).Geometry) :?> Point).Location
-                | :? (string*string*string) as xyz  -> let x,y,z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
+                | :? (string*string*string) as xyz  -> let x, y, z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
                 | :? Guid as g ->  ((Doc.Objects.FindId(g).Geometry) :?> Point).Location 
-                | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
-                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
-                | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz,Seq.item 3 xyz,Seq.item 2 xyz)
+                | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<string> as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
                 | :? string as s  -> 
                     let xs = s.Split(';')
                     if Seq.length xs > 2 then 
@@ -237,7 +237,7 @@ type RhinoScriptSyntax private () = // no constructor?
         match box point with
         | :? Point2d    as point -> point
         | :? Point3d    as point -> Point2d(point.X, point.Y)
-        | :? (float*float) as xy  -> let x,y = xy in Point2d(x,y)
+        | :? (float*float) as xy  -> let x, y = xy in Point2d(x, y)
         | _ -> failwithf "Coerce2dPoint: could not Coerce: Could not convert %A to a Point2d"  point
     
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible</summary>
@@ -266,7 +266,7 @@ type RhinoScriptSyntax private () = // no constructor?
     //    with _ -> failwithf "Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
 
     ///<summary>Convert input into a Rhino.Geometry.Plane if possible</summary>
-    ///<param name="plane">Plane,point, list, tuple</param>
+    ///<param name="plane">Plane, point, list, tuple</param>
     ///<returns>(Rhino.Geometry.Plane) Fails on bad input</returns>
     static member CoercePlane(plane:'T) =
         match box plane with 
@@ -280,15 +280,15 @@ type RhinoScriptSyntax private () = // no constructor?
         match box xform with
         | :? Transform  as xform -> xform 
         | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
-            let mutable t=Transform()
-            for c,xs in Seq.indexed xss do
-                for r,x in Seq.indexed xs do
-                    t.[c,r] <- x
+            let mutable t= Transform()
+            for c, xs in Seq.indexed xss do
+                for r, x in Seq.indexed xs do
+                    t.[c, r] <- x
             t
 
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
-            let mutable t=Transform()           
-            xss|> Array2D.iteri (fun i j x -> t.[i,j]<-x)
+            let mutable t= Transform()           
+            xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
             t
 
         | _ -> failwithf "CoerceXform: could not CoerceXform %A can not be converted to a Transformation Matrix" xform
@@ -322,7 +322,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get a System.Drawing.Color also works on natrural language color strings see Drawing.ColorTranslator.FromHtml</summary>
     ///<param name="color">string, tuple with  or 3 or 4 items</param>
     ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provIde better comparison to other colors.
-    /// For example the named color Red is not equal to fromRGB(255,0,0) ) Fails on bad input</returns>
+    /// For example the named color Red is not equal to fromRGB(255, 0, 0) ) Fails on bad input</returns>
     static member CoerceColor(color:'T) : Drawing.Color =
         match box color with
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
@@ -362,11 +362,11 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? Guid as g ->  
             match Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
-                if crv.IsLinear() then Line(crv.PointAtStart,crv.PointAtEnd)
+                if crv.IsLinear() then Line(crv.PointAtStart, crv.PointAtEnd)
                 else failwithf "CoerceLine: could not Coerce %A to a Line" line
             //| :? Line as l -> l
             | _ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
-        | :? (Point3d*Point3d) as ab -> let a,b = ab in Line(a,b)
+        | :? (Point3d*Point3d) as ab -> let a, b = ab in Line(a, b)
         // TODO parse 6 numbers, convert form polyline
         |_ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
     
@@ -632,7 +632,7 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? Guid  as g -> if Guid.Empty = g then None else Some g    
         | :? DocObjects.RhinoObject as o -> Some o.Id
         | :? DocObjects.ObjRef      as o -> Some o.ObjectId
-        | :? string  as s -> let ok,g= Guid.TryParse s in  if ok then Some g else None
+        | :? string  as s -> let ok, g= Guid.TryParse s in  if ok then Some g else None
         | _ -> None
 
     ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>

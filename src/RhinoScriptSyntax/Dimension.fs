@@ -31,11 +31,11 @@ module ExtensionsDimension =
         let mutable onpoint = pointOnDimensionLine
         let mutable plane = Geometry.Plane(start, ende, onpoint)
         let mutable success, s, t = plane.ClosestParameter(start)
-        let start2 = Point2d(s,t)
+        let start2 = Point2d(s, t)
         let success, s, t = plane.ClosestParameter(ende)
-        let ende2 = Point2d(s,t)
+        let ende2 = Point2d(s, t)
         let success, s, t = plane.ClosestParameter(onpoint)
-        let onpoint2 = Point2d(s,t)
+        let onpoint2 = Point2d(s, t)
         let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
         if isNull ldim then  failwithf "addAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
         ldim.Aligned <- true
@@ -74,14 +74,14 @@ module ExtensionsDimension =
         let plane0 =
             if plane.IsValid then plane
             else
-                let ps=ResizeArray(points)
+                let ps= ResizeArray(points)
                 let o = ps.GetItem(-2)
                 let mutable x = ps.GetItem(-1)-o
                 let mutable y = ps.[0]-ps.[1]
                 if y.Z < 0.0 then y <- -y
                 if y.Y < 0.0 then y <- -y
                 if x.X < 0.0 then x <- -x
-                Plane(o,x,y)
+                Plane(o, x, y)
                 |> fun pl->
                     if not pl.IsValid then failwithf "AddLeader failed to find plane.  points %A, text:%s" points text
                     pl
@@ -89,7 +89,7 @@ module ExtensionsDimension =
         for point in points do
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  failwithf "AddLeader failed.  points %A, text:%s, plane %A" points text plane
-            points2d.Add( Rhino.Geometry.Point2d(s,t) )
+            points2d.Add( Rhino.Geometry.Point2d(s, t) )
         Doc.Objects.AddLeader(text, plane0, points2d)
 
 
@@ -108,17 +108,17 @@ module ExtensionsDimension =
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
-        let start = Point2d(s,t)
+        let start = Point2d(s, t)
         let success, s, t = plane0.ClosestParameter(endPoint)
-        let ende = Point2d(s,t)
+        let ende = Point2d(s, t)
         let success, s, t = plane0.ClosestParameter(pointOnDimensionLine)
-        let onpoint = Point2d(s,t)
+        let onpoint = Point2d(s, t)
         // Add the dimension
         let ldim = new LinearDimension(plane0, start, ende, onpoint)
         if isNull ldim then
             failwithf "addLinearDimension failed.  plane:'%A' startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" plane startPoint endPoint pointOnDimensionLine
         let rc = Doc.Objects.AddLinearDimension(ldim)
-        if rc=Guid.Empty then
+        if rc= Guid.Empty then
             failwithf "addLinearDimension Unable to add dimension to document.  plane:'%A' startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" plane startPoint endPoint pointOnDimensionLine
         Doc.Views.Redraw()
         rc

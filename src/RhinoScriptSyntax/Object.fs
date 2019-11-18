@@ -93,7 +93,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member DeleteObject(objectId:Guid) : unit =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
-        if not <| Doc.Objects.Delete(objectId,true)  then failwithf "DeleteObject failed on %A" objectId
+        if not <| Doc.Objects.Delete(objectId, true)  then failwithf "DeleteObject failed on %A" objectId
         Doc.Views.Redraw()
 
 
@@ -103,7 +103,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
     ///<returns>(unit) void, nothing</returns>
     static member DeleteObjects(objectIds:Guid seq) : unit =
-        let k = Doc.Objects.Delete(objectIds,true)
+        let k = Doc.Objects.Delete(objectIds, true)
         let l = Seq.length objectIds
         if k <> l then failwithf "DeleteObjects failed on %d out of %A" (l-k) objectIds
         Doc.Views.Redraw()
@@ -261,7 +261,7 @@ module ExtensionsObject =
     ///<returns>(bool) True or False</returns>
     static member IsObjectSelectable(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        rhobj.IsSelectable(true,false,false,false)
+        rhobj.IsSelectable(true, false, false, false)
 
 
     [<EXT>]
@@ -650,7 +650,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if source <0 || source >3 || source=2 then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 || source = 2 then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         let source : Rhino.DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoobject.Attributes.LinetypeSource <- source
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
@@ -712,7 +712,7 @@ module ExtensionsObject =
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = int(rhinoobject.Attributes.MaterialSource)
-        if source <0 || source >3 || source=2 then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 || source = 2 then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         let source :Rhino.DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoobject.Attributes.MaterialSource <- source
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
@@ -781,7 +781,7 @@ module ExtensionsObject =
     ///  3 = print color by parent</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
-        if source <0 || source >3 || source=2 then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 || source = 2 then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectId
         let source : Rhino.DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
@@ -803,7 +803,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the print width of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="width">(float) New print width value in millimeters, where width=0 means use
+    ///<param name="width">(float) New print width value in millimeters, where width = 0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
     ///  but does not show on print)</param>
     ///<returns>(unit) void, nothing</returns>
@@ -879,7 +879,7 @@ module ExtensionsObject =
 
 
     // TODO, not implemented use Xform rotaion or scale instead
-    //static member OrientObject( objectId:Guid,   reference:Point3d seq,   target:Point3d seq,    [<OPT;DEF(0)>]flags:int) : Guid =
+    //static member OrientObject( objectId:Guid,  reference:Point3d seq,  target:Point3d seq,   [<OPT;DEF(0)>]flags:int) : Guid =
 
 
 
@@ -957,8 +957,8 @@ module ExtensionsObject =
                                [<OPT;DEF(false)>]copy:bool) : Guid =
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
-        let x,y,z = scale
-        let xf = Transform.Scale(plane,x,y,z)
+        let x, y, z = scale
+        let xf = Transform.Scale(plane, x, y, z)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
         res
@@ -977,7 +977,7 @@ module ExtensionsObject =
                                [<OPT;DEF(false)>]copy:bool) : Guid =
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
-        let xf = Transform.Scale(plane,scale,scale,scale)
+        let xf = Transform.Scale(plane, scale, scale, scale)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
         res
@@ -997,8 +997,8 @@ module ExtensionsObject =
                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
-        let x,y,z = scale
-        let xf = Transform.Scale(plane,x,y,z)
+        let x, y, z = scale
+        let xf = Transform.Scale(plane, x, y, z)
         let rc = ResizeArray()
         for objectid in objectIds do
             let res = Doc.Objects.Transform(objectid, xf, not copy)
@@ -1020,7 +1020,7 @@ module ExtensionsObject =
                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
-        let xf = Transform.Scale(plane,scale,scale,scale)
+        let xf = Transform.Scale(plane, scale, scale, scale)
         let rc = ResizeArray()
         for objectid in objectIds do
             let res = Doc.Objects.Transform(objectid, xf, not copy)
@@ -1086,7 +1086,7 @@ module ExtensionsObject =
        let worldplane = Plane.WorldXY
        let cob = Transform.ChangeBasis(worldplane, frame)
        let mutable shear2d = Transform.Identity
-       shear2d.[0,1] <- tan(toRadians(angleDegrees))
+       shear2d.[0, 1] <- tan(toRadians(angleDegrees))
        let cobinv = Transform.ChangeBasis(frame, worldplane)
        let xf = cobinv * shear2d * cob
        let res = Doc.Objects.Transform(objectId, xf, not copy)
@@ -1124,7 +1124,7 @@ module ExtensionsObject =
         let worldplane = Plane.WorldXY
         let cob = Transform.ChangeBasis(worldplane, frame)
         let mutable shear2d = Transform.Identity
-        shear2d.[0,1] <- tan(toRadians(angleDegrees))
+        shear2d.[0, 1] <- tan(toRadians(angleDegrees))
         let cobinv = Transform.ChangeBasis(frame, worldplane)
         let xf = cobinv * shear2d * cob
         resizeArray{

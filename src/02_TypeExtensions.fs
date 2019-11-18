@@ -70,13 +70,13 @@ module TypeExtensions =
         /// Returns a seq of key and value tuples
         [<EXT>] 
         member inline d.Items =
-                    seq { for KeyValue(k,v) in d -> k,v}
+                    seq { for KeyValue(k, v) in d -> k, v}
 
    
     type Collections.Generic.List<'T>  with        
         [<EXT>] 
         /// Allows for negtive slice index too ( -1 = last element), returns a shallow copy including the end index.
-        member this.GetSlice(startIdx,endIdx) =    
+        member this.GetSlice(startIdx, endIdx) =    
             let count = this.Count
             let st  = match startIdx with None -> 0        | Some i -> if i<0 then count+i      else i
             let len = match endIdx   with None -> count-st | Some i -> if i<0 then count+i-st+1 else i-st+1
@@ -94,7 +94,7 @@ module TypeExtensions =
                 let err = sprintf "GetSlice: Start Index '%A' (= %d) is bigger than End Index '%A'(= %d) for List of %d items" startIdx st startIdx en  count
                 raise (IndexOutOfRangeException(err)) 
                 
-            this.GetRange(st,len)
+            this.GetRange(st, len)
         
         [<EXT>] 
         /// Allows for negtive index too (like python)
@@ -115,4 +115,4 @@ module TypeExtensions =
         /// Allows for negtive index too (like python)
         member this.SetItem index value = if index<0 then this.[this.Length+index]<-value   else this.[index]<-value 
 
-        //member this.GetSlice(startIdx,endIdx) = // overides of existing methods are ignored / not possible
+        //member this.GetSlice(startIdx, endIdx) = // overides of existing methods are ignored / not possible

@@ -33,7 +33,7 @@ module ExtensionsUtility =
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldX</c>
     ///  If a plane is provided, angle calculation is with respect to this plane</param>
     ///<returns>(float * float * float * float * float * float) containing the following elements:
-    ///  element 0 = the X,Y angle in degrees
+    ///  element 0 = the X, Y angle in degrees
     ///  element 1 = the elevation
     ///  element 2 = delta in the X direction
     ///  element 3 = delta in the Y direction
@@ -176,12 +176,10 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Removes duplicates from a list of 3D points</summary>
     ///<param name="points">(Point3d seq) A list of 3D points</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>-1</c>
-    ///Minimum distance between points. Points within this
-    ///  tolerance will be discarded. If omitted, Rhino's internal zero tolerance
-    ///  is used</param>
+    ///<param name="tolerance">(float) Optional, Minimum distance between points. Points within this
+    ///  tolerance will be discarded. If omitted, Rhino's internal zero tolerance is used</param>
     ///<returns>(Point3d array) of 3D points with duplicates removed </returns>
-    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(-1)>]tolerance:float) : Point3d array =
+    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
@@ -295,7 +293,7 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>convert a formatted string value into a 3D point value</summary>
-    ///<param name="point">(string) A string that contains a delimited point like "1,2,3"</param>
+    ///<param name="point">(string) A string that contains a delimited point like "1, 2, 3"</param>
     ///<returns>(Point3d) Point structure from the input string</returns>
     static member Str2Pt(point:string) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
@@ -308,13 +306,13 @@ module ExtensionsUtility =
     static member CreatePoint(point:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
     [<EXT>]
-    ///<summary>Converts x,y and z into a Rhino.Geometry.Point3d if possible</summary>
+    ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible</summary>
     ///<param name="x">something that can be converted or parsed to X coordinate</param>
     ///<param name="y">something that can be converted or parsed to Y coordinate</param>
     ///<param name="z">something that can be converted or parsed to Z coordinate</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
-    static member CreatePoint(x:'T, y:'T,z:'T ) : Point3d =
-        RhinoScriptSyntax.Coerce3dPoint ((x,y,z))
+    static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d =
+        RhinoScriptSyntax.Coerce3dPoint ((x, y, z))
 
 
     [<EXT>]
@@ -324,13 +322,13 @@ module ExtensionsUtility =
     static member CreateVector(vector:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
     [<EXT>]
-    ///<summary>Converts x,y and z into a Rhino.Geometry.Vector3d if possible</summary>
+    ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible</summary>
     ///<param name="x">something that can be converted or parsed to X coordinate</param>
     ///<param name="y">something that can be converted or parsed to Y coordinate</param>
     ///<param name="z">something that can be converted or parsed to Z coordinate</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
-    static member CreateVector(x:'T, y:'T,z:'T ) : Vector3d =
-        RhinoScriptSyntax.Coerce3dVector ((x,y,z))
+    static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d =
+        RhinoScriptSyntax.Coerce3dVector ((x, y, z))
 
 
 
@@ -344,7 +342,7 @@ module ExtensionsUtility =
     ///<returns>(Plane) A Rhino.Geometry.Plane</returns>
     static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
         if xAxis.IsZero || yAxis.IsZero then
-            Plane(origin,Vector3d.XAxis,Vector3d.YAxis)
+            Plane(origin, Vector3d.XAxis, Vector3d.YAxis)
         else
             Plane(origin, xAxis, yAxis)
 
@@ -352,7 +350,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Converts input into a Rhino.Geometry.Transform object if possible</summary>
     ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
-    ///<returns>(Transform) A Rhino.Geometry.Transform. result[0,3] gives access to the first row, last column</returns>
+    ///<returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column</returns>
     static member CreateXform(xform:seq<seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xform) // TODO verify row, column order !!
 
@@ -370,8 +368,8 @@ module ExtensionsUtility =
     ///<param name="alpha">(int) Optional, Default Value: <c>0</c>
     ///Alpha value</param>
     ///<returns>(Drawing.Color) a Color</returns>
-    static member CreateColor(red:int, green:int,blue:int, [<OPT;DEF(0)>]alpha:int) : Drawing.Color =
-        RhinoScriptSyntax.CoerceColor((red,green,blue,alpha))
+    static member CreateColor(red:int, green:int, blue:int, [<OPT;DEF(0)>]alpha:int) : Drawing.Color =
+        RhinoScriptSyntax.CoerceColor((red, green, blue, alpha))
 
 
     [<EXT>]
@@ -381,5 +379,5 @@ module ExtensionsUtility =
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///  [0] start of interval
     ///  [1] end of interval</returns>
-    static member CreateInterval(start:float,ende:float) : Rhino.Geometry.Interval =
+    static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval =
         Geometry.Interval(start , ende)

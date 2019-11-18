@@ -34,15 +34,15 @@ module ExtensionsDocument =
     static member CreatePreviewImage(fileName:string, [<OPT;DEF("":string)>]view:string, [<OPT;DEF(0:int)>]width:int,[<OPT;DEF(0:int)>]height:int, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
         let rhview = RhinoScriptSyntax.CoerceView(view)
         let rhsize =
-            match width,height with
-            | 0,0 -> rhview.ClientRectangle.Size
-            | x,0 ->
+            match width, height with
+            | 0, 0 -> rhview.ClientRectangle.Size
+            | x, 0 ->
                 let sc = x /. rhview.ClientRectangle.Size.Width
                 Drawing.Size(x, rhview.ClientRectangle.Size.Height *. sc)
-            | 0,y ->
+            | 0, y ->
                 let sc = y /. rhview.ClientRectangle.Size.Height
                 Drawing.Size(rhview.ClientRectangle.Size.Width *. sc , y)
-            | x,y -> Drawing.Size(x,y)
+            | x, y -> Drawing.Size(x, y)
         let ignoreHighlights =  (flags &&& 1) <> 1
         let drawcplane =        (flags &&& 2)  = 2
         let useghostedshading = (flags &&& 4)  = 4
@@ -167,16 +167,16 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Returns render antialiasing style</summary>
-    ///<returns>(int) The current antialiasing style (0=none, 1=normal, 2=best)</returns>
+    ///<returns>(int) The current antialiasing style (0= none, 1= normal, 2= best)</returns>
     static member RenderAntialias() : int = //GET
         int(Doc.RenderSettings.AntialiasLevel) // TODO check
 
     [<EXT>]
      ///<summary>Sets render antialiasing style</summary>
-    ///<param name="style">(int) Level of antialiasing (0=none, 1=normal, 2=best)</param>
+    ///<param name="style">(int) Level of antialiasing (0= none, 1= normal, 2= best)</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderAntialias(style:int) : unit = //SET
-        if style=0 || style=1 || style=2 then
+        if style = 0 || style = 1 || style = 2 then
             let settings = Doc.RenderSettings
             settings.AntialiasLevel <- EnumOfValue (style)
             Doc.RenderSettings <- settings
@@ -184,22 +184,22 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Returns the render ambient light or background color</summary>
-    ///<param name="item">(int) 0=ambient light color, 1=background color</param>
+    ///<param name="item">(int) 0= ambient light color, 1= background color</param>
     ///<returns>(Drawing.Color) The current item color</returns>
     static member RenderColor(item:int) : Drawing.Color = //GET
         if item<>0 && item<>1 then  failwithf "Item must be 0 or 1.  item:'%A'" item
-        if item=0 then  Doc.RenderSettings.AmbientLight
+        if item = 0 then  Doc.RenderSettings.AmbientLight
         else Doc.RenderSettings.BackgroundColorTop
 
     [<EXT>]
      ///<summary>Sets the render ambient light or background color</summary>
-    ///<param name="item">(int) 0=ambient light color, 1=background color</param>
+    ///<param name="item">(int) 0= ambient light color, 1= background color</param>
     ///<param name="color">(Drawing.Color) The new color value. If omitted, the current item color is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
         if item<>0 && item<>1 then  failwithf "Item must be 0 || 1.  item:'%A' color:'%A'" item color
         let settings = Doc.RenderSettings
-        if item=0 then  settings.AmbientLight <- color
+        if item = 0 then  settings.AmbientLight <- color
         else            settings.BackgroundColorTop <- color
         Doc.RenderSettings <- settings
         Doc.Views.Redraw()
@@ -207,7 +207,7 @@ module ExtensionsDocument =
 
     [<EXT>]
      ///<summary>Returns the render resolution</summary>
-    ///<returns>(int * int) The current resolution width,height</returns>
+    ///<returns>(int * int) The current resolution width, height</returns>
     static member RenderResolution() : int * int = //GET
         let rc = Doc.RenderSettings.ImageSize
         rc.Width, rc.Height
@@ -453,11 +453,11 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Returns render settings</summary>
     ///<returns>(int) if settings are not specified, the current render settings in bit-coded flags
-    ///  0=none,
-    ///  1=create shadows,
-    ///  2=use lights on layers that are off,
-    ///  4=render curves and isocurves,
-    ///  8=render dimensions and text</returns>
+    ///  0= none,
+    ///  1= create shadows,
+    ///  2= use lights on layers that are off,
+    ///  4= render curves and isocurves,
+    ///  8= render dimensions and text</returns>
     static member RenderSettings() : int = //GET
         let mutable rc = 0
         let rendersettings = Doc.RenderSettings
@@ -470,11 +470,11 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets render settings</summary>
     ///<param name="settings">(int) Bit-coded flags of render settings to modify.
-    ///  0=none,
-    ///  1=create shadows,
-    ///  2=use lights on layers that are off,
-    ///  4=render curves and isocurves,
-    ///  8=render dimensions and text</param>
+    ///  0= none,
+    ///  1= create shadows,
+    ///  2= use lights on layers that are off,
+    ///  4= render curves and isocurves,
+    ///  8= render dimensions and text</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
         let rendersettings = Doc.RenderSettings

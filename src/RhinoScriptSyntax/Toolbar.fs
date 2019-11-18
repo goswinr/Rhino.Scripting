@@ -54,8 +54,8 @@ module ExtensionsToolbar =
            if group then
               tbfile.GetGroup(toolbar) |> notNull
            else
-              seq { for i=0 to tbfile.ToolbarCount-1 do yield tbfile.GetToolbar(i).Name }
-              |> Seq.exists (fun n -> n=toolbar)
+              seq { for i = 0 to tbfile.ToolbarCount-1 do yield tbfile.GetToolbar(i).Name }
+              |> Seq.exists (fun n -> n= toolbar)
            //tbfile.GetToolbar(toolbar) <> null // Fails in Rhino 5 with string
        else
            false
@@ -199,9 +199,9 @@ module ExtensionsToolbar =
         let rc = ResizeArray()
         if notNull tbfile then
             if groups then
-                for i=0 to tbfile.GroupCount-1 do rc.Add(tbfile.GetGroup(i).Name)
+                for i = 0 to tbfile.GroupCount-1 do rc.Add(tbfile.GetGroup(i).Name)
             else
-                for i=0 to tbfile.ToolbarCount-1 do rc.Add(tbfile.GetToolbar(i).Name)
+                for i = 0 to tbfile.ToolbarCount-1 do rc.Add(tbfile.GetToolbar(i).Name)
         rc
 
 

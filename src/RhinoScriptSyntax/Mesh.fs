@@ -22,7 +22,7 @@ module ExtensionsMesh =
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
     ///  the mesh. Note, for every vertex, there must be a corresponding vertex
     ///  normal</param>
-    ///<param name="textureCoordinates">(Point2f seq) Optional,List of 2D texture coordinates. For every
+    ///<param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
     ///  vertex, there must be a corresponding texture coordinate</param>
     ///<param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
     ///  there must be a corresponding vertex color</param>
@@ -82,7 +82,7 @@ module ExtensionsMesh =
         if isNull mesh then failwithf "Rhino.Scripting: AddPlanarMesh failed.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         if deleteInput then
             let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| Doc.Objects.Delete(ob,true) then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+            if not<| Doc.Objects.Delete(ob, true) then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         let rc = Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         Doc.Views.Redraw()
@@ -205,7 +205,7 @@ module ExtensionsMesh =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let maxdistance = ifZero1 tolerance Rhino.RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point,pt, maxdistance)
+        let face = mesh.ClosestPoint(point, pt, maxdistance)
         face>=0
 
 
@@ -223,7 +223,7 @@ module ExtensionsMesh =
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId,true) |> ignore
+                Doc.Objects.Delete(objectId, true) |> ignore
         Doc.Views.Redraw()
         rc
 
@@ -265,7 +265,7 @@ module ExtensionsMesh =
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then failwithf "Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -291,7 +291,7 @@ module ExtensionsMesh =
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then failwithf "Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -318,7 +318,7 @@ module ExtensionsMesh =
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count=0 || meshes1.Count=0 then failwithf "Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then failwithf "Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -568,7 +568,7 @@ module ExtensionsMesh =
         let  meshes =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = ResizeArray()
         if notNull view then
-            let viewport = Doc.Views.Find(view,false).MainViewport
+            let viewport = Doc.Views.Find(view, false).MainViewport
             if isNull viewport then failwithf "Rhino.Scripting.MeshOutline: did not find view named '%A'" view
             else
                 for mesh in meshes do
@@ -628,7 +628,7 @@ module ExtensionsMesh =
                               [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
-        let breps =  resizeArray { for piece in pieces do yield Brep.CreateFromMesh(piece,trimmedTriangles) }
+        let breps =  resizeArray { for piece in pieces do yield Brep.CreateFromMesh(piece, trimmedTriangles) }
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
         let ids =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep, attr) }

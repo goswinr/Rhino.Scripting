@@ -13,10 +13,10 @@ module NiceString =
         let last = s.Length - 1         
         let sb= Text.StringBuilder()
         let inline add (c:char) = sb.Append(c) |> ignore
-        for i=0 to last do
-            if i=0 || i = last then 
+        for i = 0 to last do
+            if i = 0 || i = last then 
                 add s.[i]
-            elif i=1 && s.[0] = '-' then 
+            elif i = 1 && s.[0] = '-' then 
                 add s.[i]
             else
                 if (last - i + 1) % 3 = 0 then 
@@ -90,13 +90,13 @@ module NiceString =
     // -- generic pretty printer-----
     //-------------------------------
 
-    let mutable toNiceStringMaxDepth= 2
+    let mutable toNiceStringMaxDepth = 2
     let mutable toNiceStringMaxItemsPerSeq = 4
 
     let private before (splitter:string) (s:string) = 
         let start = s.IndexOf(splitter) 
         if start = -1 then s
-        else s.Substring(0,start )
+        else s.Substring(0, start )
     
     let private formatTypeName nameSpace name = 
         let name = name |> before "`" // Collections.Generic.List`1  -> Collections.Generic.List
@@ -129,27 +129,27 @@ module NiceString =
                     let rs = ResizeArray<obj>()
                     let ics = xs :?> Collections.IEnumerable
                     let enum = ics.GetEnumerator()
-                    let mutable k=0
+                    let mutable k = 0
                     while enum.MoveNext() && k < toNiceStringMaxItemsPerSeq do 
                         rs.Add (box enum.Current)
                         k <- k+1
-                    if k=toNiceStringMaxItemsPerSeq && enum.MoveNext() then                         
-                        Some (MoreThan k,  rs:>IEnumerable<_>, name, elName)   // the retuened seq is trimmed!  to a length of maxItemsPerSeq
+                    if k= toNiceStringMaxItemsPerSeq && enum.MoveNext() then                         
+                        Some (MoreThan k, rs:>IEnumerable<_>, name, elName)   // the retuened seq is trimmed!  to a length of maxItemsPerSeq
                     else 
-                        Some (Length k,  rs:>IEnumerable<_>, name, elName)
+                        Some (Length k, rs:>IEnumerable<_>, name, elName)
                 else                
                     let ics = xs :?> IEnumerable<_> 
                     if count > 0 then 
                         Some (Length count, ics, name, elName)
                     else
                         let enum = ics.GetEnumerator()
-                        let mutable k=0
+                        let mutable k = 0
                         while enum.MoveNext() && k < toNiceStringMaxItemsPerSeq do 
                             k <- k+1
-                        if k=toNiceStringMaxItemsPerSeq && enum.MoveNext() then                         
-                            Some (MoreThan k,  ics, name, elName)  
+                        if k= toNiceStringMaxItemsPerSeq && enum.MoveNext() then                         
+                            Some (MoreThan k, ics, name, elName)  
                         else 
-                            Some (Length k,  ics, name, elName)
+                            Some (Length k, ics, name, elName)
             else
                 None
         |None -> None
@@ -158,7 +158,7 @@ module NiceString =
     let private sb = Text.StringBuilder()
 
 
-    let rec private toNiceStringRec (x:obj,indent:int) : unit =
+    let rec private toNiceStringRec (x:obj, indent:int) : unit =
         
         let add  (s:string) =  sb.Append(String(' ', 4 *  indent )).Append(s)     |> ignore
         let adn  (s:string) =  sb.AppendLine(s) |> ignore
@@ -174,14 +174,14 @@ module NiceString =
         | :? Char       as c   -> c.ToString()          |> add // "'" + c.ToString() + "'" // or add qotes?
         | :? string     as s   -> s                     |> add // to not have it in quotes, s.ToString() adds a " at start and end
         | :? Guid       as g   -> sprintf "Guid[%O]" g  |> add
-        | IsSeq (leng,xs,name,elName) ->  
+        | IsSeq (leng, xs, name, elName) ->  
                     match leng with
                     |Length count -> sprintf "%s with %d items of %s" name count elName |> add // new line added below at    adn ":" 
                     |MoreThan _ ->   sprintf "%s of %s" name elName  |> add 
                     
                     if indent < toNiceStringMaxDepth  then 
                         adn ":"
-                        for i,x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq |> Seq.indexed do  
+                        for i, x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq |> Seq.indexed do  
                             if i > 0 then adn ""
                             toNiceStringRec (x, indent+1)                            
                         
@@ -214,7 +214,7 @@ module NiceString =
         toNiceStringMaxItemsPerSeq  <- Int32.MaxValue
 
         sb.Clear() |> ignore
-        toNiceStringRec(box x,0)
+        toNiceStringRec(box x, 0)
 
         toNiceStringMaxDepth <- maxDepthP 
         toNiceStringMaxItemsPerSeq  <- maxItemsPerSeqP 

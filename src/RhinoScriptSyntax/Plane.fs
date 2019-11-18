@@ -23,14 +23,14 @@ module ExtensionsPlane =
 
 
     [<EXT>]
-    ///<summary>Evaluates a plane at a U,V parameter</summary>
+    ///<summary>Evaluates a plane at a U, V parameter</summary>
     ///<param name="plane">(Plane) The plane to evaluate</param>
     ///<param name="u">(float) U parameter to evaluate</param>
     ///<param name="v">(float) V parameter to evaluate</param>
     ///<returns>(Point3d) Point3d on success</returns>
     static member EvaluatePlane(plane:Plane, u:float ,v: float) : Point3d =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
-        plane.PointAt(u,v)
+        plane.PointAt(u, v)
 
 
     [<EXT>]
@@ -67,7 +67,7 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(Point3d) the 3-D point</returns>
-    static member PlaneClosestPoint( plane:Plane,  point:Point3d) : Point3d =
+    static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d =
         plane.ClosestPoint(point)
 
     [<EXT>]
@@ -75,9 +75,9 @@ module ExtensionsPlane =
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
-    ///<returns>(float,float) The u and v paramter on the plane of the closest point</returns>
+    ///<returns>(float, float) The u and v paramter on the plane of the closest point</returns>
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
-        let rc, s,t = plane.ClosestParameter(point)
+        let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
         else failwithf "PlaneClosestParameter faild for %A; %A" plane point
 
@@ -102,7 +102,7 @@ module ExtensionsPlane =
     ///  [5]       Number      If the event type is Point (1), then the curve parameter.
     ///    If the event type is Overlap (2), then the start value of the curve parameter range.
     ///  [6]       Number      If the event type is Point (1), then the curve parameter.
-    ///    If the event type is Overlap (2),  then the end value of the curve parameter range.
+    ///    If the event type is Overlap (2), then the end value of the curve parameter range.
     ///  [7]       Number      If the event type is Point (1), then the U plane parameter.
     ///    If the event type is Overlap (2), then the U plane parameter for curve at (n, 5).
     ///  [8]       Number      If the event type is Point (1), then the V plane parameter.
@@ -132,7 +132,7 @@ module ExtensionsPlane =
                 let i = intersection.OverlapA.[1]
                 let j = intersection.OverlapB.[0]
                 let k = intersection.OverlapB.[1]
-                rc.Add( (a,b,c,d,e,f,g,h,i,j,k) )
+                rc.Add( (a, b, c, d, e, f, g, h, i, j, k) )
             rc
         else
             failwithf "PlaneCurveIntersection faild on %A; %A tolerance %A" plane curve tolerance
@@ -140,7 +140,7 @@ module ExtensionsPlane =
 
     [<EXT>]
     ///<summary>Returns the equation of a plane as a tuple of four numbers. The standard
-    ///  equation of a plane with a non-zero vector is Ax+By+Cz+D=0</summary>
+    ///  equation of a plane with a non-zero vector is Ax+By+Cz+D = 0</summary>
     ///<param name="plane">(Plane) The plane to deconstruct</param>
     ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D)</returns>
     static member PlaneEquation(plane:Plane) : float * float * float * float =

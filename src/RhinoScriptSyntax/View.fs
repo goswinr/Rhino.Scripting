@@ -48,9 +48,9 @@ module ExtensionsView =
     ///<returns>(Guid*string) Id and Name of new layout</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null)>]size:float * float) : Guid*string =
         let page =
-            if Object.ReferenceEquals(size,null)  then Doc.Views.AddPageView(title)
+            if Object.ReferenceEquals(size, null)  then Doc.Views.AddPageView(title)
             else  Doc.Views.AddPageView(title, size|> fst, size|> snd)
-        if notNull page then page.MainViewport.Id,page.PageName
+        if notNull page then page.MainViewport.Id, page.PageName
         else failwithf "AddLayout failed for %A %A" title size
 
 
@@ -98,7 +98,7 @@ module ExtensionsView =
         let page = RhinoScriptSyntax.CoercePageView(layout)
         if layout = detail then page.SetPageAsActive()
         else
-            if not <| page.SetActiveDetail(detail,false) then failwithf "set CurrentDetail failed for %s to %s" layout detail
+            if not <| page.SetActiveDetail(detail, false) then failwithf "set CurrentDetail failed for %s to %s" layout detail
         Doc.Views.Redraw()
 
 
@@ -171,7 +171,7 @@ module ExtensionsView =
     ///<param name="modelLength">(float) A length in the current model units</param>
     ///<param name="pageLength">(float) A length in the current page units</param>
     ///<returns>(unit) void, nothing</returns>
-    static member DetailScale(detailId:Guid, modelLength:float,pageLength:float) : unit = //SET
+    static member DetailScale(detailId:Guid, modelLength:float, pageLength:float) : unit = //SET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
         let modelunits = Doc.ModelUnitSystem
         let pageunits = Doc.PageUnitSystem
@@ -355,10 +355,10 @@ module ExtensionsView =
     ///  command in the Rhino help file for more details</summary>
     ///<param name="direction">(int)
     ///The direction to rotate the camera where
-    ///  0=right
-    ///  1=left
-    ///  2=down
-    ///  3=up</param>
+    ///  0= right
+    ///  1= left
+    ///  2= down
+    ///  3= up</param>
     ///<param name="angle">(float) The angle to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
@@ -394,10 +394,10 @@ module ExtensionsView =
     ///<summary>Rotates a view. See RotateView command in Rhino help for more information</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) Optional, The direction to rotate the view where
-    ///  0=right
-    ///  1=left
-    ///  2=down
-    ///  3=up</param>
+    ///  0= right
+    ///  1= left
+    ///  2= down
+    ///  3= up</param>
     ///<param name="angle">(float) Angle to rotate. If omitted, the angle of rotation is specified
     ///  by the "Increment in divisions of a circle" parameter specified in
     ///  Options command's View tab</param>
@@ -508,8 +508,8 @@ module ExtensionsView =
     ///  the Rhino help file for more details</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) The direction to rotate the view where
-    ///  0=right
-    ///  1=left</param>
+    ///  0= right
+    ///  1= left</param>
     ///<param name="angle">(float) The angle in degrees to rotate</param>
     ///<returns>(unit) void, nothing</returns>
     static member TiltView( direction:int,
@@ -561,7 +561,7 @@ module ExtensionsView =
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="length">(float) The new 35mm camera lens length</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCameraLens(view:string,length:float) : unit = //SET
+    static member ViewCameraLens(view:string, length:float) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.Camera35mmLensLength <- length
         view.Redraw()
@@ -593,7 +593,7 @@ module ExtensionsView =
     ///<param name="camera">(Point3d) 3d point identifying the new camera location</param>
     ///<param name="target">(Point3d) 3d point identifying the new target location</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewCameraTarget(view:string, camera:Point3d,target:Point3d) : unit = //SET
+    static member ViewCameraTarget(view:string, camera:Point3d, target:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.SetCameraLocations(target, camera)
         view.Redraw()
@@ -762,7 +762,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then failwithf "Rhino.Scripting: ViewRadius view is not ParallelProjection.  view:'%A' " view
-        let ok,a,b,c,d,e,f = viewport.GetFrustum()
+        let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let frusright = b
         let frustop = d
         let oldradius = min frustop frusright
@@ -781,7 +781,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then failwithf "Rhino.Scripting: ViewRadius view is not ParallelProjection.  view:'%A' " view
-        let ok,a,b,c,d,e,f = viewport.GetFrustum()
+        let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let frusright = b
         let frustop = d
         let oldradius = min frustop frusright
@@ -841,7 +841,7 @@ module ExtensionsView =
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="target">(Point3d) 3d point identifying the new target location</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ViewTarget(view:string,target:Point3d) : unit = //SET
+    static member ViewTarget(view:string, target:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         viewport.SetCameraTarget(target, true)
@@ -865,7 +865,7 @@ module ExtensionsView =
     ///<returns>(string option) The current wallpaper bitmap filename</returns>
     static member Wallpaper(view:string) : string option= //GET
         let view = RhinoScriptSyntax.CoerceView(view)
-        let f=view.ActiveViewport.WallpaperFilename
+        let f= view.ActiveViewport.WallpaperFilename
         if isNull f then None else Some f
 
     ///<summary>Sets the wallpaper bitmap of the specified view. To remove a

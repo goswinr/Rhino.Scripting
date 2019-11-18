@@ -41,8 +41,8 @@ module ExtensionsLight =
         let start =  startPoint
         let ende =  endPoint
         let mutable width = width
-        if width=0.0  then
-            let mutable radius=0.5
+        if width = 0.0  then
+            let mutable radius = 0.5
             let units = Doc.ModelUnitSystem
             if units <> UnitSystem.None then
                 let scale = Rhino.RhinoMath.UnitScale(UnitSystem.Millimeters, units)

@@ -46,7 +46,7 @@ module ExtensionsGrips =
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             let grip = ref null
-            let rc = Input.RhinoGet.GetGrip(grip,message)
+            let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
             return
                 if rc <> Commands.Result.Success || isNull grip then
@@ -81,7 +81,7 @@ module ExtensionsGrips =
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             let grips = ref null
-            let re = Input.RhinoGet.GetGrips(grips,message)
+            let re = Input.RhinoGet.GetGrips(grips, message)
             let grips = !grips
             let rc = ResizeArray()
             if re = Commands.Result.Success && notNull grips then
@@ -98,7 +98,7 @@ module ExtensionsGrips =
 
 
     [<EXT>]
-    static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject,string> =
+    static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then Error "rhobj.GetGrips() is null"
@@ -107,10 +107,10 @@ module ExtensionsGrips =
             else
                 let grip = grips.[index]
                 let ng =
-                    if direction=0 then
-                        grip.NeighborGrip(i,0,0,false)
+                    if direction = 0 then
+                        grip.NeighborGrip(i, 0, 0, false)
                     else
-                        grip.NeighborGrip(0,i,0,false)
+                        grip.NeighborGrip(0, i, 0, false)
                 if notNull ng && enable then
                     ng.Select(true) |> ignore
                     Doc.Views.Redraw()
@@ -122,7 +122,7 @@ module ExtensionsGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the next grip index</param>
     ///<param name="direction">(int ) Optional, Default Value: <c>0</c>
-    ///Direction to get the next grip index (0=U, 1=V)</param>
+    ///Direction to get the next grip index (0= U, 1= V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///If True, the next grip index found will be selected</param>
     ///<returns>(int) index of the next grip on success</returns>
@@ -254,7 +254,7 @@ module ExtensionsGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
-    ///Direction to get the next grip index (0=U, 1=V)</param>
+    ///Direction to get the next grip index (0= U, 1= V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///If True, the next grip index found will be selected</param>
     ///<returns>(int) index of the next grip on success</returns>
@@ -300,7 +300,7 @@ module ExtensionsGrips =
                 if index<0 || index>=grips.Length then false
                 else
                     let grip = grips.[index]
-                    if grip.Select(true,true) >0 then
+                    if grip.Select(true, true) >0 then
                         Doc.Views.Redraw()
                         true
                     else
@@ -319,7 +319,7 @@ module ExtensionsGrips =
         if isNull grips then failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
         let mutable count = 0
         for grip in grips do
-            if grip.Select(true,true)>0 then count<- count +  1
+            if grip.Select(true, true)>0 then count<- count +  1
         if count>0 then
             Doc.Views.Redraw()
             count

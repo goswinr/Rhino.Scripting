@@ -30,8 +30,7 @@ module ExtensionsApplication =
     ///<summary>Add new path to Rhino's search path list. Search paths can be added by
     ///  using Rhino's Options command and modifying the contents of the files tab</summary>
     ///<param name="folder">(string) A valid folder, or path, to add</param>
-    ///<param name="index">(int) Optional, Default Value: <c>-1</c>
-    ///  Zero-based position in the search path list to insert.
+    ///<param name="index">(int) Optional, Zero-based position in the search path list to insert.
     ///  If omitted, path will be appended to the end of the search path list.
     ///<returns>(int) The index where the item was inserted.
     ///  -1 on failure</returns>
@@ -103,20 +102,20 @@ module ExtensionsApplication =
     ///  12 = Text Background
     ///  13 = Text hover</returns>
     static member AppearanceColor(item:int) : Drawing.Color = //GET
-        if   item=0 then AppearanceSettings.ViewportBackgroundColor
-        elif item=1 then AppearanceSettings.GridThickLineColor
-        elif item=2 then AppearanceSettings.GridThinLineColor
-        elif item=3 then AppearanceSettings.GridXAxisLineColor
-        elif item=4 then AppearanceSettings.GridYAxisLineColor
-        elif item=5 then AppearanceSettings.SelectedObjectColor
-        elif item=6 then AppearanceSettings.LockedObjectColor
-        elif item=7 then AppearanceSettings.DefaultLayerColor
-        elif item=8 then AppearanceSettings.FeedbackColor
-        elif item=9 then  AppearanceSettings.TrackingColor
-        elif item=10 then AppearanceSettings.CrosshairColor
-        elif item=11 then AppearanceSettings.CommandPromptTextColor
-        elif item=12 then AppearanceSettings.CommandPromptBackgroundColor
-        elif item=13 then AppearanceSettings.CommandPromptHypertextColor
+        if   item = 0 then AppearanceSettings.ViewportBackgroundColor
+        elif item = 1 then AppearanceSettings.GridThickLineColor
+        elif item = 2 then AppearanceSettings.GridThinLineColor
+        elif item = 3 then AppearanceSettings.GridXAxisLineColor
+        elif item = 4 then AppearanceSettings.GridYAxisLineColor
+        elif item = 5 then AppearanceSettings.SelectedObjectColor
+        elif item = 6 then AppearanceSettings.LockedObjectColor
+        elif item = 7 then AppearanceSettings.DefaultLayerColor
+        elif item = 8 then AppearanceSettings.FeedbackColor
+        elif item = 9 then  AppearanceSettings.TrackingColor
+        elif item = 10 then AppearanceSettings.CrosshairColor
+        elif item = 11 then AppearanceSettings.CommandPromptTextColor
+        elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor
+        elif item = 13 then AppearanceSettings.CommandPromptHypertextColor
         else failwithf "getAppearanceColor: item %d is out of range" item
 
     [<EXT>]
@@ -139,20 +138,20 @@ module ExtensionsApplication =
     ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color </param>
     ///<returns>(unit) void, nothing</returns>
     static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
-        if item=0 then AppearanceSettings.ViewportBackgroundColor <- color
-        elif item=1 then AppearanceSettings.GridThickLineColor <- color
-        elif item=2 then AppearanceSettings.GridThinLineColor <- color
-        elif item=3 then AppearanceSettings.GridXAxisLineColor <- color
-        elif item=4 then AppearanceSettings.GridYAxisLineColor <- color
-        elif item=5 then AppearanceSettings.SelectedObjectColor <- color
-        elif item=6 then AppearanceSettings.LockedObjectColor <- color
-        elif item=7 then AppearanceSettings.DefaultLayerColor <- color
-        elif item=8 then AppearanceSettings.FeedbackColor <- color
-        elif item=9 then AppearanceSettings.TrackingColor <- color
-        elif item=10 then AppearanceSettings.CrosshairColor <- color
-        elif item=11 then AppearanceSettings.CommandPromptTextColor <- color
-        elif item=12 then AppearanceSettings.CommandPromptBackgroundColor <- color
-        elif item=13 then AppearanceSettings.CommandPromptHypertextColor <- color
+        if item = 0 then AppearanceSettings.ViewportBackgroundColor <- color
+        elif item = 1 then AppearanceSettings.GridThickLineColor <- color
+        elif item = 2 then AppearanceSettings.GridThinLineColor <- color
+        elif item = 3 then AppearanceSettings.GridXAxisLineColor <- color
+        elif item = 4 then AppearanceSettings.GridYAxisLineColor <- color
+        elif item = 5 then AppearanceSettings.SelectedObjectColor <- color
+        elif item = 6 then AppearanceSettings.LockedObjectColor <- color
+        elif item = 7 then AppearanceSettings.DefaultLayerColor <- color
+        elif item = 8 then AppearanceSettings.FeedbackColor <- color
+        elif item = 9 then AppearanceSettings.TrackingColor <- color
+        elif item = 10 then AppearanceSettings.CrosshairColor <- color
+        elif item = 11 then AppearanceSettings.CommandPromptTextColor <- color
+        elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor <- color
+        elif item = 13 then AppearanceSettings.CommandPromptHypertextColor <- color
         else failwithf "setAppearanceColor: item %d is out of range" item
         Doc.Views.Redraw()
 
@@ -240,7 +239,7 @@ module ExtensionsApplication =
         let rc = RhinoApp.RunScript(commandString, echo)
         let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
         commandSerialNumbers <- None
-        if start<>ende then  commandSerialNumbers <- Some(start,ende)
+        if start<>ende then  commandSerialNumbers <- Some(start, ende)
         rc
 
 
@@ -323,7 +322,7 @@ module ExtensionsApplication =
     ///  1 - display naked edges</param>
     ///<returns>(unit) void, nothing</returns>
     static member EdgeAnalysisMode(mode:int) : unit = //SET
-        if mode=1 || mode=2 then
+        if mode = 1 || mode = 2 then
             ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
         else
             failwithf "bad edge analysisMode %d" mode
@@ -637,25 +636,25 @@ module ExtensionsApplication =
     ///<summary>Returns a array of registered Rhino plug-ins</summary>
     ///<param name="types">(int) Optional, Default Value: <c>0</c>
     ///The type of plug-ins to return.
-    ///  0=all
-    ///  1=render
-    ///  2=file export
-    ///  4=file import
-    ///  8=digitizer
-    ///  16=utility.
+    ///  0= all
+    ///  1= render
+    ///  2= file export
+    ///  4= file import
+    ///  8= digitizer
+    ///  16= utility.
     ///  If omitted, all are returned</param>
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
-    ///0=both loaded and unloaded, 1=loaded, 2=unloaded.  If omitted both status is returned</param>
+    ///0= both loaded and unloaded, 1= loaded, 2= unloaded.  If omitted both status is returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
-        if types=1 then  filter <- Rhino.PlugIns.PlugInType.Render
-        if types=2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
-        if types=4 then  filter <- Rhino.PlugIns.PlugInType.FileImport
-        if types=8 then  filter <- Rhino.PlugIns.PlugInType.Digitizer
-        if types=16 then filter <- Rhino.PlugIns.PlugInType.Utility
-        let loaded = status=0 || status=1
-        let unloaded = status=0 || status=2
+        if types = 1 then  filter <- Rhino.PlugIns.PlugInType.Render
+        if types = 2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
+        if types = 4 then  filter <- Rhino.PlugIns.PlugInType.FileImport
+        if types = 8 then  filter <- Rhino.PlugIns.PlugInType.Digitizer
+        if types = 16 then filter <- Rhino.PlugIns.PlugInType.Utility
+        let loaded = status = 0 || status = 1
+        let unloaded = status = 0 || status = 2
         Rhino.PlugIns.PlugIn.GetInstalledPlugInNames(filter, loaded, unloaded)
 
 
@@ -771,7 +770,7 @@ module ExtensionsApplication =
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         let mutable rc = Rhino.UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
-        rc=1
+        rc = 1
 
 
     [<EXT>]

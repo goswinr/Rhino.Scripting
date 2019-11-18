@@ -31,10 +31,10 @@ module ExtensionsBlock =
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)  //Coerce should not be needed
             if obj.IsReference then  failwithf "AddBlock: cannt add Refrence Object %A to %s" objectId name
             let ot = obj.ObjectType
-            if   ot=DocObjects.ObjectType.Light then  failwithf "AddBlock: cannot add Light Object %A to %s" objectId name
-            elif ot=DocObjects.ObjectType.Grip then  failwithf "AddBlock: cannot add Grip Object %A to %s" objectId name
-            elif ot=DocObjects.ObjectType.Phantom then failwithf "AddBlock: cannot add Phantom Object %A to %s" objectId name
-            elif ot=DocObjects.ObjectType.InstanceReference && notNull found then
+            if   ot= DocObjects.ObjectType.Light then  failwithf "AddBlock: cannot add Light Object %A to %s" objectId name
+            elif ot= DocObjects.ObjectType.Grip then  failwithf "AddBlock: cannot add Grip Object %A to %s" objectId name
+            elif ot= DocObjects.ObjectType.Phantom then failwithf "AddBlock: cannot add Phantom Object %A to %s" objectId name
+            elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
                 if uses then failwithf "AddBlock: cannt add Instance Ref Object %A to %s" objectId name
@@ -165,7 +165,7 @@ module ExtensionsBlock =
 
     [<EXT>]
     ///<summary>Returns the location of a block instance relative to the world coordinate
-    ///  system origin (0,0,0). The position is returned as a 4x4 transformation
+    ///  system origin (0, 0, 0). The position is returned as a 4x4 transformation
     ///  matrix</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Transform) the location, as a transform matrix, of a block instance relative to the world coordinate
@@ -256,7 +256,7 @@ module ExtensionsBlock =
     ///<returns>(Guid array) identifiers for the newly exploded objects on success</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
-        let  guids = Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance=true)
+        let  guids = Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance= true)
         if guids.Length > 0 then Doc.Views.Redraw()
         guids
 
@@ -281,7 +281,7 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
     ///<param name="scale">(float*float*float) Optional, Default Value: <c>Vector3d(1. , 1. , 1.)</c>
-    ///  X,y,z scale factors</param>
+    ///  X, y, z scale factors</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>0</c>
     ///  Rotation angle in degrees</param>
     ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c> Vector3d.ZAxis</c>
@@ -291,11 +291,11 @@ module ExtensionsBlock =
         let angleRadians = UtilMath.toRadians(angleDegrees)
         let sc= if scale.IsZero then Vector3d(1. ,1. ,1.) else scale
         let rotationNormal0= if rotationNormal.IsZero then Vector3d.ZAxis else rotationNormal
-        let move = Transform.Translation(insertionPoint.X,insertionPoint.Y,insertionPoint.Z)
+        let move = Transform.Translation(insertionPoint.X, insertionPoint.Y, insertionPoint.Z)
         let scale = Transform.Scale(Geometry.Plane.WorldXY, sc.X, sc.Y, sc.Z)
         let rotate = Transform.Rotation(angleRadians, rotationNormal0, Geometry.Point3d.Origin)
         let xform = move * scale * rotate
-        RhinoScriptSyntax.InsertBlock2 (blockName,xform)
+        RhinoScriptSyntax.InsertBlock2 (blockName, xform)
 
 
     [<EXT>]

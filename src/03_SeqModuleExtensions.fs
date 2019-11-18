@@ -40,7 +40,7 @@ module Seq =
         if e.MoveNext() then
             let prev = ref e.Current
             if e.MoveNext() then
-                    yield !prev,e.Current 
+                    yield !prev, e.Current 
                     prev := e.Current 
                     while e.MoveNext() do 
                         yield  !prev, e.Current 
@@ -57,7 +57,7 @@ module Seq =
         if e.MoveNext() then
             let prev = ref e.Current
             if e.MoveNext() then
-                    yield !kk,!prev,e.Current 
+                    yield !kk,!prev, e.Current 
                     prev := e.Current 
                     while e.MoveNext() do
                         incr kk 
@@ -76,7 +76,7 @@ module Seq =
             let prev = ref e.Current
             let first = e.Current
             if e.MoveNext() then
-                    yield !prev,e.Current 
+                    yield !prev, e.Current 
                     prev := e.Current 
                     while e.MoveNext() do 
                         yield  !prev, e.Current 
@@ -95,7 +95,7 @@ module Seq =
             let prev = ref e.Current
             let first = e.Current
             if e.MoveNext() then
-                    yield !kk, !prev,e.Current 
+                    yield !kk, !prev, e.Current 
                     prev := e.Current 
                     while e.MoveNext() do
                         incr kk 
@@ -147,7 +147,7 @@ module Seq =
                         yield  !prev, !this, e.Current
                         prev := !this 
                         this := e.Current                            
-                    yield !prev, !this,  first
+                    yield !prev, !this, first
                     yield !this, first, second
                 else
                     failwithf "thisNextNextaftertLooped: Input Sequence %A only had two elements" xs
@@ -156,7 +156,7 @@ module Seq =
         else
             failwithf "thisNextNextaftertLooped: Empty Input Sequence %A" xs}
     
-    ///Yields looped Seq of (Index of next, this, next, Nextafter): from (1,first, second, third)  upto (0,last, first, second)
+    ///Yields looped Seq of (Index of next, this, next, Nextafter): from (1, first, second, third)  upto (0, last, first, second)
     let iThisNextAndNextafterLooped (xs:seq<_>) =  seq{ 
         use e = xs.GetEnumerator()
         let kk = ref 2
@@ -175,7 +175,7 @@ module Seq =
                         incr kk
                         prev := !this 
                         this := e.Current                            
-                    yield !kk, !prev, !this,  first
+                    yield !kk, !prev, !this, first
                     yield 0, !this, first, second
                 else
                     failwithf "thisNextNextaftertLooped: Input Sequence %A only had two elements" xs
@@ -202,7 +202,7 @@ module Seq =
                         yield  !prev, !this, e.Current
                         prev := !this 
                         this := e.Current                            
-                    yield !prev, !this,  first
+                    yield !prev, !this, first
                 else                     
                     failwithf "prevThisNextLooped: Input Sequence %A only had two elements" xs
             else
@@ -210,7 +210,7 @@ module Seq =
         else
             failwithf "prevThisNextLooped: Empty Input Sequence %A" xs} 
 
-    ///Yields looped Seq of (index,previous, this, next): from (0,last, first, second)  upto (lastIndex, second-last, last, first)
+    ///Yields looped Seq of (index, previous, this, next): from (0, last, first, second)  upto (lastIndex, second-last, last, first)
     ///Consider "iThisNextNextafterLooped" as faster since the last element is not required from the start on.
     let iPrevThisNextLooped (xs:seq<_>) =  seq { 
         use e = xs.GetEnumerator()
@@ -230,7 +230,7 @@ module Seq =
                         incr kk
                         prev := !this 
                         this := e.Current                            
-                    yield !kk, !prev, !this,  first
+                    yield !kk, !prev, !this, first
                 else                     
                     failwithf "prevThisNextLooped: Input Sequence %A only had two elements" xs
             else

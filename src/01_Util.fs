@@ -13,7 +13,7 @@ module  Util =
     let inline notNull (value : 'T) = match value with | null -> false   | _ -> true// Fsharp core does it like this too. dont use RefrenceEquals
     
     ///Returns the value on the left unless it is null, then it returns the value on the right.
-    let inline (|?) a b = if Object.ReferenceEquals(a,null) then b else a // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs
+    let inline (|?) a b = if Object.ReferenceEquals(a, null) then b else a // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs
 
     ///apply function ( like |> ) but ignore result. return original input
     let inline (|>>) a f =  f a |> ignore ; a
@@ -21,11 +21,11 @@ module  Util =
     let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"   
  
     ///Get first element of triple (tuple of three element)
-    let inline t1 (a,_,_) = a
+    let inline t1 (a, _,_) = a
     ///Get second element of triple (tuple of three element)
-    let inline t2 (_,b,_) = b
+    let inline t2 (_, b, _) = b
     ///Get third element of triple (tuple of three element)
-    let inline t3 (_,_,c) = c    
+    let inline t3 (_,_, c) = c    
     
     ///so that python range expressions dont need top be translated to F#
     let internal range(l) = seq{0..(l-1)} 
@@ -97,8 +97,8 @@ module UtilMath =
     let randomStandardDeviation mean standardDeviation =
         let u1 = rand.NextDouble()
         let u2 = rand.NextDouble()
-        let randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2) //random normal(0,1)
-        //random normal(mean,stdDev^2)
+        let randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2) //random normal(0, 1)
+        //random normal(mean, stdDev^2)
         mean + standardDeviation * randStdNormal 
         
 
@@ -137,43 +137,43 @@ module MinMaxSort =
     let inline minBy f a b =  if f a > f b then b else a
     ///If both are equal then the first is returned
     let inline maxBy f a b =  if f a < f b then b else a
-    let inline min3 (a,b,c) = min a b |> min c
-    let inline max3 (a,b,c) = max a b |> max c
-    let inline min4 (a,b,c,d) = min a b |> min c |> min d    
-    let inline max4 (a,b,c,d) = max a b |> max c |> max d
+    let inline min3 (a, b, c) = min a b |> min c
+    let inline max3 (a, b, c) = max a b |> max c
+    let inline min4 (a, b, c, d) = min a b |> min c |> min d    
+    let inline max4 (a, b, c, d) = max a b |> max c |> max d
     ///If they are equal then the the order is kept
-    let inline sort2 (a,b)  = if a <= b  then a,b else b,a
+    let inline sort2 (a, b)  = if a <= b  then a, b else b, a
     ///If they are equal then the the order is kept
-    let inline sort2By f (a,b) = if f a <= f b  then a,b else b,a
+    let inline sort2By f (a, b) = if f a <= f b  then a, b else b, a
         
     ///If any are equal then the the order is kept
-    let inline sort3 (a,b,c) = 
+    let inline sort3 (a, b, c) = 
         if a<=b then 
-            if b<=c then a,b,c
+            if b<=c then a, b, c
             else // c<b
-                if a <= c then a,c,b
-                else           c,a,b
+                if a <= c then a, c, b
+                else           c, a, b
         else // b<a
-            if a<=c then b,a,c
+            if a<=c then b, a, c
             else //c<a
-                if b<=c then b,c,a 
-                else         c,b,a
+                if b<=c then b, c, a 
+                else         c, b, a
         
     ///If any are equal after Function is applied then the the order is kept
-    let inline sort3By f (a,b,c) = 
+    let inline sort3By f (a, b, c) = 
         if f a <= f b then 
-            if f b <= f c then a,b,c
+            if f b <= f c then a, b, c
             else // c<b
-                if f a <= f c then a,c,b
-                else               c,a,b
+                if f a <= f c then a, c, b
+                else               c, a, b
         else // b<a
-            if f a <= f c then b,a,c
+            if f a <= f c then b, a, c
             else //c<a
-                if f b <= f c then b,c,a 
-                else               c,b,a
+                if f b <= f c then b, c, a 
+                else               c, b, a
 
     let inline cmp a b =
-        if   a=b then  0
+        if   a= b then  0
         elif a<b then -1
         else           1 
         

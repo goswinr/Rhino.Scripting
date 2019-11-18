@@ -239,7 +239,7 @@ module ExtensionsSelection =
     ///  [0] identifier of the object
     ///  [1] True if the object was preselected, otherwise False
     ///  [2] selection method Enum DocObjects.SelectionMethod
-    ///       (0) selected by non-mouse method (SelAll,etc.).
+    ///       (0) selected by non-mouse method (SelAll, etc.).
     ///       (1) selected by mouse click on theobject.
     ///       (2) selected by being inside of amouse window.
     ///       (3) selected by intersecting a mousecrossing window.
@@ -356,7 +356,7 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             return
-                if go.GetMultiple(minimumCount,maximumCount) <> Rhino.Input.GetResult.Object then None
+                if go.GetMultiple(minimumCount, maximumCount) <> Rhino.Input.GetResult.Object then None
                 else
                     if not <| select && not <| go.ObjectsWerePreselected then
                         Doc.Objects.UnselectAll() |> ignore
@@ -419,7 +419,7 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             return
-                if go.GetMultiple(1,0) <> Rhino.Input.GetResult.Object then None
+                if go.GetMultiple(1, 0) <> Rhino.Input.GetResult.Object then None
                 else
                     if not <| select && not <| go.ObjectsWerePreselected then
                         Doc.Objects.UnselectAll() |> ignore
@@ -450,7 +450,7 @@ module ExtensionsSelection =
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{
-            let! ids = RhinoScriptSyntax.GetObjects(message, FilterModule.filter.Point, preselect=preselect)
+            let! ids = RhinoScriptSyntax.GetObjects(message, FilterModule.filter.Point, preselect= preselect)
             let rc = ResizeArray()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
@@ -473,7 +473,7 @@ module ExtensionsSelection =
     ///  [1]  True if the surface was preselected, otherwise False
     ///  [2]  selection method ( DocObjects.SelectionMethod )
     ///  [3]  selection point
-    ///  [4]  u,v surface parameter of the selection point
+    ///  [4]  u, v surface parameter of the selection point
     ///  [5]  name of the view in which the selection was made</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add [2] selection method ( see help )
                                     [<OPT;DEF(false)>]preselect:bool,
@@ -502,7 +502,7 @@ module ExtensionsSelection =
                     let selmethod = objref.SelectionMethod()
                     let mutable point = objref.SelectionPoint()
                     let surf, u, v = objref.SurfaceParameter()
-                    let mutable uv = (u,v)
+                    let mutable uv = (u, v)
                     if not <| point.IsValid then
                         point <- Point3d.Unset
                         uv <- RhinoMath.UnsetValue, RhinoMath.UnsetValue
@@ -611,7 +611,7 @@ module ExtensionsSelection =
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         match commandSerialNumbers with
         |None -> ResizeArray()
-        |Some (serialnum,ende) ->
+        |Some (serialnum, ende) ->
             let mutable serialnumber = serialnum
             let rc = ResizeArray()
             while serialnumber < ende do
@@ -671,10 +671,10 @@ module ExtensionsSelection =
         settings.DeletedObjects <- false
         Doc.Objects.GetObjectList(settings)
         |> Seq.thisAndNext
-        |> Seq.tryFind (fun (t,n) -> objectId = t.Id)
+        |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
             |None ->failwithf "NextObject not found for %A" objectId
-            |Some (t,n) ->
+            |Some (t, n) ->
                 if select then n.Select(true) |> ignore
                 n.Id
 

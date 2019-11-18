@@ -44,9 +44,9 @@ module ExtensionsLine =
         let cyl = Geometry.Cylinder( circle, cylinderHeight )
         if not <| cyl.IsValid then  failwithf "Unable to create valid cylinder with given circle && height.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
         let rc, pt1, pt2 = Geometry.Intersect.Intersection.LineCylinder(line, cyl)
-        if rc=Geometry.Intersect.LineCylinderIntersection.None then
+        if rc= Geometry.Intersect.LineCylinderIntersection.None then
             [| |]
-        elif rc=Geometry.Intersect.LineCylinderIntersection.Single then
+        elif rc= Geometry.Intersect.LineCylinderIntersection.Single then
             [|pt1|]
         else
             [|pt1; pt2|]
@@ -157,8 +157,8 @@ module ExtensionsLine =
     static member LineSphereIntersection(line:Line, sphereCenter:Point3d, sphereRadius:float) : Point3d array =
         let sphere = Geometry.Sphere(sphereCenter, sphereRadius)
         let rc, pt1, pt2 = Geometry.Intersect.Intersection.LineSphere(line, sphere)
-        if rc=Geometry.Intersect.LineSphereIntersection.None then  [||]
-        elif rc=Geometry.Intersect.LineSphereIntersection.Single then  [|pt1|]
+        if rc= Geometry.Intersect.LineSphereIntersection.None then  [||]
+        elif rc= Geometry.Intersect.LineSphereIntersection.Single then  [|pt1|]
         else [|pt1; pt2|]
 
 
