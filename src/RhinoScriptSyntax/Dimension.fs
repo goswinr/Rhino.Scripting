@@ -430,35 +430,48 @@ module ExtensionsDimension =
         resizeArray {for  ds in Doc.DimStyles -> ds.Name }
 
 
-    // [<EXT>]
+    [<EXT>]
     ///<summary>Returns the number display format of a dimension style</summary>
-    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    // ///<returns>(float) The current display format
-    // ///  0 = Decimal
-    // ///  1 = Fractional
-    // ///  2 = Feet and inches</returns>
-    // static member DimStyleNumberFormat(dimStyle:string) : int = //GET
-    //     let ds = Doc.DimStyles.FindName(dimStyle)
-    //     if isNull ds then  failwithf "get DimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
-    //     int(ds.LengthFormat) FIXME
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(float) The current display format
+    ///   ModelUnits       0  Decimal current model units
+    ///   Millmeters       3  Decimal Millimeters
+    ///   Centimeters      4  Decimal Centimeters
+    ///   Meters           5  Decimal Meters
+    ///   Kilometers       6  Decimal Kilometers
+    ///   InchesDecimal    7  Decimal Inches
+    ///   InchesFractional 1  Fractional Inches ( 1.75 inches displays as 1-3/4 )
+    ///   FeetDecimal      8  Decimal Feet
+    ///   FeetAndInches    2  Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
+    ///   Miles            9  Decimal Miles</returns>
+    static member DimStyleNumberFormat(dimStyle:string) : int = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
+        int ds.DimensionLengthDisplay 
 
-    // [<EXT>]
+
+    [<EXT>]
     ///<summary>Changes the number display format of a dimension style</summary>
-    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    // ///<param name="format">(int) The new number format
-    // ///  0 = Decimal
-    // ///  1 = Fractional
-    // ///  2 = Feet and inches</param>
-    // ///<returns>(unit) void, nothing</returns>
-    // static member DimStyleNumberFormat(dimStyle:string, format:int) : unit = //SET
-    //     let ds = Doc.DimStyles.FindName(dimStyle)
-    //     if isNull ds then  failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
-    //     if   format=0 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Decimal
-    //     elif format=1 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.Feet
-    //     elif format=2 then  ds.LengthFormat <- DocObjects.DistanceDisplayMode.FeetAndInches
-    //     else failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
-    //     if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
-    //     Doc.Views.Redraw()
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="format">(int) The new number format
+    ///   ModelUnits       0  Decimal current model units
+    ///   Millmeters       3  Decimal Millimeters
+    ///   Centimeters      4  Decimal Centimeters
+    ///   Meters           5  Decimal Meters
+    ///   Kilometers       6  Decimal Kilometers
+    ///   InchesDecimal    7  Decimal Inches
+    ///   InchesFractional 1  Fractional Inches ( 1.75 inches displays as 1-3/4 )
+    ///   FeetDecimal      8  Decimal Feet
+    ///   FeetAndInches    2  Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
+    ///   Miles            9  Decimal Miles</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member DimStyleNumberFormat(dimStyle:string, format:int) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+        if  format<0 || format>9 then  failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+        ds.DimensionLengthDisplay <- LanguagePrimitives.EnumOfValue format
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleNumberFormat failed.  dimStyle:'%A' format:'%A'" dimStyle format
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -534,38 +547,41 @@ module ExtensionsDimension =
 
 
 
-    // [<EXT>]
+    [<EXT>]
     ///<summary>Returns the text alignment mode of a dimension style</summary>
-    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    // ///<returns>(int) The current text alignment
-    // ///  0 = Normal (same as 2)
-    // ///  1 = Horizontal to view
-    // ///  2 = Above the dimension line
-    // ///  3 = In the dimension line</returns>
-    // static member DimStyleTextAlignment(dimStyle:string) : int = //GET
-    //     let ds = Doc.DimStyles.FindName(dimStyle)
-    //     if isNull ds then  failwithf "get DimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
-    //     int(ds.TextAlignment) //FIXME
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<returns>(int) The current text alignment
+    ///   Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///   MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///   BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
+    ///   Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
+    ///   MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
+    ///   Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
+    ///   BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</returns>
+    static member DimStyleTextAlignment(dimStyle:string) : int = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "get DimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
+        int ds.TextVerticalAlignment 
 
-    // [<EXT>]
+    [<EXT>]
     ///<summary>Changes the text alignment mode of a dimension style</summary>
-    // ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    // ///<param name="alignment">(int) The new text alignment
-    // ///  0 = Normal (same as 2)
-    // ///  1 = Horizontal to view
-    // ///  2 = Above the dimension line
-    // ///  3 = In the dimension line</param>
-    // ///<returns>(unit) void, nothing</returns>
-    // static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
-    //     let ds = Doc.DimStyles.FindName(dimStyle)
-    //     if isNull ds then  failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-    //     elif alignment=0 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Normal //FIXME
-    //     elif alignment=1 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.Horizontal
-    //     elif alignment=2 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.AboveLine
-    //     elif alignment=3 then  ds.TextAlignment <- DocObjects.TextDisplayAlignment.InLine
-    //     else failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-    //     if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-    //     Doc.Views.Redraw()
+    ///<param name="dimStyle">(string) The name of an existing dimension style</param>
+    ///<param name="alignment">(int) The new text alignment
+    ///   Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///   MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///   BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
+    ///   Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
+    ///   MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
+    ///   Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
+    ///   BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  failwithf "DimStyleTextAlignment not found.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+        elif alignment<0 || alignment>6 then  failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+        ds.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue (byte alignment)
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then failwithf "set DimStyleTextAlignment failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+        Doc.Views.Redraw()
 
 
     [<EXT>]
