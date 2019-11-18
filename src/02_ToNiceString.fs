@@ -4,6 +4,10 @@ open System.Collections.Generic
 open System
 open Rhino.Geometry
 open System.Runtime.CompilerServices
+open Microsoft.FSharp.Reflection
+open Microsoft.FSharp.Quotations
+open Microsoft.FSharp.Quotations.DerivedPatterns
+open Microsoft.FSharp.Quotations.Patterns
 
 module NiceString =
     
@@ -153,6 +157,28 @@ module NiceString =
             else
                 None
         |None -> None
+
+    let (|UC|_|) e o =
+        match e with ///https://stackoverflow.com/questions/3151099/is-there-a-way-in-f-to-type-test-against-a-generic-type-without-specifying-the
+        | Lambdas(_,NewUnionCase(uc,_)) | NewUnionCase(uc,[]) ->
+          if isNull (box o) then
+            // Need special case logic in case null is a valid value (e.g. Option.None)
+            let attrs = uc.DeclaringType.GetCustomAttributes(typeof<CompilationRepresentationAttribute>, false)
+            if attrs.Length = 1
+               && (attrs.[0] :?> CompilationRepresentationAttribute).Flags &&& CompilationRepresentationFlags.UseNullAsTrueValue <> enum 0
+               && uc.GetFields().Length = 0
+            then Some []
+            else None
+          else 
+            let t = o.GetType()
+            if FSharpType.IsUnion t then
+              let uc2, fields = FSharpValue.GetUnionFields(o,t)
+              let getGenType (t:System.Type) = if t.IsGenericType then t.GetGenericTypeDefinition() else t
+              if uc2.Tag = uc.Tag && getGenType (uc2.DeclaringType) = getGenType (uc.DeclaringType) then
+                Some(fields |> List.ofArray)
+              else None
+            else None
+        | _ -> failwith "toNiceStringRec: the UC pattern can only be used against simple union cases"
     
     /// the internal stringbuilder for recursive function
     let private sb = Text.StringBuilder()
@@ -164,7 +190,7 @@ module NiceString =
         let adn  (s:string) =  sb.AppendLine(s) |> ignore
    
         match x with // boxed already
-        | null -> "'null'" |> add
+        | null -> "'null' (or Option.None)" |> add
         | :? Point3d    as p   -> p |> point3dToString  |> add
         | :? Vector3d   as v   -> v |> vector3dToString |> add
         | :? Point3f    as p   -> p |> point3fToString  |> add
@@ -174,27 +200,30 @@ module NiceString =
         | :? Char       as c   -> c.ToString()          |> add // "'" + c.ToString() + "'" // or add qotes?
         | :? string     as s   -> s                     |> add // to not have it in quotes, s.ToString() adds a " at start and end
         | :? Guid       as g   -> sprintf "Guid[%O]" g  |> add
+        | UC <@ Some @> [v] -> adn "Option.Some: "
+                               toNiceStringRec (v, indent+1)
+        | UC <@ None @> [] -> add "Option.None or 'null'" 
         | IsSeq (leng, xs, name, elName) ->  
-                    match leng with
-                    |Length count -> sprintf "%s with %d items of %s" name count elName |> add // new line added below at    adn ":" 
-                    |MoreThan _ ->   sprintf "%s of %s" name elName  |> add 
+                match leng with
+                |Length count -> sprintf "%s with %d items of %s" name count elName |> add // new line added below at    adn ":" 
+                |MoreThan _ ->   sprintf "%s of %s" name elName  |> add 
+                
+                if indent < toNiceStringMaxDepth  then 
+                    adn ":"
+                    for i, x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq |> Seq.indexed do  
+                        if i > 0 then adn ""
+                        toNiceStringRec (x, indent+1)                            
                     
-                    if indent < toNiceStringMaxDepth  then 
-                        adn ":"
-                        for i, x in xs  |> Seq.truncate toNiceStringMaxItemsPerSeq |> Seq.indexed do  
-                            if i > 0 then adn ""
-                            toNiceStringRec (x, indent+1)                            
-                        
-                        match leng with
-                        |Length count -> 
-                            if count > toNiceStringMaxItemsPerSeq then
-                                adn ""
-                                toNiceStringRec ("...", indent+1)                                
-                        |MoreThan _ ->  
+                    match leng with
+                    |Length count -> 
+                        if count > toNiceStringMaxItemsPerSeq then
                             adn ""
-                            toNiceStringRec ("...", indent+1)                            
-                    else 
-                        adn ""                
+                            toNiceStringRec ("...", indent+1)                                
+                    |MoreThan _ ->  
+                        adn ""
+                        toNiceStringRec ("...", indent+1)                            
+                else 
+                    adn ""                
         | _ ->  x.ToString() |> add
 
     /// Nice formating for floats , some Rhino Objects and sequences of any kind, first four items are printed out.
