@@ -186,20 +186,19 @@ module ExtensionsUserinterface =
     ///  2 = 3-Point. The base rectangle is created by picking three points
     ///  3 = Vertical. The base vertical rectangle is created by picking three points.
     ///  4 = Center. The base rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///Optional 3D base point</param>
+    ///<param name="basePoint">(Point3d) Optional, Optional 3D base point</param>
     ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
     ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box on success</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
-                            [<OPT;DEF(Point3d())>]basisPoint:Point3d,
+                            [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(null:string)>]prompt1:string,
                             [<OPT;DEF(null:string)>]prompt2:string,
                             [<OPT;DEF(null:string)>]prompt3:string) : (Point3d []) option=
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let basisPoint = if basisPoint <> Point3d.Origin then basisPoint else  Point3d.Unset
+            let basePoint = if basePoint <> Point3d.Origin then basePoint else  Point3d.Unset
             let m =
                 match mode with
                 |0 -> Rhino.Input.GetBoxMode.All
@@ -210,7 +209,7 @@ module ExtensionsUserinterface =
                 |_ -> failwithf "GetBox:Bad mode %A" mode
 
             let box = ref (Box())
-            let rc= Rhino.Input.RhinoGet.GetBox(box, m, basisPoint, prompt1, prompt2, prompt3)
+            let rc= Rhino.Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             return
                 if rc = Rhino.Commands.Result.Success then Some ((!box).GetCorners())
                 else None
@@ -219,8 +218,7 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color()</c>
-    ///Default RGB value. If omitted, the default color is black</param>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c> </param>
     ///<returns>(option<Drawing.Color>) an Option of RGB color</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         async{
@@ -256,10 +254,8 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Pauses for user input of a distance</summary>
-    ///<param name="firstPt">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///First distance point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>7e89</c>
-    ///Default distance</param>
+    ///<param name="firstPt">(Point3d) Optional, First distance point</param>
+    ///<param name="distance">(float) Optional,Default distance</param>
     ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
@@ -442,8 +438,7 @@ module ExtensionsUserinterface =
     ///  7  Perpendicular - Defines a line perpendicular to or from a curve
     ///  8  Tangent - Defines a line tangent from a curve.
     ///  9  Extension - Defines a line that extends from a curve</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///Optional starting point</param>
+    ///<param name="point">(Point3d) Optional, Optional starting point</param>
     ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
     ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
@@ -559,23 +554,22 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Pauses for user input of a point</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///Point3d identifying a starting, or base point</param>
+    ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
     ///<param name="distance">(float) Optional, Default Value: <c>0.0</c>
     ///Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrains the point selections to the active construction plane</param>
     ///<returns>(option<Point3d>) an Option of point on success</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
-                            [<OPT;DEF(Point3d())>]basisPoint:Point3d,
+                            [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(0.0)>]distance:float,
                             [<OPT;DEF(false)>]inPlane:bool) : option<Point3d> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()
             if notNull message then gp.SetCommandPrompt(message)
-            if basisPoint <> Point3d.Origin then
-                gp.DrawLineFromPoint(basisPoint,true)
+            if basePoint <> Point3d.Origin then
+                gp.DrawLineFromPoint(basePoint,true)
                 gp.EnableDrawLineFromPoint(true)
                 if distance<>0.0 then gp.ConstrainDistanceFromBasePoint(distance)
             if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore
@@ -678,7 +672,7 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF(null:string)>]message1:string,
                                 [<OPT;DEF(null:string)>]message2:string,
                                 [<OPT;DEF(2147482999)>]maxPoints:int) : option<Point3d ResizeArray> =
-                                //[<OPT;DEF(Point3d())>]basisPoint:Point3d) // Ignoredhere because ignored in python too TODO <param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>   A starting or base point</param>
+                                //[<OPT;DEF(Point3d())>]basePoint:Point3d) // Ignored here because ignored in python too 
 
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -813,15 +807,14 @@ module ExtensionsUserinterface =
     ///  2 = 3Point - a rectangle is created by picking three points
     ///  3 = Vertical - a vertical rectangle is created by picking three points
     ///  4 = Center - a rectangle is created by picking a center point and a corner point</param>
-    ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///A 3d base point</param>
+    ///<param name="basePoint">(Point3d) Optional, A 3d base point</param>
     ///<param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
     ///<returns>(option<Point3d * Point3d * Point3d * Point3d>) an Option of four 3d points that define the corners of the rectangle</returns>
     static member GetRectangle(
                                         [<OPT;DEF(0)>]mode:int,
-                                        [<OPT;DEF(Point3d())>]basisPoint:Point3d,
+                                        [<OPT;DEF(Point3d())>]basePoint:Point3d,
                                         [<OPT;DEF(null:string)>]prompt1:string,
                                         [<OPT;DEF(null:string)>]prompt2:string,
                                         [<OPT;DEF(null:string)>]prompt3:string) : option<Point3d * Point3d * Point3d * Point3d> =
@@ -829,12 +822,12 @@ module ExtensionsUserinterface =
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
 
-            let basisPoint = if basisPoint = Point3d.Origin then Point3d.Unset else basisPoint
+            let basePoint = if basePoint = Point3d.Origin then Point3d.Unset else basePoint
             let prompts = ResizeArray([""; ""; ""])
             if notNull prompt1 then prompts.[0] <- prompt1
             if notNull prompt2 then prompts.[1] <- prompt2
             if notNull prompt3 then prompts.[2] <- prompt3
-            let rc, corners = Rhino.Input.RhinoGet.GetRectangle(mode, basisPoint, prompts)
+            let rc, corners = Rhino.Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             return
                 if rc = Rhino.Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
                 else None
@@ -1082,8 +1075,7 @@ module ExtensionsUserinterface =
     ///    1 = menu item is disabled
     ///    2 = menu item is checked
     ///    3 = menu item is disabled and checked</param>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
-    ///A 3D point where the menu item will appear. If omitted, the menu
+    ///<param name="point">(Point3d) Optional, A 3D point where the menu item will appear. If omitted, the menu
     ///  will appear at the current cursor position</param>
     ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
     ///  If omitted, the active view is used</param>
@@ -1108,14 +1100,11 @@ module ExtensionsUserinterface =
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///A prompt message</param>
-    ///<param name="defaultValNumber">(float) Optional, Default Value: <c>7e89</c>
-    ///A default number</param>
+    ///<param name="defaultValNumber">(float) Optional, A default number</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
     ///A dialog box title</param>
-    ///<param name="minimum">(float) Optional, Default Value: <c>7e89</c>
-    ///A minimum allowable value</param>
-    ///<param name="maximum">(float) Optional, Default Value: <c>7e89</c>
-    ///A maximum allowable value</param>
+    ///<param name="minimum">(float) Optional, A minimum allowable value</param>
+    ///<param name="maximum">(float) Optional, A maximum allowable value</param>
     ///<returns>(option<float>) an Option of The newly entered number on success</returns>
     static member RealBox(          [<OPT;DEF("")>]message:string,
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,

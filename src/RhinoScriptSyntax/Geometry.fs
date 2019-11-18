@@ -18,7 +18,7 @@ module ExtensionsGeometry =
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uMagnitude">(float) U magnitude of the plane</param>
     ///<param name="vMagnitude">(float) V magnitude of the plane</param>
-    ///<param name="views">(string seq) Optional, Titles or ids the the view(s) to clip. If omitted, the active
+    ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
     ///  view is used</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =

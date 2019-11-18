@@ -17,7 +17,7 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Adds a new block definition to the document</summary>
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
-    ///<param name="basisPoint">(Point3d) 3D base point for the block definition</param>
+    ///<param name="basePoint">(Point3d) 3D base point for the block definition</param>
     ///<param name="name">(string) Optional, Default Value: <c>InstanceDefinitions.GetUnusedInstanceDefinitionName()</c>
     ///Name of the block definition. If omitted a name will be automatically generated</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>

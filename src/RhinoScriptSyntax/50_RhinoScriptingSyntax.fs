@@ -440,7 +440,7 @@ type RhinoScriptSyntax private () = // no constructor?
         | _ -> failwithf "Cannot get view from %A" view
 
     
-    ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name or Id of the Layout</summary>
+    ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout</summary>
     ///<param name="view">(string): Name of the Layout</param> 
     ///<returns>a Doc.View object) Fails on bad input</returns>
     static member CoercePageView (view:'T) : Display.RhinoPageView =    

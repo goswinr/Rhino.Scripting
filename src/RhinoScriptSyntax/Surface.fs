@@ -158,8 +158,7 @@ module ExtensionsSurface =
     ///<param name="knotsV">(float seq) Knot values for the surface in the v direction.
     ///  Must contain pointCount[1]+degree[1]-1 elements</param>
     ///<param name="degree">(int * int) Degree of the surface in the u and v directions</param>
-    ///<param name="weights">(int seq) Optional, Default Value: <c>null:int seq</c>
-    ///Weight values for the surface. The number of elements in
+    ///<param name="weights">(int seq) Optional, Weight values for the surface. The number of elements in
     ///  weights must equal the number of elements in points. Values must be
     ///  greater than zero</param>
     ///<returns>(Guid) identifier of new object</returns>
@@ -2435,8 +2434,7 @@ module ExtensionsSurface =
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
     ///If True, the resulting surfaces ar not joined</param>
-    ///<param name="followingGeometry">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
-    ///List of curves, dots, and points which
+    ///<param name="followingGeometry">(Guid seq) Optional, List of curves, dots, and points which
     ///  should be unrolled with the surface</param>
     ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>0.0</c>
     ///Absolute tolerance</param>

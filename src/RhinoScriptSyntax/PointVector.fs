@@ -194,11 +194,12 @@ module ExtensionsPointvector =
     [<EXT>]
     ///<summary>Verifies that a list of 3D points are coplanar</summary>
     ///<param name="points">(Point3d seq) 3D points to test</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c>
-    ///Tolerance to use when verifying</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
+    ///Tolerance to use when verifying </param>
     ///<returns>(bool) True or False</returns>
-    static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(1.0e-12)>]tolerance:float) : bool =
+    static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
+        let tolerance = ifZero1 tolerance RhinoMath.ZeroTolerance
         Point3d.ArePointsCoplanar(points, tolerance)
 
 

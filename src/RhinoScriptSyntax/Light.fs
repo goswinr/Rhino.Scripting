@@ -33,8 +33,7 @@ module ExtensionsLight =
     ///<summary>Adds a new linear light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
-    ///<param name="width">(float) Optional, Default Value: <c>7e89</c>
-    ///Width of the light</param>
+    ///<param name="width">(float) Optional, Width of the light</param>
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
@@ -92,8 +91,7 @@ module ExtensionsLight =
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddRectangularLight( origin:Point3d,
                                        widthPoint:Point3d,
-                                       heightPoint:Point3d) : Guid =
-        let origin =  origin
+                                       heightPoint:Point3d) : Guid =        
         let ptx =  widthPoint
         let pty =  heightPoint
         let length = pty-origin
@@ -122,8 +120,7 @@ module ExtensionsLight =
     static member AddSpotLight( origin:Point3d,
                                 radius:float,
                                 apexPoint:Point3d) : Guid =
-        let mutable radius = radius
-        let apexPoint =  apexPoint
+        let mutable radius = radius        
         if radius<0.0 then radius<-1.0
         let light = new Light()
         light.LightStyle <- LightStyle.WorldSpot

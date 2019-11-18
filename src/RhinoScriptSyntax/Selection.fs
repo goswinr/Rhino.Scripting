@@ -233,8 +233,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
     ///  picked are not selected</param>
-    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
-    ///List of object identifiers specifying objects that are
+    ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
     ///<returns>(Guid * bool * float * Point3d * string) containing the following information
     ///  [0] identifier of the object
@@ -390,8 +389,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, the objects that are
     ///  picked are not selected</param>
-    ///<param name="objects">(Guid seq) Optional, Default Value: <c>null:Guid seq</c>
-    ///List of object identifiers specifying objects that are
+    ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
     ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) containing the following information
     ///  [n][0]  identifier of the object

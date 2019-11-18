@@ -218,8 +218,7 @@ module ExtensionsUtility =
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="angleDegrees">(float) Angle in degrees</param>
     ///<param name="distance">(float) Distance from point</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane()</c>
-    ///Plane to base the transformation. If omitted, the world
+    ///<param name="plane">(Plane) Optional, Plane to base the transformation. If omitted, the world
     ///  x-y plane is used</param>
     ///<returns>(Point3d) resulting point is successful</returns>
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =

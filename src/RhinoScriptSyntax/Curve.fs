@@ -161,9 +161,9 @@ module ExtensionsCurve =
     ///<param name="curveB">(Guid) Identifier of the second curve object</param>
     ///<param name="radius">(float) Optional, Default Value: <c>1.0</c>
     ///Fillet radius</param>
-    ///<param name="basisPointA">(Point3d) Optional, Base point of the first curve. If omitted,
+    ///<param name="basePointA">(Point3d) Optional, Base point of the first curve. If omitted,
     ///  starting point of the curve is used</param>
-    ///<param name="basisPointB">(Point3d) Optional, Base point of the second curve. If omitted,
+    ///<param name="basePointB">(Point3d) Optional, Base point of the second curve. If omitted,
     ///  starting point of the curve is used</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =

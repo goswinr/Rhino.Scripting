@@ -696,13 +696,13 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Return the names, titles, or identifiers of all views in the document</summary>
+    ///<summary>Return the names/titles, of all views in the document</summary>
     ///<param name="viewType">(int) Optional, Default: standard model views: <c>0</c>
     ///The type of view to return
     ///  0 = standard model views
     ///  1 = page layout views
     ///  2 = both standard and page layout views</param>
-    ///<returns>(string ResizeArray) of the view names or identifiers on success</returns>
+    ///<returns>(string ResizeArray) of the view names on success</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then failwithf "Rhino.Scripting: ViewNames failed. viewType:'%A'" viewType

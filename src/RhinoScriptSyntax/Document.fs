@@ -32,9 +32,7 @@ module ExtensionsDocument =
     ///  a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CreatePreviewImage(fileName:string, [<OPT;DEF("":string)>]view:string, [<OPT;DEF(0:int)>]width:int,[<OPT;DEF(0:int)>]height:int, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
-        let rhview =
-            if view = "" then Doc.Views.ActiveView
-            else Doc.Views.Find(view, false)
+        let rhview = RhinoScriptSyntax.CoerceView(view)
         let rhsize =
             match width,height with
             | 0,0 -> rhview.ClientRectangle.Size

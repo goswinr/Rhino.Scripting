@@ -98,7 +98,7 @@ module ExtensionsGrips =
 
 
     [<EXT>]
-    static member private Neighborgrip(i, objectId:Guid, index, direction, enable)=
+    static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject,string> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then Error "rhobj.GetGrips() is null"

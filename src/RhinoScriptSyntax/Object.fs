@@ -54,8 +54,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Copies object from one location to another, or in-place</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
-    ///Translation vector to apply</param>
+    ///<param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
     ///<returns>(Guid) objectId for the copy</returns>
     static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
         let translation =
@@ -72,9 +71,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Copies one or more objects from one location to another, or in-place</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
-    ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
-    ///List of three numbers or Vector3d representing
-    ///  translation vector to apply to copied set</param>
+    ///<param name="translation">(Vector3d) Optional,  Vector3d representing translation vector to apply to copied set</param>
     ///<returns>(Guid ResizeArray) identifiers for the copies</returns>
     static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray =
         let translation =
@@ -341,8 +338,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Matches, or copies the attributes of a source object to a target object</summary>
     ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
-    ///<param name="sourceId">(Guid) Optional, Default Value: <c>Guid()</c>
-    ///Identifier of object to copy attributes from. If None,
+    ///<param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
     ///  then the default attributes are copied to the targetIds</param>
     ///<returns>(int) number of objects modified</returns>
     static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int =
@@ -556,40 +552,41 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Returns the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(string ) The object's current page layout view, "" empty string if in Model Space</returns>
-    static member ObjectLayout(objectId:Guid) : string = //GET
+    ///<returns>(string option) The object's current page layout view, None if it is in Model Space</returns>
+    static member ObjectLayout(objectId:Guid) : string option= //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if rhobj.Attributes.Space = Rhino.DocObjects.ActiveSpace.PageSpace then
             let pageid = rhobj.Attributes.ViewportId
             let pageview = Doc.Views.Find(pageid)
-            pageview.MainViewport.Name
+            Some pageview.MainViewport.Name
         else
-            ""
+            None
 
 
 
     ///<summary>Changes the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<param name="layout">(string) To change, or move, an object from model space to page
+    ///<param name="layout">(string option) To change, or move, an object from model space to page
     ///  layout space, or from one page layout to another, then specify the
-    ///  title or identifier of an existing page layout view. To move an object
-    ///  from page layout space to model space, just specify Empty String ""</param>
+    ///  title of an existing page layout view. To move an object
+    ///  from page layout space to model space, just specify None</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ObjectLayout(objectId:Guid, layout:string, [<OPT;DEF(true)>]returnName:bool) : unit = //SET
+    static member ObjectLayout(objectId:Guid, layout:string option) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let view=
             if rhobj.Attributes.Space = Rhino.DocObjects.ActiveSpace.PageSpace then
                 let pageid = rhobj.Attributes.ViewportId
                 let pageview = Doc.Views.Find(pageid)
-                pageview.MainViewport.Name
+                Some pageview.MainViewport.Name
             else
-                ""
+                None 
+        
         if view<>layout then
-            if layout = "" then //move to model space
+            if layout.IsNone then //move to model space
                 rhobj.Attributes.Space <- Rhino.DocObjects.ActiveSpace.ModelSpace
                 rhobj.Attributes.ViewportId <- Guid.Empty
             else
-                match Doc.Views.Find(layout, false) with
+                match Doc.Views.Find(layout.Value, false) with
                 | null -> failwithf "Set ObjectLayout failed, layout not found for '%A' and '%A'"  layout objectId
                 | :? Rhino.Display.RhinoPageView as layout ->
                     rhobj.Attributes.ViewportId <- layout.MainViewport.Id
