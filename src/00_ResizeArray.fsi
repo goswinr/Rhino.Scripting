@@ -103,10 +103,10 @@ module ResizeArray =
     /// Split the collection into two collections, containing the 
     /// elements for which the given predicate returns True and False
     /// respectively.
-    val partition: ('T -> bool) -> ResizeArray<'T> -> ResizeArray<'T> * ResizeArray<'T>
-
+    val partition: ('T -> bool) -> ResizeArray<'T> -> ( ResizeArray<'T> * ResizeArray<'T> )
+    
     /// Apply the given function to each element of the array. Return
-    /// the array comprised of the results "x" for each element where
+    /// the array comprised of the results 'x' for each element where
     /// the function returns <c>Some(x)</c>.
     val choose: ('T -> 'U option) -> ResizeArray<'T> -> ResizeArray<'U>
 
@@ -220,7 +220,7 @@ module ResizeArray =
     val zip : ResizeArray<'T> -> ResizeArray<'U> -> ResizeArray<'T * 'U>
 
     /// Split an array of pairs into two arrays.
-    val unzip : ResizeArray<'T * 'U> -> ResizeArray<'T> * ResizeArray<'U>
+    val unzip : ResizeArray<'T * 'U> -> ( ResizeArray<'T> * ResizeArray<'U> )
 
     //---------------------------------------------------
     // extensions by Goswin:
