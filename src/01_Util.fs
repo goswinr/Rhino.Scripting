@@ -9,27 +9,25 @@ module  Util =
     type OPT = Runtime.InteropServices.OptionalAttribute
     type DEF = Runtime.InteropServices.DefaultParameterValueAttribute
     type EXT = Runtime.CompilerServices.ExtensionAttribute
-
-    let failNotImpl() = failwith "NOT IMPLEMENTED FAILURE"
     
     let inline notNull (value : 'T) = match value with | null -> false   | _ -> true// Fsharp core does it like this too. dont use RefrenceEquals
     
-    /// Returns the value on the left unless it is null, then it returns the value on the right.
+    ///Returns the value on the left unless it is null, then it returns the value on the right.
     let inline (|?) a b = if Object.ReferenceEquals(a,null) then b else a // a more fancy version: https://gist.github.com/jbtule/8477768#file-nullcoalesce-fs
 
-    /// apply function ( like |> ) but ignore result. return original input
+    ///apply function ( like |> ) but ignore result. return original input
     let inline (|>>) a f =  f a |> ignore ; a
 
     let fail() = failwith "Rhino.Scripting failed (inner exception should show more helpful message)"   
  
-     ///Get first element of triple (tuple of three element)
+    ///Get first element of triple (tuple of three element)
     let inline t1 (a,_,_) = a
     ///Get second element of triple (tuple of three element)
     let inline t2 (_,b,_) = b
     ///Get third element of triple (tuple of three element)
     let inline t3 (_,_,c) = c    
     
-    /// so that python range expressions dont need top be translated to F#
+    ///so that python range expressions dont need top be translated to F#
     let internal range(l) = seq{0..(l-1)} 
 
     ///if first value is 0.0 return second else first
@@ -43,15 +41,16 @@ module UtilMath =
     let enUs = CultureInfo.GetCultureInfo("en-us")
     let deAt = CultureInfo.GetCultureInfo("de-at")
     
-    ///parses english and german style flaots, recognizes comma and period as decimal separator
+    ///First tries to parses english float (period as decimal separator),
+    ///if this fails tries to parse german floats,(comma as decimal separator)
     let parseFloatEnDe (x:string) =
         match Double.TryParse(x, NumberStyles.Float, enUs) with
         | true, f -> f
         | _ ->  match Double.TryParse(x, NumberStyles.Any, deAt) with
                 | true, f -> f
-                | _ -> failwithf "Could not parse '%s' into a floating point number" x
+                | _ -> failwithf "Could not parse '%s' into a floating point number using englisch and german culture settings" x
         
-    /// this helper enables more generic code in parsing sequences
+    ///Get Float from any input. This helper enables more generic code in parsing sequences
     let inline floatOfObj (o:^T) = 
         match box o with 
         | :? float   as x -> x
@@ -64,16 +63,16 @@ module UtilMath =
             try 
                 float(o)
             with _ -> 
-                failwithf "Could not convert object '%A' into a floating point number" o   
+                failwithf "Could not convert %s '%A' into a floating point number" (o.GetType().Name) o   
     
     let internal rand = System.Random () 
 
-    ///allows ints to be multiplied by floats
-    ///int(round(float(i) * f))
+    ///Allows ints to be multiplied by floats
+    ///<c>int(round(float(i) * f))</c> 
     let inline ( *. ) (i:int) (f:float) = int(round(float(i) * f)) // or do it like this:https://stackoverflow.com/questions/2812084/overload-operator-in-f/2812306#2812306
     
-    ///gives a float from int / int division
-    ///(float(i)) / (float(j))
+    ///Gives a float from int / int division
+    ///<c>(float(i)) / (float(j))</c> 
     let inline ( /. ) (i:int) (j:int) = (float(i)) / (float(j)) // or do it like this:https://stackoverflow.com/questions/2812084/overload-operator-in-f/2812306#2812306
 
 
@@ -82,14 +81,16 @@ module UtilMath =
     //let inline ( /| ) (i:int) (j:float) = int(round( float(i) / j ))
    
     
-    /// test is a floating point value is Infinity or Not a Number
+    ///Test is a floating point value is Infinity or Not a Number
     let inline isNanOrInf f = Double.IsInfinity f || Double.IsNaN f
 
-    /// converts Angels from Degrees to Radians
-    let inline toRadians degrees = (Math.PI / 180.) * degrees
+    let private piOne80 = Math.PI / 180.   // precompute division
+    let private one80Pi = 180. / Math.PI // precompute division
+    ///converts Angels from Degrees to Radians
+    let inline toRadians degrees = piOne80 * degrees
 
-    /// converts Angels from Radians to Degrees
-    let inline toDegrees radians = (180. / Math.PI) * radians
+    ///converts Angels from Radians to Degrees
+    let inline toDegrees radians = one80Pi * radians
     
     ///given mean  and standardDeviation returns a random value from this Gaussian distribution
     ///if mean is 0 and stDev is 1 then 99% of values are  are within -2.3 to +2.3 ; 70% within -1 to +1
@@ -103,51 +104,49 @@ module UtilMath =
 
 module Compare = 
 
-    ///* Point must be at middle of expression: like this: min <=. x .<= max
+    ///Point must be at middle of expression: like this: min <=. x .<= max
     let inline (<=.) left middle = (left <= middle, middle)
-    ///* Point must be at middle of expression: like this: min <=. x .<= max
+    ///Point must be at middle of expression: like this: min <=. x .<= max
     let inline (>=.) left middle = (left >= middle, middle)
-    ///* Point must be at middle of expression: like this: min <=. x .<= max
+    ///Point must be at middle of expression: like this: min <=. x .<= max
     let inline (.<=) (leftResult, middle) right = leftResult && (middle <= right)
-    ///* Point must be at middle of expression: like this: min <=. x .<= max
+    ///Point must be at middle of expression: like this: min <=. x .<= max
     let inline (.>=) (leftResult, middle) right = leftResult && (middle >= right)
-    ///* for inner expressions: like this: min <. x .<. y .< max
+    ///for inner expressions: like this: min <. x .<. y .< max
     let inline (.<=.) (leftResult, middle) right = leftResult && (middle <= right), right
-    ///* for inner expressions: like this: min <. x .<. y .< max
+    ///for inner expressions: like this: min <. x .<. y .< max
     let inline (.>=.) (leftResult, middle) right = leftResult && (middle >= right), right
 
-    ///* Point must be at middle of expression: like this: min <. x .< max
+    ///Point must be at middle of expression: like this: min <. x .< max
     let inline (<.) left middle = (left < middle, middle)
-    ///* Point must be at middle of expression: like this: min <. x .< max
+    ///Point must be at middle of expression: like this: min <. x .< max
     let inline (>.) left middle = (left > middle, middle)
-    ///* Point must be at middle of expression: like this: min <. x .< max
+    ///Point must be at middle of expression: like this: min <. x .< max
     let inline (.<) (leftResult, middle) right = leftResult && (middle < right)
-    ///* Point must be at middle of expression: like this: min <. x .< max
+    ///Point must be at middle of expression: like this: min <. x .< max
     let inline (.>) (leftResult, middle) right = leftResult && (middle > right)
-    ///* for inner expressions: like this: min <. x .<. y .< max
+    ///For inner expressions: like this: min <. x .<. y .< max
     let inline (.<.) (leftResult, middle) right = leftResult && (middle < right), right
-    ///* for inner expressions: like this: min <. x .<. y .< max
+    ///For inner expressions: like this: min <. x .<. y .< max
     let inline (.>.) (leftResult, middle) right = leftResult && (middle > right), right
     
 
 module MinMaxSort = 
     
-    ///* if both are equal then the first is returned
+    ///If both are equal then the first is returned
     let inline minBy f a b =  if f a > f b then b else a
-    ///* if both are equal then the first is returned
+    ///If both are equal then the first is returned
     let inline maxBy f a b =  if f a < f b then b else a
-    let inline min2By f (a,b) =  if f a > f b then b else a
-    let inline max2By f (a,b) =  if f a < f b then b else a
     let inline min3 (a,b,c) = min a b |> min c
     let inline max3 (a,b,c) = max a b |> max c
     let inline min4 (a,b,c,d) = min a b |> min c |> min d    
     let inline max4 (a,b,c,d) = max a b |> max c |> max d
-    ///* if they are equal then the the order is kept
+    ///If they are equal then the the order is kept
     let inline sort2 (a,b)  = if a <= b  then a,b else b,a
-    ///* if they equal then the the order is kept
+    ///If they are equal then the the order is kept
     let inline sort2By f (a,b) = if f a <= f b  then a,b else b,a
         
-    ///* if any are equal then the the order is kept
+    ///If any are equal then the the order is kept
     let inline sort3 (a,b,c) = 
         if a<=b then 
             if b<=c then a,b,c
@@ -160,7 +159,7 @@ module MinMaxSort =
                 if b<=c then b,c,a 
                 else         c,b,a
         
-    ///* if any are equal after Function is applied then the the order is kept
+    ///If any are equal after Function is applied then the the order is kept
     let inline sort3By f (a,b,c) = 
         if f a <= f b then 
             if f b <= f c then a,b,c
@@ -178,8 +177,8 @@ module MinMaxSort =
         elif a<b then -1
         else           1 
         
-    /// gets the positiv differnce between 2 numbers, 
-    /// avoids the integer( or byte) overflow and underflow risk of "abs(a-b)"
+    ///Gets the positiv differnce between 2 numbers. 
+    ///Avoids the integer( or byte) overflow and underflow risk of "abs(a-b)"
     let inline diff a b =
         if   a<b then b-a
         else          a-b 
