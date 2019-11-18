@@ -122,7 +122,7 @@ module ExtensionsSelection =
     [<EXT>]
     ///<summary>Prompts user to pick or select a single curve object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, objects that
@@ -135,7 +135,7 @@ module ExtensionsSelection =
     ///  [4]  number   the curve parameter of the selection point
     ///  [5]  str      name of the view selection was made</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
-                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -404,7 +404,7 @@ module ExtensionsSelection =
     ///Honor object grouping.  If omitted and the user picks a group,
     ///  the entire group will be picked (True). Note, if filter is set to a
     ///  value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
@@ -419,7 +419,7 @@ module ExtensionsSelection =
     static member GetObjectsAndRemeber( message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
-                                        [<OPT;DEF(false)>]preselect:bool,
+                                        [<OPT;DEF(true)>]preselect:bool,
                                         [<OPT;DEF(false)>]select:bool,
                                         [<OPT;DEF(null:Guid seq)>]objects:Guid seq,
                                         [<OPT;DEF(1)>]minimumCount:int,
@@ -449,7 +449,7 @@ module ExtensionsSelection =
     ///Honor object grouping.  If omitted and the user picks a group,
     ///  the entire group will be picked (True). Note, if filter is set to a
     ///  value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, the objects that are
@@ -465,7 +465,7 @@ module ExtensionsSelection =
     static member GetObjectsEx(     [<OPT;DEF("Select objects":string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
-                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
         async{
@@ -509,7 +509,7 @@ module ExtensionsSelection =
     ///<summary>Prompts the user to select one or more point objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
     ///A prompt message</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d array) 3d coordinates of point objects on success</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
@@ -529,7 +529,7 @@ module ExtensionsSelection =
     ///<summary>Prompts the user to select a single surface</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select surface"</c>
     ///Prompt displayed</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for preselected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked object</param>
@@ -541,7 +541,7 @@ module ExtensionsSelection =
     ///  [4]  u, v surface parameter of the selection point
     ///  [5]  name of the view in which the selection was made</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add [2] selection method ( see help )
-                                    [<OPT;DEF(false)>]preselect:bool,
+                                    [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext

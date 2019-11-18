@@ -87,10 +87,10 @@ module UtilMath =
     let private piOne80 = Math.PI / 180.   // precompute division
     let private one80Pi = 180. / Math.PI // precompute division
     ///converts Angels from Degrees to Radians
-    let inline toRadians degrees = piOne80 * degrees
+    let toRadians degrees = piOne80 * degrees
 
     ///converts Angels from Radians to Degrees
-    let inline toDegrees radians = one80Pi * radians
+    let toDegrees radians = one80Pi * radians
     
     ///given mean  and standardDeviation returns a random value from this Gaussian distribution
     ///if mean is 0 and stDev is 1 then 99% of values are  are within -2.3 to +2.3 ; 70% within -1 to +1

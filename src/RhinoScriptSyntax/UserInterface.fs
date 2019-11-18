@@ -6,8 +6,7 @@ open Rhino.Geometry
 open Rhino.Scripting.Util
 open Rhino.Scripting.UtilMath
 open Rhino.Scripting.ActiceDocument
-open Rhino
-open UI
+open Rhino.UI
 open System.Drawing
 open System.Collections.Generic
 //open System.Windows.Forms
