@@ -17,7 +17,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Create a bitmap preview image of the current model</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create</param>
-    ///<param name="view">(string) Optional,   Title of the view. If omitted, the active view is used</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the active view is used</param>
     ///<param name="width">(int) Optional, Default Value: <c>0</c>
     /// integer that specifies width of the bitmap in pixel. if only width given height will be scaled to kepp screen ratio</param>
     ///<param name="height">(int) Optional, Default Value: <c>0</c>

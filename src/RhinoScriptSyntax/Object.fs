@@ -71,7 +71,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Copies one or more objects from one location to another, or in-place</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
-    ///<param name="translation">(Vector3d) Optional,  Vector3d representing translation vector to apply to copied set</param>
+    ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
     ///<returns>(Guid ResizeArray) identifiers for the copies</returns>
     static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray =
         let translation =
