@@ -207,10 +207,10 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function
     ///  verifies that the object is a member of any group</param>
-    ///<returns>(bool) True if the object is a member of the specified group. If a group_name
+    ///<returns>(bool) True if the object is a member of the specified group. If a groupName
     ///  was not specified, the object is a member of some group.
     ///  False if the object  is not a member of the specified group.
-    ///  If a group_name was not specified, the object is not a member of any group</returns>
+    ///  If a groupName was not specified, the object is not a member of any group</returns>
     static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let count = rhobj.GroupCount

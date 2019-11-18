@@ -12,7 +12,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Add new detail view to an existing layout view</summary>
-    ///<param name="layoutName">(string) Identifier of an existing layout</param>
+    ///<param name="layoutName">(string) Name of an existing layout</param>
     ///<param name="corner1">(Point2d) Corner1 of the detail in the layout's unit system</param>
     ///<param name="corner2">(Point2d) Corner2 of the detail in the layout's unit system</param>
     ///<param name="title">(string) Optional, Title of the new detail</param>
@@ -160,7 +160,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Returns the scale of a detail object</summary>
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
-    ///<returns>(float) current page to model scale ratio if model_length and page_length are both None</returns>
+    ///<returns>(float) current page to model scale ratio if model Length and page Length are both None</returns>
     static member DetailScale(detailId:Guid) : float = //GET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
         detail.DetailGeometry.PageToModelRatio

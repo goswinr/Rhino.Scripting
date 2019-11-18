@@ -165,7 +165,7 @@ module ExtensionsPointvector =
     ///<summary>Compares two 3D points</summary>
     ///<param name="point1">(Point3d) Point1 of the points to compare</param>
     ///<param name="point2">(Point3d) Point2 of the points to compare</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///Tolerance to use for comparison. If omitted,
     ///  Rhino's internal zero tolerance is used</param>
     ///<returns>(bool) True or False</returns>

@@ -68,7 +68,7 @@ module ResizeArray =
     val map: ('T -> 'U) -> ResizeArray<'T> -> ResizeArray<'U>
 
     /// Apply the given function to two arrays simultaneously. The
-    /// two arrays must have the same lengths, otherwise an Invalid_argument exception is
+    /// two arrays must have the same lengths, otherwise an Invalid Argument exception is
     /// raised.
     val iter2: ('T -> 'U -> unit) -> ResizeArray<'T> -> ResizeArray<'U> -> unit
 

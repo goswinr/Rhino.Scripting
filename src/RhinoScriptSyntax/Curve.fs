@@ -360,8 +360,7 @@ module ExtensionsCurve =
     ///  distance between helix "threads"</param>
     ///<param name="turns">(float) Number of turns</param>
     ///<param name="radius0">(float) Starting radius of spiral</param>
-    ///<param name="radius1">(float) Optional, Default Value: <c>0.0</c>
-    ///Ending radius of spiral. If omitted, the starting radius is used for the complete spiral</param>
+    ///<param name="radius1">(float) Optional, Ending radius of spiral. If omitted, the starting radius is used for the complete spiral</param>
     ///<returns>(Guid) objectId of new curve on success</returns>
     static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid =
         let dir = point1 - point0
@@ -506,14 +505,14 @@ module ExtensionsCurve =
     ///<summary>Closes an open curve object by making adjustments to the end points so
     ///  they meet at a point</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
-    ///<param name="tolerance">(float) Optional, Maximum allowable distance between start and end
-    ///  point. If omitted, the current absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///  Maximum allowable distance between start and end point</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member CloseCurve(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.IsClosed then  curveId
         else
-            if not <| curve.MakeClosed(ifZero1 tolerance RhinoMath.ZeroTolerance) then  failwithf "Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
+            if not <| curve.MakeClosed(ifZero1 tolerance Doc.ModelAbsoluteTolerance) then  failwithf "Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
             let rc = Doc.Objects.AddCurve(curve)
             if rc = Guid.Empty then failwithf "Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
             Doc.Views.Redraw()
@@ -543,16 +542,13 @@ module ExtensionsCurve =
     ///<summary>Convert curve to a polyline curve</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>5.0</c>
-    ///The maximum angle between curve tangents at line endpoints.
-    ///  If omitted, the angle tolerance is set to 5.0</param>
+    ///The maximum angle between curve tangents at line endpoints.</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.01</c>
-    ///The distance tolerance at segment midpoints. If omitted, the tolerance is set to 0.01</param>
+    ///The distance tolerance at segment midpoints.</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Delete the curve object specified by curveId. If omitted, curveId will not be deleted</param>
-    ///<param name="minEdgeLength">(float) Optional, Default Value: <c>0.0</c>
-    ///Minimum segment length. Ignored if 0.0 ?</param>
-    ///<param name="maxEdgeLength">(float) Optional, Default Value: <c>0.0</c>
-    ///Maximum segment length. Ignored if 0.0 ?</param>
+    ///<param name="minEdgeLength">(float) Optional, Minimum segment length</param>
+    ///<param name="maxEdgeLength">(float) Optional, Maximum segment length</param>
     ///<returns>(Guid) The new curve </returns>
     static member ConvertCurveToPolyline(curveId:Guid, [<OPT;DEF(0.0)>]angleTolerance:float, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]minEdgeLength:float, [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -763,8 +759,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="brepId">(Guid) Identifier of a brep object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///Distance tolerance at segment midpoints.
-    ///  If omitted, the current absolute tolerance is used</param>
+    ///Distance tolerance at segment midpoints.</param>
     ///<returns>(Guid ResizeArray * Guid ResizeArray) List of Curves and List of points </returns>
     static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray * Guid ResizeArray=
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -962,11 +957,11 @@ module ExtensionsCurve =
     ///<param name="curveA">(Guid) first Curve</param>
     ///<param name="curveB">(Guid) second Curve</param>
     ///<returns>(float * float * float * float * float * float) of deviation information on success
-    ///  [0] = curve_a parameter at maximum overlap distance point
-    ///  [1] = curve_b parameter at maximum overlap distance point
+    ///  [0] = curveA parameter at maximum overlap distance point
+    ///  [1] = curveB parameter at maximum overlap distance point
     ///  [2] = maximum overlap distance
-    ///  [3] = curve_a parameter at minimum overlap distance point
-    ///  [4] = curve_b parameter at minimum overlap distance point
+    ///  [3] = curveAparameter at minimum overlap distance point
+    ///  [4] = curveB parameter at minimum overlap distance point
     ///  [5] = minimum distance between curves</returns>
     static member CurveDeviation(curveA:Guid, curveB:Guid) : float * float * float * float * float * float =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
@@ -1075,8 +1070,8 @@ module ExtensionsCurve =
     ///  specified radius fits. A fillet point is a pair of points (point0, point1)
     ///  such that there is a circle of radius tangent to curve curve0 at point0 and
     ///  tangent to curve curve1 at point1. Of all possible fillet points, this
-    ///  function returns the one which is the closest to the base point base_point_0,
-    ///  base_point_1. Distance from the base point is measured by the sum of arc
+    ///  function returns the one which is the closest to the base point basePointA,
+    ///  basePointB. Distance from the base point is measured by the sum of arc
     ///  lengths along the two curves</summary>
     ///<param name="curveA">(Guid) Identifier of the first curve object</param>
     ///<param name="curveB">(Guid) Identifier of the second curve object</param>
@@ -1367,12 +1362,11 @@ module ExtensionsCurve =
     ///<param name="surfaceId">(Guid) The identifier of the second curve object. If omitted,
     ///  the a self-intersection test will be performed on curve</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///The absolute tolerance in drawing units. If omitted,
-    ///  the document's current absolute tolerance is used</param>
+    ///The absolute tolerance in drawing units. </param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
     ///Angle tolerance in degrees. The angle
     ///  tolerance is used to determine when the curve is tangent to the
-    ///  surface. If omitted, the document's current angle tolerance is used</param>
+    ///  surface.</param>
     ///<returns>(List of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
     ///  The list will contain one or more of the following elements:
     ///    Element Type     Description
@@ -1792,7 +1786,7 @@ module ExtensionsCurve =
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///  If the curve is not a circle, then the tolerance used
     ///  to determine whether or not the NURBS form of the curve has the
-    ///  properties of a arc. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///  properties of a arc.</param>
     ///<returns>(bool) True or False</returns>
     static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1807,7 +1801,7 @@ module ExtensionsCurve =
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///If the curve is not a circle, then the tolerance used
     ///  to determine whether or not the NURBS form of the curve has the
-    ///  properties of a circle. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///  properties of a circle.</param>
     ///<returns>(bool) True or False</returns>
     static member IsCircle(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1832,8 +1826,7 @@ module ExtensionsCurve =
     ///  approximated by chord defined by 6 points</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///  Maximum allowable distance between start point and end
-    ///  point. If omitted, the document's current absolute tolerance is used</param>
+    ///  Maximum allowable distance between start point and end point.</param>
     ///<returns>(bool) True or False</returns>
     static member IsCurveClosable(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
@@ -1856,8 +1849,7 @@ module ExtensionsCurve =
     ///<summary>Test a curve to see if it lies in a specific plane</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="plane">(Plane) Plane to test</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<returns>(bool) True or False</returns>
     static member IsCurveInPlane(curveId:Guid, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1870,9 +1862,8 @@ module ExtensionsCurve =
     ///<summary>Verifies an object is a linear curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///  The curve segment index if `curve_id` identifies a polycurve</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///  The curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1897,8 +1888,7 @@ module ExtensionsCurve =
     ///<summary>Verifies an object is a planar curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1924,10 +1914,9 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is an elliptical-shaped curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional,
-    ///  The curve segment index if `curve_id` identifies a polycurve</param>
+    ///  The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1939,10 +1928,9 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is a line curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional,
-    ///  The curve segment index if `curve_id` identifies a polycurve</param>
+    ///  The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsLine(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1963,9 +1951,8 @@ module ExtensionsCurve =
     ///<summary>Verifies that a point is on a curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="point">(Point3d) The test point</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.SqrtEpsilon</c>
-    ///  The tolerance used. If omitted, Rhino's RhinoMath.SqrtEpsilon is used</param>
-    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curve_id` identifies a polycurve</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.SqrtEpsilon</c></param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsPointOnCurve(curveId:Guid, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.SqrtEpsilon tolerance
@@ -1977,7 +1964,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is a PolyCurve curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curve_id` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False</returns>
     static member IsPolyCurve(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         // TODO can a polycurve be nested in a polycurve ?
@@ -1992,7 +1979,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is a Polyline curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curve_id` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False</returns>
     static member IsPolyline(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
@@ -2174,13 +2161,12 @@ module ExtensionsCurve =
     ///<param name="curveB">(Guid) identifier of the second planar, closed curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///Test plane. If omitted, the Plane.WorldXY plane is used</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///If omitted, the document absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(int) a number identifying the relationship
     ///  0 = the regions bounded by the curves are disjoint
     ///  1 = the two curves intersect
-    ///  2 = the region bounded by curve_a is inside of curve_b
-    ///  3 = the region bounded by curve_b is inside of curve_a</returns>
+    ///  2 = the region bounded by curveA is inside of curveB
+    ///  3 = the region bounded by curveB is inside of curveA</returns>
     static member PlanarClosedCurveContainment(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
         let curveB = RhinoScriptSyntax.CoerceCurve curveB
@@ -2196,8 +2182,7 @@ module ExtensionsCurve =
     ///<param name="curveB">(Guid) identifier of the second planar curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///Test plane. If omitted, the Plane.WorldXY plane is used</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///  If omitted, the document absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(bool) True if the curves intersect; otherwise False</returns>
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
@@ -2214,8 +2199,7 @@ module ExtensionsCurve =
     ///<param name="curve">(Guid) Identifier of a curve object</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///Plane containing the closed curve and point. If omitted, Plane.WorldXY  is used</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///  If omitted, the document abosulte tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(int) number identifying the result
     ///  0 = point is outside of the curve
     ///  1 = point is inside of the curve

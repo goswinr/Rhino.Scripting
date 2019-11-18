@@ -220,8 +220,8 @@ module ExtensionsSurface =
       ///  Acceptable object types include curves, points, point clouds, and meshes</param>
       ///<param name="startSurfaceId">(Guid) The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
       ///  to the surface you are trying to create</param>
-      ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-      ///The tolerance used by input analysis functions. If omitted, Rhino's document absolute tolerance is used</param>
+      ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+      ///The tolerance used by input analysis functions. </param>
       ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
       ///Try to find an outside curve and trims the surface to it.  The default value is True</param>
       ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
@@ -268,8 +268,8 @@ module ExtensionsSurface =
     ///  Acceptable object types include curves, points, point clouds, and meshes</param>
     ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated surface . however it is best if you create a starting surface that is similar in shape
     ///  to the surface you are trying to create an use the other overload of this method</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-    ///The tolerance used by input analysis functions. If omitted, Rhino's document absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///The tolerance used by input analysis functions. </param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     ///Try to find an outside curve and trims the surface to it.  The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
@@ -754,23 +754,21 @@ module ExtensionsSurface =
     ///<returns>(Point3d * (float * float) * (float * float) * Vector3d) of closest point information . The list will
     ///  contain the following information:
     ///  Element     Type             Description
-    ///    0        Point3d          The 3-D point at the parameter value of the
-    ///      closest point.
+    ///    0        Point3d          The 3-D point at the parameter value of the closest point.
     ///    1        (U of U, V)           Parameter values of closest point. Note, V
-    ///      is 0 if the component index type is brep_edge
-    ///      or brep_vertex.
+    ///                                      is 0 if the component index type is brepEdge
+    ///                                      or brepVertex.
     ///    2        (V of U, V)           Parameter values of closest point. Note, V
-    ///      is 0 if the component index type is brep_edge
-    ///      or brep_vertex.
+    ///                                     is 0 if the component index type is brepEdge
+    ///                                     or brepVertex.
     ///    3        (type, index)    The type and index of the brep component that
-    ///      contains the closest point. Possible types are
-    ///        BrepVertex 1 Targets a brep vertex index.
-    ///        BrepEdge   2 Targets a brep edge index.
-    ///        BrepFace   3 Targets a brep face index.
-    ///        BrepTrim   4 Targets a brep trim index.
-    ///        BrepLoop   5 Targets a brep loop index.    ///
-    ///    4        Vector3d         The normal to the brep_face, or the tangent
-    ///      to the brep_edge</returns>
+    ///                              contains the closest point. Possible types are
+    ///                                BrepVertex 1 Targets a brep vertex index.
+    ///                                BrepEdge   2 Targets a brep edge index.
+    ///                                BrepFace   3 Targets a brep face index.
+    ///                                BrepTrim   4 Targets a brep trim index.
+    ///                                BrepLoop   5 Targets a brep loop index.    ///
+    ///    4        Vector3d         The normal to the brepFace, or the tangent to the brepEdge</returns>
     static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let clpt = ref Point3d.Origin
@@ -1120,7 +1118,7 @@ module ExtensionsSurface =
     ///  SurfaceSurfaceIntersection function this function works on trimmed surfaces</summary>
     ///<param name="brep1">(Guid) Identifier of first brep object</param>
     ///<param name="brep2">(Guid) Identifier of second brep object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Distance tolerance at segment midpoints. If omitted,
     ///  the current absolute tolerance is used</param>
     ///<returns>(Guid ResizeArray) identifying the newly created intersection curve and point objects </returns>
@@ -1132,7 +1130,7 @@ module ExtensionsSurface =
         let tolerance = ifZero2 Doc.ModelAbsoluteTolerance  tolerance
         let ok, outcurves, outpoints = Intersect.Intersection.BrepBrep(brep1, brep2, tolerance)
         let ids = ResizeArray()
-        if not ok then ids // TODO or fail ?
+        if not ok then ids // empty array TODO or fail ?
         else
             let mergedcurves = Curve.JoinCurves(outcurves, 2.1 * tolerance)
 
@@ -1236,9 +1234,9 @@ module ExtensionsSurface =
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
     ///If true, the test point must be inside by at least tolerance</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.SqrtEpsilon</c>
     ///Distance tolerance used for intersection and determining
-    ///  strict inclusion. If omitted, Rhino's internal tolerance is used</param>
+    ///  strict inclusion. </param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPointInSurface( objectId:Guid,
                                     point:Point3d,
@@ -1358,7 +1356,7 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Verifies a surface object is planar</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Tolerance used when checked. If omitted, the current absolute
     ///  tolerance is used</param>
     ///<returns>(bool) True or False</returns>
@@ -1467,7 +1465,7 @@ module ExtensionsSurface =
     ///<param name="direction">(int) The direction to make periodic, either 0= U or 1= V</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Delete the input surface</param>
-    ///<returns>(Guid) if delete_input is False, identifier of the new surface</returns>
+    ///<returns>(Guid) if deleteInput is False, identifier of the new surface</returns>
     static member MakeSurfacePeriodic( surfaceId:Guid,
                                        direction:int,
                                        [<OPT;DEF(false)>]deleteInput:bool) : Guid =
@@ -1490,7 +1488,7 @@ module ExtensionsSurface =
     ///  will be added to Rhino</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="distance">(float) The distance to offset</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
     ///  document's absolute tolerance is usually sufficient</param>
     ///<param name="bothSides">(bool) Optional, Default Value: <c>false</c>
@@ -2290,7 +2288,7 @@ module ExtensionsSurface =
     ///<summary>Trims a surface or polysurface using an oriented cutter brep or surface</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
     ///<param name="cutter">(Guid) Surface or polysurface  performing the trim</param>
-    ///<param name="tolerance">(float) Optional, If omitted, the document's absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(Guid ResizeArray) identifiers of retained components on success</returns>
     static member TrimBrep( objectId:Guid,
                             cutter:Guid,
@@ -2321,7 +2319,7 @@ module ExtensionsSurface =
     ///<summary>Trims a surface using an oriented cutter Plane</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
     ///<param name="cutter">(Plane) Plane performing the trim</param>
-    ///<param name="tolerance">(float) Optional, If omitted, the document's absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(Guid ResizeArray) identifiers of retained components on success</returns>
     static member TrimBrep( objectId:Guid,
                             cutter:Plane,
@@ -2436,9 +2434,9 @@ module ExtensionsSurface =
     ///If True, the resulting surfaces ar not joined</param>
     ///<param name="followingGeometry">(Guid seq) Optional, List of curves, dots, and points which
     ///  should be unrolled with the surface</param>
-    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Absolute tolerance</param>
-    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>Doc.ModelRelativeTolerance</c>
     ///Relative tolerance</param>
     ///<returns>(Guid ResizeArray) List of unrolled surface ids and List of following objects</returns>
     static member UnrollSurface( surfaceId:Guid,

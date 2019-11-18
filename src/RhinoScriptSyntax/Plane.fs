@@ -86,8 +86,8 @@ module ExtensionsPlane =
     ///<summary>Intersect an infinite plane and a curve object</summary>
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-    ///The intersection tolerance. If omitted, the document's absolute tolerance is used</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///The intersection tolerance. </param>
     ///<returns>(ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float >) a list of intersection information tuple .  The list will contain one or more of the following tuple:
     ///  Element Type        Description
     ///  [0]       Number      The intersection event type, either Point (1) or Overlap (2).

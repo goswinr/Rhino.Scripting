@@ -417,9 +417,9 @@ module ExtensionsMesh =
     ///The face type to be returned. True = both triangles
     ///  and quads. False = Quads are broken down into triangles</param>
     ///<returns>(Point3d ResizeArray) 3D points that define the face vertices of the mesh. If
-    ///  face_type is True, then faces are returned as both quads and triangles
+    ///  faceType is True, then faces are returned as both quads and triangles
     ///  (4 3D points). For triangles, the third and fourth vertex will be
-    ///  identical. If face_type is False, then faces are returned as only
+    ///  identical. If faceType is False, then faces are returned as only
     ///  triangles(3 3D points). Quads will be converted to triangles</returns>
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
@@ -514,7 +514,7 @@ module ExtensionsMesh =
     ///<summary>Calculates the intersections of a mesh object with another mesh object</summary>
     ///<param name="mesh1">(Guid) Mesh1</param>
     ///<param name="mesh2">(Guid) Mesh2</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///The intersection tolerance</param>
     ///<returns>(Polyline array) of points that define the vertices of the intersection curves</returns>
     static member MeshMeshIntersection( mesh1:Guid,

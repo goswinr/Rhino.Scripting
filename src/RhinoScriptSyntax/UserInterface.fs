@@ -118,8 +118,7 @@ module ExtensionsUserinterface =
     ///Starting, or base point</param>
     ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
     ///If specified, the reference angle is calculated from it and the base point</param>
-    ///<param name="defaultValAngleDegrees">(float) Optional, Default Value: <c>0.0</c>
-    /// A default angle value specified</param>
+    ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
     ///<param name="message">(string) Optional, A prompt to display</param>
     ///<returns>(float option) Option of angle in degree</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d,
@@ -555,8 +554,7 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a point</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
-    ///<param name="distance">(float) Optional, Default Value: <c>0.0</c>
-    ///Constraining distance. If distance is specified, basePoint must also be specified</param>
+    ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrains the point selections to the active construction plane</param>
     ///<returns>(option<Point3d>) an Option of point on success</returns>
