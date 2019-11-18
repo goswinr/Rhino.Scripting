@@ -18,7 +18,7 @@ module ExtensionsMesh =
     ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
     ///<param name="faceVertices">(seq<IList<int>>) List containing lists of 3 or 4 numbers that define the
     ///  vertex indices for each face of the mesh. If the third a fourth vertex
-    ///    indices of a face are identical, a triangular face will be created.</param>
+    ///    indices of a face are identical, a triangular face will be created</param>
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
     ///  the mesh. Note, for every vertex, there must be a corresponding vertex
     ///  normal</param>
@@ -141,7 +141,7 @@ module ExtensionsMesh =
     ///<param name="meshIds">(Guid seq) List of mesh identifiers</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
     ///Delete the input meshes</param>
-    ///<returns>(Guid ResizeArray) List of resulting objects after explode.</returns>
+    ///<returns>(Guid ResizeArray) List of resulting objects after explode</returns>
     static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
         //id = RhinoScriptSyntax.Coerceguid(meshIds)
         let rc = ResizeArray()
@@ -171,7 +171,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Verifies a mesh object is closed</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(bool) True , otherwise False.</returns>
+    ///<returns>(bool) True , otherwise False</returns>
     static member IsMeshClosed(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
         | Some mesh -> mesh.IsClosed
@@ -183,7 +183,7 @@ module ExtensionsMesh =
     ///  by at most two faces is called manifold. If a mesh has at least one edge
     ///  that is shared by more than two faces, then that mesh is called non-manifold</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(bool) True, otherwise False.</returns>
+    ///<returns>(bool) True, otherwise False</returns>
     static member IsMeshManifold(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
         | Some mesh -> mesh.IsManifold(true)  |> t1
@@ -197,7 +197,7 @@ module ExtensionsMesh =
     ///<param name="point">(Point3d) Test point</param>
     ///<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
     ///  The testing tolerance /param>
-    ///<returns>(bool) True , otherwise False.</returns>
+    ///<returns>(bool) True , otherwise False</returns>
     static member IsPointOnMesh(    objectId:Guid,
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]tolerance:float): bool =
@@ -420,7 +420,7 @@ module ExtensionsMesh =
     ///  face_type is True, then faces are returned as both quads and triangles
     ///  (4 3D points). For triangles, the third and fourth vertex will be
     ///  identical. If face_type is False, then faces are returned as only
-    ///  triangles(3 3D points). Quads will be converted to triangles.</returns>
+    ///  triangles(3 3D points). Quads will be converted to triangles</returns>
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = ResizeArray()
@@ -446,7 +446,7 @@ module ExtensionsMesh =
     ///<summary>Returns the vertex indices of all faces of a Ngon mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(ResizeArray<ResizeArray<int>) containing a nested List that define the vertex indices for
-    ///  each face of the mesh. Ngons, quad and triangle faces are returned.</returns>
+    ///  each face of the mesh. Ngons, quad and triangle faces are returned</returns>
     static member MeshNgonFaceVertices(objectId:Guid) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = ResizeArray()
@@ -464,7 +464,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(ResizeArray<int*int*int*int>) containing tuples of 4 numbers that define the vertex indices for
     ///  each face of the mesh. Both quad and triangle faces are returned. If the
-    ///  third and fourth vertex indices are identical, the face is a triangle.</returns>
+    ///  third and fourth vertex indices are identical, the face is a triangle</returns>
     static member MeshFaceVertices(objectId:Guid) : ResizeArray<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = ResizeArray()
@@ -477,7 +477,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Verifies a mesh object has face normals</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(bool) True , otherwise False.</returns>
+    ///<returns>(bool) True , otherwise False</returns>
     static member MeshHasFaceNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.FaceNormals.Count>0
@@ -486,7 +486,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Verifies a mesh object has texture coordinates</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(bool) True , otherwise False.</returns>
+    ///<returns>(bool) True , otherwise False</returns>
     static member MeshHasTextureCoordinates(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.TextureCoordinates.Count>0
@@ -495,7 +495,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Verifies a mesh object has vertex colors</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(bool) True , otherwise False.</returns>
+    ///<returns>(bool) True , otherwise False</returns>
     static member MeshHasVertexColors(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.VertexColors.Count>0
@@ -504,7 +504,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Verifies a mesh object has vertex normals</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(bool) True , otherwise False.</returns>
+    ///<returns>(bool) True , otherwise False</returns>
     static member MeshHasVertexNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Normals.Count>0
@@ -679,7 +679,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Returns the vertex count of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(int) The number of mesh vertices .</returns>
+    ///<returns>(int) The number of mesh vertices </returns>
     static member MeshVertexCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Vertices.Count

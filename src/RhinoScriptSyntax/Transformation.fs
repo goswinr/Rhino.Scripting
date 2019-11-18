@@ -13,8 +13,8 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Verifies a matrix is the identity matrix</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix.</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>
+    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsXformIdentity(xform:Transform) : bool =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         xform = Transform.Identity
@@ -24,8 +24,8 @@ module ExtensionsTransformation =
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
     ///  transformation can be broken into a sequence of dialations, translations,
     ///  rotations, and reflections</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix.</param>
-    ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
+    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False</returns>
     static member IsXformSimilarity(xform:Transform) : bool =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         xform.SimilarityType <> TransformSimilarityType.NotSimilarity
@@ -33,8 +33,8 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>verifies that a matrix is a zero transformation matrix</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix.</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>
+    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsXformZero(xform:Transform) : bool =
         xform.IsZero4x4
 
@@ -94,7 +94,7 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Transform point from construction plane coordinates to world coordinates</summary>
-    ///<param name="point">(Point3d) A 3D point in construction plane coordinates.</param>
+    ///<param name="point">(Point3d) A 3D point in construction plane coordinates</param>
     ///<param name="plane">(Plane) The construction plane</param>
     ///<returns>(Point3d) A 3D point in world coordinates</returns>
     static member XformCPlaneToWorld(point:Point3d, plane:Plane) : Point3d =
@@ -106,8 +106,8 @@ module ExtensionsTransformation =
     [<EXT>]
     ///<summary>Returns the determinant of a transformation matrix. If the determinant
     ///  of a transformation matrix is 0, the matrix is said to be singular. Singular
-    ///  matrices do not have inverses.</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix.</param>
+    ///  matrices do not have inverses</summary>
+    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant</returns>
     static member XformDeterminant(xform:Transform) : float =
         //xform = RhinoScriptSyntax.Coercexform(xform)
@@ -132,8 +132,8 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Returns the inverse of a non-singular transformation matrix</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix.</param>
-    ///<returns>(Transform) The inverted 4x4 transformation matrix .</returns>
+    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<returns>(Transform) The inverted 4x4 transformation matrix </returns>
     static member XformInverse(xform:Transform) : Transform =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         let rc, inverse = xform.TryGetInverse()
@@ -154,8 +154,8 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Multiplies two transformation matrices, where result = xform1 * xform2</summary>
-    ///<param name="xform1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply.</param>
-    ///<param name="xform2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply.</param>
+    ///<param name="xform1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply</param>
+    ///<param name="xform2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation on success</returns>
     static member XformMultiply(xform1:Transform, xform2:Transform) : Transform =
         //xform1 = RhinoScriptSyntax.Coercexform(xform1)
@@ -164,9 +164,9 @@ module ExtensionsTransformation =
 
 
     [<EXT>]
-    ///<summary>Returns a transformation matrix that projects to a plane.</summary>
-    ///<param name="plane">(Plane) The plane to project to.</param>
-    ///<returns>(Transform) The 4x4 transformation matrix.</returns>
+    ///<summary>Returns a transformation matrix that projects to a plane</summary>
+    ///<param name="plane">(Plane) The plane to project to</param>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformPlanarProjection(plane:Plane) : Transform =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         Transform.PlanarProjection(plane)
@@ -174,10 +174,10 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Returns a rotation transformation that maps initialPlane to finalPlane.
-    ///  The planes should be right hand orthonormal planes.</summary>
+    ///  The planes should be right hand orthonormal planes</summary>
     ///<param name="initialPlane">(Plane) Plane to rotate from</param>
     ///<param name="finalPlane">(Plane) Plane to rotate to</param>
-    ///<returns>(Transform) The 4x4 transformation matrix.</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform =
         //initialPlane = RhinoScriptSyntax.Coerceplane(initialPlane)
         //finalPlane = RhinoScriptSyntax.Coerceplane(finalPlane)
@@ -191,7 +191,7 @@ module ExtensionsTransformation =
     ///<param name="angleDegrees">(float) Rotation angle in degrees</param>
     ///<param name="rotationAxis">(Vector3d) Rotation axis</param>
     ///<param name="centerPoint">(Point3d) Rotation center</param>
-    ///<returns>(Transform) The 4x4 transformation matrix.</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformRotation2( angleDegrees:float,
                                   rotationAxis:Vector3d,
                                   centerPoint:Point3d) : Transform =
@@ -209,7 +209,7 @@ module ExtensionsTransformation =
     ///<param name="startDirection">(Vector3d) Start direction of '3d vectors' (FIXME 0)</param>
     ///<param name="endDirection">(Vector3d) End direction of '3d vectors' (FIXME 0)</param>
     ///<param name="centerPoint">(Point3d) The rotation center</param>
-    ///<returns>(Transform) The 4x4 transformation matrix.</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformRotation3( startDirection:Vector3d,
                                   endDirection:Vector3d,
                                   centerPoint:Point3d) : Transform =
@@ -222,14 +222,14 @@ module ExtensionsTransformation =
 
 
     [<EXT>]
-    ///<summary>Returns a rotation transformation.</summary>
+    ///<summary>Returns a rotation transformation</summary>
     ///<param name="x0">(Vector3d) X0 of 'Vectors defining the initial orthonormal frame' (FIXME 0)</param>
     ///<param name="y0">(Vector3d) Y0 of 'Vectors defining the initial orthonormal frame' (FIXME 0)</param>
     ///<param name="z0">(Vector3d) Z0 of 'Vectors defining the initial orthonormal frame' (FIXME 0)</param>
     ///<param name="x1">(Vector3d) X1 of 'Vectors defining the final orthonormal frame' (FIXME 0)</param>
     ///<param name="y1">(Vector3d) Y1 of 'Vectors defining the final orthonormal frame' (FIXME 0)</param>
     ///<param name="z1">(Vector3d) Z1 of 'Vectors defining the final orthonormal frame' (FIXME 0)</param>
-    ///<returns>(Transform) The 4x4 transformation matrix.</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformRotation4( x0:Vector3d,
                                   y0:Vector3d,
                                   z0:Vector3d,
@@ -300,7 +300,7 @@ module ExtensionsTransformation =
 
     [<EXT>]
     ///<summary>Creates a translation transformation matrix</summary>
-    ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d.  A 3-D translation vector.</param>
+    ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d.  A 3-D translation vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix is successful, otherwise None</returns>
     static member XformTranslation(vector:Vector3d) : Transform =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
@@ -308,8 +308,8 @@ module ExtensionsTransformation =
 
 
     [<EXT>]
-    ///<summary>Transforms a point from world coordinates to construction plane coordinates.</summary>
-    ///<param name="point">(Point3d) A 3D point in world coordinates.</param>
+    ///<summary>Transforms a point from world coordinates to construction plane coordinates</summary>
+    ///<param name="point">(Point3d) A 3D point in world coordinates</param>
     ///<param name="plane">(Plane) The construction plane</param>
     ///<returns>(Point3d) 3D point in construction plane coordinates</returns>
     static member XformWorldToCPlane(point:Point3d, plane:Plane) : Point3d =

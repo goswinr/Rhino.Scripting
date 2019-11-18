@@ -12,7 +12,7 @@ module ExtensionsGrips =
 
     [<EXT>]
     ///<summary>Enables or disables an object's grips. For curves and surfaces, these are
-    ///  also called control points.</summary>
+    ///  also called control points</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///If True, the specified object's grips will be turned on.
@@ -30,9 +30,9 @@ module ExtensionsGrips =
     ///<summary>Prompts the user to pick a single object grip</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
-    ///Allow for selection of pre-selected object grip.</param>
+    ///Allow for selection of pre-selected object grip</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked object grip.</param>
+    ///Select the picked object grip</param>
     ///<returns>(option<Guid * int * Point3d>) Option of a grip record.
     ///  [0] = identifier of the object that owns the grip
     ///  [1] = index value of the grip
@@ -62,7 +62,7 @@ module ExtensionsGrips =
 
 
     [<EXT>]
-    ///<summary>Prompts user to pick one or more object grips from one or more objects.</summary>
+    ///<summary>Prompts user to pick one or more object grips from one or more objects</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///Allow for selection of pre-selected object grips</param>
@@ -351,7 +351,7 @@ module ExtensionsGrips =
 
 
     [<EXT>]
-    ///<summary>Unselects an object's grips. Note, the grips will not be turned off.</summary>
+    ///<summary>Unselects an object's grips. Note, the grips will not be turned off</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips unselected on success</returns>
     static member UnselectObjectGrips(objectId:Guid) : int =

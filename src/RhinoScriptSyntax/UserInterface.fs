@@ -81,7 +81,7 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
+    ///<summary>Displays a list of items in a combo-style list box dialog</summary>
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -100,9 +100,9 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Display dialog prompting the user to enter a string. The
     ///  string value may span multiple lines</summary>
-    ///<param name="defaultValString">(string) Optional, A default string value.</param>
-    ///<param name="message">(string) Optional, A prompt message.</param>
-    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///<param name="defaultValString">(string) Optional, A default string value</param>
+    ///<param name="message">(string) Optional, A prompt message</param>
+    ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations</returns>
     static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
         async{
@@ -255,7 +255,7 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Pauses for user input of a distance.</summary>
+    ///<summary>Pauses for user input of a distance</summary>
     ///<param name="firstPt">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///First distance point</param>
     ///<param name="distance">(float) Optional, Default Value: <c>7e89</c>
@@ -264,7 +264,7 @@ module ExtensionsUserinterface =
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///Prompt for the second distance point</param>
-    ///<returns>(option<float>) an Option of The distance between the two points .</returns>
+    ///<returns>(option<float>) an Option of The distance between the two points </returns>
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d,
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
@@ -312,13 +312,13 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
-    ///A prompt or message.</param>
+    ///A prompt or message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
-    ///Minimum number of edges to select.</param>
+    ///Minimum number of edges to select</param>
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
-    ///Maximum number of edges to select.</param>
+    ///Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the duplicated edge curves.</param>
+    ///Select the duplicated edge curves</param>
     ///<returns>(option<ResizeArray<Guid*Point3d*Point3d>>) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges":string)>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -355,12 +355,12 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Pauses for user input of a whole number.</summary>
-    ///<param name="message">(string) Optional, A prompt or message.</param>
-    ///<param name="number">(int) Optional, A default whole number value.</param>
-    ///<param name="minimum">(int) Optional, A minimum allowable value.</param>
-    ///<param name="maximum">(int) Optional, A maximum allowable value.</param>
-    ///<returns>(option<int>) an Option of The whole number input by the user .</returns>
+    ///<summary>Pauses for user input of a whole number</summary>
+    ///<param name="message">(string) Optional, A prompt or message</param>
+    ///<param name="number">(int) Optional, A default whole number value</param>
+    ///<param name="minimum">(int) Optional, A minimum allowable value</param>
+    ///<param name="maximum">(int) Optional, A maximum allowable value</param>
+    ///<returns>(option<int>) an Option of The whole number input by the user </returns>
     static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(2147482999)>]number:int, [<OPT;DEF(2147482999)>]minimum:int, [<OPT;DEF(2147482999)>]maximum:int) : option<int> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -441,7 +441,7 @@ module ExtensionsUserinterface =
     ///  6  Bisector - Defines a line that bisects a specified angle.
     ///  7  Perpendicular - Defines a line perpendicular to or from a curve
     ///  8  Tangent - Defines a line tangent from a curve.
-    ///  9  Extension - Defines a line that extends from a curve.</param>
+    ///  9  Extension - Defines a line that extends from a curve</param>
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Optional starting point</param>
     ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
@@ -470,9 +470,9 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
-    ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected.</param>
+    ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
-    ///If True, the "by Layer" linetype will show. Defaults to False.</param>
+    ///If True, the "by Layer" linetype will show. Defaults to False</param>
     ///<returns>(option<string>) an Option of The names of selected linetype</returns>
     static member GetLinetype([<OPT;DEF(null:string)>]defaultValLinetype:string, [<OPT;DEF(false)>]showByLayer:bool) : option<string> =
         async{
@@ -501,7 +501,7 @@ module ExtensionsUserinterface =
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
     ///The maximum number of faces to select.
     ///  If 0, the user must press enter to finish selection.
-    ///  If -1, selection stops as soon as there are at least minCount faces selected.</param>
+    ///  If -1, selection stops as soon as there are at least minCount faces selected</param>
     ///<returns>(option<int ResizeArray>) an Option of of mesh face indices on success</returns>
     static member GetMeshFaces(objectId:Guid, [<OPT;DEF("Select Mesh Faces")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
@@ -534,7 +534,7 @@ module ExtensionsUserinterface =
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
     ///The maximum number of vertices to select. If 0, the user must
     ///  press enter to finish selection. If -1, selection stops as soon as there
-    ///  are at least minCount vertices selected.</param>
+    ///  are at least minCount vertices selected</param>
     ///<returns>(option<int ResizeArray>) an Option of of mesh vertex indices on success</returns>
     static member GetMeshVertices(objectId:Guid, [<OPT;DEF("Select Mesh Vertices")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
@@ -557,14 +557,14 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Pauses for user input of a point.</summary>
-    ///<param name="message">(string) Optional, A prompt or message.</param>
+    ///<summary>Pauses for user input of a point</summary>
+    ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="basisPoint">(Point3d) Optional, Default Value: <c>Point3d()</c>
     ///Point3d identifying a starting, or base point</param>
     ///<param name="distance">(float) Optional, Default Value: <c>0.0</c>
-    ///Constraining distance. If distance is specified, basePoint must also be specified.</param>
+    ///Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
-    ///Constrains the point selections to the active construction plane.</param>
+    ///Constrains the point selections to the active construction plane</param>
     ///<returns>(option<Point3d>) an Option of point on success</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basisPoint:Point3d,
@@ -671,7 +671,7 @@ module ExtensionsUserinterface =
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
     ///<param name="maxPoints">(float) Optional, Default Value: <c>None</c>
     ///  Maximum number of points to pick. If not specified, an
-    ///  unlimited number of points can be picked.</param>
+    ///  unlimited number of points can be picked</param>
     ///<returns>(option<Point3d array>) an Option of of 3d points</returns>
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
@@ -735,23 +735,23 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Prompts the user to pick points that define a polyline.</summary>
+    ///<summary>Prompts the user to pick points that define a polyline</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
     ///The options are bit coded flags. Values can be added together to specify more than one option. The default is 3.
     ///  value description
     ///  1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
     ///  2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
     ///  4     Force close. If specified, then the returned polyline is always closed. If specified, then intMax must be 0 or >= 4.
-    ///  Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False".</param>
-    ///<param name="message1">(string) Optional, A prompt or message for the first point.</param>
-    ///<param name="message2">(string) Optional, A prompt or message for the second point.</param>
-    ///<param name="message3">(string) Optional, A prompt or message for the third point.</param>
-    ///<param name="message4">(string) Optional, A prompt or message for the 'next' point.</param>
+    ///  Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
+    ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
+    ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
+    ///<param name="message3">(string) Optional, A prompt or message for the third point</param>
+    ///<param name="message4">(string) Optional, A prompt or message for the 'next' point</param>
     ///<param name="min">(int) Optional, Default Value: <c>2</c>
-    ///The minimum number of points to require. The default is 2.</param>
+    ///The minimum number of points to require. The default is 2</param>
     ///<param name="max">(int) Optional, Default Value: <c>0</c>
-    ///The maximum number of points to require; 0 for no limit.  The default is 0.</param>
-    ///<returns>(option<Polyline>) an Option of A  polyline .</returns>
+    ///The maximum number of points to require; 0 for no limit.  The default is 0</param>
+    ///<returns>(option<Polyline>) an Option of A  polyline </returns>
     static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
                                         [<OPT;DEF(null:string)>]message1:string,
                                         [<OPT;DEF(null:string)>]message2:string,
@@ -777,13 +777,13 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Pauses for user input of a number.</summary>
+    ///<summary>Pauses for user input of a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
-    ///A prompt or message.</param>
-    ///<param name="number">(float) Optional, A default number value.</param>
-    ///<param name="minimum">(float) Optional, A minimum allowable value.</param>
-    ///<param name="maximum">(float) Optional, A maximum allowable value.</param>
-    ///<returns>(option<float>) an Option of The number input by the user .</returns>
+    ///A prompt or message</param>
+    ///<param name="number">(float) Optional, A default number value</param>
+    ///<param name="minimum">(float) Optional, A minimum allowable value</param>
+    ///<param name="maximum">(float) Optional, A maximum allowable value</param>
+    ///<returns>(option<float>) an Option of The number input by the user </returns>
     static member GetReal(              [<OPT;DEF("Number")>]message:string,
                                         [<OPT;DEF(7e89)>]number:float,
                                         [<OPT;DEF(7e89)>]minimum:float,
@@ -848,7 +848,7 @@ module ExtensionsUserinterface =
     ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
     ///  Note, strings cannot begin with a numeric character</param>
     ///<returns>(option<string>) an Option of The string either input or selected by the user .
-    ///  If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
+    ///  If the user presses the Enter key without typing in a string, an empty string "" is returned</returns>
     static member GetString(
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]defaultValString:string,
@@ -873,7 +873,7 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Display a list of items in a list box dialog.</summary>
+    ///<summary>Display a list of items in a list box dialog</summary>
     ///<param name="items">(string IList) A list of values to select</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -896,8 +896,8 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Displays a message box. A message box contains a message and
-    ///  title, plus any combination of predefined icons and push buttons.</summary>
-    ///<param name="message">(string) A prompt or message.</param>
+    ///  title, plus any combination of predefined icons and push buttons</summary>
+    ///<param name="message">(string) A prompt or message</param>
     ///<param name="buttons">(int) Optional, Default Value: <c>0</c>
     ///Buttons and icon to display as a bit coded flag. Can be a combination of the
     ///  following flags. If omitted, an OK button and no icon is displayed
@@ -918,7 +918,7 @@ module ExtensionsUserinterface =
     ///  0      Application modal. The user must respond to the message box
     ///    before continuing work in the current application.
     ///  4096   System modal. The user must respond to the message box
-    ///    before continuing work in any application.</param>
+    ///    before continuing work in any application</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
     ///The dialog box title</param>
     ///<returns>(option<int>) an Option of indicating which button was clicked:
@@ -928,7 +928,7 @@ module ExtensionsUserinterface =
     ///  4      Retry button was clicked.
     ///  5      Ignore button was clicked.
     ///  6      Yes button was clicked.
-    ///  7      No button was clicked.</returns>
+    ///  7      No button was clicked</returns>
     static member MessageBox(           message:string,
                                         [<OPT;DEF(0)>]buttons:int,
                                         [<OPT;DEF("")>]title:string) : option<int> =
@@ -1012,12 +1012,12 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
-    ///  Note, this function does not open the file.</summary>
-    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///  Note, this function does not open the file</summary>
+    ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
-    ///  If omitted, the filter (*.*) is used.</param>
-    ///<param name="folder">(string) Optional, A default folder.</param>
+    ///  If omitted, the filter (*.*) is used</param>
+    ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
     ///<returns>(option<string>) an Option of file name is successful</returns>
@@ -1042,12 +1042,12 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
-    ///  Note, this function does not open the file.</summary>
-    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///  Note, this function does not open the file</summary>
+    ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
-    ///  If omitted, the filter (*.*) is used.</param>
-    ///<param name="folder">(string) Optional, A default folder.</param>
+    ///  If omitted, the filter (*.*) is used</param>
+    ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
     ///<returns>(option<string array>) an Option of of selected file names</returns>
@@ -1107,15 +1107,15 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
-    ///A prompt message.</param>
+    ///A prompt message</param>
     ///<param name="defaultValNumber">(float) Optional, Default Value: <c>7e89</c>
-    ///A default number.</param>
+    ///A default number</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
-    ///A dialog box title.</param>
+    ///A dialog box title</param>
     ///<param name="minimum">(float) Optional, Default Value: <c>7e89</c>
-    ///A minimum allowable value.</param>
+    ///A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, Default Value: <c>7e89</c>
-    ///A maximum allowable value.</param>
+    ///A maximum allowable value</param>
     ///<returns>(option<float>) an Option of The newly entered number on success</returns>
     static member RealBox(          [<OPT;DEF("")>]message:string,
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,
@@ -1138,12 +1138,12 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Display a save dialog box allowing the user to enter a file name.
-    ///  Note, this function does not save the file.</summary>
-    ///<param name="title">(string) Optional, A dialog box title.</param>
+    ///  Note, this function does not save the file</summary>
+    ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
-    ///  If omitted, the filter (*.*) is used.</param>
-    ///<param name="folder">(string) Optional, A default folder.</param>
+    ///  If omitted, the filter (*.*) is used</param>
+    ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
     ///<returns>(option<string>) an Option of the file name is successful</returns>
@@ -1165,7 +1165,7 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
+    ///<summary>Display a dialog box prompting the user to enter a string value</summary>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="defaultValValue">(string) Optional, A default string value</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1181,7 +1181,7 @@ module ExtensionsUserinterface =
 
 
     [<EXT>]
-    ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
+    ///<summary>Display a text dialog box similar to the one used by the _What command</summary>
     ///<param name="message">(string) Optional, A message</param>
     ///<param name="title">(string) Optional, The message title</param>
     ///<returns>(option<unit>) an Option of in any case</returns>

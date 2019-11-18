@@ -18,9 +18,9 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///  matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member.</summary>
-    ///<param name="objectIds">(Guid seq) List of object identifiers.</param>
-    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers).</param>
+    ///  matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
+    ///<param name="objectIds">(Guid seq) List of object identifiers</param>
+    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the objects</param>
     ///<returns>(Guid ResizeArray) ids identifying the newly transformed objects</returns>
@@ -37,11 +37,11 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///  The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member.</summary>
-    ///<param name="objectId">(Guid) The identifier of the object.</param>
-    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers).</param>
+    ///  The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
-    ///Copy the object.</param>
+    ///Copy the object</param>
     ///<returns>(Guid) The identifier of the transformed object</returns>
     static member TransformObject(  objectId:Guid,
                                     matrix:Transform,
@@ -52,7 +52,7 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Copies object from one location to another, or in-place.</summary>
+    ///<summary>Copies object from one location to another, or in-place</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
     ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///Translation vector to apply</param>
@@ -70,7 +70,7 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
+    ///<summary>Copies one or more objects from one location to another, or in-place</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///List of three numbers or Vector3d representing
@@ -269,7 +269,7 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Verifies that an object is currently selected.</summary>
+    ///<summary>Verifies that an object is currently selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(int) 0, the object is not selected
     ///  1, the object is selected
@@ -283,7 +283,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Determines if an object is closed, solid</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is solid, or a mesh is closed., False otherwise.</returns>
+    ///<returns>(bool) True if the object is solid, or a mesh is closed., False otherwise</returns>
     static member IsObjectSolid(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry
@@ -308,8 +308,8 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Verifies an object is visible in a view</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<param name="view">(string) Optional, Default Value: The title of the view.  If omitted, the current active view is used.</param>
-    ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
+    ///<param name="view">(string) Optional, Default Value: The title of the view.  If omitted, the current active view is used</param>
+    ///<returns>(bool) True if the object is visible in the specified view, otherwise False</returns>
     static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
@@ -319,7 +319,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Locks a single object. Locked objects are visible, and they can be
-    ///  snapped to. But, they cannot be selected.</summary>
+    ///  snapped to. But, they cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member LockObject(objectId:Guid) : bool =
@@ -328,7 +328,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Locks one or more objects. Locked objects are visible, and they can be
-    ///  snapped to. But, they cannot be selected.</summary>
+    ///  snapped to. But, they cannot be selected</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
     ///<returns>(int) number of objects locked</returns>
     static member LockObjects(objectIds:Guid seq) : int =
@@ -455,7 +455,7 @@ module ExtensionsObject =
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
     ///<param name="objectId">(Guid) Id or ids of object</param>
-    ///<param name="color">(Drawing.Color) The new color value.</param>
+    ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -468,7 +468,7 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Returns the color source of an object.</summary>
+    ///<summary>Returns the color source of an object</summary>
     ///<param name="objectId">(Guid) Single identifier of list of identifiers</param>
     ///<returns>(int) The current color source
     ///  0 = color from layer
@@ -479,7 +479,7 @@ module ExtensionsObject =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhobj.Attributes.ColorSource)
 
-    ///<summary>Modifies the color source of an object.</summary>
+    ///<summary>Modifies the color source of an object</summary>
     ///<param name="objectId">(Guid) Single identifier of list of identifiers</param>
     ///<param name="source">(int) New color source
     ///  0 = color from layer
@@ -500,7 +500,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Returns a short text description of an object</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(string) A short text description of the object .</returns>
+    ///<returns>(string) A short text description of the object </returns>
     static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
@@ -666,12 +666,12 @@ module ExtensionsObject =
     ///<summary>Returns the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
-    /// indices into this array.</summary>
+    /// indices into this array</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) If the return value of ObjectMaterialSource is "material by object", then
     ///  the return value of this function is the index of the object's rendering
     ///  material. A material index of -1 indicates no material has been assigned,
-    ///  and that Rhino's internal default material has been assigned to the object.</returns>
+    ///  and that Rhino's internal default material has been assigned to the object</returns>
     static member ObjectMaterialIndex(objectId:Guid) : int = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.MaterialIndex
@@ -679,7 +679,7 @@ module ExtensionsObject =
     ///<summary>Changes the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
-    /// indices into this array.</summary>
+    /// indices into this array</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
@@ -691,7 +691,7 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Returns the rendering material source of an object.</summary>
+    ///<summary>Returns the rendering material source of an object</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<returns>(int) The current rendering material source
     ///  0 = Material from layer
@@ -703,7 +703,7 @@ module ExtensionsObject =
         int(rhinoobject.Attributes.MaterialSource)
 
 
-    ///<summary>Modifies the rendering material source of an object.</summary>
+    ///<summary>Modifies the rendering material source of an object</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<param name="source">(int) The new rendering material source. If omitted and a single
     ///  object is provided in objectId, then the current material source is
@@ -755,7 +755,7 @@ module ExtensionsObject =
 
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="color">(Drawing.Color) New print color. If omitted, the current color is returned.</param>
+    ///<param name="color">(Drawing.Color) New print color. If omitted, the current color is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -809,7 +809,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="width">(float) New print width value in millimeters, where width=0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
-    ///  but does not show on print).</param>
+    ///  but does not show on print)</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -948,7 +948,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
-    ///  scale transformation. Scaling is based on the WorldXY plane.</summary>
+    ///  scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -968,7 +968,7 @@ module ExtensionsObject =
         res
 
     [<EXT>]
-    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY plane.</summary>
+    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -988,7 +988,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
-    ///  uniform scale transformation. Scaling is based on the WorldXY plane.</summary>
+    ///  uniform scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1011,7 +1011,7 @@ module ExtensionsObject =
         rc
 
     [<EXT>]
-    ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY plane.</summary>
+    ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1164,7 +1164,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Unlocks an object. Locked objects are visible, and can be snapped to,
-    ///  but they cannot be selected.</summary>
+    ///  but they cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member UnlockObject(objectId:Guid) : bool =
@@ -1173,7 +1173,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
-    ///  snapped to, but they cannot be selected.</summary>
+    ///  snapped to, but they cannot be selected</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
     ///<returns>(int) number of objects unlocked</returns>
     static member UnlockObjects(objectIds:Guid seq) : int =
@@ -1196,8 +1196,8 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Unselects one or more selected objects.</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect.</param>
+    ///<summary>Unselects one or more selected objects</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnselectObjects(objectIds:Guid seq) : unit =
         for objectId in objectIds do

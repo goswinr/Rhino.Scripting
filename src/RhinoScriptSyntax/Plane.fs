@@ -63,18 +63,18 @@ module ExtensionsPlane =
         rc
 
     [<EXT>]
-    ///<summary>Returns the point on a plane that is closest to a test point.</summary>
+    ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
-    ///<param name="point">(Point3d) The 3-D point to test.</param>
+    ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(Point3d) the 3-D point</returns>
     static member PlaneClosestPoint( plane:Plane,  point:Point3d) : Point3d =
         plane.ClosestPoint(point)
 
     [<EXT>]
 
-    ///<summary>Returns the point on a plane that is closest to a test point.</summary>
+    ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
-    ///<param name="point">(Point3d) The 3-D point to test.</param>
+    ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(float,float) The u and v paramter on the plane of the closest point</returns>
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s,t = plane.ClosestParameter(point)
@@ -84,10 +84,10 @@ module ExtensionsPlane =
 
     [<EXT>]
     ///<summary>Intersect an infinite plane and a curve object</summary>
-    ///<param name="plane">(Plane) The plane to intersect.</param>
+    ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-    ///The intersection tolerance. If omitted, the document's absolute tolerance is used.</param>
+    ///The intersection tolerance. If omitted, the document's absolute tolerance is used</param>
     ///<returns>(ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float >) a list of intersection information tuple .  The list will contain one or more of the following tuple:
     ///  Element Type        Description
     ///  [0]       Number      The intersection event type, either Point (1) or Overlap (2).
@@ -110,7 +110,7 @@ module ExtensionsPlane =
     ///  [9]       Number      If the event type is Point (1), then the U plane parameter.
     ///    If the event type is Overlap (2), then the U plane parameter for curve at (n, 6).
     ///  [10]      Number      If the event type is Point (1), then the V plane parameter.
-    ///    If the event type is Overlap (2), then the V plane parameter for curve at (n, 6).</returns>
+    ///    If the event type is Overlap (2), then the V plane parameter for curve at (n, 6)</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
@@ -150,8 +150,8 @@ module ExtensionsPlane =
 
 
     [<EXT>]
-    ///<summary>Returns a plane that was fit through an array of 3D points.</summary>
-    ///<param name="points">(Point3d seq) An array of 3D points.</param>
+    ///<summary>Returns a plane that was fit through an array of 3D points</summary>
+    ///<param name="points">(Point3d seq) An array of 3D points</param>
     ///<returns>(Plane) The plane</returns>
     static member PlaneFitFromPoints(points:Point3d seq) : Plane =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
@@ -161,14 +161,14 @@ module ExtensionsPlane =
 
 
     [<EXT>]
-    ///<summary>Construct a plane from a point, and two vectors in the plane.</summary>
-    ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane.</param>
+    ///<summary>Construct a plane from a point, and two vectors in the plane</summary>
+    ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
     ///<param name="xAxis">(Vector3d) A non-zero 3D vector in the plane that determines the X axis
-    ///  direction.</param>
+    ///  direction</param>
     ///<param name="yAxis">(Vector3d) A non-zero 3D vector not parallel to xAxis that is used
     ///  to determine the Y axis direction. Note, yAxis does not
-    ///  have to be perpendicular to xAxis.</param>
-    ///<returns>(Plane) The plane .</returns>
+    ///  have to be perpendicular to xAxis</param>
+    ///<returns>(Plane) The plane </returns>
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
                                   yAxis:Vector3d) : Plane =
@@ -179,12 +179,12 @@ module ExtensionsPlane =
 
 
     [<EXT>]
-    ///<summary>Creates a plane from an origin point and a normal direction vector.</summary>
-    ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane.</param>
-    ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane.</param>
+    ///<summary>Creates a plane from an origin point and a normal direction vector</summary>
+    ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
+    ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane</param>
     ///<param name="xaxis">(Vector3d) Optional, Default Value: <c>Vector3d()</c>
     ///Optional vector defining the plane's x-axis</param>
-    ///<returns>(Plane) The plane .</returns>
+    ///<returns>(Plane) The plane </returns>
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
                                    [<OPT;DEF(Vector3d())>]xaxis:Vector3d) : Plane =
@@ -241,7 +241,7 @@ module ExtensionsPlane =
     ///  [0]       number     The type of intersection, where 0 = point and 1 = circle.
     ///  [1]      plane  If a point intersection, the a Point3d identifying the 3-D intersection location is plane.Origin
     ///                  If a circle intersection, then the circle's plane. The origin of the plane will be the center point of the circle
-    ///  [2]       number     If a circle intersection, then the radius of the circle.</returns>
+    ///  [2]       number     If a circle intersection, then the radius of the circle</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
                                            sphereRadius:float) : int * Plane * float =

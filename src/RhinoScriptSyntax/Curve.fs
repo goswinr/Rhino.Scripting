@@ -19,7 +19,7 @@ module ExtensionsCurve =
     ///<summary>Adds an arc curve to the document</summary>
     ///<param name="plane">(Plane) Plane on which the arc will lie. The origin of the plane will be
     ///  the center point of the arc. x-axis of the plane defines the 0 angle
-    ///  direction.</param>
+    ///  direction</param>
     ///<param name="radius">(float) Radius of the arc</param>
     ///<param name="angleDegrees">(float) Interval of arc in degrees</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
@@ -195,7 +195,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Adds an interpolated curve object that lies on a specified
     ///  surface.  Note, this function will not create periodic curves,
-    ///  but it will create closed curves.</summary>
+    ///  but it will create closed curves</summary>
     ///<param name="surfaceId">(Guid) Identifier of the surface to create the curve on</param>
     ///<param name="points">(Point3d seq) List of 3D points that lie on the specified surface.
     ///  The list must contain at least 2 points</param>
@@ -214,7 +214,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Adds an interpolated curve object based on surface parameters,
     ///  that lies on a specified surface. Note, this function will not
-    ///  create periodic curves, but it will create closed curves.</summary>
+    ///  create periodic curves, but it will create closed curves</summary>
     ///<param name="surfaceId">(Guid) Identifier of the surface to create the curve on</param>
     ///<param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain
     ///  at least 2 sets of parameters</param>
@@ -233,10 +233,10 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Adds an interpolated curve object to the document. Options exist to make
     ///  a periodic curve or to specify the tangent at the endpoints. The resulting
-    ///  curve is a non-rational NURBS curve of the specified degree.</summary>
+    ///  curve is a non-rational NURBS curve of the specified degree</summary>
     ///<param name="points">(Point3d seq) A list containing 3D points to interpolate. For periodic curves,
     ///  if the final point is a duplicate of the initial point, it is
-    ///  ignored. The number of control points must be >= (degree+1).</param>
+    ///  ignored. The number of control points must be >= (degree+1)</param>
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>
     ///The degree of the curve (must be >=1).
     ///  Periodic curves must have a degree >= 2. For knotstyle = 1 or 2,
@@ -247,11 +247,11 @@ module ExtensionsCurve =
     ///  2 Sqrt (chord length).  Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///  3 Periodic with uniform spacing.
     ///  4 Periodic with chord length spacing.  Requires an odd degree value.
-    ///  5 Periodic with sqrt (chord length) spacing.  Requires an odd degree value.</param>
+    ///  5 Periodic with sqrt (chord length) spacing.  Requires an odd degree value</param>
     ///<param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
-    ///  beginning of the curve. If the curve is periodic, this argument must be omitted.</param>
+    ///  beginning of the curve. If the curve is periodic, this argument must be omitted</param>
     ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
-    ///  end of the curve. If the curve is periodic, this argument must be omitted.</param>
+    ///  end of the curve. If the curve is periodic, this argument must be omitted</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0)>]knotstyle:int, [<OPT;DEF(Vector3d())>]startTangent:Vector3d, [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
         let endTangent   = if endTangent.IsZero then Vector3d.Unset else endTangent
@@ -266,7 +266,7 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Adds a line curve to the current model.</summary>
+    ///<summary>Adds a line curve to the current model</summary>
     ///<param name="start">(Point3d) Startpoint of the line</param>
     ///<param name="ende">(Point3d) Endpoint of the line</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
@@ -324,7 +324,7 @@ module ExtensionsCurve =
     ///<param name="points">(Point3d seq) List of 3D points. Duplicate, consecutive points will be
     ///  removed. The list must contain at least two points. If the
     ///  list contains less than four points, then the first point and
-    ///  last point must be different.</param>
+    ///  last point must be different</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
@@ -361,7 +361,7 @@ module ExtensionsCurve =
     ///<param name="turns">(float) Number of turns</param>
     ///<param name="radius0">(float) Starting radius of spiral</param>
     ///<param name="radius1">(float) Optional, Default Value: <c>0.0</c>
-    ///Ending radius of spiral. If omitted, the starting radius is used for the complete spiral.</param>
+    ///Ending radius of spiral. If omitted, the starting radius is used for the complete spiral</param>
     ///<returns>(Guid) objectId of new curve on success</returns>
     static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid =
         let dir = point1 - point0
@@ -394,11 +394,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the angle of an arc curve object.</summary>
+    ///<summary>Returns the angle of an arc curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///Identifies the curve segment if curveId identifies a polycurve</param>
-    ///<returns>(float) The angle in degrees .</returns>
+    ///<returns>(float) The angle in degrees </returns>
     static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
@@ -412,7 +412,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Point3d) The 3D center point of the arc .</returns>
+    ///<returns>(Point3d) The 3D center point of the arc </returns>
     static member ArcCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
@@ -426,7 +426,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Point3d) The 3D mid point of the arc .</returns>
+    ///<returns>(Point3d) The 3D mid point of the arc </returns>
     static member ArcMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
@@ -440,7 +440,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(float) The radius of the arc .</returns>
+    ///<returns>(float) The radius of the arc </returns>
     static member ArcRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
@@ -455,7 +455,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Point3d) The 3D center point of the circle .</returns>
+    ///<returns>(Point3d) The 3D center point of the circle </returns>
     static member CircleCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
@@ -469,7 +469,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Point3d) The 3D plane at the center point of the circle .</returns>
+    ///<returns>(Point3d) The 3D plane at the center point of the circle </returns>
     static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
@@ -486,7 +486,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(float) The circumference of the circle .</returns>
+    ///<returns>(float) The circumference of the circle </returns>
     static member CircleCircumference(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
@@ -500,7 +500,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(float) The radius of the circle .</returns>
+    ///<returns>(float) The radius of the circle </returns>
     static member CircleRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
@@ -552,16 +552,16 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>5.0</c>
     ///The maximum angle between curve tangents at line endpoints.
-    ///  If omitted, the angle tolerance is set to 5.0.</param>
+    ///  If omitted, the angle tolerance is set to 5.0</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.01</c>
-    ///The distance tolerance at segment midpoints. If omitted, the tolerance is set to 0.01.</param>
+    ///The distance tolerance at segment midpoints. If omitted, the tolerance is set to 0.01</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///Delete the curve object specified by curveId. If omitted, curveId will not be deleted.</param>
+    ///Delete the curve object specified by curveId. If omitted, curveId will not be deleted</param>
     ///<param name="minEdgeLength">(float) Optional, Default Value: <c>0.0</c>
     ///Minimum segment length. Ignored if 0.0 ?</param>
     ///<param name="maxEdgeLength">(float) Optional, Default Value: <c>0.0</c>
     ///Maximum segment length. Ignored if 0.0 ?</param>
-    ///<returns>(Guid) The new curve .</returns>
+    ///<returns>(Guid) The new curve </returns>
     static member ConvertCurveToPolyline(curveId:Guid, [<OPT;DEF(0.0)>]angleTolerance:float, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]minEdgeLength:float, [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let angleTolerance0 = toRadians (ifZero1 angleTolerance 0.5 )
@@ -585,13 +585,13 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the point on the curve that is a specified arc length
-    ///  from the start of the curve.</summary>
+    ///  from the start of the curve</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
-    ///<param name="length">(float) The arc length from the start of the curve to evaluate.</param>
+    ///<param name="length">(float) The arc length from the start of the curve to evaluate</param>
     ///<param name="fromStart">(bool) Optional, Default Value: <c>true</c>
     ///If not specified or True, then the arc length point is
     ///  calculated from the start of the curve. If False, the arc length
-    ///  point is calculated from the end of the curve.</param>
+    ///  point is calculated from the end of the curve</param>
     ///<returns>(Point3d) on curve</returns>
     static member CurveArcLengthPoint(curveId:Guid, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -616,9 +616,9 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns area of closed planar curves. The results are based on the
-    ///  current drawing units.</summary>
-    ///<param name="curveId">(Guid) The identifier of a closed, planar curve object.</param>
-    ///<returns>(float) The area.</returns>
+    ///  current drawing units</summary>
+    ///<param name="curveId">(Guid) The identifier of a closed, planar curve object</param>
+    ///<returns>(float) The area</returns>
     static member CurveArea(curveId:Guid) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = Doc.ModelAbsoluteTolerance
@@ -629,9 +629,9 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns area centroid of closed, planar curves. The results are based
-    ///  on the current drawing units.</summary>
-    ///<param name="curveId">(Guid) The identifier of a closed, planar curve object.</param>
-    ///<returns>(Point3d ) The 3d centroid point.</returns>
+    ///  on the current drawing units</summary>
+    ///<param name="curveId">(Guid) The identifier of a closed, planar curve object</param>
+    ///<returns>(Point3d ) The 3d centroid point</returns>
     static member CurveAreaCentroid(curveId:Guid) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = Doc.ModelAbsoluteTolerance
@@ -689,12 +689,12 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Calculates the difference between two closed, planar curves and
-    ///  adds the results to the document. Note, curves must be coplanar.</summary>
-    ///<param name="curveA">(Guid) Identifier of the first curve object.</param>
-    ///<param name="curveB">(Guid) Identifier of the second curve object.</param>
+    ///  adds the results to the document. Note, curves must be coplanar</summary>
+    ///<param name="curveA">(Guid) Identifier of the first curve object</param>
+    ///<param name="curveB">(Guid) Identifier of the second curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///A positive tolerance value, or None for the doc default.</param>
-    ///<returns>(Guid List) The identifiers of the new objects , .</returns>
+    ///A positive tolerance value, or None for the doc default</param>
+    ///<returns>(Guid List) The identifiers of the new objects , </returns>
     static member CurveBooleanDifference(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
@@ -716,12 +716,12 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Calculates the intersection of two closed, planar curves and adds
-    ///  the results to the document. Note, curves must be coplanar.</summary>
-    ///<param name="curveA">(Guid) Identifier of the first curve object.</param>
-    ///<param name="curveB">(Guid) Identifier of the second curve object.</param>
+    ///  the results to the document. Note, curves must be coplanar</summary>
+    ///<param name="curveA">(Guid) Identifier of the first curve object</param>
+    ///<param name="curveB">(Guid) Identifier of the second curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///A positive tolerance value, or None for the doc default.</param>
-    ///<returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
+    ///A positive tolerance value, or None for the doc default</param>
+    ///<returns>(Guid ResizeArray) The identifiers of the new objects</returns>
     static member CurveBooleanIntersection(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
@@ -743,11 +743,11 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Calculate the union of two or more closed, planar curves and
-    ///  add the results to the document. Note, curves must be coplanar.</summary>
+    ///  add the results to the document. Note, curves must be coplanar</summary>
     ///<param name="curveIds">(Guid seq) List of two or more close planar curves identifiers</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///A positive tolerance value, or None for the doc default.</param>
-    ///<returns>(Guid ResizeArray) The identifiers of the new objects.</returns>
+    ///A positive tolerance value, or None for the doc default</param>
+    ///<returns>(Guid ResizeArray) The identifiers of the new objects</returns>
     static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let inCurves = resizeArray { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         if inCurves.Count < 2 then failwithf "curveBooleanUnion:curveIds must have at least 2 curves %A" curveIds
@@ -767,13 +767,13 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Intersects a curve object with a brep object. Note, unlike the
-    ///  CurveSurfaceIntersection function, this function works on trimmed surfaces.</summary>
+    ///  CurveSurfaceIntersection function, this function works on trimmed surfaces</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="brepId">(Guid) Identifier of a brep object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Distance tolerance at segment midpoints.
-    ///  If omitted, the current absolute tolerance is used.</param>
-    ///<returns>(Guid ResizeArray * Guid ResizeArray) List of Curves and List of points .</returns>
+    ///  If omitted, the current absolute tolerance is used</param>
+    ///<returns>(Guid ResizeArray * Guid ResizeArray) List of Curves and List of points </returns>
     static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray * Guid ResizeArray=
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
@@ -800,7 +800,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Returns the 3D point locations on two objects where they are closest to
     ///  each other. Note, this function provides similar functionality to that of
-    ///  Rhino's ClosestPt command.</summary>
+    ///  Rhino's ClosestPt command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object to test</param>
     ///<param name="curveIds">(Guid seq) List of identifiers of point cloud, curve, surface, or
     ///  polysurface to test against</param>
@@ -808,7 +808,7 @@ module ExtensionsCurve =
     ///  The elements are as follows:
     ///    [0]    The identifier of the closest object.
     ///    [1]    The 3-D point that is closest to the closest object.
-    ///    [2]    The 3-D point that is closest to the test curve.</returns>
+    ///    [2]    The 3-D point that is closest to the test curve</returns>
     static member CurveClosestObject(curveId:Guid, curveIds:Guid seq) : Guid * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let geometry = ResizeArray()
@@ -825,7 +825,7 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns parameter of the point on a curve that is closest to a test point.</summary>
+    ///<summary>Returns parameter of the point on a curve that is closest to a test point</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
@@ -839,7 +839,7 @@ module ExtensionsCurve =
         !t
 
     [<EXT>]
-    ///<summary>Returns the point on a curve that is closest to a test point.</summary>
+    ///<summary>Returns the point on a curve that is closest to a test point</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
@@ -855,11 +855,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the 3D point locations calculated by contouring a curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of a curve object.</param>
-    ///<param name="startPoint">(Point3d) 3D starting point of a center line.</param>
-    ///<param name="endPoint">(Point3d) 3D ending point of a center line.</param>
-    ///<param name="interval">(float) The distance between contour curves.</param>
+    ///<summary>Returns the 3D point locations calculated by contouring a curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of a curve object</param>
+    ///<param name="startPoint">(Point3d) 3D starting point of a center line</param>
+    ///<param name="endPoint">(Point3d) 3D ending point of a center line</param>
+    ///<param name="interval">(float) The distance between contour curves</param>
     ///<returns>(Point3d array) A list of 3D points, one for each contour</returns>
     static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -895,13 +895,13 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Calculates intersection of two curve objects.</summary>
-    ///<param name="curveA">(Guid) Identifier of the first curve object.</param>
+    ///<summary>Calculates intersection of two curve objects</summary>
+    ///<param name="curveA">(Guid) Identifier of the first curve object</param>
     ///<param name="curveB">(Guid) Optional, Identifier of the second curve object. If omitted, then a
-    ///  self-intersection test will be performed on curveA.</param>
+    ///  self-intersection test will be performed on curveA</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///  Absolute tolerance in drawing units. If omitted,
-    ///  the document's current absolute tolerance is used.</param>
+    ///  the document's current absolute tolerance is used</param>
     ///<returns>( a List of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float)
     ///  List of tuples: containing intersection information .
     ///  The list will contain one or more of the following elements:
@@ -930,7 +930,7 @@ module ExtensionsCurve =
     ///      second curve parameter range.
     ///    [n][8]  Number   If the event type is Point (1), then the second curve parameter.
     ///      If the event type is Overlap (2), then the end value of the
-    ///      second curve parameter range.</returns>
+    ///      second curve parameter range</returns>
     static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
         let curve1 = RhinoScriptSyntax.CoerceCurve curveA
         let curve2 = if curveB=Guid.Empty then curve1 else RhinoScriptSyntax.CoerceCurve curveB
@@ -956,11 +956,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the degree of a curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of a curve object.</param>
+    ///<summary>Returns the degree of a curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///The curve segment index if `curveId` identifies a polycurve.</param>
-    ///<returns>(int) The degree of the curve .</returns>
+    ///The curve segment index if `curveId` identifies a polycurve</param>
+    ///<returns>(int) The degree of the curve </returns>
     static member CurveDegree(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.Degree
@@ -968,8 +968,8 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the minimum and maximum deviation between two curve objects</summary>
-    ///<param name="curveA">(Guid) first Curve.</param>
-    ///<param name="curveB">(Guid) second Curve.</param>
+    ///<param name="curveA">(Guid) first Curve</param>
+    ///<param name="curveB">(Guid) second Curve</param>
     ///<returns>(float * float * float * float * float * float) of deviation information on success
     ///  [0] = curve_a parameter at maximum overlap distance point
     ///  [1] = curve_b parameter at maximum overlap distance point
@@ -989,10 +989,10 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the dimension of a curve object</summary>
-    ///<param name="curveId">(Guid) Identifier of a curve object.</param>
+    ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///  The curve segment if curveId identifies a polycurve.</param>
-    ///<returns>(int) The dimension of the curve . .</returns>
+    ///  The curve segment if curveId identifies a polycurve</param>
+    ///<returns>(int) The dimension of the curve . </returns>
     static member CurveDim(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.Dimension
@@ -1002,10 +1002,10 @@ module ExtensionsCurve =
     ///<summary>Tests if two curve objects are generally in the same direction or if they
     ///  would be more in the same direction if one of them were flipped. When testing
     ///  curve directions, both curves must be either open or closed - you cannot test
-    ///  one open curve and one closed curve.</summary>
+    ///  one open curve and one closed curve</summary>
     ///<param name="curveA">(Guid) Identifier of first curve object</param>
     ///<param name="curveB">(Guid) Identifier of second curve object</param>
-    ///<returns>(bool) True if the curve directions match, otherwise False.</returns>
+    ///<returns>(bool) True if the curve directions match, otherwise False</returns>
     static member CurveDirectionsMatch(curveA:Guid, curveB:Guid) : bool =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
@@ -1014,7 +1014,7 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Search for a derivatitive, tangent, or curvature discontinuity in
-    ///  a curve object.</summary>
+    ///  a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of curve object</param>
     ///<param name="style">(int) The type of continuity to test for. The types of
     ///  continuity are as follows:
@@ -1044,11 +1044,11 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the domain of a curve object
-    ///  as an indexable object with two elements.</summary>
+    ///  as an indexable object with two elements</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///The curve segment index if `curveId` identifies a polycurve.</param>
-    ///<returns>(Interval) the domain of the curve .</returns>
+    ///The curve segment index if `curveId` identifies a polycurve</param>
+    ///<returns>(Interval) the domain of the curve </returns>
     static member CurveDomain(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Interval =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.Domain
@@ -1056,7 +1056,7 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the edit, or Greville, points of a curve object.
-    ///  For each curve control point, there is a corresponding edit point.</summary>
+    ///  For each curve control point, there is a corresponding edit point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="returnParameters">(bool) Optional, Default Value: <c>false</c>
     ///If True, return as a list of curve parameters.
@@ -1076,7 +1076,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Point3d) The 3d endpoint of the curve .</returns>
+    ///<returns>(Point3d) The 3d endpoint of the curve </returns>
     static member CurveEndPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.PointAtEnd
@@ -1089,14 +1089,14 @@ module ExtensionsCurve =
     ///  tangent to curve curve1 at point1. Of all possible fillet points, this
     ///  function returns the one which is the closest to the base point base_point_0,
     ///  base_point_1. Distance from the base point is measured by the sum of arc
-    ///  lengths along the two curves.</summary>
-    ///<param name="curveA">(Guid) Identifier of the first curve object.</param>
-    ///<param name="curveB">(Guid) Identifier of the second curve object.</param>
-    ///<param name="radius">(float) The fillet radius.</param>
+    ///  lengths along the two curves</summary>
+    ///<param name="curveA">(Guid) Identifier of the first curve object</param>
+    ///<param name="curveB">(Guid) Identifier of the second curve object</param>
+    ///<param name="radius">(float) The fillet radius</param>
     ///<param name="basePointA">(Point3d) Optional, The base point on the first curve.
-    ///  If omitted, the starting point of the curve is used.</param>
+    ///  If omitted, the starting point of the curve is used</param>
     ///<param name="basePointB">(Point3d) Optional, The base point on the second curve. If omitted,
-    ///  the starting point of the curve is used.</param>
+    ///  the starting point of the curve is used</param>
     ///<returns>(Point3d * Point3d * Plane)
     ///  . The list elements are as follows:
     ///    [0]    A point on the first curve at which to cut (point).
@@ -1110,7 +1110,7 @@ module ExtensionsCurve =
         //<param name="returnPoints">(bool) Optional, Default Value: <c>true</c>
         //If True (Default), then fillet points are
         //  returned. Otherwise, a fillet curve is created and
-        //  it's identifier is returned.</param>
+        //  it's identifier is returned</param>
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
@@ -1145,12 +1145,12 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the plane at a parameter of a curve. The plane is based on the
-    ///  tangent and curvature vectors at a parameter.</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object.</param>
-    ///<param name="parameter">(float) Parameter to evaluate.</param>
+    ///  tangent and curvature vectors at a parameter</summary>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
+    ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Plane) The plane at the specified parameter .</returns>
+    ///<returns>(Plane) The plane at the specified parameter </returns>
     static member CurveFrame(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
@@ -1169,11 +1169,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the knot count of a curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object.</param>
+    ///<summary>Returns the knot count of a curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///The curve segment if `curveId` identifies a polycurve.</param>
-    ///<returns>(int) The number of knots .</returns>
+    ///The curve segment if `curveId` identifies a polycurve</param>
+    ///<returns>(int) The number of knots </returns>
     static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
@@ -1183,10 +1183,10 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the knots, or knot vector, of a curve object</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object.</param>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///The curve segment index if `curveId` identifies a polycurve.</param>
-    ///<returns>(float List / ResizeArray) knot values .</returns>
+    ///The curve segment index if `curveId` identifies a polycurve</param>
+    ///<returns>(float List / ResizeArray) knot values </returns>
     static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : ResizeArray<float> =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
@@ -1196,15 +1196,15 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the length of a curve object.</summary>
+    ///<summary>Returns the length of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
     ///<param name="subDomain">(Interval) Optional,   List of two numbers identifying the sub-domain of the
     ///  curve on which the calculation will be performed. The two parameters
     ///  (sub-domain) must be non-decreasing. If omitted, the length of the
-    ///  entire curve is returned.</param>
-    ///<returns>(float) The length of the curve .</returns>
+    ///  entire curve is returned</param>
+    ///<returns>(float) The length of the curve </returns>
     static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         if subDomain.T0=0.0 && subDomain.T1=0.0 then curve.GetLength() else curve.GetLength(subDomain)
@@ -1214,11 +1214,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the mid point of a curve object.</summary>
+    ///<summary>Returns the mid point of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Point3d) The 3D midpoint of the curve .</returns>
+    ///<returns>(Point3d) The 3D midpoint of the curve </returns>
     static member CurveMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  rc, t = curve.NormalizedLengthParameter(0.5)
@@ -1227,11 +1227,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the normal direction of the plane in which a planar curve object lies.</summary>
+    ///<summary>Returns the normal direction of the plane in which a planar curve object lies</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment if curveId identifies a polycurve</param>
-    ///<returns>(Vector3d) The 3D normal vector .</returns>
+    ///<returns>(Vector3d) The 3D normal vector </returns>
     static member CurveNormal(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let tol = Doc.ModelAbsoluteTolerance
@@ -1277,11 +1277,11 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Returns the plane in which a planar curve lies. Note, this function works
-    ///  only on planar curves.</summary>
+    ///  only on planar curves</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Plane) The plane in which the curve lies .</returns>
+    ///<returns>(Plane) The plane in which the curve lies </returns>
     static member CurvePlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let tol = Doc.ModelAbsoluteTolerance
@@ -1292,11 +1292,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the control points count of a curve object.</summary>
+    ///<summary>Returns the control points count of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment if `curveId` identifies a polycurve</param>
-    ///<returns>(int) Number of control points .</returns>
+    ///<returns>(int) Number of control points </returns>
     static member CurvePointCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable nc = curve.ToNurbsCurve()
@@ -1307,7 +1307,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Returns the control points, or control vertices, of a curve object.
     ///  If the curve is a rational NURBS curve, the euclidean control vertices
-    ///  are returned.</summary>
+    ///  are returned</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment if `curveId` identifies a polycurve</param>
@@ -1320,12 +1320,12 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the radius of curvature at a point on a curve.</summary>
+    ///<summary>Returns the radius of curvature at a point on a curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment if curveId identifies a polycurve</param>
-    ///<returns>(float) The radius of curvature at the point on the curve .</returns>
+    ///<returns>(float) The radius of curvature at the point on the curve </returns>
     static member CurveRadius(curveId:Guid, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable rc, t = curve.ClosestPoint(testPoint)//, 0.0)
@@ -1337,12 +1337,12 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Adjusts the seam, or start/end, point of a closed curve.</summary>
+    ///<summary>Adjusts the seam, or start/end, point of a closed curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="parameter">(float) The parameter of the new start/end point.
     ///  Note, if successful, the resulting curve's
-    ///  domain will start at `parameter`.</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>
+    ///  domain will start at `parameter`</param>
+    ///<returns>(bool) True or False indicating success or failure</returns>
     static member CurveSeam(curveId:Guid, parameter:float) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if (not <| curve.IsClosed || not <| curve.Domain.IncludesParameter(parameter)) then
@@ -1364,7 +1364,7 @@ module ExtensionsCurve =
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
     ///<param name="point">(Point3d) Optional, New start point</param>
-    ///<returns>(Point3d) The 3D starting point of the curve .</returns>
+    ///<returns>(Point3d) The 3D starting point of the curve </returns>
     static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.PointAtStart
@@ -1384,17 +1384,17 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Calculates intersection of a curve object with a surface object.
-    ///  Note, this function works on the untrimmed portion of the surface.</summary>
-    ///<param name="curveId">(Guid) The identifier of the first curve object.</param>
+    ///  Note, this function works on the untrimmed portion of the surface</summary>
+    ///<param name="curveId">(Guid) The identifier of the first curve object</param>
     ///<param name="surfaceId">(Guid) The identifier of the second curve object. If omitted,
-    ///  the a self-intersection test will be performed on curve.</param>
+    ///  the a self-intersection test will be performed on curve</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///The absolute tolerance in drawing units. If omitted,
-    ///  the document's current absolute tolerance is used.</param>
+    ///  the document's current absolute tolerance is used</param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
     ///Angle tolerance in degrees. The angle
     ///  tolerance is used to determine when the curve is tangent to the
-    ///  surface. If omitted, the document's current angle tolerance is used.</param>
+    ///  surface. If omitted, the document's current angle tolerance is used</param>
     ///<returns>(List of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
     ///  The list will contain one or more of the following elements:
     ///    Element Type     Description
@@ -1428,7 +1428,7 @@ module ExtensionsCurve =
     ///      for curve at (n, 6).
     ///    [n][10] Number   If the event type is Point(1), then the V surface parameter.
     ///      If the event type is Overlap(2), then the V surface parameter
-    ///      for curve at (n, 6).</returns>
+    ///      for curve at (n, 6)</returns>
     static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let surface = RhinoScriptSyntax.CoerceSurface surfaceId
@@ -1450,12 +1450,12 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns a 3D vector that is the tangent to a curve at a parameter.</summary>
+    ///<summary>Returns a 3D vector that is the tangent to a curve at a parameter</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Vector3d) A 3D vector .</returns>
+    ///<returns>(Vector3d) A 3D vector </returns>
     static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable rc = Point3d.Unset
@@ -1470,7 +1470,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
     ///The curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(float) The weight values of the curve .</returns>
+    ///<returns>(float) The weight values of the curve </returns>
     static member CurveWeights(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) :  float ResizeArray =
         let nc =
             match RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex) with
@@ -1482,10 +1482,10 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Divides a curve object into a specified number of segments.</summary>
+    ///<summary>Divides a curve object into a specified number of segments</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segments">(int) The number of segments.</param>
-    ///<returns>(float array) Array containing division curve parameters.</returns>
+    ///<param name="segments">(int) The number of segments</param>
+    ///<returns>(float array) Array containing division curve parameters</returns>
     static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let pts = ref (Array.zeroCreate (segments+1))
@@ -1495,10 +1495,10 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Divides a curve object into a specified number of segments.</summary>
+    ///<summary>Divides a curve object into a specified number of segments</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segments">(int) The number of segments.</param>
-    ///<returns>( float array ) array containing 3D division points.</returns>
+    ///<param name="segments">(int) The number of segments</param>
+    ///<returns>( float array ) array containing 3D division points</returns>
     static member DivideCurve(curveId:Guid, segments:int) :  float array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let rc = curve.DivideByCount(segments, true)
@@ -1507,10 +1507,10 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Divides a curve such that the linear distance between the points is equal.</summary>
+    ///<summary>Divides a curve such that the linear distance between the points is equal</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="distance">(float) Linear distance between division points</param>
-    ///<returns>(float array) array containing 3D division points.</returns>
+    ///<returns>(float array) array containing 3D division points</returns>
     static member DivideCurveEquidistant(curveId:Guid, distance:float) : array<Point3d> =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let  points = curve.DivideEquidistant(distance)
@@ -1524,10 +1524,10 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Divides a curve object into segments of a specified length.</summary>
+    ///<summary>Divides a curve object into segments of a specified length</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="length">(float) The length of each segment.</param>
-    ///<returns>(Point3d ResizeArray) a list containing division points.</returns>
+    ///<param name="length">(float) The length of each segment</param>
+    ///<returns>(Point3d ResizeArray) a list containing division points</returns>
     static member DivideCurveLengthIntoPoints(curveId:Guid, length:float) : Point3d ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, true)
@@ -1535,10 +1535,10 @@ module ExtensionsCurve =
         ResizeArray.init rc.Length (fun i-> curve.PointAt(rc.[i]))
 
     [<EXT>]
-    ///<summary>Divides a curve object into segments of a specified length.</summary>
+    ///<summary>Divides a curve object into segments of a specified length</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="length">(float) The length of each segment.</param>
-    ///<returns>( float array) a list containing division parameters.</returns>
+    ///<param name="length">(float) The length of each segment</param>
+    ///<returns>( float array) a list containing division parameters</returns>
     static member DivideCurveLength(curveId:Guid, length:float) :  float [] =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, true)
@@ -1547,9 +1547,9 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the center point of an elliptical-shaped curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object.</param>
-    ///<returns>(Point3d) The 3D center point of the ellipse .</returns>
+    ///<summary>Returns the center point of an elliptical-shaped curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
+    ///<returns>(Point3d) The 3D center point of the ellipse </returns>
     static member EllipseCenterPoint(curveId:Guid) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc, ellipse = curve.TryGetEllipse()
@@ -1558,8 +1558,8 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Returns the quadrant points of an elliptical-shaped curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object.</param>
+    ///<summary>Returns the quadrant points of an elliptical-shaped curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse</returns>
     static member EllipseQuadPoints(curveId:Guid) : Point3d * Point3d * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -1586,10 +1586,10 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Explodes, or un-joins, one curves. Polycurves will be exploded into curve
     ///  segments. Polylines will be exploded into line segments. ExplodeCurves will
-    ///  return the curves in topological order.</summary>
-    ///<param name="curveId">(Guid) The curve object to explode.</param>
+    ///  return the curves in topological order</summary>
+    ///<param name="curveId">(Guid) The curve object to explode</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///Delete input objects after exploding if True.</param>
+    ///Delete input objects after exploding if True</param>
     ///<returns>(Guid ResizeArray) identifying the newly created curve objects</returns>
     static member ExplodeCurve(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let rc = ResizeArray()
@@ -1610,7 +1610,7 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Extends a non-closed curve object by a line, arc, or smooth extension
-    ///  until it intersects a collection of objects.</summary>
+    ///  until it intersects a collection of objects</summary>
     ///<param name="curveId">(Guid) Identifier of curve to extend</param>
     ///<param name="extensionType">(int) 0 = line
     ///  1 = arc
@@ -1620,7 +1620,7 @@ module ExtensionsCurve =
     ///  2=extend from both the start and the end of the curve</param>
     ///<param name="boundarycurveIds">(Guid seq) Curve, surface, and polysurface objects to extend to</param>
     ///<param name="replaceInput">(bool) Optional, Default Value <c>false</c> Replace input or add new?</param>
-    ///<returns>(Guid) The identifier of the new object or orignal curve ( depending on 'replaceInput').</returns>
+    ///<returns>(Guid) The identifier of the new object or orignal curve ( depending on 'replaceInput')</returns>
     static member ExtendCurve(curveId:Guid, extensionType:int, side:int, boundarycurveIds:Guid seq,[<OPT;DEF(false)>]replaceInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mutable extensionTypet = CurveExtensionStyle.Line
@@ -1698,7 +1698,7 @@ module ExtensionsCurve =
     ///<param name="side">(int) 0=extend from start of the curve
     ///  1=extend from end of the curve</param>
     ///<param name="point">(Point3d) Point to extend to</param>
-    ///<returns>(Guid) The identifier of the new object .</returns>
+    ///<returns>(Guid) The identifier of the new object </returns>
     static member ExtendCurvePoint(curveId:Guid, side:int, point:Point3d) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
 
@@ -1722,7 +1722,7 @@ module ExtensionsCurve =
     ///<summary>Fairs a curve. Fair works best on degree 3 (cubic) curves. Fair attempts
     ///  to remove large curvature variations while limiting the geometry changes to
     ///  be no more than the specified tolerance. Sometimes several applications of
-    ///  this method are necessary to remove nasty curvature problems.</summary>
+    ///  this method are necessary to remove nasty curvature problems</summary>
     ///<param name="curveId">(Guid) Curve to fair</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>1.0</c>
     ///Fairing tolerance</param>
@@ -1747,20 +1747,20 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Reduces number of curve control points while maintaining the curve's same
     ///  general shape. Use this function for replacing curves with many control
-    ///  points. For more information, see the Rhino help for the FitCrv command.</summary>
+    ///  points. For more information, see the Rhino help for the FitCrv command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>
     ///The curve degree, which must be greater than 1.
-    ///  The default is 3.</param>
+    ///  The default is 3</param>
     ///<param name="distanceTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///The fitting tolerance. If distanceTolerance
-    ///  is not specified or <= 0.0, the document absolute tolerance is used.</param>
+    ///  is not specified or <= 0.0, the document absolute tolerance is used</param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
     ///The kink smoothing tolerance in degrees. If
     ///  angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
     ///  is > 0.0, kinks smaller than angleTolerance are smoothed. If
     ///  angleTolerance is not specified or < 0.0, the document angle
-    ///  tolerance is used for the kink smoothing.</param>
+    ///  tolerance is used for the kink smoothing</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member FitCurve(curveId:Guid, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0.0)>]distanceTolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -1872,7 +1872,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is a closed curve object</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True  otherwise False.</returns>
+    ///<returns>(bool) True  otherwise False</returns>
     static member IsCurveClosed(curveId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
@@ -1882,7 +1882,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Test a curve to see if it lies in a specific plane</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
-    ///<param name="plane">(Plane) Plane to test.</param>
+    ///<param name="plane">(Plane) Plane to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///  The tolerance used. If omitted, Rhino's RhinoMath.ZeroTolerance is used</param>
     ///<returns>(bool) True or False</returns>
@@ -2078,7 +2078,7 @@ module ExtensionsCurve =
     ///  kinks when deformed</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///Delete the input curve. If omitted, the input curve will not be deleted.</param>
+    ///Delete the input curve. If omitted, the input curve will not be deleted</param>
     ///<returns>(Guid) objectId of the new or modified curve</returns>
     static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -2101,8 +2101,8 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Creates an average curve from two curves</summary>
-    ///<param name="curve0">(Guid) identifiers of first curve.</param>
-    ///<param name="curve1">(Guid) identifiers of second curve.</param>
+    ///<param name="curve0">(Guid) identifiers of first curve</param>
+    ///<param name="curve1">(Guid) identifiers of second curve</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Angle tolerance used to match kinks between curves</param>
     ///<returns>(Guid) objectId of the new or modified curve</returns>
@@ -2186,7 +2186,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Curve identifiers</param>
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
     ///<param name="distance">(float) ):the distance of the offset. Based on the curve's direction, a positive value
-    ///  will offset to the left and a negative value will offset to the right.</param>
+    ///  will offset to the left and a negative value will offset to the right</param>
     ///<returns>(Guid ResizeArray) identifiers of the new curves</returns>
     static member OffsetCurveOnSurface(curveId:Guid, surfaceId:Guid, distance:float) : Guid ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -2202,8 +2202,8 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed curves</summary>
-    ///<param name="curveA">(Guid) identifier of the first  planar, closed curve.</param>
-    ///<param name="curveB">(Guid) identifier of the second planar, closed curve.</param>
+    ///<param name="curveA">(Guid) identifier of the first  planar, closed curve</param>
+    ///<param name="curveB">(Guid) identifier of the second planar, closed curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///Test plane. If omitted, the Plane.WorldXY plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
@@ -2224,8 +2224,8 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Determines if two coplanar curves intersect</summary>
-    ///<param name="curveA">(Guid) identifier of the first  planar curve.</param>
-    ///<param name="curveB">(Guid) identifier of the second planar curve.</param>
+    ///<param name="curveA">(Guid) identifier of the first  planar curve</param>
+    ///<param name="curveB">(Guid) identifier of the second planar curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///Test plane. If omitted, the Plane.WorldXY plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
@@ -2268,7 +2268,7 @@ module ExtensionsCurve =
     ///<summary>Returns the number of curve segments that make up a polycurve</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///  If `curveId` identifies a polycurve object, then `segmentIndex` identifies the curve segment of the polycurve to query.</param>
+    ///  If `curveId` identifies a polycurve object, then `segmentIndex` identifies the curve segment of the polycurve to query</param>
     ///<returns>(int) the number of curve segments in a polycurve</returns>
     static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
@@ -2281,7 +2281,7 @@ module ExtensionsCurve =
     ///<summary>Returns the vertices of a polyline curve on success</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional, Default Value: <c>-1</c>
-    ///  If curveId identifies a polycurve object, then segmentIndex identifies the curve segment of the polycurve to query.</param>
+    ///  If curveId identifies a polycurve object, then segmentIndex identifies the curve segment of the polycurve to query</param>
     ///<returns>(Point3d ResizeArray) an list of Point3d vertex points</returns>
     static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d ResizeArray =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
@@ -2295,7 +2295,7 @@ module ExtensionsCurve =
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
     ///<param name="meshIds">(Guid seq) Identifiers of meshes to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>
-    ///<returns>(Guid ResizeArray) list of identifiers for the resulting curves.</returns>
+    ///<returns>(Guid ResizeArray) list of identifiers for the resulting curves</returns>
     static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid ResizeArray =
         let curves = resizeArray { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         let meshes = resizeArray { for objectId in meshIds -> RhinoScriptSyntax.CoerceMesh(objectId) }
@@ -2324,10 +2324,10 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Rebuilds a curve to a given degree and control point count. For more
-    ///  information, see the Rhino help for the Rebuild command.</summary>
+    ///  information, see the Rhino help for the Rebuild command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="degree">(int) New degree (must be greater than 0)</param>
-    ///<param name="pointCount">(int) New point count, which must be bigger than degree.</param>
+    ///<param name="pointCount">(int) New point count, which must be bigger than degree</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RebuildCurve(curveId:Guid, degree:int, pointCount:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -2340,10 +2340,10 @@ module ExtensionsCurve =
             true
 
     // Rhino 6 only ??
-    //<summary>Deletes a knot from a curve object.</summary>
+    //<summary>Deletes a knot from a curve object</summary>
     //<param name="parameter">(float): The parameter on the curve. Note, if the parameter is not equal to one
     //                of the existing knots, then the knot closest to the specified parameter
-    //                will be removed.</param>
+    //                will be removed</param>
     //<param name="curve">(Guid): The reference of the source object</param>
     //<returns>(bool) True of False indicating success or failure</returns>
     //let removeCurveKnot (parameter:float) (curve:Guid) :bool =
@@ -2363,11 +2363,11 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Deletes a knot from a curve object.</summary>
+    ///<summary>Deletes a knot from a curve object</summary>
     ///<param name="curve">(Guid) The reference of the source object</param>
     ///<param name="parameter">(float) The parameter on the curve. Note, if the parameter is not equal to one
     ///  of the existing knots, then the knot closest to the specified parameter
-    ///  will be removed.</param>
+    ///  will be removed</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RemoveCurveKnot(curve:Guid, parameter:float) : bool =
          let curveInst = RhinoScriptSyntax.CoerceCurve curve
@@ -2418,7 +2418,7 @@ module ExtensionsCurve =
     ///  4     Do not replace segments with IsArc = True with arc curves.
     ///  8     Do not replace rational NURBS curves with constant denominator with an equivalent non-rational NURBS curve.
     ///  16    Do not adjust curves at G1-joins.
-    ///  32    Do not merge adjacent co-linear lines or co-circular arcs or combine consecutive line segments into a polyline.</param>
+    ///  32    Do not merge adjacent co-linear lines or co-circular arcs or combine consecutive line segments into a polyline</param>
     ///<returns>(bool) True or False</returns>
     static member SimplifyCurve(curveId:Guid, [<OPT;DEF(0)>]flags:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -2471,7 +2471,7 @@ module ExtensionsCurve =
     ///  curve is closed and the interval is decreasing, then the portion of
     ///  the curve across the start and end of the curve is returned</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
-    ///Delete the input curve. If omitted the input curve is deleted.</param>
+    ///Delete the input curve. If omitted the input curve is deleted</param>
     ///<returns>(Guid) identifier of the new curve on success</returns>
     static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -2487,10 +2487,10 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Changes the degree of a curve object. For more information see the Rhino help file for the ChangeDegree command.</summary>
-    ///<param name="curveId">(Guid) The object's identifier.</param>
-    ///<param name="degree">(int) The new degree.</param>
-    ///<returns>(bool) True of False indicating success or failure.</returns>
+    ///<summary>Changes the degree of a curve object. For more information see the Rhino help file for the ChangeDegree command</summary>
+    ///<param name="curveId">(Guid) The object's identifier</param>
+    ///<param name="degree">(int) The new degree</param>
+    ///<returns>(bool) True of False indicating success or failure</returns>
     static member ChangeCurveDegree(curveId:Guid, degree:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let nc = curve.ToNurbsCurve()
@@ -2503,19 +2503,19 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Creates curves between two open or closed input curves.</summary>
-    ///<param name="fromCurveId">(Guid) Identifier of the first curve object.</param>
-    ///<param name="toCurveId">(Guid) Identifier of the second curve object.</param>
+    ///<summary>Creates curves between two open or closed input curves</summary>
+    ///<param name="fromCurveId">(Guid) Identifier of the first curve object</param>
+    ///<param name="toCurveId">(Guid) Identifier of the second curve object</param>
     ///<param name="numberOfCurves">(int) Optional, Default Value: <c>1</c>
-    ///The number of curves to create. The default is 1.</param>
+    ///The number of curves to create. The default is 1</param>
     ///<param name="method">(int) Optional, Default Value: <c>0</c>
     ///The method for refining the output curves, where:
     ///  0: (Default) Uses the control points of the curves for matching. So the first control point of first curve is matched to first control point of the second curve.
     ///  1: Refits the output curves like using the FitCurve method.  Both the input curve and the output curve will have the same structure. The resulting curves are usually more complex than input unless input curves are compatible.
-    ///  2: Input curves are divided to the specified number of points on the curve, corresponding points define new points that output curves go through. If you are making one tween curve, the method essentially does the following: divides the two curves into an equal number of points, finds the midpoint between the corresponding points on the curves, and interpolates the tween curve through those points.</param>
+    ///  2: Input curves are divided to the specified number of points on the curve, corresponding points define new points that output curves go through. If you are making one tween curve, the method essentially does the following: divides the two curves into an equal number of points, finds the midpoint between the corresponding points on the curves, and interpolates the tween curve through those points</param>
     ///<param name="sampleNumber">(int) Optional, Default Value: <c>10</c>
-    ///  The number of samples points to use if method is 2. The default is 10.</param>
-    ///<returns>(Guid ResizeArray) The identifiers of the new tween objects , .</returns>
+    ///  The number of samples points to use if method is 2. The default is 10</param>
+    ///<returns>(Guid ResizeArray) The identifiers of the new tween objects , </returns>
     static member AddTweenCurves(fromCurveId:Guid, toCurveId:Guid, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Guid ResizeArray =
         let curve0 = RhinoScriptSyntax.CoerceCurve fromCurveId
         let curve1 = RhinoScriptSyntax.CoerceCurve toCurveId

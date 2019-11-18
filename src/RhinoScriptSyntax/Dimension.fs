@@ -51,8 +51,8 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Adds a new dimension style to the document. The new dimension style will
-    ///  be initialized with the current default dimension style properties.</summary>
-    ///<param name="dimStyleName">(string) Name of the new dimension style.</param>
+    ///  be initialized with the current default dimension style properties</summary>
+    ///<param name="dimStyleName">(string) Name of the new dimension style</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddDimStyle(dimStyleName:string) : unit =
         let index = Doc.DimStyles.Add(dimStyleName)
@@ -95,10 +95,10 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Adds a linear dimension to the document</summary>
-    ///<param name="startPoint">(Point3d) The origin, or first point of the dimension.</param>
-    ///<param name="endPoint">(Point3d) The offset, or second point of the dimension.</param>
-    ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line.</param>
-    ///<param name="plane">(Plane) Optional, The plane on which the dimension will lie. The default is World XY Plane.</param>
+    ///<param name="startPoint">(Point3d) The origin, or first point of the dimension</param>
+    ///<param name="endPoint">(Point3d) The offset, or second point of the dimension</param>
+    ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line</param>
+    ///<param name="plane">(Plane) Optional, The plane on which the dimension will lie. The default is World XY Plane</param>
     ///<returns>(Guid) identifier of the new object on success</returns>
     static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,
@@ -144,7 +144,7 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Removes an existing dimension style from the document. The dimension style
-    ///  to be removed cannot be referenced by any dimension objects.</summary>
+    ///  to be removed cannot be referenced by any dimension objects</summary>
     ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
     ///<returns>(unit) void, nothing (fails on error)</returns>
     static member DeleteDimStyle(dimStyleName:string) : unit =
@@ -265,7 +265,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Changes the arrow size of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    ///<param name="size">(float) The new arrow size.</param>
+    ///<param name="size">(float) The new arrow size</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleArrowSize(dimStyle:string, size:float) : unit = //SET
         let ds = Doc.DimStyles.FindName(dimStyle)
@@ -486,7 +486,7 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Returns the prefix of a dimension style - the text to
-    /// prefix to the dimension text.</summary>
+    /// prefix to the dimension text</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<returns>(string) The current prefix</returns>
     static member DimStylePrefix(dimStyle:string) : string = //GET
@@ -496,7 +496,7 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Changes the prefix of a dimension style - the text to
-    /// prefix to the dimension text.</summary>
+    /// prefix to the dimension text</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<param name="prefix">(string) The new prefix</param>
     ///<returns>(unit) void, nothing</returns>
@@ -511,7 +511,7 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Returns the suffix of a dimension style - the text to
-    /// append to the dimension text.</summary>
+    /// append to the dimension text</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<returns>(string) The current suffix</returns>
     static member DimStyleSuffix(dimStyle:string) : string = //GET
@@ -521,7 +521,7 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Changes the suffix of a dimension style - the text to
-    /// append to the dimension text.</summary>
+    /// append to the dimension text</summary>
     ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
     ///<param name="suffix">(string) The new suffix</param>
     ///<returns>(unit) void, nothing</returns>
@@ -622,7 +622,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is an aligned dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsAlignedDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
@@ -635,7 +635,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is an angular dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsAngularDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
@@ -648,7 +648,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is a diameter dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
@@ -661,7 +661,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is a dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false
@@ -674,7 +674,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies the existance of a dimension style in the document</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsDimStyle(dimStyle:string) : bool =
         let ds = Doc.DimStyles.FindName(dimStyle)
         notNull ds
@@ -683,7 +683,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies that an existing dimension style is from a reference file</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsDimStyleReference(dimStyle:string) : bool =
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then false
@@ -693,7 +693,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is a dimension leader object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsLeader(objectId:Guid) : bool =
          match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
          | None -> false
@@ -706,7 +706,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is a linear dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
          match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
          | None -> false
@@ -719,7 +719,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is an ordinate dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
          match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
          | None -> false
@@ -732,7 +732,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Verifies an object is a radial dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True or False.</returns>
+    ///<returns>(bool) True or False</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
         | None -> false

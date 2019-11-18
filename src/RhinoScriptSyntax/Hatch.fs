@@ -51,9 +51,9 @@ module ExtensionsHatch =
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
     ///Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
-    ///Hatch pattern rotation angle in degrees.</param>
+    ///Hatch pattern rotation angle in degrees</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-    ///Tolerance for hatch fills.</param>
+    ///Tolerance for hatch fills</param>
     ///<returns>(Guid ResizeArray) identifiers of the newly created hatch on success</returns>
     static member AddHatches( curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
@@ -91,7 +91,7 @@ module ExtensionsHatch =
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
     ///Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
-    ///Hatch pattern rotation angle in degrees.</param>
+    ///Hatch pattern rotation angle in degrees</param>
     ///<returns>(Guid) identifier of the newly created hatch on success</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
@@ -105,7 +105,7 @@ module ExtensionsHatch =
 
     [<EXT>]
     ///<summary>Adds hatch patterns to the document by importing hatch pattern definitions
-    ///  from a pattern file.</summary>
+    ///  from a pattern file</summary>
     ///<param name="filename">(string) Name of the hatch pattern file</param>
     ///<param name="replace">(bool) Optional, Default Value: <c>false</c>
     ///If hatch pattern names already in the document match hatch
@@ -222,7 +222,7 @@ module ExtensionsHatch =
 
 
     [<EXT>]
-    ///<summary>Returns the fill type of a hatch pattern.</summary>
+    ///<summary>Returns the fill type of a hatch pattern</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(int) hatch pattern's fill type
     ///  0 = solid, uses object color

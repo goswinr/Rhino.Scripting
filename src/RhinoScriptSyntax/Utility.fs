@@ -57,11 +57,11 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>Measures the angle between two lines</summary>
-    ///<param name="line1">(Line) List of 6 numbers or 2 Point3d.</param>
-    ///<param name="line2">(Line) List of 6 numbers or 2 Point3d.</param>
+    ///<param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
+    ///<param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     ///<returns>(float * float) containing the following elements .
     ///  0 The angle in degrees.
-    ///  1 The reflex angle in degrees.</returns>
+    ///  1 The reflex angle in degrees</returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
@@ -96,7 +96,7 @@ module ExtensionsUtility =
     ///  value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
     ///<param name="isScaleRelative">(bool) Optional, Default Value: <c>false</c>
     ///If True, luma specifies how much to increment or decrement the
-    ///  current luminance. If False, luma specified the absolute luminance.</param>
+    ///  current luminance. If False, luma specified the absolute luminance</param>
     ///<returns>(Drawing.Color) modified rgb value</returns>
     static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
@@ -149,11 +149,11 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Removes duplicates from an array of numbers.</summary>
+    ///<summary>Removes duplicates from an array of numbers</summary>
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>0.0</c>
-    ///The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded.  If omitted, Rhino's internal zero tolerance is used.</param>
-    ///<returns>(float ResizeArray) numbers with duplicates removed .</returns>
+    ///The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded.  If omitted, Rhino's internal zero tolerance is used</param>
+    ///<returns>(float ResizeArray) numbers with duplicates removed </returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
         if Seq.length numbers < 2 then ResizeArray(numbers )
         else
@@ -174,37 +174,37 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Removes duplicates from a list of 3D points.</summary>
-    ///<param name="points">(Point3d seq) A list of 3D points.</param>
+    ///<summary>Removes duplicates from a list of 3D points</summary>
+    ///<param name="points">(Point3d seq) A list of 3D points</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>-1</c>
     ///Minimum distance between points. Points within this
     ///  tolerance will be discarded. If omitted, Rhino's internal zero tolerance
-    ///  is used.</param>
-    ///<returns>(Point3d array) of 3D points with duplicates removed .</returns>
+    ///  is used</param>
+    ///<returns>(Point3d array) of 3D points with duplicates removed </returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(-1)>]tolerance:float) : Point3d array =
         let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
 
     [<EXT>]
-    ///<summary>Measures Square distance between two 3D points. Does not validate input.</summary>
-    ///<param name="point1">(Point3d) The first 3D point.</param>
+    ///<summary>Measures Square distance between two 3D points. Does not validate input</summary>
+    ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
-    ///<returns>(float) the square distance.</returns>
+    ///<returns>(float) the square distance</returns>
     static member DistanceSquare(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).SquareLength
 
     [<EXT>]
     ///<summary>Measures distance between two 3D points</summary>
-    ///<param name="point1">(Point3d) The first 3D point.</param>
+    ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
-    ///<returns>(float) the distance .</returns>
+    ///<returns>(float) the distance </returns>
     static member Distance(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).Length
 
 
     [<EXT>]
-    ///<summary>NOT IMPLEMENTED YET.Returns string from a specified section in a initialization file.</summary>
+    ///<summary>NOT IMPLEMENTED YET.Returns string from a specified section in a initialization file</summary>
     ///<param name="filename">(string) Name of the initialization file</param>
     ///<param name="section">(string) Optional, Section containing the entry</param>
     ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
@@ -234,7 +234,7 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
+    ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float ResizeArray) A one-dimensional list containing real numbers, , otherwise None</returns>
     static member SimplifyArray(points:Point3d seq) : float ResizeArray =
@@ -258,7 +258,7 @@ module ExtensionsUtility =
     ///<param name="points">(Point3d seq) The points to sort</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///Minimum distance between points. Points that fall within this tolerance
-    ///  will be discarded. If omitted, Rhino's internal zero tolerance is used.</param>
+    ///  will be discarded. If omitted, Rhino's internal zero tolerance is used</param>
     ///<returns>(Point3d array) of sorted 3D points</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -269,7 +269,7 @@ module ExtensionsUtility =
     ///<summary>Sorts the components of an array of 3D points</summary>
     ///<param name="points">(Point3d seq) Points to sort</param>
     ///<param name="ascending">(bool) Optional, Default Value: <c>true</c>
-    ///Ascendeing if omitted (True) or True, descending if False.</param>
+    ///Ascendeing if omitted (True) or True, descending if False</param>
     ///<param name="order">(int) Optional, Default Value: <c>0</c>
     ///The component sort order
     ///  Value       Component Sort Order
@@ -296,14 +296,14 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>convert a formatted string value into a 3D point value</summary>
-    ///<param name="point">(string) A string that contains a delimited point like "1,2,3".</param>
-    ///<returns>(Point3d) Point structure from the input string.</returns>
+    ///<param name="point">(string) A string that contains a delimited point like "1,2,3"</param>
+    ///<returns>(Point3d) Point structure from the input string</returns>
     static member Str2Pt(point:string) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
 
     [<EXT>]
-    ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
+    ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible</summary>
     ///<param name="point">something that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
     static member CreatePoint(point:'T ) : Point3d =
@@ -319,7 +319,7 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
+    ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible</summary>
     ///<param name="vector">something that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
     static member CreateVector(vector:'T ) : Vector3d =
@@ -336,7 +336,7 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.</summary>
+    ///<summary>Converts input into a Rhino.Geometry.Plane object if possible</summary>
     ///<param name="origin">(Point3d) the Plane Center or Origin</param>
     ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d.XAxis</c>
     ///Direction of X-Axis</param>
@@ -351,9 +351,9 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
-    ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists.</param>
-    ///<returns>(Transform) A Rhino.Geometry.Transform. result[0,3] gives access to the first row, last column.</returns>
+    ///<summary>Converts input into a Rhino.Geometry.Transform object if possible</summary>
+    ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
+    ///<returns>(Transform) A Rhino.Geometry.Transform. result[0,3] gives access to the first row, last column</returns>
     static member CreateXform(xform:seq<seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xform) // TODO verify row, column order !!
 
@@ -364,7 +364,7 @@ module ExtensionsUtility =
     ///  Red index is [0], Green index is [1], Blue index is [2] and Alpha index is [3].
     ///  If the provided object is already a color, its value is copied.
     ///  Alternatively, you can also pass three coordinates singularly for an RGB color, or four
-    ///  for an RGBA color point.</summary>
+    ///  for an RGBA color point</summary>
     ///<param name="red">(int) Red Value</param>
     ///<param name="green">(int) Green value</param>
     ///<param name="blue">(int) Blue value</param>
@@ -376,7 +376,7 @@ module ExtensionsUtility =
 
 
     [<EXT>]
-    ///<summary>Converts input into a Rhino.Geometry.Interval.</summary>
+    ///<summary>Converts input into a Rhino.Geometry.Interval</summary>
     ///<param name="start">(float) The lower bound</param>
     ///<param name="ende">(float) Uper bound of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:

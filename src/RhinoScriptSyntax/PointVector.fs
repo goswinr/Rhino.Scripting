@@ -17,7 +17,7 @@ module ExtensionsPointvector =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
     ///<param name="toleranceDegree">(float) Optional, Default Value: <c>1.0</c>
-    ///  Angle Tolerance in degree.</param>
+    ///  Angle Tolerance in degree</param>
     ///<returns>(int) the value represents
     ///   -1 = the vectors are anti-parallel
     ///    0 = the vectors are not parallel
@@ -36,7 +36,7 @@ module ExtensionsPointvector =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
     ///<param name="toleranceDegree">(float) Optional, Default Value: <c>1.0</c>
-    ///  Angle Tolerance in degree.</param>
+    ///  Angle Tolerance in degree</param>
     ///<returns>(bool) True if vectors are perpendicular, otherwise False</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
@@ -300,8 +300,8 @@ module ExtensionsPointvector =
 
     [<EXT>]
     ///<summary>Returns the angle, in degrees, between two 3-D vectors</summary>
-    ///<param name="vector1">(Vector3d) The first 3-D vector.</param>
-    ///<param name="vector2">(Vector3d) The second 3-D vector.</param>
+    ///<param name="vector1">(Vector3d) The first 3-D vector</param>
+    ///<param name="vector2">(Vector3d) The second 3-D vector</param>
     ///<returns>(float) The angle in degrees</returns>
     static member VectorAngle(vector1:Vector3d, vector2:Vector3d) : float =
         //vector1 = RhinoScriptSyntax.Coerce3dvector(vector1)
@@ -378,7 +378,7 @@ module ExtensionsPointvector =
 
     [<EXT>]
     ///<summary>Returns the length of a 3D vector</summary>
-    ///<param name="vector">(Vector3d) The 3-D vector.</param>
+    ///<param name="vector">(Vector3d) The 3-D vector</param>
     ///<returns>(float) The length of the vector , otherwise None</returns>
     static member VectorLength(vector:Vector3d) : float =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
@@ -466,7 +466,7 @@ module ExtensionsPointvector =
 
     [<EXT>]
     ///<summary>Returns either a world axis-aligned or a construction plane axis-aligned
-    ///  bounding box of an array of 3-D point locations.</summary>
+    ///  bounding box of an array of 3-D point locations</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///  Plane to which the bounding box should be aligned,

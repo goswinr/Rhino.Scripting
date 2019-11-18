@@ -28,7 +28,7 @@ module ExtensionsGroup =
 
 
     [<EXT>]
-    ///<summary>Adds one or more objects to an existing group.</summary>
+    ///<summary>Adds one or more objects to an existing group</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing</returns>
@@ -42,7 +42,7 @@ module ExtensionsGroup =
 
 
     [<EXT>]
-    ///<summary>Adds a single object to an existing group.</summary>
+    ///<summary>Adds a single object to an existing group</summary>
     ///<param name="objectId">(Guid) String or Guid representing the object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing</returns>

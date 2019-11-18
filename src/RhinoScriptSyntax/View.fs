@@ -62,7 +62,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Adds new named construction plane to the document</summary>
     ///<param name="cplaneName">(string) The name of the new named construction plane</param>
-    ///<param name="plane">(Plane) The construction plane.</param>
+    ///<param name="plane">(Plane) The construction plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddNamedCPlane(cplaneName:string, plane:Plane) : unit =
         if isNull cplaneName then failwithf "Rhino.Scripting: CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
@@ -318,7 +318,7 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Restores a named construction plane to the specified view.</summary>
+    ///<summary>Restores a named construction plane to the specified view</summary>
     ///<param name="cplaneName">(string) Name of the construction plane to restore</param>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///  active view is used</param>
@@ -364,7 +364,7 @@ module ExtensionsView =
     ///  1=left
     ///  2=down
     ///  3=up</param>
-    ///<param name="angle">(float) The angle to rotate.</param>
+    ///<param name="angle">(float) The angle to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member RotateCamera( direction:int,
@@ -445,7 +445,7 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Get status of a view's construction plane grid axes.</summary>
+    ///<summary>Get status of a view's construction plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(bool) The grid axes display state</returns>
     static member ShowGridAxes(view:string) : bool = //GET
@@ -454,7 +454,7 @@ module ExtensionsView =
         let rc = viewport.ConstructionAxesVisible
         rc
 
-    ///<summary>Shows or hides a view's construction plane grid axes.</summary>
+    ///<summary>Shows or hides a view's construction plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="show">(bool) The state to set. If omitted, the current grid axes display state is returned</param>
     ///<returns>(unit) void, nothing</returns>
@@ -478,7 +478,7 @@ module ExtensionsView =
 
     ///<summary>Shows or hides the title window of a view</summary>
     ///<param name="view">(string) Title of the view. If omitted, the current active view is used</param>
-    ///<param name="show">(bool) The state to set.</param>
+    ///<param name="show">(bool) The state to set</param>
     static member ShowViewTitle(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible <- show
@@ -496,7 +496,7 @@ module ExtensionsView =
 
     ///<summary>Shows or hides a view's world axis icon</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="show">(bool) The state to set.</param>
+    ///<param name="show">(bool) The state to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowWorldAxes(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -510,7 +510,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Tilts a view by rotating the camera up vector. See the TiltView command in
-    ///  the Rhino help file for more details.</summary>
+    ///  the Rhino help file for more details</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) The direction to rotate the view where
     ///  0=right
@@ -542,7 +542,7 @@ module ExtensionsView =
 
     ///<summary>Sets the camera location of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="cameraLocation">(Point3d) A 3D point identifying the new camera location.</param>
+    ///<param name="cameraLocation">(Point3d) A 3D point identifying the new camera location</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewCamera(view:string, cameraLocation:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -554,7 +554,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Returns the 35mm camera lens length of the specified perspective
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    /// projection view.</summary>
+    /// projection view</summary>
     ///<returns>(float) The current lens length</returns>
     static member ViewCameraLens(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -562,9 +562,9 @@ module ExtensionsView =
 
 
     ///<summary>Sets the 35mm camera lens length of the specified perspective
-    /// projection view.</summary>
+    /// projection view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="length">(float) The new 35mm camera lens length.</param>
+    ///<param name="length">(float) The new 35mm camera lens length</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewCameraLens(view:string,length:float) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -574,7 +574,7 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Returns the orientation of a view's camera.</summary>
+    ///<summary>Returns the orientation of a view's camera</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(Plane) the view's camera plane</returns>
     static member ViewCameraPlane([<OPT;DEF("":string)>]view:string) : Plane =
@@ -595,8 +595,8 @@ module ExtensionsView =
 
     ///<summary>Sets the camera and target positions of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="camera">(Point3d) 3d point identifying the new camera location.</param>
-    ///<param name="target">(Point3d) 3d point identifying the new target location.</param>
+    ///<param name="camera">(Point3d) 3d point identifying the new camera location</param>
+    ///<param name="target">(Point3d) 3d point identifying the new target location</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewCameraTarget(view:string, camera:Point3d,target:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -682,7 +682,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Return name of a display mode given it's id</summary>
-    ///<param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method.</param>
+    ///<param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method</param>
     ///<returns>(string) The name of the display mode , otherwise None</returns>
     static member ViewDisplayModeName(modeId:Guid) : string =
         //modeId = RhinoScriptSyntax.Coerceguid(modeId)
@@ -727,7 +727,7 @@ module ExtensionsView =
 
 
     [<EXT>]
-    ///<summary>Return a view's projection mode.</summary>
+    ///<summary>Return a view's projection mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(int) The current projection mode for the specified view
     ///  1 = parallel
@@ -741,7 +741,7 @@ module ExtensionsView =
         elif viewport.IsTwoPointPerspectiveProjection then rc <- 3
         rc
 
-    ///<summary>Set a view's projection mode.</summary>
+    ///<summary>Set a view's projection mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="mode">(int) The projection mode
     ///  1 = parallel
@@ -811,17 +811,17 @@ module ExtensionsView =
     ///<summary>Test's Rhino's display performance</summary>
     ///<param name="view">(string) Optional, The title of the view.  If omitted, the current active view is used</param>
     ///<param name="frames">(int) Optional, Default Value: <c>100</c>
-    ///The number of frames, or times to regenerate the view. If omitted, the view will be regenerated 100 times.</param>
+    ///The number of frames, or times to regenerate the view. If omitted, the view will be regenerated 100 times</param>
     ///<param name="freeze">(bool) Optional, Default Value: <c>true</c>
-    ///If True (Default), then Rhino's display list will not be updated with every frame redraw. If False, then Rhino's display list will be updated with every frame redraw.</param>
+    ///If True (Default), then Rhino's display list will not be updated with every frame redraw. If False, then Rhino's display list will be updated with every frame redraw</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
     ///The direction to rotate the view. The default direction is Right (0). Modes:
     ///  0 = Right
     ///  1 = Left
     ///  2 = Down
-    ///  3 = Up.</param>
+    ///  3 = Up</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>5</c>
-    ///The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used.</param>
+    ///The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
     ///<returns>(float) The number of seconds it took to regenerate the view frames number of times,</returns>
     static member ViewSpeedTest( [<OPT;DEF("":string)>]view:string,
                                  [<OPT;DEF(100)>]frames:int,
@@ -844,7 +844,7 @@ module ExtensionsView =
 
     ///<summary>Sets the target location of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="target">(Point3d) 3d point identifying the new target location.</param>
+    ///<param name="target">(Point3d) 3d point identifying the new target location</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewTarget(view:string,target:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)

@@ -12,7 +12,7 @@ module ExtensionsLinetype =
 
     [<EXT>]
     ///<summary>Verifies the existance of a linetype in the document</summary>
-    ///<param name="name">(string) The name of an existing linetype.</param>
+    ///<param name="name">(string) The name of an existing linetype</param>
     ///<returns>(bool) True or False</returns>
     static member IsLinetype(name:string) : bool =
         notNull <| Doc.Linetypes.FindName(name)
@@ -20,7 +20,7 @@ module ExtensionsLinetype =
 
     [<EXT>]
     ///<summary>Verifies that an existing linetype is from a reference file</summary>
-    ///<param name="name">(string) The name of an existing linetype.</param>
+    ///<param name="name">(string) The name of an existing linetype</param>
     ///<returns>(bool) True or False</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = Doc.Linetypes.FindName(name)

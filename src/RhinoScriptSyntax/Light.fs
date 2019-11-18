@@ -357,7 +357,7 @@ module ExtensionsLight =
 
     [<EXT>]
     ///<summary>Returns the hardness of a spot light. Spotlight hardness
-    /// controls the fully illuminated region.</summary>
+    /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(float) The current hardness</returns>
     static member SpotLightHardness(objectId:Guid) : float = //GET
@@ -368,7 +368,7 @@ module ExtensionsLight =
         rc
 
     ///<summary>Changes the hardness of a spot light. Spotlight hardness
-    /// controls the fully illuminated region.</summary>
+    /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="hardness">(float) The light's new hardness</param>
     ///<returns>(unit) void, nothing</returns>
@@ -384,7 +384,7 @@ module ExtensionsLight =
 
 
     [<EXT>]
-    ///<summary>Returns the radius of a spot light.</summary>
+    ///<summary>Returns the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(float) The current radius</returns>
     static member SpotLightRadius(objectId:Guid) : float = //GET
@@ -395,7 +395,7 @@ module ExtensionsLight =
         let rc = light.Direction.Length * tan(radians)
         rc
 
-    ///<summary>Changes the radius of a spot light.</summary>
+    ///<summary>Changes the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="radius">(float) The light's new radius</param>
     ///<returns>(unit) void, nothing</returns>
@@ -412,7 +412,7 @@ module ExtensionsLight =
 
 
     [<EXT>]
-    ///<summary>Returns the shadow intensity of a spot light.</summary>
+    ///<summary>Returns the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(float) The current intensity</returns>
     static member SpotLightShadowIntensity(objectId:Guid) : float = //GET
@@ -422,7 +422,7 @@ module ExtensionsLight =
         let rc = light.ShadowIntensity
         rc
 
-    ///<summary>Changes the shadow intensity of a spot light.</summary>
+    ///<summary>Changes the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="intensity">(float) The light's new intensity</param>
     ///<returns>(unit) void, nothing</returns>

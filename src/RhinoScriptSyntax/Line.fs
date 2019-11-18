@@ -13,8 +13,8 @@ module ExtensionsLine =
 
     [<EXT>]
     ///<summary>Finds the point on an FINITE line that is closest to a test point</summary>
-    ///<param name="line">(Geometry.Line) the finite line.</param>
-    ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d.  The test point.</param>
+    ///<param name="line">(Geometry.Line) the finite line</param>
+    ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d.  The test point</param>
     ///<returns>(Point3d) the point on the finite line that is closest to the test point</returns>
     static member LineClosestPointFinite(line:Line, testPoint:Point3d) : Point3d =
         line.ClosestPoint(testPoint, true)
@@ -23,8 +23,8 @@ module ExtensionsLine =
 
     [<EXT>]
     ///<summary>Finds the point on an INFINITE line (ray) that is closest to a test point</summary>
-    ///<param name="line">(Geometry.Line) the line to be considered infinite.</param>
-    ///<param name="testPoint">(Point3d) The test point.</param>
+    ///<param name="line">(Geometry.Line) the line to be considered infinite</param>
+    ///<param name="testPoint">(Point3d) The test point</param>
     ///<returns>(Point3d) the point on the infinite line (ray) that is closest to the test point</returns>
     static member LineClosestPoint(line:Line, testPoint:Point3d) : Point3d =
         line.ClosestPoint(testPoint, false)
@@ -57,7 +57,7 @@ module ExtensionsLine =
     [<EXT>]
     ///<summary>Determines if the shortest distance from a line to a point or another
     ///  line is greater than a specified distance</summary>
-    ///<param name="line">(Geometry.Line) a Geometry.Line.</param>
+    ///<param name="line">(Geometry.Line) a Geometry.Line</param>
     ///<param name="distance">(float) The distance</param>
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(bool) True if the shortest distance from the line to the other project is
@@ -92,16 +92,16 @@ module ExtensionsLine =
 
     [<EXT>]
     ///<summary>Finds the longest distance between a line as a finite chord, and a point</summary>
-    ///<param name="line">(Geometry.Line) Line.</param>
-    ///<param name="point">(Point3d) The test point or test line.</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D >= Rhino.Distance(Q, P).</returns>
+    ///<param name="line">(Geometry.Line) Line</param>
+    ///<param name="point">(Point3d) The test point or test line</param>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D >= Rhino.Distance(Q, P)</returns>
     static member LineMaxDistanceTo(line:Line, point:Point3d) : float =
         line.MaximumDistanceTo(point)
     [<EXT>]
     ///<summary>Finds the longest distance between a line as a finite chord, and a line</summary>
-    ///<param name="line">(Geometry.Line) Line.</param>
-    ///<param name="line2">(Geometry.Line) The test line.</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D >= Rhino.Distance(Q, P).</returns>
+    ///<param name="line">(Geometry.Line) Line</param>
+    ///<param name="line2">(Geometry.Line) The test line</param>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D >= Rhino.Distance(Q, P)</returns>
     static member LineMaxDistanceTo(line:Line, line2:Line) : float =
         line.MaximumDistanceTo(line2)
 
@@ -109,18 +109,18 @@ module ExtensionsLine =
     [<EXT>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
     ///  or another line</summary>
-    ///<param name="line">(Geometry.Line) Line.</param>
-    ///<param name="point">(Point3d) The test point.</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D <= Rhino.Distance(Q, P).</returns>
+    ///<param name="line">(Geometry.Line) Line</param>
+    ///<param name="point">(Point3d) The test point</param>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D <= Rhino.Distance(Q, P)</returns>
     static member LineMinDistanceTo(line:Line, point:Point3d) : float =
         line.MinimumDistanceTo(point)
 
     [<EXT>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
     ///  or another line</summary>
-    ///<param name="line">(Geometry.Line) Line.</param>
-    ///<param name="line2">(Geometry.Line) The test line.</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D <= Rhino.Distance(Q, P).</returns>
+    ///<param name="line">(Geometry.Line) Line</param>
+    ///<param name="line2">(Geometry.Line) The test line</param>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D <= Rhino.Distance(Q, P)</returns>
     static member LineMinDistanceTo(line:Line, line2:Line) : float =
         line.MinimumDistanceTo(line2)
 
@@ -129,7 +129,7 @@ module ExtensionsLine =
     [<EXT>]
     ///<summary>Returns a plane that contains the line. The origin of the plane is at the start of
     ///  the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
-    ///<param name="line">(Geometry.Line) List of 6 numbers, two Point3d, or Line.</param>
+    ///<param name="line">(Geometry.Line) List of 6 numbers, two Point3d, or Line</param>
     ///<returns>(Plane) the plane</returns>
     static member LinePlane(line:Line) : Plane =
         let rc, plane = line.TryGetPlane()
@@ -138,10 +138,10 @@ module ExtensionsLine =
 
 
     [<EXT>]
-    ///<summary>Calculates the intersection of a line and a plane.</summary>
-    ///<param name="line">(Line) The line to intersect.</param>
-    ///<param name="plane">(Plane) The plane to intersect.</param>
-    ///<returns>(Point3d) The 3D point of intersection is successful.</returns>
+    ///<summary>Calculates the intersection of a line and a plane</summary>
+    ///<param name="line">(Line) The line to intersect</param>
+    ///<param name="plane">(Plane) The plane to intersect</param>
+    ///<returns>(Point3d) The 3D point of intersection is successful</returns>
     static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d =
         let rc, t = Geometry.Intersect.Intersection.LinePlane(line, plane)
         if  not <| rc then  failwithf "linePlaneIntersection failed. Paralell? line:'%A' plane:'%A'" line plane

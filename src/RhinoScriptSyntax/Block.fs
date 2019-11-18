@@ -61,7 +61,7 @@ module ExtensionsBlock =
 
     [<EXT>]
     ///<summary>Returns names of the block definitions that contain a specified block
-    ///  definition.</summary>
+    ///  definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string ResizeArray) A list of block definition names</returns>
     static member BlockContainers(blockName:string) : string ResizeArray =
@@ -101,7 +101,7 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Sets the description of a block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<param name="description">(string) The new description.</param>
+    ///<param name="description">(string) The new description</param>
     ///<returns>(unit) void, nothing</returns>
     static member BlockDescription(blockName:string, description:string) : unit = //SET
         let idef = Doc.InstanceDefinitions.Find(blockName)
@@ -111,7 +111,7 @@ module ExtensionsBlock =
 
     [<EXT>]
     ///<summary>Counts number of instances of the block in the document.
-    ///  Nested instances are not included in the count. Attention this may include deleted blocks.</summary>
+    ///  Nested instances are not included in the count. Attention this may include deleted blocks</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///0 = get top level references in active document.
@@ -127,7 +127,7 @@ module ExtensionsBlock =
 
 
     [<EXT>]
-    ///<summary>Returns the insertion point of a block instance.</summary>
+    ///<summary>Returns the insertion point of a block instance</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Point3d) The insertion 3D point</returns>
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
@@ -149,13 +149,13 @@ module ExtensionsBlock =
 
 
     [<EXT>]
-    ///<summary>Returns the identifiers of the inserted instances of a block.</summary>
+    ///<summary>Returns the identifiers of the inserted instances of a block</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///0 = get top level references in active document.
     ///  1 = get top level and nested references in active document.
     ///  2 = check for references from other instance definitions</param>
-    ///<returns>(Guid ResizeArray) Ids identifying the instances of a block in the model.</returns>
+    ///<returns>(Guid ResizeArray) Ids identifying the instances of a block in the model</returns>
     static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
@@ -208,7 +208,7 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Returns path to the source of a linked or embedded block definition.
     ///  A linked or embedded block definition is a block definition that was
-    ///  inserted from an external file.</summary>
+    ///  inserted from an external file</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block on success</returns>
     static member BlockPath(blockName:string) : string =
@@ -228,7 +228,7 @@ module ExtensionsBlock =
     ///    0    The linked block definition is up-to-date.
     ///    1    The linked block definition's file is newer than definition.
     ///    2    The linked block definition's file is older than definition.
-    ///    3    The linked block definition's file is different than definition.</returns>
+    ///    3    The linked block definition's file is different than definition</returns>
     static member BlockStatus(blockName:string) : int =
         let  idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  -3
@@ -236,7 +236,7 @@ module ExtensionsBlock =
 
 
     [<EXT>]
-    ///<summary>Deletes a block definition and all of it's inserted instances.</summary>
+    ///<summary>Deletes a block definition and all of it's inserted instances</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteBlock(blockName:string) : bool =
@@ -252,7 +252,7 @@ module ExtensionsBlock =
     ///  exploded objects are added to the document</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
-    ///By default nested blocks are not exploded.</param>
+    ///By default nested blocks are not exploded</param>
     ///<returns>(Guid array) identifiers for the newly exploded objects on success</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
@@ -285,7 +285,7 @@ module ExtensionsBlock =
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>0</c>
     ///  Rotation angle in degrees</param>
     ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c> Vector3d.ZAxis</c>
-    ///  The axis of rotation.</param>
+    ///  The axis of rotation</param>
     ///<returns>(Guid) objectId for the block that was added to the doc</returns>
     static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
@@ -299,7 +299,7 @@ module ExtensionsBlock =
 
 
     [<EXT>]
-    ///<summary>Verifies the existence of a block definition in the document.</summary>
+    ///<summary>Verifies the existence of a block definition in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlock(blockName:string) : bool =
@@ -308,7 +308,7 @@ module ExtensionsBlock =
 
 
     [<EXT>]
-    ///<summary>Verifies a block definition is embedded, or linked, from an external file.</summary>
+    ///<summary>Verifies a block definition is embedded, or linked, from an external file</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockEmbedded(blockName:string) : bool =
@@ -346,7 +346,7 @@ module ExtensionsBlock =
 
 
     [<EXT>]
-    ///<summary>Verifies that a block definition is from a reference file.</summary>
+    ///<summary>Verifies that a block definition is from a reference file</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockReference(blockName:string) : bool =

@@ -52,8 +52,8 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Returns a user data item  entry from the current document</summary>
-    ///<param name="section">(string) Section name.</param>
-    ///<param name="entry">(string) Entry name.</param>
+    ///<param name="section">(string) Section name</param>
+    ///<param name="entry">(string) Entry name</param>
     ///<returns>(string) the entry value</returns>
     static member GetDocumentDataEntry(section:string, entry:string) : string =
         Doc.Strings.GetValue(section, entry)
@@ -62,8 +62,8 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Returns user text stored in the document</summary>
-    ///<param name="key">(string) Key to use for retrieving user text.</param>
-    ///<returns>(string) If key is specified, then the associated value .</returns>
+    ///<param name="key">(string) Key to use for retrieving user text</param>
+    ///<returns>(string) If key is specified, then the associated value </returns>
     static member GetDocumentUserText(key:string) : string =
         Doc.Strings.GetValue(key)
 
@@ -78,7 +78,7 @@ module ExtensionsUserdata =
 
 
     [<EXT>]
-    ///<summary>Returns all user text keys stored on an object.</summary>
+    ///<summary>Returns all user text keys stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
@@ -94,9 +94,9 @@ module ExtensionsUserdata =
 
 
     [<EXT>]
-    ///<summary>Returns user text stored on an object.</summary>
+    ///<summary>Returns user text stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<param name="key">The key name.</param>
+    ///<param name="key">The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value</returns>
@@ -160,7 +160,7 @@ module ExtensionsUserdata =
 
 
     [<EXT>]
-    ///<summary>Sets or removes user text stored on an object.</summary>
+    ///<summary>Sets or removes user text stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair

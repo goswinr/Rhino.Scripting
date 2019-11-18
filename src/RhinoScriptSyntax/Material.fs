@@ -16,7 +16,7 @@ module ExtensionsMaterial =
     ///<summary>Add material to a layer and returns the new material's index. If the
     ///  layer already has a material, then the layer's current material index is
     ///  returned</summary>
-    ///<param name="layer">(string) Name of an existing layer.</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(int) Material index of the layer</returns>
     static member AddMaterialToLayer(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
@@ -32,7 +32,7 @@ module ExtensionsMaterial =
     [<EXT>]
     ///<summary>Adds material to an object and returns the new material's index. If the
     ///  object already has a material, the the object's current material index is
-    ///  returned.</summary>
+    ///  returned</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) material index of the object</returns>
     static member AddMaterialToObject(objectId:Guid) : int =
@@ -70,7 +70,7 @@ module ExtensionsMaterial =
     [<EXT>]
     ///<summary>Verifies a material is a copy of Rhino's built-in "default" material.
     ///  The default material is used by objects and layers that have not been
-    ///  assigned a material.</summary>
+    ///  assigned a material</summary>
     ///<param name="materialIndex">(int) The zero-based material index</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsMaterialDefault(materialIndex:int) : bool =
@@ -137,7 +137,7 @@ module ExtensionsMaterial =
 
 
     [<EXT>]
-    ///<summary>Returns a material's diffuse color.</summary>
+    ///<summary>Returns a material's diffuse color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material color</returns>
     static member MaterialColor(materialIndex:int) : Drawing.Color = //GET
@@ -146,7 +146,7 @@ module ExtensionsMaterial =
         let rc = mat.DiffuseColor
         rc
 
-    ///<summary>Modifies a material's diffuse color.</summary>
+    ///<summary>Modifies a material's diffuse color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
@@ -159,7 +159,7 @@ module ExtensionsMaterial =
 
 
     [<EXT>]
-    ///<summary>Returns a material's environment bitmap filename.</summary>
+    ///<summary>Returns a material's environment bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current environment bitmap filename</returns>
     static member MaterialEnvironmentMap(materialIndex:int) : string option= //GET
@@ -168,7 +168,7 @@ module ExtensionsMaterial =
         let texture = mat.GetEnvironmentTexture()
         if notNull texture then Some texture.FileName  else None
 
-    ///<summary>Modifies a material's environment bitmap filename.</summary>
+    ///<summary>Modifies a material's environment bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The environment bitmap filename</param>
     ///<returns>(unit) void, nothing</returns>
@@ -207,7 +207,7 @@ module ExtensionsMaterial =
 
 
     [<EXT>]
-    ///<summary>Returns a material's reflective color.</summary>
+    ///<summary>Returns a material's reflective color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material reflective color</returns>
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
@@ -216,7 +216,7 @@ module ExtensionsMaterial =
         let rc = mat.ReflectionColor
         rc
 
-    ///<summary>Modifies a material's reflective color.</summary>
+    ///<summary>Modifies a material's reflective color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>

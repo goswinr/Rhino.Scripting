@@ -19,7 +19,7 @@ module ExtensionsGeometry =
     ///<param name="uMagnitude">(float) U magnitude of the plane</param>
     ///<param name="vMagnitude">(float) V magnitude of the plane</param>
     ///<param name="views">(string seq) Optional, Titles or ids the the view(s) to clip. If omitted, the active
-    ///  view is used.</param>
+    ///  view is used</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
         let viewlist =
@@ -37,21 +37,21 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Creates a picture frame and adds it to the document.</summary>
-    ///<param name="plane">(Plane) The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction.</param>
-    ///<param name="filename">(string) The path to a bitmap or image file.</param>
+    ///<summary>Creates a picture frame and adds it to the document</summary>
+    ///<param name="plane">(Plane) The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction</param>
+    ///<param name="filename">(string) The path to a bitmap or image file</param>
     ///<param name="width">(float) Optional, Default Value: <c>0.0</c>
-    ///If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.</param>
+    ///If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="height">(float) Optional, Default Value: <c>0.0</c>
-    ///If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system.</param>
+    ///If both dblWidth and dblHeight = 0, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="selfIllumination">(bool) Optional, Default Value: <c>true</c>
-    ///If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow.</param>
+    ///If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow</param>
     ///<param name="embed">(bool) Optional, Default Value: <c>false</c>
-    ///If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained.</param>
+    ///If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
     ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
-    ///If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot.</param>
+    ///If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
-    ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface.</param>
+    ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
       if not <| IO.File.Exists(filename) then failwithf "image %s does not exist" filename
@@ -61,7 +61,7 @@ module ExtensionsGeometry =
       rc
 
     [<EXT>]
-    ///<summary>Adds point object to the document.</summary>
+    ///<summary>Adds point object to the document</summary>
     ///<param name="X">(float) X location of point to add</param>
     ///<param name="y">(float) Y location of point to add</param>
     ///<param name="z">(float) Z location of point to add</param>
@@ -73,7 +73,7 @@ module ExtensionsGeometry =
         rc
 
     [<EXT>]
-    ///<summary>Adds point object to the document.</summary>
+    ///<summary>Adds point object to the document</summary>
     ///<param name="point">(Point3d) point to draw</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(point:Point3d) : Guid =
@@ -178,9 +178,9 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Add a text dot to the document.</summary>
+    ///<summary>Add a text dot to the document</summary>
     ///<param name="text">(string) String in dot</param>
-    ///<param name="point">(Point3d) A 3D point identifying the origin point.</param>
+    ///<param name="point">(Point3d) A 3D point identifying the origin point</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddTextDot(text:string, point:Point3d) : Guid =
         let rc = Doc.Objects.AddTextDot(text, point)
@@ -211,9 +211,9 @@ module ExtensionsGeometry =
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
     ///Return the bounding box as world coordinates or
     ///  construction plane coordinates. Note, this option does not apply to
-    ///  world axis-aligned bounding boxes.</param>
+    ///  world axis-aligned bounding boxes</param>
     ///<returns>(Point3d array) Eight 3D points that define the bounding box.
-    ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d array =
         let mutable bbox = BoundingBox.Empty
 
@@ -241,10 +241,10 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Compares two objects to determine if they are geometrically identical.</summary>
-    ///<param name="first">(Guid) The identifier of the first object to compare.</param>
-    ///<param name="second">(Guid) The identifier of the second object to compare.</param>
-    ///<returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
+    ///<summary>Compares two objects to determine if they are geometrically identical</summary>
+    ///<param name="first">(Guid) The identifier of the first object to compare</param>
+    ///<param name="second">(Guid) The identifier of the second object to compare</param>
+    ///<returns>(bool) True if the objects are geometrically identical, otherwise False</returns>
     static member CompareGeometry(first:Guid, second:Guid) : bool =
         let firstG = RhinoScriptSyntax.CoerceGeometry(first)
         let secondG = RhinoScriptSyntax.CoerceGeometry(second)
@@ -277,7 +277,7 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Verifies an object is a point object.</summary>
+    ///<summary>Verifies an object is a point object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point</returns>
     static member IsPoint(objectId:Guid) : bool =
@@ -286,7 +286,7 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Verifies an object is a point cloud object.</summary>
+    ///<summary>Verifies an object is a point cloud object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud</returns>
     static member IsPointCloud(objectId:Guid) : bool =
@@ -295,7 +295,7 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Verifies an object is a text object.</summary>
+    ///<summary>Verifies an object is a text object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object</returns>
     static member IsText(objectId:Guid) : bool =
@@ -304,7 +304,7 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Verifies an object is a text dot object.</summary>
+    ///<summary>Verifies an object is a text dot object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object</returns>
     static member IsTextDot(objectId:Guid) : bool =
@@ -408,12 +408,12 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Returns amount indices of points in a point cloud that are near needlePoints.</summary>
-    ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points.</param>
-    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud.</param>
+    ///<summary>Returns amount indices of points in a point cloud that are near needlePoints</summary>
+    ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
+    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
     ///<param name="amount">(int) Optional, Default Value: <c>1</c>
-    ///The amount of required closest points. Defaults to 1.</param>
-    ///<returns>(seq<int array>) nested lists with amount items within a list, with the indices of the found points.</returns>
+    ///The amount of required closest points. Defaults to 1</param>
+    ///<returns>(seq<int array>) nested lists with amount items within a list, with the indices of the found points</returns>
     static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
         if Seq.length(needlePoints) > 100 then
             RTree.Point3dKNeighbors(ptCloud, needlePoints, amount)
@@ -427,11 +427,11 @@ module ExtensionsGeometry =
 
     [<EXT>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
-    ///  closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius.</summary>
-    ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points.</param>
-    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud.</param>
-    ///<param name="distance">(float) The included limit for listing points.</param>
-    ///<returns>(seq<int array>) a seq of arrays with the indices of the found points.</returns>
+    ///  closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius</summary>
+    ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
+    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
+    ///<param name="distance">(float) The included limit for listing points</param>
+    ///<returns>(seq<int array>) a seq of arrays with the indices of the found points</returns>
     static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
         RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
 
@@ -448,7 +448,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the X, Y, and Z coordinates of a point object</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
-    ///<param name="point">(Point3d) A new 3D point location.</param>
+    ///<param name="point">(Point3d) A new 3D point location</param>
     ///<returns>(unit) void, nothing</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
@@ -504,7 +504,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the location, or insertion point, on a text dot object</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="point">(Point3d) A new 3D point location.</param>
+    ///<param name="point">(Point3d) A new 3D point location</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
@@ -577,7 +577,7 @@ module ExtensionsGeometry =
 
     ///<summary>Modifies the height of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="height">(float) The new text height.</param>
+    ///<param name="height">(float) The new text height</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
@@ -673,7 +673,7 @@ module ExtensionsGeometry =
 
 
     [<EXT>]
-    ///<summary>Returns the text string of a text object.</summary>
+    ///<summary>Returns the text string of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value</returns>
     static member TextObjectText(objectId:Guid) : string = //GET
@@ -681,7 +681,7 @@ module ExtensionsGeometry =
         text.PlainText
 
 
-    ///<summary>Modifies the text string of a text object.</summary>
+    ///<summary>Modifies the text string of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing</returns>
