@@ -253,7 +253,7 @@ module ExtensionsLayer =
     [<EXT>]
     ///<summary>Changes the color of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="color">(Drawing.Color) The new color value. If omitted, the current layer color is returned</param>
+    ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)

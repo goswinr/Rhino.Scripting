@@ -31,8 +31,7 @@ module ExtensionsMaterial =
 
     [<EXT>]
     ///<summary>Adds material to an object and returns the new material's index. If the
-    ///  object already has a material, the the object's current material index is
-    ///  returned</summary>
+    ///  object already has a material, the the object's current material index is returned</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) material index of the object</returns>
     static member AddMaterialToObject(objectId:Guid) : int =

@@ -55,7 +55,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Modifies the macro of a command alias</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
-    ///<param name="macro">(string) The new macro to run when the alias is executed. If omitted, the current alias macro is returned</param>
+    ///<param name="macro">(string) The new macro to run when the alias is executed.</param>
     ///<returns>(unit) void, nothing</returns>
     static member AliasMacro(alias:string, macro:string) : unit = //SET
         ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
@@ -525,7 +525,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's ortho modeling aid</summary>
-    ///<param name="enable">(bool) The new enabled status (True or False). If omitted the current state is returned</param>
+    ///<param name="enable">(bool) The new enabled status</param>
     ///<returns>(unit) void, nothing</returns>
     static member Ortho(enable:bool) : unit = //SET
         ModelAidSettings.Ortho <- enable
@@ -555,7 +555,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Shows or hides Rhino's dockable object snap bar</summary>
-    ///<param name="visible">(bool) The new visibility state. If omitted then the current state is returned</param>
+    ///<param name="visible">(bool) The new visibility state.</param>
     ///<returns>(unit) void, nothing</returns>
     static member OsnapDialog(visible:bool) : unit = //SET
         ModelAidSettings.UseHorizontalDialog <- visible
@@ -613,7 +613,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's planar modeling aid</summary>
-    ///<param name="enable">(bool) The new enable status.  If omitted the current state is returned</param>
+    ///<param name="enable">(bool) The new enable status.</param>
     ///<returns>(unit) void, nothing</returns>
     static member Planar(enable:bool) : unit = //SET
         ModelAidSettings.Planar <- enable
@@ -641,7 +641,9 @@ module ExtensionsApplication =
     ///  16= utility.
     ///  If omitted, all are returned</param>
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
-    ///0= both loaded and unloaded, 1= loaded, 2= unloaded.  If omitted both status is returned</param>
+    /// 0= both loaded and unloaded, 
+    /// 1= loaded, 
+    /// 2= unloaded.  If omitted both status is returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
@@ -663,7 +665,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables object snap projection</summary>
-    ///<param name="enable">(bool) The new enabled status.  If omitted the current status is returned</param>
+    ///<param name="enable">(bool) The new enabled status.</param>
     static member ProjectOsnaps(enable:bool) : unit = //SET
         ModelAidSettings.ProjectSnapToCPlane <- enable
 
@@ -725,7 +727,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Enables or disables Rhino's grid snap modeling aid</summary>
-    ///<param name="enable">(bool) The new enabled status. If omitted the current status is returned</param>
+    ///<param name="enable">(bool) The new enabled status.</param>
     static member Snap(enable:bool) : unit = //SET
         ModelAidSettings.GridSnap <- enable
 
@@ -798,7 +800,7 @@ module ExtensionsApplication =
     [<EXT>]
     ///<summary>Sets Rhino's default template file. This is the file used
     /// when Rhino starts</summary>
-    ///<param name="filename">(string) The name of the new default template file. If omitted the current default template name is returned</param>
+    ///<param name="filename">(string) The name of the new default template file.</param>
     ///<returns>(unit) void, nothing</returns>
     static member TemplateFile(filename:string) : unit = //SET
         ApplicationSettings.FileSettings.TemplateFile <- filename

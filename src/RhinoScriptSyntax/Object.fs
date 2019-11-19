@@ -614,9 +614,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Modifies the linetype of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="linetype">(string) Name of an existing linetyp. If omitted, the current
-    ///  linetyp is returned. If objectId is a list of identifiers, this parameter
-    ///  is required</param>
+    ///<param name="linetype">(string) Name of an existing linetyp</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -648,7 +646,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Modifies the linetype source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="source">(int) New linetype source. If omitted, the current source is returned.
+    ///<param name="source">(int) New linetype source.
     ///  If objectId is a list of identifiers, this parameter is required
     ///    0 = By Layer
     ///    1 = By Object
@@ -709,10 +707,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Modifies the rendering material source of an object</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
-    ///<param name="source">(int) The new rendering material source. If omitted and a single
-    ///  object is provided in objectId, then the current material source is
-    ///  returned. This parameter is required if multiple objects are passed in
-    ///  objectId
+    ///<param name="source">(int) The new rendering material source.
     ///  0 = Material from layer
     ///  1 = Material from object
     ///  3 = Material from parent</param>
@@ -739,7 +734,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Modifies the name of an object</summary>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<param name="name">(string) The new object name. If omitted, the current name is returned</param>
+    ///<param name="name">(string) The new object name.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
         //id = RhinoScriptSyntax.Coerceguid(objectId)
@@ -761,7 +756,7 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="color">(Drawing.Color) New print color. If omitted, the current color is returned</param>
+    ///<param name="color">(Drawing.Color) New print color.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)

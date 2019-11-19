@@ -194,7 +194,7 @@ module ExtensionsDocument =
     [<EXT>]
      ///<summary>Sets the render ambient light or background color</summary>
     ///<param name="item">(int) 0= ambient light color, 1= background color</param>
-    ///<param name="color">(Drawing.Color) The new color value. If omitted, the current item color is returned</param>
+    ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
         if item<>0 && item<>1 then  failwithf "Item must be 0 || 1.  item:'%A' color:'%A'" item color

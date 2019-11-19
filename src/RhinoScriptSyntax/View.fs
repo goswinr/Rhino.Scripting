@@ -429,7 +429,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Shows or hides a view's construction plane grid</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="show">(bool) The grid state to set. If omitted, the current grid display state is returned</param>
+    ///<param name="show">(bool) The grid state to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowGrid(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -454,7 +454,7 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Shows or hides a view's construction plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="show">(bool) The state to set. If omitted, the current grid axes display state is returned</param>
+    ///<param name="show">(bool) The state to set</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowGridAxes(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)

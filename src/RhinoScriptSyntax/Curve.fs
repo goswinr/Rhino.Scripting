@@ -652,7 +652,7 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Enables or disables a curve object's annotation arrows</summary>
     ///<param name="curveId">(Guid) Identifier of a curve</param>
-    ///<param name="arrowStyle">(int) The style of annotation arrow to be displayed. If omitted the current type is returned.
+    ///<param name="arrowStyle">(int) The style of annotation arrow to be displayed.
     ///  0 = no arrows
     ///  1 = display arrow at start of curve
     ///  2 = display arrow at end of curve

@@ -239,8 +239,7 @@ module ExtensionsDimension =
     [<EXT>]
     ///<summary>Changes the angle display precision of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    ///<param name="precision">(int) The new angle precision value. If omitted, the current angle
-    ///  precision is returned</param>
+    ///<param name="precision">(int) The new angle precision value.</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleAnglePrecision(dimStyle:string, precision:int) : unit = //SET
         let ds = Doc.DimStyles.FindName(dimStyle)
