@@ -64,7 +64,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x">('T): the value or object to print</param>
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
     ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
-    ///<returns>(unit) voId, nothing/returns>
+    ///<returns>(unit) voId, nothing</returns>
     static member Print (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, true)
         |>> RhinoApp.WriteLine 
@@ -75,7 +75,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
     ///<param name="x1">('T): the first value or object to print</param>
     ///<param name="x2">('T): the second value or object to print</param>    
-    ///<returns>(unit) voId, nothing/returns>
+    ///<returns>(unit) voId, nothing</returns>
     static member Print (x1:'T, x2:'U) : unit =
         let s1 = RhinoScriptSyntax.ToNiceString(x1, true)
         let s2 = RhinoScriptSyntax.ToNiceString(x2, true)
@@ -88,7 +88,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Prints an object or value to Rhino Command line. 
     ///  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
     ///<param name="x">('T): the value or object to print</param>   
-    ///<returns>(unit) voId, nothing/returns>
+    ///<returns>(unit) voId, nothing</returns>
     static member PrintFull (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, false)
         |>> RhinoApp.WriteLine 
@@ -99,7 +99,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
     ///<param name="x1">('T): the first value or object to print</param>
     ///<param name="x2">('T): the second value or object to print</param>    
-    ///<returns>(unit) voId, nothing/returns>
+    ///<returns>(unit) voId, nothing</returns>
     static member PrintFull (x1:'T, x2:'U) : unit =
         let s1 = RhinoScriptSyntax.ToNiceString(x1, false)
         let s2 = RhinoScriptSyntax.ToNiceString(x2, false)
@@ -111,7 +111,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value</summary>
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
-    ///<returns>(unit) voId, nothing/returns>
+    ///<returns>(unit) voId, nothing</returns>
     static member PrintSeq (xs:'T seq, [<OPT;DEF(null:string)>]separator:string) : unit =
         xs
         |> Seq.map RhinoScriptSyntax.ToNiceString

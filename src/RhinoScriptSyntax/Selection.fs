@@ -326,7 +326,7 @@ module ExtensionsSelection =
     ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
-    ///<param name="customFilter">(string) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
+    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid array) identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
@@ -414,7 +414,7 @@ module ExtensionsSelection =
     ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
-    ///<param name="customFilter">(string) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
+    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid array) identifiers of the picked objects</returns>
     static member GetObjectsAndRemeber( message:string,
                                         [<OPT;DEF(0)>]filter:int,
@@ -533,14 +533,14 @@ module ExtensionsSelection =
     ///Allow for preselected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked object</param>
-    ///<returns>(Guid * bool * float * Point3d * (float * float) * string) of information on success
+    ///<returns>(option of (Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string)):
     ///  [0]  identifier of the surface
     ///  [1]  True if the surface was preselected, otherwise False
     ///  [2]  selection method ( DocObjects.SelectionMethod )
     ///  [3]  selection point
     ///  [4]  u, v surface parameter of the selection point
     ///  [5]  name of the view in which the selection was made</returns>
-    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add [2] selection method ( see help )
+    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help 
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
         async{
@@ -872,7 +872,7 @@ module ExtensionsSelection =
     ///      1073741824  Extrusion</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the objects</param>
-    ///<param name="state">(bool) Optional, Default Value: <c>0</c>
+    ///<param name="state">(int) Optional, Default Value: <c>0</c>
     ///The object state (normal, locked, and hidden). Object states can be
     ///  added together to filter several different states of geometry.
     ///    Value     Description

@@ -280,7 +280,7 @@ module ExtensionsBlock =
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
-    ///<param name="scale">(float*float*float) Optional, Default Value: <c>Vector3d(1. , 1. , 1.)</c>
+    ///<param name="scale">(Vector3d) Optional, Default Value: <c>Vector3d(1.0 , 1.0 , 1.0)</c>
     ///  X, y, z scale factors</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>0</c>
     ///  Rotation angle in degrees</param>

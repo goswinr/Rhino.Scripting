@@ -66,7 +66,7 @@ module ExtensionsDimension =
     ///  The 3D points passed will define the plane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text</param>
-    ///<param name="plane">(string) Optional, Default Value: <c>defined by points arg</c>
+    ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
     ///  If points will be projected to this plane</param>
     ///<returns>(Guid) identifier of the new leader on success</returns>
     static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =

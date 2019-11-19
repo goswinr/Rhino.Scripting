@@ -301,15 +301,16 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible</summary>
-    ///<param name="point">something that can be converted or parsed to a point</param>
+    ///<param name="point">('T) any value that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
     static member CreatePoint(point:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
+
     [<EXT>]
     ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible</summary>
-    ///<param name="x">something that can be converted or parsed to X coordinate</param>
-    ///<param name="y">something that can be converted or parsed to Y coordinate</param>
-    ///<param name="z">something that can be converted or parsed to Z coordinate</param>
+    ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
+    ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
+    ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d</returns>
     static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint ((x, y, z))
@@ -317,15 +318,15 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible</summary>
-    ///<param name="vector">something that can be converted or parsed to a Vector</param>
+    ///<param name="vector">('T) any value that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
     static member CreateVector(vector:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
     [<EXT>]
     ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible</summary>
-    ///<param name="x">something that can be converted or parsed to X coordinate</param>
-    ///<param name="y">something that can be converted or parsed to Y coordinate</param>
-    ///<param name="z">something that can be converted or parsed to Z coordinate</param>
+    ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
+    ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
+    ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d</returns>
     static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector ((x, y, z))

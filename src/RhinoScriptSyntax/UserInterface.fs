@@ -131,7 +131,7 @@ module ExtensionsUserinterface =
             let defaultangle = toRadians(defaultValAngleDegrees)
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             return
-                if rc = Rhino.Commands.Result.Success then Some(toDegrees(angle))
+                if rc = Commands.Result.Success then Some(toDegrees(angle))
                 else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -140,7 +140,7 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
     ///  displayed as click-able command line option toggles</summary>
     ///<param name="message">(string) A prompt</param>
-    ///<param name="items">(string seq) List or tuple of options. Each option is a tuple of three strings
+    ///<param name="items">((string*string*string) array) List of options. Each option is a tuple of three strings
     ///  [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
     ///  [n][2]    string identifying the false value
     ///  [n][3]    string identifying the true value</param>
@@ -209,7 +209,7 @@ module ExtensionsUserinterface =
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             return
-                if rc = Rhino.Commands.Result.Success then Some ((!box).GetCorners())
+                if rc = Commands.Result.Success then Some ((!box).GetCorners())
                 else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -454,7 +454,7 @@ module ExtensionsUserinterface =
             if notNull message3 then gl.SecondPointPrompt <- message3
             let rc, line = gl.Get()
             return
-                if rc = Rhino.Commands.Result.Success then
+                if rc = Commands.Result.Success then
                     Some line
                 else
                     None
@@ -572,7 +572,7 @@ module ExtensionsUserinterface =
             if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore
             gp.Get() |> ignore
             return
-                if gp.CommandResult() <> Rhino.Commands.Result.Success then
+                if gp.CommandResult() <> Commands.Result.Success then
                     None
                 else
                     let pt = gp.Point()
@@ -596,7 +596,7 @@ module ExtensionsUserinterface =
             gp.Constrain(curve, false) |> ignore
             gp.Get() |> ignore
             return
-                if gp.CommandResult() <> Rhino.Commands.Result.Success then
+                if gp.CommandResult() <> Commands.Result.Success then
                     None
                 else
                     let pt = gp.Point()
@@ -615,7 +615,7 @@ module ExtensionsUserinterface =
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             return
-                if cmdrc = Rhino.Commands.Result.Success then Some point
+                if cmdrc = Commands.Result.Success then Some point
                 else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -644,7 +644,7 @@ module ExtensionsUserinterface =
 
             gp.Get() |>ignore
             return
-                if gp.CommandResult() <> Rhino.Commands.Result.Success then
+                if gp.CommandResult() <> Commands.Result.Success then
                     None
                 else
                     let pt = gp.Point()
@@ -660,15 +660,14 @@ module ExtensionsUserinterface =
     ///Constrain point selection to the active construction plane</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
-    ///<param name="maxPoints">(float) Optional, Default Value: <c>None</c>
-    ///  Maximum number of points to pick. If not specified, an
+    ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
     ///  unlimited number of points can be picked</param>
     ///<returns>(option<Point3d array>) an Option of of 3d points</returns>
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
                                 [<OPT;DEF(null:string)>]message2:string,
-                                [<OPT;DEF(2147482999)>]maxPoints:int) : option<Point3d ResizeArray> =
+                                [<OPT;DEF(0)>]maxPoints:int) : option<Point3d ResizeArray> =
                                 //[<OPT;DEF(Point3d())>]basePoint:Point3d) // Ignored here because ignored in python too 
 
         async{
@@ -682,22 +681,22 @@ module ExtensionsUserinterface =
                 gp.Constrain(plane, false) |> ignore
             let mutable getres = gp.Get()
             return
-                if gp.CommandResult() <> Rhino.Commands.Result.Success then None
+                if gp.CommandResult() <> Commands.Result.Success then None
                 else
                     let mutable prevPoint = gp.Point()
                     let rc = ResizeArray([prevPoint])
-                    if maxPoints = 2147482999 || maxPoints>1 then
+                    if maxPoints = 0 || maxPoints > 1 then
                         let mutable currentpoint = 1
                         if notNull message2 then gp.SetCommandPrompt(message2)
 
                         if drawLines then
                             gp.DynamicDraw.Add (fun args  -> if rc.Count > 1 then
-                                                                let c = Rhino.ApplicationSettings.AppearanceSettings.FeedbackColor
+                                                                let c = ApplicationSettings.AppearanceSettings.FeedbackColor
                                                                 args.Display.DrawPolyline(rc, c)
                                                                 |>  ignore)
                         let mutable cont = true
                         while cont do
-                            if maxPoints <> 2147482999 && currentpoint>=maxPoints then cont <- false
+                            if maxPoints <> 0 && currentpoint>=maxPoints then cont <- false
                             if cont && drawLines then
                                 gp.DrawLineFromPoint(prevPoint, true)
                             if cont then
@@ -707,7 +706,7 @@ module ExtensionsUserinterface =
                                 if getres = Input.GetResult.Cancel then
                                     cont <- false
                                     //RhinoApp.WriteLine "GetPoints canceled"
-                                if cont && gp.CommandResult() <> Rhino.Commands.Result.Success then
+                                if cont && gp.CommandResult() <> Commands.Result.Success then
                                     rc.Clear()
                                     cont <- false
                                     RhinoApp.WriteLine "GetPoints no Success"
@@ -762,7 +761,7 @@ module ExtensionsUserinterface =
             let rc, polyline = gpl.Get()
             Doc.Views.Redraw()
             return
-              if rc = Rhino.Commands.Result.Success then Some polyline
+              if rc = Commands.Result.Success then Some polyline
               else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -826,7 +825,7 @@ module ExtensionsUserinterface =
             if notNull prompt3 then prompts.[2] <- prompt3
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             return
-                if rc = Rhino.Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
+                if rc = Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
                 else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -985,8 +984,7 @@ module ExtensionsUserinterface =
     ///<param name="items">(string IList) A zero-based list of string items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<param name="defaultVals">(string seq) Optional, Either a string representing the pre-selected item in the list
-    ///  or a list if multiple items are pre-selected</param>
+    ///<param name="defaultVals">(string IList) Optional, a list if multiple items that are pre-selected</param>
     ///<returns>(option<string array>) an Option of containing the selected items</returns>
     static member MultiListBox(     items:string IList,
                                     [<OPT;DEF(null:string)>]message:string,

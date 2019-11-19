@@ -1782,11 +1782,11 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is an open arc curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///  If the curve is not a circle, then the tolerance used
     ///  to determine whether or not the NURBS form of the curve has the
     ///  properties of a arc.</param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>    
     ///<returns>(bool) True or False</returns>
     static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1860,10 +1860,9 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Verifies an object is a linear curve</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segmentIndex">(int) Optional,
-    ///  The curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>    ///  
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
+    ///<param name="segmentIndex">(int) Optional,The curve segment index if `curveId` identifies a polycurve</param>    
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1887,8 +1886,8 @@ module ExtensionsCurve =
     [<EXT>]
     ///<summary>Verifies an object is a planar curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -2290,28 +2289,6 @@ module ExtensionsCurve =
             Doc.Objects.Replace(curveId, newcurve) |> ignore
             Doc.Views.Redraw()
             true
-
-    // Rhino 6 only ??
-    //<summary>Deletes a knot from a curve object</summary>
-    //<param name="parameter">(float): The parameter on the curve. Note, if the parameter is not equal to one
-    //                of the existing knots, then the knot closest to the specified parameter
-    //                will be removed</param>
-    //<param name="curve">(Guid): The reference of the source object</param>
-    //<returns>(bool) True of False indicating success or failure</returns>
-    //let removeCurveKnot (parameter:float) (curve:Guid) :bool =
-    ////    let curveInst = RhinoScriptSyntax.CoerceCurve curve
-    //    let success, nParam = curveInst.GetCurveParameterFromNurbsFormParameter(parameter)
-    //    if not <| success then  false
-    //    else
-    //        let nCurve = curveInst.ToNurbsCurve()
-    //        if isNull nCurve then  false
-    //        else
-    //            let success = nCurve.Knots.RemoveKnotAt(nParam)
-    //            if not <| success then  false
-    //            else
-    //                Doc.Objects.Replace(curve, nCurve)|> ignore
-    //                Doc.Views.Redraw()
-    //                true
 
 
     [<EXT>]

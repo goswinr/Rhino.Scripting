@@ -21,7 +21,10 @@ module ExtensionsGeometry =
     ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
     ///  view is used</param>
     ///<returns>(Guid) object identifier on success</returns>
-    static member AddClippingPlane(plane:Plane, uMagnitude:float, vMagnitude:float, [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
+    static member AddClippingPlane( plane:Plane, 
+                                    uMagnitude:float, 
+                                    vMagnitude:float, 
+                                    [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
         let viewlist =
             if isNull views then [Doc.Views.ActiveView.ActiveViewportID]
             else
@@ -51,12 +54,19 @@ module ExtensionsGeometry =
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
     ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
     ///<returns>(Guid) object identifier on success</returns>
-    static member AddPictureFrame(plane:Plane, filename:string, [<OPT;DEF(0.0)>]width:float, [<OPT;DEF(0.0)>]height:float, [<OPT;DEF(true)>]selfIllumination:bool, [<OPT;DEF(false)>]embed:bool, [<OPT;DEF(false)>]useAlpha:bool, [<OPT;DEF(false)>]makeMesh:bool) : Guid =
-      if not <| IO.File.Exists(filename) then failwithf "image %s does not exist" filename
-      let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
-      if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
-      Doc.Views.Redraw()
-      rc
+    static member AddPictureFrame(  plane:Plane, 
+                                    filename:string, 
+                                    [<OPT;DEF(0.0)>]width:float, 
+                                    [<OPT;DEF(0.0)>]height:float, 
+                                    [<OPT;DEF(true)>]selfIllumination:bool, 
+                                    [<OPT;DEF(false)>]embed:bool, 
+                                    [<OPT;DEF(false)>]useAlpha:bool, 
+                                    [<OPT;DEF(false)>]makeMesh:bool) : Guid =
+        if not <| IO.File.Exists(filename) then failwithf "image %s does not exist" filename
+        let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
+        Doc.Views.Redraw()
+        rc
 
     [<EXT>]
     ///<summary>Adds point object to the document</summary>

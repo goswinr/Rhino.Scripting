@@ -96,7 +96,7 @@ module ExtensionsUserdata =
     [<EXT>]
     ///<summary>Returns user text stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<param name="key">The key name</param>
+    ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value</returns>

@@ -372,14 +372,14 @@ module ExtensionsView =
         let mutable axis = viewport.CameraY
         if direction = 0 || direction = 2 then angle <- -angle
         if direction = 0 || direction = 1 then
-            if Rhino.ApplicationSettings.ViewSettings.RotateToView then
+            if ApplicationSettings.ViewSettings.RotateToView then
                 axis <- viewport.CameraY
             else
                 axis <- Vector3d.ZAxis
         elif direction = 2 || direction = 3 then
             axis <- viewport.CameraX
 
-        if Rhino.ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle<- -angle
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle<- -angle
         let rot = Transform.Rotation(angle, axis, Point3d.Origin)
         let camUp = rot * viewport.CameraY
         let camDir = -(rot * viewport.CameraZ)
@@ -392,7 +392,6 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Rotates a view. See RotateView command in Rhino help for more information</summary>
-    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) Optional, The direction to rotate the view where
     ///  0= right
     ///  1= left
@@ -401,6 +400,7 @@ module ExtensionsView =
     ///<param name="angle">(float) Angle to rotate. If omitted, the angle of rotation is specified
     ///  by the "Increment in divisions of a circle" parameter specified in
     ///  Options command's View tab</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member RotateView( direction:int,
                               angle:float,
@@ -408,7 +408,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle =  Rhino.RhinoMath.ToRadians( abs(angle) )
-        if Rhino.ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
         if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore
         elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore
         elif direction = 2 then viewport.KeyboardRotate(false, -angle)   |> ignore
@@ -506,11 +506,11 @@ module ExtensionsView =
     [<EXT>]
     ///<summary>Tilts a view by rotating the camera up vector. See the TiltView command in
     ///  the Rhino help file for more details</summary>
-    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<param name="direction">(int) The direction to rotate the view where
     ///  0= right
     ///  1= left</param>
     ///<param name="angle">(float) The angle in degrees to rotate</param>
+    ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member TiltView( direction:int,
                             angle:float,
@@ -518,7 +518,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle = angle
-        if Rhino.ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
+        if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
         let axis = viewport.CameraLocation - viewport.CameraTarget
         if direction = 0 then viewport.Rotate(angle, axis, viewport.CameraLocation) |> ignore
         elif direction = 1 then viewport.Rotate(-angle, axis, viewport.CameraLocation)   |> ignore
@@ -927,8 +927,7 @@ module ExtensionsView =
 
     [<EXT>]
     ///<summary>Zooms to the extents of a specified bounding box in the specified view</summary>
-    ///<param name="boundingBox">(Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d * Point3d) Eight points that define the corners
-    ///  of a bounding box or a BoundingBox class instance</param>
+    ///<param name="boundingBox">(Geometry.BoundingBox) a BoundingBox class instance</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///Zoom extents in all views</param>

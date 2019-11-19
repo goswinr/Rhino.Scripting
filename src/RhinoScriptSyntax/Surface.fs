@@ -152,13 +152,13 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Adds a NURBS surface object to the document</summary>
     ///<param name="pointCount">(int * int) Number of control points in the u and v direction</param>
-    ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<param name="knotsU">(float seq) Knot values for the surface in the u direction.
+    ///<param name="points">(Point3d IList) List or Array of 3D points</param>
+    ///<param name="knotsU">(float IList) List or Array of Knot values for the surface in the u direction.
     ///  Must contain pointCount[0]+degree[0]-1 elements</param>
-    ///<param name="knotsV">(float seq) Knot values for the surface in the v direction.
+    ///<param name="knotsV">(float IList) List or Array of Knot values for the surface in the v direction.
     ///  Must contain pointCount[1]+degree[1]-1 elements</param>
     ///<param name="degree">(int * int) Degree of the surface in the u and v directions</param>
-    ///<param name="weights">(int seq) Optional, Weight values for the surface. The number of elements in
+    ///<param name="weights">(float IList) Optional, List or Array ofWeight values for the surface. The number of elements in
     ///  weights must equal the number of elements in points. Values must be
     ///  greater than zero</param>
     ///<returns>(Guid) identifier of new object</returns>
@@ -961,7 +961,7 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Separates or copies a surface or a copy of a surface from a polysurface</summary>
     ///<param name="objectId">(Guid) Polysurface identifier</param>
-    ///<param name="faceIndices">(float seq) One or more numbers representing faces</param>
+    ///<param name="faceIndices">(int seq) One or more numbers representing faces</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///If True the faces are copied. If False, the faces are extracted</param>
     ///<returns>(Guid ResizeArray) identifiers of extracted surface objects on success</returns>

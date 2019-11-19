@@ -230,7 +230,7 @@ module ExtensionsMesh =
 
     [<EXT>]
     ///<summary>Returns approximate area of onemesh object</summary>
-    ///<param name="objectId">(Guid seq) Identifiers of one or more mesh objects</param>
+    ///<param name="objectId">(Guid) Identifier of a mesh objects</param>
     ///<returns>(float) total area of mesh</returns>
     static member MeshArea(objectId:Guid ) :float =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)

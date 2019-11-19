@@ -458,7 +458,7 @@ module ExtensionsApplication =
     ///<param name="commandName">(string) The command name to test</param>
     ///<returns>(bool) True if the string is a command or False if it is not a command</returns>
     static member IsCommand(commandName:string) : bool =
-        Rhino.Commands.Command.IsCommand(commandName)
+        Commands.Command.IsCommand(commandName)
 
 
     [<EXT>]
@@ -484,8 +484,8 @@ module ExtensionsApplication =
     ///<summary>Returns the name of the last executed command</summary>
     ///<returns>(string) the name of the last executed command</returns>
     static member LastCommandName() : string =
-        let mutable objectId = Rhino.Commands.Command.LastCommandId
-        Rhino.Commands.Command.LookupCommandName(objectId, true)
+        let mutable objectId = Commands.Command.LastCommandId
+        Commands.Command.LookupCommandName(objectId, true)
 
 
     [<EXT>]
@@ -497,7 +497,7 @@ module ExtensionsApplication =
     ///  3 = failure (command failed due to bad input, computational problem...)
     ///  4 = unknown command (the command was not found)</returns>
     static member LastCommandResult() : int =
-        int(Rhino.Commands.Command.LastCommandResult)
+        int(Commands.Command.LastCommandResult)
 
 
     [<EXT>]
@@ -673,7 +673,7 @@ module ExtensionsApplication =
 
     [<EXT>]
     ///<summary>Change Rhino's command window prompt</summary>
-    ///<param name="message">The new prompt on the commandline</param>
+    ///<param name="message">(string) The new prompt on the commandline</param>
     ///<returns>(unit) void, nothing</returns>
     static member Prompt(message:string) : unit =
         RhinoApp.SetCommandPrompt(message)

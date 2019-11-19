@@ -599,7 +599,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the linetype of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(string) The object's current linetype</returns>
     static member ObjectLinetype(objectId:Guid) : string = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -608,7 +608,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the linetype of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="linetype">(string) Name of an existing linetyp. If omitted, the current
     ///  linetyp is returned. If objectId is a list of identifiers, this parameter
     ///  is required</param>
@@ -628,7 +628,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the linetype source of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current linetype source
     ///    0 = By Layer
     ///    1 = By Object
@@ -641,7 +641,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the linetype source of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New linetype source. If omitted, the current source is returned.
     ///  If objectId is a list of identifiers, this parameter is required
     ///    0 = By Layer
@@ -741,7 +741,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print color of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(Drawing.Color) The object's current print color</returns>
     static member ObjectPrintColor(objectId:Guid) : Drawing.Color = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -750,7 +750,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the print color of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="color">(Drawing.Color) New print color. If omitted, the current color is returned</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
@@ -763,7 +763,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print color source of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current print color source
     ///  0 = print color by layer
     ///  1 = print color by object
@@ -774,7 +774,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the print color source of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print color source
     ///  0 = print color by layer
     ///  1 = print color by object
@@ -794,7 +794,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print width of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(float) The object's current print width</returns>
     static member ObjectPrintWidth(objectId:Guid) : float = //GET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -802,7 +802,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the print width of an object</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0 means use
     ///  the default width, and width<0 means do not print (visible for screen display,
     ///  but does not show on print)</param>
@@ -818,7 +818,7 @@ module ExtensionsObject =
 
     [<EXT>]
     ///<summary>Returns the print width source of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current print width source
     ///  0 = print width by layer
     ///  1 = print width by object
@@ -829,7 +829,7 @@ module ExtensionsObject =
 
 
     ///<summary>Modifies the print width source of an object</summary>
-    ///<param name="objectId">(Guid) Identifiers of object</param>
+    ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print width source
     ///  0 = print width by layer
     ///  1 = print width by object
@@ -888,7 +888,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
     ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Vector3D) Optional, Default Value: <c>Vector3d.ZAxis</c>
+    ///<param name="axis">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
     ///Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object</param>
@@ -916,7 +916,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
     ///<param name="rotationAngle">(float) In degrees</param>
-    ///<param name="axis">(Vector3D) Optional, Default Value: <c>Vector3d.ZAxis</c>
+    ///<param name="axis">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
     ///Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///Copy the object</param>
