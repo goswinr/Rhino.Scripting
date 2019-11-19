@@ -236,13 +236,12 @@ module ExtensionsCurve =
     ///  curve is a non-rational NURBS curve of the specified degree</summary>
     ///<param name="points">(Point3d seq) A list containing 3D points to interpolate. For periodic curves,
     ///  if the final point is a duplicate of the initial point, it is
-    ///  ignored. The number of control points must be >= (degree+1)</param>
-    ///<param name="degree">(int) Optional, Default Value: <c>3</c>
-    ///The degree of the curve (must be >=1).
-    ///  Periodic curves must have a degree >= 2. For knotstyle = 1 or 2,
+    ///  ignored. The number of control points must be bigger than 'degree' number</param>
+    ///<param name="degree">(int) Optional, Default Value: <c>3</c>    
+    ///  Periodic curves must have a degree bigger than 1. For knotstyle = 1 or 2,
     ///  the degree must be 3. For knotstyle = 4 or 5, the degree must be odd</param>
     ///<param name="knotstyle">(int) Optional, Default Value: <c>0</c>
-    ///0 Uniform knots.  Parameter spacing between consecutive knots is 1.0.
+    ///  0 Uniform knots.  Parameter spacing between consecutive knots is 1.0.
     ///  1 Chord length spacing.  Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///  2 Sqrt (chord length).  Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///  3 Periodic with uniform spacing.
@@ -253,7 +252,11 @@ module ExtensionsCurve =
     ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
     ///  end of the curve. If the curve is periodic, this argument must be omitted</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
-    static member AddInterpCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0)>]knotstyle:int, [<OPT;DEF(Vector3d())>]startTangent:Vector3d, [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
+    static member AddInterpCurve(   points:Point3d seq, 
+                                    [<OPT;DEF(3)>]degree:int, 
+                                    [<OPT;DEF(0)>]knotstyle:int, 
+                                    [<OPT;DEF(Vector3d())>]startTangent:Vector3d, 
+                                    [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
         let endTangent   = if endTangent.IsZero then Vector3d.Unset else endTangent
         let startTangent = if startTangent.IsZero then Vector3d.Unset else startTangent
         let knotstyle : CurveKnotStyle = EnumOfValue knotstyle
@@ -1721,19 +1724,21 @@ module ExtensionsCurve =
     ///The curve degree, which must be greater than 1.
     ///  The default is 3</param>
     ///<param name="distanceTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///The fitting tolerance. If distanceTolerance
-    ///  is not specified or <= 0.0, the document absolute tolerance is used</param>
+    ///  The fitting tolerance. </param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
     ///The kink smoothing tolerance in degrees. If
     ///  angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
-    ///  is > 0.0, kinks smaller than angleTolerance are smoothed. If
-    ///  angleTolerance is not specified or < 0.0, the document angle
+    ///  is bigger than  0.0, kinks smaller than angleTolerance are smoothed. If
+    ///  angleTolerance is not specified or smaller than 0.0, the document angle
     ///  tolerance is used for the kink smoothing</param>
     ///<returns>(Guid) The identifier of the new object</returns>
-    static member FitCurve(curveId:Guid, [<OPT;DEF(3)>]degree:int, [<OPT;DEF(0.0)>]distanceTolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
+    static member FitCurve( curveId:Guid, 
+                            [<OPT;DEF(3)>]degree:int, 
+                            [<OPT;DEF(0.0)>]distanceTolerance:float, 
+                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let distanceTolerance0 = ifZero1 distanceTolerance Doc.ModelAbsoluteTolerance
-        let angleTolerance0 = ifZero1 (toRadians angleTolerance) Doc.ModelAngleToleranceRadians
+        let angleTolerance0 = if  angleTolerance < 0.0 then  Doc.ModelAngleToleranceRadians else toRadians angleTolerance
         let nc = curve.Fit(degree, distanceTolerance0, angleTolerance0)
         if notNull nc then
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)

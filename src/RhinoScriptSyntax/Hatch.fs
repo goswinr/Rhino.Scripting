@@ -113,7 +113,7 @@ module ExtensionsHatch =
     ///  patterns will be redefined</param>
     ///<returns>(string ResizeArray) Names of the newly added hatch patterns</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string ResizeArray =
-        let patterns = Rhino.DocObjects.HatchPattern.ReadFromFile(filename, true)
+        let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
         if isNull patterns then failwithf "Rhino.Scripting: AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         let rc = ResizeArray()
         for pattern in patterns do

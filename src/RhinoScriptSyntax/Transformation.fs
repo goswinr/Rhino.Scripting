@@ -83,9 +83,9 @@ module ExtensionsTransformation =
     ///<summary>Compares two transformation matrices</summary>
     ///<param name="xform1">(Transform) First matrix to compare</param>
     ///<param name="xform2">(Transform) Second matrix to compare</param>
-    ///<returns>(int) -1 if xform1<xform2
-    ///  1 if xform1>xform2
-    ///  0 if xform1= xform2</returns>
+    ///<returns>(int) -1 if xform1 is smaller than xform2
+    ///  1 if xform1 bigger than xform2
+    ///  0 if xform1 = xform2</returns>
     static member XformCompare(xform1:Transform, xform2:Transform) : int =
         //xform1 = RhinoScriptSyntax.Coercexform(xform1)
         //xform2 = RhinoScriptSyntax.Coercexform(xform2)
@@ -274,7 +274,7 @@ module ExtensionsTransformation =
         //point = RhinoScriptSyntax.Coerce2dpoint(point)
         let view = RhinoScriptSyntax.CoerceView(view |? "") // ""to get active view
         let viewport = view.MainViewport
-        let xform = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
+        let xform = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
         let mutable point3d = Point3d(point.X, point.Y, 0.0)
         if  screenCoordinates then
             let screen = view.ScreenRectangle

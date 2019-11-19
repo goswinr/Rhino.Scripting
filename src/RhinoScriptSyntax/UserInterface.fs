@@ -221,7 +221,7 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c> </param>
-    ///<returns>(option<Drawing.Color>) an Option of RGB color</returns>
+    ///<returns>(Drawing.Color option) an Option of RGB color</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -247,7 +247,7 @@ module ExtensionsUserinterface =
             let screenpt = UI.MouseCursor.Location
             let clientpt = view.ScreenToClient(screenpt)
             let viewport = view.ActiveViewport
-            let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.Screen, Rhino.DocObjects.CoordinateSystem.World)
+            let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
             worldpt.Transform(xf)
             return worldpt, screenpt, viewport.Id, clientpt
@@ -262,11 +262,11 @@ module ExtensionsUserinterface =
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///Prompt for the second distance point</param>
-    ///<returns>(option<float>) an Option of The distance between the two points </returns>
+    ///<returns>(float option) an Option of The distance between the two points </returns>
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d,
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
-                                [<OPT;DEF("Second distance point")>]secondPtMsg:string) : option<float> =
+                                [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let pt1 =
@@ -327,7 +327,7 @@ module ExtensionsUserinterface =
             if maxCount > 0 && minCount > maxCount then failwithf "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
-            go.GeometryFilter <- Rhino.DocObjects.ObjectType.Curve
+            go.GeometryFilter <- DocObjects.ObjectType.Curve
             go.GeometryAttributeFilter <- Input.Custom.GeometryAttributeFilter.EdgeCurve
             go.EnablePreSelect(false, true)
             let rc = go.GetMultiple(minCount, maxCount)
@@ -358,11 +358,11 @@ module ExtensionsUserinterface =
     ///<param name="number">(int) Optional, A default whole number value</param>
     ///<param name="minimum">(int) Optional, A minimum allowable value</param>
     ///<param name="maximum">(int) Optional, A maximum allowable value</param>
-    ///<returns>(option<int>) an Option of The whole number input by the user </returns>
+    ///<returns>(int option) an Option of The whole number input by the user </returns>
     static member GetInteger(   [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(2147482999)>]number:int,
                                 [<OPT;DEF(2147482999)>]minimum:int,
-                                [<OPT;DEF(2147482999)>]maximum:int) : option<int> =
+                                [<OPT;DEF(2147482999)>]maximum:int) : int option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gi = new Input.Custom.GetInteger()
@@ -390,11 +390,11 @@ module ExtensionsUserinterface =
     ///Show new button of on the dialog</param>
     ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
     ///Show set current  button on the dialog</param>
-    ///<returns>(option<string>) an Option of name of selected layer</returns>
+    ///<returns>(string option) an Option of name of selected layer</returns>
     static member GetLayer( [<OPT;DEF("Select Layer")>]title:string,
                             [<OPT;DEF(null:string)>]layer:string,
                             [<OPT;DEF(false)>]showNewButton:bool,
-                            [<OPT;DEF(false)>]showSetCurrent:bool) : option<string> =
+                            [<OPT;DEF(false)>]showSetCurrent:bool) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let layerindex = ref Doc.Layers.CurrentLayerIndex
@@ -450,7 +450,7 @@ module ExtensionsUserinterface =
     ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
     ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
-    ///<returns>(option<Line>) an Option of A Line</returns>
+    ///<returns>(Line option) an Option of a Line</returns>
     static member GetLine(  [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]point:Point3d,
                             [<OPT;DEF(null:string)>]message1:string,
@@ -480,9 +480,9 @@ module ExtensionsUserinterface =
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///If True, the "by Layer" linetype will show. Defaults to False</param>
-    ///<returns>(option<string>) an Option of The names of selected linetype</returns>
+    ///<returns>(string option) an Option of The names of selected linetype</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
-                                [<OPT;DEF(false)>]showByLayer:bool) : option<string> =
+                                [<OPT;DEF(false)>]showByLayer:bool) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable ltinstance = Doc.Linetypes.CurrentLinetype
@@ -522,7 +522,7 @@ module ExtensionsUserinterface =
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoobject _ _ -> objectId = rhinoobject.Id)
             go.SetCommandPrompt(message)
-            go.GeometryFilter <- Rhino.DocObjects.ObjectType.MeshFace
+            go.GeometryFilter <- DocObjects.ObjectType.MeshFace
             go.AcceptNothing(true)
 
             return
@@ -558,7 +558,7 @@ module ExtensionsUserinterface =
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoobject _ _ -> objectId = rhinoobject.Id)
             go.SetCommandPrompt(message)
-            go.GeometryFilter <-  Rhino.DocObjects.ObjectType.MeshVertex
+            go.GeometryFilter <-  DocObjects.ObjectType.MeshVertex
             go.AcceptNothing(true)
             return
                 if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
@@ -577,11 +577,11 @@ module ExtensionsUserinterface =
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///Constrains the point selections to the active construction plane</param>
-    ///<returns>(option<Point3d>) an Option of point on success</returns>
+    ///<returns>(Point3d option) an Option of point on success</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(0.0)>]distance:float,
-                            [<OPT;DEF(false)>]inPlane:bool) : option<Point3d> =
+                            [<OPT;DEF(false)>]inPlane:bool) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()
@@ -607,8 +607,8 @@ module ExtensionsUserinterface =
     ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///A prompt of message</param>
-    ///<returns>(option<Point3d>) an Option of 3d point</returns>
-    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve":string)>]message:string) : option<Point3d> =
+    ///<returns>(Point3d option) an Option of 3d point</returns>
+    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve":string)>]message:string) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -630,8 +630,8 @@ module ExtensionsUserinterface =
     ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
     ///A prompt or message</param>
-    ///<returns>(option<Point3d>) an Option of 3d point</returns>
-    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : option<Point3d> =
+    ///<returns>(Point3d option) an Option of 3d point</returns>
+    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
@@ -647,8 +647,8 @@ module ExtensionsUserinterface =
     ///<param name="surfaceId">(Guid) Identifier of the surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
     ///A prompt or message</param>
-    ///<returns>(option<Point3d>) an Option of 3d point</returns>
-    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface":string)>]message:string) : option<Point3d> =
+    ///<returns>(Point3d option) an Option of 3d point</returns>
+    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface":string)>]message:string) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gp = new Input.Custom.GetPoint()
@@ -748,11 +748,11 @@ module ExtensionsUserinterface =
     [<EXT>]
     ///<summary>Prompts the user to pick points that define a polyline</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
-    ///The options are bit coded flags. Values can be added together to specify more than one option. The default is 3.
+    ///The options are bit coded flags. Values can be added together to specify more than one option. 
     ///  value description
     ///  1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
     ///  2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
-    ///  4     Force close. If specified, then the returned polyline is always closed. If specified, then intMax must be 0 or >= 4.
+    ///  4     Force close. If specified, then the returned polyline is always closed. If specified, then max must bebet 0 or bigger than 4.
     ///  Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
@@ -761,8 +761,8 @@ module ExtensionsUserinterface =
     ///<param name="min">(int) Optional, Default Value: <c>2</c>
     ///The minimum number of points to require. The default is 2</param>
     ///<param name="max">(int) Optional, Default Value: <c>0</c>
-    ///The maximum number of points to require; 0 for no limit.  The default is 0</param>
-    ///<returns>(option<Polyline>) an Option of A  polyline </returns>
+    ///The maximum number of points to require; 0 for no limit. </param>
+    ///<returns>(Polyline option) an Option of a  polyline </returns>
     static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
                                         [<OPT;DEF(null:string)>]message1:string,
                                         [<OPT;DEF(null:string)>]message2:string,
@@ -794,11 +794,11 @@ module ExtensionsUserinterface =
     ///<param name="number">(float) Optional, A default number value</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(option<float>) an Option of The number input by the user </returns>
+    ///<returns>(float option) an Option of The number input by the user </returns>
     static member GetReal(              [<OPT;DEF("Number")>]message:string,
                                         [<OPT;DEF(7e89)>]number:float,
                                         [<OPT;DEF(7e89)>]minimum:float,
-                                        [<OPT;DEF(7e89)>]maximum:float) : option<float> =
+                                        [<OPT;DEF(7e89)>]maximum:float) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let gn = new Input.Custom.GetNumber()
@@ -828,7 +828,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
-    ///<returns>(option<Point3d * Point3d * Point3d * Point3d>) an Option of four 3d points that define the corners of the rectangle</returns>
+    ///<returns>(Point3d * Point3d * Point3d * Point3d) an Option of four 3d points that define the corners of the rectangle</returns>
     static member GetRectangle(
                                         [<OPT;DEF(0)>]mode:int,
                                         [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -857,12 +857,12 @@ module ExtensionsUserinterface =
     ///<param name="defaultValString">(string) Optional, A default value</param>
     ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
     ///  Note, strings cannot begin with a numeric character</param>
-    ///<returns>(option<string>) an Option of The string either input or selected by the user .
+    ///<returns>(string option) an Option of The string either input or selected by the user .
     ///  If the user presses the Enter key without typing in a string, an empty string "" is returned</returns>
     static member GetString(
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]defaultValString:string,
-                                        [<OPT;DEF(null:string seq)>]strings:string seq) : option<string> =
+                                        [<OPT;DEF(null:string seq)>]strings:string seq) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let gs = new Input.Custom.GetString()
@@ -888,11 +888,11 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="defaultVal">(string) Optional, Selected item in the list</param>
-    ///<returns>(option<string>) an Option of he selected item</returns>
+    ///<returns>(string option) an Option of he selected item</returns>
     static member ListBox(              items:string IList,
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]title:string,
-                                        [<OPT;DEF(null:string)>]defaultVal:string) : option<string> =
+                                        [<OPT;DEF(null:string)>]defaultVal:string) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             return
@@ -931,7 +931,7 @@ module ExtensionsUserinterface =
     ///    before continuing work in any application</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
     ///The dialog box title</param>
-    ///<returns>(option<int>) an Option of indicating which button was clicked:
+    ///<returns>(int option) an Option of indicating which button was clicked:
     ///  1      OK button was clicked.
     ///  2      Cancel button was clicked.
     ///  3      Abort button was clicked.
@@ -941,7 +941,7 @@ module ExtensionsUserinterface =
     ///  7      No button was clicked</returns>
     static member MessageBox(           message:string,
                                         [<OPT;DEF(0)>]buttons:int,
-                                        [<OPT;DEF("")>]title:string) : option<int> =
+                                        [<OPT;DEF("")>]title:string) : int option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable buttontyp =  buttons &&& 0x00000007 //111 in binary
@@ -985,11 +985,11 @@ module ExtensionsUserinterface =
     ///<param name="values">(string seq) the corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(option<string array>) an Option of of new values on success</returns>
+    ///<returns>(string array option) an Option of of new values on success</returns>
     static member PropertyListBox(  items:string IList,
                                     values:string seq,
                                     [<OPT;DEF(null:string)>]message:string,
-                                    [<OPT;DEF(null:string)>]title:string) : option<string array> =
+                                    [<OPT;DEF(null:string)>]title:string) : string array option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let values = resizeArray { for  v in values do yield v.ToString() }
@@ -1006,11 +1006,11 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="defaultVals">(string IList) Optional, a list if multiple items that are pre-selected</param>
-    ///<returns>(option<string array>) an Option of containing the selected items</returns>
+    ///<returns>(string array option) an Option of containing the selected items</returns>
     static member MultiListBox(     items:string IList,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string,
-                                    [<OPT;DEF(null:string IList)>]defaultVals:string IList) : option<string array> =
+                                    [<OPT;DEF(null:string IList)>]defaultVals:string IList) : string array option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
@@ -1029,12 +1029,12 @@ module ExtensionsUserinterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(option<string>) an Option of file name is successful</returns>
+    ///<returns>(string option) an Option of file name is successful</returns>
     static member OpenFileName(     [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]filename:string,
-                                    [<OPT;DEF(null:string)>]extension:string) : option<string> =
+                                    [<OPT;DEF(null:string)>]extension:string) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let fd = UI.OpenFileDialog()
@@ -1059,12 +1059,12 @@ module ExtensionsUserinterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(option<string array>) an Option of of selected file names</returns>
+    ///<returns>(string array option) an Option of of selected file names</returns>
     static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]filename:string,
-                                    [<OPT;DEF(null:string)>]extension:string) : option<string array> =
+                                    [<OPT;DEF(null:string)>]extension:string) : string array option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let fd = UI.OpenFileDialog()
@@ -1121,12 +1121,12 @@ module ExtensionsUserinterface =
     ///A dialog box title</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(option<float>) an Option of The newly entered number on success</returns>
+    ///<returns>(float option) an Option of The newly entered number on success</returns>
     static member RealBox(          [<OPT;DEF("")>]message:string,
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,
                                     [<OPT;DEF("")>]title:string,
                                     [<OPT;DEF(7e89)>]minimum:float,
-                                    [<OPT;DEF(7e89)>]maximum:float) : option<float> =
+                                    [<OPT;DEF(7e89)>]maximum:float) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let defaultValNumber = ref <| if defaultValNumber = 7e89 then Rhino.RhinoMath.UnsetValue else defaultValNumber
@@ -1151,12 +1151,12 @@ module ExtensionsUserinterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(option<string>) an Option of the file name is successful</returns>
+    ///<returns>(string option) an Option of the file name is successful</returns>
     static member SaveFileName(     [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]filename:string,
-                                    [<OPT;DEF(null:string)>]extension:string) : option<string> =
+                                    [<OPT;DEF(null:string)>]extension:string) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let fd = UI.SaveFileDialog()
@@ -1174,10 +1174,10 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="defaultValValue">(string) Optional, A default string value</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(option<string>) an Option of the newly entered string value</returns>
+    ///<returns>(string option) an Option of the newly entered string value</returns>
     static member StringBox(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]defaultValValue:string,
-                                    [<OPT;DEF(null:string)>]title:string) : option<string> =
+                                    [<OPT;DEF(null:string)>]title:string) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)

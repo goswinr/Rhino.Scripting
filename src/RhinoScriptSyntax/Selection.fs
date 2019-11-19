@@ -28,7 +28,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
 
-            let it = Rhino.DocObjects.ObjectEnumeratorSettings()
+            let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
             it.NormalObjects <- true
@@ -59,7 +59,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid =
 
-            let it = Rhino.DocObjects.ObjectEnumeratorSettings()
+            let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
             let e = Doc.Objects.GetObjectList(it).GetEnumerator()
@@ -144,7 +144,7 @@ module ExtensionsSelection =
                 Doc.Views.Redraw()
             let go = new Input.Custom.GetObject()
             if notNull message then go.SetCommandPrompt(message)
-            go.GeometryFilter <- Rhino.DocObjects.ObjectType.Curve
+            go.GeometryFilter <- DocObjects.ObjectType.Curve
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)
@@ -550,7 +550,7 @@ module ExtensionsSelection =
                 Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
-            go.GeometryFilter <- Rhino.DocObjects.ObjectType.Surface
+            go.GeometryFilter <- DocObjects.ObjectType.Surface
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)
@@ -594,7 +594,7 @@ module ExtensionsSelection =
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) :Guid ResizeArray =
-            let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+            let settings = DocObjects.ObjectEnumeratorSettings()
             settings.ActiveObjects <- true
             settings.NormalObjects <- true
             settings.LockedObjects <- true
@@ -622,7 +622,7 @@ module ExtensionsSelection =
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
-        let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let settings = DocObjects.ObjectEnumeratorSettings()
         settings.ActiveObjects <- true
         settings.NormalObjects <- true
         settings.LockedObjects <- true
@@ -648,7 +648,7 @@ module ExtensionsSelection =
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
                                         [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
-        let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.IncludePhantoms <- true
@@ -702,7 +702,7 @@ module ExtensionsSelection =
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
-        let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
@@ -730,7 +730,7 @@ module ExtensionsSelection =
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
-        let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
@@ -753,7 +753,7 @@ module ExtensionsSelection =
     ///Include grips objects.  If omitted, grips objects are not returned</param>
     ///<returns>(Guid ResizeArray) identifier of normal objects </returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
-        let iter = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true
         iter.LockedObjects <- false
         iter.IncludeLights <- includeLights
@@ -830,7 +830,7 @@ module ExtensionsSelection =
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(false)>]includeLights:bool,
                                  [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
-        let settings = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let settings = DocObjects.ObjectEnumeratorSettings()
         settings.HiddenObjects <- true
         settings.DeletedObjects <- false
         settings.IncludeGrips <- false
@@ -892,13 +892,13 @@ module ExtensionsSelection =
         let mutable bGrips = false
         let mutable bPhantoms = false
         let mutable geometryfilter = RhinoScriptSyntax.FilterHelper(geometryType)
-        if geometryType = 0 then geometryfilter <- Rhino.DocObjects.ObjectType.AnyObject
+        if geometryType = 0 then geometryfilter <- DocObjects.ObjectType.AnyObject
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Surface) then bSurface <- true // TODO verify this works OK !
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Brep ) then bPolySurface <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Light ) then bLights <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Grip ) then bGrips <- true
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Phantom ) then bPhantoms <- true
-        let it = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let it = DocObjects.ObjectEnumeratorSettings()
         it.DeletedObjects <- false
         it.ActiveObjects <- true
         it.ReferenceObjects <- true
@@ -916,14 +916,14 @@ module ExtensionsSelection =
         for object in e do
             let  mutable bFound = false
             let objecttyp = object.ObjectType
-            if objecttyp = Rhino.DocObjects.ObjectType.Brep && (bSurface || bPolySurface) then
+            if objecttyp = DocObjects.ObjectType.Brep && (bSurface || bPolySurface) then
                 let brep = RhinoScriptSyntax.CoerceBrep(object.Id)
                 if notNull brep then
                     if brep.Faces.Count = 1 then
                         if bSurface then bFound <- true
                     else
                         if bPolySurface then bFound <- true
-            elif objecttyp = Rhino.DocObjects.ObjectType.Extrusion && (bSurface || bPolySurface) then
+            elif objecttyp = DocObjects.ObjectType.Extrusion && (bSurface || bPolySurface) then
                 let extrusion = object.Geometry :?> Extrusion
                 let profilecount = extrusion.ProfileCount
                 let capcount = extrusion.CapCount
@@ -975,7 +975,7 @@ module ExtensionsSelection =
                                   [<OPT;DEF(false)>]select:bool,
                                   [<OPT;DEF(false)>]includeLights:bool,
                                   [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
-        let it = Rhino.DocObjects.ObjectEnumeratorSettings()
+        let it = DocObjects.ObjectEnumeratorSettings()
         it.DeletedObjects <- false
         it.ActiveObjects <- true
         it.ReferenceObjects <- true
@@ -1013,11 +1013,11 @@ module ExtensionsSelection =
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
         let screen1 = Point2d(corner1)
         let screen2 = Point2d(corner2)
-        let xf = viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Screen)
+        let xf = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
         screen1.Transform(xf)
         screen2.Transform(xf)
 
-        let filter = Rhino.DocObjects.ObjectType.AnyObject
+        let filter = DocObjects.ObjectType.AnyObject
         let objects =
             if inWindow then
                 Doc.Objects.FindByWindowRegion(viewport, screen1, screen2, true, filter)

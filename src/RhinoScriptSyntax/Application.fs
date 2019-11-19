@@ -211,7 +211,7 @@ module ExtensionsApplication =
     ///  scripts. The command can be a built-in Rhino command or one provided by a
     ///  3rd party plug-in.
     ///  Write command scripts just as you would type the command sequence at the
-    ///  command line. A space or a new line acts like pressing <Enter> at the
+    ///  command line. A space or a new line acts like pressing 'Enter' at the
     ///  command line. For more information, see "Scripting" in Rhino help.
     ///  Note, this function is designed to run one command and one command only.
     ///  Do not combine multiple Rhino commands into a single call to this method.

@@ -2011,18 +2011,17 @@ module ExtensionsSurface =
     /// NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<returns>(int) The current isocurve density
-    ///  -1: Hides the surface isocurves
+    ///    -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
-    ///    1: Display boundary and knot wires and one interior wire if there
-    ///      are no interior knots
-    ///        >=2: Display boundary and knot wires and (N+1) interior wires</returns>
+    ///    1: Display boundary and knot wires and one interior wire if there are no interior knots
+    ///    bigger than 1: Display boundary and knot wires and (N+1) interior wires</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid) : int = //GET
         match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with
-        | :?  Rhino.DocObjects.BrepObject as rhinoobject ->
+        | :?  DocObjects.BrepObject as rhinoobject ->
                 rhinoobject.Attributes.WireDensity
-        | :?  Rhino.DocObjects.SurfaceObject as rhinoobject ->
+        | :?  DocObjects.SurfaceObject as rhinoobject ->
                 rhinoobject.Attributes.WireDensity
-        | :?  Rhino.DocObjects.ExtrusionObject as rhinoobject ->
+        | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 rhinoobject.Attributes.WireDensity
         | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' " surfaceId
 
@@ -2034,25 +2033,24 @@ module ExtensionsSurface =
     /// NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="density">(int) The isocurve wireframe density. The possible values are
-    ///  -1: Hides the surface isocurves
+    ///    -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
-    ///    1: Display boundary and knot wires and one interior wire if there
-    ///      are no interior knots
-    ///        >=2: Display boundary and knot wires and (N+1) interior wires</param>
+    ///    1: Display boundary and knot wires and one interior wire if there are no interior knots
+    ///    bigger than 1: Display boundary and knot wires and (N+1) interior wires</param>
     ///<returns>(unit) void, nothing</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid, density:int) : unit = //SET
         match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with
-        | :?  Rhino.DocObjects.BrepObject as rhinoobject ->
+        | :?  DocObjects.BrepObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges()|> ignore
                 Doc.Views.Redraw()
-        | :?  Rhino.DocObjects.SurfaceObject as rhinoobject ->
+        | :?  DocObjects.SurfaceObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges()|> ignore
                 Doc.Views.Redraw()
-        | :?  Rhino.DocObjects.ExtrusionObject as rhinoobject ->
+        | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges()|> ignore
@@ -2076,8 +2074,8 @@ module ExtensionsSurface =
     [<EXT>]
     ///<summary>Returns the knots, or knot vector, of a surface object</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<returns>(NurbsSurfaceKnotList * NurbsSurfaceKnotList) knot values of the surface . The list will
-    ///  contain the following information:
+    ///<returns>(NurbsSurfaceKnotList * NurbsSurfaceKnotList) knot values of the surface. 
+    ///  The list will contain the following information:
     ///  Element   Description
     ///    [0]     Knot vectors in U direction
     ///    [1]     Knot vectors in V direction</returns>

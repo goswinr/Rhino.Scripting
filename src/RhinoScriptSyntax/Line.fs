@@ -43,10 +43,10 @@ module ExtensionsLine =
         if not <| circle.IsValid then  failwithf "Unable to create valid circle with given plane && radius.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
         let cyl = Geometry.Cylinder( circle, cylinderHeight )
         if not <| cyl.IsValid then  failwithf "Unable to create valid cylinder with given circle && height.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
-        let rc, pt1, pt2 = Geometry.Intersect.Intersection.LineCylinder(line, cyl)
-        if rc= Geometry.Intersect.LineCylinderIntersection.None then
+        let rc, pt1, pt2 = Intersect.Intersection.LineCylinder(line, cyl)
+        if rc= Intersect.LineCylinderIntersection.None then
             [| |]
-        elif rc= Geometry.Intersect.LineCylinderIntersection.Single then
+        elif rc= Intersect.LineCylinderIntersection.Single then
             [|pt1|]
         else
             [|pt1; pt2|]
@@ -86,7 +86,7 @@ module ExtensionsLine =
     ///<param name="lineB">(Geometry.Line) LineB of lines to intersect</param>
     ///<returns>(Point3d * Point3d) containing a point on the first line and a point on the second line</returns>
     static member LineLineIntersection(lineA:Line, lineB:Line) : Point3d * Point3d =
-        let rc, a, b = Geometry.Intersect.Intersection.LineLine(lineA, lineB)
+        let rc, a, b = Intersect.Intersection.LineLine(lineA, lineB)
         if not <| rc then  failwithf "lineLineIntersection failed on lineA:%A lineB:%A , are they paralell?" lineA lineB
         lineA.PointAt(a), lineB.PointAt(b)
 
@@ -94,14 +94,16 @@ module ExtensionsLine =
     ///<summary>Finds the longest distance between a line as a finite chord, and a point</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point or test line</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D >= Rhino.Distance(Q, P)</returns>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
+    /// then D is bigger than Rhino.Distance(Q, P)</returns>
     static member LineMaxDistanceTo(line:Line, point:Point3d) : float =
         line.MaximumDistanceTo(point)
     [<EXT>]
     ///<summary>Finds the longest distance between a line as a finite chord, and a line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D >= Rhino.Distance(Q, P)</returns>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
+    /// then D is bigger than Rhino.Distance(Q, P)</returns>
     static member LineMaxDistanceTo(line:Line, line2:Line) : float =
         line.MaximumDistanceTo(line2)
 
@@ -111,7 +113,8 @@ module ExtensionsLine =
     ///  or another line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D <= Rhino.Distance(Q, P)</returns>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
+    /// then D is smaller than Rhino.Distance(Q, P)</returns>
     static member LineMinDistanceTo(line:Line, point:Point3d) : float =
         line.MinimumDistanceTo(point)
 
@@ -120,7 +123,8 @@ module ExtensionsLine =
     ///  or another line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
-    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object, then D <= Rhino.Distance(Q, P)</returns>
+    ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
+    /// then D is smaller than Rhino.Distance(Q, P)</returns>
     static member LineMinDistanceTo(line:Line, line2:Line) : float =
         line.MinimumDistanceTo(line2)
 
@@ -129,7 +133,7 @@ module ExtensionsLine =
     [<EXT>]
     ///<summary>Returns a plane that contains the line. The origin of the plane is at the start of
     ///  the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
-    ///<param name="line">(Geometry.Line) List of 6 numbers, two Point3d, or Line</param>
+    ///<param name="line">(Geometry.Line) a Line</param>
     ///<returns>(Plane) the plane</returns>
     static member LinePlane(line:Line) : Plane =
         let rc, plane = line.TryGetPlane()
@@ -143,7 +147,7 @@ module ExtensionsLine =
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<returns>(Point3d) The 3D point of intersection is successful</returns>
     static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d =
-        let rc, t = Geometry.Intersect.Intersection.LinePlane(line, plane)
+        let rc, t = Intersect.Intersection.LinePlane(line, plane)
         if  not <| rc then  failwithf "linePlaneIntersection failed. Paralell? line:'%A' plane:'%A'" line plane
         line.PointAt(t)
 
@@ -155,10 +159,10 @@ module ExtensionsLine =
     ///<param name="sphereRadius">(float) The radius of the sphere</param>
     ///<returns>(Point3d array) list of intersection points , otherwise None</returns>
     static member LineSphereIntersection(line:Line, sphereCenter:Point3d, sphereRadius:float) : Point3d array =
-        let sphere = Geometry.Sphere(sphereCenter, sphereRadius)
-        let rc, pt1, pt2 = Geometry.Intersect.Intersection.LineSphere(line, sphere)
-        if rc= Geometry.Intersect.LineSphereIntersection.None then  [||]
-        elif rc= Geometry.Intersect.LineSphereIntersection.Single then  [|pt1|]
+        let sphere = Sphere(sphereCenter, sphereRadius)
+        let rc, pt1, pt2 = Intersect.Intersection.LineSphere(line, sphere)
+        if rc= Intersect.LineSphereIntersection.None then  [||]
+        elif rc= Intersect.LineSphereIntersection.Single then  [|pt1|]
         else [|pt1; pt2|]
 
 

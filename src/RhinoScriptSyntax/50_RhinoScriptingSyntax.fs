@@ -216,7 +216,7 @@ type RhinoScriptSyntax private () = // no constructor?
         | _ ->
             try
                 match b with
-                | :? option<Point3d> as pto   -> pto.Value // from UI function
+                | :? (Point3d option) as pto   -> pto.Value // from UI function
                 | :? option<Guid> as go      -> ((Doc.Objects.FindId(go.Value).Geometry) :?> Point).Location
                 | :? (string*string*string) as xyz  -> let x, y, z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
                 | :? Guid as g ->  ((Doc.Objects.FindId(g).Geometry) :?> Point).Location 
@@ -473,7 +473,7 @@ type RhinoScriptSyntax private () = // no constructor?
     
     ///<summary>attempt to get Rhino Hatch Object</summary>
     ///<param name="objectId">(Guid): objectId of Hatch object</param> 
-    ///<returns>(Rhino.DocObjects.HatchObject) Fails on bad input</returns>
+    ///<returns>(DocObjects.HatchObject) Fails on bad input</returns>
     static member CoerceHatchObject (objectId:Guid): DocObjects.HatchObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
@@ -481,7 +481,7 @@ type RhinoScriptSyntax private () = // no constructor?
 
     ///<summary>attempt to get Rhino Annotation Object</summary>
     ///<param name="objectId">(Guid): objectId of annotation object</param> 
-    ///<returns>(Rhino.DocObjects.AnnotationObjectBase) Fails on bad input</returns>
+    ///<returns>(DocObjects.AnnotationObjectBase) Fails on bad input</returns>
     static member CoerceAnnotation (objectId:Guid): DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
@@ -489,8 +489,8 @@ type RhinoScriptSyntax private () = // no constructor?
         
     ///<summary>Returns the Rhino Block instance object for a given Id</summary>
     ///<param name="objectId">(Guid) Id of block instance</param>    
-    ///<returns>(Rhino.DocObjects.InstanceObject) block instance object</returns>
-    static member CoerceBlockInstanceObject(objectId:Guid) : Rhino.DocObjects.InstanceObject =
+    ///<returns>(DocObjects.InstanceObject) block instance object</returns>
+    static member CoerceBlockInstanceObject(objectId:Guid) : DocObjects.InstanceObject =
         match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  
         | :? DocObjects.InstanceObject as b -> b
         | o -> failwithf "CoerceBlockInstanceObject: unable to find Block InstanceObject from %A '%A'" o.ObjectType objectId

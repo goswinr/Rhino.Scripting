@@ -351,7 +351,7 @@ module ExtensionsUtility =
 
     [<EXT>]
     ///<summary>Converts input into a Rhino.Geometry.Transform object if possible</summary>
-    ///<param name="xform">(seq<seq<float>>) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
+    ///<param name="xform">(float seq seq) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column</returns>
     static member CreateXform(xform:seq<seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xform) // TODO verify row, column order !!

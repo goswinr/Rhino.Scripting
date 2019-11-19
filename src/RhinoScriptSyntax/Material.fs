@@ -38,8 +38,8 @@ module ExtensionsMaterial =
     static member AddMaterialToObject(objectId:Guid) : int =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable attr = rhinoobject.Attributes
-        if attr.MaterialSource <> Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject then
-            attr.MaterialSource <- Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject
+        if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
+            attr.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
             Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
             attr <- rhinoobject.Attributes
         let mutable materialindex = attr.MaterialIndex
@@ -103,7 +103,7 @@ module ExtensionsMaterial =
             let rhobj = Doc.Objects.FindId(objectId)
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
-                rhobj.Attributes.MaterialSource <- Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject
+                rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
                 rhobj.CommitChanges()|> ignore
         Doc.Views.Redraw()
 
@@ -112,7 +112,7 @@ module ExtensionsMaterial =
     [<EXT>]
     ///<summary>Returns a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<returns>(string option) The current bump bitmap filename /returns>
+    ///<returns>(string option) The current bump bitmap filename </returns>
     static member MaterialBump(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' " materialIndex

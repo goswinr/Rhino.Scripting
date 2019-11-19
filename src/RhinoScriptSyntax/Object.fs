@@ -161,7 +161,7 @@ module ExtensionsObject =
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space</returns>
     static member IsLayoutObject(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        rhobj.Attributes.Space = Rhino.DocObjects.ActiveSpace.PageSpace
+        rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
 
     [<EXT>]
@@ -347,7 +347,7 @@ module ExtensionsObject =
                 let source = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
                 source.Attributes.Duplicate()
             else
-                new Rhino.DocObjects.ObjectAttributes()
+                new DocObjects.ObjectAttributes()
         let mutable rc = 0
         for objectId in targetIds do
             if Doc.Objects.ModifyAttributes(objectId, sourceattr, true) then
@@ -456,7 +456,7 @@ module ExtensionsObject =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
         attr.ObjectColor <- color
-        attr.ColorSource <- Rhino.DocObjects.ObjectColorSource.ColorFromObject
+        attr.ColorSource <- DocObjects.ObjectColorSource.ColorFromObject
         if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then failwithf "set ObjectColor faile for %A; %A" objectId color
         Doc.Views.Redraw()
 
@@ -484,7 +484,7 @@ module ExtensionsObject =
     ///  3 = color from parent</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectColorSource(objectId:Guid, source:int) : unit = //SET
-        let source : Rhino.DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
+        let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectColorSource failed for '%A' and '%A'" objectId source
@@ -558,7 +558,7 @@ module ExtensionsObject =
     ///<returns>(string option) The object's current page layout view, None if it is in Model Space</returns>
     static member ObjectLayout(objectId:Guid) : string option= //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if rhobj.Attributes.Space = Rhino.DocObjects.ActiveSpace.PageSpace then
+        if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
             let pageid = rhobj.Attributes.ViewportId
             let pageview = Doc.Views.Find(pageid)
             Some pageview.MainViewport.Name
@@ -578,7 +578,7 @@ module ExtensionsObject =
     static member ObjectLayout(objectId:Guid, layout:string option) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let view=
-            if rhobj.Attributes.Space = Rhino.DocObjects.ActiveSpace.PageSpace then
+            if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                 let pageid = rhobj.Attributes.ViewportId
                 let pageview = Doc.Views.Find(pageid)
                 Some pageview.MainViewport.Name
@@ -587,14 +587,14 @@ module ExtensionsObject =
 
         if view<>layout then
             if layout.IsNone then //move to model space
-                rhobj.Attributes.Space <- Rhino.DocObjects.ActiveSpace.ModelSpace
+                rhobj.Attributes.Space <- DocObjects.ActiveSpace.ModelSpace
                 rhobj.Attributes.ViewportId <- Guid.Empty
             else
                 match Doc.Views.Find(layout.Value, false) with
                 | null -> failwithf "Set ObjectLayout failed, layout not found for '%A' and '%A'"  layout objectId
                 | :? Rhino.Display.RhinoPageView as layout ->
                     rhobj.Attributes.ViewportId <- layout.MainViewport.Id
-                    rhobj.Attributes.Space <- Rhino.DocObjects.ActiveSpace.PageSpace
+                    rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> failwithf "Set ObjectLayout failed, layout is not a Page view for '%A' and '%A'"  layout objectId
 
 
@@ -623,7 +623,7 @@ module ExtensionsObject =
         let oldindex = Doc.Linetypes.LinetypeIndexForObject(rhinoobject)
         let newindex = Doc.Linetypes.Find(linetype)
         if newindex <0 then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
-        rhinoobject.Attributes.LinetypeSource <- Rhino.DocObjects.ObjectLinetypeSource.LinetypeFromObject
+        rhinoobject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoobject.Attributes.LinetypeIndex <- newindex
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         Doc.Views.Redraw()
@@ -657,7 +657,7 @@ module ExtensionsObject =
     static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if source <0 || source >3 || source = 2 then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
-        let source : Rhino.DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
+        let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoobject.Attributes.LinetypeSource <- source
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
@@ -721,7 +721,7 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = int(rhinoobject.Attributes.MaterialSource)
         if source <0 || source >3 || source = 2 then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
-        let source :Rhino.DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
+        let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoobject.Attributes.MaterialSource <- source
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
 
@@ -765,7 +765,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.PlotColorSource <- Rhino.DocObjects.ObjectPlotColorSource.PlotColorFromObject
+        rhinoobject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoobject.Attributes.PlotColor <- color
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         Doc.Views.Redraw()
@@ -793,7 +793,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
         if source <0 || source >3 || source = 2 then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectId
-        let source : Rhino.DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
+        let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
@@ -815,14 +815,14 @@ module ExtensionsObject =
     [<EXT>]
     ///<summary>Modifies the print width of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="width">(float) New print width value in millimeters, where width = 0 means use
-    ///  the default width, and width<0 means do not print (visible for screen display,
+    ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
+    ///  the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
     ///  but does not show on print)</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let rc = rhinoobject.Attributes.PlotWeight
-            rhinoobject.Attributes.PlotWeightSource <- Rhino.DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
+            rhinoobject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoobject.Attributes.PlotWeight <- width
             if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
             Doc.Views.Redraw()

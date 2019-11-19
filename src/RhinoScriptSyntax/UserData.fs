@@ -36,9 +36,9 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Returns a user data item from the current document</summary>
-    ///<param name="section">(string) Optional, Section name. If omitted, all section names are returned</param
-    ///<returns>(string array) of all section names if section name is omitted
-    ///  list(str, ...) of all entry names for a section if entry is omitted</returns>
+    ///<param name="section">(string) Optional, Section name. If omitted, all section names are returned</param>
+    ///<returns>(string array) of all section names if section name is omitted, 
+    /// else all entry names in this  section</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> =
         if notNull section then
             Doc.Strings.GetSectionNames()

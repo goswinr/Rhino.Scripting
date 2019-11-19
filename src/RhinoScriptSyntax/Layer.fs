@@ -34,7 +34,7 @@ module ExtensionsLayer =
         let mutable lastparentindex = -1
         let mutable lastparent:DocObjects.Layer = null
         for idx, name in Seq.indexed(names) do
-          let layer = Rhino.DocObjects.Layer.GetDefaultLayerProperties()
+          let layer = DocObjects.Layer.GetDefaultLayerProperties()
           if idx = 0 then
             if notNull parent then
               lastparent <- RhinoScriptSyntax.CoerceLayer(parent)

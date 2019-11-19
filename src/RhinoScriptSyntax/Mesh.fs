@@ -16,7 +16,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Add a mesh object to the document</summary>
     ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
-    ///<param name="faceVertices">(seq<IList<int>>) List containing lists of 3 or 4 numbers that define the
+    ///<param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
     ///  vertex indices for each face of the mesh. If the third a fourth vertex
     ///    indices of a face are identical, a triangular face will be created</param>
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
@@ -93,7 +93,7 @@ module ExtensionsMesh =
     ///<summary>Calculates the intersection of a curve object and a mesh object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="meshId">(Guid) Identifier or a mesh object</param>
-    ///<returns>(array<Point3d>*array<int>) two arrays as tuple:
+    ///<returns>(Point3d array * int array) two arrays as tuple:
     ///      [0] = point of intersection
     ///      [1] = mesh face index where intersection lies</returns>
     static member CurveMeshIntersection( curveId:Guid,
@@ -196,7 +196,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="point">(Point3d) Test point</param>
     ///<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
-    ///  The testing tolerance /param>
+    ///  The testing tolerance </param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPointOnMesh(    objectId:Guid,
                                     point:Point3d,
@@ -361,7 +361,7 @@ module ExtensionsMesh =
     ///<param name="point">(Point3d) Point to test</param>
     ///<param name="maximumDistance">(float) Optional, Upper bound used for closest point calculation.
     ///  If you are only interested in finding a point Q on the mesh when
-    ///  point.DistanceTo(Q) < maximumDistance, then set maximumDistance to
+    ///  point.DistanceTo(Q) is smaller than maximumDistance, then set maximumDistance to
     ///  that value</param>
     ///<returns>(Point3d * int) containing the results of the calculation where
     ///  [0] = the 3-D point on the mesh
@@ -446,7 +446,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Returns the vertex indices of all faces of a Ngon mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(ResizeArray<ResizeArray<int>) containing a nested List that define the vertex indices for
+    ///<returns>(int ResizeArray ResizeArray) containing a nested List that define the vertex indices for
     ///  each face of the mesh. Ngons, quad and triangle faces are returned</returns>
     static member MeshNgonFaceVertices(objectId:Guid) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
@@ -463,7 +463,7 @@ module ExtensionsMesh =
     [<EXT>]
     ///<summary>Returns the vertex indices of all faces of a mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(ResizeArray<int*int*int*int>) containing tuples of 4 numbers that define the vertex indices for
+    ///<returns>((int*int*int*int) ResizeArray) containing tuples of 4 numbers that define the vertex indices for
     ///  each face of the mesh. Both quad and triangle faces are returned. If the
     ///  third and fourth vertex indices are identical, the face is a triangle</returns>
     static member MeshFaceVertices(objectId:Guid) : ResizeArray<int*int*int*int> =

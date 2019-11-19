@@ -33,7 +33,7 @@ module ExtensionsGrips =
     ///Allow for selection of pre-selected object grip</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked object grip</param>
-    ///<returns>(option<Guid * int * Point3d>) Option of a grip record.
+    ///<returns>(Guid * int * Point3d) Option of a grip record.
     ///  [0] = identifier of the object that owns the grip
     ///  [1] = index value of the grip
     ///  [2] = location of the grip</returns>
@@ -68,7 +68,7 @@ module ExtensionsGrips =
     ///Allow for selection of pre-selected object grips</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked object grips</param>
-    ///<returns>(ResizeArray<Guid * int * Point3d>) containing one or more grip records. Each grip record is a tuple
+    ///<returns>((Guid * int * Point3d) ResizeArray) containing one or more grip records. Each grip record is a tuple
     ///  [n][0] = identifier of the object that owns the grip
     ///  [n][1] = index value of the grip
     ///  [n][2] = location of the grip</returns>

@@ -70,13 +70,12 @@ module ExtensionsPlane =
     static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d =
         plane.ClosestPoint(point)
 
-    [<EXT>]
-
+    
     [<EXT>]
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
-    ///<returns>(float,*float) The u and v paramter on the plane of the closest point</returns>
+    ///<returns>(float*float) The u and v paramter on the plane of the closest point</returns>
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
@@ -89,7 +88,7 @@ module ExtensionsPlane =
     ///<param name="curve">(Guid) The identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///The intersection tolerance. </param>
-    ///<returns>(ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float >) a list of intersection information tuple .  The list will contain one or more of the following tuple:
+    ///<returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
     ///  Element Type        Description
     ///  [0]       Number      The intersection event type, either Point (1) or Overlap (2).
     ///  [1]       Point3d     If the event type is Point (1), then the intersection point on the curve.

@@ -417,11 +417,13 @@ module ExtensionsGeometry =
 
     [<EXT>]
     ///<summary>Returns amount indices of points in a point cloud that are near needlePoints</summary>
-    ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
-    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
+    ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack".
+    /// This can also be a list of points</param>
+    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud.
+    /// This can also be specified as a point cloud</param>
     ///<param name="amount">(int) Optional, Default Value: <c>1</c>
     ///The amount of required closest points. Defaults to 1</param>
-    ///<returns>(seq<int array>) nested lists with amount items within a list, with the indices of the found points</returns>
+    ///<returns>(int array seq) nested lists with amount items within a list, with the indices of the found points</returns>
     static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
         if Seq.length(needlePoints) > 100 then
             RTree.Point3dKNeighbors(ptCloud, needlePoints, amount)
@@ -439,7 +441,7 @@ module ExtensionsGeometry =
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>
-    ///<returns>(seq<int array>) a seq of arrays with the indices of the found points</returns>
+    ///<returns>(int array seq) a seq of arrays with the indices of the found points</returns>
     static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
         RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
 
