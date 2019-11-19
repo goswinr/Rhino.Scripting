@@ -911,7 +911,7 @@ module ExtensionsObject =
                 Vector3d.ZAxis
             else
                 axis
-        let rotationAngle = Rhino.RhinoMath.ToRadians(rotationAngle)
+        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
         if res = Guid.Empty then failwithf "Rhino.Scripting: RotateObject failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectId centerPoint rotationAngle axis copy
@@ -939,7 +939,7 @@ module ExtensionsObject =
                 Vector3d.ZAxis
             else
                 axis
-        let rotationAngle = Rhino.RhinoMath.ToRadians(rotationAngle)
+        let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let rc = ResizeArray()
         for objectid in objectIds do

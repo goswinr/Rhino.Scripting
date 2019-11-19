@@ -45,7 +45,7 @@ module ExtensionsLight =
             let mutable radius = 0.5
             let units = Doc.ModelUnitSystem
             if units <> UnitSystem.None then
-                let scale = Rhino.RhinoMath.UnitScale(UnitSystem.Millimeters, units)
+                let scale = RhinoMath.UnitScale(UnitSystem.Millimeters, units)
                 radius <- radius * scale
             width <- radius
         let light = new Light()

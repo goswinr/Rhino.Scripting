@@ -1129,9 +1129,9 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(7e89)>]maximum:float) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            let defaultValNumber = ref <| if defaultValNumber = 7e89 then Rhino.RhinoMath.UnsetValue else defaultValNumber
-            let minimum = if minimum = 7e89 then Rhino.RhinoMath.UnsetValue else minimum
-            let maximum = if maximum = 7e89 then Rhino.RhinoMath.UnsetValue else maximum
+            let defaultValNumber = ref <| if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
+            let minimum = if minimum = 7e89 then RhinoMath.UnsetValue else minimum
+            let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
 
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
             return

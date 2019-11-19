@@ -368,7 +368,7 @@ module ExtensionsView =
                                 [<OPT;DEF("":string)>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let mutable angle = Rhino.RhinoMath.ToRadians( abs(angle) )
+        let mutable angle = RhinoMath.ToRadians( abs(angle) )
         let targetdistance = (viewport.CameraLocation-viewport.CameraTarget)*viewport.CameraZ
         let mutable axis = viewport.CameraY
         if direction = 0 || direction = 2 then angle <- -angle
@@ -408,7 +408,7 @@ module ExtensionsView =
                               [<OPT;DEF("":string)>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        let mutable angle =  Rhino.RhinoMath.ToRadians( abs(angle) )
+        let mutable angle =  RhinoMath.ToRadians( abs(angle) )
         if ApplicationSettings.ViewSettings.RotateReverseKeyboard then angle <- -angle
         if direction = 0 then viewport.KeyboardRotate(true, angle)       |> ignore
         elif direction = 1 then viewport.KeyboardRotate(true, -angle)    |> ignore

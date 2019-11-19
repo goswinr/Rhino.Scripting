@@ -68,7 +68,7 @@ module ExtensionsHatch =
             index <-  if patterninstance|> isNull then RhinoMath.UnsetIntIndex else patterninstance.Index
             if index<0 then failwithf "Rhino.Scripting: AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
         let curves =  resizeArray { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
-        let rotation = Rhino.RhinoMath.ToRadians(rotation)
+        let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
@@ -258,7 +258,7 @@ module ExtensionsHatch =
     static member HatchRotation(hatchId:Guid) : float = //GET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let rc = hatchobj.HatchGeometry.PatternRotation
-        Rhino.RhinoMath.ToDegrees(rc)
+        RhinoMath.ToDegrees(rc)
 
 
     [<EXT>]
@@ -270,9 +270,9 @@ module ExtensionsHatch =
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let mutable rc = hatchobj.HatchGeometry.PatternRotation
-        rc <- Rhino.RhinoMath.ToDegrees(rc)
+        rc <- RhinoMath.ToDegrees(rc)
         if rotation <> rc then
-            let rotation = Rhino.RhinoMath.ToRadians(rotation)
+            let rotation = RhinoMath.ToRadians(rotation)
             hatchobj.HatchGeometry.PatternRotation <- rotation
             if not <| hatchobj.CommitChanges() then failwithf "HatchRotation failed on rotation %f on %A" rotation hatchId
             Doc.Views.Redraw()

@@ -415,7 +415,7 @@ module ExtensionsPointvector =
                                 axis:Vector3d) : Vector3d =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         //axis = RhinoScriptSyntax.Coerce3dvector(axis)
-        let angleradians = Rhino.RhinoMath.ToRadians(angleDegrees)
+        let angleradians = RhinoMath.ToRadians(angleDegrees)
         let rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
         else failwithf "VectorRotate failed on %A, %A, %A" vector angleDegrees axis

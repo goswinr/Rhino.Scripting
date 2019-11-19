@@ -203,7 +203,7 @@ module ExtensionsMesh =
                                     [<OPT;DEF(0.0)>]tolerance:float): bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
-        let maxdistance = ifZero1 tolerance Rhino.RhinoMath.SqrtEpsilon
+        let maxdistance = ifZero1 tolerance RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maxdistance)
         face>=0
@@ -523,7 +523,7 @@ module ExtensionsMesh =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
         let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
-        let tolerance = ifZero1 tolerance Rhino.RhinoMath.ZeroTolerance
+        let tolerance = ifZero1 tolerance RhinoMath.ZeroTolerance
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
 

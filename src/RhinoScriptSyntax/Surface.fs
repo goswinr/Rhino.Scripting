@@ -1245,7 +1245,7 @@ module ExtensionsSurface =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         //if objectId|> isNull  || point|> isNull  then failwithf "Rhino.Scripting: IsPointInSurface failed.  objectId:'%A' point:'%A' strictlyIn:'%A' tolerance:'%A'" objectId point strictlyIn tolerance
         let obj = Doc.Objects.FindId(objectId)
-        let  tolerance= ifZero1 tolerance Rhino.RhinoMath.SqrtEpsilon
+        let  tolerance= ifZero1 tolerance RhinoMath.SqrtEpsilon
         match obj with
         | :? DocObjects.ExtrusionObject as es->
             let brep= es.ExtrusionGeometry.ToBrep(false)
