@@ -98,6 +98,7 @@ module ExtensionsGrips =
 
 
     [<EXT>]
+    /// Internal helper
     static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
@@ -133,12 +134,6 @@ module ExtensionsGrips =
         match RhinoScriptSyntax.Neighborgrip(1, objectId, index, direction, enable) with
         |Ok r -> r.Index
         |Error s -> failwithf "NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
-
-
-
-
-
-
 
     [<EXT>]
     ///<summary>Returns number of grips owned by an object</summary>

@@ -127,7 +127,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, objects that
     ///  are picked are not selected</param>
-    ///<returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
+    ///<returns>(Guid * bool * int * Point3d * float * string) Option of Tuple containing the following information
     ///  [0]  guid     identifier of the curve object
     ///  [1]  bool     True if the curve was preselected, otherwise False
     ///  [2]  Enum     DocObjects.SelectionMethod
@@ -184,13 +184,13 @@ module ExtensionsSelection =
     ///<param name="subobjects">(bool) Optional, Default Value: <c>false</c>
     ///If True, subobjects can be selected. When this is the
     ///  case, for tracking  of the subobject go via the Object Ref</param>
-    ///<returns>(Guid) Identifier of the picked object</returns>
+    ///<returns>(Guid option) Identifier of the picked object</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
-                                    [<OPT;DEF(false)>]subobjects:bool) : option<Guid> =
+                                    [<OPT;DEF(false)>]subobjects:bool) : Guid option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not  preselect then
@@ -234,7 +234,7 @@ module ExtensionsSelection =
     ///  picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
-    ///<returns>(Guid * bool * float * Point3d * string) containing the following information
+    ///<returns>(Guid * bool * float * Point3d * string) Option of Tuple containing the following information
     ///  [0] identifier of the object
     ///  [1] True if the object was preselected, otherwise False
     ///  [2] selection method Enum DocObjects.SelectionMethod
@@ -327,7 +327,7 @@ module ExtensionsSelection =
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid array) identifiers of the picked objects</returns>
+    ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -415,7 +415,7 @@ module ExtensionsSelection =
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid array) identifiers of the picked objects</returns>
+    ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
     static member GetObjectsAndRemeber( message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
@@ -456,7 +456,7 @@ module ExtensionsSelection =
     ///  picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
-    ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) containing the following information
+    ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
     ///  [n][0]  identifier of the object
     ///  [n][1]  True if the object was preselected, otherwise False
     ///  [n][2]  selection method (DocObjects.SelectionMethod)
@@ -511,7 +511,7 @@ module ExtensionsSelection =
     ///A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
-    ///<returns>(Point3d array) 3d coordinates of point objects on success</returns>
+    ///<returns>(Point3d ResizeArray) Option of LIst of 3d points</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{

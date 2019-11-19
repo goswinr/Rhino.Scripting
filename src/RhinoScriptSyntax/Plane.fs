@@ -75,7 +75,7 @@ module ExtensionsPlane =
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
-    ///<returns>(float, float) The u and v paramter on the plane of the closest point</returns>
+    ///<returns>(float,*float) The u and v paramter on the plane of the closest point</returns>
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
@@ -235,12 +235,12 @@ module ExtensionsPlane =
     ///<param name="spherePlane">(Plane) Equatorial plane of the sphere. origin of the plane is
     ///  the center of the sphere</param>
     ///<param name="sphereRadius">(float) Radius of the sphere</param>
-    ///<returns>(float * Plane * float) of intersection results
-    ///  Element    Type      Description
-    ///  [0]       number     The type of intersection, where 0 = point and 1 = circle.
-    ///  [1]      plane  If a point intersection, the a Point3d identifying the 3-D intersection location is plane.Origin
-    ///                  If a circle intersection, then the circle's plane. The origin of the plane will be the center point of the circle
-    ///  [2]       number     If a circle intersection, then the radius of the circle</returns>
+    ///<returns>(int * Plane * float) of intersection results
+    ///  Element  Type      Description
+    ///  [0]      number     The type of intersection, where 0 = point and 1 = circle.
+    ///  [1]      plane      If a point intersection, the a Point3d identifying the 3-D intersection location is plane.Origin
+    ///                      If a circle intersection, then the circle's plane. The origin of the plane will be the center point of the circle
+    ///  [2]      number     If a circle intersection, then the radius of the circle</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
                                            sphereRadius:float) : int * Plane * float =

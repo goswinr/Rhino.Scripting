@@ -751,24 +751,22 @@ module ExtensionsSurface =
     ///  point. This function works on both untrimmed and trimmed surfaces</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
-    ///<returns>(Point3d * (float * float) * (float * float) * Vector3d) of closest point information . The list will
+    ///<returns>(Point3d * float * float * ComponentIndexType * int * Vector3d) of closest point information . The list will
     ///  contain the following information:
-    ///  Element     Type             Description
+    ///  Element     Type            Description
     ///    0        Point3d          The 3-D point at the parameter value of the closest point.
-    ///    1        (U of U, V)           Parameter values of closest point. Note, V
-    ///                                      is 0 if the component index type is brepEdge
-    ///                                      or brepVertex.
-    ///    2        (V of U, V)           Parameter values of closest point. Note, V
-    ///                                     is 0 if the component index type is brepEdge
-    ///                                     or brepVertex.
-    ///    3        (type, index)    The type and index of the brep component that
-    ///                              contains the closest point. Possible types are
-    ///                                BrepVertex 1 Targets a brep vertex index.
-    ///                                BrepEdge   2 Targets a brep edge index.
-    ///                                BrepFace   3 Targets a brep face index.
-    ///                                BrepTrim   4 Targets a brep trim index.
-    ///                                BrepLoop   5 Targets a brep loop index.    ///
-    ///    4        Vector3d         The normal to the brepFace, or the tangent to the brepEdge</returns>
+    ///    1        (U of U, V)      Parameter values of closest point. 
+    ///                                 Note, V is 0 if the component index type is brepEdge or brepVertex.
+    ///    2        (V of U, V)      Parameter values of closest point.
+    ///                                 Note, V is 0 if the component index type is brepEdge or brepVertex.
+    ///    3        (type, index)   The type  the brep component that contains the closest point. Possible types are
+    ///                                 BrepVertex 1 Targets a brep vertex index.
+    ///                                 BrepEdge   2 Targets a brep edge index.
+    ///                                 BrepFace   3 Targets a brep face index.
+    ///                                 BrepTrim   4 Targets a brep trim index.
+    ///                                 BrepLoop   5 Targets a brep loop index.    
+    ///    4        int             The index of the brep component
+    ///    5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge</returns>
     static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let clpt = ref Point3d.Origin
@@ -1163,9 +1161,9 @@ module ExtensionsSurface =
     ///<param name="sphereRadius0">(float) Radius of the first sphere</param>
     ///<param name="spherePlane1">(Plane) Plane for second sphere</param>
     ///<param name="sphereRadius1">(float) Radius for second sphere</param>
-    ///<returns>(float * Point3d * float) of intersection results
+    ///<returns>(int * Circle * float ) of intersection results
     ///  [0] = type of intersection (0= point, 1= circle, 2= spheres are identical)
-    ///  [1] = Point of intersection or plane of circle intersection
+    ///  [1] = Circle of  intersection , if type is Point take Circle center
     ///  [2] = radius of circle if circle intersection</returns>
     static member IntersectSpheres( spherePlane0:Plane,
                                     sphereRadius0:float,
@@ -1179,7 +1177,7 @@ module ExtensionsSurface =
         elif rc = Intersect.SphereSphereIntersection.Circle then
             1, circle, circle.Radius
         elif rc = Intersect.SphereSphereIntersection.Overlap then
-            2, circle, 0.0
+            2, circle, sphere0.Radius
         else
             failwithf "Rhino.Scripting: IntersectSpheres failed.  spherePlane0:'%A' sphereRadius0:'%A' spherePlane1:'%A' sphereRadius1:'%A'" spherePlane0 sphereRadius0 spherePlane1 sphereRadius1
 
@@ -1665,7 +1663,7 @@ module ExtensionsSurface =
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<param name="createCopy">(bool) Optional, Default Value: <c>false</c>
     ///If True, the original surface is not deleted</param>
-    ///<returns>(bool) If createCopy is true the new Guid, else the input Guid</returns>
+    ///<returns>(Guid) If createCopy is true the new Guid, else the input Guid</returns>
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         if brep.Faces.ShrinkFaces() then failwithf "Rhino.Scripting: ShrinkTrimmedSurface failed.  objectId:'%A' createCopy:'%A'" objectId createCopy
@@ -1747,7 +1745,7 @@ module ExtensionsSurface =
     ///<summary>Calculates area moments of inertia of a surface or polysurface object.
     ///  See the Rhino help for "Mass Properties calculation details"</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<returns>(float ResizeArray) of moments and error bounds in tuples(X, Y, Z) - see help topic
+    ///<returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
     ///  Index   Description
     ///  [0]     First Moments.
     ///  [1]     The absolute (+/-) error bound for the First Moments.
@@ -1837,7 +1835,7 @@ module ExtensionsSurface =
     ///  for details of surface curvature</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter</param>
-    ///<returns>(Point3d * Vector3d * float * float * float * float * float* float) of curvature information
+    ///<returns>(Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float) of curvature information
     ///  [0]   point at specified U, V parameter
     ///  [1]   normal direction
     ///  [2]   maximum principal curvature
@@ -2219,7 +2217,7 @@ module ExtensionsSurface =
     ///<summary>Calculates volume moments of inertia of a surface or polysurface object.
     ///  For more information, see Rhino help for "Mass Properties calculation details"</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
-    ///<returns>(float ResizeArray) of moments and error bounds in tuple(X, Y, Z) - see help topic
+    ///<returns>((float*float*float) ResizeArray) of moments and error bounds in tuple(X, Y, Z) - see help topic
     ///  Index   Description
     ///  [0]     First Moments.
     ///  [1]     The absolute (+/-) error bound for the First Moments.
@@ -2438,12 +2436,12 @@ module ExtensionsSurface =
     ///Absolute tolerance</param>
     ///<param name="relativeTolerance">(float) Optional, Default Value: <c>Doc.ModelRelativeTolerance</c>
     ///Relative tolerance</param>
-    ///<returns>(Guid ResizeArray) List of unrolled surface ids and List of following objects</returns>
+    ///<returns>(Guid ResizeArray * Guid ResizeArray) Two lists: List of unrolled surface ids and list of following objects</returns>
     static member UnrollSurface( surfaceId:Guid,
                                  [<OPT;DEF(false)>]explode:bool,
                                  [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq,
                                  [<OPT;DEF(0.0)>]absoluteTolerance:float,
-                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid ResizeArray *Guid ResizeArray =
+                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid ResizeArray * Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let unroll = Unroller(brep)
         unroll.ExplodeOutput <- explode

@@ -62,7 +62,9 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>((string*bool) ResizeArray option) Option of tuples containing the input string in items along with their new boolean check value</returns>
-    static member CheckListBox(items:(string*bool) seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : option<ResizeArray<string*bool>> =
+    static member CheckListBox( items:(string*bool) seq, 
+                                [<OPT;DEF(null:string)>]message:string, 
+                                [<OPT;DEF(null:string)>]title:string) : option<ResizeArray<string*bool>> =
         let checkstates = resizeArray { for  item in items -> snd item }
         let itemstrs =    resizeArray { for item in items -> fst item}
 
@@ -84,7 +86,7 @@ module ExtensionsUserinterface =
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string Option) Option of The selected item</returns>
+    ///<returns>(string option) Option of The selected item</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option=
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -103,7 +105,9 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations</returns>
-    static member EditBox([<OPT;DEF(null:string)>]defaultValString:string, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option =
+    static member EditBox(  [<OPT;DEF(null:string)>]defaultValString:string, 
+                            [<OPT;DEF(null:string)>]message:string, 
+                            [<OPT;DEF(null:string)>]title:string) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
@@ -145,7 +149,7 @@ module ExtensionsUserinterface =
     ///  [n][2]    string identifying the false value
     ///  [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
-    ///<returns>(bool ResizeArray) a list of values that represent the boolean values</returns>
+    ///<returns>(bool ResizeArray) Option of a list of values that represent the boolean values</returns>
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<ResizeArray<bool>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -231,11 +235,11 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Retrieves the cursor's position</summary>
-    ///<returns>(Point3d * Point3d * Guid * Point3d) a Tuple of containing the following information
-    ///  0  cursor position in world coordinates
-    ///  1  cursor position in screen coordinates
-    ///  2  objectId of the active viewport
-    ///  3  cursor position in client coordinates</returns>
+    ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
+    ///  0  Point3d: cursor position in world coordinates
+    ///  1  Point2d: cursor position in screen coordinates
+    ///  2  Guid:    objectId of the active viewport
+    ///  3  Point2d: cursor position in client coordinates</returns>
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -313,7 +317,7 @@ module ExtensionsUserinterface =
     ///Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the duplicated edge curves</param>
-    ///<returns>(option<ResizeArray<Guid*Point3d*Point3d>>) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
+    ///<returns>((Guid*Guid*Point3d) ResizeArray) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges":string)>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
@@ -355,7 +359,10 @@ module ExtensionsUserinterface =
     ///<param name="minimum">(int) Optional, A minimum allowable value</param>
     ///<param name="maximum">(int) Optional, A maximum allowable value</param>
     ///<returns>(option<int>) an Option of The whole number input by the user </returns>
-    static member GetInteger([<OPT;DEF(null:string)>]message:string, [<OPT;DEF(2147482999)>]number:int, [<OPT;DEF(2147482999)>]minimum:int, [<OPT;DEF(2147482999)>]maximum:int) : option<int> =
+    static member GetInteger(   [<OPT;DEF(null:string)>]message:string, 
+                                [<OPT;DEF(2147482999)>]number:int, 
+                                [<OPT;DEF(2147482999)>]minimum:int, 
+                                [<OPT;DEF(2147482999)>]maximum:int) : option<int> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gi = new Input.Custom.GetInteger()
@@ -384,7 +391,10 @@ module ExtensionsUserinterface =
     ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
     ///Show set current  button on the dialog</param>
     ///<returns>(option<string>) an Option of name of selected layer</returns>
-    static member GetLayer([<OPT;DEF("Select Layer")>]title:string, [<OPT;DEF(null:string)>]layer:string, [<OPT;DEF(false)>]showNewButton:bool, [<OPT;DEF(false)>]showSetCurrent:bool) : option<string> =
+    static member GetLayer( [<OPT;DEF("Select Layer")>]title:string, 
+                            [<OPT;DEF(null:string)>]layer:string, 
+                            [<OPT;DEF(false)>]showNewButton:bool, 
+                            [<OPT;DEF(false)>]showSetCurrent:bool) : option<string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let layerindex = ref Doc.Layers.CurrentLayerIndex
@@ -407,8 +417,8 @@ module ExtensionsUserinterface =
     ///Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
     ///Optional button to show on the dialog</param>
-    ///<returns>(option<string array>) an Option of The names of selected layers</returns>
-    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<ResizeArray<string>> =
+    ///<returns>(string ResizeArray) an Option of The names of selected layers</returns>
+    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
@@ -441,7 +451,11 @@ module ExtensionsUserinterface =
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
     ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
     ///<returns>(option<Line>) an Option of A Line</returns>
-    static member GetLine([<OPT;DEF(0)>]mode:int, [<OPT;DEF(Point3d())>]point:Point3d, [<OPT;DEF(null:string)>]message1:string, [<OPT;DEF(null:string)>]message2:string, [<OPT;DEF(null:string)>]message3:string) : option<Line> =
+    static member GetLine(  [<OPT;DEF(0)>]mode:int, 
+                            [<OPT;DEF(Point3d())>]point:Point3d, 
+                            [<OPT;DEF(null:string)>]message1:string, 
+                            [<OPT;DEF(null:string)>]message2:string, 
+                            [<OPT;DEF(null:string)>]message3:string) : option<Line> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             use gl = new Input.Custom.GetLine()
@@ -467,7 +481,8 @@ module ExtensionsUserinterface =
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///If True, the "by Layer" linetype will show. Defaults to False</param>
     ///<returns>(option<string>) an Option of The names of selected linetype</returns>
-    static member GetLinetype([<OPT;DEF(null:string)>]defaultValLinetype:string, [<OPT;DEF(false)>]showByLayer:bool) : option<string> =
+    static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string, 
+                                [<OPT;DEF(false)>]showByLayer:bool) : option<string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             let mutable ltinstance = Doc.Linetypes.CurrentLinetype
@@ -495,8 +510,11 @@ module ExtensionsUserinterface =
     ///The maximum number of faces to select.
     ///  If 0, the user must press enter to finish selection.
     ///  If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(option<int ResizeArray>) an Option of of mesh face indices on success</returns>
-    static member GetMeshFaces(objectId:Guid, [<OPT;DEF("Select Mesh Faces")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
+    ///<returns>(int ResizeArray) an Option of of mesh face indices on success</returns>
+    static member GetMeshFaces( objectId:Guid, 
+                                [<OPT;DEF("Select Mesh Faces")>]message:string, 
+                                [<OPT;DEF(1)>]minCount:int, 
+                                [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             Doc.Objects.UnselectAll() |> ignore
@@ -528,8 +546,11 @@ module ExtensionsUserinterface =
     ///The maximum number of vertices to select. If 0, the user must
     ///  press enter to finish selection. If -1, selection stops as soon as there
     ///  are at least minCount vertices selected</param>
-    ///<returns>(option<int ResizeArray>) an Option of of mesh vertex indices on success</returns>
-    static member GetMeshVertices(objectId:Guid, [<OPT;DEF("Select Mesh Vertices")>]message:string, [<OPT;DEF(1)>]minCount:int, [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
+    ///<returns>(int ResizeArray) an Option of of mesh vertex indices on success</returns>
+    static member GetMeshVertices(  objectId:Guid, 
+                                    [<OPT;DEF("Select Mesh Vertices")>]message:string, 
+                                    [<OPT;DEF(1)>]minCount:int, 
+                                    [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             Doc.Objects.UnselectAll() |> ignore
@@ -662,7 +683,7 @@ module ExtensionsUserinterface =
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
     ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
     ///  unlimited number of points can be picked</param>
-    ///<returns>(option<Point3d array>) an Option of of 3d points</returns>
+    ///<returns>(Point3d array) an Option of of 3d points</returns>
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
@@ -1166,12 +1187,11 @@ module ExtensionsUserinterface =
 
     [<EXT>]
     ///<summary>Display a text dialog box similar to the one used by the _What command</summary>
-    ///<param name="message">(string) Optional, A message</param>
+    ///<param name="message">(string) The message</param>
     ///<param name="title">(string) Optional, The message title</param>
-    ///<returns>(option<unit>) an Option of in any case</returns>
-    static member TextOut(
-                                    [<OPT;DEF(null:string)>]message:string,
-                                    [<OPT;DEF(null:string)>]title:string) : unit =
+    ///<returns>(unit) void, nothing</returns>
+    static member TextOut(message:string,
+                          [<OPT;DEF(null:string)>]title:string) : unit =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             return UI.Dialogs.ShowTextDialog(message, title)

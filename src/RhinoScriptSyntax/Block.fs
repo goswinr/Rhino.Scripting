@@ -178,7 +178,7 @@ module ExtensionsBlock =
     [<EXT>]
     ///<summary>Returns the names of all block definitions in the document</summary>
     ///<returns>(string ResizeArray) the names of all block definitions in the document</returns>
-    static member BlockNames() : ResizeArray<string> =
+    static member BlockNames() : string ResizeArray =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
         resizeArray { for item in ideflist do yield item.Name}
 

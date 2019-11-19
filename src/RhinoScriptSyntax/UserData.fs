@@ -69,7 +69,7 @@ module ExtensionsUserdata =
 
     [<EXT>]
     ///<summary>Returns all document user text keys</summary>
-    ///<returns>(string array) all document user text keys</returns>
+    ///<returns>(string ResizeArray) all document user text keys</returns>
     static member GetDocumentUserTextKeys() : string ResizeArray =
         resizeArray { for  i = 0 to Doc.Strings.Count-1  do
                           let k = Doc.Strings.GetKey(i)
@@ -125,7 +125,7 @@ module ExtensionsUserdata =
     [<EXT>]
     ///<summary>Verifies that an object contains user text</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(float) result of test:
+    ///<returns>(int) result of test:
     ///  0 = no user text
     ///  1 = attribute user text
     ///  2 = geometry user text

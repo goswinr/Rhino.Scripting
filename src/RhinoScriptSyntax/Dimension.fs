@@ -425,15 +425,15 @@ module ExtensionsDimension =
 
     [<EXT>]
     ///<summary>Returns the names of all dimension styles in the document</summary>
-    ///<returns>(string []) the names of all dimension styles in the document</returns>
-    static member DimStyleNames() : ResizeArray<string> =
+    ///<returns>(string ResizeArray) the names of all dimension styles in the document</returns>
+    static member DimStyleNames() : string ResizeArray =
         resizeArray {for  ds in Doc.DimStyles -> ds.Name }
 
 
     [<EXT>]
     ///<summary>Returns the number display format of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
-    ///<returns>(float) The current display format
+    ///<returns>(int) The current display format
     ///   ModelUnits       0  Decimal current model units
     ///   Millmeters       3  Decimal Millimeters
     ///   Centimeters      4  Decimal Centimeters

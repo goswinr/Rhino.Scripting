@@ -350,13 +350,13 @@ module ExtensionsGeometry =
     [<EXT>]
     ///<summary>Returns the hidden points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
-    ///<returns>(bool []) List of point cloud hidden states</returns>
+    ///<returns>(bool ResizeArray) List of point cloud hidden states</returns>
     static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         resizeArray { for item in pc do yield item.Hidden }
 
 
-
+    [<EXT>]
     ///<summary>Modifies the hidden points of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<param name="hidden">(bool seq) List of booleans matched to the index of points to be hidden, On empty seq all point wil be shown</param>
@@ -385,7 +385,7 @@ module ExtensionsGeometry =
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
         resizeArray { for item in pc do yield item.Color }
 
-
+    [<EXT>]
     ///<summary>Modifies the point colors of a point cloud object</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<param name="colors">(Drawing.Color seq) List of color values if you want to adjust colors, empty Seq to clear colors</param>

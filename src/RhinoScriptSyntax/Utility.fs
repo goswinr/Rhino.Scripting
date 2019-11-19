@@ -32,7 +32,7 @@ module ExtensionsUtility =
     ///<param name="point2">(Point3d) Point2 of input points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldX</c>
     ///  If a plane is provided, angle calculation is with respect to this plane</param>
-    ///<returns>(float * float * float * float * float * float) containing the following elements:
+    ///<returns>(float * float * float * float * float) containing the following elements:
     ///  element 0 = the X, Y angle in degrees
     ///  element 1 = the elevation
     ///  element 2 = delta in the X direction

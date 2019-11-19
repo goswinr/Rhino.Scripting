@@ -363,7 +363,7 @@ module ExtensionsMesh =
     ///  If you are only interested in finding a point Q on the mesh when
     ///  point.DistanceTo(Q) < maximumDistance, then set maximumDistance to
     ///  that value</param>
-    ///<returns>(Point3d * float) containing the results of the calculation where
+    ///<returns>(Point3d * int) containing the results of the calculation where
     ///  [0] = the 3-D point on the mesh
     ///  [1] = the index of the mesh face on which the 3-D point lies</returns>
     static member MeshClosestPoint( objectId:Guid,

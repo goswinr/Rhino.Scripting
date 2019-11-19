@@ -413,7 +413,7 @@ module ExtensionsApplication =
     ///  to see if they support this capability</summary>
     ///<param name="plugIn">(string) The name of a registered plug-in that supports scripting.
     ///  If the plug-in is registered but not loaded, it will be loaded</param>
-    ///<returns>(object) a scriptable object</returns>
+    ///<returns>(object) a scriptable plugin object</returns>
     static member GetPlugInObject(plugIn:string) : obj =
         RhinoApp.GetPlugInObject(plugIn)
 
@@ -603,9 +603,6 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing</returns>
     static member OsnapMode(mode:int) : unit = //SET
         ModelAidSettings.OsnapModes <- LanguagePrimitives.EnumOfValue mode
-
-
-
 
 
     [<EXT>]

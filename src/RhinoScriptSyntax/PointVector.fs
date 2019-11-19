@@ -108,56 +108,56 @@ module ExtensionsPointvector =
     ///    [0] Guid, closest  objectId
     ///    [1] the point on object
     ///    [2] the distance</returns>
-    static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d =
+    static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float =
         //objectIds = RhinoScriptSyntax.Coerceguidlist(objectIds)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
-        let mutable closest = Unchecked.defaultof<float*Guid*Point3d>
+        let mutable closest = Unchecked.defaultof<Guid*Point3d*float>
         let mutable distance = Double.MaxValue
         for objectId in objectIds do
             let geom = RhinoScriptSyntax.CoerceGeometry(objectId)
             match geom with
             | :?  Point as pointgeometry ->
                 distance <- point.DistanceTo( pointgeometry.Location )
-                if distance < t1 closest then
-                    closest <- distance, objectId, pointgeometry.Location
+                if distance < t3 closest then
+                    closest  <-  objectId, pointgeometry.Location, distance
 
             | :?  PointCloud as pointcloud ->
                 let index = pointcloud.ClosestPoint(point)
                 if index>=0 then
                     distance <- point.DistanceTo( pointcloud.[index].Location )
-                    if distance < t1 closest then
-                        closest <- distance, objectId, pointcloud.[index].Location
+                    if distance < t3 closest then
+                        closest  <-  objectId, pointcloud.[index].Location, distance
 
             | :?  Curve as curve ->
                 let rc, t = curve.ClosestPoint(point)
                 if rc then
                     distance <- point.DistanceTo( curve.PointAt(t) )
-                    if distance < t1 closest then
-                        closest <- distance, objectId, curve.PointAt(t)
+                    if distance < t3 closest then
+                        closest  <-  objectId, curve.PointAt(t), distance
 
             | :?  Surface as srf ->
                 let ok, u, v = srf.ClosestPoint(point)
                 if ok then
                     let srfclosest = srf.PointAt(u, v)
                     distance <- point.DistanceTo( srfclosest )
-                    if distance < t1 closest then
-                        closest <- distance, objectId, srfclosest
+                    if distance < t3 closest then
+                        closest  <-  objectId, srfclosest, distance
 
             | :?  Brep as brep ->
                 let brepclosest = brep.ClosestPoint(point)
                 distance <- point.DistanceTo( brepclosest )
-                if distance < t1 closest then
-                    closest <- distance, objectId, brepclosest
+                if distance < t3 closest then
+                    closest  <-  objectId, brepclosest, distance
 
             | :?  Mesh as mesh ->
                 let meshclosest = mesh.ClosestPoint(point)
                 distance <- point.DistanceTo( meshclosest )
-                if distance < t1 closest then
-                    closest <- distance, objectId, meshclosest
+                if distance < t3 closest then
+                    closest  <-  objectId, meshclosest, distance
 
             | _ -> failwithf "PointClosestObject: non supported object type %A %A ose Point, Pointcloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
-        if t2 closest <> Guid.Empty then t2 closest, t3 closest
+        if t1 closest <> Guid.Empty then closest
         else failwithf "PointClosestObject failed on %A and %A " point objectIds
 
 
@@ -456,7 +456,7 @@ module ExtensionsPointvector =
     [<EXT>]
     ///<summary>Unitizes, or normalizes a 3D vector. Note, zero vectors cannot be unitized</summary>
     ///<param name="vector">(Vector3d) The vector to unitize</param>
-    ///<returns>(unit) unitized vector on success</returns>
+    ///<returns>(Vector3d) unitized vector on success</returns>
     static member VectorUnitize(vector:Vector3d) : Vector3d =
         let ll = sqrt vector.SquareLength
         if Double.IsInfinity ll || ll < RhinoMath.ZeroTolerance then failwithf "VectorUnitize failed on zero length or very short Vector %A" vector

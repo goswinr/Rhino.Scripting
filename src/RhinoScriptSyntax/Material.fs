@@ -112,7 +112,7 @@ module ExtensionsMaterial =
     [<EXT>]
     ///<summary>Returns a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<returns>(string Option) The current bump bitmap filename /returns>
+    ///<returns>(string option) The current bump bitmap filename /returns>
     static member MaterialBump(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' " materialIndex
@@ -308,12 +308,13 @@ module ExtensionsMaterial =
     [<EXT>]
     ///<summary>Returns a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<returns>(string) The current transparency bitmap filename</returns>
+    ///<returns>(string option) The current transparency bitmap filename</returns>
     static member MaterialTransparencyMap(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTransparencyMap failed.  materialIndex:'%A' " materialIndex
         let texture = mat.GetTransparencyTexture()
         if notNull texture then  Some texture.FileName else None
+
 
     ///<summary>Modifies a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
@@ -329,7 +330,6 @@ module ExtensionsMaterial =
             Doc.Views.Redraw()
         else
             failwithf "Rhino.Scripting: MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-
 
 
 
