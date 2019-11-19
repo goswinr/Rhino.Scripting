@@ -474,6 +474,7 @@ module ExtensionsObject =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhobj.Attributes.ColorSource)
 
+    [<EXT>]
     ///<summary>Modifies the color source of an object</summary>
     ///<param name="objectId">(Guid) Single identifier of list of identifiers</param>
     ///<param name="source">(int) New color source
@@ -523,6 +524,7 @@ module ExtensionsObject =
         let index = obj.Attributes.LayerIndex
         Doc.Layers.[index].FullPath
 
+    [<EXT>]
     ///<summary>Modifies the layer of an object</summary>
     ///<param name="objectId">(Guid) The identifier of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -535,6 +537,7 @@ module ExtensionsObject =
         if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
         Doc.Views.Redraw()
 
+    [<EXT>]
     ///<summary>Modifies the layer of an objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -564,6 +567,7 @@ module ExtensionsObject =
 
 
 
+    [<EXT>]
     ///<summary>Changes the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="layout">(string option) To change, or move, an object from model space to page
@@ -579,8 +583,8 @@ module ExtensionsObject =
                 let pageview = Doc.Views.Find(pageid)
                 Some pageview.MainViewport.Name
             else
-                None 
-        
+                None
+
         if view<>layout then
             if layout.IsNone then //move to model space
                 rhobj.Attributes.Space <- Rhino.DocObjects.ActiveSpace.ModelSpace
@@ -607,6 +611,7 @@ module ExtensionsObject =
         Doc.Linetypes.[oldindex].Name
 
 
+    [<EXT>]
     ///<summary>Modifies the linetype of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="linetype">(string) Name of an existing linetyp. If omitted, the current
@@ -640,6 +645,7 @@ module ExtensionsObject =
 
 
 
+    [<EXT>]
     ///<summary>Modifies the linetype source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New linetype source. If omitted, the current source is returned.
@@ -672,6 +678,7 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.MaterialIndex
 
+    [<EXT>]
     ///<summary>Changes the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
@@ -699,6 +706,7 @@ module ExtensionsObject =
         int(rhinoobject.Attributes.MaterialSource)
 
 
+    [<EXT>]
     ///<summary>Modifies the rendering material source of an object</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<param name="source">(int) The new rendering material source. If omitted and a single
@@ -728,6 +736,7 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.Name
 
+    [<EXT>]
     ///<summary>Modifies the name of an object</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name. If omitted, the current name is returned</param>
@@ -749,6 +758,7 @@ module ExtensionsObject =
 
 
 
+    [<EXT>]
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="color">(Drawing.Color) New print color. If omitted, the current color is returned</param>
@@ -773,6 +783,7 @@ module ExtensionsObject =
             int(rhinoobject.Attributes.PlotColorSource)
 
 
+    [<EXT>]
     ///<summary>Modifies the print color source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print color source
@@ -801,6 +812,7 @@ module ExtensionsObject =
             rhinoobject.Attributes.PlotWeight
 
 
+    [<EXT>]
     ///<summary>Modifies the print width of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0 means use
@@ -828,6 +840,7 @@ module ExtensionsObject =
             int(rhinoobject.Attributes.PlotWeightSource)
 
 
+    [<EXT>]
     ///<summary>Modifies the print width source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print width source

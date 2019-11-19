@@ -161,6 +161,7 @@ module ExtensionsGrips =
         let rc = grip.CurrentLocation
         rc
 
+    [<EXT>]
     ///<summary>Modifies the location of an object's grip</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to either query or modify</param>
@@ -197,6 +198,7 @@ module ExtensionsGrips =
 
 
 
+    [<EXT>]
     ///<summary>Modifies the location of all grips owned by an object. The
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of

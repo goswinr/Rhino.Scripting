@@ -91,7 +91,7 @@ module ExtensionsLight =
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddRectangularLight( origin:Point3d,
                                        widthPoint:Point3d,
-                                       heightPoint:Point3d) : Guid =        
+                                       heightPoint:Point3d) : Guid =
         let ptx =  widthPoint
         let pty =  heightPoint
         let length = pty-origin
@@ -120,7 +120,7 @@ module ExtensionsLight =
     static member AddSpotLight( origin:Point3d,
                                 radius:float,
                                 apexPoint:Point3d) : Guid =
-        let mutable radius = radius        
+        let mutable radius = radius
         if radius<0.0 then radius<-1.0
         let light = new Light()
         light.LightStyle <- LightStyle.WorldSpot
@@ -143,6 +143,7 @@ module ExtensionsLight =
         let rc = light.IsEnabled
         rc
 
+    [<EXT>]
     ///<summary>Enables or disables a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="enable">(bool) The light's enabled status</param>
@@ -239,6 +240,7 @@ module ExtensionsLight =
         let rc = light.Diffuse
         rc
 
+    [<EXT>]
     ///<summary>Changes the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="color">(Drawing.Color) The light's new color</param>
@@ -268,6 +270,7 @@ module ExtensionsLight =
         let rc = light.Direction
         rc
 
+    [<EXT>]
     ///<summary>Changes the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="direction">(Vector3d) The light's new direction</param>
@@ -290,6 +293,7 @@ module ExtensionsLight =
         let rc = light.Location
         rc
 
+    [<EXT>]
     ///<summary>Changes the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="location">(Point3d) The light's new location</param>
@@ -312,6 +316,7 @@ module ExtensionsLight =
         let rc = light.Name
         rc
 
+    [<EXT>]
     ///<summary>Changes the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="name">(string) The light's new name</param>
@@ -364,6 +369,7 @@ module ExtensionsLight =
         let rc = light.HotSpot
         rc
 
+    [<EXT>]
     ///<summary>Changes the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
@@ -392,6 +398,7 @@ module ExtensionsLight =
         let rc = light.Direction.Length * tan(radians)
         rc
 
+    [<EXT>]
     ///<summary>Changes the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="radius">(float) The light's new radius</param>
@@ -419,6 +426,7 @@ module ExtensionsLight =
         let rc = light.ShadowIntensity
         rc
 
+    [<EXT>]
     ///<summary>Changes the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="intensity">(float) The light's new intensity</param>

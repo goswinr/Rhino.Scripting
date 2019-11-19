@@ -21,9 +21,9 @@ module ExtensionsGeometry =
     ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
     ///  view is used</param>
     ///<returns>(Guid) object identifier on success</returns>
-    static member AddClippingPlane( plane:Plane, 
-                                    uMagnitude:float, 
-                                    vMagnitude:float, 
+    static member AddClippingPlane( plane:Plane,
+                                    uMagnitude:float,
+                                    vMagnitude:float,
                                     [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
         let viewlist =
             if isNull views then [Doc.Views.ActiveView.ActiveViewportID]
@@ -54,13 +54,13 @@ module ExtensionsGeometry =
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
     ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
     ///<returns>(Guid) object identifier on success</returns>
-    static member AddPictureFrame(  plane:Plane, 
-                                    filename:string, 
-                                    [<OPT;DEF(0.0)>]width:float, 
-                                    [<OPT;DEF(0.0)>]height:float, 
-                                    [<OPT;DEF(true)>]selfIllumination:bool, 
-                                    [<OPT;DEF(false)>]embed:bool, 
-                                    [<OPT;DEF(false)>]useAlpha:bool, 
+    static member AddPictureFrame(  plane:Plane,
+                                    filename:string,
+                                    [<OPT;DEF(0.0)>]width:float,
+                                    [<OPT;DEF(0.0)>]height:float,
+                                    [<OPT;DEF(true)>]selfIllumination:bool,
+                                    [<OPT;DEF(false)>]embed:bool,
+                                    [<OPT;DEF(false)>]useAlpha:bool,
                                     [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         if not <| IO.File.Exists(filename) then failwithf "image %s does not exist" filename
         let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
@@ -454,6 +454,7 @@ module ExtensionsGeometry =
         RhinoScriptSyntax.Coerce3dPoint(objectId)
 
 
+    [<EXT>]
     ///<summary>Modifies the X, Y, and Z coordinates of a point object</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<param name="point">(Point3d) A new 3D point location</param>
@@ -472,6 +473,7 @@ module ExtensionsGeometry =
     static member TextDotFont(objectId:Guid) : string = //GET
         (RhinoScriptSyntax.CoerceTextDot(objectId)).FontFace
 
+    [<EXT>]
     ///<summary>Modifies the font of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="fontface">(string) New font face name</param>
@@ -490,6 +492,7 @@ module ExtensionsGeometry =
     static member TextDotHeight(objectId:Guid) : int = //GET
         (RhinoScriptSyntax.CoerceTextDot(objectId)).FontHeight
 
+    [<EXT>]
     ///<summary>Modifies the font height of a text dot</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="height">(int) New font height</param>
@@ -510,6 +513,7 @@ module ExtensionsGeometry =
         (RhinoScriptSyntax.CoerceTextDot(objectId)).Point
 
 
+    [<EXT>]
     ///<summary>Modifies the location, or insertion point, on a text dot object</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="point">(Point3d) A new 3D point location</param>
@@ -532,6 +536,7 @@ module ExtensionsGeometry =
 
 
 
+    [<EXT>]
     ///<summary>Modifies the text on a text dot object</summary>
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<param name="text">(string) A new string for the dot</param>
@@ -583,6 +588,7 @@ module ExtensionsGeometry =
     static member TextObjectHeight(objectId:Guid) : float = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).TextHeight
 
+    [<EXT>]
     ///<summary>Modifies the height of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="height">(float) The new text height</param>
@@ -603,6 +609,7 @@ module ExtensionsGeometry =
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
 
+    [<EXT>]
     ///<summary>Modifies the plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="plane">(Plane) The new text object plane</param>
@@ -623,6 +630,7 @@ module ExtensionsGeometry =
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane.Origin
 
+    [<EXT>]
     ///<summary>Modifies the location of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="point">(Point3d) The new text object location</param>
@@ -654,6 +662,7 @@ module ExtensionsGeometry =
         if fontdata.Italic then rc <- 2 + rc
         rc
 
+    [<EXT>]
     ///<summary>Modifies the font style of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
@@ -689,6 +698,7 @@ module ExtensionsGeometry =
         text.PlainText
 
 
+    [<EXT>]
     ///<summary>Modifies the text string of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="text">(string) A new text string</param>

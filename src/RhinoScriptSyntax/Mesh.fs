@@ -443,6 +443,7 @@ module ExtensionsMesh =
         rc
 
 
+    [<EXT>]
     ///<summary>Returns the vertex indices of all faces of a Ngon mesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(ResizeArray<ResizeArray<int>) containing a nested List that define the vertex indices for
@@ -655,6 +656,7 @@ module ExtensionsMesh =
         resizeArray { for i in range(mesh.VertexColors.Count) do mesh.VertexColors.[i] }
 
 
+    [<EXT>]
     ///<summary>Modifies vertex colors of a mesh</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<param name="colors">(Drawing.Color seq), optional) A list of color values. Note, for each vertex, there must

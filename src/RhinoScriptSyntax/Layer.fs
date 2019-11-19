@@ -9,7 +9,7 @@ open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsLayer =
   type RhinoScriptSyntax with
-    
+
     [<EXT>]
     ///<summary>Add a new layer to the document</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
@@ -64,6 +64,7 @@ module ExtensionsLayer =
         Doc.Layers.CurrentLayer.FullPath
 
 
+    [<EXT>]
     ///<summary>Changes the current layer</summary>
     ///<param name="layer">(string) The name or Guid of an existing layer to make current</param>
     ///<returns>(unit) void, nothing</returns>
@@ -110,7 +111,7 @@ module ExtensionsLayer =
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayer(layer:string) : bool =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        i <> RhinoMath.UnsetIntIndex 
+        i <> RhinoMath.UnsetIntIndex
 
 
     [<EXT>]
@@ -249,6 +250,7 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Color
 
+    [<EXT>]
     ///<summary>Changes the color of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="color">(Drawing.Color) The new color value. If omitted, the current layer color is returned</param>
@@ -285,6 +287,7 @@ module ExtensionsLayer =
         Doc.Linetypes.[index].Name
 
 
+    [<EXT>]
     ///<summary>Changes the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="linetyp">(string) Name of a linetype</param>
@@ -312,6 +315,7 @@ module ExtensionsLayer =
         layer.IsLocked
 
 
+    [<EXT>]
     ///<summary>Changes the locked mode of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="locked">(bool) New layer locked mode</param>
@@ -333,6 +337,7 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.RenderMaterialIndex
 
+    [<EXT>]
     ///<summary>Changes the material index of a layer. A material index of -1
     /// indicates that no material has been assigned to the layer. Thus, the layer
     /// will use Rhino's default layer material</summary>
@@ -401,6 +406,7 @@ module ExtensionsLayer =
         let rc = layer.PlotColor
         rc
 
+    [<EXT>]
     ///<summary>Changes the print color of a layer. Layer print colors are
     /// represented as RGB colors</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -425,6 +431,7 @@ module ExtensionsLayer =
         let rc = layer.PlotWeight
         rc
 
+    [<EXT>]
     ///<summary>Changes the print width of a layer. Print width is specified
     /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -448,6 +455,7 @@ module ExtensionsLayer =
         let rc = layer.IsVisible
         rc
 
+    [<EXT>]
     ///<summary>Changes the visible property of a layer</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="visible">(bool) New visible state</param>
@@ -479,6 +487,7 @@ module ExtensionsLayer =
                 oldparentlayer.FullPath
 
 
+    [<EXT>]
     ///<summary>Modify the parent layer of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="parent">(string) Name of new parent layer. To remove the parent layer,

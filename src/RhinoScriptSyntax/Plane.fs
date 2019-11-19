@@ -72,6 +72,7 @@ module ExtensionsPlane =
 
     [<EXT>]
 
+    [<EXT>]
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>

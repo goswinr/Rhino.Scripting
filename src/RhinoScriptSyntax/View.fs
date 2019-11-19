@@ -89,7 +89,7 @@ module ExtensionsView =
         let page = RhinoScriptSyntax.CoercePageView(layout)
         if page.MainViewport.Id = page.ActiveViewport.Id then None
         else  Some  page.ActiveViewport.Name
-    
+
     [<EXT>]
     ///<summary>Changes the current detail view in a page layout view</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
@@ -425,7 +425,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         viewport.ConstructionGridVisible
-    
+
     [<EXT>]
     ///<summary>Shows or hides a view's construction plane grid</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
@@ -473,7 +473,7 @@ module ExtensionsView =
     static member ShowViewTitle(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible
-    
+
     [<EXT>]
     ///<summary>Shows or hides the title window of a view</summary>
     ///<param name="view">(string) Title of the view. If omitted, the current active view is used</param>
@@ -741,7 +741,7 @@ module ExtensionsView =
         if viewport.IsParallelProjection then rc <- 1
         elif viewport.IsTwoPointPerspectiveProjection then rc <- 3
         rc
-    
+
     [<EXT>]
     ///<summary>Set a view's projection mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
@@ -774,7 +774,7 @@ module ExtensionsView =
         let frustop = d
         let oldradius = min frustop frusright
         oldradius
-    
+
     [<EXT>]
     ///<summary>Sets the radius of a parallel-projected view. Useful
     /// when you need an absolute zoom factor for a parallel-projected view</summary>
@@ -877,6 +877,7 @@ module ExtensionsView =
         let f= view.ActiveViewport.WallpaperFilename
         if isNull f then None else Some f
 
+    [<EXT>]
     ///<summary>Sets the wallpaper bitmap of the specified view. To remove a
     /// wallpaper bitmap, pass an empty string ""</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
@@ -899,6 +900,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.WallpaperGrayscale
 
+    [<EXT>]
     ///<summary>Sets the grayscale display option of the wallpaper bitmap in a
     /// specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
@@ -921,6 +923,7 @@ module ExtensionsView =
         not view.ActiveViewport.WallpaperVisible
 
 
+    [<EXT>]
     ///<summary>Sets the visibility of the wallpaper bitmap in a specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="hidden">(bool) Show or hide the wallpaper</param>

@@ -447,7 +447,7 @@ module ExtensionsDimension =
     static member DimStyleNumberFormat(dimStyle:string) : int = //GET
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  failwithf "get DimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
-        int ds.DimensionLengthDisplay 
+        int ds.DimensionLengthDisplay
 
 
     [<EXT>]
@@ -561,7 +561,7 @@ module ExtensionsDimension =
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  failwithf "get DimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
-        int ds.TextVerticalAlignment 
+        int ds.TextVerticalAlignment
 
     [<EXT>]
     ///<summary>Changes the text alignment mode of a dimension style</summary>

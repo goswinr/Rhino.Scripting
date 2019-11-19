@@ -120,6 +120,7 @@ module ExtensionsMaterial =
         if notNull texture then Some texture.FileName else None
 
 
+    [<EXT>]
     ///<summary>Modifies a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The bump bitmap filename</param>
@@ -146,6 +147,7 @@ module ExtensionsMaterial =
         let rc = mat.DiffuseColor
         rc
 
+    [<EXT>]
     ///<summary>Modifies a material's diffuse color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
@@ -168,6 +170,7 @@ module ExtensionsMaterial =
         let texture = mat.GetEnvironmentTexture()
         if notNull texture then Some texture.FileName  else None
 
+    [<EXT>]
     ///<summary>Modifies a material's environment bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The environment bitmap filename</param>
@@ -194,6 +197,7 @@ module ExtensionsMaterial =
         let rc = mat.Name
         rc
 
+    [<EXT>]
     ///<summary>Modifies a material's user defined name</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="name">(string) The new name</param>
@@ -216,6 +220,7 @@ module ExtensionsMaterial =
         let rc = mat.ReflectionColor
         rc
 
+    [<EXT>]
     ///<summary>Modifies a material's reflective color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
@@ -240,6 +245,7 @@ module ExtensionsMaterial =
         let rc = mat.Shine
         rc
 
+    [<EXT>]
     ///<summary>Modifies a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="shine">(float) The new shine value. A material's shine value ranges from 0.0 to 255.0, with
@@ -265,6 +271,7 @@ module ExtensionsMaterial =
         let texture = mat.GetBitmapTexture()
         if notNull texture then  Some texture.FileName else None
 
+    [<EXT>]
     ///<summary>Modifies a material's texture bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The texture bitmap filename</param>
@@ -291,6 +298,7 @@ module ExtensionsMaterial =
         let rc = mat.Transparency
         rc
 
+    [<EXT>]
     ///<summary>Modifies a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="transparency">(float) The new transparency value. A material's transparency value ranges from 0.0 to 1.0, with
@@ -316,6 +324,7 @@ module ExtensionsMaterial =
         if notNull texture then  Some texture.FileName else None
 
 
+    [<EXT>]
     ///<summary>Modifies a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The transparency bitmap filename</param>

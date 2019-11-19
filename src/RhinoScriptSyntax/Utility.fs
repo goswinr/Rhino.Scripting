@@ -81,6 +81,7 @@ module ExtensionsUtility =
     static member ClipboardText() : string = //GET
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 
+    [<EXT>]
     ///<summary>Sets a text string to the Windows clipboard</summary>
     ///<param name="text">(string) Text to set</param>
     ///<returns>(unit) void, nothing</returns>
@@ -176,7 +177,7 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Removes duplicates from a list of 3D points</summary>
     ///<param name="points">(Point3d seq) A list of 3D points</param>
-    ///<param name="tolerance">(float) Optional,Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points. 
+    ///<param name="tolerance">(float) Optional,Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
     ///<returns>(Point3d array) of 3D points with duplicates removed </returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
@@ -287,8 +288,8 @@ module ExtensionsUtility =
             |4 -> fun (p:Point3d) -> p.Z, p.X, p.Y
             |5 -> fun (p:Point3d) -> p.Z, p.Y, p.X
             |_ -> failwithf "sortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
-        if ascending then points |>  Seq.sortBy           f 
-        else              points |>  Seq.sortByDescending f 
+        if ascending then points |>  Seq.sortBy           f
+        else              points |>  Seq.sortByDescending f
 
 
     [<EXT>]

@@ -755,7 +755,7 @@ module ExtensionsSurface =
     ///  contain the following information:
     ///  Element     Type            Description
     ///    0        Point3d          The 3-D point at the parameter value of the closest point.
-    ///    1        (U of U, V)      Parameter values of closest point. 
+    ///    1        (U of U, V)      Parameter values of closest point.
     ///                                 Note, V is 0 if the component index type is brepEdge or brepVertex.
     ///    2        (V of U, V)      Parameter values of closest point.
     ///                                 Note, V is 0 if the component index type is brepEdge or brepVertex.
@@ -764,7 +764,7 @@ module ExtensionsSurface =
     ///                                 BrepEdge   2 Targets a brep edge index.
     ///                                 BrepFace   3 Targets a brep face index.
     ///                                 BrepTrim   4 Targets a brep trim index.
-    ///                                 BrepLoop   5 Targets a brep loop index.    
+    ///                                 BrepLoop   5 Targets a brep loop index.
     ///    4        int             The index of the brep component
     ///    5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge</returns>
     static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
@@ -1095,6 +1095,7 @@ module ExtensionsSurface =
         let oldreverse = face.OrientationIsReversed
         oldreverse
 
+    [<EXT>]
     ///<summary>Changes the normal direction of a surface. This feature can
     /// also be found in Rhino's Dir command</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
@@ -2026,6 +2027,7 @@ module ExtensionsSurface =
         | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' " surfaceId
 
 
+    [<EXT>]
     ///<summary>Sets the isocurve density of a surface or polysurface object.
     /// An isoparametric curve is a curve of constant U or V value on a surface.
     /// Rhino uses isocurves and surface edge curves to visualize the shape of a

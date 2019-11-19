@@ -11,7 +11,7 @@ module ExtensionsHatch =
  type RhinoScriptSyntax with
 
     [<EXT>]
-    static member private InitHatchPatterns() : unit = 
+    static member private InitHatchPatterns() : unit =
         if isNull <| Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Solid.Name) then
             Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore
 
@@ -135,6 +135,7 @@ module ExtensionsHatch =
 
 
 
+    [<EXT>]
     ///<summary>Sets the current hatch pattern file</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern to make current</param>
     ///<returns>(unit) void, nothing</returns>
@@ -184,6 +185,7 @@ module ExtensionsHatch =
         let oldindex = hatchobj.HatchGeometry.PatternIndex
         Doc.HatchPatterns.[oldindex].Name
 
+    [<EXT>]
     ///<summary>Changes a hatch object's hatch pattern</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern to replace the
@@ -259,6 +261,7 @@ module ExtensionsHatch =
         Rhino.RhinoMath.ToDegrees(rc)
 
 
+    [<EXT>]
     ///<summary>Modifies the rotation applied to the hatch pattern when
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
@@ -286,6 +289,7 @@ module ExtensionsHatch =
         hatchobj.HatchGeometry.PatternScale
 
 
+    [<EXT>]
     ///<summary>Modifies the scale applied to the hatch pattern when it is
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>

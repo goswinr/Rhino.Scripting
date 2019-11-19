@@ -1089,11 +1089,11 @@ module ExtensionsCurve =
                                     curveB:Guid,
                                     radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
-                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = 
-        //  [<OPT;DEF(true)>]returnPoints:bool)   
+                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane =
+        //  [<OPT;DEF(true)>]returnPoints:bool)
         //<param name="returnPoints">(bool) Optional, Default Value: <c>true</c>
         //If True (Default), then fillet points are
-        //  returned. Otherwise, a fillet curve is created and                       // TODO not Implemented   
+        //  returned. Otherwise, a fillet curve is created and                       // TODO not Implemented
         //  it's identifier is returned</param>
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
@@ -1786,7 +1786,7 @@ module ExtensionsCurve =
     ///  If the curve is not a circle, then the tolerance used
     ///  to determine whether or not the NURBS form of the curve has the
     ///  properties of a arc.</param>
-    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>    
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False</returns>
     static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -1860,9 +1860,9 @@ module ExtensionsCurve =
 
     [<EXT>]
     ///<summary>Verifies an object is a linear curve</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve object</param>    ///  
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>    ///
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
-    ///<param name="segmentIndex">(int) Optional,The curve segment index if `curveId` identifies a polycurve</param>    
+    ///<param name="segmentIndex">(int) Optional,The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance

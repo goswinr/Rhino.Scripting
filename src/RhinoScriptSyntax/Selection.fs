@@ -75,7 +75,7 @@ module ExtensionsSelection =
     ///<summary>A helper Function for DocObjects.ObjectType Enum</summary>
     ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types</param>
     ///<returns>(DocObjects.ObjectType) translated DocObjects.ObjectType Enum</returns>
-    static member private FilterHelper(filter:int) : DocObjects.ObjectType =        
+    static member private FilterHelper(filter:int) : DocObjects.ObjectType =
         let mutable geometryfilter = DocObjects.ObjectType.None
         if 0 <> (filter &&& 1 ) then
             geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Point
@@ -425,13 +425,13 @@ module ExtensionsSelection =
                                         [<OPT;DEF(1)>]minimumCount:int,
                                         [<OPT;DEF(0)>]maximumCount:int,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
-        if Internals.sticky.ContainsKey message then 
+        if Internals.sticky.ContainsKey message then
             try Some(Internals.sticky.[message] :?> ResizeArray<Guid>)
             with |_ -> failwithf "found stored obejcts for '%s' but cast to ResizeArray<Guid> failed" message
         else
             match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,customFilter) with
             |Some ids ->
-                Internals.sticky.[message] <- ids 
+                Internals.sticky.[message] <- ids
                 Some ids
             | None -> None
 
@@ -540,7 +540,7 @@ module ExtensionsSelection =
     ///  [3]  selection point
     ///  [4]  u, v surface parameter of the selection point
     ///  [5]  name of the view in which the selection was made</returns>
-    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help 
+    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
         async{

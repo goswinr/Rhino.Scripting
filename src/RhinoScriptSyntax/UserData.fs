@@ -27,6 +27,7 @@ module ExtensionsUserdata =
         Doc.Strings.DocumentDataCount
 
 
+    [<EXT>]
     //<summary>Returns the number of user text strings in the current document</summary>
     //<returns>(float) The number of user text strings in the current document</returns>
     //let documentUserTextCount () :int = Doc.Strings.Count //DocumentUserTextCount //TODO same as Data count? only in Rhino 6?
