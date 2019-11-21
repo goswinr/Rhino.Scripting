@@ -49,6 +49,12 @@ type RhinoScriptSyntax private () = // no constructor?
     
     /// An Integer Enum of Object types to be use in object selection functions
     static member Filter:Filter = Internals.filter
+    
+    ///<summary>The Synchronization Context of the Rhino UI Therad.
+    ///This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
+    static member SynchronizationContext
+        with get (): Threading.SynchronizationContext = syncContext
+        and  set v : unit                             = syncContext <- v
 
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
@@ -176,7 +182,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get GeometryBase class from given input,</summary>
     ///<param name="objectId">geometry Identifier (Guid or string)</param>
     ///<returns>(Rhino.Geometry.GeometryBase) Fails on bad input</returns>
-    static member CoerceGeometry(objectId:'T) =
+    static member CoerceGeometry(objectId:'T) : GeometryBase =
         match box objectId with
         | :? GeometryBase as g -> g
         | :? Guid  as g -> 
@@ -238,7 +244,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     ///<returns>(Rhino.Geometry.Point2d) Fails on bad input</returns>
-    static member Coerce2dPoint(point:'point2d) =
+    static member Coerce2dPoint(point:'point2d) : Point2d =
         match box point with
         | :? Point2d    as point -> point
         | :? Point3d    as point -> Point2d(point.X, point.Y)
@@ -270,10 +276,11 @@ type RhinoScriptSyntax private () = // no constructor?
     //    try Seq.map RhinoScriptSyntax.Coerce2dPoint points //|> Seq.cache
     //    with _ -> failwithf "Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
 
+
     ///<summary>Convert input into a Rhino.Geometry.Plane if possible</summary>
     ///<param name="plane">Plane, point, list, tuple</param>
     ///<returns>(Rhino.Geometry.Plane) Fails on bad input</returns>
-    static member CoercePlane(plane:'T) =
+    static member CoercePlane(plane:'T) : Plane =
         match box plane with 
         | :? Plane  as plane -> plane // TODO add more
         | _ -> failwithf "CoercePlane: could not Coerce: %A can not be converted to a Plane" plane    
@@ -281,27 +288,33 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible</summary>
     ///<param name="xform">object to convert</param>
     ///<returns>(Rhino.Geometry.Transform) Fails on bad input</returns>   
-    static member CoerceXform(xform:'T) =
+    static member CoerceXform(xform:'T) : Transform =
         match box xform with
         | :? Transform  as xform -> xform 
         | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
             let mutable t= Transform()
-            for c, xs in Seq.indexed xss do
-                for r, x in Seq.indexed xs do
-                    t.[c, r] <- x
+            try
+                for c, xs in Seq.indexed xss do
+                    for r, x in Seq.indexed xs do
+                        t.[c, r] <- x
+            with
+                | _ -> failwithf "CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" xform.ToNiceString
             t
-
+        
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
             let mutable t= Transform()           
-            xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
+            try
+                xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
+            with
+                | _ -> failwithf "CoerceXform: Array2D %s can not be converted to a Transformation Matrix" xform.ToNiceString
             t
 
-        | _ -> failwithf "CoerceXform: could not CoerceXform %A can not be converted to a Transformation Matrix" xform
+        | _ -> failwithf "CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" xform.ToNiceString
     
-    ///<summary>attempt to get a Guids from input</summary>
+    ///<summary>Attempt to get a Guids from input</summary>
     ///<param name="objectId">objcts , Guid or string</param>
     ///<returns>Guid) Fails on bad input</returns>
-    static member CoerceGuid(objectId:'T):Guid =
+    static member CoerceGuid(objectId:'T) : Guid =
         match box objectId with
         | :? Guid  as g -> if Guid.Empty = g then failwithf ": CoerceGuid: Guid is Emty: %A" objectId else g
         | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then failwithf ": CoerceGuid: Guid is Emty or None: %A" objectId else go.Value //from UI functions
@@ -510,7 +523,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get polysurface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
     ///<returns>(Rhino.Geometry.Brep) Fails on bad input</returns>
-    static member CoerceBrep(objectId:'T) =
+    static member CoerceBrep(objectId:'T) : Brep  =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Brep as b -> b
         | :? Extrusion as b -> b.ToBrep(true)
@@ -566,7 +579,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get mesh geometry from the document with a given objectId</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>(Rhino.Geometry.Mesh) Fails on bad input</returns>    
-    static member CoerceMesh(objectId:'T) =
+    static member CoerceMesh(objectId:'T) : Mesh =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Mesh as m -> m        
         | g -> failwithf "CoerceMesh failed on %A : %A " g.ObjectType objectId
@@ -575,7 +588,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get Rhino LightObject from the document with a given objectId</summary>
     ///<param name="objectId">(Guid): light Identifier</param>
     ///<returns>a  Rhino.Geometry.Light) Fails on bad input</returns>
-    static member CoerceLight (objectId:'T) =
+    static member CoerceLight (objectId:'T) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
         | g -> failwithf "CoerceLight failed on %A : %A " g.ObjectType objectId
@@ -632,7 +645,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<summary>attempt to get a Guids from input</summary>
     ///<param name="objectId">objcts , Guid or string</param>
     ///<returns>Guid Option</returns>
-    static member TryCoerceGuid(objectId:'T):Guid option=
+    static member TryCoerceGuid(objectId:'T) : Guid option=
         match box objectId with
         | :? Guid  as g -> if Guid.Empty = g then None else Some g    
         | :? DocObjects.RhinoObject as o -> Some o.Id

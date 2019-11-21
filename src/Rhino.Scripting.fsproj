@@ -30,7 +30,7 @@
     <Compile Include="05_DefaultDict.fs" />
     <Compile Include="13_RhinoTypeExtensions.fs" />
     <Compile Include="19_ActiveDoc.fs" />
-    <Compile Include="RhinoScriptSyntax/50_RhinoScriptingSyntax.fs" />
+    <Compile Include="RhinoScriptSyntax/50_RhinoScriptSyntax.fs" />
     <Compile Include="RhinoScriptSyntax/Application.fs" />
     <Compile Include="RhinoScriptSyntax/Block.fs" />
     <Compile Include="RhinoScriptSyntax/Curve.fs" />

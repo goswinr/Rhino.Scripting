@@ -2351,8 +2351,8 @@ module ExtensionsSurface =
     ///Should the input surface be deleted</param>
     ///<returns>(Guid) new surface identifier on success</returns>
     static member TrimSurfaceU( surfaceId:Guid,
-                               interval:float*float,
-                               [<OPT;DEF(false)>]deleteInput:bool) : Guid =
+                                interval:float*float,
+                                [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
@@ -2420,9 +2420,6 @@ module ExtensionsSurface =
         else
             failwithf "TrimSurfaceUV faild on %A with domain %A and %A" surfaceId intervalU intervalV
 
-
-
-    static member TrimSurface() =()
 
 
     [<EXT>]

@@ -16,12 +16,7 @@ module ExtensionsUserinterface =
 
   type RhinoScriptSyntax with
 
-    [<EXT>]
-    ///<summary>The Synchronization Context of the Rhino UI Therad.
-    ///This MUST be set at the  beginning of every Script if using UI dialogs and not running on UI thread</summary>
-    static member SynchronizationContext
-        with get() = syncContext
-        and set v  = syncContext <- v
+    
 
 
     [<EXT>]
