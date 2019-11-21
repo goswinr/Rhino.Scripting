@@ -128,7 +128,7 @@ module ExtensionsUtility =
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
-        let hls = Rhino.Display.ColorHSL(hls.A.ToDouble/240.0, hls.R.ToDouble/240.0, hls.G.ToDouble/240.0, hls.B.ToDouble/240.0) // TODO test if correct with reverse function
+        let hls = Display.ColorHSL(hls.A.ToDouble/240.0, hls.R.ToDouble/240.0, hls.G.ToDouble/240.0, hls.B.ToDouble/240.0) // TODO test if correct with reverse function
         hls.ToArgbColor()
 
 
@@ -143,9 +143,9 @@ module ExtensionsUtility =
     [<EXT>]
     ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance)</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
-    ///<returns>(Rhino.Display.ColorHSL) The HLS color value</returns>
+    ///<returns>(Display.ColorHSL) The HLS color value</returns>
     static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
-        let hsl = Rhino.Display.ColorHSL(rgb)
+        let hsl = Display.ColorHSL(rgb)
         hsl
 
 

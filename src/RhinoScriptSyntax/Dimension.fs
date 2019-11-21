@@ -180,8 +180,22 @@ module ExtensionsDimension =
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |>ignore // TODO verify this works ok
+        Doc.Views.Redraw()
 
-
+    [<EXT>]
+    ///<summary>Modifies the dimension style of multiple dimension objects</summary>
+    ///<param name="objectsIds">(Guid seq) Identifier of the objects</param>
+    ///<param name="dimStyleName">(string) The name of multiple existing dimension style</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
+        let ds =  Doc.DimStyles.FindName(dimStyleName)
+        if isNull ds then  failwithf "set DimensionStyle failed.  objectId:'%A' dimStyleName:'%A'" objectIds dimStyleName
+        for objectId in objectIds do         
+            let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+            let mutable annotation = annotationObject.Geometry:?> AnnotationBase
+            annotation.DimensionStyleId <- ds.Id
+            annotationObject.CommitChanges() |>ignore // TODO verify this works ok
+        Doc.Views.Redraw()
 
     [<EXT>]
     ///<summary>Returns the text displayed by a dimension object</summary>
@@ -213,6 +227,20 @@ module ExtensionsDimension =
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
         annotationObject.CommitChanges() |>ignore
+        Doc.Views.Redraw()
+    
+    [<EXT>]
+    ///<summary>Modifies the user text string of multiple dimension objects. The user
+    /// text is the string that gets printed when the dimension is defined</summary>
+    ///<param name="objectsIds">(Guid seq) Identifiers of the objects</param>
+    ///<param name="usertext">(string) The new user text string value</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member DimensionUserText(objectIds:Guid seq, usertext:string) : unit = //MULTISET
+        for objectId in objectIds do 
+            let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+            let geo = annotationObject.Geometry :?> AnnotationBase
+            geo.PlainText <- usertext
+            annotationObject.CommitChanges() |>ignore
         Doc.Views.Redraw()
 
 
@@ -787,6 +815,23 @@ module ExtensionsDimension =
                 annotationObject.CommitChanges()|> ignore
                 Doc.Views.Redraw()
             | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+    [<EXT>]
+    ///<summary>Modifies the text string of multiple dimension leader objects</summary>
+    ///<param name="objectsIds">(Guid seq) The objects's identifiers</param>
+    ///<param name="text">(string) The new text string</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LeaderText(objectIds:Guid seq, text:string) : unit = //MULTISET
+        for objectId in objectIds do 
+            match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
+            | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+            | Some g ->
+                match g with
+                | :? Leader as g ->
+                    let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
+                    g.PlainText <- text               // TODO or use rich text?
+                    annotationObject.CommitChanges()|> ignore
+                    Doc.Views.Redraw()
+                | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
 
 
     [<EXT>]

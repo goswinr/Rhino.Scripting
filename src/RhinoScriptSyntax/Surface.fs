@@ -1110,6 +1110,22 @@ module ExtensionsSurface =
             brep.Flip()
             Doc.Objects.Replace(surfaceId, brep)|> ignore
             Doc.Views.Redraw()
+    [<EXT>]
+    ///<summary>Changes the normal direction of multiple surface. This feature can
+    /// also be found in Rhino's Dir command</summary>
+    ///<param name="surfaceIds">(Guid seq) Identifiers of multiple surface objects</param>
+    ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member FlipSurface(surfaceIds:Guid seq, flip:bool) : unit = //MULTISET
+        for surfaceId in surfaceIds do 
+            let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+            if brep.Faces.Count>1 then failwithf "Rhino.Scripting: FlipSurface failed.  surfaceId:'%A' flip:'%A'" surfaceId flip
+            let face = brep.Faces.[0]
+            let oldreverse = face.OrientationIsReversed
+            if brep.IsSolid = false && oldreverse <> flip then
+                brep.Flip()
+                Doc.Objects.Replace(surfaceId, brep)|> ignore
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -2058,7 +2074,35 @@ module ExtensionsSurface =
         | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' density:'%A'" surfaceId density
 
 
-
+    [<EXT>]
+    ///<summary>Sets the isocurve density of multiple surface or polysurface objects.
+    /// An isoparametric curve is a curve of constant U or V value on a surface.
+    /// Rhino uses isocurves and surface edge curves to visualize the shape of a
+    /// NURBS surface</summary>
+    ///<param name="surfaceIds">(Guid seq) The surface's identifiers</param>
+    ///<param name="density">(int) The isocurve wireframe density. The possible values are
+    ///    -1: Hides the surface isocurves
+    ///    0: Display boundary and knot wires
+    ///    1: Display boundary and knot wires and one interior wire if there are no interior knots
+    ///    bigger than 1: Display boundary and knot wires and (N+1) interior wires</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member SurfaceIsocurveDensity(surfaceIds:Guid seq, density:int) : unit = //MULTISET
+        for surfaceId in surfaceIds do 
+            match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with
+            | :?  DocObjects.BrepObject as rhinoobject ->
+                    let dens = if density<0 then -1 else density
+                    rhinoobject.Attributes.WireDensity <- dens
+                    rhinoobject.CommitChanges()|> ignore
+            | :?  DocObjects.SurfaceObject as rhinoobject ->
+                    let dens = if density<0 then -1 else density
+                    rhinoobject.Attributes.WireDensity <- dens
+                    rhinoobject.CommitChanges()|> ignore
+            | :?  DocObjects.ExtrusionObject as rhinoobject ->
+                    let dens = if density<0 then -1 else density
+                    rhinoobject.Attributes.WireDensity <- dens
+                    rhinoobject.CommitChanges()|> ignore
+            | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' density:'%A'" surfaceId density
+        Doc.Views.Redraw()
 
     [<EXT>]
     ///<summary>Returns the control point count of a surface

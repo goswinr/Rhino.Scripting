@@ -23,10 +23,10 @@ module ExtensionsSelection =
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers for all the objects in the document</returns>
-    static member AllObjects(       [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(false)>]includeLights:bool,
-                                    [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
+    static member AllObjects(  [<OPT;DEF(false)>]select:bool,
+                               [<OPT;DEF(false)>]includeLights:bool,
+                               [<OPT;DEF(false)>]includeGrips:bool,
+                               [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
 
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights

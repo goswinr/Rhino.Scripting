@@ -676,7 +676,33 @@ module ExtensionsCurve =
         else
            failwithf "curve Arrow style %d invalid" arrowStyle
 
-
+    [<EXT>]
+    ///<summary>Enables or disables multiple curve objects's annotation arrows</summary>
+    ///<param name="curveIds">(Guid seq) Identifier of multiple curve</param>
+    ///<param name="arrowStyle">(int) The style of annotation arrow to be displayed.
+    ///  0 = no arrows
+    ///  1 = display arrow at start of curve
+    ///  2 = display arrow at end of curve
+    ///  3 = display arrow at both start and end of curve</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member CurveArrows(curveIds:Guid seq, arrowStyle:int) : unit = //MULTISET
+        for curveId in curveIds do 
+            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
+            let attr = rhobj.Attributes
+            let rc = attr.ObjectDecoration
+            if arrowStyle >= 0 && arrowStyle <= 3 then
+                if arrowStyle = 0 then
+                    attr.ObjectDecoration <- DocObjects.ObjectDecoration.None
+                elif arrowStyle = 1 then
+                    attr.ObjectDecoration <- DocObjects.ObjectDecoration.StartArrowhead
+                elif arrowStyle = 2 then
+                    attr.ObjectDecoration <- DocObjects.ObjectDecoration.EndArrowhead
+                elif arrowStyle = 3 then
+                    attr.ObjectDecoration <- DocObjects.ObjectDecoration.BothArrowhead
+                if not <| Doc.Objects.ModifyAttributes(curveId, attr, true) then failwithf "curve Arrow style %d invalid" arrowStyle              
+            else
+               failwithf "curve Arrow style %d invalid" arrowStyle
+        Doc.Views.Redraw()
 
     [<EXT>]
     ///<summary>Calculates the difference between two closed, planar curves and

@@ -8600,7 +8600,7 @@ Minimum distance between points. Points that fall within this tolerance
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.ColorRGBToHLS.Static(System.Drawing.Color)">
 <summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance)</summary>
 <param name="rgb">(Drawing.Color) The RGB color value</param>
-<returns>(Rhino.Display.ColorHSL) The HLS color value</returns>
+<returns>(Display.ColorHSL) The HLS color value</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.ColorRedValue.Static(System.Drawing.Color)">
 <summary>Retrieves intensity value for the red component of an RGB color</summary>

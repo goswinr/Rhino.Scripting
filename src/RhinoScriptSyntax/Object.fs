@@ -616,7 +616,7 @@ module ExtensionsObject =
             else
                 match Doc.Views.Find(layout.Value, false) with
                 | null -> failwithf "Set ObjectLayout failed, layout not found for '%A' and '%A'"  layout objectId
-                | :? Rhino.Display.RhinoPageView as layout ->
+                | :? Display.RhinoPageView as layout ->
                     rhobj.Attributes.ViewportId <- layout.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> failwithf "Set ObjectLayout failed, layout is not a Page view for '%A' and '%A'"  layout objectId
@@ -624,6 +624,48 @@ module ExtensionsObject =
 
             if not <| rhobj.CommitChanges() then failwithf "Set ObjectLayout failed for '%A' and '%A'"  layout objectId
             Doc.Views.Redraw()
+
+    [<EXT>]
+    ///<summary>Changes the layout or model space of an objects</summary>
+    ///<param name="objectsIds">(Guid seq) Identifier of the objects</param>
+    ///<param name="layout">(string option) To change, or move, an objects from model space to page
+    ///  layout space, or from one page layout to another, then specify the
+    ///  title of an existing page layout view. To move an objects
+    ///  from page layout space to model space, just specify None</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLayout(objectIds:Guid seq, layout:string option) : unit = //MULTISET 
+        let lay =
+            if layout.IsSome then
+                match Doc.Views.Find(layout.Value, false) with
+                | null -> failwithf "Set ObjectLayout failed, layout not found for '%A' and '%A'"  layout objectIds
+                | :? Display.RhinoPageView as layout -> Some layout
+                | _ -> failwithf "Set ObjectLayout failed, layout is not a Page view for '%A' and '%A'"  layout objectIds
+            else
+                None
+
+        for objectId in objectIds do
+            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let view=
+                if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
+                    let pageid = rhobj.Attributes.ViewportId
+                    let pageview = Doc.Views.Find(pageid)
+                    Some pageview.MainViewport.Name
+                else
+                    None
+
+            if view<>layout then
+                if layout.IsNone then //move to model space
+                    rhobj.Attributes.Space <- DocObjects.ActiveSpace.ModelSpace
+                    rhobj.Attributes.ViewportId <- Guid.Empty
+                else                
+                    rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
+                    rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
+                    
+
+
+                if not <| rhobj.CommitChanges() then failwithf "Set ObjectLayout failed for '%A' and '%A'"  layout objectId
+        Doc.Views.Redraw()
+     
 
     [<EXT>]
     ///<summary>Returns the linetype of an object</summary>
@@ -634,7 +676,6 @@ module ExtensionsObject =
         let oldindex = Doc.Linetypes.LinetypeIndexForObject(rhinoobject)
         Doc.Linetypes.[oldindex].Name
 
-
     [<EXT>]
     ///<summary>Modifies the linetype of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
@@ -642,15 +683,27 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let oldindex = Doc.Linetypes.LinetypeIndexForObject(rhinoobject)
         let newindex = Doc.Linetypes.Find(linetype)
         if newindex <0 then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         rhinoobject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoobject.Attributes.LinetypeIndex <- newindex
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         Doc.Views.Redraw()
-
-
+    
+    [<EXT>]
+    ///<summary>Modifies the linetype of multiple object</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="linetype">(string) Name of an existing linetyp</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
+        let newindex = Doc.Linetypes.Find(linetype)
+        if newindex <0 then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectIds
+        for objectId in objectIds do
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
+            rhinoobject.Attributes.LinetypeIndex <- newindex
+            if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -664,8 +717,6 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let oldsource = rhinoobject.Attributes.LinetypeSource
         int(oldsource)
-
-
 
     [<EXT>]
     ///<summary>Modifies the linetype source of an object</summary>
@@ -684,6 +735,23 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the linetype source of multiple objects</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<param name="source">(int) New linetype source.
+    ///  If objectId is a list of identifiers, this parameter is required
+    ///    0 = By Layer
+    ///    1 = By Object
+    ///    3 = By Parent</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLinetypeSource(objectIds:Guid seq, source:int) : unit = //MULTISET        
+        if source <0 || source >3 || source = 2 then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectIds
+        let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
+        for objectId in objectIds do
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.LinetypeSource <- source
+            if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -709,11 +777,29 @@ module ExtensionsObject =
     ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if 0 <=. materialIndex .< Doc.Materials.Count then failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
+        if 0 <=. materialIndex .< Doc.Materials.Count then 
+            failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
         let attrs = rhinoobject.Attributes
         attrs.MaterialIndex <- materialIndex
-        if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
+        if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then 
+            failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
+    [<EXT>]
+    ///<summary>Changes the material index multiple objects. Rendering materials are stored in
+    /// Rhino's rendering material table. The table is conceptually an array. Render
+    /// materials associated with objects and layers are specified by zero based
+    /// indices into this array</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of an objects</param>
+    ///<param name="materialIndex">(int) The new material index</param>
+    static member ObjectMaterialIndex(objectIds:Guid seq, materialIndex:int) : unit = //MULTISET
+        if 0 <=. materialIndex .< Doc.Materials.Count then 
+            failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectIds
+        for objectId in objectIds do
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let attrs = rhinoobject.Attributes
+            attrs.MaterialIndex <- materialIndex
+            if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then 
+                failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
     [<EXT>]
     ///<summary>Returns the rendering material source of an object</summary>
@@ -723,7 +809,6 @@ module ExtensionsObject =
     ///  1 = Material from object
     ///  3 = Material from parent</returns>
     static member ObjectMaterialSource(objectId:Guid) : int = //GET
-        //id = RhinoScriptSyntax.Coerceguid(objectId)
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhinoobject.Attributes.MaterialSource)
 
@@ -743,8 +828,25 @@ module ExtensionsObject =
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoobject.Attributes.MaterialSource <- source
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
-
-
+        Doc.Views.Redraw()
+    
+    [<EXT>]
+    ///<summary>Modifies the rendering material source of multiple objects</summary>
+    ///<param name="objectsIds">(Guid seq) One or more objects identifierss</param>
+    ///<param name="source">(int) The new rendering material source.
+    ///  0 = Material from layer
+    ///  1 = Material from objects
+    ///  3 = Material from parent</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectMaterialSource(objectIds:Guid seq, source:int) : unit = //MULTISET
+        if source <0 || source >3 || source = 2 then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectIds
+        let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
+        for objectId in objectIds do
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let rc = int(rhinoobject.Attributes.MaterialSource)            
+            rhinoobject.Attributes.MaterialSource <- source
+            if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -765,7 +867,17 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.Name <- name
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectName failed for '%A' and '%A'"  name objectId
-
+    
+    [<EXT>]
+    ///<summary>Modifies the name of multiple objects</summary>
+    ///<param name="objectsIds">(Guid seq)Id of objects</param>
+    ///<param name="name">(string) The new objects name.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectName(objectIds:Guid seq, name:string) : unit = //MULTISET
+        for objectId in objectIds do
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.Name <- name
+            if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectName failed for '%A' and '%A'"  name objectId
 
     [<EXT>]
     ///<summary>Returns the print color of an object</summary>
@@ -789,6 +901,18 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the print color of multiple objects</summary>
+    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="color">(Drawing.Color) New print color.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectPrintColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
+        for objectId in objectIds do
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
+            rhinoobject.Attributes.PlotColor <- color
+            if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
+        Doc.Views.Redraw()
 
     [<EXT>]
     ///<summary>Returns the print color source of an object</summary>
@@ -818,9 +942,22 @@ module ExtensionsObject =
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
         Doc.Views.Redraw()
 
-
-
-
+    [<EXT>]
+    ///<summary>Modifies the print color source of multiple objects</summary>
+    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="source">(int) New print color source
+    ///  0 = print color by layer
+    ///  1 = print color by objects
+    ///  3 = print color by parent</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectPrintColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
+        if source <0 || source >3 || source = 2 then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectIds
+        let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
+        for objectId in objectIds do
+            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhobj.Attributes.PlotColorSource <- source
+            if not <| rhobj.CommitChanges() then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
+        Doc.Views.Redraw()
 
     [<EXT>]
     ///<summary>Returns the print width of an object</summary>
@@ -839,12 +976,28 @@ module ExtensionsObject =
     ///  but does not show on print)</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
+        let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let rc = rhinoobject.Attributes.PlotWeight
+        rhinoobject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
+        rhinoobject.Attributes.PlotWeight <- width
+        if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
+        Doc.Views.Redraw()
+
+    [<EXT>]
+    ///<summary>Modifies the print width of multiple objects</summary>
+    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
+    ///  the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
+    ///  but does not show on print)</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectPrintWidth(objectIds:Guid seq, width:float) : unit = //MULTISET
+        for objectId in objectIds do 
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let rc = rhinoobject.Attributes.PlotWeight
             rhinoobject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoobject.Attributes.PlotWeight <- width
             if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
-            Doc.Views.Redraw()
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -873,6 +1026,20 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the print width source of multiple objects</summary>
+    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="source">(int) New print width source
+    ///  0 = print width by layer
+    ///  1 = print width by objects
+    ///  3 = print width by parent</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectPrintWidthSource(objectIds:Guid seq, source:int) : unit = //MULTISET
+        for objectId in objectIds do     
+            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            rhinoobject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
+            if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
+        Doc.Views.Redraw()
 
 
     [<EXT>]

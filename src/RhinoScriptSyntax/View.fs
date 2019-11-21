@@ -661,7 +661,7 @@ module ExtensionsView =
     ///<returns>(string) If mode is not specified, the current mode</returns>
     static member ViewDisplayMode(view:string, mode:string) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
-        let desc = Rhino.Display.DisplayModeDescription.FindByName(mode)
+        let desc = Display.DisplayModeDescription.FindByName(mode)
         if notNull desc then
             view.ActiveViewport.DisplayMode <- desc
             Doc.Views.Redraw()
@@ -675,7 +675,7 @@ module ExtensionsView =
     ///<param name="name">(string) Name of the display mode</param>
     ///<returns>(Guid) The id of the display mode , otherwise None</returns>
     static member ViewDisplayModeId(name:string) : Guid =
-        let desc = Rhino.Display.DisplayModeDescription.FindByName(name)
+        let desc = Display.DisplayModeDescription.FindByName(name)
         if notNull desc then desc.Id
         else
             failwithf "set ViewDisplayModeId mode %s not found." name
@@ -687,7 +687,7 @@ module ExtensionsView =
     ///<returns>(string) The name of the display mode , otherwise None</returns>
     static member ViewDisplayModeName(modeId:Guid) : string =
         //modeId = RhinoScriptSyntax.Coerceguid(modeId)
-        let desc = Rhino.Display.DisplayModeDescription.GetDisplayMode(modeId)
+        let desc = Display.DisplayModeDescription.GetDisplayMode(modeId)
         if notNull desc then desc.EnglishName
         else
             failwithf "set ViewDisplayModeName Id %A not found." modeId
@@ -697,7 +697,7 @@ module ExtensionsView =
     ///<summary>Return list of display modes</summary>
     ///<returns>(string ResizeArray) strings identifying the display mode names</returns>
     static member ViewDisplayModes() : string ResizeArray =
-        let modes = Rhino.Display.DisplayModeDescription.GetDisplayModes()
+        let modes = Display.DisplayModeDescription.GetDisplayModes()
         resizeArray {for mode in modes do mode.EnglishName }
 
 

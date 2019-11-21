@@ -485,6 +485,17 @@ module ExtensionsGeometry =
         textdot.FontFace <-  fontface
         if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotFont failed to change object %A to %A " objectId fontface
         Doc.Views.Redraw()
+    [<EXT>]
+    ///<summary>Modifies the font of multiple text dots</summary>
+    ///<param name="objectsIds">(Guid seq) Identifiers of multiple text dot objects</param>
+    ///<param name="fontface">(string) New font face name</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member TextDotFont(objectIds:Guid seq, fontface:string) : unit = //MULTISET
+        for objectId in objectIds do 
+            let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+            textdot.FontFace <-  fontface
+            if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotFont failed to change object %A to %A " objectId fontface
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -505,6 +516,17 @@ module ExtensionsGeometry =
         if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotHeight failed to change object %A to %A " objectId height
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the font height of multiple text dots</summary>
+    ///<param name="objectsIds">(Guid seq) Identifiers of multiple text dot objects</param>
+    ///<param name="height">(int) New font height</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member TextDotHeight(objectIds:Guid seq, height:int) : unit = //MULTISET
+        for objectId in objectIds do 
+            let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+            textdot.FontHeight <- height
+            if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotHeight failed to change object %A to %A " objectId height
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -549,7 +571,17 @@ module ExtensionsGeometry =
         if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotText failed to change object %A to %A " objectId text
         Doc.Views.Redraw()
 
-
+    [<EXT>]
+    ///<summary>Modifies the text on multiple text dot objects</summary>
+    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text dot objects</param>
+    ///<param name="text">(string) A new string for the dot</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member TextDotText(objectIds:Guid seq, text:string) : unit = //MULTISET
+        for objectId in objectIds do 
+            let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
+            textdot.Text <-  text
+            if not <| Doc.Objects.Replace(objectId, textdot) then failwithf "TextDotText failed to change object %A to %A " objectId text
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -560,11 +592,12 @@ module ExtensionsGeometry =
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
 
 
-
-
-
-    static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+    [<EXT>]
+    ///<summary>Modifies the font used by a text object</summary>
+    ///<param name="objectId">(Guid) The identifier of a text object</param>
+    ///<param name="font">(string) The new Font Name</param> 
+    ///<returns>(unit) void, nothing</returns>
+    static member TextObjectFont(objectId:Guid, font:string) : unit = //SET        
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
         let f =
@@ -576,11 +609,31 @@ module ExtensionsGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, false, true)
             |? DocObjects.Font.FromQuartetProperties(font, true, true)
             |? failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
-
         annotation.Font <- f
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the font used by multiple text objects</summary>
+    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="font">(string) The new Font Name</param> 
+    ///<returns>(unit) void, nothing</returns>
+    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
+        for objectId in objectIds do         
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+            let fontdata = annotation.Font
+            let f =
+                DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
+                // normally calls will not  go further than FromQuartetProperties(font, false, false)
+                // but there are a few rare fonts that don"t have a regular font
+                |? DocObjects.Font.FromQuartetProperties(font, false, false)
+                |? DocObjects.Font.FromQuartetProperties(font, true, false)
+                |? DocObjects.Font.FromQuartetProperties(font, false, true)
+                |? DocObjects.Font.FromQuartetProperties(font, true, true)
+                |? failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
+            annotation.Font <- f
+            if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectFont failed.  objectId:'%A' font:'%A'" objectId font
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -597,12 +650,21 @@ module ExtensionsGeometry =
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        annotation.TextHeight <-  height
-        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        annotation.TextHeight <-  height        
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
         Doc.Views.Redraw()
 
-
+    [<EXT>]
+    ///<summary>Modifies the height of multiple text objects</summary>
+    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="height">(float) The new text height</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member TextObjectHeight(objectIds:Guid seq, height:float) : unit = //MULTISET
+        for objectId in objectIds do 
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+            annotation.TextHeight <-  height            
+            if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectHeight failed.  objectId:'%A' height:'%A'" objectId height
+        Doc.Views.Redraw()
 
     [<EXT>]
     ///<summary>Returns the plane used by a text object</summary>
@@ -618,13 +680,11 @@ module ExtensionsGeometry =
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        annotation.Plane <-  plane
-        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        annotation.Plane <-  plane        
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectPlane failed.  objectId:'%A' plane:'%A'" objectId plane
         Doc.Views.Redraw()
 
-
-
+    
     [<EXT>]
     ///<summary>Returns the location of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
@@ -642,7 +702,7 @@ module ExtensionsGeometry =
         let mutable plane = text.Plane
         plane.Origin <-  point
         text.Plane <-  plane
-        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        
         if not <| Doc.Objects.Replace(objectId, text) then failwithf "Rhino.Scripting: TextObjectPoint failed.  objectId:'%A' point:'%A'" objectId point
         Doc.Views.Redraw()
 
@@ -684,11 +744,36 @@ module ExtensionsGeometry =
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
             |_ -> failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
             |?    failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A' not availabe for %s" objectId style fontdata.QuartetName
-
-        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
-        if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
+ 
+        if not <| Doc.Objects.Replace(objectId, annotation) then 
+            failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the font style of multiple text objects</summary>
+    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="style">(int) The font style. Can be any of the following flags
+    ///  0 = Normal
+    ///  1 = Bold
+    ///  2 = Italic
+    ///  3 = Bold and Italic</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
+        for objectId in objectIds do 
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+            let fontdata = annotation.Font
+            let f =
+                match style with
+                |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, true)
+                |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
+                |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
+                |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
+                |_ -> failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
+                |?    failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' style:'%A' not availabe for %s" objectId style fontdata.QuartetName
+     
+            if not <| Doc.Objects.Replace(objectId, annotation) then 
+                failwithf "Rhino.Scripting: TextObjectStyle failed.  objectId:'%A' bad style:'%A'" objectId style
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -708,8 +793,20 @@ module ExtensionsGeometry =
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
-        let objectId = RhinoScriptSyntax.CoerceGuid(objectId)
+        
         if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
+        Doc.Views.Redraw()
+    
+    [<EXT>]
+    ///<summary>Modifies the text string of multiple text objects</summary>
+    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="text">(string) A new text string</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET
+        for objectId in objectIds do 
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+            annotation.PlainText <-  text
+            if not <| Doc.Objects.Replace(objectId, annotation) then failwithf "Rhino.Scripting: TextObjectText failed.  objectId:'%A' text:'%A'" objectId text
         Doc.Views.Redraw()
 
 

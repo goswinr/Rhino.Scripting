@@ -201,6 +201,22 @@ module ExtensionsHatch =
         if not<| hatchobj.CommitChanges() then failwithf "Rhino.Scripting: HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Changes multiple hatch objects's hatch pattern</summary>
+    ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
+    ///<param name="hatchPattern">(string) Name of multiple existing hatch pattern to replace the
+    ///  current hatch pattern</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member HatchPattern(hatchIds:Guid seq, hatchPattern:string) : unit = //MULTISET
+        RhinoScriptSyntax.InitHatchPatterns()
+        for hatchId in hatchIds do 
+            let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
+            let oldindex = hatchobj.HatchGeometry.PatternIndex            
+            let newpatt = Doc.HatchPatterns.FindName(hatchPattern)
+            if newpatt|> isNull  then failwithf "Rhino.Scripting: HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+            hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
+            if not<| hatchobj.CommitChanges() then failwithf "Rhino.Scripting: HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -277,6 +293,22 @@ module ExtensionsHatch =
             if not <| hatchobj.CommitChanges() then failwithf "HatchRotation failed on rotation %f on %A" rotation hatchId
             Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the rotation applied to the hatch pattern when
+    /// it is mapped to the hatch's plane</summary>
+    ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
+    ///<param name="rotation">(float) Rotation angle in degrees</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member HatchRotation(hatchIds:Guid seq, rotation:float) : unit = //MULTISET
+        for hatchId in hatchIds do  
+            let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
+            let mutable rc = hatchobj.HatchGeometry.PatternRotation
+            rc <- RhinoMath.ToDegrees(rc)
+            if rotation <> rc then
+                let rotation = RhinoMath.ToRadians(rotation)
+                hatchobj.HatchGeometry.PatternRotation <- rotation
+                if not <| hatchobj.CommitChanges() then failwithf "HatchRotation failed on rotation %f on %A" rotation hatchId
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -303,6 +335,20 @@ module ExtensionsHatch =
             if not <| hatchobj.CommitChanges() then failwithf "HatchScale failed on scale %f on %A" scale hatchId
             Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Modifies the scale applied to the hatch pattern when it is
+    /// mapped to the hatch's plane</summary>
+    ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
+    ///<param name="scale">(float) Scale factor</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member HatchScale(hatchIds:Guid seq, scale:float) : unit = //MULTISET
+        for hatchId in hatchIds do  
+            let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
+            let rc = hatchobj.HatchGeometry.PatternScale
+            if scale <> rc then
+                hatchobj.HatchGeometry.PatternScale <- scale
+                if not <| hatchobj.CommitChanges() then failwithf "HatchScale failed on scale %f on %A" scale hatchId
+        Doc.Views.Redraw()
 
 
     [<EXT>]

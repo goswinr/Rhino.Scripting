@@ -166,9 +166,24 @@ module ExtensionsUserdata =
     static member SetUserText(objectId:Guid, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
-            obj.Geometry.SetUserString(key, value)|> ignore
+            if not <| obj.Geometry.SetUserString(key, value) then failwithf "SetUserText failed on %A for key %s value %s" objectId key value
         else
-            obj.Attributes.SetUserString(key, value)|> ignore
+            if not <| obj.Attributes.SetUserString(key, value) then failwithf "SetUserText failed on %A for key %s value %s" objectId key value
 
-
+    [<EXT>]
+    ///<summary>Sets or removes user text stored on multiple objects</summary>
+    ///<param name="objectIds">(Guid seq) The object identifiers</param>
+    ///<param name="key">(string) The key name to set</param>
+    ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair
+    ///  specified by key will be deleted</param>
+    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///Location on the object to store the user text</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member SetUserText(objectIds:Guid seq, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
+        for objectId in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            if attachToGeometry then
+                if not <| obj.Geometry.SetUserString(key, value) then failwithf "SetUserText failed on %A for key %s value %s" objectId key value
+            else
+                if not <| obj.Attributes.SetUserString(key, value) then failwithf "SetUserText failed on %A for key %s value %s" objectId key value
 

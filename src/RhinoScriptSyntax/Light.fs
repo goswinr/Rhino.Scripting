@@ -156,6 +156,19 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: EnableLight failed.  objectId:'%A' enable:'%A'" objectId enable
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Enables or disables multiple light objects</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="enable">(bool) The light's enabled status</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member EnableLight(objectIds:Guid seq, enable:bool) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            light.IsEnabled <- enable
+            //id = RhinoScriptSyntax.Coerceguid(objectId)
+            if not <| Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: EnableLight failed.  objectId:'%A' enable:'%A'" objectId enable
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -252,6 +265,18 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: LightColor failed.  objectId:'%A' color:'%A'" objectId color
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Changes the color of multiple light</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="color">(Drawing.Color) The light's new color</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LightColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            light.Diffuse <- color
+            if not <|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: LightColor failed.  objectId:'%A' color:'%A'" objectId color
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -282,6 +307,18 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: LightDirection failed.  objectId:'%A' direction:'%A'" objectId direction
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Changes the direction of multiple light objects</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="direction">(Vector3d) The light's new direction</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LightDirection(objectIds:Guid seq, direction:Vector3d) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            light.Direction <- direction
+            if not<|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: LightDirection failed.  objectId:'%A' direction:'%A'" objectId direction
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -305,6 +342,18 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: LightLocation failed.  objectId:'%A' location:'%A'" objectId location
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Changes the location of multiple light objects</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="location">(Point3d) The light's new location</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LightLocation(objectIds:Guid seq, location:Point3d) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            light.Location <- location
+            if not<|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: LightLocation failed.  objectId:'%A' location:'%A'" objectId location
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -326,6 +375,18 @@ module ExtensionsLight =
         light.Name <- name
         if not <|  Doc.Lights.Modify(objectId, light) then
             failwithf "Rhino.Scripting: LightName failed.  objectId:'%A' name:'%A'" objectId name
+        Doc.Views.Redraw()
+    [<EXT>]
+    ///<summary>Changes the name of multiple light objects</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="name">(string) The light's new name</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LightName(objectIds:Guid seq, name:string) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            light.Name <- name
+            if not <|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: LightName failed.  objectId:'%A' name:'%A'" objectId name
         Doc.Views.Redraw()
 
 
@@ -384,6 +445,21 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: SpotLightHardness failed.  objectId:'%A' hardness:'%A'" objectId hardness
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Changes the hardness of multiple spot light. Spotlight hardness
+    /// controls the fully illuminated region</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="hardness">(float) The light's new hardness</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member SpotLightHardness(objectIds:Guid seq, hardness:float) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            if light.LightStyle <> LightStyle.WorldSpot then
+                failwithf "Rhino.Scripting: SpotLightHardness failed.  objectId:'%A' hardness:'%A'" objectId hardness
+            light.HotSpot <- hardness
+            if not <|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: SpotLightHardness failed.  objectId:'%A' hardness:'%A'" objectId hardness
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -413,6 +489,21 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: SpotLightRadius failed.  objectId:'%A' radius:'%A'" objectId radius
         Doc.Views.Redraw()
 
+    [<EXT>]
+    ///<summary>Changes the radius of multiple spot light</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="radius">(float) The light's new radius</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member SpotLightRadius(objectIds:Guid seq, radius:float) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            if light.LightStyle <> LightStyle.WorldSpot then
+                failwithf "Rhino.Scripting: SpotLightRadius failed.  objectId:'%A' radius:'%A'" objectId radius
+            let radians = Math.Atan(radius/light.Direction.Length)
+            light.SpotAngleRadians <- radians
+            if not <|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: SpotLightRadius failed.  objectId:'%A' radius:'%A'" objectId radius
+        Doc.Views.Redraw()
 
 
     [<EXT>]
@@ -438,6 +529,20 @@ module ExtensionsLight =
         light.ShadowIntensity <- intensity
         if not <|  Doc.Lights.Modify(objectId, light) then
             failwithf "Rhino.Scripting: SpotLightShadowIntensity failed.  objectId:'%A' intensity:'%A'" objectId intensity
+        Doc.Views.Redraw()
+    [<EXT>]
+    ///<summary>Changes the shadow intensity of multiple spot light</summary>
+    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="intensity">(float) The light's new intensity</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member SpotLightShadowIntensity(objectIds:Guid seq, intensity:float) : unit = //MULTISET
+        for objectId in objectIds do 
+            let light = RhinoScriptSyntax.CoerceLight(objectId)
+            if light.LightStyle <> LightStyle.WorldSpot then
+                failwithf "Rhino.Scripting: SpotLightShadowIntensity failed.  objectId:'%A' intensity:'%A'" objectId intensity
+            light.ShadowIntensity <- intensity
+            if not <|  Doc.Lights.Modify(objectId, light) then
+                failwithf "Rhino.Scripting: SpotLightShadowIntensity failed.  objectId:'%A' intensity:'%A'" objectId intensity
         Doc.Views.Redraw()
 
 
