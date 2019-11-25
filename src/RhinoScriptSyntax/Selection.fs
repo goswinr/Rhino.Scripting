@@ -42,7 +42,38 @@ module ExtensionsSelection =
                 objectids.Add(object.Id)
             if objectids.Count > 0 && select then Doc.Views.Redraw()
             objectids
+    [<EXT>]
+    ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
+    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///Include refrence objects such as work session objects</param>
+    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
+    ///Include locked objects</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///Include grips objects</param>
+  
+    ///<returns>(Guid ResizeArray) identifiers for all the objects in the document</returns>
+    static member VisibleObjects(   [<OPT;DEF(false)>]includeReferences:bool,
+                                    [<OPT;DEF(0)>]filter:int,@@@
+                                    [<OPT;DEF(true)>]includeLockedObjects:bool,
+                                    [<OPT;DEF(false)>]includeLights:bool,
+                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
 
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.IncludeLights <- includeLights
+            it.IncludeGrips <- includeGrips
+            it.NormalObjects <- true
+            it.LockedObjects <- includeLockedObjects
+            it.HiddenObjects <- false
+            it.ReferenceObjects <- includeReferences
+            let e = Doc.Objects.GetObjectList(it)
+            let objectids = ResizeArray()
+            for object in e do
+                if select then object.Select(true) |> ignore
+                objectids.Add(object.Id)
+            if objectids.Count > 0 && select then Doc.Views.Redraw()
+            objectids
 
 
     [<EXT>]
