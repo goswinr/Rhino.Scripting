@@ -650,7 +650,7 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? Guid  as g -> if Guid.Empty = g then None else Some g    
         | :? DocObjects.RhinoObject as o -> Some o.Id
         | :? DocObjects.ObjRef      as o -> Some o.ObjectId
-        | :? string  as s -> let ok, g= Guid.TryParse s in  if ok then Some g else None
+        | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
         | _ -> None
 
     ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>

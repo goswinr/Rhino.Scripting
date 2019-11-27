@@ -10,98 +10,7 @@ open Rhino.Scripting.ActiceDocument
 module ExtensionsSelection =
 
   type RhinoScriptSyntax with
-
-
-    [<EXT>]
-    ///<summary>Returns identifiers of all objects in the document</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for all the objects in the document</returns>
-    static member AllObjects(  [<OPT;DEF(false)>]select:bool,
-                               [<OPT;DEF(false)>]includeLights:bool,
-                               [<OPT;DEF(false)>]includeGrips:bool,
-                               [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
-
-            let it = DocObjects.ObjectEnumeratorSettings()
-            it.IncludeLights <- includeLights
-            it.IncludeGrips <- includeGrips
-            it.NormalObjects <- true
-            it.LockedObjects <- true
-            it.HiddenObjects <- true
-            it.ReferenceObjects <- includeReferences
-            let e = Doc.Objects.GetObjectList(it)
-            let objectids = ResizeArray()
-            for object in e do
-                if select then object.Select(true) |> ignore
-                objectids.Add(object.Id)
-            if objectids.Count > 0 && select then Doc.Views.Redraw()
-            objectids
-    [<EXT>]
-    ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
-    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
-    ///Include locked objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects</param>
-  
-    ///<returns>(Guid ResizeArray) identifiers for all the objects in the document</returns>
-    static member VisibleObjects(   [<OPT;DEF(false)>]includeReferences:bool,
-                                    [<OPT;DEF(0)>]filter:int,@@@
-                                    [<OPT;DEF(true)>]includeLockedObjects:bool,
-                                    [<OPT;DEF(false)>]includeLights:bool,
-                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
-
-            let it = DocObjects.ObjectEnumeratorSettings()
-            it.IncludeLights <- includeLights
-            it.IncludeGrips <- includeGrips
-            it.NormalObjects <- true
-            it.LockedObjects <- includeLockedObjects
-            it.HiddenObjects <- false
-            it.ReferenceObjects <- includeReferences
-            let e = Doc.Objects.GetObjectList(it)
-            let objectids = ResizeArray()
-            for object in e do
-                if select then object.Select(true) |> ignore
-                objectids.Add(object.Id)
-            if objectids.Count > 0 && select then Doc.Views.Redraw()
-            objectids
-
-
-    [<EXT>]
-    ///<summary>Returns identifier of the first object in the document. The first
-    ///  object is the last object created by the user</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object.  If omitted, the object is not selected</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted, grips objects are not returned</param>
-    ///<returns>(Guid) The identifier of the object </returns>
-    static member FirstObject(      [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(false)>]includeLights:bool,
-                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid =
-
-            let it = DocObjects.ObjectEnumeratorSettings()
-            it.IncludeLights <- includeLights
-            it.IncludeGrips <- includeGrips
-            let e = Doc.Objects.GetObjectList(it).GetEnumerator()
-            if not <| e.MoveNext() then failwithf "FirstObject not found"
-            let object = e.Current
-            if isNull object then failwithf "FirstObject not found(null)"
-            if select then object.Select(true) |> ignore
-            object.Id
-
-
-
+    
     [<EXT>]
     ///<summary>A helper Function for DocObjects.ObjectType Enum</summary>
     ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types</param>
@@ -147,6 +56,130 @@ module ExtensionsSelection =
         if 0 <> (filter &&& 1073741824 ) then
             geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Extrusion
         geometryfilter
+
+    [<EXT>]
+    ///<summary>Returns identifiers of all objects in the document</summary>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select the objects</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///Include grips objects</param>
+    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///Include refrence objects such as work session objects</param>
+    ///<returns>(Guid ResizeArray) Identifiers for all the objects in the document</returns>
+    static member AllObjects(  [<OPT;DEF(false)>]select:bool,
+                               [<OPT;DEF(false)>]includeLights:bool,
+                               [<OPT;DEF(false)>]includeGrips:bool,
+                               [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =            
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.IncludeLights <- includeLights
+            it.IncludeGrips <- includeGrips
+            it.NormalObjects <- true
+            it.LockedObjects <- true
+            it.HiddenObjects <- true
+            it.ReferenceObjects <- includeReferences
+            let e = Doc.Objects.GetObjectList(it)
+            let objectids = ResizeArray()             
+            for object in e do
+                if select then object.Select(true) |> ignore                
+            if objectids.Count > 0 && select then Doc.Views.Redraw()
+            if printLog then 
+                let mutable tx = ""
+                let typesk = Seq.length count.Items
+                if typesk > 0 then  
+                    tx <- "No objects found. "
+                elif typesk = 1  then      
+                    for k,v in count.Items do
+                        tx <- sprintf " %d objects of type %s found" (!v) k
+                else
+                    tx <- sprintf "%d objects found of following types:" objectIds.Count
+                    for k,v in count.Items do
+                        tx <- sprintf "%s%s    %d: %s" tx Environment.NewLine (!v) k 
+                RhinoApp.WriteLine tx
+            objectids
+
+    [<EXT>]
+    ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
+    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
+    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///  that can be selected. Object types can be added together to filter
+    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///<param name="printLog">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///Include refrence objects such as work session objects</param>
+    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
+    ///Include locked objects</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///Include grips objects</param>  
+    ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible </returns>
+    static member VisibleObjects(   [<OPT;DEF(0)>]filter:int,
+                                    [<OPT;DEF(true)>]printLog:bool,
+                                    [<OPT;DEF(false)>]includeReferences:bool,
+                                    [<OPT;DEF(true)>]includeLockedObjects:bool,
+                                    [<OPT;DEF(false)>]includeLights:bool,
+                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+            let Vis = new Collections.Generic.HashSet<int>()
+            for layer in Doc.Layers do
+                if not layer.IsDeleted && layer.IsVisible then 
+                    Vis.Add(layer.Index) |> ignore
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.IncludeLights <- includeLights
+            it.IncludeGrips <- includeGrips
+            it.NormalObjects <- true
+            it.LockedObjects <- includeLockedObjects
+            it.HiddenObjects <- false
+            it.ReferenceObjects <- includeReferences            
+            it.ObjectTypeFilter <- RhinoScriptSyntax.FilterHelper(filter)
+            let e = Doc.Objects.GetObjectList(it)
+            let objectIds = ResizeArray()
+            let count = DefaultDict(fun () -> ref 0)
+            for object in e do  
+                if Vis.Contains(object.Attributes.LayerIndex) then 
+                    objectIds.Add(object.Id)
+                    if printLog then 
+                        incr count.[object.ShortDescription(true)]
+            if printLog then 
+                let mutable tx = ""
+                let typesk = Seq.length count.Items
+                if typesk > 0 then  
+                    tx <- "No visible objects found. "
+                elif typesk = 1  then      
+                    for k,v in count.Items do
+                        tx <- sprintf " %d visible %s found" (!v) k
+                else
+                    tx <- sprintf "%d visible objects found of following types:" objectIds.Count
+                    for k,v in count.Items do
+                        tx <- sprintf "%s%s    %d: %s" tx Environment.NewLine (!v) k 
+                RhinoApp.WriteLine tx
+            objectIds
+
+
+    [<EXT>]
+    ///<summary>Returns identifier of the first object in the document. The first
+    ///  object is the last object created by the user</summary>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select the object.  If omitted, the object is not selected</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///Include light objects.  If omitted, light objects are not returned</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///Include grips objects.  If omitted, grips objects are not returned</param>
+    ///<returns>(Guid) The identifier of the object </returns>
+    static member FirstObject(      [<OPT;DEF(false)>]select:bool,
+                                    [<OPT;DEF(false)>]includeLights:bool,
+                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid =
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.IncludeLights <- includeLights
+            it.IncludeGrips <- includeGrips
+            let e = Doc.Objects.GetObjectList(it).GetEnumerator()
+            if not <| e.MoveNext() then failwithf "FirstObject not found"
+            let object = e.Current
+            if isNull object then failwithf "FirstObject not found(null)"
+            if select then object.Select(true) |> ignore
+            object.Id
+
 
 
 
@@ -447,7 +480,7 @@ module ExtensionsSelection =
     ///Maximum count of objects allowed to be selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
-    static member GetObjectsAndRemeber( message:string,
+    static member GetObjectsAndRemember( message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
                                         [<OPT;DEF(true)>]preselect:bool,
@@ -458,7 +491,7 @@ module ExtensionsSelection =
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         if Internals.sticky.ContainsKey message then
             try Some(Internals.sticky.[message] :?> ResizeArray<Guid>)
-            with |_ -> failwithf "found stored obejcts for '%s' but cast to ResizeArray<Guid> failed" message
+            with |_ -> failwithf "GetObjectsAndRemember found stored obejcts for '%s'. but cast to ResizeArray<Guid> failed" message
         else
             match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,customFilter) with
             |Some ids ->
