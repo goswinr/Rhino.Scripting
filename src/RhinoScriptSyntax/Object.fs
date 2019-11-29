@@ -518,12 +518,33 @@ module ExtensionsObject =
 
 
     [<EXT>]
-    ///<summary>Returns a short text description of an object</summary>
+    ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...)</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object </returns>
     static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
+
+
+
+    [<EXT>]
+    ///<summary>Returns the count for each object type in a List of objects</summary>
+    ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
+    ///<returns>(string) A short text description of the object </returns>
+    static member ObjectDescription(objectIds:Guid seq) : string =
+        let count =  Seq.countBy (fun id -> RhinoScriptSyntax.CoerceRhinoObject(id).ShortDescription(true)) objectIds
+        let mutable tx = ""
+        let typesk = Seq.length count        
+        if typesk > 0 then  
+            tx <- "zero objects"
+        elif typesk = 1  then      
+            for typ,k in count  do
+                tx <- sprintf " %d: %s" k typ
+        else
+            tx <- sprintf "%d objects of following types:" (Seq.length objectIds)
+            for typ,k  in count |> Seq.sortBy snd do
+                tx <- sprintf "%s%s    %d: %s" tx Environment.NewLine  k typ
+        tx
 
 
     [<EXT>]
@@ -536,7 +557,6 @@ module ExtensionsObject =
         else
             let groupindices = rhinoobject.GetGroupList()
             resizeArray { for index in groupindices do yield Doc.Groups.GroupName(index) }
-
 
 
     [<EXT>]

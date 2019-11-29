@@ -83,20 +83,7 @@ module ExtensionsSelection =
             let objectids = ResizeArray()             
             for object in e do
                 if select then object.Select(true) |> ignore                
-            if objectids.Count > 0 && select then Doc.Views.Redraw()
-            if printLog then 
-                let mutable tx = ""
-                let typesk = Seq.length count.Items
-                if typesk > 0 then  
-                    tx <- "No objects found. "
-                elif typesk = 1  then      
-                    for k,v in count.Items do
-                        tx <- sprintf " %d objects of type %s found" (!v) k
-                else
-                    tx <- sprintf "%d objects found of following types:" objectIds.Count
-                    for k,v in count.Items do
-                        tx <- sprintf "%s%s    %d: %s" tx Environment.NewLine (!v) k 
-                RhinoApp.WriteLine tx
+            if objectids.Count > 0 && select then Doc.Views.Redraw()           
             objectids
 
     [<EXT>]
@@ -105,7 +92,7 @@ module ExtensionsSelection =
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
-    ///<param name="printLog">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
@@ -116,7 +103,7 @@ module ExtensionsSelection =
     ///Include grips objects</param>  
     ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible </returns>
     static member VisibleObjects(   [<OPT;DEF(0)>]filter:int,
-                                    [<OPT;DEF(true)>]printLog:bool,
+                                    [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
                                     [<OPT;DEF(true)>]includeLockedObjects:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
@@ -134,26 +121,12 @@ module ExtensionsSelection =
             it.ReferenceObjects <- includeReferences            
             it.ObjectTypeFilter <- RhinoScriptSyntax.FilterHelper(filter)
             let e = Doc.Objects.GetObjectList(it)
-            let objectIds = ResizeArray()
-            let count = DefaultDict(fun () -> ref 0)
+            let objectIds = ResizeArray()            
             for object in e do  
                 if Vis.Contains(object.Attributes.LayerIndex) then 
-                    objectIds.Add(object.Id)
-                    if printLog then 
-                        incr count.[object.ShortDescription(true)]
-            if printLog then 
-                let mutable tx = ""
-                let typesk = Seq.length count.Items
-                if typesk > 0 then  
-                    tx <- "No visible objects found. "
-                elif typesk = 1  then      
-                    for k,v in count.Items do
-                        tx <- sprintf " %d visible %s found" (!v) k
-                else
-                    tx <- sprintf "%d visible objects found of following types:" objectIds.Count
-                    for k,v in count.Items do
-                        tx <- sprintf "%s%s    %d: %s" tx Environment.NewLine (!v) k 
-                RhinoApp.WriteLine tx
+                    objectIds.Add(object.Id)                    
+            if printCount then
+                RhinoApp.WriteLine ("VisibleObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds
 
 
@@ -385,11 +358,12 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects.  If False, the objects that are
     ///  picked are not selected</param>
-    ///<param name="objects">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
+    ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
     ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
@@ -397,9 +371,10 @@ module ExtensionsSelection =
                                     [<OPT;DEF(true)>]group:bool,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq,
+                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq,
                                     [<OPT;DEF(1)>]minimumCount:int,
                                     [<OPT;DEF(0)>]maximumCount:int,
+                                    [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
@@ -407,8 +382,8 @@ module ExtensionsSelection =
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
-            if notNull objects then
-                let s = System.Collections.Generic.HashSet(objects)
+            if notNull objectsToSelectFrom then
+                let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
                 go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
             elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
@@ -431,6 +406,7 @@ module ExtensionsSelection =
                         rc.Add(objref.ObjectId)
                         let obj = objref.Object()
                         if select && notNull obj then obj.Select(select) |> ignore
+                    if printCount then RhinoApp.WriteLine ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                     Some rc
             } |> Async.RunSynchronously
 
@@ -478,6 +454,7 @@ module ExtensionsSelection =
     ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
     static member GetObjectsAndRemember( message:string,
@@ -488,12 +465,14 @@ module ExtensionsSelection =
                                         [<OPT;DEF(null:Guid seq)>]objects:Guid seq,
                                         [<OPT;DEF(1)>]minimumCount:int,
                                         [<OPT;DEF(0)>]maximumCount:int,
+                                        [<OPT;DEF(true)>]printCount:bool,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
-        if Internals.sticky.ContainsKey message then
-            try Some(Internals.sticky.[message] :?> ResizeArray<Guid>)
-            with |_ -> failwithf "GetObjectsAndRemember found stored obejcts for '%s'. but cast to ResizeArray<Guid> failed" message
-        else
-            match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,customFilter) with
+        try 
+            let objectIds = Internals.sticky.[message] :?> ResizeArray<Guid>
+            if printCount then  RhinoApp.WriteLine ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
+            Some objectIds
+        with | _ -> 
+            match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,printCount,customFilter) with
             |Some ids ->
                 Internals.sticky.[message] <- ids
                 Some ids
@@ -518,7 +497,8 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, the objects that are
     ///  picked are not selected</param>
-    ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
     ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
     ///  [n][0]  identifier of the object
@@ -531,15 +511,16 @@ module ExtensionsSelection =
                                     [<OPT;DEF(true)>]group:bool,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
+                                    [<OPT;DEF(true)>]printCount:bool,
+                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
-            if notNull objects then
-                let s = System.Collections.Generic.HashSet(objects)
+            if notNull objectsToSelectFrom then
+                let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
                 go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
             go.SetCommandPrompt(message)
             let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
@@ -565,6 +546,13 @@ module ExtensionsSelection =
                         rc.Add( (objectId, presel, selmethod, point, viewname) )
                         let obj = objref.Object()
                         if select && notNull obj then obj.Select(select) |> ignore
+                    if printCount then 
+                        rc 
+                        |> ResizeArray.map ( fun (id,_,_,_,_) -> id )
+                        |> RhinoScriptSyntax.ObjectDescription
+                        |> (+) "GetObjectsEx got " 
+                        |> RhinoApp.WriteLine 
+
                     Some rc
             } |> Async.RunSynchronously
 
