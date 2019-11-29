@@ -5926,8 +5926,13 @@ Copy the object</param>
 <param name="objectId">(Guid) Identifier of an object</param>
 <returns>(string ResizeArray) list of group names on success</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectDescription.Static(System.Collections.Generic.IEnumerable{System.Guid})">
+<summary>Returns the count for each object type in a List of objects</summary>
+<param name="objectIds">(Guid seq) Identifiers of objects</param>
+<returns>(string) A short text description of the object </returns>
+</member>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectDescription.Static(System.Guid)">
-<summary>Returns a short text description of an object</summary>
+<summary>Returns a description of the object type (e.g. Line, Surface, Text,...)</summary>
 <param name="objectId">(Guid) Identifier of an object</param>
 <returns>(string) A short text description of the object </returns>
 </member>
@@ -6739,7 +6744,7 @@ A prompt message</param>
 Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
 <returns>(Point3d ResizeArray) Option of LIst of 3d points</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectsEx.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid})">
+<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectsEx.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid})">
 <summary>Prompts user to pick, or select one or more objects</summary>
 <param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
 A prompt or message</param>
@@ -6756,7 +6761,8 @@ Allow for the selection of pre-selected objects</param>
 <param name="select">(bool) Optional, Default Value: <c>false</c>
 Select the picked objects. If False, the objects that are
   picked are not selected</param>
-<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
   allowed to be selected</param>
 <returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
   [n][0]  identifier of the object
@@ -6765,7 +6771,7 @@ Select the picked objects. If False, the objects that are
   [n][3]  selection point
   [n][4]  name of the view selection was made</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectsAndRemember.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid},System.Int32,System.Int32,Rhino.Input.Custom.GetObjectGeometryFilter)">
+<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectsAndRemember.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid},System.Int32,System.Int32,System.Boolean,Rhino.Input.Custom.GetObjectGeometryFilter)">
 <summary>Returns the same objects as in the last user interaction with the same prompt message
  If none found Prompts user to pick or select one or more objects and remembers them.</summary>
 <param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
@@ -6808,10 +6814,11 @@ Select the picked objects.  If False, the objects that are
 Minimum count of objects allowed to be selected</param>
 <param name="maximumCount">(int) Optional, Default Value: <c>0</c>
 Maximum count of objects allowed to be selected</param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
 <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
 <returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjects.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid},System.Int32,System.Int32,Rhino.Input.Custom.GetObjectGeometryFilter)">
+<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjects.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid},System.Int32,System.Int32,System.Boolean,Rhino.Input.Custom.GetObjectGeometryFilter)">
 <summary>Prompts user to pick or select one or more objects</summary>
 <param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
 A prompt or message</param>
@@ -6848,11 +6855,12 @@ Allow for the selection of pre-selected objects</param>
 <param name="select">(bool) Optional, Default Value: <c>false</c>
 Select the picked objects.  If False, the objects that are
   picked are not selected</param>
-<param name="objects">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
+<param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
 <param name="minimumCount">(int) Optional, Default Value: <c>1</c>
 Minimum count of objects allowed to be selected</param>
 <param name="maximumCount">(int) Optional, Default Value: <c>0</c>
 Maximum count of objects allowed to be selected</param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
 <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
 <returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
 </member>
@@ -6932,7 +6940,7 @@ Include grips objects.  If omitted, grips objects are not returned</param>
 The type(s) of geometry (points, curves, surfaces, meshes,...)
   that can be selected. Object types can be added together to filter
   several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
-<param name="printLog">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
 <param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
 Include refrence objects such as work session objects</param>
 <param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
