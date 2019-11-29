@@ -1,11 +1,15 @@
 ﻿namespace Rhino.Scripting
-open System
 
+open System
 open Rhino.Runtime
+
+type internal OPT = Runtime.InteropServices.OptionalAttribute
+type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
+type internal EXT = Runtime.CompilerServices.ExtensionAttribute
 
 [<AutoOpen>]
 module ActiceDocument =
-
+    
 
     /// the current active Rhino document (= the file currently open)
     let mutable Doc = 
@@ -31,6 +35,15 @@ module ActiceDocument =
             let o = Doc.Objects.FindId(g) 
             if isNull o then sprintf "Guid does not exits in current Rhino Document"
             else o.ShortDescription(false)
+
+    ///so that python range expressions dont need top be translated to F#
+    let internal range(l) = seq{0..(l-1)} 
+
+    ///if first value is 0.0 return second else first
+    let internal ifZero1 a b = if a = 0.0 then b else a
+    
+    ///if second value is 0.0 return first else second
+    let internal ifZero2 a b = if b = 0.0 then a else b
 
     do
         if HostUtils.RunningInRhino then 

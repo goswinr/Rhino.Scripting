@@ -1,10 +1,11 @@
 namespace Rhino.Scripting
 
+open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
-open Rhino.Scripting.UtilMath
+open FsEx.Util
+open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 [<AutoOpen>]
 module ExtensionsHatch =

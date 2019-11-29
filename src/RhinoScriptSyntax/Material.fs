@@ -1,11 +1,13 @@
 namespace Rhino.Scripting
 
+open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
-open Rhino.Scripting.UtilMath
+open FsEx.Util
+open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
+
 [<AutoOpen>]
 module ExtensionsMaterial =
 
@@ -26,8 +28,6 @@ module ExtensionsMaterial =
             layer.RenderMaterialIndex <- materialindex
             Doc.Views.Redraw()
             materialindex
-
-
 
     [<EXT>]
     ///<summary>Adds material to an object and returns the new material's index. If the

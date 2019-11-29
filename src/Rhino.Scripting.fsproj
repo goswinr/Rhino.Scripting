@@ -18,16 +18,7 @@
     <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>
   </PropertyGroup>
   
-  <ItemGroup>    
-    <Compile Include="00_ResizeArray.fsi" />    
-    <Compile Include="00_ResizeArray.fs" />    
-    <Compile Include="01_Util.fs" />    
-    <Compile Include="02_ToNiceString.fs" />    
-    <Compile Include="02_ComputationalExpressions.fs" />
-    <Compile Include="02_TypeExtensions.fs" />
-    <Compile Include="03_StringModule.fs" />  
-    <Compile Include="03_SeqModuleExtensions.fs" />
-    <Compile Include="05_DefaultDict.fs" />
+  <ItemGroup>
     <Compile Include="13_RhinoTypeExtensions.fs" />
     <Compile Include="19_ActiveDoc.fs" />
     <Compile Include="RhinoScriptSyntax/50_RhinoScriptSyntax.fs" />
@@ -60,6 +51,11 @@
   </ItemGroup>
 
   <ItemGroup>
+  
+    <Reference Include="FsEx">
+      <HintPath>..\..\FsEx\src\bin\Release\net45\FsEx.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   
     <Reference Include="RhinoCommon">
       <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>

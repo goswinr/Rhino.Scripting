@@ -1,9 +1,10 @@
 namespace Rhino.Scripting
 
+open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
+open FsEx.Util
 open Rhino.Scripting.ActiceDocument
 
 [<AutoOpen>]

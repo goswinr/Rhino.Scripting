@@ -1,11 +1,12 @@
 namespace Rhino.Scripting
 
+open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
-open Rhino.Scripting.Compare
-open Rhino.Scripting.UtilMath
+open FsEx.Util
+open FsEx.UtilMath
+open FsEx.CompareOperators
 open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
 

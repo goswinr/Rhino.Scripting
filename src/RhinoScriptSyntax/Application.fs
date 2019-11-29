@@ -3,7 +3,7 @@ namespace Rhino.Scripting
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
+open FsEx.Util
 open Rhino.Scripting.ActiceDocument
 //open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.ApplicationSettings

@@ -4,11 +4,11 @@ namespace Rhino.Scripting
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
-open Rhino.Scripting.UtilMath
-open Rhino.Scripting.ActiceDocument 
-open Rhino.Scripting.TypeExtensions
+open FsEx.Util
+open FsEx.UtilMath
+open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
+open FsEx
 
 /// An Integer Enum of Object types to be use in object selection functions
 /// Don't create an instance, use the instance in RhinoScriptSyntax.Filter

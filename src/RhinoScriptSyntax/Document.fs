@@ -3,8 +3,8 @@ namespace Rhino.Scripting
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Util
-open Rhino.Scripting.UtilMath
+open FsEx.Util
+open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open Microsoft.FSharp.Core.LanguagePrimitives
 open System.IO
