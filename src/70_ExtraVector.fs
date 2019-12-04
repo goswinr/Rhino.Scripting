@@ -210,8 +210,8 @@ module ExtrasVector =
                     v.UnitizedUnchecked
 
         
-        ///auto detects points from closed polylines and loops them
-        ///distance must have exact length or be singelton or empty
+        ///Auto detects points from closed polylines and loops them
+        ///Distance must have exact length or be singelton or empty
         [<Extension>]
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistances: float seq, 
@@ -254,16 +254,16 @@ module ExtrasVector =
                     elif loop      then pointk
                     else                pointk   // not -1 !!        
                                             
-                let offVar, offDists = 
-                    if   lenDist = 0 then               false, Array.create distsNeeded 0.0
-                    elif lenDist = 1 then               false, Array.create distsNeeded offDists0.[0]
-                    elif lenDist = distsNeeded then     true , offDists0
+                let  offDists = 
+                    if   lenDist = 0 then             Array.create distsNeeded 0.0
+                    elif lenDist = 1 then             Array.create distsNeeded offDists0.[0]
+                    elif lenDist = distsNeeded then   offDists0
                     else failwithf"OffsetPoints: offsetDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeeded lastIsFirst loop
                                                 
-                let normVar, normDists = 
-                    if   lenDistNorm = 0 then                   false, Array.create distsNeededNorm 0.0
-                    elif lenDistNorm = 1 then                   false, Array.create distsNeededNorm normDists0.[0]
-                    elif lenDistNorm = distsNeededNorm then     true , normDists0
+                let normDists = 
+                    if   lenDistNorm = 0 then                 Array.create distsNeededNorm 0.0
+                    elif lenDistNorm = 1 then                 Array.create distsNeededNorm normDists0.[0]
+                    elif lenDistNorm = distsNeededNorm then   normDists0
                     else failwithf "OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop
                                                 
                                            
