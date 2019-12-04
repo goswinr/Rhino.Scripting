@@ -325,9 +325,8 @@ module ExtensionsCurve =
 
 
     [<EXT>]
-    ///<summary>Adds a polyline curve to the current model</summary>
-    ///<param name="points">(Point3d seq) List of 3D points. Duplicate, consecutive points will be
-    ///  removed. The list must contain at least two points. If the
+    ///<summary>Adds a polyline curve</summary>
+    ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
     ///  list contains less than four points, then the first point and
     ///  last point must be different</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
@@ -338,7 +337,25 @@ module ExtensionsCurve =
         if rc = Guid.Empty then failwithf "Unable to add polyline to document.  points:'%A' " points
         Doc.Views.Redraw()
         rc
-
+    
+    [<EXT>]
+    ///<summary>Adds a closed polyline curve , 
+    ///if the endpoint is already closer than Doc.ModelAbsoluteTolerance to the start it wil be set to start point
+    // else an additional point will be added with the same position as start </summary>
+    ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points. </param>
+    ///<returns>(Guid) objectId of the new curve object</returns>
+    static member AddPolylineClosed(points:Point3d seq) : Guid =
+        let pl = Polyline(points)
+        if pl.Count < 3 then failwithf "Unable to add closed polyline to document.  points:'%A' " points.ToNiceString        
+        if (pl.First-pl.Last).Length <= Doc.ModelAbsoluteTolerance then 
+            pl.[pl.Count-1] <- pl.First
+        else
+            pl.Add pl.First
+        //pl.DeleteShortSegments(Doc.ModelAbsoluteTolerance) |>ignore
+        let rc = Doc.Objects.AddPolyline(pl)
+        if rc = Guid.Empty then failwithf "Unable to add closed polyline to document.  points:'%A' " points
+        Doc.Views.Redraw()
+        rc
 
     [<EXT>]
     ///<summary>Add a rectangular curve to the document</summary>
