@@ -352,4 +352,48 @@ module ExtrasVector =
                                         
              
         
-
+        [<Extension>]
+        static member FreeFillet(a:Line, b:Line, rad:float):NurbsCurve =
+            //TODO verify that both lines lie in the same || in paralell planes
+            let va = RhinoScriptSyntax.VectorUnitize(a.To-a.From)
+            let vb = RhinoScriptSyntax.VectorUnitize(b.To-b.From)
+            let dot = va*vb
+            if abs(dot) > 0.999 then
+                failwithf "FreeFillet: lines colinear"
+            let alphaD = Math.Acos(dot)
+            let alpha = alphaD*0.5
+            let beta  = Math.PI*0.5 - alpha
+            let trim = tan(beta) * rad
+            let pa = a.From+va*trim
+            let pb = b.From+vb*trim
+            let mutable m  = (a.From+b.From)*0.5
+            
+            if alphaD > Math.PI * 0.49999 then // bigger  than 90 degrees
+                let midw = Math.Sin(alpha)
+                let knots= [| 0. ; 0. ; 1. ; 1.|]
+                let weights = [|1.; midw; 1.|]
+                let pts = [| pa; m; pb |]
+                //RhinoScriptSyntax.AddPolyline(pts)
+                RhinoScriptSyntax.CreateNurbsCurve(pts,knots,2,weights)
+            
+            else // smaller than 90 degrees, 2 arcs
+                let mv = RhinoScriptSyntax.VectorUnitize(va+vb)
+                let arcmid = mv * (Math.Sqrt(trim*trim + rad*rad) - rad)
+                let betaH = beta*0.5
+                let trim2 = trim - rad * tan(betaH)
+                let ma,mb =
+                    if false then //stay in plane ?????????
+                        let rel = trim2/trim
+                        m + (pa-m)*rel ,
+                        m + (pb-m)*rel
+                    else // making S curve, this would make a jumpe at 90 && bigger wher only 3 points are needed ???
+                        a.From + va *trim2 ,
+                        b.From + vb *trim2
+                let gamma = Math.PI*0.5 - betaH
+                let midw= sin(gamma)
+                let knots= [| 0. ; 0. ; 1. ; 1. ; 2. ; 2.|]
+                let weights = [|1. ; midw ; 1. ; midw ; 1.|]
+                m  <- m + arcmid
+                let pts = [|pa; ma; m; mb; pb|]
+                //RhinoScriptSyntax.AddPolyline(pts)
+                RhinoScriptSyntax.CreateNurbsCurve(pts,knots,2,weights)
