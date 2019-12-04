@@ -5,19 +5,18 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open Microsoft.FSharp.Core.LanguagePrimitives
-open System.Collections.Generic
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 
 [<AutoOpen>]
 module ExtensionsCurve =
 
-
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds an arc curve to the document</summary>
     ///<param name="plane">(Plane) Plane on which the arc will lie. The origin of the plane will be
     ///  the center point of the arc. x-axis of the plane defines the 0 angle
@@ -34,7 +33,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a 3-point arc curve to the document</summary>
     ///<param name="start">(Point3d) Start of the arc</param>
     ///<param name="ende">(Point3d) Endpoint of the arc</param>
@@ -48,7 +47,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds an arc curve, created from a start point, a start direction, and an
     ///  end point, to the document</summary>
     ///<param name="start">(Point3d) The starting point of the arc</param>
@@ -63,7 +62,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Makes a curve blend between two curves</summary>
     ///<param name="curves">(Guid * Guid) List of two curves</param>
     ///<param name="parameters">(float * float) List of two curve parameters defining the blend end points</param>
@@ -85,7 +84,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a circle curve to the document</summary>
     ///<param name="plane">(Plane) Plane on which the circle will lie. If a point is
     ///  passed, this will be the center of the circle on the active construction plane</param>
@@ -99,7 +98,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a 3-point circle curve to the document</summary>
     ///<param name="first">(Point3d) First point on the circle'</param>
     ///<param name="second">(Point3d) Second point on the circle'</param>
@@ -113,7 +112,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a control points curve object to the document</summary>
     ///<param name="points">(Point3d seq) A list of points</param>
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>
@@ -128,7 +127,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds an elliptical curve to the document</summary>
     ///<param name="plane">(Plane) The plane on which the ellipse will lie. The origin of
     ///  the plane will be the center of the ellipse</param>
@@ -143,7 +142,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a 3-point elliptical curve to the document</summary>
     ///<param name="center">(Point3d) Center point of the ellipse</param>
     ///<param name="second">(Point3d) End point of the x axis</param>
@@ -157,7 +156,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a fillet curve between two curve objects</summary>
     ///<param name="curveA">(Guid) Identifier of the first curve object</param>
     ///<param name="curveB">(Guid) Identifier of the second curve object</param>
@@ -194,7 +193,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds an interpolated curve object that lies on a specified
     ///  surface.  Note, this function will not create periodic curves,
     ///  but it will create closed curves</summary>
@@ -213,7 +212,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds an interpolated curve object based on surface parameters,
     ///  that lies on a specified surface. Note, this function will not
     ///  create periodic curves, but it will create closed curves</summary>
@@ -232,7 +231,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds an interpolated curve object to the document. Options exist to make
     ///  a periodic curve or to specify the tangent at the endpoints. The resulting
     ///  curve is a non-rational NURBS curve of the specified degree</summary>
@@ -270,7 +269,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a line curve to the current model</summary>
     ///<param name="start">(Point3d) Startpoint of the line</param>
     ///<param name="ende">(Point3d) Endpoint of the line</param>
@@ -282,7 +281,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a NURBS curve object to the document</summary>
     ///<param name="points">(Point3d seq) A list containing 3D control points</param>
     ///<param name="knots">(float seq) Knot values for the curve. The number of elements in knots must
@@ -324,7 +323,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a polyline curve</summary>
     ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
     ///  list contains less than four points, then the first point and
@@ -338,7 +337,7 @@ module ExtensionsCurve =
         Doc.Views.Redraw()
         rc
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a closed polyline curve , 
     ///if the endpoint is already closer than Doc.ModelAbsoluteTolerance to the start it wil be set to start point
     // else an additional point will be added with the same position as start </summary>
@@ -357,7 +356,7 @@ module ExtensionsCurve =
         Doc.Views.Redraw()
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Add a rectangular curve to the document</summary>
     ///<param name="plane">(Plane) Plane on which the rectangle will lie</param>
     ///<param name="width">(float) Width of rectangle as measured along the plane's
@@ -374,7 +373,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a spiral or helical curve to the document</summary>
     ///<param name="point0">(Point3d) Helix axis start point or center of spiral</param>
     ///<param name="point1">(Point3d) Helix axis end point or point normal on spiral plane</param>
@@ -397,7 +396,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Add a curve object based on a portion, or interval of an existing curve
     ///  object. Similar in operation to Rhino's SubCrv command</summary>
     ///<param name="curveId">(Guid) Identifier of a closed planar curve object</param>
@@ -414,7 +413,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the angle of an arc curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional,
@@ -428,7 +427,7 @@ module ExtensionsCurve =
         (!arc).AngleDegrees
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the center point of an arc curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -441,7 +440,7 @@ module ExtensionsCurve =
         (!arc).Center
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the mid point of an arc curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -454,7 +453,7 @@ module ExtensionsCurve =
         (!arc).MidPoint
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the radius of an arc curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -468,7 +467,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the center point of a circle curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -481,7 +480,7 @@ module ExtensionsCurve =
         (!circle).Center
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the center plane of a circle curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -497,7 +496,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the circumference of a circle curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -510,7 +509,7 @@ module ExtensionsCurve =
         (!circle).Circumference
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the radius of a circle curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -523,7 +522,7 @@ module ExtensionsCurve =
         (!circle).Radius
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Closes an open curve object by making adjustments to the end points so
     ///  they meet at a point</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
@@ -541,7 +540,7 @@ module ExtensionsCurve =
             rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
     ///  planar curve</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
@@ -560,7 +559,7 @@ module ExtensionsCurve =
             int(orientation)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Convert curve to a polyline curve</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>5.0</c>
@@ -593,7 +592,7 @@ module ExtensionsCurve =
                 objectId
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the point on the curve that is a specified arc length
     ///  from the start of the curve</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
@@ -624,7 +623,7 @@ module ExtensionsCurve =
         else failwithf "Unable to curveArcLengthPoint %A, length:%f, fromStart:%b" curveId length fromStart
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns area of closed planar curves. The results are based on the
     ///  current drawing units</summary>
     ///<param name="curveId">(Guid) The identifier of a closed, planar curve object</param>
@@ -637,7 +636,7 @@ module ExtensionsCurve =
         mp.Area
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns area centroid of closed, planar curves. The results are based
     ///  on the current drawing units</summary>
     ///<param name="curveId">(Guid) The identifier of a closed, planar curve object</param>
@@ -650,7 +649,7 @@ module ExtensionsCurve =
         mp.Centroid
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of a curve object's annotation arrows</summary>
     ///<param name="curveId">(Guid) Identifier of a curve</param>
     ///<returns>(int) The current annotation arrow style
@@ -668,7 +667,7 @@ module ExtensionsCurve =
         elif rc= DocObjects.ObjectDecoration.BothArrowhead then 3
         else -1
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables a curve object's annotation arrows</summary>
     ///<param name="curveId">(Guid) Identifier of a curve</param>
     ///<param name="arrowStyle">(int) The style of annotation arrow to be displayed.
@@ -695,7 +694,7 @@ module ExtensionsCurve =
         else
            failwithf "curve Arrow style %d invalid" arrowStyle
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables multiple curve objects's annotation arrows</summary>
     ///<param name="curveIds">(Guid seq) Identifier of multiple curve</param>
     ///<param name="arrowStyle">(int) The style of annotation arrow to be displayed.
@@ -723,7 +722,7 @@ module ExtensionsCurve =
                failwithf "curve Arrow style %d invalid" arrowStyle
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the difference between two closed, planar curves and
     ///  adds the results to the document. Note, curves must be coplanar</summary>
     ///<param name="curveA">(Guid) Identifier of the first curve object</param>
@@ -750,7 +749,7 @@ module ExtensionsCurve =
             failwithf "Unable to add curve to document.  curveA:'%A' curveB:'%A' " curveA curveB
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of two closed, planar curves and adds
     ///  the results to the document. Note, curves must be coplanar</summary>
     ///<param name="curveA">(Guid) Identifier of the first curve object</param>
@@ -777,7 +776,7 @@ module ExtensionsCurve =
             failwithf "Unable to add curve to document.  curveA:'%A' curveB:'%A' " curveA curveB
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculate the union of two or more closed, planar curves and
     ///  add the results to the document. Note, curves must be coplanar</summary>
     ///<param name="curveIds">(Guid seq) List of two or more close planar curves identifiers</param>
@@ -801,7 +800,7 @@ module ExtensionsCurve =
         curves
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Intersects a curve object with a brep object. Note, unlike the
     ///  CurveSurfaceIntersection function, this function works on trimmed surfaces</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
@@ -832,7 +831,7 @@ module ExtensionsCurve =
         curves, points
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the 3D point locations on two objects where they are closest to
     ///  each other. Note, this function provides similar functionality to that of
     ///  Rhino's ClosestPt command</summary>
@@ -859,7 +858,7 @@ module ExtensionsCurve =
         else failwithf "curveClosestObject failed  curveId:'%A' curveIds:'%A'" curveId curveIds
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns parameter of the point on a curve that is closest to a test point</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
@@ -873,7 +872,7 @@ module ExtensionsCurve =
         if not <| rc then failwithf "curveClosestParameter failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
         !t
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the point on a curve that is closest to a test point</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
@@ -889,7 +888,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the 3D point locations calculated by contouring a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="startPoint">(Point3d) 3D starting point of a center line</param>
@@ -903,7 +902,7 @@ module ExtensionsCurve =
         curve.DivideAsContour( startPoint, endPoint, interval)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the curvature of a curve at a parameter. See the Rhino help for
     ///  details on curve curvature</summary>
     ///<param name="curveId">(Guid) Identifier of the curve</param>
@@ -929,7 +928,7 @@ module ExtensionsCurve =
         point, tangent, center, radius, cv
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates intersection of two curve objects</summary>
     ///<param name="curveA">(Guid) Identifier of the first curve object</param>
     ///<param name="curveB">(Guid) Optional, Identifier of the second curve object. If omitted, then a
@@ -990,7 +989,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the degree of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1000,7 +999,7 @@ module ExtensionsCurve =
         curve.Degree
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the minimum and maximum deviation between two curve objects</summary>
     ///<param name="curveA">(Guid) first Curve</param>
     ///<param name="curveB">(Guid) second Curve</param>
@@ -1021,7 +1020,7 @@ module ExtensionsCurve =
             maxa, maxb, maxd, mina, minb, mind
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the dimension of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="segmentIndex">(int) Optional,
@@ -1032,7 +1031,7 @@ module ExtensionsCurve =
         curve.Dimension
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Tests if two curve objects are generally in the same direction or if they
     ///  would be more in the same direction if one of them were flipped. When testing
     ///  curve directions, both curves must be either open or closed - you cannot test
@@ -1046,7 +1045,7 @@ module ExtensionsCurve =
         Curve.DoDirectionsMatch(curve0, curve1)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Search for a derivatitive, tangent, or curvature discontinuity in
     ///  a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of curve object</param>
@@ -1076,7 +1075,7 @@ module ExtensionsCurve =
         points
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the domain of a curve object
     ///  as an indexable object with two elements</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1087,7 +1086,7 @@ module ExtensionsCurve =
         curve.Domain
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the edit, or Greville, points of a curve object.
     ///  For each curve control point, there is a corresponding edit point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1103,7 +1102,7 @@ module ExtensionsCurve =
         nc.GrevillePoints()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the end point of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1113,7 +1112,7 @@ module ExtensionsCurve =
         curve.PointAtEnd
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Find points at which to cut a pair of curves so that a fillet of a
     ///  specified radius fits. A fillet point is a pair of points (point0, point1)
     ///  such that there is a circle of radius tangent to curve curve0 at point0 and
@@ -1175,7 +1174,7 @@ module ExtensionsCurve =
         curve0.PointAt(a), curve0.PointAt(b), pl
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the plane at a parameter of a curve. The plane is based on the
     ///  tangent and curvature vectors at a parameter</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1199,7 +1198,7 @@ module ExtensionsCurve =
         else failwithf  "curveFrame failed.  curveId:'%A' parameter:'%A' segmentIndex:'%A'" curveId parameter segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the knot count of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment if `curveId` identifies a polycurve</param>
@@ -1211,7 +1210,7 @@ module ExtensionsCurve =
         nc.Knots.Count
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the knots, or knot vector, of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1224,7 +1223,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the length of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1241,7 +1240,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the mid point of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1253,7 +1252,7 @@ module ExtensionsCurve =
         else failwithf "curveMidPoint failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the normal direction of the plane in which a planar curve object lies</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment if curveId identifies a polycurve</param>
@@ -1267,7 +1266,7 @@ module ExtensionsCurve =
         else failwithf "curveNormal failed. curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Converts a curve parameter to a normalized curve parameter;
     ///  one that ranges between 0-1</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1278,7 +1277,7 @@ module ExtensionsCurve =
         curve.Domain.NormalizedParameterAt(parameter)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Converts a normalized curve parameter to a curve parameter;
     ///  one within the curve's domain</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1289,7 +1288,7 @@ module ExtensionsCurve =
         curve.Domain.ParameterAt(parameter)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the perpendicular plane at a parameter of a curve. The result
     ///  is relatively parallel (zero-twisting) plane</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1301,7 +1300,7 @@ module ExtensionsCurve =
         if rc then  plane else failwithf "curvePerpFrame failed. curveId:'%A' parameter:'%f'" curveId parameter
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the plane in which a planar curve lies. Note, this function works
     ///  only on planar curves</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -1316,7 +1315,7 @@ module ExtensionsCurve =
         else failwithf "curvePlane failed. curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the control points count of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment if `curveId` identifies a polycurve</param>
@@ -1328,7 +1327,7 @@ module ExtensionsCurve =
         else failwithf "curvePointCount failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the control points, or control vertices, of a curve object.
     ///  If the curve is a rational NURBS curve, the euclidean control vertices
     ///  are returned</summary>
@@ -1342,7 +1341,7 @@ module ExtensionsCurve =
         resizeArray { for i = 0 to nc.Points.Count-1 do yield nc.Points.[i].Location }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the radius of curvature at a point on a curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
@@ -1358,7 +1357,7 @@ module ExtensionsCurve =
         else failwithf "curveRadius failed.  curveId:'%A' testPoint:'%A' segmentIndex:'%A'" curveId testPoint segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adjusts the seam, or start/end, point of a closed curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="parameter">(float) The parameter of the new start/end point.
@@ -1380,7 +1379,7 @@ module ExtensionsCurve =
                 false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the start point of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1390,7 +1389,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.PointAtStart
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets the start point of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="point">(Point3d) New start point</param>
@@ -1403,7 +1402,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates intersection of a curve object with a surface object.
     ///  Note, this function works on the untrimmed portion of the surface</summary>
     ///<param name="curveId">(Guid) The identifier of the first curve object</param>
@@ -1469,7 +1468,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a 3D vector that is the tangent to a curve at a parameter</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
@@ -1484,7 +1483,7 @@ module ExtensionsCurve =
             failwithf "curveTangent failed.  curveId:'%A' parameter:'%A' segmentIndex:'%A'" curveId parameter segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns list of weights that are assigned to the control points of a curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1499,7 +1498,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a curve object into a specified number of segments</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segments">(int) The number of segments</param>
@@ -1512,7 +1511,7 @@ module ExtensionsCurve =
         !pts
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a curve object into a specified number of segments</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segments">(int) The number of segments</param>
@@ -1524,7 +1523,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a curve such that the linear distance between the points is equal</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="distance">(float) Linear distance between division points</param>
@@ -1541,7 +1540,7 @@ module ExtensionsCurve =
         //tvals
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a curve object into segments of a specified length</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="length">(float) The length of each segment</param>
@@ -1552,7 +1551,7 @@ module ExtensionsCurve =
         if isNull rc then  failwithf "divideCurveLength failed.  curveId:'%A' length:'%A'" curveId length
         ResizeArray.init rc.Length (fun i-> curve.PointAt(rc.[i]))
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a curve object into segments of a specified length</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="length">(float) The length of each segment</param>
@@ -1564,7 +1563,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the center point of an elliptical-shaped curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<returns>(Point3d) The 3D center point of the ellipse </returns>
@@ -1575,7 +1574,7 @@ module ExtensionsCurve =
         ellipse.Plane.Origin
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the quadrant points of an elliptical-shaped curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse</returns>
@@ -1589,7 +1588,7 @@ module ExtensionsCurve =
         (origin-xaxis, origin+xaxis, origin-yaxis, origin+yaxis)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Evaluates a curve at a parameter and returns a 3D point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="t">(float) The parameter to evaluate</param>
@@ -1600,7 +1599,7 @@ module ExtensionsCurve =
         curve.PointAt(t)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Explodes, or un-joins, one curve. Polycurves will be exploded into curve
     ///  segments. Polylines will be exploded into line segments. ExplodeCurves will
     ///  return the curves in topological order</summary>
@@ -1625,7 +1624,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Extends a non-closed curve object by a line, arc, or smooth extension
     ///  until it intersects a collection of objects</summary>
     ///<param name="curveId">(Guid) Identifier of curve to extend</param>
@@ -1671,7 +1670,7 @@ module ExtensionsCurve =
             failwithf "extendCurve failed.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Extends a non-closed curve by a line, arc, or smooth extension for a
     ///  specified distance</summary>
     ///<param name="curveId">(Guid) Curve to extend</param>
@@ -1709,7 +1708,7 @@ module ExtensionsCurve =
         else failwithf "extendCurveLength failed.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Extends a non-closed curve by smooth extension to a point</summary>
     ///<param name="curveId">(Guid) Curve to extend</param>
     ///<param name="side">(int) 0= extend from start of the curve
@@ -1735,7 +1734,7 @@ module ExtensionsCurve =
         else failwithf "extendCurvePoint failed.  curveId:'%A' side:'%A' point:'%A'" curveId side point
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Fairs a curve. Fair works best on degree 3 (cubic) curves. Fair attempts
     ///  to remove large curvature variations while limiting the geometry changes to
     ///  be no more than the specified tolerance. Sometimes several applications of
@@ -1760,7 +1759,7 @@ module ExtensionsCurve =
                 false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Reduces number of curve control points while maintaining the curve's same
     ///  general shape. Use this function for replacing curves with many control
     ///  points. For more information, see the Rhino help for the FitCrv command</summary>
@@ -1799,7 +1798,7 @@ module ExtensionsCurve =
             failwithf "fitCurve failed.  curveId:'%A' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" curveId degree distanceTolerance angleTolerance
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Inserts a knot into a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="parameter">(float) Parameter on the curve</param>
@@ -1829,7 +1828,7 @@ module ExtensionsCurve =
                 rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is an open arc curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
@@ -1845,7 +1844,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsArc(tol) && not curve.IsClosed
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a circle curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
@@ -1860,7 +1859,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsCircle(tol)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a curve</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -1870,7 +1869,7 @@ module ExtensionsCurve =
         |Some curve  -> true
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Decide if it makes sense to close off the curve by moving the end point
     ///  to the start point based on start-end gap size and length of curve as
     ///  approximated by chord defined by 6 points</summary>
@@ -1885,7 +1884,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsClosable(tolerance0)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a closed curve object</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<returns>(bool) True  otherwise False</returns>
@@ -1895,7 +1894,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsClosed
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Test a curve to see if it lies in a specific plane</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="plane">(Plane) Plane to test</param>
@@ -1908,7 +1907,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsInPlane(plane, tolerance0)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a linear curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>    ///
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
@@ -1921,7 +1920,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsLinear(tolerance0)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a periodic curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional,
@@ -1933,7 +1932,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsPeriodic
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a planar curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
@@ -1946,7 +1945,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsPlanar(tol)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a rational NURBS curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -1960,7 +1959,7 @@ module ExtensionsCurve =
             |_ -> false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is an elliptical-shaped curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
@@ -1974,7 +1973,7 @@ module ExtensionsCurve =
         |Some curve  -> curve.IsEllipse(tol)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a line curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
@@ -1996,7 +1995,7 @@ module ExtensionsCurve =
                     else false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a point is on a curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="point">(Point3d) The test point</param>
@@ -2010,7 +2009,7 @@ module ExtensionsCurve =
         curve.ClosestPoint(point, t, tol)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a PolyCurve curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -2025,7 +2024,7 @@ module ExtensionsCurve =
             | _             -> false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a Polyline curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -2039,7 +2038,7 @@ module ExtensionsCurve =
             | _             -> false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Joins multiple curves together to form one or more curves or polycurves</summary>
     ///<param name="curveIds">(Guid) List of multiple curves</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
@@ -2067,7 +2066,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a line that was fit through an array of 3D points</summary>
     ///<param name="points">(Point3d seq) A list of at least two 3D points</param>
     ///<returns>(Line) line on success</returns>
@@ -2077,7 +2076,7 @@ module ExtensionsCurve =
         else failwithf "lineFitFromPoints failed.  points:'%A'" points
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Makes a periodic curve non-periodic. Non-periodic curves can develop
     ///  kinks when deformed</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -2103,7 +2102,7 @@ module ExtensionsCurve =
             rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates an average curve from two curves</summary>
     ///<param name="curve0">(Guid) identifiers of first curve</param>
     ///<param name="curve1">(Guid) identifiers of second curve</param>
@@ -2123,7 +2122,7 @@ module ExtensionsCurve =
             failwithf "meanCurve failed.  curve1:'%A' curve0:'%A' tolerance:'%f'" curve1 curve0 tolerance
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a polygon mesh object based on a closed polyline curve object.
     ///  The created mesh object is added to the document</summary>
     ///<param name="polylineId">(Guid) Identifier of the polyline curve object</param>
@@ -2139,7 +2138,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Offsets a curve by a distance. The offset curve will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="direction">(Point3d) Point describing direction of the offset</param>
@@ -2167,7 +2166,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Offset a curve on a surface. The source curve must lie on the surface.
     ///  The offset curve or curves will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
@@ -2184,7 +2183,7 @@ module ExtensionsCurve =
         Doc.Views.Redraw()
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Offset a curve on a surface. The source curve must lie on the surface.
     ///  The offset curve or curves will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
@@ -2204,7 +2203,7 @@ module ExtensionsCurve =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines the relationship between the regions bounded by two coplanar simple closed curves</summary>
     ///<param name="curveA">(Guid) identifier of the first  planar, closed curve</param>
     ///<param name="curveB">(Guid) identifier of the second planar, closed curve</param>
@@ -2225,7 +2224,7 @@ module ExtensionsCurve =
         int(rc)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines if two coplanar curves intersect</summary>
     ///<param name="curveA">(Guid) identifier of the first  planar curve</param>
     ///<param name="curveB">(Guid) identifier of the second planar curve</param>
@@ -2241,7 +2240,7 @@ module ExtensionsCurve =
         Curve.PlanarCurveCollision(curveA, curveB, plane0, tolerance0)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines if a point is inside of a closed curve, on a closed curve, or
     ///  outside of a closed curve</summary>
     ///<param name="point">(Point3d) Text point</param>
@@ -2265,7 +2264,7 @@ module ExtensionsCurve =
         else 2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of curve segments that make up a polycurve</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional,
@@ -2278,7 +2277,7 @@ module ExtensionsCurve =
         | _ -> failwithf "CurveId does not reference a polycurve.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the vertices of a polyline curve on success</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional,
@@ -2291,7 +2290,7 @@ module ExtensionsCurve =
         else failwithf "CurveId does not <| reference a polyline.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Projects one or more curves onto one or more surfaces or meshes</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
     ///<param name="meshIds">(Guid seq) Identifiers of meshes to project onto</param>
@@ -2307,7 +2306,7 @@ module ExtensionsCurve =
         ids
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Projects one or more curves onto one or more surfaces or polysurfaces</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
     ///<param name="surfaceIds">(Guid seq) Identifiers of surfaces to project onto</param>
@@ -2323,7 +2322,7 @@ module ExtensionsCurve =
         ids
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Rebuilds a curve to a given degree and control point count. For more
     ///  information, see the Rhino help for the Rebuild command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
@@ -2341,7 +2340,7 @@ module ExtensionsCurve =
             true
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Deletes a knot from a curve object</summary>
     ///<param name="curve">(Guid) The reference of the source object</param>
     ///<param name="parameter">(float) The parameter on the curve. Note, if the parameter is not equal to one
@@ -2364,7 +2363,7 @@ module ExtensionsCurve =
                      true
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Reverses the direction of a curve object. Same as Rhino's Dir command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -2377,7 +2376,7 @@ module ExtensionsCurve =
             false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Replace a curve with a geometrically equivalent polycurve.
     ///  The polycurve will have the following properties:
     ///    - All the polycurve segments are lines, polylines, arcs, or NURBS curves.
@@ -2421,7 +2420,7 @@ module ExtensionsCurve =
             false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Splits, or divides, a curve at a specified parameter. The parameter must
     ///  be in the interior of the curve's domain</summary>
     ///<param name="curveId">(Guid) The curve to split</param>
@@ -2441,7 +2440,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Trims a curve by removing portions of the curve outside a specified interval</summary>
     ///<param name="curveId">(Guid) The curve to trim</param>
     ///<param name="interval">(float * float) Two numbers identifying the interval to keep. Portions of
@@ -2465,7 +2464,7 @@ module ExtensionsCurve =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the degree of a curve object. For more information see the Rhino help file for the ChangeDegree command</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="degree">(int) The new degree</param>
@@ -2481,7 +2480,7 @@ module ExtensionsCurve =
             false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates curves between two open or closed input curves</summary>
     ///<param name="fromCurveId">(Guid) Identifier of the first curve object</param>
     ///<param name="toCurveId">(Guid) Identifier of the second curve object</param>

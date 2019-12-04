@@ -3,9 +3,9 @@ namespace Rhino.Scripting
 open System
 open Rhino.Geometry
 open System.Runtime.CompilerServices
-open FsEx.Util
 open FsEx
 open FsEx.NiceString
+
 
 
 [<assembly:Extension>] do() //http://www.latkin.org/blog/2014/04/30/f-extension-methods-in-roslyn/
@@ -13,7 +13,7 @@ open FsEx.NiceString
 [<AutoOpen>]
 module TypeExtensionsRhino =  
 
-    [<Extension>]  
+    //[<Extension>] //Error 3246
     type Point3d with  
         
         [<Extension>]     
@@ -29,7 +29,7 @@ module TypeExtensionsRhino =
 
         
 
-    [<Extension>]     
+    //[<Extension>] //Error 3246     
     type Point3f with  
         
         [<Extension>]  
@@ -43,7 +43,7 @@ module TypeExtensionsRhino =
         [<Extension>] 
         member pt.ToPoint3d = Point3d(pt)
 
-    [<Extension>]      
+    //[<Extension>] //Error 3246     
     type Vector3d with  
         
         [<Extension>] 
@@ -65,7 +65,7 @@ module TypeExtensionsRhino =
         ///Unitizes the vector , fails if input is of zero length
         member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
 
-    [<Extension>]
+    //[<Extension>] //Error 3246
     type Vector3f with  
         
         [<Extension>] 
@@ -80,7 +80,7 @@ module TypeExtensionsRhino =
         [<Extension>] 
         member v.ToVector3d = Vector3d(v)
 
-    [<Extension>]  
+    //[<Extension>] //Error 3246  
     type Line with  
         
         [<Extension>]     

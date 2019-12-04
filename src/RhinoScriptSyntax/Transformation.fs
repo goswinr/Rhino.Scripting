@@ -4,15 +4,16 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open FsEx.UtilMath
-open Rhino.Scripting.ActiceDocument
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsTransformation =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a matrix is the identity matrix</summary>
     ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -21,7 +22,7 @@ module ExtensionsTransformation =
         xform = Transform.Identity
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
     ///  transformation can be broken into a sequence of dialations, translations,
     ///  rotations, and reflections</summary>
@@ -32,7 +33,7 @@ module ExtensionsTransformation =
         xform.SimilarityType <> TransformSimilarityType.NotSimilarity
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>verifies that a matrix is a zero transformation matrix</summary>
     ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -41,7 +42,7 @@ module ExtensionsTransformation =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a change of basis transformation matrix or None on error</summary>
     ///<param name="initialPlane">(Plane) The initial plane</param>
     ///<param name="finalPlane">(Plane) The final plane</param>
@@ -54,7 +55,7 @@ module ExtensionsTransformation =
         xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a change of basis transformation matrix of None on error</summary>
     ///<param name="x0">(Vector3d) X of initial basis</param>
     ///<param name="y0">(Vector3d) Y of initial basis</param>
@@ -80,7 +81,7 @@ module ExtensionsTransformation =
         xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Compares two transformation matrices</summary>
     ///<param name="xform1">(Transform) First matrix to compare</param>
     ///<param name="xform2">(Transform) Second matrix to compare</param>
@@ -93,7 +94,7 @@ module ExtensionsTransformation =
         xform1.CompareTo(xform2)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transform point from construction plane coordinates to world coordinates</summary>
     ///<param name="point">(Point3d) A 3D point in construction plane coordinates</param>
     ///<param name="plane">(Plane) The construction plane</param>
@@ -104,7 +105,7 @@ module ExtensionsTransformation =
         plane.Origin + point.X*plane.XAxis + point.Y*plane.YAxis + point.Z*plane.ZAxis
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the determinant of a transformation matrix. If the determinant
     ///  of a transformation matrix is 0, the matrix is said to be singular. Singular
     ///  matrices do not have inverses</summary>
@@ -115,7 +116,7 @@ module ExtensionsTransformation =
         xform.Determinant
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a diagonal transformation matrix. Diagonal matrices are 3x3 with
     ///  the bottom row [0, 0, 0, 1]</summary>
     ///<param name="diagonalValue">(float) The diagonal value</param>
@@ -124,14 +125,14 @@ module ExtensionsTransformation =
         Transform(diagonalValue)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>returns the identity transformation matrix</summary>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformIdentity() : Transform =
         Transform.Identity
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the inverse of a non-singular transformation matrix</summary>
     ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix </returns>
@@ -142,7 +143,7 @@ module ExtensionsTransformation =
         inverse
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a mirror transformation matrix</summary>
     ///<param name="mirrorPlanePoint">(Point3d) Point on the mirror plane</param>
     ///<param name="mirrorPlaneNormal">(Vector3d) A 3D vector that is normal to the mirror plane</param>
@@ -153,7 +154,7 @@ module ExtensionsTransformation =
         Transform.Mirror(mirrorPlanePoint, mirrorPlaneNormal)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Multiplies two transformation matrices, where result = xform1 * xform2</summary>
     ///<param name="xform1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply</param>
     ///<param name="xform2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply</param>
@@ -164,7 +165,7 @@ module ExtensionsTransformation =
         xform1*xform2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a transformation matrix that projects to a plane</summary>
     ///<param name="plane">(Plane) The plane to project to</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
@@ -173,7 +174,7 @@ module ExtensionsTransformation =
         Transform.PlanarProjection(plane)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a rotation transformation that maps initialPlane to finalPlane.
     ///  The planes should be right hand orthonormal planes</summary>
     ///<param name="initialPlane">(Plane) Plane to rotate from</param>
@@ -187,7 +188,7 @@ module ExtensionsTransformation =
         xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a rotation transformation around an axis</summary>
     ///<param name="angleDegrees">(float) Rotation angle in degrees</param>
     ///<param name="rotationAxis">(Vector3d) Rotation axis</param>
@@ -204,7 +205,7 @@ module ExtensionsTransformation =
         xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculate the minimal transformation that rotates startDirection to
     ///  endDirection while fixing centerPoint</summary>
     ///<param name="startDirection">(Vector3d) Start direction</param>
@@ -222,7 +223,7 @@ module ExtensionsTransformation =
         xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a rotation transformation</summary>
     ///<param name="x0">(Vector3d) X of Vector defining the initial orthonormal frame</param>
     ///<param name="y0">(Vector3d) Y of Vector defining the initial orthonormal frame</param>
@@ -248,7 +249,7 @@ module ExtensionsTransformation =
         xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a scale transformation</summary>
     ///<param name="scale">(float*float*float) list of 3 numbers for x , y andf z direction</param>
     ///<param name="point">(Point3d) Optional, Center of scale. If omitted, world origin is used</param>
@@ -259,7 +260,7 @@ module ExtensionsTransformation =
         xf
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a point from either client-area coordinates of the specified view
     ///  or screen coordinates to world coordinates. The resulting coordinates are represented
     ///  as a 3-D point</summary>
@@ -285,7 +286,7 @@ module ExtensionsTransformation =
         point3d
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a shear transformation matrix</summary>
     ///<param name="plane">(Plane) Plane.Origin is the fixed point</param>
     ///<param name="x">(Vector3d) X axis scale vecto</param>
@@ -299,7 +300,7 @@ module ExtensionsTransformation =
         Transform.Shear(plane, x, y, z)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a translation transformation matrix</summary>
     ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d.  A 3-D translation vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix is successful, otherwise None</returns>
@@ -308,7 +309,7 @@ module ExtensionsTransformation =
         Transform.Translation(vector)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a point from world coordinates to construction plane coordinates</summary>
     ///<param name="point">(Point3d) A 3D point in world coordinates</param>
     ///<param name="plane">(Plane) The construction plane</param>
@@ -320,7 +321,7 @@ module ExtensionsTransformation =
         Point3d(v*plane.XAxis, v*plane.YAxis, v*plane.ZAxis)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a point from world coordinates to either client-area coordinates of
     ///  the specified view or screen coordinates. The resulting coordinates are represented
     ///  as a 2D point</summary>
@@ -345,7 +346,7 @@ module ExtensionsTransformation =
         point
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a zero transformation matrix</summary>
     ///<returns>(Transform) a zero transformation matrix</returns>
     static member XformZero() : Transform =

@@ -4,14 +4,17 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
+
 [<AutoOpen>]
 module ExtensionsHatch =
+
+  //[<Extension>] //Error 3246
  type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     static member private InitHatchPatterns() : unit =
         if isNull <| Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Solid.Name) then
             Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Solid) |> ignore
@@ -43,7 +46,7 @@ module ExtensionsHatch =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates one or more new hatch objects a list of closed planar curves</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar curves that defines the
     ///  boundary of the hatch objects</param>
@@ -83,7 +86,7 @@ module ExtensionsHatch =
         Doc.Views.Redraw()
         ids
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a new hatch object from a closed planar curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar curve that defines the
     ///  boundary of the hatch object</param>
@@ -104,7 +107,7 @@ module ExtensionsHatch =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds hatch patterns to the document by importing hatch pattern definitions
     ///  from a pattern file</summary>
     ///<param name="filename">(string) Name of the hatch pattern file</param>
@@ -126,7 +129,7 @@ module ExtensionsHatch =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the current hatch pattern file</summary>
     ///<returns>(string) The current hatch pattern</returns>
     static member CurrentHatchPattern() : string = //GET
@@ -136,7 +139,7 @@ module ExtensionsHatch =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets the current hatch pattern file</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern to make current</param>
     ///<returns>(unit) void, nothing</returns>
@@ -148,7 +151,7 @@ module ExtensionsHatch =
         Doc.HatchPatterns.CurrentHatchPatternIndex <- patterninstance.Index
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Explodes a hatch object into its component objects. The exploded objects
     ///  will be added to the document. If the hatch object uses a solid pattern,
     ///  then planar face Brep objects will be created. Otherwise, line curve objects
@@ -177,7 +180,7 @@ module ExtensionsHatch =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a hatch object's hatch pattern</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<returns>(string) The current hatch pattern</returns>
@@ -186,7 +189,7 @@ module ExtensionsHatch =
         let oldindex = hatchobj.HatchGeometry.PatternIndex
         Doc.HatchPatterns.[oldindex].Name
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes a hatch object's hatch pattern</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern to replace the
@@ -202,7 +205,7 @@ module ExtensionsHatch =
         if not<| hatchobj.CommitChanges() then failwithf "Rhino.Scripting: HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes multiple hatch objects's hatch pattern</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
     ///<param name="hatchPattern">(string) Name of multiple existing hatch pattern to replace the
@@ -220,7 +223,7 @@ module ExtensionsHatch =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of hatch patterns in the document</summary>
     ///<returns>(int) the number of hatch patterns in the document</returns>
     static member HatchPatternCount() : int =
@@ -228,7 +231,7 @@ module ExtensionsHatch =
         Doc.HatchPatterns.Count
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the description of a hatch pattern. Note, not all hatch patterns
     ///  have descriptions</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
@@ -240,7 +243,7 @@ module ExtensionsHatch =
         patterninstance.Description
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the fill type of a hatch pattern</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(int) hatch pattern's fill type
@@ -254,7 +257,7 @@ module ExtensionsHatch =
         int(patterninstance.FillType)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the names of all of the hatch patterns in the document</summary>
     ///<returns>(string ResizeArray) the names of all of the hatch patterns in the document</returns>
     static member HatchPatternNames() : string ResizeArray =
@@ -267,7 +270,7 @@ module ExtensionsHatch =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the rotation applied to the hatch pattern when
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
@@ -278,7 +281,7 @@ module ExtensionsHatch =
         RhinoMath.ToDegrees(rc)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the rotation applied to the hatch pattern when
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
@@ -294,7 +297,7 @@ module ExtensionsHatch =
             if not <| hatchobj.CommitChanges() then failwithf "HatchRotation failed on rotation %f on %A" rotation hatchId
             Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the rotation applied to the hatch pattern when
     /// it is mapped to the hatch's plane</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
@@ -312,7 +315,7 @@ module ExtensionsHatch =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the scale applied to the hatch pattern when it is
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
@@ -322,7 +325,7 @@ module ExtensionsHatch =
         hatchobj.HatchGeometry.PatternScale
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the scale applied to the hatch pattern when it is
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
@@ -336,7 +339,7 @@ module ExtensionsHatch =
             if not <| hatchobj.CommitChanges() then failwithf "HatchScale failed on scale %f on %A" scale hatchId
             Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the scale applied to the hatch pattern when it is
     /// mapped to the hatch's plane</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
@@ -352,7 +355,7 @@ module ExtensionsHatch =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the existence of a hatch object in the document</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(bool) True or False</returns>
@@ -361,7 +364,7 @@ module ExtensionsHatch =
         match rhobj with :? DocObjects.HatchObject  -> true |_ -> false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the existence of a hatch pattern in the document</summary>
     ///<param name="name">(string) The name of a hatch pattern</param>
     ///<returns>(bool) True or False</returns>
@@ -370,7 +373,7 @@ module ExtensionsHatch =
         Doc.HatchPatterns.FindName(name) |> notNull
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a hatch pattern is the current hatch pattern</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(bool) True or False</returns>
@@ -381,7 +384,7 @@ module ExtensionsHatch =
         patterninstance.Index = Doc.HatchPatterns.CurrentHatchPatternIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a hatch pattern is from a reference file</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
     ///<returns>(bool) True or False</returns>

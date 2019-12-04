@@ -5,7 +5,7 @@ open Rhino.Runtime
 
 type internal OPT = Runtime.InteropServices.OptionalAttribute
 type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
-type internal EXT = Runtime.CompilerServices.ExtensionAttribute
+
 
 [<AutoOpen>]
 module ActiceDocument =

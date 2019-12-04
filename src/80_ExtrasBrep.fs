@@ -4,17 +4,17 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-open System.Collections.Generic
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 
 module ExtrasBrep =
-    type RhinoScriptSyntax with
+    
+  //[<Extension>] //Error 3246  
+  type RhinoScriptSyntax with
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
     ///<param name="plane">(Plane)Origin = center of hole </param>
     ///<param name="length">(float) total length of sloted hole</param>

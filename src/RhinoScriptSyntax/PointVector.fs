@@ -4,16 +4,17 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsPointvector =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
-    [<EXT>]
+    [<Extension>]
     ///<summary>Compares two vectors to see if they are parallel within one degree or custom tolerance</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
@@ -32,7 +33,7 @@ module ExtensionsPointvector =
         else vector1.IsParallelTo(vector2, toRadians(toleranceDegree))
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Compares two vectors to see if they are perpendicular</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
@@ -49,7 +50,7 @@ module ExtensionsPointvector =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a vector is very short. The X, Y, Z elements are smaler than 1.0e-12</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is tiny, otherwise False</returns>
@@ -58,7 +59,7 @@ module ExtensionsPointvector =
         vector.IsTiny( 1.0e-12 )
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a vector is zero, or tiny. The X, Y, Z elements are equal to 0.0</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is zero, otherwise False</returns>
@@ -67,7 +68,7 @@ module ExtensionsPointvector =
         vector.IsZero
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a 3D point or a 3D vector to a 3D point</summary>
     ///<param name="point1">(Point3d) Point1 of the points to add</param>
     ///<param name="point2">(Point3d) Point2 of the points to add</param>
@@ -78,7 +79,7 @@ module ExtensionsPointvector =
         point1+point2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the point in a list of 3D points that is closest to a test point</summary>
     ///<param name="points">(Point3d IList) List of points</param>
     ///<param name="testPoint">(Point3d) The point to compare against</param>
@@ -91,7 +92,7 @@ module ExtensionsPointvector =
         else failwithf "PointArrayClosestPoint failed on %A, %A" points testPoint
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a list of 3D points</summary>
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<param name="xform">(Transform) Transformation to apply</param>
@@ -101,7 +102,7 @@ module ExtensionsPointvector =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         resizeArray {for point in points do xform*point}
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the object that is closest to a test point</summary>
     ///<param name="point">(Point3d) Point to test</param>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more objects</param>
@@ -162,7 +163,7 @@ module ExtensionsPointvector =
         else failwithf "PointClosestObject failed on %A and %A " point objectIds
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Compares two 3D points</summary>
     ///<param name="point1">(Point3d) Point1 of the points to compare</param>
     ///<param name="point2">(Point3d) Point2 of the points to compare</param>
@@ -179,7 +180,7 @@ module ExtensionsPointvector =
         vector.IsTiny(tolerance)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a 3D point by a value</summary>
     ///<param name="point">(Point3d) The point to divide</param>
     ///<param name="divide">(float) A non-zero value to divide</param>
@@ -191,7 +192,7 @@ module ExtensionsPointvector =
             point/divide
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a list of 3D points are coplanar</summary>
     ///<param name="points">(Point3d seq) 3D points to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
@@ -203,7 +204,7 @@ module ExtensionsPointvector =
         Point3d.ArePointsCoplanar(points, tolerance)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Scales a 3D point by a value</summary>
     ///<param name="point">(Point3d) The point to divide</param>
     ///<param name="scale">(float) Scale factor to apply</param>
@@ -213,7 +214,7 @@ module ExtensionsPointvector =
         point*scale
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Subtracts a 3D point or a 3D vector from a 3D point</summary>
     ///<param name="point1">(Point3d) Point1 of the points to subtract</param>
     ///<param name="point2">(Point3d) Point2 of the points to subtract</param>
@@ -225,7 +226,7 @@ module ExtensionsPointvector =
         Point3d(v)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a 3D point</summary>
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
@@ -236,7 +237,7 @@ module ExtensionsPointvector =
         xform*point
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Projects one or more points onto one or more meshes</summary>
     ///<param name="points">(Point3d seq) One or more 3D points</param>
     ///<param name="meshIds">(Guid seq) Identifiers of one or more meshes</param>
@@ -251,7 +252,7 @@ module ExtensionsPointvector =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Projects one or more points onto one or more surfaces or polysurfaces</summary>
     ///<param name="points">(Point3d seq) One or more 3D points</param>
     ///<param name="surfaceIds">(Guid seq) Identifiers of one or more surfaces/polysurfaces</param>
@@ -265,7 +266,7 @@ module ExtensionsPointvector =
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pulls an array of points to a surface or mesh object. For more
     ///  information, see the Rhino help file Pull command</summary>
     ///<param name="objectId">(Guid) The identifier of the surface or mesh object that pulls</param>
@@ -288,7 +289,7 @@ module ExtensionsPointvector =
         | _ -> failwithf "PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId) )
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds two 3D vectors</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to add</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to add</param>
@@ -299,7 +300,7 @@ module ExtensionsPointvector =
         vector1+vector2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the angle, in degrees, between two 3-D vectors</summary>
     ///<param name="vector1">(Vector3d) The first 3-D vector</param>
     ///<param name="vector2">(Vector3d) The second 3-D vector</param>
@@ -317,7 +318,7 @@ module ExtensionsPointvector =
         toDegrees(radians)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Compares two 3D vectors</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the two vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the two vectors to compare</param>
@@ -331,7 +332,7 @@ module ExtensionsPointvector =
         vector1.CompareTo(vector2)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a vector from two 3D points</summary>
     ///<param name="fromPoint">(Point3d) Start point of vector</param>
     ///<param name="toPoint">(Point3d) End point vector</param>
@@ -342,7 +343,7 @@ module ExtensionsPointvector =
         toPoint-fromPoint
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the cross product of two 3D vectors</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to perform cross product on</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to perform cross product on</param>
@@ -353,7 +354,7 @@ module ExtensionsPointvector =
         Vector3d.CrossProduct( vector1, vector2 )
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Divides a 3D vector by a value</summary>
     ///<param name="vector">(Vector3d) The vector to divide</param>
     ///<param name="divide">(float) A non-zero value to divide</param>
@@ -366,7 +367,7 @@ module ExtensionsPointvector =
             vector/divide
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the dot product of two 3D vectors</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to perform the dot product on</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to perform the dot product on</param>
@@ -377,7 +378,7 @@ module ExtensionsPointvector =
         vector1*vector2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the length of a 3D vector</summary>
     ///<param name="vector">(Vector3d) The 3-D vector</param>
     ///<returns>(float) The length of the vector , otherwise None</returns>
@@ -386,7 +387,7 @@ module ExtensionsPointvector =
         vector.Length
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Multiplies two 3D vectors, same as Dot Product</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to multiply</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to multiply</param>
@@ -395,7 +396,7 @@ module ExtensionsPointvector =
         vector1* vector2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Reverses the direction of a 3D vector</summary>
     ///<param name="vector">(Vector3d) The vector to reverse</param>
     ///<returns>(Vector3d) reversed vector on success</returns>
@@ -405,7 +406,7 @@ module ExtensionsPointvector =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Rotates a 3D vector</summary>
     ///<param name="vector">(Vector3d) The vector to rotate</param>
     ///<param name="angleDegrees">(float) Rotation angle</param>
@@ -422,7 +423,7 @@ module ExtensionsPointvector =
         else failwithf "VectorRotate failed on %A, %A, %A" vector angleDegrees axis
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Scales a 3-D vector</summary>
     ///<param name="vector">(Vector3d) The vector to scale</param>
     ///<param name="scale">(float) Scale factor to apply</param>
@@ -432,7 +433,7 @@ module ExtensionsPointvector =
         vector*scale
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Subtracts two 3D vectors</summary>
     ///<param name="vector1">(Vector3d) The vector to subtract from</param>
     ///<param name="vector2">(Vector3d) The vector to subtract</param>
@@ -443,7 +444,7 @@ module ExtensionsPointvector =
         vector1-vector2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a 3D vector</summary>
     ///<param name="vector">(Vector3d) The vector to transform</param>
     ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
@@ -454,7 +455,7 @@ module ExtensionsPointvector =
         xform*vector
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unitizes, or normalizes a 3D vector. Note, zero vectors cannot be unitized</summary>
     ///<param name="vector">(Vector3d) The vector to unitize</param>
     ///<returns>(Vector3d) unitized vector on success</returns>
@@ -465,7 +466,7 @@ module ExtensionsPointvector =
         Vector3d(vector.X*l, vector.Y*l, vector.Z*l)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns either a world axis-aligned or a construction plane axis-aligned
     ///  bounding box of an array of 3-D point locations</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>

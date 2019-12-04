@@ -4,15 +4,17 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsPlane =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the distance from a 3D point to a plane</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
@@ -23,7 +25,7 @@ module ExtensionsPlane =
         plane.DistanceTo(point)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Evaluates a plane at a U, V parameter</summary>
     ///<param name="plane">(Plane) The plane to evaluate</param>
     ///<param name="u">(float) U parameter to evaluate</param>
@@ -34,7 +36,7 @@ module ExtensionsPlane =
         plane.PointAt(u, v)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of three planes</summary>
     ///<param name="plane1">(Plane) The 1st plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd plane to intersect</param>
@@ -51,7 +53,7 @@ module ExtensionsPlane =
         else failwithf "IntersectPlanes failed, are they paralell? %A; %A; %A" plane1 plane2 plane3
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Moves the origin of a plane</summary>
     ///<param name="plane">(Plane) Plane or ConstructionPlane</param>
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
@@ -63,7 +65,7 @@ module ExtensionsPlane =
         rc.Origin <- origin
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
@@ -72,7 +74,7 @@ module ExtensionsPlane =
         plane.ClosestPoint(point)
 
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
@@ -83,7 +85,7 @@ module ExtensionsPlane =
         else failwithf "PlaneClosestParameter faild for %A; %A" plane point
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Intersect an infinite plane and a curve object</summary>
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
@@ -139,7 +141,7 @@ module ExtensionsPlane =
             failwithf "PlaneCurveIntersection faild on %A; %A tolerance %A" plane curve tolerance
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the equation of a plane as a tuple of four numbers. The standard
     ///  equation of a plane with a non-zero vector is Ax+By+Cz+D = 0</summary>
     ///<param name="plane">(Plane) The plane to deconstruct</param>
@@ -150,7 +152,7 @@ module ExtensionsPlane =
         rc.[0], rc.[1], rc.[2], rc.[3]
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a plane that was fit through an array of 3D points</summary>
     ///<param name="points">(Point3d seq) An array of 3D points</param>
     ///<returns>(Plane) The plane</returns>
@@ -161,7 +163,7 @@ module ExtensionsPlane =
         else failwithf "PlaneFitFromPoints faild for %A" points
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Construct a plane from a point, and two vectors in the plane</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
     ///<param name="xAxis">(Vector3d) A non-zero 3D vector in the plane that determines the X axis
@@ -179,7 +181,7 @@ module ExtensionsPlane =
         Plane(origin, xAxis, yAxis)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a plane from an origin point and a normal direction vector</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
     ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane</param>
@@ -200,7 +202,7 @@ module ExtensionsPlane =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Creates a plane from three non-colinear points</summary>
     ///<param name="origin">(Point3d) Origin point of the plane</param>
     ///<param name="x">(Point3d) X point on the plane's x  axis</param>
@@ -217,7 +219,7 @@ module ExtensionsPlane =
         else failwithf "PlaneFromPoints failed for %A; %A; %A" origin x y
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of two planes</summary>
     ///<param name="plane1">(Plane) The 1st plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd plane to intersect</param>
@@ -230,7 +232,7 @@ module ExtensionsPlane =
         else failwithf "PlanePlaneIntersection failed for %A; %A " plane1 plane2
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of a plane and a sphere</summary>
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="spherePlane">(Plane) Equatorial plane of the sphere. origin of the plane is
@@ -257,7 +259,7 @@ module ExtensionsPlane =
             failwithf "PlaneSphereIntersection failed for %A; %A, %A " plane spherePlane sphereRadius
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a plane</summary>
     ///<param name="plane">(Plane) Plane to transform</param>
     ///<param name="xform">(Transform) Transformation to apply</param>
@@ -270,7 +272,7 @@ module ExtensionsPlane =
         else failwithf "PlaneTransform faild for %A; %A" plane xform
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Rotates a plane</summary>
     ///<param name="plane">(Plane) Plane to rotate</param>
     ///<param name="angleDegrees">(float) Rotation angle in degrees</param>
@@ -287,21 +289,21 @@ module ExtensionsPlane =
         else failwithf "RotatePlane failed for %A; %A; %A" plane angleDegrees axis
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns Rhino's world XY plane</summary>
     ///<returns>(Plane) Rhino's world XY plane</returns>
     static member WorldXYPlane() : Plane =
         Plane.WorldXY
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns Rhino's world YZ plane</summary>
     ///<returns>(Plane) Rhino's world YZ plane</returns>
     static member WorldYZPlane() : Plane =
         Plane.WorldYZ
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns Rhino's world ZX plane</summary>
     ///<returns>(Plane) Rhino's world ZX plane</returns>
     static member WorldZXPlane() : Plane =

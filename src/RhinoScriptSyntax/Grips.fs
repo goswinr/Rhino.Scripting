@@ -4,16 +4,16 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+  
 [<AutoOpen>]
 module ExtensionsGrips =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables an object's grips. For curves and surfaces, these are
     ///  also called control points</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -29,7 +29,7 @@ module ExtensionsGrips =
         enable = rhobj.GripsOn
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to pick a single object grip</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
@@ -64,7 +64,7 @@ module ExtensionsGrips =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts user to pick one or more object grips from one or more objects</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
@@ -100,7 +100,7 @@ module ExtensionsGrips =
 
 
 
-    [<EXT>]
+    [<Extension>]
     /// Internal helper
     static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -121,7 +121,7 @@ module ExtensionsGrips =
                 Ok ng
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the next grip index from a specified grip index of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the next grip index</param>
@@ -138,7 +138,7 @@ module ExtensionsGrips =
         |Ok r -> r.Index
         |Error s -> failwithf "NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns number of grips owned by an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) number of grips</returns>
@@ -149,7 +149,7 @@ module ExtensionsGrips =
         grips.Length
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the location of an object's grip</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to either query or modify</param>
@@ -164,7 +164,7 @@ module ExtensionsGrips =
         let rc = grip.CurrentLocation
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the location of an object's grip</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to either query or modify</param>
@@ -184,7 +184,7 @@ module ExtensionsGrips =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the location of all grips owned by an object. The
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
@@ -201,7 +201,7 @@ module ExtensionsGrips =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the location of all grips owned by an object. The
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
@@ -223,7 +223,7 @@ module ExtensionsGrips =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object's grips are turned on</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating Grips state</returns>
@@ -232,7 +232,7 @@ module ExtensionsGrips =
         rhobj.GripsOn
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object's grips are turned on and at least one grip
     ///  is selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -249,7 +249,7 @@ module ExtensionsGrips =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the previous grip index from a specified grip index of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
@@ -267,7 +267,7 @@ module ExtensionsGrips =
         |Error s -> failwithf "PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a list of grip indices indentifying an object's selected grips</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int ResizeArray) list of indices on success</returns>
@@ -284,7 +284,7 @@ module ExtensionsGrips =
             rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Selects a single grip owned by an object. If the object's grips are
     ///  not turned on, the grips will not be selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -307,7 +307,7 @@ module ExtensionsGrips =
                         false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Selects an object's grips. If the object's grips are not turned on,
     ///  they will not be selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -327,7 +327,7 @@ module ExtensionsGrips =
             failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unselects a single grip owned by an object. If the object's grips are
     ///  not turned on, the grips will not be unselected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -350,7 +350,7 @@ module ExtensionsGrips =
                         false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unselects an object's grips. Note, the grips will not be turned off</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips unselected on success</returns>

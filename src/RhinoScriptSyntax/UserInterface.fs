@@ -4,23 +4,21 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-open Rhino.UI
-open System.Drawing
 open System.Collections.Generic
-//open System.Windows.Forms
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 
 [<AutoOpen>]
 module ExtensionsUserinterface =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
-
     
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
@@ -52,7 +50,7 @@ module ExtensionsUserinterface =
         //    dlg.Directory
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays a list of items in a checkable-style list dialog box</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
@@ -77,7 +75,7 @@ module ExtensionsUserinterface =
             None
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays a list of items in a combo-style list box dialog</summary>
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
@@ -94,7 +92,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display dialog prompting the user to enter a string. The
     ///  string value may span multiple lines</summary>
     ///<param name="defaultValString">(string) Optional, A default string value</param>
@@ -111,7 +109,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pause for user input of an angle</summary>
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
     ///Starting, or base point</param>
@@ -136,7 +134,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
     ///  displayed as click-able command line option toggles</summary>
     ///<param name="message">(string) A prompt</param>
@@ -175,7 +173,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a box</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///The box selection mode.
@@ -214,7 +212,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c> </param>
     ///<returns>(Drawing.Color option) an Option of RGB color</returns>
@@ -229,7 +227,7 @@ module ExtensionsUserinterface =
         } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Retrieves the cursor's position</summary>
     ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
     ///  0  Point3d: cursor position in world coordinates
@@ -250,7 +248,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a distance</summary>
     ///<param name="firstPt">(Point3d) Optional, First distance point</param>
     ///<param name="distance">(float) Optional, Default distance</param>
@@ -303,7 +301,7 @@ module ExtensionsUserinterface =
                 } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
     ///A prompt or message</param>
@@ -348,7 +346,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a whole number</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="number">(int) Optional, A default whole number value</param>
@@ -377,7 +375,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays dialog box prompting the user to select a layer</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
     ///Dialog box title</param>
@@ -407,7 +405,7 @@ module ExtensionsUserinterface =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays a dialog box prompting the user to select one or more layers</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
     ///Dialog box title</param>
@@ -428,7 +426,7 @@ module ExtensionsUserinterface =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to pick points that define a line</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///Line definition mode.
@@ -471,7 +469,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
@@ -495,7 +493,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to pick one or more mesh faces</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Faces"</c>
@@ -531,7 +529,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to pick one or more mesh vertices</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Vertices"</c>
@@ -566,7 +564,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a point</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
@@ -598,7 +596,7 @@ module ExtensionsUserinterface =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a point constrainted to a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
@@ -621,7 +619,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a point constrained to a mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
@@ -637,7 +635,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a point constrained to a surface or polysurface
     ///  object</summary>
     ///<param name="surfaceId">(Guid) Identifier of the surface to get a point on</param>
@@ -669,7 +667,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of one or more points</summary>
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
     ///Draw lines between points</param>
@@ -741,7 +739,7 @@ module ExtensionsUserinterface =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to pick points that define a polyline</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
     ///The options are bit coded flags. Values can be added together to specify more than one option. 
@@ -783,7 +781,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
     ///A prompt or message</param>
@@ -811,7 +809,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a rectangle</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///The rectangle selection mode. The modes are as follows
@@ -847,7 +845,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Pauses for user input of a string value</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="defaultValString">(string) Optional, A default value</param>
@@ -878,7 +876,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display a list of items in a list box dialog</summary>
     ///<param name="items">(string IList) A list of values to select</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
@@ -900,7 +898,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays a message box. A message box contains a message and
     ///  title, plus any combination of predefined icons and push buttons</summary>
     ///<param name="message">(string) A prompt or message</param>
@@ -975,7 +973,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
     ///<param name="items">(string IList) list of string items</param>
     ///<param name="values">(string seq) the corresponding values to the items</param>
@@ -996,7 +994,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays a list of items in a multiple-selection list box dialog</summary>
     ///<param name="items">(string IList) A zero-based list of string items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
@@ -1015,7 +1013,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
     ///  Note, this function does not open the file</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1045,7 +1043,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
     ///  Note, this function does not open the file</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1076,7 +1074,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
     ///  anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
     ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
@@ -1108,7 +1106,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///A prompt message</param>
@@ -1137,7 +1135,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display a save dialog box allowing the user to enter a file name.
     ///  Note, this function does not save the file</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1165,7 +1163,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display a dialog box prompting the user to enter a string value</summary>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="defaultValValue">(string) Optional, A default string value</param>
@@ -1181,7 +1179,7 @@ module ExtensionsUserinterface =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Display a text dialog box similar to the one used by the _What command</summary>
     ///<param name="message">(string) The message</param>
     ///<param name="title">(string) Optional, The message title</param>

@@ -3,16 +3,16 @@ namespace Rhino.Scripting
 open FsEx
 open System
 open Rhino
-open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsLinetype =
+
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the existance of a linetype in the document</summary>
     ///<param name="name">(string) The name of an existing linetype</param>
     ///<returns>(bool) True or False</returns>
@@ -20,7 +20,7 @@ module ExtensionsLinetype =
         notNull <| Doc.Linetypes.FindName(name)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an existing linetype is from a reference file</summary>
     ///<param name="name">(string) The name of an existing linetype</param>
     ///<returns>(bool) True or False</returns>
@@ -30,14 +30,14 @@ module ExtensionsLinetype =
         lt.IsReference
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns number of linetypes in the document</summary>
     ///<returns>(int) the number of linetypes in the document</returns>
     static member LinetypeCount() : int =
         Doc.Linetypes.Count
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns names of all linetypes in the document</summary>
     ///<returns>(string ResizeArray) list of linetype names</returns>
     static member LinetypeNames() : string ResizeArray =

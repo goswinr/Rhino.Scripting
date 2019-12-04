@@ -3,16 +3,16 @@ namespace Rhino.Scripting
 open FsEx
 open System
 open Rhino
-open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsLayer =
+
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Add a new layer to the document</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
     ///  generates the layer name</param>
@@ -59,14 +59,14 @@ module ExtensionsLayer =
             lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
         Doc.Layers.[lastparentindex].FullPath
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the current layer</summary>
     ///<returns>(string) The full name of the current layer</returns>
     static member CurrentLayer() : string = //GET
         Doc.Layers.CurrentLayer.FullPath
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the current layer</summary>
     ///<param name="layer">(string) The name or Guid of an existing layer to make current</param>
     ///<returns>(unit) void, nothing</returns>
@@ -78,7 +78,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Removes an existing layer from the document. The layer to be removed
     ///  cannot be the current layer. Unlike the PurgeLayer method, the layer must
     ///  be empty, or contain no objects, before it can be removed. Any layers that
@@ -92,7 +92,7 @@ module ExtensionsLayer =
         Doc.Layers.Delete(i, true)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Expands a layer. Expanded layers can be viewed in Rhino's layer dialog</summary>
     ///<param name="layer">(string) Name of the layer to expand</param>
     ///<param name="expand">(bool) True to expand, False to collapse</param>
@@ -107,7 +107,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the existance of a layer in the document</summary>
     ///<param name="layer">(string) The name of a layer to search for</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -116,7 +116,7 @@ module ExtensionsLayer =
         i <> RhinoMath.UnsetIntIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that the objects on a layer can be changed (normal)</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -126,7 +126,7 @@ module ExtensionsLayer =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is a child of another layer</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
@@ -137,7 +137,7 @@ module ExtensionsLayer =
         test.IsChildOf(layer)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is the current layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -146,7 +146,7 @@ module ExtensionsLayer =
         layer.Index = Doc.Layers.CurrentLayerIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an existing layer is empty, or contains no objects</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -156,7 +156,7 @@ module ExtensionsLayer =
         isNull rhobjs || rhobjs.Length = 0
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
     ///  Rhino's layer dialog</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
@@ -166,7 +166,7 @@ module ExtensionsLayer =
         layer.IsExpanded
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is locked</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -175,7 +175,7 @@ module ExtensionsLayer =
         layer.IsLocked
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is on</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -184,7 +184,7 @@ module ExtensionsLayer =
         layer.IsVisible
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an existing layer is selectable (normal and reference)</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -193,7 +193,7 @@ module ExtensionsLayer =
         layer.IsVisible && not layer.IsLocked
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is a parent of another layer</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
@@ -204,7 +204,7 @@ module ExtensionsLayer =
         test.IsParentOf(layer)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is from a reference file</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -213,7 +213,7 @@ module ExtensionsLayer =
         layer.IsReference
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a layer is visible (normal, locked, and reference)</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
@@ -222,7 +222,7 @@ module ExtensionsLayer =
         layer.IsVisible
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(int) the number of immediate child layers</returns>
@@ -233,7 +233,7 @@ module ExtensionsLayer =
         else 0
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string ResizeArray) List of children layer names</returns>
@@ -244,7 +244,7 @@ module ExtensionsLayer =
         else resizeArray { () } //empty list
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the color of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(Drawing.Color) The current color value on success</returns>
@@ -252,7 +252,7 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Color
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the color of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
@@ -263,14 +263,14 @@ module ExtensionsLayer =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of layers in the document</summary>
     ///<returns>(int) the number of layers in the document</returns>
     static member LayerCount() : int =
         Doc.Layers.ActiveCount
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Return identifiers of all layers in the document</summary>
     ///<returns>(Guid ResizeArray) the identifiers of all layers in the document</returns>
     static member LayerIds() : Guid ResizeArray =
@@ -279,7 +279,7 @@ module ExtensionsLayer =
                             layer.Id }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) Name of the current linetype</returns>
@@ -289,7 +289,7 @@ module ExtensionsLayer =
         Doc.Linetypes.[index].Name
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="linetyp">(string) Name of a linetype</param>
@@ -308,7 +308,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the locked mode of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(bool) The current layer locked mode</returns>
@@ -317,7 +317,7 @@ module ExtensionsLayer =
         layer.IsLocked
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the locked mode of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="locked">(bool) New layer locked mode</param>
@@ -329,7 +329,7 @@ module ExtensionsLayer =
             Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the material index of a layer. A material index of -1
     /// indicates that no material has been assigned to the layer. Thus, the layer
     /// will use Rhino's default layer material</summary>
@@ -339,7 +339,7 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.RenderMaterialIndex
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the material index of a layer. A material index of -1
     /// indicates that no material has been assigned to the layer. Thus, the layer
     /// will use Rhino's default layer material</summary>
@@ -354,7 +354,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the identifier of a layer given the layer's name</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Guid) The layer's identifier</returns>
@@ -365,7 +365,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Return the name of a layer given it's identifier</summary>
     ///<param name="layerId">(Guid) Layer identifier</param>
     ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
@@ -377,7 +377,7 @@ module ExtensionsLayer =
         else layer.Name
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the names of all layers in the document</summary>
     ///<returns>(string ResizeArray) list of layer names</returns>
     static member LayerNames() : string ResizeArray =
@@ -387,7 +387,7 @@ module ExtensionsLayer =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the current display order index of a layer as displayed in Rhino's
     ///  layer dialog box. A display order index of -1 indicates that the current
     ///  layer dialog filter does not allow the layer to appear in the layer list</summary>
@@ -398,7 +398,7 @@ module ExtensionsLayer =
         layer.SortIndex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the print color of a layer. Layer print colors are
     /// represented as RGB colors</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -408,7 +408,7 @@ module ExtensionsLayer =
         let rc = layer.PlotColor
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the print color of a layer. Layer print colors are
     /// represented as RGB colors</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -423,7 +423,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the print width of a layer. Print width is specified
     /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -433,7 +433,7 @@ module ExtensionsLayer =
         let rc = layer.PlotWeight
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the print width of a layer. Print width is specified
     /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -448,7 +448,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the visible property of a layer</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility</returns>
@@ -457,7 +457,7 @@ module ExtensionsLayer =
         let rc = layer.IsVisible
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the visible property of a layer</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="visible">(bool) New visible state</param>
@@ -475,7 +475,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Return the parent layer of a layer or mepty string if no parent present</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) The name of the current parent layer</returns>
@@ -489,7 +489,7 @@ module ExtensionsLayer =
                 oldparentlayer.FullPath
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modify the parent layer of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="parent">(string) Name of new parent layer. To remove the parent layer,
@@ -505,7 +505,7 @@ module ExtensionsLayer =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Removes an existing layer from the document. The layer will be removed
     ///  even if it contains geometry objects. The layer to be removed cannot be the
     ///  current layer
@@ -519,7 +519,7 @@ module ExtensionsLayer =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Renames an existing layer</summary>
     ///<param name="oldname">(string) Original layer name</param>
     ///<param name="newname">(string) New layer name</param>

@@ -4,14 +4,16 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsUserdata =
-    type RhinoScriptSyntax with
 
-    [<EXT>]
+  //[<Extension>] //Error 3246
+  type RhinoScriptSyntax with
+
+    [<Extension>]
     ///<summary>Removes user data strings from the current document</summary>
     ///<param name="section">(string) Optional, Section name. If omitted, all sections and their corresponding
     ///  entries are removed</param>
@@ -21,21 +23,21 @@ module ExtensionsUserdata =
         Doc.Strings.Delete(section, entry) //TODO check null case
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of user data strings in the current document</summary>
     ///<returns>(int) the number of user data strings in the current document</returns>
     static member DocumentDataCount() : int =
         Doc.Strings.DocumentDataCount
 
   
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of user text strings in the current document</summary>
     ///<returns>(int) the number of user text strings in the current document</returns>
     static member DocumentUserTextCount() : int =
         Doc.Strings.DocumentUserTextCount
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a user data item from the current document</summary>
     ///<param name="section">(string) Optional, Section name. If omitted, all section names are returned</param>
     ///<returns>(string array) of all section names if section name is omitted, 
@@ -46,7 +48,7 @@ module ExtensionsUserdata =
         else
             Doc.Strings.GetEntryNames(section)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a user data item  entry from the current document</summary>
     ///<param name="section">(string) Section name</param>
     ///<param name="entry">(string) Entry name</param>
@@ -56,14 +58,14 @@ module ExtensionsUserdata =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns user text stored in the document</summary>
     ///<param name="key">(string) Key to use for retrieving user text</param>
     ///<returns>(string) If key is specified, then the associated value </returns>
     static member GetDocumentUserText(key:string) : string =
         Doc.Strings.GetValue(key)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns all document user text keys</summary>
     ///<returns>(string ResizeArray) all document user text keys</returns>
     static member GetDocumentUserTextKeys() : string ResizeArray =
@@ -73,7 +75,7 @@ module ExtensionsUserdata =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns all user text keys stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
@@ -89,7 +91,7 @@ module ExtensionsUserdata =
             resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns user text stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
@@ -104,21 +106,21 @@ module ExtensionsUserdata =
             obj.Attributes.GetUserString(key)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the current document contains user data</summary>
     ///<returns>(bool) True or False indicating the presence of Script user data</returns>
     static member IsDocumentData() : bool =
         Doc.Strings.Count > 0 //DocumentDataCount > 0
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the current document contains user text</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text</returns>
     static member IsDocumentUserText() : bool =
         Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object contains user text</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(int) result of test:
@@ -134,7 +136,7 @@ module ExtensionsUserdata =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds or sets a user data string to the current document</summary>
     ///<param name="section">(string) The section name</param>
     ///<param name="entry">(string) The entry name</param>
@@ -144,7 +146,7 @@ module ExtensionsUserdata =
         Doc.Strings.SetString(section, entry, value) |> ignore
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets or removes user text stored in the document</summary>
     ///<param name="key">(string) Key name to set</param>
     ///<param name="value">(string) Optional, The string value to set. If omitted the key/value pair
@@ -155,7 +157,7 @@ module ExtensionsUserdata =
         //TODO check null case
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets or removes user text stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
@@ -171,7 +173,7 @@ module ExtensionsUserdata =
         else
             if not <| obj.Attributes.SetUserString(key, value) then failwithf "SetUserText failed on %A for key %s value %s" objectId key value
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets or removes user text stored on multiple objects</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set</param>

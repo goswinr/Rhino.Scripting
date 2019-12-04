@@ -8,13 +8,15 @@ open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open Microsoft.FSharp.Core.LanguagePrimitives
 open System.IO
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsDocument =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Create a bitmap preview image of the current model</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the active view is used</param>
@@ -52,7 +54,7 @@ module ExtensionsDocument =
             rhview.CreateShadedPreviewImage(fileName, rhsize, ignoreHighlights, drawcplane, useghostedshading)
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the document's modified flag. This flag indicates whether
     /// or not any changes to the current document have been made. NOTE: setting the
     /// document modified flag to False will prevent the "Do you want to save this
@@ -61,7 +63,7 @@ module ExtensionsDocument =
     static member DocumentModified() : bool = //GET
         Doc.Modified
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the document's modified flag. This flag indicates whether
     /// or not any changes to the current document have been made. NOTE: setting the
     /// document modified flag to False will prevent the "Do you want to save this
@@ -73,7 +75,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the name of the currently loaded Rhino document (3DM file)</returns>
     static member DocumentName() : string =
@@ -81,7 +83,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns path of the currently loaded Rhino document (3DM file)</summary>
     ///<returns>(string) the path of the currently loaded Rhino document (3DM file)</returns>
     static member DocumentPath() : string =
@@ -94,7 +96,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Enables or disables screen redrawing</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///True to enable, False to disable</param>
@@ -103,7 +105,7 @@ module ExtensionsDocument =
         Doc.Views.RedrawEnabled <- enable
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Extracts the bitmap preview image from the specified model (.3dm)</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create. The extension of
     ///  the fileName controls the format of the bitmap file created.
@@ -121,21 +123,21 @@ module ExtensionsDocument =
         bmp.Save(fileName)
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Verifies that the current document has been modified in some way</summary>
     ///<returns>(bool) True or False</returns>
     static member IsDocumentModified() : bool =
         Doc.Modified
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<returns>(string) if `newnotes` is omitted, the current notes</returns>
     static member Notes() : string = //GET
         Doc.Notes
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command</summary>
     ///<param name="newnotes">(string) New notes to set</param>
@@ -145,7 +147,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the file version of the current document. Use this function to
     ///  determine which version of Rhino last saved the document. Note, this
     ///  function will not return values from referenced or merged files</summary>
@@ -154,7 +156,7 @@ module ExtensionsDocument =
         Doc.ReadFileVersion()
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Redraws all views</summary>
     ///<returns>(unit)</returns>
     static member Redraw() : unit =
@@ -165,13 +167,13 @@ module ExtensionsDocument =
         Doc.Views.RedrawEnabled <- old
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns render antialiasing style</summary>
     ///<returns>(int) The current antialiasing style (0= none, 1= normal, 2= best)</returns>
     static member RenderAntialias() : int = //GET
         int(Doc.RenderSettings.AntialiasLevel) // TODO check
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets render antialiasing style</summary>
     ///<param name="style">(int) Level of antialiasing (0= none, 1= normal, 2= best)</param>
     ///<returns>(unit) void, nothing</returns>
@@ -182,7 +184,7 @@ module ExtensionsDocument =
             Doc.RenderSettings <- settings
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render ambient light or background color</summary>
     ///<param name="item">(int) 0= ambient light color, 1= background color</param>
     ///<returns>(Drawing.Color) The current item color</returns>
@@ -191,7 +193,7 @@ module ExtensionsDocument =
         if item = 0 then  Doc.RenderSettings.AmbientLight
         else Doc.RenderSettings.BackgroundColorTop
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render ambient light or background color</summary>
     ///<param name="item">(int) 0= ambient light color, 1= background color</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
@@ -205,14 +207,14 @@ module ExtensionsDocument =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render resolution</summary>
     ///<returns>(int * int) The current resolution width, height</returns>
     static member RenderResolution() : int * int = //GET
         let rc = Doc.RenderSettings.ImageSize
         rc.Width, rc.Height
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render resolution</summary>
     ///<param name="width">(int) width and height of render</param>
     ///<param name="height">(int) height of render</param>
@@ -224,7 +226,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render mesh density </returns>
@@ -232,7 +234,7 @@ module ExtensionsDocument =
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         current.RelativeTolerance
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="density">(float) The new render mesh density, which is a number between 0.0 and 1.0</param>
@@ -245,7 +247,7 @@ module ExtensionsDocument =
             Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current maximum angle </returns>
@@ -253,7 +255,7 @@ module ExtensionsDocument =
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         toDegrees(current.RefineAngle)
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="angleDegrees">(float) The new maximum angle, which is a positive number in degrees</param>
@@ -266,7 +268,7 @@ module ExtensionsDocument =
                 Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render mesh maximum aspect ratio </returns>
@@ -275,7 +277,7 @@ module ExtensionsDocument =
         let rc = current.GridAspectRatio
         rc
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="ratio">(float) The render mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100</param>
@@ -288,7 +290,7 @@ module ExtensionsDocument =
             Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render mesh maximum distance, edge to surface </returns>
@@ -297,7 +299,7 @@ module ExtensionsDocument =
         let rc = current.Tolerance
         rc
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="distance">(float) The render mesh maximum distance, edge to surface</param>
@@ -310,7 +312,7 @@ module ExtensionsDocument =
             Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render mesh maximum edge length </returns>
@@ -319,7 +321,7 @@ module ExtensionsDocument =
         let rc = current.MaximumEdgeLength
         rc
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="distance">(float) The render mesh maximum edge length</param>
@@ -332,7 +334,7 @@ module ExtensionsDocument =
             Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render mesh minimum edge length </returns>
@@ -341,7 +343,7 @@ module ExtensionsDocument =
         let rc = current.MinimumEdgeLength
         rc
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="distance">(float) The render mesh minimum edge length</param>
@@ -355,7 +357,7 @@ module ExtensionsDocument =
             Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render mesh minimum initial grid quads </returns>
@@ -364,7 +366,7 @@ module ExtensionsDocument =
         current.GridMinCount
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="quads">(int) The render mesh minimum initial grid quads. The suggested range is from 0 to 10000</param>
@@ -378,7 +380,7 @@ module ExtensionsDocument =
             Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render mesh quality .
@@ -392,7 +394,7 @@ module ExtensionsDocument =
         elif current = MeshingParameterStyle.Custom then  2
         else -1
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="quality">(int) The render mesh quality, either:
@@ -413,7 +415,7 @@ module ExtensionsDocument =
         Doc.MeshingParameterStyle <- newValue
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render mesh settings .
@@ -430,7 +432,7 @@ module ExtensionsDocument =
         if current.SimplePlanes then  rc <- rc +  4
         rc
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="settings">(int) The render mesh settings, which is a bit-coded number that allows or disallows certain features.
@@ -450,7 +452,7 @@ module ExtensionsDocument =
         Doc.MeshingParameterStyle <- Rhino.Geometry.MeshingParameterStyle.Custom
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns render settings</summary>
     ///<returns>(int) if settings are not specified, the current render settings in bit-coded flags
     ///  0= none,
@@ -467,7 +469,7 @@ module ExtensionsDocument =
         if rendersettings.RenderAnnotations     then  rc <- rc + 8
         rc
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets render settings</summary>
     ///<param name="settings">(int) Bit-coded flags of render settings to modify.
     ///  0= none,
@@ -485,7 +487,7 @@ module ExtensionsDocument =
         Doc.RenderSettings <- rendersettings
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the document's absolute tolerance. Absolute tolerance
     /// is measured in drawing units. See Rhino's document properties command
     /// (Units and Page Units Window) for details</summary>
@@ -493,7 +495,7 @@ module ExtensionsDocument =
     static member UnitAbsoluteTolerance() : float = //GET
         Doc.ModelAbsoluteTolerance
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Sets the document's absolute tolerance. Absolute tolerance
     /// is measured in drawing units. See Rhino's document properties command
     /// (Units and Page Units Window) for details</summary>
@@ -507,7 +509,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Return the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
@@ -515,7 +517,7 @@ module ExtensionsDocument =
     static member UnitAngleTolerance() : float = //GET
        Doc.ModelAngleToleranceDegrees
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Set the document's angle tolerance. Angle tolerance is
     /// measured in degrees. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
@@ -528,13 +530,13 @@ module ExtensionsDocument =
                 failwithf "UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Return the document's distance display precision</summary>
     ///<returns>(int) The current distance display precision </returns>
     static member UnitDistanceDisplayPrecision() : int = //GET
         Doc.ModelDistanceDisplayPrecision
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Set the document's distance display precision</summary>
     ///<param name="precision">(int) The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
     ///  If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
@@ -544,7 +546,7 @@ module ExtensionsDocument =
             Doc.ModelDistanceDisplayPrecision <- precision
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Return the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
@@ -552,7 +554,7 @@ module ExtensionsDocument =
     static member UnitRelativeTolerance() : float = //GET
          Doc.ModelRelativeTolerance
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Set the document's relative tolerance. Relative tolerance
     /// is measured in percent. See Rhino's DocumentProperties command
     /// (Units and Page Units Window) for details</summary>
@@ -565,7 +567,7 @@ module ExtensionsDocument =
               failwithf "UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Return the scale factor for changing between unit systems</summary>
     ///<param name="toSystem">(int) The unit system to convert to. The unit systems are are:
     ///  0 - No unit system
@@ -602,7 +604,7 @@ module ExtensionsDocument =
       RhinoMath.UnitScale(fromSystemt, toSystemt)
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Return the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
     ///<returns>(int) The current unit system
@@ -635,7 +637,7 @@ module ExtensionsDocument =
     static member UnitSystem() : int = //GET
             int(Doc.ModelUnitSystem)
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Set the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
     ///<param name="unitSystem">(int) The unit system to set the document to. The unit systems are:
@@ -676,7 +678,7 @@ module ExtensionsDocument =
 
 
 
-    [<EXT>]
+    [<Extension>]
      ///<summary>Returns the name of the current unit system</summary>
     ///<param name="capitalize">(bool) Optional, Default Value: <c>false</c>
     ///Capitalize the first character of the units system name (e.g. return "Millimeter" instead of "millimeter"). The default is not to capitalize the first character (false)</param>

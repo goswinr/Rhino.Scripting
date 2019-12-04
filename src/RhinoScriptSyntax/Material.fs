@@ -3,18 +3,17 @@ namespace Rhino.Scripting
 open FsEx
 open System
 open Rhino
-open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsMaterial =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Add material to a layer and returns the new material's index. If the
     ///  layer already has a material, then the layer's current material index is
     ///  returned</summary>
@@ -29,7 +28,7 @@ module ExtensionsMaterial =
             Doc.Views.Redraw()
             materialindex
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds material to an object and returns the new material's index. If the
     ///  object already has a material, the the object's current material index is returned</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
@@ -50,7 +49,7 @@ module ExtensionsMaterial =
             materialindex
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Copies definition of a source material to a destination material</summary>
     ///<param name="sourceIndex">(int) Source index of materials to copy</param>
     ///<param name="destinationIndex">(int) Destination index materials to copy</param>
@@ -66,7 +65,7 @@ module ExtensionsMaterial =
                 rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a material is a copy of Rhino's built-in "default" material.
     ///  The default material is used by objects and layers that have not been
     ///  assigned a material</summary>
@@ -77,7 +76,7 @@ module ExtensionsMaterial =
         notNull mat && mat.IsDefaultMaterial
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a material is referenced from another file</summary>
     ///<param name="materialIndex">(int) The zero-based material index</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -86,7 +85,7 @@ module ExtensionsMaterial =
         notNull mat && mat.IsReference
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Copies the material definition from one material to one or more objects</summary>
     ///<param name="source">(Guid) Source material index -or- identifier of the source object.
     ///  The object must have a material assigned</param>
@@ -108,7 +107,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current bump bitmap filename </returns>
@@ -119,7 +118,7 @@ module ExtensionsMaterial =
         if notNull texture then Some texture.FileName else None
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The bump bitmap filename</param>
@@ -136,7 +135,7 @@ module ExtensionsMaterial =
             failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's diffuse color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material color</returns>
@@ -146,7 +145,7 @@ module ExtensionsMaterial =
         let rc = mat.DiffuseColor
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's diffuse color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
@@ -159,7 +158,7 @@ module ExtensionsMaterial =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's environment bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current environment bitmap filename</returns>
@@ -169,7 +168,7 @@ module ExtensionsMaterial =
         let texture = mat.GetEnvironmentTexture()
         if notNull texture then Some texture.FileName  else None
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's environment bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The environment bitmap filename</param>
@@ -186,7 +185,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's user defined name</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current material name</returns>
@@ -196,7 +195,7 @@ module ExtensionsMaterial =
         let rc = mat.Name
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's user defined name</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="name">(string) The new name</param>
@@ -209,7 +208,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's reflective color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material reflective color</returns>
@@ -219,7 +218,7 @@ module ExtensionsMaterial =
         let rc = mat.ReflectionColor
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's reflective color</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
@@ -233,7 +232,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(float) The current material shine value
@@ -244,7 +243,7 @@ module ExtensionsMaterial =
         let rc = mat.Shine
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="shine">(float) The new shine value. A material's shine value ranges from 0.0 to 255.0, with
@@ -260,7 +259,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's texture bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current texture bitmap filename</returns>
@@ -270,7 +269,7 @@ module ExtensionsMaterial =
         let texture = mat.GetBitmapTexture()
         if notNull texture then  Some texture.FileName else None
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's texture bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The texture bitmap filename</param>
@@ -286,7 +285,7 @@ module ExtensionsMaterial =
             failwithf "Rhino.Scripting: MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(float) The current material transparency value
@@ -297,7 +296,7 @@ module ExtensionsMaterial =
         let rc = mat.Transparency
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="transparency">(float) The new transparency value. A material's transparency value ranges from 0.0 to 1.0, with
@@ -312,7 +311,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current transparency bitmap filename</returns>
@@ -323,7 +322,7 @@ module ExtensionsMaterial =
         if notNull texture then  Some texture.FileName else None
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies a material's transparency bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The transparency bitmap filename</param>
@@ -341,7 +340,7 @@ module ExtensionsMaterial =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Resets a material to Rhino's default material</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(bool) True or False indicating success or failure</returns>

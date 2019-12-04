@@ -3,19 +3,16 @@ namespace Rhino.Scripting
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open Rhino.Scripting.ActiceDocument
-//open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.ApplicationSettings
-open Rhino.Commands
-open System.Windows.Forms
 
 [<AutoOpen>]
 module ExtensionsApplication =
 
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Add new command alias to Rhino. Command aliases can be added manually by
     ///  using Rhino's Options command and modifying the contents of the Aliases tab</summary>
     ///<param name="alias">(string) Name of new command alias. Cannot match command names or existing
@@ -26,7 +23,7 @@ module ExtensionsApplication =
         ApplicationSettings.CommandAliasList.Add(alias, macro)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Add new path to Rhino's search path list. Search paths can be added by
     ///  using Rhino's Options command and modifying the contents of the files tab</summary>
     ///<param name="folder">(string) A valid folder, or path, to add</param>
@@ -38,21 +35,21 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.AddSearchPath(folder, index)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns number of command aliases in Rhino</summary>
     ///<returns>(int) the number of command aliases in Rhino</returns>
     static member AliasCount() : int =
         ApplicationSettings.CommandAliasList.Count
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the macro of a command alias</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
     ///<returns>(string) The existing macro </returns>
     static member AliasMacro(alias:string) : string = //GET
         ApplicationSettings.CommandAliasList.GetMacro(alias)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the macro of a command alias</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
     ///<param name="macro">(string) The new macro to run when the alias is executed.</param>
@@ -62,14 +59,14 @@ module ExtensionsApplication =
         |> ignore
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a array of command alias names</summary>
     ///<returns>(string array) a array of command alias names</returns>
     static member AliasNames() : array<string> =
         ApplicationSettings.CommandAliasList.GetNames()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns an application interface item's color</summary>
     ///<param name="item">(int) Item number to either query or modify
     ///  0  = View background
@@ -118,7 +115,7 @@ module ExtensionsApplication =
         elif item = 13 then AppearanceSettings.CommandPromptHypertextColor
         else failwithf "getAppearanceColor: item %d is out of range" item
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies an application interface item's color</summary>
     ///<param name="item">(int) Item number to either query or modify
     ///  0  = View background
@@ -161,13 +158,13 @@ module ExtensionsApplication =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the file name used by Rhino's automatic file saving</summary>
     ///<returns>(string) The name of the current autosave file</returns>
     static member AutosaveFile() : string = //GET
         ApplicationSettings.FileSettings.AutoSaveFile
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the file name used by Rhino's automatic file saving</summary>
     ///<param name="filename">(string) Name of the new autosave file</param>
     ///<returns>(unit) void, nothing</returns>
@@ -175,14 +172,14 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.AutoSaveFile <- filename
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns how often the document will be saved when Rhino's
     /// automatic file saving mechanism is enabled</summary>
     ///<returns>(float) The current interval in minutes</returns>
     static member AutosaveInterval() : float = //GET
         ApplicationSettings.FileSettings.AutoSaveInterval.TotalMinutes
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes how often the document will be saved when Rhino's
     /// automatic file saving mechanism is enabled</summary>
     ///<param name="minutes">(float) The number of minutes between saves</param>
@@ -191,14 +188,14 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.AutoSaveInterval <- TimeSpan.FromMinutes(minutes)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the build date of Rhino</summary>
     ///<returns>(DateTime) the build date of Rhino. Will be converted to a string by most functions</returns>
     static member BuildDate() : DateTime =
         RhinoApp.BuildDate
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Clears contents of Rhino's command history window. You can view the
     ///  command history window by using the CommandHistory command in Rhino</summary>
     ///<returns>(unit) void, nothing</returns>
@@ -206,7 +203,7 @@ module ExtensionsApplication =
         RhinoApp.ClearCommandHistoryWindow()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Runs a Rhino command script. All Rhino commands can be used in command
     ///  scripts. The command can be a built-in Rhino command or one provided by a
     ///  3rd party plug-in.
@@ -243,14 +240,14 @@ module ExtensionsApplication =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the contents of Rhino's command history window</summary>
     ///<returns>(string) the contents of Rhino's command history window</returns>
     static member CommandHistory() : string =
         RhinoApp.CommandHistoryWindowText
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the default render plug-in</summary>
     ///<returns>(string) Name of default renderer</returns>
     static member DefaultRenderer() : string = //GET
@@ -258,7 +255,7 @@ module ExtensionsApplication =
         let mutable plugins = PlugIns.PlugIn.GetInstalledPlugIns()
         plugins.[objectId]
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the default render plug-in</summary>
     ///<param name="renderer">(string) The name of the renderer to set as default renderer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -267,7 +264,7 @@ module ExtensionsApplication =
         Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Delete an existing alias from Rhino</summary>
     ///<param name="alias">(string) The name of an existing alias</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
@@ -275,7 +272,7 @@ module ExtensionsApplication =
         ApplicationSettings.CommandAliasList.Delete(alias)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Removes existing path from Rhino's search path list. Search path items
     ///  can be removed manually by using Rhino's options command and modifying the
     ///  contents of the files tab</summary>
@@ -285,7 +282,7 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.DeleteSearchPath(folder)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables/disables OLE Server Busy/Not Responding dialog boxes</summary>
     ///<param name="enable">(bool) Whether alerts should be visible (True or False)</param>
     ///<returns>(unit) void, nothing</returns>
@@ -293,13 +290,13 @@ module ExtensionsApplication =
         Rhino.Runtime.HostUtils.DisplayOleAlerts( enable )
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns edge analysis color displayed by the ShowEdges command</summary>
     ///<returns>(Drawing.Color) The current edge analysis color</returns>
     static member EdgeAnalysisColor() : Drawing.Color= //GET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdgeColor
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies edge analysis color displayed by the ShowEdges command</summary>
     ///<param name="color">(Drawing.Color), optional): The new color for the analysis</param>
     ///<returns>(unit) void, nothing</returns>
@@ -307,7 +304,7 @@ module ExtensionsApplication =
         ApplicationSettings.EdgeAnalysisSettings.ShowEdgeColor <- color
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns edge analysis mode displayed by the ShowEdges command</summary>
     ///<returns>(int) The current edge analysis mode
     ///  0 - display all edges
@@ -315,7 +312,7 @@ module ExtensionsApplication =
     static member EdgeAnalysisMode() : int = //GET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdges
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies edge analysis mode displayed by the ShowEdges command</summary>
     ///<param name="mode">(int) The new display mode. The available modes are
     ///  0 - display all edges
@@ -328,7 +325,7 @@ module ExtensionsApplication =
             failwithf "bad edge analysisMode %d" mode
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables Rhino's automatic file saving mechanism</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///The autosave state. If omitted automatic saving is enabled (True)</param>
@@ -337,7 +334,7 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.AutoSaveEnabled <- enable
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of a Rhino plug-in</summary>
     ///<param name="plugin">(string) The name of the plugin</param>
     ///<returns>(bool) True if set to load silently otherwise False</returns>
@@ -347,7 +344,7 @@ module ExtensionsApplication =
         if rc then loadSilent
         else failwithf "EnablePlugIn: %s GetLoadProtection failed" plugin
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables a Rhino plug-in</summary>
     ///<param name="plugin">(string) The name of the plugin</param>
     ///<param name="enable">(bool) Load silently if True</param>
@@ -361,42 +358,42 @@ module ExtensionsApplication =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the full path to Rhino's executable folder</summary>
     ///<returns>(string) the full path to Rhino's executable folder</returns>
     static member ExeFolder() : string =
         ApplicationSettings.FileSettings.ExecutableFolder
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the platform of the Rhino executable</summary>
     ///<returns>(int) 1 for 64 bit, 0 for 32 bit</returns>
     static member ExePlatform() : int =
         if System.Environment.Is64BitProcess then  1 else  0
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the service release number of the Rhino executable</summary>
     ///<returns>(int) the service release number of the Rhino executable</returns>
     static member ExeServiceRelease() : int =
         RhinoApp.ExeServiceRelease
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the major version number of the Rhino executable</summary>
     ///<returns>(int) the major version number of the Rhino executable</returns>
     static member ExeVersion() : int =
         RhinoApp.ExeVersion
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Closes the rhino application</summary>
     ///<returns>(unit) void, nothing</returns>
     static member Exit() : unit =
         RhinoApp.Exit()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Searches for a file using Rhino's search path. Rhino will look for a file in the following locations:
     ///    1. The current document's folder.
     ///    2. Folder's specified in Options dialog, File tab.
@@ -407,7 +404,7 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.FindFile(filename)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a scriptable object from a specified plug-in. Not all plug-ins
     ///  contain scriptable objects. Check with the manufacturer of your plug-in
     ///  to see if they support this capability</summary>
@@ -418,7 +415,7 @@ module ExtensionsApplication =
         RhinoApp.GetPlugInObject(plugIn)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines if Rhino is currently running a command. Because Rhino allows
     ///  for transparent commands (commands run from inside of other commands), this
     ///  method returns the total number of active commands</summary>
@@ -437,14 +434,14 @@ module ExtensionsApplication =
         |> Array.length
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>The full path to Rhino's installation folder</summary>
     ///<returns>(string) the full path to Rhino's installation folder</returns>
     static member InstallFolder() : string =
         ApplicationSettings.FileSettings.InstallFolder.FullName
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a command alias exists in Rhino</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
     ///<returns>(bool) True if exists or False if the alias does not exist</returns>
@@ -452,7 +449,7 @@ module ExtensionsApplication =
         ApplicationSettings.CommandAliasList.IsAlias(alias)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a command exists in Rhino. Useful when scripting commands
     ///  found in 3rd party plug-ins</summary>
     ///<param name="commandName">(string) The command name to test</param>
@@ -461,7 +458,7 @@ module ExtensionsApplication =
         Commands.Command.IsCommand(commandName)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that a plug-in is registered</summary>
     ///<param name="plugin">(string) The unique objectId of the plug-in</param>
     ///<returns>(bool) True if the Guid is registered or False if it is not</returns>
@@ -473,14 +470,14 @@ module ExtensionsApplication =
             rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns True if this script is being executed on a Windows platform</summary>
     ///<returns>(bool) True if currently running on the Widows platform. False if it is not Windows</returns>
     static member IsRunningOnWindows() : bool =
         Rhino.Runtime.HostUtils.RunningOnWindows
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the name of the last executed command</summary>
     ///<returns>(string) the name of the last executed command</returns>
     static member LastCommandName() : string =
@@ -488,7 +485,7 @@ module ExtensionsApplication =
         Commands.Command.LookupCommandName(objectId, true)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the result code for the last executed command</summary>
     ///<returns>(int) the result code for the last executed command.
     ///  0 = success (command successfully completed)
@@ -500,7 +497,7 @@ module ExtensionsApplication =
         int(Commands.Command.LastCommandResult)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the current language used for the Rhino interface.  The current
     ///  language is returned as a locale ID, or LCID, value</summary>
     ///<returns>(int) the current language used for the Rhino interface as a locale ID, or LCID.
@@ -517,13 +514,13 @@ module ExtensionsApplication =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of Rhino's ortho modeling aid</summary>
     ///<returns>(bool) The current ortho status</returns>
     static member Ortho() : bool = //GET
         ModelAidSettings.Ortho
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables Rhino's ortho modeling aid</summary>
     ///<param name="enable">(bool) The new enabled status</param>
     ///<returns>(unit) void, nothing</returns>
@@ -531,14 +528,14 @@ module ExtensionsApplication =
         ModelAidSettings.Ortho <- enable
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of Rhino's object snap modeling aid.
     ///  Object snaps are tools for specifying points on existing objects</summary>
     ///<returns>(bool) The current osnap status</returns>
     static member Osnap() : bool = //GET
         ModelAidSettings.Osnap
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables Rhino's object snap modeling aid.
     ///  Object snaps are tools for specifying points on existing objects</summary>
     ///<param name="enable">(bool) The new enabled status</param>
@@ -547,13 +544,13 @@ module ExtensionsApplication =
         ModelAidSettings.Osnap <- enable
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of Rhino's dockable object snap bar</summary>
     ///<returns>(bool) The current visible state</returns>
     static member OsnapDialog() : bool = //GET
         ModelAidSettings.UseHorizontalDialog
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Shows or hides Rhino's dockable object snap bar</summary>
     ///<param name="visible">(bool) The new visibility state.</param>
     ///<returns>(unit) void, nothing</returns>
@@ -561,7 +558,7 @@ module ExtensionsApplication =
         ModelAidSettings.UseHorizontalDialog <- visible
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the object snap mode. Object snaps are tools for
     /// specifying points on existing objects</summary>
     ///<returns>(int) The current object snap mode(s)
@@ -582,7 +579,7 @@ module ExtensionsApplication =
     static member OsnapMode() : int = //GET
         int(ModelAidSettings.OsnapModes)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets the object snap mode. Object snaps are tools for
     /// specifying points on existing objects</summary>
     ///<param name="mode">(int) The object snap mode or modes to set.
@@ -605,13 +602,13 @@ module ExtensionsApplication =
         ModelAidSettings.OsnapModes <- LanguagePrimitives.EnumOfValue mode
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of Rhino's planar modeling aid</summary>
     ///<returns>(bool) The current planar status</returns>
     static member Planar() : bool = //GET
         ModelAidSettings.Planar
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables Rhino's planar modeling aid</summary>
     ///<param name="enable">(bool) The new enable status.</param>
     ///<returns>(unit) void, nothing</returns>
@@ -619,7 +616,7 @@ module ExtensionsApplication =
         ModelAidSettings.Planar <- enable
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the identifier of a plug-in given the plug-in name</summary>
     ///<param name="plugin">(string) the name  of the plug-in</param>
     ///<returns>(Guid) the  Unique Guid of the plug-in</returns>
@@ -629,7 +626,7 @@ module ExtensionsApplication =
         else failwithf "Plugin %s not found" plugin
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a array of registered Rhino plug-ins</summary>
     ///<param name="types">(int) Optional, Default Value: <c>0</c>
     ///The type of plug-ins to return.
@@ -657,20 +654,20 @@ module ExtensionsApplication =
         Rhino.PlugIns.PlugIn.GetInstalledPlugInNames(filter, loaded, unloaded)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of object snap projection</summary>
     ///<returns>(bool) the current object snap projection status</returns>
     static member ProjectOsnaps() : bool = //GET
         ModelAidSettings.ProjectSnapToCPlane
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables object snap projection</summary>
     ///<param name="enable">(bool) The new enabled status.</param>
     static member ProjectOsnaps(enable:bool) : unit = //SET
         ModelAidSettings.ProjectSnapToCPlane <- enable
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Change Rhino's command window prompt</summary>
     ///<param name="message">(string) The new prompt on the commandline</param>
     ///<returns>(unit) void, nothing</returns>
@@ -678,7 +675,7 @@ module ExtensionsApplication =
         RhinoApp.SetCommandPrompt(message)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns current width and height, of the screen of the primary monitor</summary>
     ///<returns>(int * int) containing two numbers identifying the width and height in pixels</returns>
     static member ScreenSize() : int * int =
@@ -686,14 +683,14 @@ module ExtensionsApplication =
         sz.Width, sz.Height
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns version of the Rhino SDK supported by the executing Rhino</summary>
     ///<returns>(int) the version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn</returns>
     static member SdkVersion() : int =
         RhinoApp.SdkVersion
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of path items in Rhino's search path list.
     ///  See "Options Files settings" in the Rhino help file for more details</summary>
     ///<returns>(int) the number of path items in Rhino's search path list</returns>
@@ -701,7 +698,7 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.SearchPathCount
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns all of the path items in Rhino's search path list.
     ///  See "Options Files settings" in the Rhino help file for more details</summary>
     ///<returns>(string array) list of search paths</returns>
@@ -709,7 +706,7 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sends a string of printable characters to Rhino's command line</summary>
     ///<param name="keys">(string) A string of characters to send to the command line</param>
     ///<param name="addReturn">(bool) Optional, Default Value: <c>true</c>
@@ -719,20 +716,20 @@ module ExtensionsApplication =
         RhinoApp.SendKeystrokes(keys, addReturn)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get status of Rhino's grid snap modeling aid</summary>
     ///<returns>(bool) the current grid snap status</returns>
     static member Snap() : bool = //GET
         ModelAidSettings.GridSnap
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables Rhino's grid snap modeling aid</summary>
     ///<param name="enable">(bool) The new enabled status.</param>
     static member Snap(enable:bool) : unit = //SET
         ModelAidSettings.GridSnap <- enable
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets Rhino's status bar distance pane</summary>
     ///<param name="distance">(float) The distance to set the status bar</param>
     ///<returns>(unit) void, nothing</returns>
@@ -740,7 +737,7 @@ module ExtensionsApplication =
         UI.StatusBar.SetDistancePane(distance)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets Rhino's status bar message pane</summary>
     ///<param name="message">(string) The message to display</param>
     ///<returns>(unit) void, nothing</returns>
@@ -748,7 +745,7 @@ module ExtensionsApplication =
         UI.StatusBar.SetMessagePane(message)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets Rhino's status bar point coordinate pane</summary>
     ///<param name="point">(Point3d) The 3d coordinates of the status bar</param>
     ///<returns>(unit) void, nothing</returns>
@@ -756,7 +753,7 @@ module ExtensionsApplication =
         UI.StatusBar.SetPointPane(point)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Start the Rhino status bar progress meter</summary>
     ///<param name="label">(string) Short description of the progesss</param>
     ///<param name="lower">(int) Lower limit of the progress meter's range</param>
@@ -772,7 +769,7 @@ module ExtensionsApplication =
         rc = 1
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Set the current position of the progress meter</summary>
     ///<param name="position">(int) The new position in the progress meter</param>
     ///<param name="absolute">(bool) Optional, Default Value: <c>true</c>
@@ -783,21 +780,21 @@ module ExtensionsApplication =
         |> ignore
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Hide the progress meter</summary>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarProgressMeterHide() : unit =
         UI.StatusBar.HideProgressMeter()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns Rhino's default template file. This is the file used
     /// when Rhino starts</summary>
     ///<returns>(string) The current default template file</returns>
     static member TemplateFile() : string = //GET
         ApplicationSettings.FileSettings.TemplateFile
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets Rhino's default template file. This is the file used
     /// when Rhino starts</summary>
     ///<param name="filename">(string) The name of the new default template file.</param>
@@ -806,13 +803,13 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.TemplateFile <- filename
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the location of Rhino's template folder</summary>
     ///<returns>(string) The current template file folder</returns>
     static member TemplateFolder() : string = //GET
         ApplicationSettings.FileSettings.TemplateFolder
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets the location of Rhino's template folder</summary>
     ///<param name="folder">(string) The location of Rhino's template files. Note, the location must exist</param>
     ///<returns>(unit) void, nothing</returns>
@@ -820,21 +817,21 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.TemplateFolder <- folder
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the windows handle of Rhino's main window</summary>
     ///<returns>(IntPtr) the Window's handle of Rhino's main window. IntPtr is a platform-specific type that is used to represent a pointer or a handle</returns>
     static member WindowHandle() : IntPtr =
         RhinoApp.MainWindowHandle()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns Rhino's working folder (directory).
     /// The working folder is the default folder for all file operations</summary>
     ///<returns>(string) The current working folder</returns>
     static member WorkingFolder() : string = //GET
         ApplicationSettings.FileSettings.WorkingFolder
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Sets Rhino's working folder (directory).
     /// The working folder is the default folder for all file operations</summary>
     ///<param name="folder">(string) The new working folder for the current Rhino session</param>

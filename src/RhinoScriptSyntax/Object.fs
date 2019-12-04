@@ -4,20 +4,19 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 open FsEx.UtilMath
 open FsEx.CompareOperators
 open Rhino.Scripting.ActiceDocument
-open System.Collections.Generic
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsObject =
 
-
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///  matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
@@ -37,7 +36,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
     ///  The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
@@ -53,7 +52,7 @@ module ExtensionsObject =
         res
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Copies object from one location to another, or in-place</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
     ///<param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
@@ -70,7 +69,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Copies one or more objects from one location to another, or in-place</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
@@ -89,7 +88,7 @@ module ExtensionsObject =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Deletes a single object from the document</summary>
     ///<param name="objectId">(Guid) Identifier of object to delete</param>
     ///<returns>(unit) void, nothing</returns>
@@ -100,7 +99,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Deletes one or more objects from the document, Fails if not all objects can be deleted</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
     ///<returns>(unit) void, nothing</returns>
@@ -111,7 +110,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Causes the selection state of one or more objects to change momentarily
     ///  so the object appears to flash on the screen</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to flash</param>
@@ -125,7 +124,7 @@ module ExtensionsObject =
             Doc.Views.FlashObjects(rhobjs, style)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Hides a single object</summary>
     ///<param name="objectId">(Guid) Id of object to hide</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
@@ -133,7 +132,7 @@ module ExtensionsObject =
         Doc.Objects.Hide(objectId, false)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Hides one or more objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden</returns>
@@ -147,7 +146,7 @@ module ExtensionsObject =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is in either page layout space or model space</summary>
     ///<param name="objectId">(Guid) Id of an object to test</param>
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space</returns>
@@ -156,7 +155,7 @@ module ExtensionsObject =
         rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies the existence of an object</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist</returns>
@@ -164,7 +163,7 @@ module ExtensionsObject =
         RhinoScriptSyntax.TryCoerceRhinoObject(objectId) <> None
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is hidden. Hidden objects are not visible, cannot
     ///  be snapped to, and cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
@@ -174,7 +173,7 @@ module ExtensionsObject =
         rhobj.IsHidden
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object's bounding box is inside of another bounding box</summary>
     ///<param name="objectId">(Guid) Identifier of an object to be tested</param>
     ///<param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
@@ -194,7 +193,7 @@ module ExtensionsObject =
           union.IsValid
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is a member of a group</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function
@@ -217,7 +216,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is locked. Locked objects are visible, and can
     ///  be snapped to, but cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
@@ -227,7 +226,7 @@ module ExtensionsObject =
         rhobj.IsLocked
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is normal. Normal objects are visible, can be
     ///  snapped to, and can be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
@@ -237,7 +236,7 @@ module ExtensionsObject =
         rhobj.IsNormal
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is a reference object. Reference objects are
     ///  objects that are not part of the current document</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
@@ -247,7 +246,7 @@ module ExtensionsObject =
         rhobj.IsReference
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object can be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True or False</returns>
@@ -256,7 +255,7 @@ module ExtensionsObject =
         rhobj.IsSelectable(true, false, false, false)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies that an object is currently selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(int) 0, the object is not selected
@@ -268,7 +267,7 @@ module ExtensionsObject =
         rhobj.IsSelected(false)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines if an object is closed, solid</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is solid, or a mesh is closed., False otherwise</returns>
@@ -283,7 +282,7 @@ module ExtensionsObject =
         | _                 -> false
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object's geometry is valid and without error</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is valid</returns>
@@ -293,7 +292,7 @@ module ExtensionsObject =
         |Some rhobj ->  rhobj.IsValid
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is visible in a view</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<param name="view">(string) Optional, Default Value: The title of the view.  If omitted, the current active view is used</param>
@@ -305,7 +304,7 @@ module ExtensionsObject =
         rhobj.Visible && viewport.IsVisible(bbox)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Locks a single object. Locked objects are visible, and they can be
     ///  snapped to. But, they cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -314,7 +313,7 @@ module ExtensionsObject =
         Doc.Objects.Lock(objectId, false)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Locks multiple objects. Locked objects are visible, and they can be
     ///  snapped to. But, they cannot be selected</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
@@ -327,7 +326,7 @@ module ExtensionsObject =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Matches, or copies the attributes of a source object to a target object</summary>
     ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
     ///<param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
@@ -348,7 +347,7 @@ module ExtensionsObject =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Mirrors a single object on World XY Plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
@@ -371,7 +370,7 @@ module ExtensionsObject =
         res
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Mirrors a list of objects on World XY Plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
@@ -398,7 +397,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Moves a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
@@ -409,7 +408,7 @@ module ExtensionsObject =
         if res = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply move to from objectId:'%A' translation:'%A'" objectId translation
         res
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Moves one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
@@ -425,7 +424,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
@@ -435,7 +434,7 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.DrawColor(Doc)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
@@ -450,7 +449,7 @@ module ExtensionsObject =
         if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then failwithf "set ObjectColor faile for %A; %A" objectId color
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the color of multiple objects. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed</summary>
@@ -469,7 +468,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the color source of an object</summary>
     ///<param name="objectId">(Guid) Single identifier</param>
     ///<returns>(int) The current color source
@@ -481,7 +480,7 @@ module ExtensionsObject =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhobj.Attributes.ColorSource)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the color source of an object</summary>
     ///<param name="objectId">(Guid) Single identifier</param>
     ///<param name="source">(int) New color source
@@ -497,7 +496,7 @@ module ExtensionsObject =
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectColorSource failed for '%A' and '%A'" objectId source
         Doc.Views.Redraw()
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the color source of multiple objects</summary>
     ///<param name="objectIds">(Guid seq) Multiple identifiers</param>
     ///<param name="source">(int) New color source
@@ -518,7 +517,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...)</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object </returns>
@@ -528,7 +527,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the count for each object type in a List of objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(string) A short text description of the object </returns>
@@ -548,7 +547,7 @@ module ExtensionsObject =
         tx
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns all of the group names that an object is assigned to</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string ResizeArray) list of group names on success</returns>
@@ -559,7 +558,7 @@ module ExtensionsObject =
             let groupindices = rhinoobject.GetGroupList()
             resizeArray { for index in groupindices do yield Doc.Groups.GroupName(index) }
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the short layer of an object.
     ///Without Parent Layers</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
@@ -569,7 +568,7 @@ module ExtensionsObject =
         let index = obj.Attributes.LayerIndex
         Doc.Layers.[index].Name
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the full layername of an object. 
     /// arent layers are separated by <c>::</c> </summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
@@ -580,7 +579,7 @@ module ExtensionsObject =
         Doc.Layers.[index].FullPath
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the layer of an object</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -593,7 +592,7 @@ module ExtensionsObject =
         if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the layer of multiple objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -608,7 +607,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string option) The object's current page layout view, None if it is in Model Space</returns>
@@ -622,7 +621,7 @@ module ExtensionsObject =
             None
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the layout or model space of an object</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="layout">(string option) To change, or move, an object from model space to page
@@ -656,7 +655,7 @@ module ExtensionsObject =
             if not <| rhobj.CommitChanges() then failwithf "Set ObjectLayout failed for '%A' and '%A'"  layout objectId
             Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the layout or model space of an objects</summary>
     ///<param name="objectsIds">(Guid seq) Identifier of the objects</param>
     ///<param name="layout">(string option) To change, or move, an objects from model space to page
@@ -698,7 +697,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
      
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the linetype of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(string) The object's current linetype</returns>
@@ -707,7 +706,7 @@ module ExtensionsObject =
         let oldindex = Doc.Linetypes.LinetypeIndexForObject(rhinoobject)
         Doc.Linetypes.[oldindex].Name
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the linetype of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="linetype">(string) Name of an existing linetyp</param>
@@ -721,7 +720,7 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         Doc.Views.Redraw()
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the linetype of multiple object</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="linetype">(string) Name of an existing linetyp</param>
@@ -737,7 +736,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the linetype source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current linetype source
@@ -749,7 +748,7 @@ module ExtensionsObject =
         let oldsource = rhinoobject.Attributes.LinetypeSource
         int(oldsource)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the linetype source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New linetype source.
@@ -766,7 +765,7 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the linetype source of multiple objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="source">(int) New linetype source.
@@ -785,7 +784,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
@@ -799,7 +798,7 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.MaterialIndex
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
@@ -815,7 +814,7 @@ module ExtensionsObject =
         if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then 
             failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the material index multiple objects. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
@@ -832,7 +831,7 @@ module ExtensionsObject =
             if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then 
                 failwithf "Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the rendering material source of an object</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<returns>(int) The current rendering material source
@@ -844,7 +843,7 @@ module ExtensionsObject =
         int(rhinoobject.Attributes.MaterialSource)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the rendering material source of an object</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<param name="source">(int) The new rendering material source.
@@ -861,7 +860,7 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the rendering material source of multiple objects</summary>
     ///<param name="objectsIds">(Guid seq) One or more objects identifierss</param>
     ///<param name="source">(int) The new rendering material source.
@@ -880,7 +879,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the name of an object</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(string) The current object name</returns>
@@ -888,7 +887,7 @@ module ExtensionsObject =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.Name
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the name of an object</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name.</param>
@@ -899,7 +898,7 @@ module ExtensionsObject =
         rhinoobject.Attributes.Name <- name
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectName failed for '%A' and '%A'"  name objectId
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the name of multiple objects</summary>
     ///<param name="objectsIds">(Guid seq)Id of objects</param>
     ///<param name="name">(string) The new objects name.</param>
@@ -910,7 +909,7 @@ module ExtensionsObject =
             rhinoobject.Attributes.Name <- name
             if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectName failed for '%A' and '%A'"  name objectId
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the print color of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(Drawing.Color) The object's current print color</returns>
@@ -920,7 +919,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print color of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="color">(Drawing.Color) New print color.</param>
@@ -932,7 +931,7 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print color of multiple objects</summary>
     ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
     ///<param name="color">(Drawing.Color) New print color.</param>
@@ -945,7 +944,7 @@ module ExtensionsObject =
             if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the print color source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current print color source
@@ -957,7 +956,7 @@ module ExtensionsObject =
             int(rhinoobject.Attributes.PlotColorSource)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print color source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print color source
@@ -973,7 +972,7 @@ module ExtensionsObject =
         if not <| rhobj.CommitChanges() then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print color source of multiple objects</summary>
     ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
     ///<param name="source">(int) New print color source
@@ -990,7 +989,7 @@ module ExtensionsObject =
             if not <| rhobj.CommitChanges() then failwithf "Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the print width of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(float) The object's current print width</returns>
@@ -999,7 +998,7 @@ module ExtensionsObject =
             rhinoobject.Attributes.PlotWeight
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print width of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
@@ -1014,7 +1013,7 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print width of multiple objects</summary>
     ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
@@ -1031,7 +1030,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the print width source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current print width source
@@ -1043,7 +1042,7 @@ module ExtensionsObject =
             int(rhinoobject.Attributes.PlotWeightSource)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print width source of an object</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print width source
@@ -1057,7 +1056,7 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Modifies the print width source of multiple objects</summary>
     ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
     ///<param name="source">(int) New print width source
@@ -1073,7 +1072,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the object type</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) The object type .
@@ -1113,7 +1112,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Rotates a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
@@ -1141,7 +1140,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Rotates multiple objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
@@ -1172,7 +1171,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
     ///  scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -1193,7 +1192,7 @@ module ExtensionsObject =
         if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
         res
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -1212,7 +1211,7 @@ module ExtensionsObject =
         if res = Guid.Empty then failwithf "Rhino.Scripting: ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
         res
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
     ///  uniform scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
@@ -1236,7 +1235,7 @@ module ExtensionsObject =
             rc.Add res
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -1261,7 +1260,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Selects a single object</summary>
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1272,7 +1271,7 @@ module ExtensionsObject =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Selects one or more objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1284,7 +1283,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Perform a shear transformation on a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
@@ -1320,7 +1319,7 @@ module ExtensionsObject =
        res
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Shears one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to shear</param>
     ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
@@ -1358,7 +1357,7 @@ module ExtensionsObject =
                 res  }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Shows a previously hidden object. Hidden objects are not visible, cannot
     ///  be snapped to and cannot be selected</summary>
     ///<param name="objectId">(Guid) Representing id of object to show</param>
@@ -1368,7 +1367,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Shows one or more objects. Hidden objects are not visible, cannot be
     ///  snapped to and cannot be selected</summary>
     ///<param name="objectIds">(Guid seq) Ids of objects to show</param>
@@ -1380,7 +1379,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unlocks an object. Locked objects are visible, and can be snapped to,
     ///  but they cannot be selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -1389,7 +1388,7 @@ module ExtensionsObject =
         if not <| Doc.Objects.Unlock(objectId, false) then failwithf "UnlockObject faild on %A" objectId
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
     ///  snapped to, but they cannot be selected</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
@@ -1401,7 +1400,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unselects a single selected object</summary>
     ///<param name="objectId">(Guid) Id of object to unselect</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1411,7 +1410,7 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unselects multiple selected objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect</param>
     ///<returns>(unit) void, nothing</returns>

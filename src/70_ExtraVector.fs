@@ -8,6 +8,8 @@ open FsEx.Util
 open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 
 
 module ExtrasVector =
@@ -131,11 +133,11 @@ module ExtrasVector =
         
             
 
-    [<EXT>]
+    //[<Extension>] //Error 3246
     type RhinoScriptSyntax with
 
 
-        [<EXT>]
+        [<Extension>]
         static member DrawVector(   vector:Vector3d, 
                                     [<OPT;DEF(Point3d())>]fromPoint:Point3d, 
                                     [<OPT;DEF("")>]layer:string ) : unit  = 
@@ -144,7 +146,7 @@ module ExtrasVector =
             if layer<>"" then  RhinoScriptSyntax.ObjectLayer(l,layer)
          
     
-        [<EXT>]
+        [<Extension>]
         static member DrawPlane(    pl:Plane,
                                     [<OPT;DEF(1000.0)>]scale:float,
                                     [<OPT;DEF("")>]suffixInDot:string,
@@ -161,19 +163,19 @@ module ExtrasVector =
             RhinoScriptSyntax.AddObjectToGroup([a;b;c;e;f;g],gg)
        
 
-        [<EXT>]
+        [<Extension>]
         static member DistPt(from:Point3d, dir:Point3d, distance:float) : Point3d  =
             let v = dir - from
             let sc = distance/v.Length
             from + v*sc
     
-        [<EXT>]
+        [<Extension>]
         static member DivPt(from:Point3d, dir:Point3d, rel:float) : Point3d  =
             let v = dir - from
             from + v*rel
         
 
-        [<EXT>]
+        [<Extension>]
         static member MeanPoint(pts:Point3d seq) : Point3d  =
             let mutable p = Point3d.Origin
             let mutable k = 0.0
@@ -184,7 +186,7 @@ module ExtrasVector =
 
     
         ///considers current order of points too, counterclockwise in xy plane is z
-        [<EXT>]
+        [<Extension>]
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
             let k = Seq.length pts
             if k < 2 then 
@@ -210,7 +212,7 @@ module ExtrasVector =
         
         ///auto detects points from closed polylines and loops them
         ///distance must have exact length or be singelton or empty
-        [<EXT>]
+        [<Extension>]
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistances: float seq, 
                                         [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
@@ -240,9 +242,7 @@ module ExtrasVector =
                                         
             else // regular case more than 2 points        
                                             
-                let lastIsFirst = //auto detect closed polyline points:
-                    if (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance then true         
-                    else false        
+                let lastIsFirst = (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance //auto detect closed polyline points:
                                             
                 let distsNeeded = 
                     if lastIsFirst then pointk - 1
@@ -342,7 +342,7 @@ module ExtrasVector =
 
 
         ///auto detects points from closed polylines and loops them
-        [<EXT>]
+        [<Extension>]
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistance: float, 
                                         [<OPT;DEF(0.0)>]normalDistance: float ,

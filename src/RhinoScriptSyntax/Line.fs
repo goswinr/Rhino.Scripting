@@ -4,17 +4,18 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 
 [<AutoOpen>]
 module ExtensionsLine =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the point on an FINITE line that is closest to a test point</summary>
     ///<param name="line">(Geometry.Line) the finite line</param>
     ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d.  The test point</param>
@@ -24,7 +25,7 @@ module ExtensionsLine =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the point on an INFINITE line (ray) that is closest to a test point</summary>
     ///<param name="line">(Geometry.Line) the line to be considered infinite</param>
     ///<param name="testPoint">(Point3d) The test point</param>
@@ -34,7 +35,7 @@ module ExtensionsLine =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of a line and a cylinder</summary>
     ///<param name="line">(Geometry.Line) The line to intersect</param>
     ///<param name="cylinderPlane">(Plane) Base plane of the cylinder</param>
@@ -57,7 +58,7 @@ module ExtensionsLine =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines if the shortest distance from a line to a point or another
     ///  line is greater than a specified distance</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line</param>
@@ -68,7 +69,7 @@ module ExtensionsLine =
     static member LineIsFartherThan(line:Line, distance:float, point:Point3d) : bool =
         let minDist = line.MinimumDistanceTo(point)
         minDist > distance
-    [<EXT>]
+    [<Extension>]
     ///<summary>Determines if the shortest distance from a line to a point or another
     ///  line is greater than a specified distance</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line</param>
@@ -82,7 +83,7 @@ module ExtensionsLine =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of two non-parallel lines. The lines are considered endless.
     ///  If the two lines do not actually intersect the closest point on each is returned</summary>
     ///<param name="lineA">(Geometry.Line) LineA of lines to intersect</param>
@@ -93,7 +94,7 @@ module ExtensionsLine =
         if not <| rc then  failwithf "lineLineIntersection failed on lineA:%A lineB:%A , are they paralell?" lineA lineB
         lineA.PointAt(a), lineB.PointAt(b)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the longest distance between a line as a finite chord, and a point</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point or test line</param>
@@ -101,7 +102,7 @@ module ExtensionsLine =
     /// then D is bigger than Rhino.Distance(Q, P)</returns>
     static member LineMaxDistanceTo(line:Line, point:Point3d) : float =
         line.MaximumDistanceTo(point)
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the longest distance between a line as a finite chord, and a line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
@@ -111,7 +112,7 @@ module ExtensionsLine =
         line.MaximumDistanceTo(line2)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
     ///  or another line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
@@ -121,7 +122,7 @@ module ExtensionsLine =
     static member LineMinDistanceTo(line:Line, point:Point3d) : float =
         line.MinimumDistanceTo(point)
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
     ///  or another line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
@@ -133,7 +134,7 @@ module ExtensionsLine =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns a plane that contains the line. The origin of the plane is at the start of
     ///  the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
     ///<param name="line">(Geometry.Line) a Line</param>
@@ -144,7 +145,7 @@ module ExtensionsLine =
         plane
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of a line and a plane</summary>
     ///<param name="line">(Line) The line to intersect</param>
     ///<param name="plane">(Plane) The plane to intersect</param>
@@ -155,7 +156,7 @@ module ExtensionsLine =
         line.PointAt(t)
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Calculates the intersection of a line and a sphere</summary>
     ///<param name="line">(Geometry.Line) The line</param>
     ///<param name="sphereCenter">(Point3d) The center point of the sphere</param>
@@ -169,7 +170,7 @@ module ExtensionsLine =
         else [|pt1; pt2|]
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Transforms a line</summary>
     ///<param name="lineId">(Guid) The line to transform</param>
     ///<param name="xform">(Transform) The transformation to apply</param>

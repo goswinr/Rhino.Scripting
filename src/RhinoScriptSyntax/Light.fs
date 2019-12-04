@@ -4,15 +4,16 @@ open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsLight =
+
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a new directional light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
@@ -31,7 +32,7 @@ module ExtensionsLight =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a new linear light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
@@ -70,7 +71,7 @@ module ExtensionsLight =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a new point light object to the document</summary>
     ///<param name="point">(Point3d) The 3d location of the point</param>
     ///<returns>(Guid) identifier of the new object</returns>
@@ -85,7 +86,7 @@ module ExtensionsLight =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a new rectangular light object to the document</summary>
     ///<param name="origin">(Point3d) 3d origin point of the light</param>
     ///<param name="widthPoint">(Point3d) 3d width and direction point of the light</param>
@@ -113,7 +114,7 @@ module ExtensionsLight =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Adds a new spot light object to the document</summary>
     ///<param name="origin">(Point3d) 3d origin point of the light</param>
     ///<param name="radius">(float) Radius of the cone</param>
@@ -136,7 +137,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Get On / Off status of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) The current enabled status</returns>
@@ -145,7 +146,7 @@ module ExtensionsLight =
         let rc = light.IsEnabled
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="enable">(bool) The light's enabled status</param>
@@ -158,7 +159,7 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: EnableLight failed.  objectId:'%A' enable:'%A'" objectId enable
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Enables or disables multiple light objects</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="enable">(bool) The light's enabled status</param>
@@ -173,7 +174,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is a directional light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -182,7 +183,7 @@ module ExtensionsLight =
         light.IsDirectionalLight
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies an object is a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -191,7 +192,7 @@ module ExtensionsLight =
         |> Option.isSome
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is enabled</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -200,7 +201,7 @@ module ExtensionsLight =
         light.IsEnabled
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is referenced from another file</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -210,7 +211,7 @@ module ExtensionsLight =
         light.IsReference
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is a linear light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -219,7 +220,7 @@ module ExtensionsLight =
         light.IsLinearLight
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is a point light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -228,7 +229,7 @@ module ExtensionsLight =
         light.IsPointLight
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is a rectangular light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -237,7 +238,7 @@ module ExtensionsLight =
         light.IsRectangularLight
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Verifies a light object is a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False</returns>
@@ -246,7 +247,7 @@ module ExtensionsLight =
         light.IsSpotLight
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Drawing.Color) The current color</returns>
@@ -255,7 +256,7 @@ module ExtensionsLight =
         let rc = light.Diffuse
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="color">(Drawing.Color) The light's new color</param>
@@ -267,7 +268,7 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: LightColor failed.  objectId:'%A' color:'%A'" objectId color
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the color of multiple light</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="color">(Drawing.Color) The light's new color</param>
@@ -281,14 +282,14 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the number of light objects in the document</summary>
     ///<returns>(int) the number of light objects in the document</returns>
     static member LightCount() : int =
         Doc.Lights.Count
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Vector3d) The current direction</returns>
@@ -297,7 +298,7 @@ module ExtensionsLight =
         let rc = light.Direction
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="direction">(Vector3d) The light's new direction</param>
@@ -309,7 +310,7 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: LightDirection failed.  objectId:'%A' direction:'%A'" objectId direction
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the direction of multiple light objects</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="direction">(Vector3d) The light's new direction</param>
@@ -323,7 +324,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Point3d) The current location</returns>
@@ -332,7 +333,7 @@ module ExtensionsLight =
         let rc = light.Location
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="location">(Point3d) The light's new location</param>
@@ -344,7 +345,7 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: LightLocation failed.  objectId:'%A' location:'%A'" objectId location
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the location of multiple light objects</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="location">(Point3d) The light's new location</param>
@@ -358,7 +359,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(string) The current name</returns>
@@ -367,7 +368,7 @@ module ExtensionsLight =
         let rc = light.Name
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="name">(string) The light's new name</param>
@@ -378,7 +379,7 @@ module ExtensionsLight =
         if not <|  Doc.Lights.Modify(objectId, light) then
             failwithf "Rhino.Scripting: LightName failed.  objectId:'%A' name:'%A'" objectId name
         Doc.Views.Redraw()
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the name of multiple light objects</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="name">(string) The light's new name</param>
@@ -392,7 +393,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns list of identifiers of light objects in the document</summary>
     ///<returns>(Guid ResizeArray) the list of identifiers of light objects in the document</returns>
     static member LightObjects() : Guid ResizeArray =
@@ -404,7 +405,7 @@ module ExtensionsLight =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the plane of a rectangular light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Plane*float*float) the plane, X and Y length</returns>
@@ -420,7 +421,7 @@ module ExtensionsLight =
         plane, length.Length, width.Length
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
@@ -432,7 +433,7 @@ module ExtensionsLight =
         let rc = light.HotSpot
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
@@ -447,7 +448,7 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: SpotLightHardness failed.  objectId:'%A' hardness:'%A'" objectId hardness
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the hardness of multiple spot light. Spotlight hardness
     /// controls the fully illuminated region</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
@@ -464,7 +465,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(float) The current radius</returns>
@@ -476,7 +477,7 @@ module ExtensionsLight =
         let rc = light.Direction.Length * tan(radians)
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="radius">(float) The light's new radius</param>
@@ -491,7 +492,7 @@ module ExtensionsLight =
             failwithf "Rhino.Scripting: SpotLightRadius failed.  objectId:'%A' radius:'%A'" objectId radius
         Doc.Views.Redraw()
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the radius of multiple spot light</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="radius">(float) The light's new radius</param>
@@ -508,7 +509,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(float) The current intensity</returns>
@@ -519,7 +520,7 @@ module ExtensionsLight =
         let rc = light.ShadowIntensity
         rc
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="intensity">(float) The light's new intensity</param>
@@ -532,7 +533,7 @@ module ExtensionsLight =
         if not <|  Doc.Lights.Modify(objectId, light) then
             failwithf "Rhino.Scripting: SpotLightShadowIntensity failed.  objectId:'%A' intensity:'%A'" objectId intensity
         Doc.Views.Redraw()
-    [<EXT>]
+    [<Extension>]
     ///<summary>Changes the shadow intensity of multiple spot light</summary>
     ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="intensity">(float) The light's new intensity</param>

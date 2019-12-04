@@ -6,13 +6,15 @@ open Rhino
 open Rhino.Geometry
 open FsEx.Util
 open Rhino.Scripting.ActiceDocument
-
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+ 
 [<AutoOpen>]
 module ExtensionsSelection =
 
+  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
     
-    [<EXT>]
+    [<Extension>]
     ///<summary>A helper Function for DocObjects.ObjectType Enum</summary>
     ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types</param>
     ///<returns>(DocObjects.ObjectType) translated DocObjects.ObjectType Enum</returns>
@@ -58,7 +60,7 @@ module ExtensionsSelection =
             geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Extrusion
         geometryfilter
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects in the document</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the objects</param>
@@ -87,7 +89,7 @@ module ExtensionsSelection =
             if objectids.Count > 0 && select then Doc.Views.Redraw()           
             objectids
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
@@ -131,7 +133,7 @@ module ExtensionsSelection =
             objectIds
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifier of the first object in the document. The first
     ///  object is the last object created by the user</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -157,7 +159,7 @@ module ExtensionsSelection =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts user to pick or select a single curve object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -206,7 +208,7 @@ module ExtensionsSelection =
             } |> Async.RunSynchronously
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts user to pick, or select, a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
@@ -258,7 +260,7 @@ module ExtensionsSelection =
 
             } |> Async.RunSynchronously
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts user to pick, or select a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
@@ -322,7 +324,7 @@ module ExtensionsSelection =
             } |> Async.RunSynchronously
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts user to pick or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///A prompt or message</param>
@@ -412,7 +414,7 @@ module ExtensionsSelection =
             } |> Async.RunSynchronously
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the same objects as in the last user interaction with the same prompt message
     /// If none found Prompts user to pick or select one or more objects and remembers them.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
@@ -481,7 +483,7 @@ module ExtensionsSelection =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts user to pick, or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///A prompt or message</param>
@@ -558,7 +560,7 @@ module ExtensionsSelection =
             } |> Async.RunSynchronously
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to select one or more point objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
     ///A prompt message</param>
@@ -578,7 +580,7 @@ module ExtensionsSelection =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Prompts the user to select a single surface</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select surface"</c>
     ///Prompt displayed</param>
@@ -634,7 +636,7 @@ module ExtensionsSelection =
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
     ///  cannot be snapped to, and cannot be selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -662,7 +664,7 @@ module ExtensionsSelection =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
     ///  are not visible, cannot be snapped to, and cannot be selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -688,7 +690,7 @@ module ExtensionsSelection =
                             i.Id }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Inverts the current object selection. The identifiers of the newly
     ///  selected objects are returned</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -718,7 +720,7 @@ module ExtensionsSelection =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of the objects that were most recently created or changed
     ///  by scripting a Rhino command using the Command function. It is important to
     ///  call this function immediately after calling the Command function as only the
@@ -742,7 +744,7 @@ module ExtensionsSelection =
             rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the identifier of the last object in the document. The last object
     ///  in the document is the first object created by the user</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -769,7 +771,7 @@ module ExtensionsSelection =
         firstobj.Id
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the identifier of the next object in the document</summary>
     ///<param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -798,7 +800,7 @@ module ExtensionsSelection =
                 n.Id
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
     ///  are visible, can be snapped to, and are independent of selection state</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -815,7 +817,7 @@ module ExtensionsSelection =
         resizeArray {for obj in Doc.Objects.GetObjectList(iter) do yield obj.Id }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects based on color</summary>
     ///<param name="color">(Drawing.Color) Color to get objects by</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -833,7 +835,7 @@ module ExtensionsSelection =
         resizeArray {for obj in rhinoobjects do yield obj.Id }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects based on the objects' group name</summary>
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -852,7 +854,7 @@ module ExtensionsSelection =
             resizeArray { for obj in rhinoobjects do yield obj.Id }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects based on the objects' layer name</summary>
     ///<param name="layerName">(string) Name of the layer</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -870,7 +872,7 @@ module ExtensionsSelection =
 
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects based on user-assigned name</summary>
     ///<param name="name">(string) Name of the object or objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -899,7 +901,7 @@ module ExtensionsSelection =
             Doc.Views.Redraw()
         ids
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns identifiers of all objects based on the objects' geometry type</summary>
     ///<param name="geometryType">(int) The type(s) of geometry objects (points, curves, surfaces,
     ///  meshes, etc.) that can be selected. Object types can be
@@ -994,7 +996,7 @@ module ExtensionsSelection =
         objectids
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Returns the identifiers of all objects that are currently selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///Include light objects</param>
@@ -1006,7 +1008,7 @@ module ExtensionsSelection =
         resizeArray {for obj in selobjects do obj.Id }
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Unselects all objects in the document</summary>
     ///<returns>(int) the number of objects that were unselected</returns>
     static member UnselectAllObjects() : int =
@@ -1015,7 +1017,7 @@ module ExtensionsSelection =
         rc
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Return identifiers of all objects that are visible in a specified view</summary>
     ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -1049,7 +1051,7 @@ module ExtensionsSelection =
         objectids
 
 
-    [<EXT>]
+    [<Extension>]
     ///<summary>Picks objects using either a window or crossing selection</summary>
     ///<param name="corner1">(Point3d) Corner1 of selection window</param>
     ///<param name="corner2">(Point3d) Corner2 of selection window</param>
