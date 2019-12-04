@@ -559,15 +559,26 @@ module ExtensionsObject =
             let groupindices = rhinoobject.GetGroupList()
             resizeArray { for index in groupindices do yield Doc.Groups.GroupName(index) }
 
-
     [<EXT>]
-    ///<summary>Returns the layer of an object</summary>
+    ///<summary>Returns the short layer of an object.
+    ///Without Parent Layers</summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<returns>(string) The object's current layer</returns>
+    static member ObjectLayerShort(objectId:Guid) : string = //GET
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let index = obj.Attributes.LayerIndex
+        Doc.Layers.[index].Name
+    
+    [<EXT>]
+    ///<summary>Returns the full layername of an object. 
+    /// arent layers are separated by <c>::</c> </summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
         Doc.Layers.[index].FullPath
+
 
     [<EXT>]
     ///<summary>Modifies the layer of an object</summary>
@@ -609,7 +620,6 @@ module ExtensionsObject =
             Some pageview.MainViewport.Name
         else
             None
-
 
 
     [<EXT>]
