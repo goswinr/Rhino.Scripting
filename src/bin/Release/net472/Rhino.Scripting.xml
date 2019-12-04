@@ -2,22 +2,6 @@
 <doc>
 <assembly><name>Rhino.Scripting</name></assembly>
 <members>
-<member name="P:Rhino.Scripting.DefaultDict`2.Items">
-<summary>
- Returns a seq of key and value tuples
-</summary>
-</member>
-<member name="M:Rhino.Scripting.DefaultDict`2.Pop(`0)">
-<summary>
- Get a value and remove it from Dictionary, like *.pop() in Python 
-</summary>
-</member>
-<member name="T:Rhino.Scripting.DefaultDict`2">
-<summary>A System.Collections.Generic.Dictionary with default Values that get created upon accessing a key.
- If accessing a non exiting key , the default function is called to create and set it. 
- Like defaultdict in Python</summary>    
-<param name="defaultFun">(unit->'V): The function to create a default Value</param>
-</member>
 <member name="P:Rhino.Scripting.RhinoScriptSyntax.SynchronizationContext(System.Threading.SynchronizationContext)">
 <summary>The Synchronization Context of the Rhino UI Therad.
 This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
@@ -90,24 +74,10 @@ This MUST be set at the  beginning of every Script if using UI dialogs and scrip
 <param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
 <returns>(unit) voId, nothing</returns>
 </member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.PrintFull``2(``0,``1)">
-<summary>Prints two objects or value to Rhino Command line. 
-  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
-<param name="x1">('T): the first value or object to print</param>
-<param name="x2">('T): the second value or object to print</param>    
-<returns>(unit) voId, nothing</returns>
-</member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.PrintFull``1(``0)">
 <summary>Prints an object or value to Rhino Command line. 
   If the value is a Seq the string will conatain a line for each item and per nested item</summary>
 <param name="x">('T): the value or object to print</param>   
-<returns>(unit) voId, nothing</returns>
-</member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.Print``2(``0,``1)">
-<summary>Prints two objects or value to Rhino Command line. 
-  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
-<param name="x1">('T): the first value or object to print</param>
-<param name="x2">('T): the second value or object to print</param>    
 <returns>(unit) voId, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.Print``1(``0)">
@@ -294,754 +264,24 @@ This last or stop value will NOT be included in range as per python semantics, t
  Don&apos;t create an instance, use the instance in RhinoScriptSyntax.Filter
 </summary>
 </member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.rotate``1(System.Int32,System.Collections.Generic.List{``0})">
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Line.get_ToNiceString(Rhino.Geometry.Line)">
 <summary>
- shift items poistion  towards the end of ResizeArray. refilling at start from end.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.unzip``2(System.Collections.Generic.List{System.Tuple{``0,``1}})">
-<summary>
- Split an array of pairs into two arrays.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.zip``2(System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Combine the two arrays into an array of pairs. The two arrays must have equal lengths, 
- otherwise an &lt;c&gt;ArgumentException&lt;/c&gt; is raised..
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.tryFindIndexi``1(Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean}},System.Collections.Generic.List{``0})">
-<summary>
- Return the index of the first element in the array
- that satisfies the given predicate.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.tryFindIndex``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Return the index of the first element in the array
- that satisfies the given predicate.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.singleton``1(``0)">
-<summary>
- Return an array containing the given element.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.scanBack``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,``1}},System.Collections.Generic.List{``0},``1)">
-<summary>
- Like &lt;c&gt;foldBack&lt;/c&gt;, but return both the intermediary and final results.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.scan``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,``0}},``0,System.Collections.Generic.List{``1})">
-<summary>
- Like &lt;c&gt;fold&lt;/c&gt;, but return the intermediary and final results.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.mapi2``3(Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,``2}}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Build a new collection whose elements are the results of applying the given function
- to the corresponding elements of the two collections pairwise.  The two input
- arrays must have the same lengths, otherwise an &lt;c&gt;ArgumentException&lt;/c&gt; is
- raised.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.iteri2``2(Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.Unit}}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Apply the given function to pair of elements drawn from matching indices in two arrays,
- also passing the index of the elements. The two arrays must have the same lengths, 
- otherwise an &lt;c&gt;ArgumentException&lt;/c&gt; is raised.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.isEmpty``1(System.Collections.Generic.List{``0})">
-<summary>
- Return True if the given array is empty, otherwise False.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.forall2``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,System.Boolean}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Test elements of the two arrays pairwise to see if all pairs of elements satisfy the given predicate.
- Raise &lt;c&gt;ArgumentException&lt;/c&gt; if the arrays have different lengths.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.foldBack2``3(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.FSharpFunc{``2,``2}}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1},``2)">
-<summary>
- Apply a function to pairs of elements drawn from the two collections, right-to-left, 
- threading an accumulator argument through the computation.  The two input
- arrays must have the same lengths, otherwise an &lt;c&gt;ArgumentException&lt;/c&gt; is
- raised.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.fold2``3(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.FSharpFunc{``2,``0}}},``0,System.Collections.Generic.List{``1},System.Collections.Generic.List{``2})">
-<summary>
- Apply a function to pairs of elements drawn from the two collections, 
- left-to-right, threading an accumulator argument
- through the computation.  The two input
- arrays must have the same lengths, otherwise an &lt;c&gt;ArgumentException&lt;/c&gt; is
- raised.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.reduceBack``1(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``0,``0}},System.Collections.Generic.List{``0})">
-<summary>
- Apply a function to each element of the array, threading an accumulator argument
- through the computation. If the input function is &lt;c&gt;f&lt;/c&gt; and the elements are &lt;c&gt;i0...iN&lt;/c&gt; then 
- computes &lt;c&gt;f i0 (...(f iN-1 iN))&lt;/c&gt;. Raises ArgumentException if the array has size zero.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.reduce``1(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``0,``0}},System.Collections.Generic.List{``0})">
-<summary>
- Apply a function to each element of the array, threading an accumulator argument
- through the computation. If the input function is &lt;c&gt;f&lt;/c&gt; and the elements are &lt;c&gt;i0...iN&lt;/c&gt; 
- then computes &lt;c&gt;f (... (f i0 i1)...) iN&lt;/c&gt;. Raises ArgumentException if the array has size zero.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.findIndexi``1(Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean}},System.Collections.Generic.List{``0})">
-<summary>
- Return the index of the first element in the array
- that satisfies the given predicate. Raise &lt;c&gt;KeyNotFoundException&lt;/c&gt; if 
- none of the elements satisfy the predicate.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.findIndex``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Return the index of the first element in the array
- that satisfies the given predicate. Raise &lt;c&gt;KeyNotFoundException&lt;/c&gt; if 
- none of the elements satisfy the predicate.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.exists2``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,System.Boolean}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Test elements of the two arrays pairwise to see if any pair of element satisfies the given predicate.
- Raise ArgumentException if the arrays have different lengths.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.ofSeq``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
- Build a &lt;c&gt;ResizeArray&lt;/c&gt; from the given elements.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.toSeq``1(System.Collections.Generic.List{``0})">
-<summary>
- Return a view of the array as an enumerable object.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.ofArray``1(``0[])">
-<summary>
- Build a &lt;c&gt;ResizeArray&lt;/c&gt; from the given elements.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.toArray``1(System.Collections.Generic.List{``0})">
-<summary>
- Return a fixed-length array containing the elements of the input &lt;c&gt;ResizeArray&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.sortBy``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1},System.Collections.Generic.List{``0})">
-<summary>
- Sort the elements using the key extractor and generic comparison on the keys.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.sort``1(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``0,System.Int32}},System.Collections.Generic.List{``0})">
-<summary>
- Sort the elements using the given comparison function.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.rev``1(System.Collections.Generic.List{``0})">
-<summary>
- Return a new array with the elements in reverse order.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.tryPick``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpOption{``1}},System.Collections.Generic.List{``0})">
-<summary>
- Apply the given function to successive elements, returning the first
- result where function returns Some(x) for some x.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.tryFind``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Return the first element for which the given function returns True.
- Return None if no such element exists.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.find``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Return the first element for which the given function returns True.
- Raise &lt;c&gt;KeyNotFoundException&lt;/c&gt; if no such element exists.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.choose``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpOption{``1}},System.Collections.Generic.List{``0})">
-<summary>
- Apply the given function to each element of the array. Return
- the array comprised of the results &apos;x&apos; for each element where
- the function returns &lt;c&gt;Some(x)&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.partition``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Split the collection into two collections, containing the 
- elements for which the given predicate returns True and False
- respectively.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.filter``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Return a new collection containing only the elements of the collection
- for which the given predicate returns True.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.forall``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Test if all elements of the array satisfy the given predicate.
- If the input function is &lt;c&gt;f&lt;/c&gt; and the elements are &lt;c&gt;i0...iN&lt;/c&gt; and &quot;j0...jN&quot;
- then computes &lt;c&gt;p i0 &amp;&amp; ... &amp;&amp; p iN&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.exists``1(Microsoft.FSharp.Core.FSharpFunc{``0,System.Boolean},System.Collections.Generic.List{``0})">
-<summary>
- Test if any element of the array satisfies the given predicate.
- If the input function is &lt;c&gt;f&lt;/c&gt; and the elements are &lt;c&gt;i0...iN&lt;/c&gt; 
- then computes &lt;c&gt;p i0 or ... or p iN&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.mapi``2(Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{``0,``1}},System.Collections.Generic.List{``0})">
-<summary>
- Build a new array whose elements are the results of applying the given function
- to each of the elements of the array. The integer index passed to the
- function indicates the index of element being transformed.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.iteri``1(Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.Unit}},System.Collections.Generic.List{``0})">
-<summary>
- Apply the given function to each element of the array.  The integer passed to the
- function indicates the index of element.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.map2``3(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,``2}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Build a new collection whose elements are the results of applying the given function
- to the corresponding elements of the two collections pairwise.  The two input
- arrays must have the same lengths.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.iter2``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.Unit}},System.Collections.Generic.List{``0},System.Collections.Generic.List{``1})">
-<summary>
- Apply the given function to two arrays simultaneously. The
- two arrays must have the same lengths, otherwise an Invalid Argument exception is
- raised.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.map``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1},System.Collections.Generic.List{``0})">
-<summary>
- Build a new array whose elements are the results of applying the given function
- to each of the elements of the array.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.iter``1(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.Unit},System.Collections.Generic.List{``0})">
-<summary>
- Apply the given function to each element of the array. 
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.foldBack``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,``1}},System.Collections.Generic.List{``0},``1)">
-<summary>
- Apply a function to each element of the array, threading an accumulator argument
- through the computation. If the input function is &lt;c&gt;f&lt;/c&gt; and the elements are &lt;c&gt;i0...iN&lt;/c&gt; then 
- computes &lt;c&gt;f i0 (...(f iN s))&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.fold``2(Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.FSharpFunc{``1,``0}},``0,System.Collections.Generic.List{``1})">
-<summary>
- Apply a function to each element of the collection, threading an accumulator argument
- through the computation. If the input function is &lt;c&gt;f&lt;/c&gt; and the elements are &lt;c&gt;i0...iN&lt;/c&gt; 
- then computes &lt;c&gt;f (... (f s i0)...) iN&lt;/c&gt;
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.ofList``1(Microsoft.FSharp.Collections.FSharpList{``0})">
-<summary>
- Build an array from the given list.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.toList``1(System.Collections.Generic.List{``0})">
-<summary>
- Build a list from the given array.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.blit``1(System.Collections.Generic.List{``0},System.Int32,System.Collections.Generic.List{``0},System.Int32,System.Int32)">
-<summary>
- Read a range of elements from the first array and write them into the second.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.fill``1(System.Collections.Generic.List{``0},System.Int32,System.Int32,``0)">
-<summary>
- Fill a range of the collection with the given element.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.copy``1(System.Collections.Generic.List{``0})">
-<summary>
- Build a new array that contains the elements of the given array.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.sub``1(System.Collections.Generic.List{``0},System.Int32,System.Int32)">
-<summary>
- Build a new array that contains the given subrange specified by
- starting index and length.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.concat``1(Microsoft.FSharp.Collections.FSharpList{System.Collections.Generic.List{``0}})">
-<summary>
- Build a new array that contains the elements of each of the given list of arrays.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.append``1(System.Collections.Generic.List{``0},System.Collections.Generic.List{``0})">
-<summary>
- Build a new array that contains the elements of the first array followed by the elements of the second array.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.init``1(System.Int32,Microsoft.FSharp.Core.FSharpFunc{System.Int32,``0})">
-<summary>
- Create an array by calling the given generator on each index.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.create``1(System.Int32,``0)">
-<summary>
- Create an array whose elements are all initially the given value.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.set``1(System.Collections.Generic.List{``0},System.Int32,``0)">
-<summary>
- Set the value of an element in the collection. You can also use the syntax &lt;c&gt;arr.[idx] &lt;- e&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.get``1(System.Collections.Generic.List{``0},System.Int32)">
-<summary>
- Fetch an element from the collection.  You can also use the syntax &lt;c&gt;arr.[idx]&lt;/c&gt;.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayModule.length``1(System.Collections.Generic.List{``0})">
-<summary>
- Return the length of the collection.  You can also use property &lt;c&gt;arr.Length&lt;/c&gt;.
-</summary>
-</member>
-<member name="T:Rhino.Scripting.ResizeArrayModule">
-<summary>
- Generic operations on the type System.Collections.Generic.List, which is called ResizeArray in the F# libraries.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.diff``2(``0,``0)">
-<summary>
-Gets the positiv differnce between 2 numbers. 
-Avoids the integer( or byte) overflow and underflow risk of &quot;abs(a-b)&quot;
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.sort3By``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1},``0,``0,``0)">
-<summary>
-If any are equal after Function is applied then the the order is kept
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.sort3``1(``0,``0,``0)">
-<summary>
-If any are equal then the the order is kept
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.sort2By``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1},``0,``0)">
-<summary>
-If they are equal then the the order is kept
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.sort2``1(``0,``0)">
-<summary>
-If they are equal then the the order is kept
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.maxBy``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1},``0,``0)">
-<summary>
-If both are equal then the first is returned
-</summary>
-</member>
-<member name="M:Rhino.Scripting.MinMaxSort.minBy``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1},``0,``0)">
-<summary>
-If both are equal then the first is returned
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotGreaterDot``1(System.Boolean,``0,``0)">
-<summary>
-For inner expressions: like this: min &lt;. x .&lt;. y .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotLessDot``1(System.Boolean,``0,``0)">
-<summary>
-For inner expressions: like this: min &lt;. x .&lt;. y .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotGreater``1(System.Boolean,``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;. x .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotLess``1(System.Boolean,``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;. x .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_GreaterDot``1(``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;. x .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_LessDot``1(``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;. x .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotGreaterEqualsDot``1(System.Boolean,``0,``0)">
-<summary>
-for inner expressions: like this: min &lt;. x .&lt;. y .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotLessEqualsDot``1(System.Boolean,``0,``0)">
-<summary>
-for inner expressions: like this: min &lt;. x .&lt;. y .&lt; max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotGreaterEquals``1(System.Boolean,``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;=. x .&lt;= max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_DotLessEquals``1(System.Boolean,``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;=. x .&lt;= max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_GreaterEqualsDot``1(``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;=. x .&lt;= max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Compare.op_LessEqualsDot``1(``0,``0)">
-<summary>
-Point must be at middle of expression: like this: min &lt;=. x .&lt;= max
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.randomStandardDeviation(System.Double,System.Double)">
-<summary>
-given mean  and standardDeviation returns a random value from this Gaussian distribution
-if mean is 0 and stDev is 1 then 99% of values are  are within -2.3 to +2.3 ; 70% within -1 to +1
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.toDegrees(System.Double)">
-<summary>
-converts Angels from Radians to Degrees
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.toRadians(System.Double)">
-<summary>
-converts Angels from Degrees to Radians
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.isNanOrInf(System.Double)">
-<summary>
-Test is a floating point value is Infinity or Not a Number
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.op_DivideDot(System.Int32,System.Int32)">
-<summary>
-Gives a float from int / int division
-&lt;c&gt;(float(i)) / (float(j))&lt;/c&gt; 
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.op_MultiplyDot(System.Int32,System.Double)">
-<summary>
-Allows ints to be multiplied by floats
-&lt;c&gt;int(round(float(i) * f))&lt;/c&gt; 
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.floatOfObj``1(``0)">
-<summary>
-Get Float from any input. This helper enables more generic code in parsing sequences
-</summary>
-</member>
-<member name="M:Rhino.Scripting.UtilMath.parseFloatEnDe(System.String)">
-<summary>
-First tries to parses english float (period as decimal separator),
-if this fails tries to parse german floats,(comma as decimal separator)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.ifZero2(System.Double,System.Double)">
-<summary>
-if second value is 0.0 return first else second
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.ifZero1(System.Double,System.Double)">
-<summary>
-if first value is 0.0 return second else first
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.range(System.Int32)">
-<summary>
-so that python range expressions dont need top be translated to F#
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.t3``3(``0,``1,``2)">
-<summary>
-Get third element of triple (tuple of three element)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.t2``3(``0,``1,``2)">
-<summary>
-Get second element of triple (tuple of three element)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.t1``3(``0,``1,``2)">
-<summary>
-Get first element of triple (tuple of three element)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.op_BarGreaterGreater``2(``0,Microsoft.FSharp.Core.FSharpFunc{``0,``1})">
-<summary>
-apply function ( like |&gt; ) but ignore result. return original input
-</summary>
-</member>
-<member name="M:Rhino.Scripting.Util.op_BarQmark``1(``0,``0)">
-<summary>
-Returns the value on the left unless it is null, then it returns the value on the right.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.toNiceStringFull``1(``0)">
-<summary>
- Nice formating for floats , some Rhino Objects and sequences of any kind, all items including nested items are printed out.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.toNiceString``1(``0)">
-<summary>
- Nice formating for floats , some Rhino Objects and sequences of any kind, first four items are printed out.
- set NiceString.toNiceStringMaxItemsPerSeq to other value if more or less shall be shown (default is 4)
- set NiceString.toNiceStringMaxDepth to change how deep nested lists are printed (default is 2)
-</summary>
-</member>
-<member name="P:Rhino.Scripting.NiceString.sb">
-<summary>
- the internal stringbuilder for recursive function
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.vector3fToString(Rhino.Geometry.Vector3f)">
-<summary>
-Like the ToString function but with appropiate precision formating       
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.vector3dToString(Rhino.Geometry.Vector3d)">
-<summary>
-Like the ToString function but with appropiate precision formating       
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.point3fToString(Rhino.Geometry.Point3f)">
-<summary>
-Like the ToString function but with appropiate precision formating       
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.point3dToString(Rhino.Geometry.Point3d)">
-<summary>
-Like the ToString function but with appropiate precision formating       
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.singleToString(System.Single)">
-<summary>
- with automatic formationg of precision
-</summary>
-</member>
-<member name="M:Rhino.Scripting.NiceString.floatToString(System.Double)">
-<summary>
- with automatic formationg of precision
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ResizeArrayBuilder.resizeArray``1">
-<summary>
- Computational Expression:  use &apos;yield&apos; to add alements to a ResizeArray (= Collections.Generic.List).
-</summary>
-</member>
-<member name="P:Rhino.Scripting.StringBufferBuilder.stringBuffer">
-<summary>
-Computational Expression:  
-use &apos;yield&apos; to append text
-and &apos;yield!&apos; (with an exclamation mark)  to append text followed by a new line character.
-accepts ints and floats too.(including nice Formating)
-</summary>
-</member>
-<member name="T:Rhino.Scripting.OptionBuilder.MaybeBuilder">
-<summary>
- The maybe monad. 
-</summary>
-</member>
-<member name="P:Rhino.Scripting.OptionBuilder.maybe">
-<summary>
- A maybe monad. 
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.[]`1.SetItem``1(``0[],System.Int32,``0)">
-<summary>
- Allows for negtive index too (like python)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.[]`1.GetItem``1(``0[],System.Int32)">
-<summary>
- Allows for negtive index too (like python)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.List`1.SetItem``1(System.Collections.Generic.List{``0},System.Int32,``0)">
-<summary>
- Allows for negtive index too (like python)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.List`1.GetItem``1(System.Collections.Generic.List{``0},System.Int32)">
-<summary>
- Allows for negtive index too (like python)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.List`1.GetSlice``1(System.Collections.Generic.List{``0},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{System.Int32})">
-<summary>
- Allows for negtive slice index too ( -1 = last element), returns a shallow copy including the end index.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Dictionary`2.get_Items``2(System.Collections.Generic.Dictionary{``0,``1})">
-<summary>
- Returns a seq of key and value tuples
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Dictionary`2.Pop``2(System.Collections.Generic.Dictionary{``0,``1},``0)">
-<summary>
- get a value and remove it from Dictionary, like *.pop() in Python         
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Color.AreEqualARGB.Static(System.Drawing.Color,System.Drawing.Color)">
-<summary>
-Compare two colors only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Color.EqualsARGB(System.Drawing.Color,System.Drawing.Color)">
-<summary>
-Compare to another color only by Alpha, Red, Green and Blue values ignoring other fields such as IsNamedColor        
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Single.get_ToNiceString(System.Single)">
-<summary>
- with automatic formating of display precision depending on float size
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Double.get_ToNiceString(System.Double)">
-<summary>
- with automatic formating of display precision depending on float size
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Double.get_ToInt(System.Double)">
-<summary>
-converts int to float including rounding: 
-int(round(x))
-</summary>
-</member>
-<member name="M:Rhino.Scripting.TypeExtensions.Object.get_ToNiceString(System.Object)">
-<summary>
-A property like the ToString() method, 
-but with richer formationg for collections.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.betweenIncl(System.String,System.String,System.String)">
-<summary>
- finds text betwween two strings including delimiters on middle string 
-betweenIncl &quot;((&quot; &quot;))&quot; &quot;c((ab))d&quot; = &quot;c&quot;, &quot;((ab))&quot;, &quot;d&quot;
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.between(System.String,System.String,System.String)">
-<summary>
-finds text betwween two strings
-between &quot;((&quot; &quot;)&quot; &quot;c((ab)c&quot; = (&quot;c&quot;, &quot;ab&quot;, &quot;c&quot;)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.replace(System.String,System.String,System.String)">
-<summary>
-s.Replace(a, b)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.split2(System.String,System.String)">
-<summary>
-split string into maximum two elements
-.Split( [| spliter |],2, StringSplitOptions.RemoveEmptyEntries) in if xs.Length &gt; 1 then xs.[0],xs.[1] else s,&quot;&quot;
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.splitkeep(System.String,System.String)">
-<summary>
-s.Split([| spliter |], StringSplitOptions.None)  
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.split(System.String,System.String)">
-<summary>
-s.Split([| spliter |], StringSplitOptions.RemoveEmptyEntries)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.StringModule.before(System.String,System.String)">
-<summary>
- Returns everytrhing before a given splitting string
- Full strring if splitter not present
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.iPrevThisNextLooped``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields looped Seq of (index, previous, this, next): from (0, last, first, second)  upto (lastIndex, second-last, last, first)
-Consider &quot;iThisNextNextafterLooped&quot; as faster since the last element is not required from the start on.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.prevThisNextLooped``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields looped Seq of (previous, this, next): from (last, first, second)  upto (second-last, last, first)
-Consider &quot;thisNextNextafterLooped&quot; as faster since the last element is not required from the start on.
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.iThisNextAndNextafterLooped``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields looped Seq of (Index of next, this, next, Nextafter): from (1, first, second, third)  upto (0, last, first, second)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.thisNextAndNextafterLooped``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields looped Seq of (this, next, Nextafter): from (first, second, third)  upto (last, first, second)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.thisNextAndNextafter``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields Seq of (this, next, Nextafter): from (first, second, third)  upto (third-last, second-last, last)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.iThisAndNextLooped``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields looped Seq of (this, next) from (first, second)  upto (last, first)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.thisAndNextLooped``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields looped Seq of (this, next) from (first, second)  upto (last, first)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.iThisAndNext``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields Seq of (index this, this, next) from (first, second)  upto (second-last, last)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.thisAndNext``1(System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Yields Seq of (this, next) from (first, second)  upto (second-last, last)
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.rotate``1(System.Int32,System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Considers sequence cirular and move elements up or down
- e.g.: rotate +1 [ a, b, c, d] = [ d, a, b, c]
- e.g.: rotate -1 [ a, b, c, d] = [ b, c, d, a]
-</summary>
-</member>
-<member name="M:Rhino.Scripting.SeqModule.slice``1(System.Int32,System.Int32,System.Collections.Generic.IEnumerable{``0})">
-<summary>
-Allows for negtive slice index too ( -1 = last element), returns a shallow copy including the end index.
+Like the ToString function but with appropiate precision formating
 </summary>
 </member>
 <member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3f.get_ToNiceString(Rhino.Geometry.Vector3f)">
 <summary>
 Like the ToString function but with appropiate precision formating
+</summary>
+</member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_UnitizedUnchecked(Rhino.Geometry.Vector3d)">
+<summary>
+Unitizes the vector , fails if input is of zero length
+</summary>
+</member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_Unitized(Rhino.Geometry.Vector3d)">
+<summary>
+Unitizes the vector , checks input length
 </summary>
 </member>
 <member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_ToNiceString(Rhino.Geometry.Vector3d)">
@@ -1059,6 +299,21 @@ Like the ToString function but with appropiate precision formating
 Like the ToString function but with appropiate precision formating
 </summary>
 </member>
+<member name="M:Rhino.Scripting.ActiceDocument.ifZero2(System.Double,System.Double)">
+<summary>
+if second value is 0.0 return first else second
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ActiceDocument.ifZero1(System.Double,System.Double)">
+<summary>
+if first value is 0.0 return second else first
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ActiceDocument.range(System.Int32)">
+<summary>
+so that python range expressions dont need top be translated to F#
+</summary>
+</member>
 <member name="M:Rhino.Scripting.ActiceDocument.rhtype(System.Guid)">
 <summary>
  gets a localised descritipn on rhino object type (curve , point, surface ....)
@@ -1072,6 +327,11 @@ Like the ToString function but with appropiate precision formating
 <member name="P:Rhino.Scripting.ActiceDocument.syncContext">
 <summary>
 of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ActiceDocument.redraw">
+<summary>
+Redraws all Rhino viewports
 </summary>
 </member>
 <member name="P:Rhino.Scripting.ActiceDocument.Doc">
@@ -2789,10 +2049,13 @@ Identifies the curve segment if curveId identifies a polycurve</param>
   x and y axes</param>
 <returns>(Guid) objectId of new rectangle</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddPolylineClosed.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
+<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points. </param>
+<returns>(Guid) objectId of the new curve object</returns>
+</member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddPolyline.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
-<summary>Adds a polyline curve to the current model</summary>
-<param name="points">(Point3d seq) List of 3D points. Duplicate, consecutive points will be
-  removed. The list must contain at least two points. If the
+<summary>Adds a polyline curve</summary>
+<param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
   list contains less than four points, then the first point and
   last point must be different</param>
 <returns>(Guid) objectId of the new curve object</returns>
@@ -5917,7 +5180,14 @@ Copy the object</param>
 <returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectLayer.Static(System.Guid)">
-<summary>Returns the layer of an object</summary>
+<summary>Returns the full layername of an object. 
+ arent layers are separated by <c>::</c> </summary>
+<param name="objectId">(Guid) The identifier of the object</param>
+<returns>(string) The object's current layer</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectLayerShort.Static(System.Guid)">
+<summary>Returns the short layer of an object.
+Without Parent Layers</summary>
 <param name="objectId">(Guid) The identifier of the object</param>
 <returns>(string) The object's current layer</returns>
 </member>
@@ -9460,6 +8730,63 @@ Type of initial view projection for the detail
   6 = parallel back view
   7 = perspective view</param>
 <returns>(Guid) identifier of the newly created detail on success</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Double,System.Double,System.Boolean)">
+<summary>
+auto detects points from closed polylines and loops them
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Double},System.Collections.Generic.IEnumerable{System.Double},System.Boolean)">
+<summary>
+auto detects points from closed polylines and loops them
+distance must have exact length or be singelton or empty
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.NormalOfPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d})">
+<summary>
+considers current order of points too, counterclockwise in xy plane is z
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.findOffsetCorner(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,System.Double,System.Double,Rhino.Geometry.Vector3d)">
+<summary>
+Points  must not be colinear !
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.offsetTwoPt(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,System.Double,System.Double)">
+<summary>
+ distHor in XY plane, 
+ distNormal in free Normal ( ZAxis for Flat line)
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.normalOfTwoPointsInXY(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
+<summary>
+Every line has a normal vector in XY Plane.
+If line is vertical then XAxis
+result is unitized
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.unitizeWithAlternative(Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
+<summary>
+Unitize vector, if input vector is shorter than 1e-6 alternative vector is returned UN-unitized.
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.isAngleBelow1Degree(Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
+<summary>
+ Fails on zero length vectors
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.saveIdx(System.Int32,System.Int32)">
+<summary>
+ Any int will give a valid index for given collection size.
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasBrep.RhinoScriptSyntax.SlotedHole.Static(Rhino.Geometry.Plane,System.Double,System.Double,System.Double)">
+<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
+<param name="plane">(Plane)Origin = center of hole </param>
+<param name="length">(float) total length of sloted hole</param>
+<param name="breite">(float) width = radius of sloted hole</param>
+<param name="height">(float) height of sloted hole volume</param> 
+<returns>(Brep) Brep Geometry</returns>
 </member>
 </members>
 </doc>

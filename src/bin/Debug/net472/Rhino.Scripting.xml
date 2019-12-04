@@ -74,24 +74,10 @@ This MUST be set at the  beginning of every Script if using UI dialogs and scrip
 <param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
 <returns>(unit) voId, nothing</returns>
 </member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.PrintFull``2(``0,``1)">
-<summary>Prints two objects or value to Rhino Command line. 
-  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
-<param name="x1">('T): the first value or object to print</param>
-<param name="x2">('T): the second value or object to print</param>    
-<returns>(unit) voId, nothing</returns>
-</member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.PrintFull``1(``0)">
 <summary>Prints an object or value to Rhino Command line. 
   If the value is a Seq the string will conatain a line for each item and per nested item</summary>
 <param name="x">('T): the value or object to print</param>   
-<returns>(unit) voId, nothing</returns>
-</member>
-<member name="M:Rhino.Scripting.RhinoScriptSyntax.Print``2(``0,``1)">
-<summary>Prints two objects or value to Rhino Command line. 
-  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
-<param name="x1">('T): the first value or object to print</param>
-<param name="x2">('T): the second value or object to print</param>    
 <returns>(unit) voId, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.Print``1(``0)">
@@ -278,9 +264,24 @@ This last or stop value will NOT be included in range as per python semantics, t
  Don&apos;t create an instance, use the instance in RhinoScriptSyntax.Filter
 </summary>
 </member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Line.get_ToNiceString(Rhino.Geometry.Line)">
+<summary>
+Like the ToString function but with appropiate precision formating
+</summary>
+</member>
 <member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3f.get_ToNiceString(Rhino.Geometry.Vector3f)">
 <summary>
 Like the ToString function but with appropiate precision formating
+</summary>
+</member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_UnitizedUnchecked(Rhino.Geometry.Vector3d)">
+<summary>
+Unitizes the vector , fails if input is of zero length
+</summary>
+</member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_Unitized(Rhino.Geometry.Vector3d)">
+<summary>
+Unitizes the vector , checks input length
 </summary>
 </member>
 <member name="M:Rhino.Scripting.TypeExtensionsRhino.Vector3d.get_ToNiceString(Rhino.Geometry.Vector3d)">
@@ -326,6 +327,11 @@ so that python range expressions dont need top be translated to F#
 <member name="P:Rhino.Scripting.ActiceDocument.syncContext">
 <summary>
 of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ActiceDocument.redraw">
+<summary>
+Redraws all Rhino viewports
 </summary>
 </member>
 <member name="P:Rhino.Scripting.ActiceDocument.Doc">
@@ -2043,10 +2049,13 @@ Identifies the curve segment if curveId identifies a polycurve</param>
   x and y axes</param>
 <returns>(Guid) objectId of new rectangle</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddPolylineClosed.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
+<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points. </param>
+<returns>(Guid) objectId of the new curve object</returns>
+</member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddPolyline.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
-<summary>Adds a polyline curve to the current model</summary>
-<param name="points">(Point3d seq) List of 3D points. Duplicate, consecutive points will be
-  removed. The list must contain at least two points. If the
+<summary>Adds a polyline curve</summary>
+<param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
   list contains less than four points, then the first point and
   last point must be different</param>
 <returns>(Guid) objectId of the new curve object</returns>
@@ -5171,7 +5180,14 @@ Copy the object</param>
 <returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectLayer.Static(System.Guid)">
-<summary>Returns the layer of an object</summary>
+<summary>Returns the full layername of an object. 
+ arent layers are separated by <c>::</c> </summary>
+<param name="objectId">(Guid) The identifier of the object</param>
+<returns>(string) The object's current layer</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectLayerShort.Static(System.Guid)">
+<summary>Returns the short layer of an object.
+Without Parent Layers</summary>
 <param name="objectId">(Guid) The identifier of the object</param>
 <returns>(string) The object's current layer</returns>
 </member>
@@ -8714,6 +8730,63 @@ Type of initial view projection for the detail
   6 = parallel back view
   7 = perspective view</param>
 <returns>(Guid) identifier of the newly created detail on success</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Double,System.Double,System.Boolean)">
+<summary>
+auto detects points from closed polylines and loops them
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Double},System.Collections.Generic.IEnumerable{System.Double},System.Boolean)">
+<summary>
+auto detects points from closed polylines and loops them
+distance must have exact length or be singelton or empty
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.NormalOfPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d})">
+<summary>
+considers current order of points too, counterclockwise in xy plane is z
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.findOffsetCorner(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,System.Double,System.Double,Rhino.Geometry.Vector3d)">
+<summary>
+Points  must not be colinear !
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.offsetTwoPt(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,System.Double,System.Double)">
+<summary>
+ distHor in XY plane, 
+ distNormal in free Normal ( ZAxis for Flat line)
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.normalOfTwoPointsInXY(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
+<summary>
+Every line has a normal vector in XY Plane.
+If line is vertical then XAxis
+result is unitized
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.unitizeWithAlternative(Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
+<summary>
+Unitize vector, if input vector is shorter than 1e-6 alternative vector is returned UN-unitized.
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.isAngleBelow1Degree(Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
+<summary>
+ Fails on zero length vectors
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.saveIdx(System.Int32,System.Int32)">
+<summary>
+ Any int will give a valid index for given collection size.
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasBrep.RhinoScriptSyntax.SlotedHole.Static(Rhino.Geometry.Plane,System.Double,System.Double,System.Double)">
+<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
+<param name="plane">(Plane)Origin = center of hole </param>
+<param name="length">(float) total length of sloted hole</param>
+<param name="breite">(float) width = radius of sloted hole</param>
+<param name="height">(float) height of sloted hole volume</param> 
+<returns>(Brep) Brep Geometry</returns>
 </member>
 </members>
 </doc>
