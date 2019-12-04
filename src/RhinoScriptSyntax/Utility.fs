@@ -156,7 +156,7 @@ module ExtensionsUtility =
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///  The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
-    ///<returns>(float ResizeArray) numbers with duplicates removed </returns>
+    ///<returns>(float ResizeArray) numbers with duplicates removed</returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
         if Seq.length numbers < 2 then ResizeArray(numbers )
         else
@@ -181,7 +181,7 @@ module ExtensionsUtility =
     ///<param name="points">(Point3d seq) A list of 3D points</param>
     ///<param name="tolerance">(float) Optional,Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
-    ///<returns>(Point3d array) of 3D points with duplicates removed </returns>
+    ///<returns>(Point3d array) of 3D points with duplicates removed</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
@@ -199,7 +199,7 @@ module ExtensionsUtility =
     ///<summary>Measures distance between two 3D points</summary>
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
-    ///<returns>(float) the distance </returns>
+    ///<returns>(float) the distance</returns>
     static member Distance(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).Length
 
@@ -236,7 +236,7 @@ module ExtensionsUtility =
     [<Extension>]
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
-    ///<returns>(float ResizeArray) A one-dimensional list containing real numbers, , otherwise None</returns>
+    ///<returns>(float ResizeArray) A one-dimensional list containing real numbers</returns>
     static member SimplifyArray(points:Point3d seq) : float ResizeArray =
         resizeArray { for  p in points do
                             yield p.X
@@ -258,7 +258,7 @@ module ExtensionsUtility =
     ///<param name="points">(Point3d seq) The points to sort</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///Minimum distance between points. Points that fall within this tolerance
-    ///  will be discarded. </param>
+    ///  will be discarded.</param>
     ///<returns>(Point3d array) of sorted 3D points</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance

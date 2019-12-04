@@ -135,7 +135,7 @@ module ExtensionsTransformation =
     [<Extension>]
     ///<summary>Returns the inverse of a non-singular transformation matrix</summary>
     ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
-    ///<returns>(Transform) The inverted 4x4 transformation matrix </returns>
+    ///<returns>(Transform) The inverted 4x4 transformation matrix</returns>
     static member XformInverse(xform:Transform) : Transform =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         let rc, inverse = xform.TryGetInverse()
@@ -303,7 +303,7 @@ module ExtensionsTransformation =
     [<Extension>]
     ///<summary>Creates a translation transformation matrix</summary>
     ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d.  A 3-D translation vector</param>
-    ///<returns>(Transform) The 4x4 transformation matrix is successful, otherwise None</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix if successful</returns>
     static member XformTranslation(vector:Vector3d) : Transform =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         Transform.Translation(vector)

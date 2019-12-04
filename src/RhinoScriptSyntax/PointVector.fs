@@ -196,7 +196,7 @@ module ExtensionsPointvector =
     ///<summary>Verifies that a list of 3D points are coplanar</summary>
     ///<param name="points">(Point3d seq) 3D points to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
-    ///Tolerance to use when verifying </param>
+    ///Tolerance to use when verifying</param>
     ///<returns>(bool) True or False</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
@@ -230,7 +230,7 @@ module ExtensionsPointvector =
     ///<summary>Transforms a 3D point</summary>
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
-    ///<returns>(Point3d) transformed Pooint on success</returns>
+    ///<returns>(Point3d) transformed Point on success</returns>
     static member PointTransform(point:Point3d, xform:Transform) : Point3d =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         //xform = RhinoScriptSyntax.Coercexform(xform)
@@ -381,7 +381,7 @@ module ExtensionsPointvector =
     [<Extension>]
     ///<summary>Returns the length of a 3D vector</summary>
     ///<param name="vector">(Vector3d) The 3-D vector</param>
-    ///<returns>(float) The length of the vector , otherwise None</returns>
+    ///<returns>(float) The length of the vector</returns>
     static member VectorLength(vector:Vector3d) : float =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         vector.Length

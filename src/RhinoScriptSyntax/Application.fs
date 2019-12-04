@@ -45,7 +45,7 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Returns the macro of a command alias</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
-    ///<returns>(string) The existing macro </returns>
+    ///<returns>(string) The existing macro</returns>
     static member AliasMacro(alias:string) : string = //GET
         ApplicationSettings.CommandAliasList.GetMacro(alias)
 
@@ -132,7 +132,7 @@ module ExtensionsApplication =
     ///  11 = Text
     ///  12 = Text Background
     ///  13 = Text hover</param>
-    ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color </param>
+    ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color</param>
     ///<returns>(unit) void, nothing</returns>
     static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
         if item = 0 then AppearanceSettings.ViewportBackgroundColor <- color

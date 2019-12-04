@@ -18,7 +18,7 @@ module ExtensionsPlane =
     ///<summary>Returns the distance from a 3D point to a plane</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
-    ///<returns>(float) The distance , otherwise None</returns>
+    ///<returns>(float) The distance</returns>
     static member DistanceToPlane(plane:Plane, point:Point3d) : float =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
@@ -90,7 +90,7 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///The intersection tolerance. </param>
+    ///The intersection tolerance.</param>
     ///<returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
     ///  Element Type        Description
     ///  [0]       Number      The intersection event type, either Point (1) or Overlap (2).
@@ -171,7 +171,7 @@ module ExtensionsPlane =
     ///<param name="yAxis">(Vector3d) A non-zero 3D vector not parallel to xAxis that is used
     ///  to determine the Y axis direction. Note, yAxis does not
     ///  have to be perpendicular to xAxis</param>
-    ///<returns>(Plane) The plane </returns>
+    ///<returns>(Plane) The plane</returns>
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
                                   yAxis:Vector3d) : Plane =
@@ -186,7 +186,7 @@ module ExtensionsPlane =
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
     ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane</param>
     ///<param name="xaxis">(Vector3d) Optional, vector defining the plane's x-axis</param>
-    ///<returns>(Plane) The plane </returns>
+    ///<returns>(Plane) The plane</returns>
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
                                    [<OPT;DEF(Vector3d())>]xaxis:Vector3d) : Plane =
@@ -207,7 +207,7 @@ module ExtensionsPlane =
     ///<param name="origin">(Point3d) Origin point of the plane</param>
     ///<param name="x">(Point3d) X point on the plane's x  axis</param>
     ///<param name="y">(Point3d) Y point on the plane's y axis</param>
-    ///<returns>(Plane) The plane , otherwise None</returns>
+    ///<returns>(Plane) The plane</returns>
     static member PlaneFromPoints( origin:Point3d,
                                    x:Point3d,
                                    y:Point3d) : Plane =

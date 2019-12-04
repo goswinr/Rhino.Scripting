@@ -18,8 +18,8 @@ module ExtensionsGrips =
     ///  also called control points</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
-    ///If True, the specified object's grips will be turned on.
-    ///  Otherwise, they will be turned off</param>
+    ///  If True, the specified object's grips will be turned on.
+    ///  If False, they will be turned off</param>
     ///<returns>(bool) True on success, False on failure</returns>
     static member EnableObjectGrips(objectId:Guid, [<OPT;DEF(true)>]enable:bool) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)

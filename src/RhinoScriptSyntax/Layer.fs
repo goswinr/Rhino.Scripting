@@ -24,7 +24,7 @@ module ExtensionsLayer =
     ///Layer's locked state</param>
     ///<param name="parent">(string) Optional, Name of the new layer's parent layer. If omitted, the new
     ///  layer will not have a parent layer</param>
-    ///<returns>(string) The full name of the new layer </returns>
+    ///<returns>(string) The full name of the new layer</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,
                             [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
                             [<OPT;DEF(true)>]visible:bool,

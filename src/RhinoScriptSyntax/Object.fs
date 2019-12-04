@@ -520,7 +520,7 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...)</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(string) A short text description of the object </returns>
+    ///<returns>(string) A short text description of the object</returns>
     static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
@@ -530,7 +530,7 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Returns the count for each object type in a List of objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<returns>(string) A short text description of the object </returns>
+    ///<returns>(string) A short text description of the object</returns>
     static member ObjectDescription(objectIds:Guid seq) : string =
         let count =  Seq.countBy (fun id -> RhinoScriptSyntax.CoerceRhinoObject(id).ShortDescription(true)) objectIds
         let mutable tx = ""
@@ -570,7 +570,7 @@ module ExtensionsObject =
     
     [<Extension>]
     ///<summary>Returns the full layername of an object. 
-    /// arent layers are separated by <c>::</c> </summary>
+    /// arent layers are separated by <c>::</c></summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET

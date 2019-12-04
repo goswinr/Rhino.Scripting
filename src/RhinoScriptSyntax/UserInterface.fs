@@ -214,7 +214,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c> </param>
+    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c></param>
     ///<returns>(Drawing.Color option) an Option of RGB color</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         async{
@@ -256,7 +256,7 @@ module ExtensionsUserinterface =
     ///Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///Prompt for the second distance point</param>
-    ///<returns>(float option) an Option of The distance between the two points </returns>
+    ///<returns>(float option) an Option of The distance between the two points</returns>
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d,
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
@@ -352,7 +352,7 @@ module ExtensionsUserinterface =
     ///<param name="number">(int) Optional, A default whole number value</param>
     ///<param name="minimum">(int) Optional, A minimum allowable value</param>
     ///<param name="maximum">(int) Optional, A maximum allowable value</param>
-    ///<returns>(int option) an Option of The whole number input by the user </returns>
+    ///<returns>(int option) an Option of The whole number input by the user</returns>
     static member GetInteger(   [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(2147482999)>]number:int,
                                 [<OPT;DEF(2147482999)>]minimum:int,
@@ -755,8 +755,8 @@ module ExtensionsUserinterface =
     ///<param name="min">(int) Optional, Default Value: <c>2</c>
     ///The minimum number of points to require. The default is 2</param>
     ///<param name="max">(int) Optional, Default Value: <c>0</c>
-    ///The maximum number of points to require; 0 for no limit. </param>
-    ///<returns>(Polyline option) an Option of a  polyline </returns>
+    ///The maximum number of points to require; 0 for no limit.</param>
+    ///<returns>(Polyline option) an Option of a  polyline</returns>
     static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
                                         [<OPT;DEF(null:string)>]message1:string,
                                         [<OPT;DEF(null:string)>]message2:string,
@@ -788,7 +788,7 @@ module ExtensionsUserinterface =
     ///<param name="number">(float) Optional, A default number value</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(float option) an Option of The number input by the user </returns>
+    ///<returns>(float option) an Option of The number input by the user</returns>
     static member GetReal(              [<OPT;DEF("Number")>]message:string,
                                         [<OPT;DEF(7e89)>]number:float,
                                         [<OPT;DEF(7e89)>]minimum:float,

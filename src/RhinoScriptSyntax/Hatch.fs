@@ -235,7 +235,7 @@ module ExtensionsHatch =
     ///<summary>Returns the description of a hatch pattern. Note, not all hatch patterns
     ///  have descriptions</summary>
     ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
-    ///<returns>(string) description of the hatch pattern on success otherwise None</returns>
+    ///<returns>(string) description of the hatch pattern</returns>
     static member HatchPatternDescription(hatchPattern:string) : string =
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)

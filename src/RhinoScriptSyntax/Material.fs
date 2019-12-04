@@ -110,7 +110,7 @@ module ExtensionsMaterial =
     [<Extension>]
     ///<summary>Returns a material's bump bitmap filename</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
-    ///<returns>(string option) The current bump bitmap filename </returns>
+    ///<returns>(string option) The current bump bitmap filename</returns>
     static member MaterialBump(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' " materialIndex

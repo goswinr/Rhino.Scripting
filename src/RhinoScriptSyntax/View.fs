@@ -677,7 +677,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return id of a display mode given it's name</summary>
     ///<param name="name">(string) Name of the display mode</param>
-    ///<returns>(Guid) The id of the display mode , otherwise None</returns>
+    ///<returns>(Guid) The id of the display mode</returns>
     static member ViewDisplayModeId(name:string) : Guid =
         let desc = Display.DisplayModeDescription.FindByName(name)
         if notNull desc then desc.Id
@@ -688,7 +688,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return name of a display mode given it's id</summary>
     ///<param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method</param>
-    ///<returns>(string) The name of the display mode , otherwise None</returns>
+    ///<returns>(string) The name of the display mode</returns>
     static member ViewDisplayModeName(modeId:Guid) : string =
         //modeId = RhinoScriptSyntax.Coerceguid(modeId)
         let desc = Display.DisplayModeDescription.GetDisplayMode(modeId)
@@ -829,7 +829,7 @@ module ExtensionsView =
     ///  3 = Up</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>5</c>
     ///The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
-    ///<returns>(float) The number of seconds it took to regenerate the view frames number of times,</returns>
+    ///<returns>(float) The number of seconds it took to regenerate the view frames number of times</returns>
     static member ViewSpeedTest( [<OPT;DEF("":string)>]view:string,
                                  [<OPT;DEF(100)>]frames:int,
                                  [<OPT;DEF(true)>]freeze:bool,

@@ -161,7 +161,7 @@ module ExtensionsLine =
     ///<param name="line">(Geometry.Line) The line</param>
     ///<param name="sphereCenter">(Point3d) The center point of the sphere</param>
     ///<param name="sphereRadius">(float) The radius of the sphere</param>
-    ///<returns>(Point3d array) list of intersection points , otherwise None</returns>
+    ///<returns>(Point3d array) list of intersection points</returns>
     static member LineSphereIntersection(line:Line, sphereCenter:Point3d, sphereRadius:float) : Point3d array =
         let sphere = Sphere(sphereCenter, sphereRadius)
         let rc, pt1, pt2 = Intersect.Intersection.LineSphere(line, sphere)

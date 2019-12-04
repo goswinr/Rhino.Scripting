@@ -197,7 +197,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="point">(Point3d) Test point</param>
     ///<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
-    ///  The testing tolerance </param>
+    ///  The testing tolerance</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPointOnMesh(    objectId:Guid,
                                     point:Point3d,
@@ -682,7 +682,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Returns the vertex count of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(int) The number of mesh vertices </returns>
+    ///<returns>(int) The number of mesh vertices</returns>
     static member MeshVertexCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Vertices.Count

@@ -229,7 +229,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh density property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current render mesh density </returns>
+    ///<returns>(float) The current render mesh density</returns>
     static member RenderMeshDensity() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         current.RelativeTolerance
@@ -250,7 +250,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh maximum angle property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current maximum angle </returns>
+    ///<returns>(float) The current maximum angle</returns>
     static member RenderMeshMaxAngle() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         toDegrees(current.RefineAngle)
@@ -271,7 +271,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh maximum aspect ratio property of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current render mesh maximum aspect ratio </returns>
+    ///<returns>(float) The current render mesh maximum aspect ratio</returns>
     static member RenderMeshMaxAspectRatio() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         let rc = current.GridAspectRatio
@@ -293,7 +293,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current render mesh maximum distance, edge to surface </returns>
+    ///<returns>(float) The current render mesh maximum distance, edge to surface</returns>
     static member RenderMeshMaxDistEdgeToSrf() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         let rc = current.Tolerance
@@ -315,7 +315,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh maximum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current render mesh maximum edge length </returns>
+    ///<returns>(float) The current render mesh maximum edge length</returns>
     static member RenderMeshMaxEdgeLength() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         let rc = current.MaximumEdgeLength
@@ -337,7 +337,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh minimum edge length parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current render mesh minimum edge length </returns>
+    ///<returns>(float) The current render mesh minimum edge length</returns>
     static member RenderMeshMinEdgeLength() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         let rc = current.MinimumEdgeLength
@@ -360,7 +360,7 @@ module ExtensionsDocument =
     [<Extension>]
      ///<summary>Returns the render mesh minimum initial grid quads parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(int) The current render mesh minimum initial grid quads </returns>
+    ///<returns>(int) The current render mesh minimum initial grid quads</returns>
     static member RenderMeshMinInitialGridQuads() : int = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         current.GridMinCount
@@ -532,7 +532,7 @@ module ExtensionsDocument =
 
     [<Extension>]
      ///<summary>Return the document's distance display precision</summary>
-    ///<returns>(int) The current distance display precision </returns>
+    ///<returns>(int) The current distance display precision</returns>
     static member UnitDistanceDisplayPrecision() : int = //GET
         Doc.ModelDistanceDisplayPrecision
 
@@ -688,7 +688,7 @@ module ExtensionsDocument =
     ///Abbreviate the name of the units system (e.g. return "mm" instead of "millimeter"). The default is not to abbreviate the name (false)</param>
     ///<param name="modelUnits">(bool) Optional, Default Value: <c>true</c>
     ///Return the document's model units (True) or the document's page units (False). The default is True</param>
-    ///<returns>(string) The name of the current units system </returns>
+    ///<returns>(string) The name of the current units system</returns>
     static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string =
         Doc.GetUnitSystemName(modelUnits, capitalize, singular, abbreviate)
 

@@ -224,7 +224,7 @@ module ExtensionsSurface =
       ///<param name="startSurfaceId">(Guid) The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
       ///  to the surface you are trying to create</param>
       ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-      ///The tolerance used by input analysis functions. </param>
+      ///The tolerance used by input analysis functions.</param>
       ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
       ///Try to find an outside curve and trims the surface to it.  The default value is True</param>
       ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
@@ -243,7 +243,7 @@ module ExtensionsSurface =
       ///Clamps the edges of the starting surface in place. This option is useful if you are using a
       ///  curve or points for deforming an existing surface, and you do not want the edges of the starting surface
       ///  to move.  The default if False</param>
-      ///<returns>(Guid) Identifier of the new surface object </returns>
+      ///<returns>(Guid) Identifier of the new surface object</returns>
       static member AddPatch( objectIds:Guid seq,
                               startSurfaceId: Guid,
                               [<OPT;DEF(0.0)>]tolerance:float,
@@ -272,7 +272,7 @@ module ExtensionsSurface =
     ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated surface . however it is best if you create a starting surface that is similar in shape
     ///  to the surface you are trying to create an use the other overload of this method</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///The tolerance used by input analysis functions. </param>
+    ///The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     ///Try to find an outside curve and trims the surface to it.  The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
@@ -291,7 +291,7 @@ module ExtensionsSurface =
     ///Clamps the edges of the starting surface in place. This option is useful if you are using a
     ///  curve or points for deforming an existing surface, and you do not want the edges of the starting surface
     ///  to move.  The default if False</param>
-    ///<returns>(Guid) Identifier of the new surface object </returns>
+    ///<returns>(Guid) Identifier of the new surface object</returns>
     static member AddPatch( objectIds:Guid seq,
                             uvSpans: int * int ,
                             [<OPT;DEF(0.0)>]tolerance:float,
@@ -363,7 +363,7 @@ module ExtensionsSurface =
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uDir">(float) The magnitude in the U direction</param>
     ///<param name="vDir">(float) The magnitude in the V direction</param>
-    ///<returns>(Guid) The identifier of the new object </returns>
+    ///<returns>(Guid) The identifier of the new object</returns>
     static member AddPlaneSurface( plane:Plane,
                                    uDir:float,
                                    vDir:float) : Guid =
@@ -527,7 +527,7 @@ module ExtensionsSurface =
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<param name="degree">(int * int) Optional, Default Value: <c>3*3</c>
     ///Two numbers defining degree of the surface in the u, v directions</param>
-    ///<returns>(Guid) The identifier of the new object </returns>
+    ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfControlPtGrid( count:int * int,
                                        points:Point3d seq,
                                        [<OPT;DEF(null)>]degree:int * int) : Guid =
@@ -547,7 +547,7 @@ module ExtensionsSurface =
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<param name="pointD">(Point3d) Fourth corner point</param>
-    ///<returns>(Guid) The identifier of the new object </returns>
+    ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPt(pointA:Point3d ,pointB:Point3d ,pointC: Point3d ,pointD: Point3d) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA ,pointB ,pointC ,pointD)
         if surface|> isNull  then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
@@ -561,7 +561,7 @@ module ExtensionsSurface =
     ///<param name="pointA">(Point3d) First corner point</param>
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
-    ///<returns>(Guid) The identifier of the new object </returns>
+    ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPt(pointA:Point3d ,pointB:Point3d ,pointC: Point3d ) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA ,pointB ,pointC)
         if surface|> isNull  then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
@@ -579,7 +579,7 @@ module ExtensionsSurface =
     ///Two numbers defining degree of the surface in the u, v directions</param>
     ///<param name="closed">(bool * bool) Optional, Default Value: <c>false*false</c>
     ///Two booleans defining if the surface is closed in the u, v directions</param>
-    ///<returns>(Guid) The identifier of the new object </returns>
+    ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPtGrid( count:int * int,
                                 points:Point3d seq,
                                 [<OPT;DEF(null)>]degree:int * int,
@@ -665,7 +665,7 @@ module ExtensionsSurface =
     ///<param name="basis">(Plane)  the basis plane of the torus</param>
     ///<param name="majorRadius">(float) Major radius of  the torus</param>
     ///<param name="minorRadius">(float) Minor radius of  torus</param>
-       ///<returns>(Guid) The identifier of the new object </returns>
+       ///<returns>(Guid) The identifier of the new object</returns>
     static member AddTorus( basis:Plane,
                             majorRadius:float,
                             minorRadius:float,
@@ -814,7 +814,7 @@ module ExtensionsSurface =
     ///<param name="objectId">(Guid) The identifier of the surface or polysurface object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the duplicated edge curves. The default is not to select (False)</param>
-    ///<returns>(Guid ResizeArray) identifying the newly created curve objects </returns>
+    ///<returns>(Guid ResizeArray) identifying the newly created curve objects</returns>
     static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let outcurves = brep.DuplicateEdgeCurves()
@@ -1139,7 +1139,7 @@ module ExtensionsSurface =
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Distance tolerance at segment midpoints. If omitted,
     ///  the current absolute tolerance is used</param>
-    ///<returns>(Guid ResizeArray) identifying the newly created intersection curve and point objects </returns>
+    ///<returns>(Guid ResizeArray) identifying the newly created intersection curve and point objects</returns>
     static member IntersectBreps( brep1:Guid,
                                   brep2:Guid,
                                   [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
@@ -1254,7 +1254,7 @@ module ExtensionsSurface =
     ///If true, the test point must be inside by at least tolerance</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.SqrtEpsilon</c>
     ///Distance tolerance used for intersection and determining
-    ///  strict inclusion. </param>
+    ///  strict inclusion.</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPointInSurface( objectId:Guid,
                                     point:Point3d,
@@ -1814,7 +1814,7 @@ module ExtensionsSurface =
     ///<summary>Returns the point on a surface that is closest to a test point</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
-    ///<returns>(Point3d) The closest point on the surface </returns>
+    ///<returns>(Point3d) The closest point on the surface</returns>
     static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
@@ -1826,7 +1826,7 @@ module ExtensionsSurface =
     ///<summary>Returns U, V parameters of point on a surface that is closest to a test point</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
-    ///<returns>(float * float) The U, V parameters of the closest point on the surface </returns>
+    ///<returns>(float * float) The U, V parameters of the closest point on the surface</returns>
     static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)

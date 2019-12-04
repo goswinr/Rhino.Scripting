@@ -154,7 +154,7 @@ type RhinoScriptSyntax private () = // no constructor?
     //-------------------------------------------------------
 
 
-    ///<summary>attempt to get GeometryBase class from given input,</summary>
+    ///<summary>attempt to get GeometryBase class from given input</summary>
     ///<param name="objectId">geometry Identifier (Guid or string)</param>
     ///<returns>(Rhino.Geometry.GeometryBase) Fails on bad input</returns>
     static member CoerceGeometry(objectId:'T) : GeometryBase =

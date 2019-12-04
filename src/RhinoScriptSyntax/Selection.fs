@@ -95,7 +95,7 @@ module ExtensionsSelection =
     ///The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
     ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
@@ -104,7 +104,7 @@ module ExtensionsSelection =
     ///Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips objects</param>  
-    ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible </returns>
+    ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
     static member VisibleObjects(   [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
@@ -142,7 +142,7 @@ module ExtensionsSelection =
     ///Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips objects.  If omitted, grips objects are not returned</param>
-    ///<returns>(Guid) The identifier of the object </returns>
+    ///<returns>(Guid) The identifier of the object</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid =
@@ -366,7 +366,7 @@ module ExtensionsSelection =
     ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
@@ -457,7 +457,7 @@ module ExtensionsSelection =
     ///Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///Maximum count of objects allowed to be selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
     static member GetObjectsAndRemember( message:string,
@@ -500,7 +500,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the picked objects. If False, the objects that are
     ///  picked are not selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///  allowed to be selected</param>
     ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
@@ -645,7 +645,7 @@ module ExtensionsSelection =
     ///Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers the locked objects </returns>
+    ///<returns>(Guid ResizeArray) identifiers the locked objects</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) :Guid ResizeArray =
@@ -673,7 +673,7 @@ module ExtensionsSelection =
     ///Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the hidden objects </returns>
+    ///<returns>(Guid ResizeArray) identifiers of the hidden objects</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
@@ -699,7 +699,7 @@ module ExtensionsSelection =
     ///Include grips objects.  If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the newly selected objects </returns>
+    ///<returns>(Guid ResizeArray) identifiers of the newly selected objects</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
                                         [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
@@ -727,7 +727,7 @@ module ExtensionsSelection =
     ///  most recently created or changed object identifiers will be returned</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///Select the object.  If omitted, the object is not selected</param>
-    ///<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects </returns>
+    ///<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects</returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         match commandSerialNumbers with
         |None -> ResizeArray()
@@ -807,7 +807,7 @@ module ExtensionsSelection =
     ///Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips objects.  If omitted, grips objects are not returned</param>
-    ///<returns>(Guid ResizeArray) identifier of normal objects </returns>
+    ///<returns>(Guid ResizeArray) identifier of normal objects</returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true

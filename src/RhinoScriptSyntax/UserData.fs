@@ -61,7 +61,7 @@ module ExtensionsUserdata =
     [<Extension>]
     ///<summary>Returns user text stored in the document</summary>
     ///<param name="key">(string) Key to use for retrieving user text</param>
-    ///<returns>(string) If key is specified, then the associated value </returns>
+    ///<returns>(string) If key is specified, then the associated value</returns>
     static member GetDocumentUserText(key:string) : string =
         Doc.Strings.GetValue(key)
 
