@@ -18,8 +18,8 @@ module ActiceDocument =
         else 
             failwith "failed to find the active Rhino document, is this dll running inside Rhino? " 
     
-    // redraws all Rhino viewports
-    //let redraw() = Doc.Views.Redraw()
+    ///Redraws all Rhino viewports
+    let redraw() = Doc.Views.Redraw()
    
 
     ///of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
