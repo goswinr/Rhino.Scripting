@@ -788,7 +788,8 @@ module ExtensionsSelection =
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
         Doc.Objects.GetObjectList(settings)
-        |> Seq.thisAndNext
+        |> Seq.thisNext
+        |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
             |None ->failwithf "NextObject not found for %A" objectId

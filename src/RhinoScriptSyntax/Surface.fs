@@ -24,7 +24,7 @@ module ExtensionsSurface =
         let brep = Brep.CreateFromBox(corners)
         if isNull brep then failwithf "Rhino.Scripting: Unable to create brep from box.  %d corners:'%A'" (Seq.length corners) corners
         let rc = Doc.Objects.AddBrep(brep)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add brep to document.  corners:'%A'" corners
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add brep to document. corners:'%A'" corners
         Doc.Views.Redraw()
         rc
 
