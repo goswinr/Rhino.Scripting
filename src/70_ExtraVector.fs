@@ -11,238 +11,345 @@ open System.Collections.Generic
 
 
 module ExtrasVector =
-  
-  let private normalOfTwoPt(a:Point3d, b:Point3d) =
-    let v = b-a
-    let p = Vector3d.CrossProduct(v,Vector3d.ZAxis)
-    if p.Length<0.00001 then 
-        Vector3d.XAxis
-    else  
-        let mutable tot = Vector3d.CrossProduct(v,p)
-        tot.Unitize() |> ignore
-        if tot.Z < 0.0 then 
-            tot <- -tot
-        tot
-
-
-  type RhinoScriptSyntax with
-
+        
+    /// Any int will give a valid index for given collection size.
+    let inline saveIdx i len =
+        let rest = i % len
+        if rest >= 0 then rest // does not fail on -4 for len 4
+        else len + rest
+        
+    let inline scale (sc:float) (v:Vector3d) = v * sc    
+            
+    let inline unitize (v:Vector3d) =
+        let f = 1. / sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)   
+        
+    let inline setLength (len:float) (v:Vector3d) =
+        let f = len / sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f) 
+            
+    let inline orientUp (v:Vector3d) =
+        if v.Z < 0.0 then -v else v
+        
+    let inline matchOrientation (orientToMatch:Vector3d) (v:Vector3d) =
+        if orientToMatch * v < 0.0 then -v else v
+        
+    /// Fails on zero length vectors
+    let isAngleBelow1Degree(a:Vector3d, b:Vector3d) = //(prevPt:Point3d, thisPt:Point3d, nextPt:Point3d) =                        
+        //let a = prevPt - thisPt 
+        //let b = nextPt - thisPt                       
+        let sa = a.SquareLength
+        if sa < RhinoMath.SqrtEpsilon then 
+            failwithf "Duplicate points: isAngleBelow1Degree: prevPt - thisPt: %s.SquareLength < RhinoMath.SqrtEpsilon; nextPt - thisPt:%s " a.ToNiceString b.ToNiceString
+        let sb = b.SquareLength
+        if sb < RhinoMath.SqrtEpsilon then 
+            failwithf "Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s.SquareLength < RhinoMath.SqrtEpsilon; prevPt - thisPt:%s " b.ToNiceString a.ToNiceString
+        let lena = sqrt sa
+        let lenb = sqrt sb
+        if lena < Doc.ModelAbsoluteTolerance then 
+            failwithf "Duplicate points: isAngleBelow1Degree: prevPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; nextPt - thisPt:%s " a.ToNiceString Doc.ModelAbsoluteTolerance b.ToNiceString
+        if lenb < Doc.ModelAbsoluteTolerance then 
+            failwithf "Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; prevPt - thisPt:%s " b.ToNiceString Doc.ModelAbsoluteTolerance a.ToNiceString  
+        let au = a * (1.0 / lena)
+        let bu = b * (1.0 / lenb)
+        abs(bu*au) > 0.999847695156391 // = cosine of 1 degree (2 degrees would be =  0.999390827019096)
+        
+    ///Unitize vector, if input vector is shorter than 1e-6 alternative vector is returned UN-unitized.
+    let inline unitizeWithAlternative (unitVectorAlt:Vector3d) (v:Vector3d) =
+        let l = v.SquareLength
+        if l < RhinoMath.ZeroTolerance  then  //sqrt RhinoMath.ZeroTolerance = 1e-06
+            unitVectorAlt //|> unitize
+        else  
+            let f = 1.0 / sqrt(l)
+            Vector3d(v.X*f , v.Y*f , v.Z*f)
+                
+    ///Every line has a normal vector in XY Plane.
+    ///If line is vertical then XAxis
+    ///result is unitized
+    let normalOfTwoPointsInXY(fromPt:Point3d,toPt:Point3d) =
+        let v = toPt - fromPt
+        Vector3d.CrossProduct(v,Vector3d.ZAxis)
+        |> unitizeWithAlternative Vector3d.XAxis
+            
+    /// distHor in XY plane, 
+    /// distNormal in free Normal ( ZAxis for Flat line)
+    let offsetTwoPt(    fromPt:Point3d, 
+                        toPt:Point3d, 
+                        distHor:float,
+                        distNormal:float) : Point3d*Point3d= 
+        let v = toPt - fromPt
+        let normHor =
+            Vector3d.CrossProduct(v,Vector3d.ZAxis)
+            |> unitizeWithAlternative Vector3d.XAxis
+                
+        let normFree = 
+            Vector3d.CrossProduct(v,normHor)
+            |> unitize        
+        
+        let shift = distHor * normHor + distNormal * normFree
+        fromPt +  shift, toPt + shift 
+        
+        
+    ///Points  must not be colinear !
+    let findOffsetCorner(   prevPt:Point3d,
+                            thisPt:Point3d, 
+                            nextPt:Point3d, 
+                            prevDist:float, 
+                            nextDist:float,
+                            orientation:Vector3d) : Vector3d* Vector3d * Point3d * Vector3d=
+        let vp = prevPt - thisPt
+        let vn = nextPt - thisPt    
+        if isAngleBelow1Degree(vp,vn) then 
+            Vector3d.Zero,Vector3d.Zero,Point3d.Origin,Vector3d.Zero
+        else 
+            let n = 
+                Vector3d.CrossProduct(vp,vn)
+                |> unitize
+                |> matchOrientation orientation            
+                
+            let sp = Vector3d.CrossProduct(vp,n) |> setLength prevDist 
+            let sn = Vector3d.CrossProduct(n,vn) |> setLength nextDist    
+            let lp = Line(thisPt + sp , vp)  //|>> (Doc.Objects.AddLine>>ignore)
+            let ln = Line(thisPt + sn , vn)  //|>> (Doc.Objects.AddLine>> ignore)
+               
+            let ok, tp ,tn = Intersect.Intersection.LineLine(lp,ln) //could also be solved with trigonometry functions
+            
+            if ok then
+                sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
+            else  
+                failwithf "findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
+        
+    let rec internal searchBack i (ns:ResizeArray<Vector3d>) = 
+        let ii = saveIdx (i) ns.Count
+        let v = ns.[ii]
+        if v <> Vector3d.Zero || i < -ns.Count then ii
+        else searchBack (i-1) ns
+        
+    let rec internal searchForward i (ns:ResizeArray<Vector3d>) = 
+        let ii = saveIdx (i) ns.Count
+        let v = ns.[ii]
+        if v <> Vector3d.Zero || i > (2 * ns.Count) then ii
+        else searchForward (i+1) ns        
+        
+            
 
     [<EXT>]
-    static member DrawVector(   vector:Vector3d, 
-                                [<OPT;DEF(Point3d())>]fromPoint:Point3d, 
-                                [<OPT;DEF("")>]layer:string ) : unit  = 
-        let l = RhinoScriptSyntax.AddLine(fromPoint,fromPoint+vector)
-        RhinoScriptSyntax.CurveArrows(l,2)
-        if layer<>"" then  RhinoScriptSyntax.ObjectLayer(l,layer)
+    type RhinoScriptSyntax with
+
+
+        [<EXT>]
+        static member DrawVector(   vector:Vector3d, 
+                                    [<OPT;DEF(Point3d())>]fromPoint:Point3d, 
+                                    [<OPT;DEF("")>]layer:string ) : unit  = 
+            let l = RhinoScriptSyntax.AddLine(fromPoint,fromPoint+vector)
+            RhinoScriptSyntax.CurveArrows(l,2)
+            if layer<>"" then  RhinoScriptSyntax.ObjectLayer(l,layer)
          
     
-    [<EXT>]
-    static member DrawPlane(    pl:Plane,
-                                [<OPT;DEF(1000.0)>]scale:float,
-                                [<OPT;DEF("")>]suffixInDot:string,
-                                [<OPT;DEF("")>]layer:string ) : unit  = 
+        [<EXT>]
+        static member DrawPlane(    pl:Plane,
+                                    [<OPT;DEF(1000.0)>]scale:float,
+                                    [<OPT;DEF("")>]suffixInDot:string,
+                                    [<OPT;DEF("")>]layer:string ) : unit  = 
         
-        let a=RhinoScriptSyntax.AddLine(pl.Origin, pl.Origin+pl.XAxis*scale)
-        let b=RhinoScriptSyntax.AddLine(pl.Origin, pl.Origin+pl.YAxis*scale)
-        let c=RhinoScriptSyntax.AddLine(pl.Origin, pl.Origin+pl.ZAxis*scale*0.5)
-        let e=RhinoScriptSyntax.AddTextDot("x"+suffixInDot, pl.Origin+pl.XAxis*scale)
-        let f=RhinoScriptSyntax.AddTextDot("y"+suffixInDot, pl.Origin+pl.YAxis*scale)
-        let g=RhinoScriptSyntax.AddTextDot("z"+suffixInDot, pl.Origin+ pl.ZAxis*scale*0.5)
-        let gg=RhinoScriptSyntax.AddGroup()
-        if layer <>"" then  RhinoScriptSyntax.ObjectLayer([a;b;c;e;f;g],layer)
-        RhinoScriptSyntax.AddObjectToGroup([a;b;c;e;f;g],gg)
+            let a=RhinoScriptSyntax.AddLine(pl.Origin, pl.Origin+pl.XAxis*scale)
+            let b=RhinoScriptSyntax.AddLine(pl.Origin, pl.Origin+pl.YAxis*scale)
+            let c=RhinoScriptSyntax.AddLine(pl.Origin, pl.Origin+pl.ZAxis*scale*0.5)
+            let e=RhinoScriptSyntax.AddTextDot("x"+suffixInDot, pl.Origin+pl.XAxis*scale)
+            let f=RhinoScriptSyntax.AddTextDot("y"+suffixInDot, pl.Origin+pl.YAxis*scale)
+            let g=RhinoScriptSyntax.AddTextDot("z"+suffixInDot, pl.Origin+ pl.ZAxis*scale*0.5)
+            let gg=RhinoScriptSyntax.AddGroup()
+            if layer <>"" then  RhinoScriptSyntax.ObjectLayer([a;b;c;e;f;g],layer)
+            RhinoScriptSyntax.AddObjectToGroup([a;b;c;e;f;g],gg)
        
 
-    [<EXT>]
-    static member DistPt(from:Point3d, dir:Point3d, distance:float) : Point3d  =
-        let v = dir - from
-        let sc = distance/v.Length
-        from + v*sc
+        [<EXT>]
+        static member DistPt(from:Point3d, dir:Point3d, distance:float) : Point3d  =
+            let v = dir - from
+            let sc = distance/v.Length
+            from + v*sc
     
-    [<EXT>]
-    static member DivPt(from:Point3d, dir:Point3d, rel:float) : Point3d  =
-        let v = dir - from
-        from + v*rel
+        [<EXT>]
+        static member DivPt(from:Point3d, dir:Point3d, rel:float) : Point3d  =
+            let v = dir - from
+            from + v*rel
         
 
-    [<EXT>]
-    static member MeanPoint(pts:Point3d seq) : Point3d  =
-        let mutable p = Point3d.Origin
-        let mutable k = 0.0
-        for pt in pts do
-            k <- k + 1.0
-            p <- p + pt
-        p/k
+        [<EXT>]
+        static member MeanPoint(pts:Point3d seq) : Point3d  =
+            let mutable p = Point3d.Origin
+            let mutable k = 0.0
+            for pt in pts do
+                k <- k + 1.0
+                p <- p + pt
+            p/k
 
     
-    ///considers current order of points too, counterclockwise in xy plane is z
-    [<EXT>]
-    static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
-        let k = Seq.length pts
-        if k < 2 then 
-            failwithf "NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString
-        elif k = 3   then  
-            let a = pts.[0] - pts.[1]
-            let b = pts.[2] - pts.[1]
-            let v= Vector3d.CrossProduct(b,a)
-            if v.IsTiny() then failwithf "NormalOfPoints: three points are in a line  %s" pts.ToNiceString
-            else
-                v.UnitizedUnchecked
-        else
-            let cen = RhinoScriptSyntax.MeanPoint(pts)
-            let mutable v = Vector3d.Zero
-            for t,n in Seq.thisNext pts do
-                let a = t-cen
-                let b = n-cen
-                v <- v + Vector3d.CrossProduct(a,b)                
-            if v.IsTiny() then failwithf "NormalOfPoints: points are in a line  %s"  pts.ToNiceString
-            else
-                v.UnitizedUnchecked
-
-
-    ///auto detects points from closed polylines and loops them
-    [<EXT>]
-    static member OffsetPoints(     points:Point3d IList, 
-                                    offsetDistances: float seq, 
-                                    normalDistances: float seq,
-                                    [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  =           
-        
-        if points.Count < 2 then failwithf "OffsetPoints needs at least two points but %s given" points.ToNiceString
-
-        //auto detect closed polyline points:
-        let lastIsFirst = 
-            if (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance then true         
-            else false
-
-        let arrD =
-            let l = Seq.length offsetDistances
-            if l = 0 then ResizeArray.create points.Count 0.0
-            elif l = 1 then ResizeArray.create points.Count (Seq.head offsetDistances)
-            elif l = points.Count then ResizeArray(offsetDistances)  
-            else failwithf "OffsetPoints: offsetDistances has %d items but should have %d or 1" l points.Count
-
-            
-        let epts,arrD = 
-            if lastIsFirst then  // always loop in this case
-                resizeArray{ yield points.GetItem(-2) ; yield! points ; yield points.[1]  },  //end and strat exist twice
-                resizeArray{ yield arrD.Last      ; yield! arrD ; yield arrD.[0] }
-
-            elif loop then
-                resizeArray{ yield points.Last    ; yield! points ; yield points.[0]  }, 
-                resizeArray{ yield arrD.Last  ; yield! arrD ; yield arrD.[0] }
-            else
-                ResizeArray(points),arrD 
-
-        // core
-        let mutable ops = ResizeArray<Point3d>(points.Count) 
-        let mutable N =   ResizeArray<Vector3d>(points.Count)  // normals
-
-        if points.Count = 2 then 
-            let norm=normalOfTwoPt(points.[0], points.[1])
-            N.[0]<-norm
-            N.[1]<-norm
-            let v = points.[1]-points.[0]
-            let mutable p = Vector3d.CrossProduct(v,Vector3d.ZAxis)
-            if p.Length < 0.00001 then
-                p <- Vector3d.XAxis
-            p.Unitize() |> ignore
-            ops.[0] <- points.[0] + arrD.[0] * p
-            ops.[1] <- points.[1] + arrD.[0] * p
-        else        
-
-            let norm = RhinoScriptSyntax.NormalOfPoints(points)
-
-            let lns = resizeArray { for t,n in Seq.thisNext(epts) do  Line(t,n)}
-            let lasti = epts.LastIndex
-
-            let mutable nPrev=Vector3d.ZAxis // Z as default ? for lines ?
-            Seq.iPrevThisNext(epts)
-            |> Seq.tryFind ( fun (i,p,t,n) ->   // this loop is only for having an inital value of nPrev
-                    if i=0 || i = lasti then
-                        false
-                    else
-                        let vn = n-t
-                        let vp = p-t
-                        let n = Vector3d.CrossProduct(vp,vn)
-                        if n.Length > 0.00001 then  // not 3 points in Line
-                            n.Unitize() |> ignore
-                            nPrev<-n // side effect
-                            true
-                        else 
-                            false ) |> ignore
-
-
-            for i,p,t,n in Seq.iPrevThisNext(epts) do    
-                if i=0 || i =lasti then
-                    ()
+        ///considers current order of points too, counterclockwise in xy plane is z
+        [<EXT>]
+        static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
+            let k = Seq.length pts
+            if k < 2 then 
+                failwithf "NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString
+            elif k = 3   then  
+                let a = pts.[0] - pts.[1]
+                let b = pts.[2] - pts.[1]
+                let v= Vector3d.CrossProduct(b,a)
+                if v.IsTiny() then failwithf "NormalOfPoints: three points are in a line  %s" pts.ToNiceString
                 else
-                    let vn = n-t
-                    let vp = p-t
+                    v.UnitizedUnchecked
+            else
+                let cen = RhinoScriptSyntax.MeanPoint(pts)
+                let mutable v = Vector3d.Zero
+                for t,n in Seq.thisNext pts do
+                    let a = t-cen
+                    let b = n-cen
+                    v <- v + Vector3d.CrossProduct(a,b)                
+                if v.IsTiny() then failwithf "NormalOfPoints: points are in a line  %s"  pts.ToNiceString
+                else
+                    v.UnitizedUnchecked
+
         
-                    if vn.Length < Doc.ModelAbsoluteTolerance || vp.Length < Doc.ModelAbsoluteTolerance then
-                        failwithf "Dulicate points in OffsetPoints"
+        ///auto detects points from closed polylines and loops them
+        ///distance must have exact length or be singelton or empty
+        [<EXT>]
+        static member OffsetPoints(     points:Point3d IList, 
+                                        offsetDistances: float seq, 
+                                        [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
+                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  = 
+                                        
+            let offDists0  = Array.ofSeq offsetDistances           
+            let normDists0 = Array.ofSeq (normalDistances |? Seq.empty<float> )
+            let pointk = points.Count
+            let lastIndex = pointk - 1
+            let lenDist = offDists0.Length
+            let lenDistNorm = normDists0.Length
+                                        
+            if pointk < 2 then 
+                failwithf "OffsetPoints needs at least two points but %s given" points.ToNiceString
+                                        
+            elif pointk = 2 then
+                let offDist = 
+                    if   lenDist = 0 then 0.0
+                    elif lenDist = 1 then offDists0.[0]
+                    else failwithf "OffsetPoints: offsetDistances has %d items but should have 1 or 0 for 2 given points %s" lenDist points.ToNiceString 
+                let normDist = 
+                    if   lenDistNorm = 0 then 0.0
+                    elif lenDistNorm = 1 then normDists0.[0]
+                    else failwithf "OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm points.ToNiceString         
+                let a,b = offsetTwoPt(points.[0], points.[1] , offDist, normDist)
+                resizeArray { a; b}
+                                        
+            else // regular case more than 2 points        
+                                            
+                let lastIsFirst = //auto detect closed polyline points:
+                    if (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance then true         
+                    else false        
+                                            
+                let distsNeeded = 
+                    if lastIsFirst then pointk - 1
+                    elif loop      then pointk
+                    else                pointk - 1
+                                            
+                let distsNeededNorm = 
+                    if lastIsFirst then pointk - 1
+                    elif loop      then pointk
+                    else                pointk   // not -1 !!        
+                                            
+                let offVar, offDists = 
+                    if   lenDist = 0 then               false, Array.create distsNeeded 0.0
+                    elif lenDist = 1 then               false, Array.create distsNeeded offDists0.[0]
+                    elif lenDist = distsNeeded then     true , offDists0
+                    else failwithf"OffsetPoints: offsetDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeeded lastIsFirst loop
+                                                
+                let normVar, normDists = 
+                    if   lenDistNorm = 0 then                   false, Array.create distsNeededNorm 0.0
+                    elif lenDistNorm = 1 then                   false, Array.create distsNeededNorm normDists0.[0]
+                    elif lenDistNorm = distsNeededNorm then     true , normDists0
+                    else failwithf "OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop
+                                                
+                                           
+                let refNormal = RhinoScriptSyntax.NormalOfPoints(points) //to have good starting direction, first kink might be in bad direction         
+                                    
+                let Pts = ResizeArray<Point3d>(pointk) 
+                let Ns = ResizeArray<Vector3d>(pointk)         
+                for i,p,t,n in Seq.iPrevThisNext(points) do 
+                                                
+                    // first one:
+                    if i=0 then 
+                        if lastIsFirst then 
+                            let prev = points.GetItem(-2) // because -1 is same as 0                    
+                            let _,_,pt, N = findOffsetCorner(prev, t, n, offDists.Last, offDists.[0], refNormal)
+                            Pts.Add pt
+                            Ns.Add N
+                        else
+                            let _,sn,pt, N = findOffsetCorner(p, t, n, offDists.Last, offDists.[0], refNormal)
+                            Ns.Add N 
+                            if loop then Pts.Add pt
+                            else         Pts.Add (t+sn)
+                                                 
+                    // last one:
+                    elif i = lastIndex  then 
+                        if lastIsFirst then
+                            let _,_,pt,N = findOffsetCorner(p, t, points.[1], offDists.[i-1], offDists.[0], refNormal)
+                            Pts.Add pt
+                            Ns.Add N
+                        elif loop then 
+                            let _,_,pt,N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
+                            Pts.Add pt
+                            Ns.Add N
+                        else 
+                            let sp,_,_,N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i-1], refNormal) // or any next off dist since only sp is used    
+                            Pts.Add (t+sp)
+                            Ns.Add N 
+                    else
+                        let _,_,pt,N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
+                        Pts.Add pt
+                        Ns.Add N
+                                            
+                if lenDistNorm > 0 then 
+                    for i=0 to  distsNeededNorm-1 do // ns might be shorter than pts if lastIsFirst= true
+                        let n = Ns.[i]
+                        if n <> Vector3d.Zero then 
+                            Pts.[i] <- Pts.[i] + n * normDists.[i] 
+                                            
+                // fix colinear segments by nearest neigbours that are ok
+                for i,n in Seq.indexed Ns do // ns might be shorter than pts if lastIsFirst= true
+                    if n = Vector3d.Zero then                 
+                        let pi = searchBack (i-1) Ns
+                        let ppt = Pts.[pi]
+                        let pln = Line(points.[pi], points.[saveIdx (pi+1) pointk])                
+                        let pclp = pln.ClosestPoint(ppt,false)
+                        let pv = ppt - pclp
+                                                    
+                        let ni = searchForward (i+1) Ns
+                        let npt = Pts.[ni]
+                        let nln = Line(points.[ni], points.[saveIdx (ni-1) pointk])
+                        let nclp = nln.ClosestPoint(npt,false)
+                        let nv = npt - nclp
+                        print (pi,"prev i")
+                        print (i,"is colinear")
+                        print (ni,"next i")
+                        if offDists.[pi] <> offDists.[saveIdx (ni-1) distsNeeded] then 
+                            failwithf "OffsetPoints: cant fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk] 
+                                                    
+                        Pts.[i] <- points.[i] + (nv+pv)*0.5
+                                            
+                if lastIsFirst then Pts.[lastIndex] <- Pts.[0]
+                Pts
+
         
-        
-                    let mutable n = Vector3d.CrossProduct(vp,vn)
-                    if n.Length < 0.0001 then //3 points in Line
-                        n <- nPrev
-                    else                    
-                        nPrev <- n.UnitizedUnchecked
-        
-                     //print n
-                    if n * norm < 0.0 then
-                        n <- -n
-        
-                    let mutable sp = Vector3d.CrossProduct(vp,n)  //direction for offset
-                    let mutable sn = Vector3d.CrossProduct(n,vn)  //direction for offset
-                    sp.Unitize() |> ignore
-                    sn.Unitize() |> ignore
-                    sn <- sn *  arrD.[i]
-                    sp <- sn *  arrD.[i-1]
-                    let lp = Line(t+sp,vp) 
-                    let ln = Line(t+sn,vn)
-                    let rc,a,b = Intersect.Intersection.LineLine(lp,ln)
-                    let pt =
-                        if rc then
-                            lp.PointAt(a)  //or on b, should be same
-                        else  // no intersection, paralell lines
-                            if arrD.[i] = arrD.[i-1] then  //can offset coliniear points with same distance
-                                t + sp  //or then + sn, should be same
-                            else
-                                failwithf "cannot offset coliniear points with variable distance"
-                
-                    ops.[i] <- pt
-                    N.[i] <- n
-        
-                    if i=1 then
-                        ops.[0] <- epts.[0] + sp
-                        N.[0] <- n
-        
-                    if i=lasti-1 then
-                        ops.[lasti] <- epts.[lasti] + sn
-                        N.[lasti] <- n
-        
-       
-        // end core
-        if lastIsFirst || loop then 
-            ops <- ops.[1 .. -1]
-            N <- N.[1 .. -1]
 
 
 
-        let lN = Seq.length normalDistances
-        if lN>0 then
-            let arrN =                
-                if lN = 1 then ResizeArray.create points.Count (Seq.head normalDistances)
-                elif lN = points.Count then ResizeArray(normalDistances)
-                else failwithf "OffsetPoints: normalDistances has %d items but should have %d or 1" lN points.Count            
-            for i in range(lN) do
-                let mutable  n = N.[i] 
-                n <- n *  arrN.[i]
-                ops.[i] <- ops.[i] +  n 
 
-        ops
-
+        ///auto detects points from closed polylines and loops them
+        [<EXT>]
+        static member OffsetPoints(     points:Point3d IList, 
+                                        offsetDistance: float, 
+                                        [<OPT;DEF(0.0)>]normalDistance: float ,
+                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  = 
+            if normalDistance = 0.0 then RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[]              ,loop)
+            else                         RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[normalDistance],loop)
+                                        
+             
         
 
