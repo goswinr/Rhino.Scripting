@@ -7,6 +7,9 @@ open FsEx.Util
 open FsEx
 open FsEx.NiceString
 
+
+[<assembly:Extension>] do() //http://www.latkin.org/blog/2014/04/30/f-extension-methods-in-roslyn/
+
 [<AutoOpen>]
 module TypeExtensionsRhino =  
 
@@ -23,6 +26,8 @@ module TypeExtensionsRhino =
         
         [<Extension>] 
         member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
+
+        
 
     [<Extension>]     
     type Point3f with  
@@ -51,7 +56,15 @@ module TypeExtensionsRhino =
         
         [<Extension>] 
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
-    
+        
+        [<Extension>] 
+        ///Unitizes the vector , checks input length
+        member v.Unitized = let l = sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in (if l > 1e-9 then v * (1./l) else failwithf "v.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString)
+        
+        [<Extension>] 
+        ///Unitizes the vector , fails if input is of zero length
+        member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
+
     [<Extension>]
     type Vector3f with  
         
@@ -66,3 +79,22 @@ module TypeExtensionsRhino =
         
         [<Extension>] 
         member v.ToVector3d = Vector3d(v)
+
+    [<Extension>]  
+    type Line with  
+        
+        [<Extension>]     
+        ///Like the ToString function but with appropiate precision formating
+        member ln.ToNiceString = 
+                sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (floatToString  ln.From.X) (floatToString  ln.From.Y) (floatToString  ln.From.Z) (floatToString  ln.To.X) (floatToString  ln.To.Y) (floatToString  ln.To.Z)
+    
+    
+    let internal formatRhinoObject (o:obj)  = 
+        match o with
+        | :? Point3d    as x -> Some x.ToNiceString
+        | :? Vector3d   as x -> Some x.ToNiceString
+        | :? Line       as x -> Some x.ToNiceString        
+        | :? Point3f    as x -> Some x.ToNiceString
+        | :? Vector3f   as x -> Some x.ToNiceString
+        | _ -> None
+             

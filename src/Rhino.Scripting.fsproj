@@ -48,6 +48,8 @@
     <Compile Include="RhinoScriptSyntax/UserInterface.fs" />
     <Compile Include="RhinoScriptSyntax/Utility.fs" />
     <Compile Include="RhinoScriptSyntax/View.fs" />
+    <Compile Include="70_ExtraVector.fs" />
+    <Compile Include="80_ExtrasBrep.fs" />
   </ItemGroup>
 
   <ItemGroup>

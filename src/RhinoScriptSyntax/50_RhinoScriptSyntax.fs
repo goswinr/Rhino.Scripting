@@ -62,8 +62,8 @@ type RhinoScriptSyntax private () = // no constructor?
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(stirng) the string</returns>
     static member ToNiceString (x:'T,[<OPT;DEF(true)>]trim:bool) : string =
-        if trim then NiceString.toNiceString(x)
-        else         NiceString.toNiceStringFull(x)        
+        if trim then NiceString.toNiceStringWithFormater(x,formatRhinoObject)
+        else         NiceString.toNiceStringFullWithFormater(x,formatRhinoObject)       
 
     ///<summary>Prints an object or value to Rhino Command line. 
     ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
@@ -76,20 +76,7 @@ type RhinoScriptSyntax private () = // no constructor?
         |>> RhinoApp.WriteLine 
         |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
-
-    ///<summary>Prints two objects or value to Rhino Command line. 
-    ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
-    ///<param name="x1">('T): the first value or object to print</param>
-    ///<param name="x2">('T): the second value or object to print</param>    
-    ///<returns>(unit) voId, nothing</returns>
-    static member Print (x1:'T, x2:'U) : unit =
-        let s1 = RhinoScriptSyntax.ToNiceString(x1, true)
-        let s2 = RhinoScriptSyntax.ToNiceString(x2, true)
-        s1 + " " + s2
-        |>> RhinoApp.WriteLine 
-        |> printfn "%s"
-        RhinoApp.Wait()
-
+    
 
     ///<summary>Prints an object or value to Rhino Command line. 
     ///  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
@@ -101,27 +88,15 @@ type RhinoScriptSyntax private () = // no constructor?
         |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
 
-    ///<summary>Prints two objects or value to Rhino Command line. 
-    ///  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
-    ///<param name="x1">('T): the first value or object to print</param>
-    ///<param name="x2">('T): the second value or object to print</param>    
-    ///<returns>(unit) voId, nothing</returns>
-    static member PrintFull (x1:'T, x2:'U) : unit =
-        let s1 = RhinoScriptSyntax.ToNiceString(x1, false)
-        let s2 = RhinoScriptSyntax.ToNiceString(x2, false)
-        s1 + " " + s2
-        |>> RhinoApp.WriteLine 
-        |> printfn "%s"
-        RhinoApp.Wait()
-
+   
     ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value</summary>
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
     ///<returns>(unit) voId, nothing</returns>
-    static member PrintSeq (xs:'T seq, [<OPT;DEF(null:string)>]separator:string) : unit =
+    static member PrintSeq (xs:'T seq, [<OPT;DEF(" ":string)>]separator:string) : unit =
         xs
         |> Seq.map RhinoScriptSyntax.ToNiceString
-        |> String.concat (separator |? " ")
+        |> String.concat separator
         |>> RhinoApp.WriteLine 
         |> printfn "%s"
         RhinoApp.Wait()
