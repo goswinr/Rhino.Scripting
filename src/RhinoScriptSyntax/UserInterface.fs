@@ -291,7 +291,7 @@ module ExtensionsUserinterface =
                     match gp2.Get() with
                     | Input.GetResult.Point ->
                         let d = gp2.Point().DistanceTo(pt)
-                        RhinoApp.WriteLine ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true, true, false, false) )
+                        RhinoScriptSyntax.Print ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true, true, false, false) )
                         gp2.Dispose()
                         Some d
                     | _ ->
@@ -724,7 +724,7 @@ module ExtensionsUserinterface =
                                 if cont && gp.CommandResult() <> Commands.Result.Success then
                                     rc.Clear()
                                     cont <- false
-                                    RhinoApp.WriteLine "GetPoints no Success"
+                                    RhinoScriptSyntax.Print "GetPoints no Success"
                                 if cont then
                                     prevPoint <- gp.Point()
                                     rc.Add(prevPoint)

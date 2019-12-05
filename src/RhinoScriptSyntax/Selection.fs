@@ -129,7 +129,7 @@ module ExtensionsSelection =
                 if Vis.Contains(object.Attributes.LayerIndex) then 
                     objectIds.Add(object.Id)                    
             if printCount then
-                RhinoApp.WriteLine ("VisibleObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))
+                RhinoScriptSyntax.Print ("VisibleObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds
 
 
@@ -409,7 +409,7 @@ module ExtensionsSelection =
                         rc.Add(objref.ObjectId)
                         let obj = objref.Object()
                         if select && notNull obj then obj.Select(select) |> ignore
-                    if printCount then RhinoApp.WriteLine ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
+                    if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                     Some rc
             } |> Async.RunSynchronously
 
@@ -472,7 +472,7 @@ module ExtensionsSelection =
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         try 
             let objectIds = Internals.sticky.[message] :?> ResizeArray<Guid>
-            if printCount then  RhinoApp.WriteLine ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
+            if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             Some objectIds
         with | _ -> 
             match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,printCount,customFilter) with
@@ -554,7 +554,7 @@ module ExtensionsSelection =
                         |> ResizeArray.map ( fun (id,_,_,_,_) -> id )
                         |> RhinoScriptSyntax.ObjectDescription
                         |> (+) "GetObjectsEx got " 
-                        |> RhinoApp.WriteLine 
+                        |> RhinoScriptSyntax.Print
 
                     Some rc
             } |> Async.RunSynchronously
