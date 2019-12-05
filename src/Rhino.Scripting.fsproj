@@ -49,7 +49,8 @@
     <Compile Include="RhinoScriptSyntax/Utility.fs" />
     <Compile Include="RhinoScriptSyntax/View.fs" />
     <Compile Include="70_ExtraVector.fs" />
-    <Compile Include="80_ExtrasBrep.fs" />
+    <Compile Include="71_ExtrasBrep.fs" />
+    <Compile Include="72_ExtrasCurried.fs" />
   </ItemGroup>
 
   <ItemGroup>
