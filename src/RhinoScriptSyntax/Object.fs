@@ -532,10 +532,10 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(string) A short text description of the object</returns>
     static member ObjectDescription(objectIds:Guid seq) : string =
-        let count =  Seq.countBy (fun id -> RhinoScriptSyntax.CoerceRhinoObject(id).ShortDescription(true)) objectIds
-        let mutable tx = ""
+        let count =  Seq.countBy (fun id -> RhinoScriptSyntax.CoerceRhinoObject(id).ShortDescription(true)) objectIds        
         let typesk = Seq.length count        
-        if typesk > 0 then  
+        let mutable tx = ""
+        if typesk = 0 then  
             tx <- "zero objects"
         elif typesk = 1  then      
             for typ,k in count  do
