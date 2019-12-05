@@ -21,7 +21,12 @@ module ExtrasVector =
         else len + rest
         
     let inline scale (sc:float) (v:Vector3d) = v * sc    
-            
+    
+    
+    let inline distance (a:Point3d) (b:Point3d) = let v = a-b in sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
+    
+    let inline distanceSq (a:Point3d) (b:Point3d) = let v = a-b in    v.X*v.X + v.Y*v.Y + v.Z*v.Z
+
     let inline unitize (v:Vector3d) =
         let f = 1. / sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)   
         

@@ -1250,7 +1250,21 @@ module ExtensionsCurve =
         if subDomain.T0 = 0.0 && subDomain.T1 = 0.0 then curve.GetLength() else curve.GetLength(subDomain)
 
 
-
+    [<Extension>]
+    ///<summary>Returns the average unitized direction of a curve object between start and end point, 
+    ///Optionally allows non linear curves too.</summary>
+    ///<param name="curveId">(Guid) Identifier of the curve object</param>
+    ///<param name="allowNonLinear">(bool) Optional, allow non linear curves true </param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
+    ///<returns>(Vector3d) The direction of the curve</returns>
+    static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
+        let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
+        if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
+            let v = curve.PointAtEnd - curve.PointAtStart
+            v.Unitize |> ignore
+            v
+        else
+            failwithf "CurveDirection failed.  curveId:'%A' allowNonLinear '%A' segmentIndex:'%A'" curveId allowNonLinear segmentIndex
 
 
     [<Extension>]

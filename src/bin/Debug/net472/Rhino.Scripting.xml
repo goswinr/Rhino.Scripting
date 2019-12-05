@@ -1644,6 +1644,15 @@ Angle tolerance in degrees. The angle
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
 <returns>(Point3d) The 3D midpoint of the curve</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveDirection.Static(System.Guid,System.Boolean,System.Int32)">
+<summary>Returns the average direction of a curve object, 
+Optionally allows non linear curves too. 
+Returns unitized vector between start and end point </summary>
+<param name="curveId">(Guid) Identifier of the curve object</param>
+<param name="allowNonLinear">(bool) Optional, allow non linear curves true </param>
+<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
+<returns>(Vector3d) The direction of the curve</returns>
+</member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveLength.Static(System.Guid,System.Int32,Rhino.Geometry.Interval)">
 <summary>Returns the length of a curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
