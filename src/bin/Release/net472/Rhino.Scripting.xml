@@ -2,14 +2,6 @@
 <doc>
 <assembly><name>Rhino.Scripting</name></assembly>
 <members>
-<member name="P:Rhino.Scripting.RhinoScriptSyntax.SynchronizationContext(System.Threading.SynchronizationContext)">
-<summary>The Synchronization Context of the Rhino UI Therad.
-This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
-</member>
-<member name="P:Rhino.Scripting.RhinoScriptSyntax.SynchronizationContext">
-<summary>The Synchronization Context of the Rhino UI Therad.
-This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
-</member>
 <member name="P:Rhino.Scripting.RhinoScriptSyntax.Sticky">
 <summary>
  A Dictionary to store state between scripting session
@@ -190,7 +182,7 @@ This last or stop value will NOT be included in range as per python semantics, t
 <returns>Guid) Fails on bad input</returns>
 </member>
 <member name="M:Rhino.Scripting.RhinoScriptSyntax.CoerceGeometry``1(``0)">
-<summary>attempt to get GeometryBase class from given input,</summary>
+<summary>attempt to get GeometryBase class from given input</summary>
 <param name="objectId">geometry Identifier (Guid or string)</param>
 <returns>(Rhino.Geometry.GeometryBase) Fails on bad input</returns>
 </member>
@@ -326,7 +318,7 @@ so that python range expressions dont need top be translated to F#
 </member>
 <member name="P:Rhino.Scripting.ActiceDocument.syncContext">
 <summary>
-of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
+SynchronizationContext  of the currently Running Rhino Instance, set via reflection on Seff.Rhino
 </summary>
 </member>
 <member name="M:Rhino.Scripting.ActiceDocument.redraw">
@@ -799,7 +791,7 @@ The command echo mode True will display the commands on the commandline. If omit
   11 = Text
   12 = Text Background
   13 = Text hover</param>
-<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color </param>
+<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color</param>
 <returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsApplication.RhinoScriptSyntax.AppearanceColor.Static(System.Int32)">
@@ -848,7 +840,7 @@ The command echo mode True will display the commands on the commandline. If omit
 <member name="M:Rhino.Scripting.ExtensionsApplication.RhinoScriptSyntax.AliasMacro.Static(System.String)">
 <summary>Returns the macro of a command alias</summary>
 <param name="alias">(string) The name of an existing command alias</param>
-<returns>(string) The existing macro </returns>
+<returns>(string) The existing macro</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsApplication.RhinoScriptSyntax.AliasCount.Static">
 <summary>Returns number of command aliases in Rhino</summary>
@@ -1060,7 +1052,7 @@ The method for refining the output curves, where:
   2: Input curves are divided to the specified number of points on the curve, corresponding points define new points that output curves go through. If you are making one tween curve, the method essentially does the following: divides the two curves into an equal number of points, finds the midpoint between the corresponding points on the curves, and interpolates the tween curve through those points</param>
 <param name="sampleNumber">(int) Optional, Default Value: <c>10</c>
   The number of samples points to use if method is 2. The default is 10</param>
-<returns>(Guid ResizeArray) The identifiers of the new tween objects , </returns>
+<returns>(Guid ResizeArray) The identifiers of the new tween objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ChangeCurveDegree.Static(System.Guid,System.Int32)">
 <summary>Changes the degree of a curve object. For more information see the Rhino help file for the ChangeDegree command</summary>
@@ -1340,7 +1332,7 @@ Join tolerance. If omitted, 2.1 * document absolute
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.IsCurveClosed.Static(System.Guid)">
 <summary>Verifies an object is a closed curve object</summary>
 <param name="curveId">(Guid) The object's identifier</param>
-<returns>(bool) True  otherwise False</returns>
+<returns>(bool) If curve is Closed True,  otherwise False</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.IsCurveClosable.Static(System.Guid,System.Double)">
 <summary>Decide if it makes sense to close off the curve by moving the end point
@@ -1393,7 +1385,7 @@ If True, then knots are added on both sides of
 The curve degree, which must be greater than 1.
   The default is 3</param>
 <param name="distanceTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-  The fitting tolerance. </param>
+  The fitting tolerance.</param>
 <param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
 The kink smoothing tolerance in degrees. If
   angleTolerance is 0.0, all kinks are smoothed. If angleTolerance
@@ -1417,7 +1409,7 @@ The kink smoothing tolerance in degrees. If
 <param name="side">(int) 0= extend from start of the curve
   1= extend from end of the curve</param>
 <param name="point">(Point3d) Point to extend to</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ExtendCurveLength.Static(System.Guid,System.Int32,System.Int32,System.Double)">
 <summary>Extends a non-closed curve by a line, arc, or smooth extension for a
@@ -1470,7 +1462,7 @@ Delete input objects after exploding if True</param>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.EllipseCenterPoint.Static(System.Guid)">
 <summary>Returns the center point of an elliptical-shaped curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
-<returns>(Point3d) The 3D center point of the ellipse </returns>
+<returns>(Point3d) The 3D center point of the ellipse</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.DivideCurveLength.Static(System.Guid,System.Double)">
 <summary>Divides a curve object into segments of a specified length</summary>
@@ -1506,14 +1498,14 @@ Delete input objects after exploding if True</param>
 <summary>Returns list of weights that are assigned to the control points of a curve</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(float ResizeArray) The weight values of the curve </returns>
+<returns>(float ResizeArray) The weight values of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveTangent.Static(System.Guid,System.Double,System.Int32)">
 <summary>Returns a 3D vector that is the tangent to a curve at a parameter</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="parameter">(float) Parameter to evaluate</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Vector3d) A 3D vector </returns>
+<returns>(Vector3d) A 3D vector</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveSurfaceIntersection.Static(System.Guid,System.Guid,System.Double,System.Double)">
 <summary>Calculates intersection of a curve object with a surface object.
@@ -1522,7 +1514,7 @@ Delete input objects after exploding if True</param>
 <param name="surfaceId">(Guid) The identifier of the second curve object. If omitted,
   the a self-intersection test will be performed on curve</param>
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-The absolute tolerance in drawing units. </param>
+The absolute tolerance in drawing units.</param>
 <param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
 Angle tolerance in degrees. The angle
   tolerance is used to determine when the curve is tangent to the
@@ -1573,7 +1565,7 @@ Angle tolerance in degrees. The angle
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
 <param name="point">(Point3d) Optional, New start point</param>
-<returns>(Point3d) The 3D starting point of the curve </returns>
+<returns>(Point3d) The 3D starting point of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveSeam.Static(System.Guid,System.Double)">
 <summary>Adjusts the seam, or start/end, point of a closed curve</summary>
@@ -1588,7 +1580,7 @@ Angle tolerance in degrees. The angle
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="testPoint">(Point3d) Sampling point</param>
 <param name="segmentIndex">(int) Optional, The curve segment if curveId identifies a polycurve</param>
-<returns>(float) The radius of curvature at the point on the curve </returns>
+<returns>(float) The radius of curvature at the point on the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurvePoints.Static(System.Guid,System.Int32)">
 <summary>Returns the control points, or control vertices, of a curve object.
@@ -1602,14 +1594,14 @@ Angle tolerance in degrees. The angle
 <summary>Returns the control points count of a curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment if `curveId` identifies a polycurve</param>
-<returns>(int) Number of control points </returns>
+<returns>(int) Number of control points</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurvePlane.Static(System.Guid,System.Int32)">
 <summary>Returns the plane in which a planar curve lies. Note, this function works
   only on planar curves</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Plane) The plane in which the curve lies </returns>
+<returns>(Plane) The plane in which the curve lies</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurvePerpFrame.Static(System.Guid,System.Double)">
 <summary>Returns the perpendicular plane at a parameter of a curve. The result
@@ -1636,13 +1628,21 @@ Angle tolerance in degrees. The angle
 <summary>Returns the normal direction of the plane in which a planar curve object lies</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment if curveId identifies a polycurve</param>
-<returns>(Vector3d) The 3D normal vector </returns>
+<returns>(Vector3d) The 3D normal vector</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveMidPoint.Static(System.Guid,System.Int32)">
 <summary>Returns the mid point of a curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Point3d) The 3D midpoint of the curve </returns>
+<returns>(Point3d) The 3D midpoint of the curve</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveDirection.Static(System.Guid,System.Boolean,System.Int32)">
+<summary>Returns the average unitized direction of a curve object between start and end point, 
+Optionally allows non linear curves too.</summary>
+<param name="curveId">(Guid) Identifier of the curve object</param>
+<param name="allowNonLinear">(bool) Optional, allow non linear curves true </param>
+<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
+<returns>(Vector3d) The direction of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveLength.Static(System.Guid,System.Int32,Rhino.Geometry.Interval)">
 <summary>Returns the length of a curve object</summary>
@@ -1652,19 +1652,19 @@ Angle tolerance in degrees. The angle
   curve on which the calculation will be performed. The two parameters
   (sub-domain) must be non-decreasing. If omitted, the length of the
   entire curve is returned</param>
-<returns>(float) The length of the curve </returns>
+<returns>(float) The length of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveKnots.Static(System.Guid,System.Int32)">
 <summary>Returns the knots, or knot vector, of a curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(float ResizeArray) knot values </returns>
+<returns>(float ResizeArray) knot values</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveKnotCount.Static(System.Guid,System.Int32)">
 <summary>Returns the knot count of a curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment if `curveId` identifies a polycurve</param>
-<returns>(int) The number of knots </returns>
+<returns>(int) The number of knots</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveFrame.Static(System.Guid,System.Double,System.Int32)">
 <summary>Returns the plane at a parameter of a curve. The plane is based on the
@@ -1672,7 +1672,7 @@ Angle tolerance in degrees. The angle
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="parameter">(float) Parameter to evaluate</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Plane) The plane at the specified parameter </returns>
+<returns>(Plane) The plane at the specified parameter</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveFilletPoints.Static(System.Guid,System.Guid,System.Double,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>Find points at which to cut a pair of curves so that a fillet of a
@@ -1699,7 +1699,7 @@ Angle tolerance in degrees. The angle
 <summary>Returns the end point of a curve object</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Point3d) The 3d endpoint of the curve </returns>
+<returns>(Point3d) The 3d endpoint of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveEditPoints.Static(System.Guid,System.Boolean,System.Int32)">
 <summary>Returns the edit, or Greville, points of a curve object.
@@ -1716,7 +1716,7 @@ If True, return as a list of curve parameters.
   as an indexable object with two elements</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Interval) the domain of the curve </returns>
+<returns>(Interval) the domain of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveDiscontinuity.Static(System.Guid,System.Int32)">
 <summary>Search for a derivatitive, tangent, or curvature discontinuity in
@@ -1746,7 +1746,7 @@ If True, return as a list of curve parameters.
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional,
   The curve segment if curveId identifies a polycurve</param>
-<returns>(int) The dimension of the curve . </returns>
+<returns>(int) The dimension of the curve .</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveDeviation.Static(System.Guid,System.Guid)">
 <summary>Returns the minimum and maximum deviation between two curve objects</summary>
@@ -1764,7 +1764,7 @@ If True, return as a list of curve parameters.
 <summary>Returns the degree of a curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(int) The degree of the curve </returns>
+<returns>(int) The degree of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveCurveIntersection.Static(System.Guid,System.Guid,System.Double)">
 <summary>Calculates intersection of two curve objects</summary>
@@ -1860,7 +1860,7 @@ Curve segment index if `curveId` identifies a polycurve</param>
 <param name="brepId">(Guid) Identifier of a brep object</param>
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
 Distance tolerance at segment midpoints.</param>
-<returns>(Guid ResizeArray * Guid ResizeArray) List of Curves and List of points </returns>
+<returns>(Guid ResizeArray * Guid ResizeArray) List of Curves and List of points</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveBooleanUnion.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Double)">
 <summary>Calculate the union of two or more closed, planar curves and
@@ -1886,7 +1886,7 @@ A positive tolerance value, or None for the doc default</param>
 <param name="curveB">(Guid) Identifier of the second curve object</param>
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
 A positive tolerance value, or None for the doc default</param>
-<returns>(Guid ResizeArray) The identifiers of the new objects , </returns>
+<returns>(Guid ResizeArray) The identifiers of the new objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveArrows.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Int32)">
 <summary>Enables or disables multiple curve objects's annotation arrows</summary>
@@ -1951,7 +1951,7 @@ The distance tolerance at segment midpoints.</param>
 Delete the curve object specified by curveId. If omitted, curveId will not be deleted</param>
 <param name="minEdgeLength">(float) Optional, Minimum segment length</param>
 <param name="maxEdgeLength">(float) Optional, Maximum segment length</param>
-<returns>(Guid) The new curve </returns>
+<returns>(Guid) The new curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ClosedCurveOrientation.Static(System.Guid,Rhino.Geometry.Vector3d)">
 <summary>Determine the orientation (counter-clockwise or clockwise) of a closed,
@@ -1976,50 +1976,50 @@ Delete the curve object specified by curveId. If omitted, curveId will not be de
 <summary>Returns the radius of a circle curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(float) The radius of the circle </returns>
+<returns>(float) The radius of the circle</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CircleCircumference.Static(System.Guid,System.Int32)">
 <summary>Returns the circumference of a circle curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(float) The circumference of the circle </returns>
+<returns>(float) The circumference of the circle</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CircleCenterPlane.Static(System.Guid,System.Int32)">
 <summary>Returns the center plane of a circle curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Plane) The 3D plane at the center point of the circle </returns>
+<returns>(Plane) The 3D plane at the center point of the circle</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CircleCenterPoint.Static(System.Guid,System.Int32)">
 <summary>Returns the center point of a circle curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Point3d) The 3D center point of the circle </returns>
+<returns>(Point3d) The 3D center point of the circle</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ArcRadius.Static(System.Guid,System.Int32)">
 <summary>Returns the radius of an arc curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(float) The radius of the arc </returns>
+<returns>(float) The radius of the arc</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ArcMidPoint.Static(System.Guid,System.Int32)">
 <summary>Returns the mid point of an arc curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Point3d) The 3D mid point of the arc </returns>
+<returns>(Point3d) The 3D mid point of the arc</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ArcCenterPoint.Static(System.Guid,System.Int32)">
 <summary>Returns the center point of an arc curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-<returns>(Point3d) The 3D center point of the arc </returns>
+<returns>(Point3d) The 3D center point of the arc</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.ArcAngle.Static(System.Guid,System.Int32)">
 <summary>Returns the angle of an arc curve object</summary>
 <param name="curveId">(Guid) Identifier of a curve object</param>
 <param name="segmentIndex">(int) Optional,
 Identifies the curve segment if curveId identifies a polycurve</param>
-<returns>(float) The angle in degrees </returns>
+<returns>(float) The angle in degrees</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddSubCrv.Static(System.Guid,System.Double,System.Double)">
 <summary>Add a curve object based on a portion, or interval of an existing curve
@@ -2050,7 +2050,7 @@ Identifies the curve segment if curveId identifies a polycurve</param>
 <returns>(Guid) objectId of new rectangle</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddPolylineClosed.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
-<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points. </param>
+<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
 <returns>(Guid) objectId of the new curve object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddPolyline.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
@@ -2068,7 +2068,17 @@ Identifies the curve segment if curveId identifies a polycurve</param>
 <param name="degree">(int) Degree of the curve. must be greater than of equal to 1</param>
 <param name="weights">(float seq) Optional, Weight values for the curve. Number of elements should
   equal the number of elements in points. Values must be greater than 0</param>
-<returns>(Guid) the identifier of the new object , otherwise None</returns>
+<returns>(Guid) the identifier of the new object</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CreateNurbsCurve.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Double},System.Int32,System.Collections.Generic.IEnumerable{System.Double})">
+<summary>Creats a NURBS curve geomety, but does not add or draw it to the document</summary>
+<param name="points">(Point3d seq) A list containing 3D control points</param>
+<param name="knots">(float seq) Knot values for the curve. The number of elements in knots must
+  equal the number of elements in points plus degree minus 1</param>
+<param name="degree">(int) Degree of the curve. must be greater than of equal to 1</param>
+<param name="weights">(float seq) Optional, Weight values for the curve. Number of elements should
+  equal the number of elements in points. Values must be greater than 0</param>
+<returns>(NurbsCurve) a NurbsCurve geometry</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.AddLine.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>Adds a line curve to the current model</summary>
@@ -2584,7 +2594,7 @@ Return the singular form of the units system name (e.g. "millimeter" instead of 
 Abbreviate the name of the units system (e.g. return "mm" instead of "millimeter"). The default is not to abbreviate the name (false)</param>
 <param name="modelUnits">(bool) Optional, Default Value: <c>true</c>
 Return the document's model units (True) or the document's page units (False). The default is True</param>
-<returns>(string) The name of the current units system </returns>
+<returns>(string) The name of the current units system</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.UnitSystem.Static(System.Int32,System.Boolean)">
 <summary>Set the document's unit system. See Rhino's DocumentProperties
@@ -2705,7 +2715,7 @@ Return the document's model units (True) or the document's page units (False). T
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.UnitDistanceDisplayPrecision.Static">
 <summary>Return the document's distance display precision</summary>
-<returns>(int) The current distance display precision </returns>
+<returns>(int) The current distance display precision</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.UnitAngleTolerance.Static(System.Double)">
 <summary>Set the document's angle tolerance. Angle tolerance is
@@ -2800,7 +2810,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMinInitialGridQuads.Static">
 <summary>Returns the render mesh minimum initial grid quads parameter of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(int) The current render mesh minimum initial grid quads </returns>
+<returns>(int) The current render mesh minimum initial grid quads</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMinEdgeLength.Static(System.Double)">
 <summary>Sets the render mesh minimum edge length parameter of the active document.
@@ -2811,7 +2821,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMinEdgeLength.Static">
 <summary>Returns the render mesh minimum edge length parameter of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(float) The current render mesh minimum edge length </returns>
+<returns>(float) The current render mesh minimum edge length</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxEdgeLength.Static(System.Double)">
 <summary>Sets the render mesh maximum edge length parameter of the active document.
@@ -2822,7 +2832,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxEdgeLength.Static">
 <summary>Returns the render mesh maximum edge length parameter of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(float) The current render mesh maximum edge length </returns>
+<returns>(float) The current render mesh maximum edge length</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxDistEdgeToSrf.Static(System.Double)">
 <summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
@@ -2833,7 +2843,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxDistEdgeToSrf.Static">
 <summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(float) The current render mesh maximum distance, edge to surface </returns>
+<returns>(float) The current render mesh maximum distance, edge to surface</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxAspectRatio.Static(System.Double)">
 <summary>Sets the render mesh maximum aspect ratio property of the active document.
@@ -2844,7 +2854,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxAspectRatio.Static">
 <summary>Returns the render mesh maximum aspect ratio property of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(float) The current render mesh maximum aspect ratio </returns>
+<returns>(float) The current render mesh maximum aspect ratio</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxAngle.Static(System.Double)">
 <summary>Sets the render mesh maximum angle property of the active document.
@@ -2855,7 +2865,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshMaxAngle.Static">
 <summary>Returns the render mesh maximum angle property of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(float) The current maximum angle </returns>
+<returns>(float) The current maximum angle</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshDensity.Static(System.Double)">
 <summary>Sets the render mesh density property of the active document.
@@ -2866,7 +2876,7 @@ Return the document's model units (True) or the document's page units (False). T
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderMeshDensity.Static">
 <summary>Returns the render mesh density property of the active document.
  For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-<returns>(float) The current render mesh density </returns>
+<returns>(float) The current render mesh density</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.RenderResolution.Static(System.Int32,System.Int32)">
 <summary>Sets the render resolution</summary>
@@ -3477,8 +3487,8 @@ Select the picked object grip</param>
   also called control points</summary>
 <param name="objectId">(Guid) Identifier of the object</param>
 <param name="enable">(bool) Optional, Default Value: <c>true</c>
-If True, the specified object's grips will be turned on.
-  Otherwise, they will be turned off</param>
+  If True, the specified object's grips will be turned on.
+  If False, they will be turned off</param>
 <returns>(bool) True on success, False on failure</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsGroup.RhinoScriptSyntax.UnlockGroup.Static(System.String)">
@@ -3648,7 +3658,7 @@ If True, the specified object's grips will be turned on.
 <summary>Returns the description of a hatch pattern. Note, not all hatch patterns
   have descriptions</summary>
 <param name="hatchPattern">(string) Name of an existing hatch pattern</param>
-<returns>(string) description of the hatch pattern on success otherwise None</returns>
+<returns>(string) description of the hatch pattern</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsHatch.RhinoScriptSyntax.HatchPatternCount.Static">
 <summary>Returns the number of hatch patterns in the document</summary>
@@ -3972,15 +3982,15 @@ Return the full path name `True` or short name `False`</param>
 <summary>Add a new layer to the document</summary>
 <param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
   generates the layer name</param>
-<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c>
-A Red-Green-Blue color value</param>
+<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.
+  If omitted a random color wil be choosen</param>
 <param name="visible">(bool) Optional, Default Value: <c>true</c>
 Layer's visibility</param>
 <param name="locked">(bool) Optional, Default Value: <c>false</c>
 Layer's locked state</param>
 <param name="parent">(string) Optional, Name of the new layer's parent layer. If omitted, the new
   layer will not have a parent layer</param>
-<returns>(string) The full name of the new layer </returns>
+<returns>(string) The full name of the new layer</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsLight.RhinoScriptSyntax.SpotLightShadowIntensity.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Double)">
 <summary>Changes the shadow intensity of multiple spot light</summary>
@@ -4217,7 +4227,7 @@ Layer's locked state</param>
 <param name="line">(Geometry.Line) The line</param>
 <param name="sphereCenter">(Point3d) The center point of the sphere</param>
 <param name="sphereRadius">(float) The radius of the sphere</param>
-<returns>(Point3d array) list of intersection points , otherwise None</returns>
+<returns>(Point3d array) list of intersection points</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsLine.RhinoScriptSyntax.LinePlaneIntersection.Static(Rhino.Geometry.Line,Rhino.Geometry.Plane)">
 <summary>Calculates the intersection of a line and a plane</summary>
@@ -4430,7 +4440,7 @@ Layer's locked state</param>
 <member name="M:Rhino.Scripting.ExtensionsMaterial.RhinoScriptSyntax.MaterialBump.Static(System.Int32)">
 <summary>Returns a material's bump bitmap filename</summary>
 <param name="materialIndex">(int) Zero based material index</param>
-<returns>(string option) The current bump bitmap filename </returns>
+<returns>(string option) The current bump bitmap filename</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMaterial.RhinoScriptSyntax.MatchMaterial.Static(System.Guid,System.Collections.Generic.IEnumerable{System.Guid})">
 <summary>Copies the material definition from one material to one or more objects</summary>
@@ -4519,7 +4529,7 @@ Delete the input object</param>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexCount.Static(System.Guid)">
 <summary>Returns the vertex count of a mesh</summary>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
-<returns>(int) The number of mesh vertices </returns>
+<returns>(int) The number of mesh vertices</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.MeshVertexColors.Static(System.Guid,System.Collections.Generic.IEnumerable{System.Drawing.Color})">
 <summary>Modifies vertex colors of a mesh</summary>
@@ -4718,7 +4728,7 @@ Delete input after joining</param>
 <param name="objectId">(Guid) Identifier of a mesh object</param>
 <param name="point">(Point3d) Test point</param>
 <param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
-  The testing tolerance </param>
+  The testing tolerance</param>
 <returns>(bool) True , otherwise False</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsMesh.RhinoScriptSyntax.IsMeshManifold.Static(System.Guid)">
@@ -5181,7 +5191,7 @@ Copy the object</param>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectLayer.Static(System.Guid)">
 <summary>Returns the full layername of an object. 
- arent layers are separated by <c>::</c> </summary>
+ arent layers are separated by <c>::</c></summary>
 <param name="objectId">(Guid) The identifier of the object</param>
 <returns>(string) The object's current layer</returns>
 </member>
@@ -5199,12 +5209,12 @@ Without Parent Layers</summary>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectDescription.Static(System.Collections.Generic.IEnumerable{System.Guid})">
 <summary>Returns the count for each object type in a List of objects</summary>
 <param name="objectIds">(Guid seq) Identifiers of objects</param>
-<returns>(string) A short text description of the object </returns>
+<returns>(string) A short text description of the object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectDescription.Static(System.Guid)">
 <summary>Returns a description of the object type (e.g. Line, Surface, Text,...)</summary>
 <param name="objectId">(Guid) Identifier of an object</param>
-<returns>(string) A short text description of the object </returns>
+<returns>(string) A short text description of the object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsObject.RhinoScriptSyntax.ObjectColorSource.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Int32)">
 <summary>Modifies the color source of multiple objects</summary>
@@ -5497,14 +5507,14 @@ Copy the objects</param>
 <param name="origin">(Point3d) Origin point of the plane</param>
 <param name="x">(Point3d) X point on the plane's x  axis</param>
 <param name="y">(Point3d) Y point on the plane's y axis</param>
-<returns>(Plane) The plane , otherwise None</returns>
+<returns>(Plane) The plane</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPlane.RhinoScriptSyntax.PlaneFromNormal.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
 <summary>Creates a plane from an origin point and a normal direction vector</summary>
 <param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
 <param name="normal">(Vector3d) A 3D vector identifying the normal direction of the plane</param>
 <param name="xaxis">(Vector3d) Optional, vector defining the plane's x-axis</param>
-<returns>(Plane) The plane </returns>
+<returns>(Plane) The plane</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPlane.RhinoScriptSyntax.PlaneFromFrame.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
 <summary>Construct a plane from a point, and two vectors in the plane</summary>
@@ -5514,7 +5524,7 @@ Copy the objects</param>
 <param name="yAxis">(Vector3d) A non-zero 3D vector not parallel to xAxis that is used
   to determine the Y axis direction. Note, yAxis does not
   have to be perpendicular to xAxis</param>
-<returns>(Plane) The plane </returns>
+<returns>(Plane) The plane</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPlane.RhinoScriptSyntax.PlaneFitFromPoints.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
 <summary>Returns a plane that was fit through an array of 3D points</summary>
@@ -5532,7 +5542,7 @@ Copy the objects</param>
 <param name="plane">(Plane) The plane to intersect</param>
 <param name="curve">(Guid) The identifier of the curve object</param>
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-The intersection tolerance. </param>
+The intersection tolerance.</param>
 <returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
   Element Type        Description
   [0]       Number      The intersection event type, either Point (1) or Overlap (2).
@@ -5593,7 +5603,7 @@ The intersection tolerance. </param>
 <summary>Returns the distance from a 3D point to a plane</summary>
 <param name="plane">(Plane) The plane</param>
 <param name="point">(Point3d) List of 3 numbers or Point3d</param>
-<returns>(float) The distance , otherwise None</returns>
+<returns>(float) The distance</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPointvector.RhinoScriptSyntax.PointArrayBoundingBox.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d},Rhino.Geometry.Plane)">
 <summary>Returns either a world axis-aligned or a construction plane axis-aligned
@@ -5649,7 +5659,7 @@ The intersection tolerance. </param>
 <member name="M:Rhino.Scripting.ExtensionsPointvector.RhinoScriptSyntax.VectorLength.Static(Rhino.Geometry.Vector3d)">
 <summary>Returns the length of a 3D vector</summary>
 <param name="vector">(Vector3d) The 3-D vector</param>
-<returns>(float) The length of the vector , otherwise None</returns>
+<returns>(float) The length of the vector</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPointvector.RhinoScriptSyntax.VectorDotProduct.Static(Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
 <summary>Calculates the dot product of two 3D vectors</summary>
@@ -5721,7 +5731,7 @@ The intersection tolerance. </param>
 <summary>Transforms a 3D point</summary>
 <param name="point">(Point3d) The point to transform</param>
 <param name="xform">(Transform) A valid 4x4 transformation matrix</param>
-<returns>(Point3d) transformed Pooint on success</returns>
+<returns>(Point3d) transformed Point on success</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPointvector.RhinoScriptSyntax.PointSubtract.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>Subtracts a 3D point or a 3D vector from a 3D point</summary>
@@ -5739,7 +5749,7 @@ The intersection tolerance. </param>
 <summary>Verifies that a list of 3D points are coplanar</summary>
 <param name="points">(Point3d seq) 3D points to test</param>
 <param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
-Tolerance to use when verifying </param>
+Tolerance to use when verifying</param>
 <returns>(bool) True or False</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPointvector.RhinoScriptSyntax.PointDivide.Static(Rhino.Geometry.Point3d,System.Double)">
@@ -5924,7 +5934,7 @@ Include lights in the set</param>
 Include light objects.  If omitted, light objects are not returned</param>
 <param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
 Include grips objects.  If omitted, grips objects are not returned</param>
-<returns>(Guid ResizeArray) identifier of normal objects </returns>
+<returns>(Guid ResizeArray) identifier of normal objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.NextObject.Static(System.Guid,System.Boolean,System.Boolean,System.Boolean)">
 <summary>Returns the identifier of the next object in the document</summary>
@@ -5955,7 +5965,7 @@ Include grips in the potential set</param>
   most recently created or changed object identifiers will be returned</summary>
 <param name="select">(bool) Optional, Default Value: <c>false</c>
 Select the object.  If omitted, the object is not selected</param>
-<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects </returns>
+<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.InvertSelectedObjects.Static(System.Boolean,System.Boolean,System.Boolean)">
 <summary>Inverts the current object selection. The identifiers of the newly
@@ -5966,7 +5976,7 @@ Include light objects.  If omitted, light objects are not returned</param>
 Include grips objects.  If omitted, grips objects are not returned</param>
 <param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
 Include refrence objects such as work session objects</param>
-<returns>(Guid ResizeArray) identifiers of the newly selected objects </returns>
+<returns>(Guid ResizeArray) identifiers of the newly selected objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.HiddenObjects.Static(System.Boolean,System.Boolean,System.Boolean)">
 <summary>Returns identifiers of all hidden objects in the document. Hidden objects
@@ -5977,7 +5987,7 @@ Include light objects</param>
 Include grip objects</param>
 <param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
 Include refrence objects such as work session objects</param>
-<returns>(Guid ResizeArray) identifiers of the hidden objects </returns>
+<returns>(Guid ResizeArray) identifiers of the hidden objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.LockedObjects.Static(System.Boolean,System.Boolean,System.Boolean)">
 <summary>Returns identifiers of all locked objects in the document. Locked objects
@@ -5988,7 +5998,7 @@ Include light objects</param>
 Include grip objects</param>
 <param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
 Include refrence objects such as work session objects</param>
-<returns>(Guid ResizeArray) identifiers the locked objects </returns>
+<returns>(Guid ResizeArray) identifiers the locked objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetSurfaceObject.Static(System.String,System.Boolean,System.Boolean)">
 <summary>Prompts the user to select a single surface</summary>
@@ -6031,7 +6041,7 @@ Allow for the selection of pre-selected objects</param>
 <param name="select">(bool) Optional, Default Value: <c>false</c>
 Select the picked objects. If False, the objects that are
   picked are not selected</param>
-<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
 <param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
   allowed to be selected</param>
 <returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
@@ -6084,7 +6094,7 @@ Select the picked objects.  If False, the objects that are
 Minimum count of objects allowed to be selected</param>
 <param name="maximumCount">(int) Optional, Default Value: <c>0</c>
 Maximum count of objects allowed to be selected</param>
-<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
 <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
 <returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
 </member>
@@ -6130,7 +6140,7 @@ Select the picked objects.  If False, the objects that are
 Minimum count of objects allowed to be selected</param>
 <param name="maximumCount">(int) Optional, Default Value: <c>0</c>
 Maximum count of objects allowed to be selected</param>
-<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
 <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
 <returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
 </member>
@@ -6202,7 +6212,7 @@ Select the object.  If omitted, the object is not selected</param>
 Include light objects.  If omitted, light objects are not returned</param>
 <param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
 Include grips objects.  If omitted, grips objects are not returned</param>
-<returns>(Guid) The identifier of the object </returns>
+<returns>(Guid) The identifier of the object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.VisibleObjects.Static(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
 <summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
@@ -6210,7 +6220,7 @@ Include grips objects.  If omitted, grips objects are not returned</param>
 The type(s) of geometry (points, curves, surfaces, meshes,...)
   that can be selected. Object types can be added together to filter
   several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
-<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window </param>
+<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
 <param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
 Include refrence objects such as work session objects</param>
 <param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
@@ -6219,7 +6229,7 @@ Include locked objects</param>
 Include light objects</param>
 <param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
 Include grips objects</param>  
-<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible </returns>
+<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.AllObjects.Static(System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
 <summary>Returns identifiers of all objects in the document</summary>
@@ -6518,13 +6528,13 @@ If True, all surface edit points are returned. If False,
 <summary>Returns U, V parameters of point on a surface that is closest to a test point</summary>
 <param name="surfaceId">(Guid) Identifier of a surface object</param>
 <param name="testPoint">(Point3d) Sampling point</param>
-<returns>(float * float) The U, V parameters of the closest point on the surface </returns>
+<returns>(float * float) The U, V parameters of the closest point on the surface</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceClosestPoint.Static(System.Guid,Rhino.Geometry.Point3d)">
 <summary>Returns the point on a surface that is closest to a test point</summary>
 <param name="surfaceId">(Guid) Identifier of a surface object</param>
 <param name="testPoint">(Point3d) Sampling point</param>
-<returns>(Point3d) The closest point on the surface </returns>
+<returns>(Point3d) The closest point on the surface</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceAreaMoments.Static(System.Guid)">
 <summary>Calculates area moments of inertia of a surface or polysurface object.
@@ -6746,7 +6756,7 @@ Tolerance used when checked. If omitted, the current absolute
 If true, the test point must be inside by at least tolerance</param>
 <param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.SqrtEpsilon</c>
 Distance tolerance used for intersection and determining
-  strict inclusion. </param>
+  strict inclusion.</param>
 <returns>(bool) True , otherwise False</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.IsPlaneSurface.Static(System.Guid)">
@@ -6790,7 +6800,7 @@ Distance tolerance used for intersection and determining
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
 Distance tolerance at segment midpoints. If omitted,
   the current absolute tolerance is used</param>
-<returns>(Guid ResizeArray) identifying the newly created intersection curve and point objects </returns>
+<returns>(Guid ResizeArray) identifying the newly created intersection curve and point objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.FlipSurface.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Boolean)">
 <summary>Changes the normal direction of multiple surface. This feature can
@@ -6912,7 +6922,7 @@ The border curves to return
 <param name="objectId">(Guid) The identifier of the surface or polysurface object</param>
 <param name="select">(bool) Optional, Default Value: <c>false</c>
 Select the duplicated edge curves. The default is not to select (False)</param>
-<returns>(Guid ResizeArray) identifying the newly created curve objects </returns>
+<returns>(Guid ResizeArray) identifying the newly created curve objects</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.CapPlanarHoles.Static(System.Guid)">
 <summary>Caps planar holes in a surface or polysurface</summary>
@@ -6975,7 +6985,7 @@ Delete all input objects</param>
 <param name="basis">(Plane)  the basis plane of the torus</param>
 <param name="majorRadius">(float) Major radius of  the torus</param>
 <param name="minorRadius">(float) Minor radius of  torus</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddRailRevSrf.Static(System.Guid,System.Guid,Rhino.Geometry.Line,System.Boolean)">
 <summary>Adds a surface created through profile curves that define the surface
@@ -7013,14 +7023,14 @@ If True, then create a closed surface</param>
 Two numbers defining degree of the surface in the u, v directions</param>
 <param name="closed">(bool * bool) Optional, Default Value: <c>false*false</c>
 Two booleans defining if the surface is closed in the u, v directions</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddSrfPt.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>Creates a new surface from three corner points</summary>
 <param name="pointA">(Point3d) First corner point</param>
 <param name="pointB">(Point3d) Second  corner point</param>
 <param name="pointC">(Point3d) Third corner point</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddSrfPt.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>Creates a new surface from four corner points</summary>
@@ -7028,7 +7038,7 @@ Two booleans defining if the surface is closed in the u, v directions</param>
 <param name="pointB">(Point3d) Second  corner point</param>
 <param name="pointC">(Point3d) Third corner point</param>
 <param name="pointD">(Point3d) Fourth corner point</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddSrfControlPtGrid.Static(System.Tuple{System.Int32,System.Int32},System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d},System.Tuple{System.Int32,System.Int32})">
 <summary>Creates a surface from a grid of points</summary>
@@ -7036,7 +7046,7 @@ Two booleans defining if the surface is closed in the u, v directions</param>
 <param name="points">(Point3d seq) List of 3D points</param>
 <param name="degree">(int * int) Optional, Default Value: <c>3*3</c>
 Two numbers defining degree of the surface in the u, v directions</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddSrfContourCrvs.Static(System.Guid,Rhino.Geometry.Point3d,Rhino.Geometry.Point3d,System.Double)">
 <summary>Adds a spaced series of planar curves resulting from the intersection of
@@ -7105,7 +7115,7 @@ Close the loft back to the first curve</param>
 <param name="plane">(Plane) The plane</param>
 <param name="uDir">(float) The magnitude in the U direction</param>
 <param name="vDir">(float) The magnitude in the V direction</param>
-<returns>(Guid) The identifier of the new object </returns>
+<returns>(Guid) The identifier of the new object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddPlanarSrf.Static(System.Collections.Generic.IEnumerable{System.Guid})">
 <summary>Creates one or more surfaces from planar curves</summary>
@@ -7132,7 +7142,7 @@ Attempt to fit a single surface</param>
 <param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated surface . however it is best if you create a starting surface that is similar in shape
   to the surface you are trying to create an use the other overload of this method</param>
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-The tolerance used by input analysis functions. </param>
+The tolerance used by input analysis functions.</param>
 <param name="trim">(bool) Optional, Default Value: <c>true</c>
 Try to find an outside curve and trims the surface to it.  The default value is True</param>
 <param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
@@ -7151,7 +7161,7 @@ Similar to stiffness, but applies to the starting surface. The bigger the pull, 
 Clamps the edges of the starting surface in place. This option is useful if you are using a
   curve or points for deforming an existing surface, and you do not want the edges of the starting surface
   to move.  The default if False</param>
-<returns>(Guid) Identifier of the new surface object </returns>
+<returns>(Guid) Identifier of the new surface object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddPatch.Static(System.Collections.Generic.IEnumerable{System.Guid},System.Guid,System.Double,System.Boolean,System.Double,System.Double,System.Double,System.Boolean)">
 <summary>Fits a surface through curve, point, point cloud, and mesh objects</summary>
@@ -7160,7 +7170,7 @@ Clamps the edges of the starting surface in place. This option is useful if you 
 <param name="startSurfaceId">(Guid) The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
   to the surface you are trying to create</param>
 <param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-The tolerance used by input analysis functions. </param>
+The tolerance used by input analysis functions.</param>
 <param name="trim">(bool) Optional, Default Value: <c>true</c>
 Try to find an outside curve and trims the surface to it.  The default value is True</param>
 <param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
@@ -7179,7 +7189,7 @@ Similar to stiffness, but applies to the starting surface. The bigger the pull, 
 Clamps the edges of the starting surface in place. This option is useful if you are using a
   curve or points for deforming an existing surface, and you do not want the edges of the starting surface
   to move.  The default if False</param>
-<returns>(Guid) Identifier of the new surface object </returns>
+<returns>(Guid) Identifier of the new surface object</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.AddNurbsSurface.Static(System.Tuple{System.Int32,System.Int32},System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Collections.Generic.IList{System.Double},System.Collections.Generic.IList{System.Double},System.Tuple{System.Int32,System.Int32},System.Collections.Generic.IList{System.Double})">
 <summary>Adds a NURBS surface object to the document</summary>
@@ -7370,7 +7380,7 @@ If False, the function returns the results as
 <member name="M:Rhino.Scripting.ExtensionsTransformation.RhinoScriptSyntax.XformTranslation.Static(Rhino.Geometry.Vector3d)">
 <summary>Creates a translation transformation matrix</summary>
 <param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d.  A 3-D translation vector</param>
-<returns>(Transform) The 4x4 transformation matrix is successful, otherwise None</returns>
+<returns>(Transform) The 4x4 transformation matrix if successful</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsTransformation.RhinoScriptSyntax.XformShear.Static(Rhino.Geometry.Plane,Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d,Rhino.Geometry.Vector3d)">
 <summary>Returns a shear transformation matrix</summary>
@@ -7449,7 +7459,7 @@ If False, point is in client-area coordinates. If True,
 <member name="M:Rhino.Scripting.ExtensionsTransformation.RhinoScriptSyntax.XformInverse.Static(Rhino.Geometry.Transform)">
 <summary>Returns the inverse of a non-singular transformation matrix</summary>
 <param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
-<returns>(Transform) The inverted 4x4 transformation matrix </returns>
+<returns>(Transform) The inverted 4x4 transformation matrix</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsTransformation.RhinoScriptSyntax.XformIdentity.Static">
 <summary>returns the identity transformation matrix</summary>
@@ -7588,7 +7598,7 @@ Location on the object to retrieve the user text</param>
 <member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.GetDocumentUserText.Static(System.String)">
 <summary>Returns user text stored in the document</summary>
 <param name="key">(string) Key to use for retrieving user text</param>
-<returns>(string) If key is specified, then the associated value </returns>
+<returns>(string) If key is specified, then the associated value</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.GetDocumentDataEntry.Static(System.String,System.String)">
 <summary>Returns a user data item  entry from the current document</summary>
@@ -7785,7 +7795,7 @@ A prompt or message</param>
 <param name="number">(float) Optional, A default number value</param>
 <param name="minimum">(float) Optional, A minimum allowable value</param>
 <param name="maximum">(float) Optional, A maximum allowable value</param>
-<returns>(float option) an Option of The number input by the user </returns>
+<returns>(float option) an Option of The number input by the user</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserinterface.RhinoScriptSyntax.GetPolyline.Static(System.Int32,System.String,System.String,System.String,System.String,System.Int32,System.Int32)">
 <summary>Prompts the user to pick points that define a polyline</summary>
@@ -7803,8 +7813,8 @@ The options are bit coded flags. Values can be added together to specify more th
 <param name="min">(int) Optional, Default Value: <c>2</c>
 The minimum number of points to require. The default is 2</param>
 <param name="max">(int) Optional, Default Value: <c>0</c>
-The maximum number of points to require; 0 for no limit. </param>
-<returns>(Polyline option) an Option of a  polyline </returns>
+The maximum number of points to require; 0 for no limit.</param>
+<returns>(Polyline option) an Option of a  polyline</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserinterface.RhinoScriptSyntax.GetPoints.Static(System.Boolean,System.Boolean,System.String,System.String,System.Int32)">
 <summary>Pauses for user input of one or more points</summary>
@@ -7927,7 +7937,7 @@ Show set current  button on the dialog</param>
 <param name="number">(int) Optional, A default whole number value</param>
 <param name="minimum">(int) Optional, A minimum allowable value</param>
 <param name="maximum">(int) Optional, A maximum allowable value</param>
-<returns>(int option) an Option of The whole number input by the user </returns>
+<returns>(int option) an Option of The whole number input by the user</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserinterface.RhinoScriptSyntax.GetEdgeCurves.Static(System.String,System.Int32,System.Int32,System.Boolean)">
 <summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
@@ -7949,7 +7959,7 @@ Select the duplicated edge curves</param>
 Prompt for the first distance point</param>
 <param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
 Prompt for the second distance point</param>
-<returns>(float option) an Option of The distance between the two points </returns>
+<returns>(float option) an Option of The distance between the two points</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserinterface.RhinoScriptSyntax.GetCursorPos.Static">
 <summary>Retrieves the cursor's position</summary>
@@ -7961,7 +7971,7 @@ Prompt for the second distance point</param>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserinterface.RhinoScriptSyntax.GetColor.Static(System.Drawing.Color)">
 <summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
-<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c> </param>
+<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c></param>
 <returns>(Drawing.Color option) an Option of RGB color</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserinterface.RhinoScriptSyntax.GetBox.Static(System.Int32,Rhino.Geometry.Point3d,System.String,System.String,System.String)">
@@ -8114,7 +8124,7 @@ The component sort order
 <param name="points">(Point3d seq) The points to sort</param>
 <param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
 Minimum distance between points. Points that fall within this tolerance
-  will be discarded. </param>
+  will be discarded.</param>
 <returns>(Point3d array) of sorted 3D points</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.Sleep.Static(System.Int32)">
@@ -8125,7 +8135,7 @@ Minimum distance between points. Points that fall within this tolerance
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.SimplifyArray.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d})">
 <summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers</summary>
 <param name="points">(Point3d seq) Points to flatten</param>
-<returns>(float ResizeArray) A one-dimensional list containing real numbers, , otherwise None</returns>
+<returns>(float ResizeArray) A one-dimensional list containing real numbers</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.Polar.Static(Rhino.Geometry.Point3d,System.Double,System.Double,Rhino.Geometry.Plane)">
 <summary>Returns 3D point that is a specified angle and distance from a 3D point</summary>
@@ -8147,7 +8157,7 @@ Minimum distance between points. Points that fall within this tolerance
 <summary>Measures distance between two 3D points</summary>
 <param name="point1">(Point3d) The first 3D point</param>
 <param name="point2">(Point3d) The second 3D point</param>
-<returns>(float) the distance </returns>
+<returns>(float) the distance</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.DistanceSquare.Static(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>Measures Square distance between two 3D points. Does not validate input</summary>
@@ -8160,14 +8170,14 @@ Minimum distance between points. Points that fall within this tolerance
 <param name="points">(Point3d seq) A list of 3D points</param>
 <param name="tolerance">(float) Optional,Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
  Points within this tolerance will be discarded.</param>
-<returns>(Point3d array) of 3D points with duplicates removed </returns>
+<returns>(Point3d array) of 3D points with duplicates removed</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.CullDuplicateNumbers.Static(System.Collections.Generic.IEnumerable{System.Double},System.Double)">
 <summary>Removes duplicates from an array of numbers</summary>
 <param name="numbers">(float seq) List or tuple</param>
 <param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
   The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
-<returns>(float ResizeArray) numbers with duplicates removed </returns>
+<returns>(float ResizeArray) numbers with duplicates removed</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.ColorRGBToHLS.Static(System.Drawing.Color)">
 <summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance)</summary>
@@ -8333,7 +8343,7 @@ The direction to rotate the view. The default direction is Right (0). Modes:
   3 = Up</param>
 <param name="angleDegrees">(float) Optional, Default Value: <c>5</c>
 The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
-<returns>(float) The number of seconds it took to regenerate the view frames number of times,</returns>
+<returns>(float) The number of seconds it took to regenerate the view frames number of times</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsView.RhinoScriptSyntax.ViewSize.Static(System.String)">
 <summary>Returns the width and height in pixels of the specified view</summary>
@@ -8396,12 +8406,12 @@ The type of view to return
 <member name="M:Rhino.Scripting.ExtensionsView.RhinoScriptSyntax.ViewDisplayModeName.Static(System.Guid)">
 <summary>Return name of a display mode given it's id</summary>
 <param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method</param>
-<returns>(string) The name of the display mode , otherwise None</returns>
+<returns>(string) The name of the display mode</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsView.RhinoScriptSyntax.ViewDisplayModeId.Static(System.String)">
 <summary>Return id of a display mode given it's name</summary>
 <param name="name">(string) Name of the display mode</param>
-<returns>(Guid) The id of the display mode , otherwise None</returns>
+<returns>(Guid) The id of the display mode</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsView.RhinoScriptSyntax.ViewDisplayMode.Static(System.String,System.String)">
 <summary>Set a view display mode</summary>
@@ -8738,8 +8748,8 @@ auto detects points from closed polylines and loops them
 </member>
 <member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Double},System.Collections.Generic.IEnumerable{System.Double},System.Boolean)">
 <summary>
-auto detects points from closed polylines and loops them
-distance must have exact length or be singelton or empty
+Auto detects points from closed polylines and loops them
+Distance must have exact length or be singelton or empty
 </summary>
 </member>
 <member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.NormalOfPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d})">
@@ -8782,11 +8792,27 @@ Unitize vector, if input vector is shorter than 1e-6 alternative vector is retur
 </member>
 <member name="M:Rhino.Scripting.ExtrasBrep.RhinoScriptSyntax.SlotedHole.Static(Rhino.Geometry.Plane,System.Double,System.Double,System.Double)">
 <summary>Creates a Brep in the Shape of a Sloted Hole</summary>
-<param name="plane">(Plane)Origin = center of hole </param>
+<param name="plane">(Plane)Origin = center of hole</param>
 <param name="length">(float) total length of sloted hole</param>
 <param name="breite">(float) width = radius of sloted hole</param>
 <param name="height">(float) height of sloted hole volume</param> 
 <returns>(Brep) Brep Geometry</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.setLayer.Static(System.String,System.Guid)">
+<summary>Modifies the layer of an object, creates layer if not yet existing</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<param name="objectId">(Guid) The identifier of the object</param>    
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.printFull``1(``0)">
+<summary>
+RhinoScriptSyntax.PrintFull
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.print``1(``0)">
+<summary>
+RhinoScriptSyntax.Print
+</summary>
 </member>
 </members>
 </doc>

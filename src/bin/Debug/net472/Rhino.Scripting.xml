@@ -2,14 +2,6 @@
 <doc>
 <assembly><name>Rhino.Scripting</name></assembly>
 <members>
-<member name="P:Rhino.Scripting.RhinoScriptSyntax.SynchronizationContext(System.Threading.SynchronizationContext)">
-<summary>The Synchronization Context of the Rhino UI Therad.
-This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
-</member>
-<member name="P:Rhino.Scripting.RhinoScriptSyntax.SynchronizationContext">
-<summary>The Synchronization Context of the Rhino UI Therad.
-This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
-</member>
 <member name="P:Rhino.Scripting.RhinoScriptSyntax.Sticky">
 <summary>
  A Dictionary to store state between scripting session
@@ -326,7 +318,7 @@ so that python range expressions dont need top be translated to F#
 </member>
 <member name="P:Rhino.Scripting.ActiceDocument.syncContext">
 <summary>
-of the currently Running Rhino Instance, to be set via RhinoScriptSyntax.SynchronizationContext from running script
+SynchronizationContext  of the currently Running Rhino Instance, set via reflection on Seff.Rhino
 </summary>
 </member>
 <member name="M:Rhino.Scripting.ActiceDocument.redraw">
@@ -1645,9 +1637,8 @@ Angle tolerance in degrees. The angle
 <returns>(Point3d) The 3D midpoint of the curve</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.CurveDirection.Static(System.Guid,System.Boolean,System.Int32)">
-<summary>Returns the average direction of a curve object, 
-Optionally allows non linear curves too. 
-Returns unitized vector between start and end point </summary>
+<summary>Returns the average unitized direction of a curve object between start and end point, 
+Optionally allows non linear curves too.</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
 <param name="allowNonLinear">(bool) Optional, allow non linear curves true </param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
@@ -3991,8 +3982,8 @@ Return the full path name `True` or short name `False`</param>
 <summary>Add a new layer to the document</summary>
 <param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
   generates the layer name</param>
-<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c>
-A Red-Green-Blue color value</param>
+<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.
+  If omitted a random color wil be choosen</param>
 <param name="visible">(bool) Optional, Default Value: <c>true</c>
 Layer's visibility</param>
 <param name="locked">(bool) Optional, Default Value: <c>false</c>
@@ -8806,6 +8797,22 @@ Unitize vector, if input vector is shorter than 1e-6 alternative vector is retur
 <param name="breite">(float) width = radius of sloted hole</param>
 <param name="height">(float) height of sloted hole volume</param> 
 <returns>(Brep) Brep Geometry</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.setLayer.Static(System.String,System.Guid)">
+<summary>Modifies the layer of an object, creates layer if not yet existing</summary>
+<param name="layer">(string) Name of an existing layer</param>
+<param name="objectId">(Guid) The identifier of the object</param>    
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.printFull``1(``0)">
+<summary>
+RhinoScriptSyntax.PrintFull
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.print``1(``0)">
+<summary>
+RhinoScriptSyntax.Print
+</summary>
 </member>
 </members>
 </doc>
