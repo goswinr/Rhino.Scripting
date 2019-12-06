@@ -1261,8 +1261,7 @@ module ExtensionsCurve =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
             let v = curve.PointAtEnd - curve.PointAtStart
-            v.Unitize |> ignore
-            v
+            v.Unitized
         else
             failwithf "CurveDirection failed.  curveId:'%A' allowNonLinear '%A' segmentIndex:'%A'" curveId allowNonLinear segmentIndex
 
