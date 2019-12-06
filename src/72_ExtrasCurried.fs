@@ -35,8 +35,8 @@ module ExtrasCurried =
                     i
                 else
                     let names = layer.Split([| "::"|],StringSplitOptions.RemoveEmptyEntries)
-                    let mutable lastparentindex = -1
-                    let mutable lastparent:DocObjects.Layer = null
+                    let mutable lastparentindex =  -1
+                    let mutable lastparent      =  null : DocObjects.Layer
                     for idx, name in Seq.indexed(names) do
                         let layer = DocObjects.Layer.GetDefaultLayerProperties()
                         if idx > 0 && lastparentindex <> -1 then
