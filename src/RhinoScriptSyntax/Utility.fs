@@ -130,7 +130,7 @@ module ExtensionsUtility =
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
-        let hls = Display.ColorHSL(hls.A.ToDouble/240.0, hls.R.ToDouble/240.0, hls.G.ToDouble/240.0, hls.B.ToDouble/240.0) // TODO test if correct with reverse function
+        let hls = Display.ColorHSL(hls.A.ToFloat/240.0, hls.R.ToFloat/240.0, hls.G.ToFloat/240.0, hls.B.ToFloat/240.0) // TODO test if correct with reverse function
         hls.ToArgbColor()
 
 

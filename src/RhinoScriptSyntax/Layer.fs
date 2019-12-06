@@ -16,8 +16,8 @@ module ExtensionsLayer =
     ///<summary>Add a new layer to the document</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
     ///  generates the layer name</param>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c>
-    ///A Red-Green-Blue color value</param>
+    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.
+    ///  If omitted a random color wil be choosen</param>
     ///<param name="visible">(bool) Optional, Default Value: <c>true</c>
     ///Layer's visibility</param>
     ///<param name="locked">(bool) Optional, Default Value: <c>false</c>
@@ -49,6 +49,7 @@ module ExtensionsLayer =
             layer.Name <- name
           //color = RhinoScriptSyntax.Coercecolor(color)
           if not color.IsEmpty then layer.Color <- color
+          else layer.Color <- Color.randomColorForRhino()
           layer.IsVisible <- visible
           layer.IsLocked <- locked
           lastparentindex <- Doc.Layers.Add(layer)
