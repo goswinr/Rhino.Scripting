@@ -50,11 +50,10 @@ type RhinoScriptSyntax private () = // no constructor?
     /// An Integer Enum of Object types to be use in object selection functions
     static member Filter:Filter = Internals.filter
     
-    ///<summary>The Synchronization Context of the Rhino UI Therad.
-    ///This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
-    static member SynchronizationContext
-        with get (): Threading.SynchronizationContext = syncContext
-        and  set v : unit                             = syncContext <- v
+    //NOT neded anymore, done via reflection ActiceDoc.fs
+    //static member SynchronizationContext //<summary>The Synchronization Context of the Rhino UI Therad.    //This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
+    //    with get (): Threading.SynchronizationContext = syncContext
+    //    and  set v : unit                             = syncContext <- v
 
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
