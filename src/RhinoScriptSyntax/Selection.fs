@@ -205,7 +205,7 @@ module ExtensionsSelection =
                         Doc.Views.Redraw()
                     obj.Select(select)  |> ignore
                     Some (objectId, presel, selmethod, point, curveparameter, viewname)
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
     [<Extension>]
@@ -258,7 +258,7 @@ module ExtensionsSelection =
                     obj.Select(select)  |> ignore
                     Some obj.Id
 
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
     [<Extension>]
     ///<summary>Prompts user to pick, or select a single object</summary>
@@ -321,7 +321,7 @@ module ExtensionsSelection =
                         Doc.Views.Redraw()
                     obj.Select(select) |> ignore
                     Some (objectId, presel, selmethod, point, viewname)
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
     [<Extension>]
@@ -411,7 +411,7 @@ module ExtensionsSelection =
                         if select && notNull obj then obj.Select(select) |> ignore
                     if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                     Some rc
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
     [<Extension>]
@@ -557,7 +557,7 @@ module ExtensionsSelection =
                         |> RhinoScriptSyntax.Print
 
                     Some rc
-            } |> Async.RunSynchronously
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
     [<Extension>]
