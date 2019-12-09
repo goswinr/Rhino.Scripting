@@ -22,7 +22,7 @@ module TypeExtensionsRhino =
             if pt = Point3d.Unset then  
                 "Point3d.Unset"
             else
-                sprintf "Point3d(%s, %s, %s)" (floatToString  pt.X) (floatToString  pt.Y) (floatToString  pt.Z)
+                sprintf "Point3d(%s, %s, %s)" (NiceString.floatToString  pt.X) (NiceString.floatToString  pt.Y) (NiceString.floatToString  pt.Z)
         
         [<Extension>] 
         member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
@@ -38,7 +38,7 @@ module TypeExtensionsRhino =
             if pt = Point3f.Unset then  
                 "Point3f.Unset"
             else
-                sprintf "Point3f(%s, %s, %s)" (singleToString  pt.X) (singleToString  pt.Y) (singleToString  pt.Z)
+                sprintf "Point3f(%s, %s, %s)" (NiceString.singleToString  pt.X) (NiceString.singleToString  pt.Y) (NiceString.singleToString  pt.Z)
         
         [<Extension>] 
         member pt.ToPoint3d = Point3d(pt)
@@ -52,7 +52,7 @@ module TypeExtensionsRhino =
             if v = Vector3d.Unset then  
                 "Vector3d.Unset"
             else
-                sprintf "Vector3d(%s, %s, %s)" (floatToString  v.X) (floatToString  v.Y) (floatToString  v.Z)
+                sprintf "Vector3d(%s, %s, %s)" (NiceString.floatToString  v.X) (NiceString.floatToString  v.Y) (NiceString.floatToString  v.Z)
         
         [<Extension>] 
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
@@ -74,7 +74,7 @@ module TypeExtensionsRhino =
             if v = Vector3f.Unset then  
                 "Vector3f.Unset"
             else
-                sprintf "Vector3f(%s, %s, %s)" (singleToString  v.X) (singleToString  v.Y) (singleToString  v.Z)
+                sprintf "Vector3f(%s, %s, %s)" (NiceString.singleToString  v.X) (NiceString.singleToString  v.Y) (NiceString.singleToString  v.Z)
    
         
         [<Extension>] 
@@ -86,9 +86,13 @@ module TypeExtensionsRhino =
         [<Extension>]     
         ///Like the ToString function but with appropiate precision formating
         member ln.ToNiceString = 
-                sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (floatToString  ln.From.X) (floatToString  ln.From.Y) (floatToString  ln.From.Z) (floatToString  ln.To.X) (floatToString  ln.To.Y) (floatToString  ln.To.Z)
+                sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceString.floatToString  ln.From.X) (NiceString.floatToString  ln.From.Y) (NiceString.floatToString  ln.From.Z) (NiceString.floatToString  ln.To.X) (NiceString.floatToString  ln.To.Y) (NiceString.floatToString  ln.To.Z)
     
-    
+        [<Extension>]     
+        ///Middle point of line
+        member ln.Mid = 
+                (ln.From + ln.To)*0.5
+
     let internal formatRhinoObject (o:obj)  = 
         match o with
         | :? Point3d    as x -> Some x.ToNiceString
