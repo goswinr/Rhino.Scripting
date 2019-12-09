@@ -211,8 +211,7 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Prompts user to pick, or select, a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
     ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -221,7 +220,7 @@ module ExtensionsSelection =
     ///Select the picked objects.  If False, the objects that are
     ///  picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
-    ///<param name="subobjects">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
     ///If True, subobjects can be selected. When this is the
     ///  case, for tracking  of the subobject go via the Object Ref</param>
     ///<returns>(Guid option) Identifier of the picked object</returns>
@@ -230,7 +229,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
-                                    [<OPT;DEF(false)>]subobjects:bool) : Guid option =
+                                    [<OPT;DEF(false)>]subObjects:bool) : Guid option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
             if not  preselect then
@@ -241,7 +240,7 @@ module ExtensionsSelection =
             if notNull message then go.SetCommandPrompt(message)
             let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
             if filter>0 then go.GeometryFilter <- geometryfilter
-            go.SubObjectSelect <- subobjects
+            go.SubObjectSelect <- subObjects
             go.GroupSelect <- false
             go.AcceptNothing(true)
             return
@@ -328,30 +327,9 @@ module ExtensionsSelection =
     ///<summary>Prompts user to pick or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///A prompt or message</param>
-    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the filter class to get values
-    ///    Value         Description
-    ///    0             All objects (default)
-    ///    1             Point
-    ///    2             Point cloud
-    ///    4             Curve
-    ///    8             Surface or single-face brep
-    ///    16            Polysurface or multiple-face
-    ///    32            Mesh
-    ///    256           Light
-    ///    512           Annotation
-    ///    4096          Instance or block reference
-    ///    8192          Text dot object
-    ///    16384         Grip object
-    ///    32768         Detail
-    ///    65536         Hatch
-    ///    131072        Morph control
-    ///    134217728     Cage
-    ///    268435456     Phantom
-    ///    536870912     Clipping plane
-    ///    1073741824    Extrusion</param>
+    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
     ///Honor object grouping.  If omitted and the user picks a group,
     ///  the entire group will be picked (True). Note, if filter is set to a
@@ -416,33 +394,11 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns the same objects as in the last user interaction with the same prompt message
-    /// If none found Prompts user to pick or select one or more objects and remembers them.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
-    ///A prompt or message</param>
-    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
+    /// If none found, Prompts user to pick or select one or more objects and remembers them.</summary>
+    ///<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber objects</param>
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
     ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the filter class to get values
-    ///    Value         Description
-    ///    0             All objects (default)
-    ///    1             Point
-    ///    2             Point cloud
-    ///    4             Curve
-    ///    8             Surface or single-face brep
-    ///    16            Polysurface or multiple-face
-    ///    32            Mesh
-    ///    256           Light
-    ///    512           Annotation
-    ///    4096          Instance or block reference
-    ///    8192          Text dot object
-    ///    16384         Grip object
-    ///    32768         Detail
-    ///    65536         Hatch
-    ///    131072        Morph control
-    ///    134217728     Cage
-    ///    268435456     Phantom
-    ///    536870912     Clipping plane
-    ///    1073741824    Extrusion</param>
+    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
     ///Honor object grouping.  If omitted and the user picks a group,
     ///  the entire group will be picked (True). Note, if filter is set to a
@@ -460,7 +416,7 @@ module ExtensionsSelection =
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
-    static member GetObjectsAndRemember( message:string,
+    static member GetObjectsAndRemember(message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
                                         [<OPT;DEF(true)>]preselect:bool,
@@ -481,7 +437,36 @@ module ExtensionsSelection =
                 Some ids
             | None -> None
 
-
+    
+    [<Extension>]
+    ///<summary>Returns the same object as in the last user interaction with the same prompt message
+    /// If none found, Prompts user to pick one object and remembers it.</summary>
+    ///<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber object</param>
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///  that can be selected. Object types can be added together to filter
+    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///Allow for the selection of pre-selected objects</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///Select the picked objects.  If False, the objects that are
+    ///  picked are not selected</param>
+    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
+    ///<returns>(Guid) Option of a identifier of the picked object</returns>
+    static member GetObjectAndRemember( message:string,
+                                        [<OPT;DEF(0)>]filter:int,
+                                        [<OPT;DEF(true)>]preselect:bool,
+                                        [<OPT;DEF(false)>]select:bool,
+                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid> =
+        try 
+            let objectIds = Internals.sticky.[message] :?> ResizeArray<Guid>
+            //if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
+            Some objectIds.[0]
+        with | _ -> 
+            match RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter,false) with
+            |Some id ->
+                Internals.sticky.[message] <- resizeArray {id}
+                Some id
+            | None -> None
 
     [<Extension>]
     ///<summary>Prompts user to pick, or select one or more objects</summary>

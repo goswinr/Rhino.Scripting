@@ -355,7 +355,7 @@ module ExtrasVector =
         
         [<Extension>]
         static member FreeFillet(a:Line, b:Line, rad:float):NurbsCurve =
-            //TODO verify that both lines lie in the same || in paralell planes
+            //TODO verify that both lines lie in the same or in paralell planes
             let va = RhinoScriptSyntax.VectorUnitize(a.To-a.From)
             let vb = RhinoScriptSyntax.VectorUnitize(b.To-b.From)
             let dot = va*vb

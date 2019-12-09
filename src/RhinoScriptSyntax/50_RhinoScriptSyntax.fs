@@ -272,7 +272,7 @@ type RhinoScriptSyntax private () = // no constructor?
                     for r, x in Seq.indexed xs do
                         t.[c, r] <- x
             with
-                | _ -> failwithf "CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" xform.ToNiceString
+                | _ -> failwithf "CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
             t
         
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
@@ -280,10 +280,10 @@ type RhinoScriptSyntax private () = // no constructor?
             try
                 xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
             with
-                | _ -> failwithf "CoerceXform: Array2D %s can not be converted to a Transformation Matrix" xform.ToNiceString
+                | _ -> failwithf "CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
             t
 
-        | _ -> failwithf "CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" xform.ToNiceString
+        | _ -> failwithf "CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
     
     ///<summary>Attempt to get a Guids from input</summary>
     ///<param name="objectId">objcts , Guid or string</param>
@@ -331,7 +331,7 @@ type RhinoScriptSyntax private () = // no constructor?
             if green<0 || green>255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
             if blue <0 || blue >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
             if alpha <0 || alpha >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d aplpha %d" red green blue alpha
-            Drawing.Color.FromArgb(alpha  , red, green, blue)        
+            Drawing.Color.FromArgb(alpha, red, green, blue)        
         | :? string  as s -> 
             try 
                 let c = Drawing.Color.FromName(s)
@@ -351,6 +351,9 @@ type RhinoScriptSyntax private () = // no constructor?
     static member CoerceLine(line:'T) : Line=
         match box line with
         | :? Line as l -> l
+        | :? Curve as crv ->
+            if crv.IsLinear() then Line(crv.PointAtStart, crv.PointAtEnd)
+                else failwithf "CoerceLine: could not Coerce %A to a Line" line
         | :? Guid as g ->  
             match Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
@@ -359,7 +362,6 @@ type RhinoScriptSyntax private () = // no constructor?
             //| :? Line as l -> l
             | _ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
         | :? (Point3d*Point3d) as ab -> let a, b = ab in Line(a, b)
-        // TODO parse 6 numbers, convert form polyline
         |_ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
     
 

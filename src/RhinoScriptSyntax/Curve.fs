@@ -291,8 +291,7 @@ module ExtensionsCurve =
     ///<returns>(NurbsCurve) a NurbsCurve geometry</returns>
     static member CreateNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : NurbsCurve =
         let cvcount = Seq.length(points)
-        let knotcount = cvcount + degree - 1
-        let noweights= (Seq.isEmpty weights)
+        let knotcount = cvcount + degree - 1        
         if Seq.length(knots)<>knotcount then
             failwithf "CreateNurbsCurve:Number of elements in knots must equal the number of elements in points plus degree minus 1.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
         let rational =
@@ -302,11 +301,9 @@ module ExtensionsCurve =
                 true
             else
             false
-
         let nc = new NurbsCurve(3, rational, degree + 1, cvcount)
         for i, k in Seq.indexed knots do
             nc.Knots.[i] <- k
-
         if notNull weights then
             if Seq.length(weights)<>cvcount then
                 failwithf "CreateNurbsCurve:Number of elements in weights should equal the number of elements in points.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
@@ -314,8 +311,7 @@ module ExtensionsCurve =
                 nc.Points.SetPoint(i, p, w) |> ignore
         else
             for i, p in Seq.indexed points do
-                nc.Points.SetPoint(i, p) |> ignore
-       
+                nc.Points.SetPoint(i, p) |> ignore       
         if not nc.IsValid then failwithf "CreateNurbsCurve:Unable to create curve.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
         nc
 
@@ -436,7 +432,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then failwithf "Curve is not arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then failwithf "Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
         (!arc).AngleDegrees
 
 
@@ -449,7 +445,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then failwithf "Curve is not arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then failwithf "Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
         (!arc).Center
 
 
@@ -462,7 +458,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then failwithf "Curve is not arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then failwithf "Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
         (!arc).MidPoint
 
 
@@ -475,7 +471,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then failwithf "Curve is not arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then failwithf "Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
         (!arc).Radius
 
 
@@ -588,10 +584,8 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let angleTolerance0 = toRadians (ifZero1 angleTolerance 0.5 )
         let tolerance0 = ifZero1 tolerance 0.01
-
         let polylineCurve = curve.ToPolyline( 0, 0, angleTolerance0, 0.0, 0.0, tolerance0, minEdgeLength, maxEdgeLength, true) //TODO what happens on 0.0 input ?
         if isNull polylineCurve then failwithf "Unable to convertCurveToPolyline %A , maxEdgeLength%f, minEdgeLength:%f, deleteInput%b, tolerance%f, angleTolerance %f " curveId   maxEdgeLength minEdgeLength deleteInput tolerance angleTolerance
-
         if deleteInput then
             if Doc.Objects.Replace( curveId, polylineCurve) then
                 curveId
@@ -981,14 +975,12 @@ module ExtensionsCurve =
     static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) ResizeArray =
         let curve1 = RhinoScriptSyntax.CoerceCurve curveA
         let curve2 = if curveB= Guid.Empty then curve1 else RhinoScriptSyntax.CoerceCurve curveB
-
         let tolerance0 = ifZero1 tolerance Doc.ModelAbsoluteTolerance
         let mutable rc = null
         if curveB<>curveA then
             rc <- Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, Doc.ModelAbsoluteTolerance)
         else
             rc <- Intersect.Intersection.CurveSelf(curve1, tolerance0)
-
         if isNull rc then failwithf "curveCurveIntersection faile dor %A; %A tolerance %f" curveB curveA tolerance
         let events = ResizeArray()
         for i =0 to rc.Count-1 do
@@ -1247,7 +1239,8 @@ module ExtensionsCurve =
     ///<returns>(float) The length of the curve</returns>
     static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
-        if subDomain.T0 = 0.0 && subDomain.T1 = 0.0 then curve.GetLength() else curve.GetLength(subDomain)
+        if subDomain.T0 = 0.0 && subDomain.T1 = 0.0 then curve.GetLength() 
+        else curve.GetLength(subDomain)
 
 
     [<Extension>]
