@@ -840,7 +840,7 @@ module ExtensionsUserinterface =
             if notNull prompt3 then prompts.[2] <- prompt3
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             return
-                if rc = Commands.Result.Success then Some (corners.[0],corners.[1],corners.[2],corners.[3])
+                if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
                 else None
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 

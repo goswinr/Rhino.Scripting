@@ -179,7 +179,7 @@ module ExtensionsUtility =
     [<Extension>]
     ///<summary>Removes duplicates from a list of 3D points</summary>
     ///<param name="points">(Point3d seq) A list of 3D points</param>
-    ///<param name="tolerance">(float) Optional,Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
     ///<returns>(Point3d array) of 3D points with duplicates removed</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
@@ -227,7 +227,7 @@ module ExtensionsUtility =
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore
         offset <- distance * offset
-        let rc = point+offset
+        let rc = point + offset
         let xform = Transform.Rotation(angle, plane.ZAxis, point)
         rc.Transform(xform)
         rc

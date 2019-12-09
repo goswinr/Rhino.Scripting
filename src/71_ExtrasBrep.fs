@@ -59,10 +59,10 @@ module ExtrasBrep =
             Point3d(-x1,  -y05, 0.0)
             Point3d(-x05, -y05, 0.0)
             |]
-        use c1 = new NurbsCurve(3,true,3,13)
+        use c1 = new NurbsCurve(3, true, 3, 13)
         for i=0 to 12 do c1.Points.[i] <- ControlPoint( points.[i], weights.[i])
         for i=0 to 13 do c1.Knots.[i] <- knots.[i]
-        use c2 = new NurbsCurve(3,true,3,13)
+        use c2 = new NurbsCurve(3, true, 3, 13)
         for i=0 to 12 do c2.Points.[i] <- ControlPoint( Point3d(points.[i].X, points.[i].Y, height), weights.[i])
         for i=0 to 13 do c2.Knots.[i] <- knots.[i]
         Transform.PlaneToPlane (Plane.WorldXY, plane) |> c1.Transform |> ignore

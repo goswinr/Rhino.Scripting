@@ -32,7 +32,7 @@ module ExtensionsLayer =
                             [<OPT;DEF(null:string)>]parent:string) : string =
         let names =
             if isNull name then [| "" |]
-            else name.Split([| "::"|],StringSplitOptions.RemoveEmptyEntries)
+            else name.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
         let mutable lastparentindex = -1
         let mutable lastparent:DocObjects.Layer = null
         for idx, name in Seq.indexed(names) do

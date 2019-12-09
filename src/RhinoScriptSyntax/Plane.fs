@@ -31,7 +31,7 @@ module ExtensionsPlane =
     ///<param name="u">(float) U parameter to evaluate</param>
     ///<param name="v">(float) V parameter to evaluate</param>
     ///<returns>(Point3d) Point3d on success</returns>
-    static member EvaluatePlane(plane:Plane, u:float ,v: float) : Point3d =
+    static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         plane.PointAt(u, v)
 
@@ -143,7 +143,7 @@ module ExtensionsPlane =
 
     [<Extension>]
     ///<summary>Returns the equation of a plane as a tuple of four numbers. The standard
-    ///  equation of a plane with a non-zero vector is Ax+By+Cz+D = 0</summary>
+    ///  equation of a plane with a non-zero vector is Ax + By + Cz + D = 0</summary>
     ///<param name="plane">(Plane) The plane to deconstruct</param>
     ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D)</returns>
     static member PlaneEquation(plane:Plane) : float * float * float * float =

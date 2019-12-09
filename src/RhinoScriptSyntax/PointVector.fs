@@ -76,7 +76,7 @@ module ExtensionsPointvector =
     static member PointAdd(point1:Point3d, point2:Point3d) : Point3d =
         //point1 = RhinoScriptSyntax.Coerce3dpoint(point1)
         //point2 = RhinoScriptSyntax.Coerce3dpoint(point2)
-        point1+point2
+        point1 + point2
 
 
     [<Extension>]
@@ -297,7 +297,7 @@ module ExtensionsPointvector =
     static member VectorAdd(vector1:Vector3d, vector2:Vector3d) : Vector3d =
         //vector1 = RhinoScriptSyntax.Coerce3dvector(vector1)
         //vector2 = RhinoScriptSyntax.Coerce3dvector(vector2)
-        vector1+vector2
+        vector1 + vector2
 
 
     [<Extension>]
@@ -313,7 +313,7 @@ module ExtensionsPointvector =
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
             failwithf "Rhino.Scripting.VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
         let mutable dot = vector1 * vector2
-        dot <- RhinoScriptSyntax.Clamp(-1.0 ,1.0 , dot)
+        dot <- RhinoScriptSyntax.Clamp(-1.0 , 1.0 , dot)
         let radians = Math.Acos(dot)
         toDegrees(radians)
 

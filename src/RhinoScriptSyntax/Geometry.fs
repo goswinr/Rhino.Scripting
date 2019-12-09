@@ -103,7 +103,7 @@ module ExtensionsGeometry =
             let pc = new PointCloud()
             for i = 0  to -1 + (Seq.length(points)) do
                 let color = RhinoScriptSyntax.CoerceColor(colors.[i])
-                pc.Add(points.[i],color)
+                pc.Add(points.[i], color)
             let rc = Doc.Objects.AddPointCloud(pc)
             if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
             Doc.Views.Redraw()
@@ -154,7 +154,7 @@ module ExtensionsGeometry =
         let bold = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = Doc.DimStyles.Current
-        let qn, quartetBoldProp ,quartetItalicProp =
+        let qn, quartetBoldProp , quartetItalicProp =
             if isNull font then
               ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
             else

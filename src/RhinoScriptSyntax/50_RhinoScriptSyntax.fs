@@ -38,14 +38,14 @@ module private Internals =
     // the singelton of this class to be used below
     let filter = Filter()
     /// A Dictionary to store state between scripting session
-    let sticky = new Dictionary<string,obj>()
+    let sticky = new Dictionary<string, obj>()
 
 [<AbstractClass; Sealed>]
 /// A static class with static members provIding functions Identical to RhinoScript in Pyhton or VBscript 
 type RhinoScriptSyntax private () = // no constructor?     
 
     /// A Dictionary to store state between scripting session
-    static member Sticky:Dictionary<string,obj> = Internals.sticky
+    static member Sticky:Dictionary<string, obj> = Internals.sticky
     
     /// An Integer Enum of Object types to be use in object selection functions
     static member Filter:Filter = Internals.filter
@@ -61,8 +61,8 @@ type RhinoScriptSyntax private () = // no constructor?
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(stirng) the string</returns>
     static member ToNiceString (x:'T,[<OPT;DEF(true)>]trim:bool) : string =
-        if trim then NiceString.toNiceStringWithFormater(x,formatRhinoObject)
-        else         NiceString.toNiceStringFullWithFormater(x,formatRhinoObject)       
+        if trim then NiceString.toNiceStringWithFormater(x, formatRhinoObject)
+        else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
 
     ///<summary>Prints an object or value to Rhino Command line. 
     ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
@@ -180,7 +180,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<returns>(Rhino.Geometry.Point3d) Fails on bad input</returns>
     static member Coerce3dPoint(pt:'T) : Point3d =               
         let inline  point3dOf3(x:^x, y:^y, z:^z) = 
-            try Geometry.Point3d(floatOfObj (x),floatOfObj(y),floatOfObj(z))
+            try Geometry.Point3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
             with _ -> failwithf "Coerce3dPoint: Could not Coerce %A, %A and %A to Point3d" x y z
         
         let b = box pt
@@ -191,14 +191,14 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? DocObjects.PointObject as po   -> po.PointGeometry.Location
         | :? TextDot as td                  -> td.Point
         | :? (float*float*float) as xyz     -> let x, y, z = xyz in Point3d(x, y, z)
-        | :? (single*single*single) as xyz  -> let x, y, z = xyz in Point3d(float(x),float(y),float(z))        
-        | :? (int*int*int) as xyz           -> let x, y, z = xyz in Point3d(float(x),float(y),float(z))        
+        | :? (single*single*single) as xyz  -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))        
+        | :? (int*int*int) as xyz           -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))        
         | _ ->
             try
                 match b with
                 | :? (Point3d option) as pto   -> pto.Value // from UI function
                 | :? option<Guid> as go      -> ((Doc.Objects.FindId(go.Value).Geometry) :?> Point).Location
-                | :? (string*string*string) as xyz  -> let x, y, z = xyz in Point3d(parseFloatEnDe(x),parseFloatEnDe(y),parseFloatEnDe(z)) 
+                | :? (string*string*string) as xyz  -> let x, y, z = xyz in Point3d(parseFloatEnDe(x), parseFloatEnDe(y), parseFloatEnDe(z)) 
                 | :? Guid as g ->  ((Doc.Objects.FindId(g).Geometry) :?> Point).Location 
                 | :? seq<float>  as xyz  ->  point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
                 | :? seq<int>  as xyz  ->    point3dOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
@@ -206,10 +206,10 @@ type RhinoScriptSyntax private () = // no constructor?
                 | :? string as s  -> 
                     let xs = s.Split(';')
                     if Seq.length xs > 2 then 
-                        Point3d(parseFloatEnDe(Seq.item 0 xs),parseFloatEnDe(Seq.item 1 xs),parseFloatEnDe(Seq.item 2 xs))
+                        Point3d(parseFloatEnDe(Seq.item 0 xs), parseFloatEnDe(Seq.item 1 xs), parseFloatEnDe(Seq.item 2 xs))
                     else
                         let ys = s.Split(',') 
-                        Point3d(parseFloatEnDe(Seq.item 0 ys),parseFloatEnDe(Seq.item 1 ys),parseFloatEnDe(Seq.item 2 ys))   
+                        Point3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))   
                 |_ -> failwithf "Coerce3dPoint: could not Coerce %A to a Point3d" pt
             with _ ->
                 failwithf "Coerce3dPoint: could not Coerce %A to a Point3d" pt
@@ -323,7 +323,7 @@ type RhinoScriptSyntax private () = // no constructor?
             if red  <0 || red  >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
             if green<0 || green>255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
             if blue <0 || blue >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
-            Drawing.Color.FromArgb(255  ,red, green, blue)
+            Drawing.Color.FromArgb(255  , red, green, blue)
             
         | :? (int*int*int*int) as argb  -> 
             let alpha, red , green, blue   = argb 
@@ -331,7 +331,7 @@ type RhinoScriptSyntax private () = // no constructor?
             if green<0 || green>255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
             if blue <0 || blue >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
             if alpha <0 || alpha >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d aplpha %d" red green blue alpha
-            Drawing.Color.FromArgb(alpha  ,red, green, blue)        
+            Drawing.Color.FromArgb(alpha  , red, green, blue)        
         | :? string  as s -> 
             try 
                 let c = Drawing.Color.FromName(s)

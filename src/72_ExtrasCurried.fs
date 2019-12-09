@@ -34,7 +34,7 @@ module ExtrasCurried =
                 if i <> RhinoMath.UnsetIntIndex then 
                     i
                 else
-                    let names = layer.Split([| "::"|],StringSplitOptions.RemoveEmptyEntries)
+                    let names = layer.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
                     let mutable lastparentindex =  -1
                     let mutable lastparent      =  null : DocObjects.Layer
                     for idx, name in Seq.indexed(names) do
@@ -60,6 +60,6 @@ module ExtrasCurried =
             if not <| obj.CommitChanges() then failwithf "setLayer failed for '%A' and '%A'"  layer objectId
             Doc.Views.Redraw()
 
-        static member setName( name:string) (objectId:Guid) : unit = RhinoScriptSyntax.ObjectName(objectId,name)    
+        static member setName( name:string) (objectId:Guid) : unit = RhinoScriptSyntax.ObjectName(objectId, name)    
     
-        static member setUserText( key:string) ( value :string) (objectId:Guid) : unit = RhinoScriptSyntax.SetUserText(objectId,key,value)
+        static member setUserText( key:string) ( value :string) (objectId:Guid) : unit = RhinoScriptSyntax.SetUserText(objectId, key, value)

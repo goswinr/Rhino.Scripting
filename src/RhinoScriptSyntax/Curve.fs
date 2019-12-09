@@ -303,7 +303,7 @@ module ExtensionsCurve =
             else
             false
 
-        let nc = new NurbsCurve(3, rational, degree+1, cvcount)
+        let nc = new NurbsCurve(3, rational, degree + 1, cvcount)
         for i, k in Seq.indexed knots do
             nc.Knots.[i] <- k
 
@@ -1531,7 +1531,7 @@ module ExtensionsCurve =
     ///<returns>(Point3d array) Array containing division curve parameters</returns>
     static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
-        let pts = ref (Array.zeroCreate (segments+1))
+        let pts = ref (Array.zeroCreate (segments + 1))
         let rc = curve.DivideByCount(segments, true, pts)
         if isNull rc then  failwithf "divideCurve failed.  curveId:'%A' segments:'%A'" curveId segments
         !pts
@@ -1611,7 +1611,7 @@ module ExtensionsCurve =
         let origin = ellipse.Plane.Origin;
         let xaxis = ellipse.Radius1 * ellipse.Plane.XAxis;
         let yaxis = ellipse.Radius2 * ellipse.Plane.YAxis;
-        (origin-xaxis, origin+xaxis, origin-yaxis, origin+yaxis)
+        (origin-xaxis, origin + xaxis, origin-yaxis, origin + yaxis)
 
 
     [<Extension>]
@@ -1937,7 +1937,7 @@ module ExtensionsCurve =
     ///<summary>Verifies an object is a linear curve</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>    ///
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
-    ///<param name="segmentIndex">(int) Optional,The curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = ifZero2 RhinoMath.ZeroTolerance tolerance

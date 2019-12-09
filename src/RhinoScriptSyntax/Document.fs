@@ -221,7 +221,7 @@ module ExtensionsDocument =
     ///<returns>(unit) void, nothing</returns>
     static member RenderResolution(width:int, height:int) : unit = //SET
             let settings = Doc.RenderSettings
-            settings.ImageSize <- Drawing.Size(width ,height)
+            settings.ImageSize <- Drawing.Size(width , height)
             Doc.RenderSettings <- settings
 
 
@@ -575,7 +575,7 @@ module ExtensionsDocument =
     ///  2 - Millimeters (1.0e-3 meters)
     ///  3 - Centimeters (1.0e-2 meters)
     ///  4 - Meters
-    ///  5 - Kilometers (1.0e+3 meters)
+    ///  5 - Kilometers (1.0e + 3 meters)
     ///  6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
     ///  7 - Mils (2.54e-5 meters, 0.001 inches)
     ///  8 - Inches (0.0254 meters)
@@ -585,17 +585,17 @@ module ExtensionsDocument =
     ///    12 - Angstroms (1.0e-10 meters)
     ///    13 - Nanometers (1.0e-9 meters)
     ///    14 - Decimeters (1.0e-1 meters)
-    ///    15 - Dekameters (1.0e+1 meters)
-    ///    16 - Hectometers (1.0e+2 meters)
-    ///    17 - Megameters (1.0e+6 meters)
-    ///    18 - Gigameters (1.0e+9 meters)
+    ///    15 - Dekameters (1.0e + 1 meters)
+    ///    16 - Hectometers (1.0e + 2 meters)
+    ///    17 - Megameters (1.0e + 6 meters)
+    ///    18 - Gigameters (1.0e + 9 meters)
     ///    19 - Yards (0.9144  meters, 36 inches)
     ///    20 - Printer point (1/72 inches, computer points)
     ///    21 - Printer pica (1/6 inches, (computer picas)
     ///    22 - Nautical mile (1852 meters)
-    ///    23 - Astronomical (1.4959787e+11)
-    ///    24 - Lightyears (9.46073e+15 meters)
-    ///    25 - Parsecs (3.08567758e+16)</param>
+    ///    23 - Astronomical (1.4959787e + 11)
+    ///    24 - Lightyears (9.46073e + 15 meters)
+    ///    25 - Parsecs (3.08567758e + 16)</param>
     ///<param name="fromSystem">(int) The unit system to convert from (see above)</param>
     ///<returns>(float) scale factor for changing between unit systems</returns>
     static member UnitScale(toSystem:int, fromSystem:int) : float =
@@ -613,7 +613,7 @@ module ExtensionsDocument =
     ///  2 - Millimeters (1.0e-3 meters)
     ///  3 - Centimeters (1.0e-2 meters)
     ///  4 - Meters
-    ///  5 - Kilometers (1.0e+3 meters)
+    ///  5 - Kilometers (1.0e + 3 meters)
     ///  6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
     ///  7 - Mils (2.54e-5 meters, 0.001 inches)
     ///  8 - Inches (0.0254 meters)
@@ -623,17 +623,17 @@ module ExtensionsDocument =
     ///    12 - Angstroms (1.0e-10 meters)
     ///    13 - Nanometers (1.0e-9 meters)
     ///    14 - Decimeters (1.0e-1 meters)
-    ///    15 - Dekameters (1.0e+1 meters)
-    ///    16 - Hectometers (1.0e+2 meters)
-    ///    17 - Megameters (1.0e+6 meters)
-    ///    18 - Gigameters (1.0e+9 meters)
+    ///    15 - Dekameters (1.0e + 1 meters)
+    ///    16 - Hectometers (1.0e + 2 meters)
+    ///    17 - Megameters (1.0e + 6 meters)
+    ///    18 - Gigameters (1.0e + 9 meters)
     ///    19 - Yards (0.9144  meters, 36 inches)
     ///    20 - Printer point (1/72 inches, computer points)
     ///    21 - Printer pica (1/6 inches, (computer picas)
     ///    22 - Nautical mile (1852 meters)
-    ///    23 - Astronomical (1.4959787e+11)
-    ///    24 - Lightyears (9.46073e+15 meters)
-    ///    25 - Parsecs (3.08567758e+16)</returns>
+    ///    23 - Astronomical (1.4959787e + 11)
+    ///    24 - Lightyears (9.46073e + 15 meters)
+    ///    25 - Parsecs (3.08567758e + 16)</returns>
     static member UnitSystem() : int = //GET
             int(Doc.ModelUnitSystem)
 
@@ -646,7 +646,7 @@ module ExtensionsDocument =
     ///  2 - Millimeters (1.0e-3 meters)
     ///  3 - Centimeters (1.0e-2 meters)
     ///  4 - Meters
-    ///  5 - Kilometers (1.0e+3 meters)
+    ///  5 - Kilometers (1.0e + 3 meters)
     ///  6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
     ///  7 - Mils (2.54e-5 meters, 0.001 inches)
     ///  8 - Inches (0.0254 meters)
@@ -656,17 +656,17 @@ module ExtensionsDocument =
     ///    12 - Angstroms (1.0e-10 meters)
     ///    13 - Nanometers (1.0e-9 meters)
     ///    14 - Decimeters (1.0e-1 meters)
-    ///    15 - Dekameters (1.0e+1 meters)
-    ///    16 - Hectometers (1.0e+2 meters)
-    ///    17 - Megameters (1.0e+6 meters)
-    ///    18 - Gigameters (1.0e+9 meters)
+    ///    15 - Dekameters (1.0e + 1 meters)
+    ///    16 - Hectometers (1.0e + 2 meters)
+    ///    17 - Megameters (1.0e + 6 meters)
+    ///    18 - Gigameters (1.0e + 9 meters)
     ///    19 - Yards (0.9144  meters, 36 inches)
     ///    20 - Printer point (1/72 inches, computer points)
     ///    21 - Printer pica (1/6 inches, (computer picas)
     ///    22 - Nautical mile (1852 meters)
-    ///    23 - Astronomical (1.4959787e+11)
-    ///    24 - Lightyears (9.46073e+15 meters)
-    ///    25 - Parsecs (3.08567758e+16)</param>
+    ///    23 - Astronomical (1.4959787e + 11)
+    ///    24 - Lightyears (9.46073e + 15 meters)
+    ///    25 - Parsecs (3.08567758e + 16)</param>
     ///<param name="scale">(bool) Scale existing geometry based on the new unit system.
     ///  If not specified, any existing geometry is not scaled (False)</param>
     ///<returns>(unit) void, nothing</returns>

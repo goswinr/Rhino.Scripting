@@ -59,11 +59,11 @@ module TypeExtensionsRhino =
         
         [<Extension>] 
         ///Unitizes the vector , checks input length
-        member v.Unitized = let l = sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in (if l > 1e-9 then v * (1./l) else failwithf "v.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString)
+        member v.Unitized = let l = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in (if l > 1e-9 then v * (1./l) else failwithf "v.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString)
         
         [<Extension>] 
         ///Unitizes the vector , fails if input is of zero length
-        member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
+        member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
 
     //[<Extension>] //Error 3246
     type Vector3f with  

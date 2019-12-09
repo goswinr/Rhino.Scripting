@@ -538,11 +538,11 @@ module ExtensionsObject =
         if typesk = 0 then  
             tx <- "zero objects"
         elif typesk = 1  then      
-            for typ,k in count  do
+            for typ, k in count  do
                 tx <- sprintf " %d: %s" k typ
         else
             tx <- sprintf "%d objects of following types:" (Seq.length objectIds)
-            for typ,k  in count |> Seq.sortBy snd do
+            for typ, k  in count |> Seq.sortBy snd do
                 tx <- sprintf "%s%s    %d: %s" tx Environment.NewLine  k typ
         tx
 

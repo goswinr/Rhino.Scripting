@@ -175,7 +175,7 @@ module ExtensionsSurface =
         let du, dv = degree
         if points.Count < (pu*pv) then
             failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
-        let ns = NurbsSurface.Create(3, notNull weights , du+1, dv+1, pu, pv)
+        let ns = NurbsSurface.Create(3, notNull weights , du + 1, dv + 1, pu, pv)
         //add the points && weights
         let controlpoints = ns.Points
         let mutable index = 0
@@ -548,8 +548,8 @@ module ExtensionsSurface =
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<param name="pointD">(Point3d) Fourth corner point</param>
     ///<returns>(Guid) The identifier of the new object</returns>
-    static member AddSrfPt(pointA:Point3d ,pointB:Point3d ,pointC: Point3d ,pointD: Point3d) : Guid =
-        let surface = NurbsSurface.CreateFromCorners(pointA ,pointB ,pointC ,pointD)
+    static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
+        let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC , pointD)
         if surface|> isNull  then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
         let rc = Doc.Objects.AddSurface(surface)
         if rc = Guid.Empty then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
@@ -562,8 +562,8 @@ module ExtensionsSurface =
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<returns>(Guid) The identifier of the new object</returns>
-    static member AddSrfPt(pointA:Point3d ,pointB:Point3d ,pointC: Point3d ) : Guid =
-        let surface = NurbsSurface.CreateFromCorners(pointA ,pointB ,pointC)
+    static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
+        let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC)
         if surface|> isNull  then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
         let rc = Doc.Objects.AddSurface(surface)
         if rc = Guid.Empty then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
@@ -1247,7 +1247,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies that a point is inside a closed mesh ,surface or polysurface</summary>
+    ///<summary>Verifies that a point is inside a closed mesh , surface or polysurface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
@@ -1802,11 +1802,11 @@ module ExtensionsSurface =
                 yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
                 yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
                 yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
-                yield (0.,0.,0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-                yield (0.,0.,0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
                 }
 
 
@@ -1932,12 +1932,12 @@ module ExtensionsSurface =
             if nurb.IsPeriodic(0) then
                 degree <- nurb.Degree(0)
                 ufirst <- degree/2
-                ulast <- nurb.Points.CountU-degree+ufirst
+                ulast <- nurb.Points.CountU-degree + ufirst
             if nurb.IsClosed(1) then vlast <- nurb.Points.CountV-1
             if nurb.IsPeriodic(1) then
                 degree <- nurb.Degree(1)
                 vfirst <- degree/2
-                vlast <- nurb.Points.CountV-degree+vfirst
+                vlast <- nurb.Points.CountV-degree + vfirst
         resizeArray{
             for u = ufirst to ulast-1 do
                 for v = vfirst to  vlast-1 do
@@ -1967,12 +1967,12 @@ module ExtensionsSurface =
             if nurb.IsPeriodic(0) then
                 degree <- nurb.Degree(0)
                 ufirst <- degree/2
-                ulast <- nurb.Points.CountU-degree+ufirst
+                ulast <- nurb.Points.CountU-degree + ufirst
             if nurb.IsClosed(1) then vlast <- nurb.Points.CountV-1
             if nurb.IsPeriodic(1) then
                 degree <- nurb.Degree(1)
                 vfirst <- degree/2
-                vlast <- nurb.Points.CountV-degree+vfirst
+                vlast <- nurb.Points.CountV-degree + vfirst
         resizeArray{
             for u = ufirst to ulast-1 do
                 for v = vfirst to  vlast-1 do
@@ -1987,7 +1987,7 @@ module ExtensionsSurface =
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter to evaluate</param>
     ///<param name="derivative">(int) Number of derivatives to evaluate</param>
-    ///<returns>(Point3d * Vector3d ResizeArray) list length (derivative+1)*(derivative+2)/2 .  The elements are as follows:
+    ///<returns>(Point3d * Vector3d ResizeArray) list length (derivative + 1)*(derivative + 2)/2 .  The elements are as follows:
     ///  firts Element of tuple
     ///  [fst]      The 3-D point.
     ///  [snd]   Vectors in List:
@@ -2033,7 +2033,7 @@ module ExtensionsSurface =
     ///    -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
     ///    1: Display boundary and knot wires and one interior wire if there are no interior knots
-    ///    bigger than 1: Display boundary and knot wires and (N+1) interior wires</returns>
+    ///    bigger than 1: Display boundary and knot wires and (N + 1) interior wires</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid) : int = //GET
         match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with
         | :?  DocObjects.BrepObject as rhinoobject ->
@@ -2055,7 +2055,7 @@ module ExtensionsSurface =
     ///    -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
     ///    1: Display boundary and knot wires and one interior wire if there are no interior knots
-    ///    bigger than 1: Display boundary and knot wires and (N+1) interior wires</param>
+    ///    bigger than 1: Display boundary and knot wires and (N + 1) interior wires</param>
     ///<returns>(unit) void, nothing</returns>
     static member SurfaceIsocurveDensity(surfaceId:Guid, density:int) : unit = //SET
         match RhinoScriptSyntax.CoerceRhinoObject(surfaceId) with
@@ -2087,7 +2087,7 @@ module ExtensionsSurface =
     ///    -1: Hides the surface isocurves
     ///    0: Display boundary and knot wires
     ///    1: Display boundary and knot wires and one interior wire if there are no interior knots
-    ///    bigger than 1: Display boundary and knot wires and (N+1) interior wires</param>
+    ///    bigger than 1: Display boundary and knot wires and (N + 1) interior wires</param>
     ///<returns>(unit) void, nothing</returns>
     static member SurfaceIsocurveDensity(surfaceIds:Guid seq, density:int) : unit = //MULTISET
         for surfaceId in surfaceIds do 
@@ -2303,11 +2303,11 @@ module ExtensionsSurface =
                 yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
                 yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
                 yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
-                yield (0.,0.,0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-                yield (0.,0.,0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
                 }
 
 

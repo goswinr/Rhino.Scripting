@@ -475,7 +475,7 @@ module ExtensionsSelection =
             if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             Some objectIds
         with | _ -> 
-            match RhinoScriptSyntax.GetObjects(message,filter,group,preselect,select,objects,minimumCount,maximumCount,printCount,customFilter) with
+            match RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) with
             |Some ids ->
                 Internals.sticky.[message] <- ids
                 Some ids
@@ -551,7 +551,7 @@ module ExtensionsSelection =
                         if select && notNull obj then obj.Select(select) |> ignore
                     if printCount then 
                         rc 
-                        |> ResizeArray.map ( fun (id,_,_,_,_) -> id )
+                        |> ResizeArray.map ( fun (id, _, _, _, _) -> id )
                         |> RhinoScriptSyntax.ObjectDescription
                         |> (+) "GetObjectsEx got " 
                         |> RhinoScriptSyntax.Print

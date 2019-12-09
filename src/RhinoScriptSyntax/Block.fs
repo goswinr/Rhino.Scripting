@@ -290,7 +290,7 @@ module ExtensionsBlock =
     ///<returns>(Guid) objectId for the block that was added to the doc</returns>
     static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
-        let sc= if scale.IsZero then Vector3d(1. ,1. ,1.) else scale
+        let sc= if scale.IsZero then Vector3d(1. , 1. , 1.) else scale
         let rotationNormal0= if rotationNormal.IsZero then Vector3d.ZAxis else rotationNormal
         let move = Transform.Translation(insertionPoint.X, insertionPoint.Y, insertionPoint.Z)
         let scale = Transform.Scale(Geometry.Plane.WorldXY, sc.X, sc.Y, sc.Z)
