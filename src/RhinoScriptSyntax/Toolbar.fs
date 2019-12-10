@@ -4,6 +4,7 @@ open FsEx
 open System
 open Rhino
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx.SaveIgnore
  
 [<AutoOpen>]
 module ExtensionsToolbar =

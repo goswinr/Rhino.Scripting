@@ -9,17 +9,12 @@ open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
- 
+open FsEx.SaveIgnore 
 
 
 module ExtrasVector =
         
-    /// Any int will give a valid index for given collection size.
-    let inline saveIdx i len =
-        let rest = i % len
-        if rest >= 0 then rest // does not fail on -4 for len 4
-        else len + rest
-        
+       
     let inline scale (sc:float) (v:Vector3d) = v * sc        
     
     let inline distance (a:Point3d) (b:Point3d) = let v = a-b in sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
@@ -37,7 +32,33 @@ module ExtrasVector =
         
     let inline matchOrientation (orientToMatch:Vector3d) (v:Vector3d) =
         if orientToMatch * v < 0.0 then -v else v
-        
+    
+    ///project vector to plane
+    let projectToPlane (pl:Plane) (v:Vector3d) =
+        let pt = pl.Origin + v
+
+        let clpt = pl.ClosestPoint(pt)
+        clpt-pl.Origin
+    
+    /// project point onto line in directin of v
+    /// fails if line is missed
+    let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
+        let h = Line(pt,v)
+        let ok,tln,th = Intersect.Intersection.LineLine(ln,h)
+        if not ok then failwithf "projectToLine: project in direction faild. (paralell?)"
+        let a = ln.PointAt(tln)
+        let b = h.PointAt(th)
+        if (a-b).SquareLength > RhinoMath.ZeroTolerance then 
+            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "projectToLine"
+            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "projectToLineDirection"
+            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "projectToLineFrom"            
+            failwithf "projectToLine: missed Line by: %g " (a-b).Length
+        a
+    
+    /// snap to point if within Doc.ModelAbsoluteTolerance
+    let snapIfClose (snapTo:Point3d) (pt:Point3d) =
+        if (snapTo-pt).Length < Doc.ModelAbsoluteTolerance then snapTo else pt
+
     /// Fails on zero length vectors
     let isAngleBelow1Degree(a:Vector3d, b:Vector3d) = //(prevPt:Point3d, thisPt:Point3d, nextPt:Point3d) =                        
         //let a = prevPt - thisPt 
@@ -352,49 +373,3 @@ module ExtrasVector =
             else                         RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[normalDistance], loop)
                                         
              
-        
-        [<Extension>]
-        static member FreeFillet(a:Line, b:Line, rad:float):NurbsCurve =
-            //TODO verify that both lines lie in the same or in paralell planes
-            let va = RhinoScriptSyntax.VectorUnitize(a.To-a.From)
-            let vb = RhinoScriptSyntax.VectorUnitize(b.To-b.From)
-            let dot = va*vb
-            if abs(dot) > 0.999 then
-                failwithf "FreeFillet: lines colinear"
-            let alphaD = Math.Acos(dot)
-            let alpha = alphaD*0.5
-            let beta  = Math.PI*0.5 - alpha
-            let trim = tan(beta) * rad
-            let pa = a.From + va*trim
-            let pb = b.From + vb*trim
-            let mutable m  = (a.From + b.From)*0.5
-            
-            if alphaD > Math.PI * 0.49999 then // bigger  than 90 degrees
-                let midw = Math.Sin(alpha)
-                let knots= [| 0. ; 0. ; 1. ; 1.|]
-                let weights = [|1.; midw; 1.|]
-                let pts = [| pa; m; pb |]
-                //RhinoScriptSyntax.AddPolyline(pts)
-                RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights)
-            
-            else // smaller than 90 degrees, 2 arcs
-                let mv = RhinoScriptSyntax.VectorUnitize(va + vb)
-                let arcmid = mv * (Math.Sqrt(trim*trim + rad*rad) - rad)
-                let betaH = beta*0.5
-                let trim2 = trim - rad * tan(betaH)
-                let ma, mb =
-                    if false then //stay in plane ?????????
-                        let rel = trim2/trim
-                        m + (pa-m)*rel ,
-                        m + (pb-m)*rel
-                    else // making S curve, this would make a jumpe at 90 && bigger wher only 3 points are needed ???
-                        a.From + va *trim2 ,
-                        b.From + vb *trim2
-                let gamma = Math.PI*0.5 - betaH
-                let midw= sin(gamma)
-                let knots= [| 0. ; 0. ; 1. ; 1. ; 2. ; 2.|]
-                let weights = [|1. ; midw ; 1. ; midw ; 1.|]
-                m  <- m + arcmid
-                let pts = [|pa; ma; m; mb; pb|]
-                //RhinoScriptSyntax.AddPolyline(pts)
-                RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights)

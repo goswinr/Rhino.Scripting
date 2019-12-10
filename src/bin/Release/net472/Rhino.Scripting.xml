@@ -256,6 +256,11 @@ This last or stop value will NOT be included in range as per python semantics, t
  Don&apos;t create an instance, use the instance in RhinoScriptSyntax.Filter
 </summary>
 </member>
+<member name="M:Rhino.Scripting.TypeExtensionsRhino.Line.get_Mid(Rhino.Geometry.Line)">
+<summary>
+Middle point of line
+</summary>
+</member>
 <member name="M:Rhino.Scripting.TypeExtensionsRhino.Line.get_ToNiceString(Rhino.Geometry.Line)">
 <summary>
 Like the ToString function but with appropiate precision formating
@@ -1319,7 +1324,7 @@ Join tolerance. If omitted, 2.1 * document absolute
 <summary>Verifies an object is a linear curve</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>    ///
 <param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
-<param name="segmentIndex">(int) Optional,The curve segment index if `curveId` identifies a polycurve</param>
+<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
 <returns>(bool) True or False indicating success or failure</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsCurve.RhinoScriptSyntax.IsCurveInPlane.Static(System.Guid,Rhino.Geometry.Plane,System.Double)">
@@ -1640,7 +1645,7 @@ Angle tolerance in degrees. The angle
 <summary>Returns the average unitized direction of a curve object between start and end point, 
 Optionally allows non linear curves too.</summary>
 <param name="curveId">(Guid) Identifier of the curve object</param>
-<param name="allowNonLinear">(bool) Optional, allow non linear curves true </param>
+<param name="allowNonLinear">(bool) Optional, allow non linear curves, Default Value <c>False</c> </param>
 <param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
 <returns>(Vector3d) The direction of the curve</returns>
 </member>
@@ -2605,7 +2610,7 @@ Return the document's model units (True) or the document's page units (False). T
   2 - Millimeters (1.0e-3 meters)
   3 - Centimeters (1.0e-2 meters)
   4 - Meters
-  5 - Kilometers (1.0e+3 meters)
+  5 - Kilometers (1.0e + 3 meters)
   6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
   7 - Mils (2.54e-5 meters, 0.001 inches)
   8 - Inches (0.0254 meters)
@@ -2615,17 +2620,17 @@ Return the document's model units (True) or the document's page units (False). T
     12 - Angstroms (1.0e-10 meters)
     13 - Nanometers (1.0e-9 meters)
     14 - Decimeters (1.0e-1 meters)
-    15 - Dekameters (1.0e+1 meters)
-    16 - Hectometers (1.0e+2 meters)
-    17 - Megameters (1.0e+6 meters)
-    18 - Gigameters (1.0e+9 meters)
+    15 - Dekameters (1.0e + 1 meters)
+    16 - Hectometers (1.0e + 2 meters)
+    17 - Megameters (1.0e + 6 meters)
+    18 - Gigameters (1.0e + 9 meters)
     19 - Yards (0.9144  meters, 36 inches)
     20 - Printer point (1/72 inches, computer points)
     21 - Printer pica (1/6 inches, (computer picas)
     22 - Nautical mile (1852 meters)
-    23 - Astronomical (1.4959787e+11)
-    24 - Lightyears (9.46073e+15 meters)
-    25 - Parsecs (3.08567758e+16)</param>
+    23 - Astronomical (1.4959787e + 11)
+    24 - Lightyears (9.46073e + 15 meters)
+    25 - Parsecs (3.08567758e + 16)</param>
 <param name="scale">(bool) Scale existing geometry based on the new unit system.
   If not specified, any existing geometry is not scaled (False)</param>
 <returns>(unit) void, nothing</returns>
@@ -2639,7 +2644,7 @@ Return the document's model units (True) or the document's page units (False). T
   2 - Millimeters (1.0e-3 meters)
   3 - Centimeters (1.0e-2 meters)
   4 - Meters
-  5 - Kilometers (1.0e+3 meters)
+  5 - Kilometers (1.0e + 3 meters)
   6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
   7 - Mils (2.54e-5 meters, 0.001 inches)
   8 - Inches (0.0254 meters)
@@ -2649,17 +2654,17 @@ Return the document's model units (True) or the document's page units (False). T
     12 - Angstroms (1.0e-10 meters)
     13 - Nanometers (1.0e-9 meters)
     14 - Decimeters (1.0e-1 meters)
-    15 - Dekameters (1.0e+1 meters)
-    16 - Hectometers (1.0e+2 meters)
-    17 - Megameters (1.0e+6 meters)
-    18 - Gigameters (1.0e+9 meters)
+    15 - Dekameters (1.0e + 1 meters)
+    16 - Hectometers (1.0e + 2 meters)
+    17 - Megameters (1.0e + 6 meters)
+    18 - Gigameters (1.0e + 9 meters)
     19 - Yards (0.9144  meters, 36 inches)
     20 - Printer point (1/72 inches, computer points)
     21 - Printer pica (1/6 inches, (computer picas)
     22 - Nautical mile (1852 meters)
-    23 - Astronomical (1.4959787e+11)
-    24 - Lightyears (9.46073e+15 meters)
-    25 - Parsecs (3.08567758e+16)</returns>
+    23 - Astronomical (1.4959787e + 11)
+    24 - Lightyears (9.46073e + 15 meters)
+    25 - Parsecs (3.08567758e + 16)</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.UnitScale.Static(System.Int32,System.Int32)">
 <summary>Return the scale factor for changing between unit systems</summary>
@@ -2669,7 +2674,7 @@ Return the document's model units (True) or the document's page units (False). T
   2 - Millimeters (1.0e-3 meters)
   3 - Centimeters (1.0e-2 meters)
   4 - Meters
-  5 - Kilometers (1.0e+3 meters)
+  5 - Kilometers (1.0e + 3 meters)
   6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
   7 - Mils (2.54e-5 meters, 0.001 inches)
   8 - Inches (0.0254 meters)
@@ -2679,17 +2684,17 @@ Return the document's model units (True) or the document's page units (False). T
     12 - Angstroms (1.0e-10 meters)
     13 - Nanometers (1.0e-9 meters)
     14 - Decimeters (1.0e-1 meters)
-    15 - Dekameters (1.0e+1 meters)
-    16 - Hectometers (1.0e+2 meters)
-    17 - Megameters (1.0e+6 meters)
-    18 - Gigameters (1.0e+9 meters)
+    15 - Dekameters (1.0e + 1 meters)
+    16 - Hectometers (1.0e + 2 meters)
+    17 - Megameters (1.0e + 6 meters)
+    18 - Gigameters (1.0e + 9 meters)
     19 - Yards (0.9144  meters, 36 inches)
     20 - Printer point (1/72 inches, computer points)
     21 - Printer pica (1/6 inches, (computer picas)
     22 - Nautical mile (1852 meters)
-    23 - Astronomical (1.4959787e+11)
-    24 - Lightyears (9.46073e+15 meters)
-    25 - Parsecs (3.08567758e+16)</param>
+    23 - Astronomical (1.4959787e + 11)
+    24 - Lightyears (9.46073e + 15 meters)
+    25 - Parsecs (3.08567758e + 16)</param>
 <param name="fromSystem">(int) The unit system to convert from (see above)</param>
 <returns>(float) scale factor for changing between unit systems</returns>
 </member>
@@ -5533,7 +5538,7 @@ Copy the objects</param>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsPlane.RhinoScriptSyntax.PlaneEquation.Static(Rhino.Geometry.Plane)">
 <summary>Returns the equation of a plane as a tuple of four numbers. The standard
-  equation of a plane with a non-zero vector is Ax+By+Cz+D = 0</summary>
+  equation of a plane with a non-zero vector is Ax + By + Cz + D = 0</summary>
 <param name="plane">(Plane) The plane to deconstruct</param>
 <returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D)</returns>
 </member>
@@ -6022,7 +6027,7 @@ Select the picked object</param>
 A prompt message</param>
 <param name="preselect">(bool) Optional, Default Value: <c>true</c>
 Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
-<returns>(Point3d ResizeArray) Option of LIst of 3d points</returns>
+<returns>(Point3d ResizeArray) Option of List of 3d points</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectsEx.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid})">
 <summary>Prompts user to pick, or select one or more objects</summary>
@@ -6051,35 +6056,28 @@ Select the picked objects. If False, the objects that are
   [n][3]  selection point
   [n][4]  name of the view selection was made</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectAndRemember.Static(System.String,System.Int32,System.Boolean,System.Boolean,Rhino.Input.Custom.GetObjectGeometryFilter)">
+<summary>Returns the same object as in the last user interaction with the same prompt message
+ If none found, Prompts user to pick one object and remembers it.</summary>
+<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber object</param>
+<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
+  that can be selected. Object types can be added together to filter
+  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+Allow for the selection of pre-selected objects</param>
+<param name="select">(bool) Optional, Default Value: <c>false</c>
+Select the picked objects.  If False, the objects that are
+  picked are not selected</param>
+<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
+<returns>(Guid) Option of a identifier of the picked object</returns>
+</member>
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObjectsAndRemember.Static(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.Guid},System.Int32,System.Int32,System.Boolean,Rhino.Input.Custom.GetObjectGeometryFilter)">
 <summary>Returns the same objects as in the last user interaction with the same prompt message
- If none found Prompts user to pick or select one or more objects and remembers them.</summary>
-<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
-A prompt or message</param>
-<param name="filter">(int) Optional, Default Value: <c>0</c>
-The type(s) of geometry (points, curves, surfaces, meshes,...)
+ If none found, Prompts user to pick or select one or more objects and remembers them.</summary>
+<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber objects</param>
+<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
   that can be selected. Object types can be added together to filter
-  several different kinds of geometry. use the filter class to get values
-    Value         Description
-    0             All objects (default)
-    1             Point
-    2             Point cloud
-    4             Curve
-    8             Surface or single-face brep
-    16            Polysurface or multiple-face
-    32            Mesh
-    256           Light
-    512           Annotation
-    4096          Instance or block reference
-    8192          Text dot object
-    16384         Grip object
-    32768         Detail
-    65536         Hatch
-    131072        Morph control
-    134217728     Cage
-    268435456     Phantom
-    536870912     Clipping plane
-    1073741824    Extrusion</param>
+  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
 <param name="group">(bool) Optional, Default Value: <c>true</c>
 Honor object grouping.  If omitted and the user picks a group,
   the entire group will be picked (True). Note, if filter is set to a
@@ -6102,30 +6100,9 @@ Maximum count of objects allowed to be selected</param>
 <summary>Prompts user to pick or select one or more objects</summary>
 <param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
 A prompt or message</param>
-<param name="filter">(int) Optional, Default Value: <c>0</c>
-The type(s) of geometry (points, curves, surfaces, meshes,...)
+<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
   that can be selected. Object types can be added together to filter
-  several different kinds of geometry. use the filter class to get values
-    Value         Description
-    0             All objects (default)
-    1             Point
-    2             Point cloud
-    4             Curve
-    8             Surface or single-face brep
-    16            Polysurface or multiple-face
-    32            Mesh
-    256           Light
-    512           Annotation
-    4096          Instance or block reference
-    8192          Text dot object
-    16384         Grip object
-    32768         Detail
-    65536         Hatch
-    131072        Morph control
-    134217728     Cage
-    268435456     Phantom
-    536870912     Clipping plane
-    1073741824    Extrusion</param>
+  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
 <param name="group">(bool) Optional, Default Value: <c>true</c>
 Honor object grouping.  If omitted and the user picks a group,
   the entire group will be picked (True). Note, if filter is set to a
@@ -6172,8 +6149,7 @@ Select the picked objects.  If False, the objects that are
 <member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.GetObject.Static(System.String,System.Int32,System.Boolean,System.Boolean,Rhino.Input.Custom.GetObjectGeometryFilter,System.Boolean)">
 <summary>Prompts user to pick, or select, a single object</summary>
 <param name="message">(string) Optional, A prompt or message</param>
-<param name="filter">(int) Optional, Default Value: <c>0</c>
-The type(s) of geometry (points, curves, surfaces, meshes,...)
+<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
   that can be selected. Object types can be added together to filter
   several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
 <param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -6182,7 +6158,7 @@ Allow for the selection of pre-selected objects</param>
 Select the picked objects.  If False, the objects that are
   picked are not selected</param>
 <param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
-<param name="subobjects">(bool) Optional, Default Value: <c>false</c>
+<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
 If True, subobjects can be selected. When this is the
   case, for tracking  of the subobject go via the Object Ref</param>
 <returns>(Guid option) Identifier of the picked object</returns>
@@ -6368,8 +6344,8 @@ If True all surface edit points are returned. If False,
 <returns>(int * int) THe number of control points in UV direction. (U count, V count)</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceParameter.Static(System.Guid,System.Tuple{System.Double,System.Double})">
-<summary>Converts normalized surface parameter to a surface parameter; or
-  within the surface's domain</summary>
+<summary>Converts normalized surface parameter to a surface domain specific (regular) parameter.
+ or a paranter within the surface's domain</summary>
 <param name="surfaceId">(Guid) The surface's identifier</param>
 <param name="parameter">(float * float) The normalized parameter to convert</param>
 <returns>(float * float) surface parameter on success</returns>
@@ -6380,6 +6356,11 @@ If True all surface edit points are returned. If False,
 <param name="surfaceId">(Guid) The surface's identifier</param>
 <param name="parameter">(float * float) The surface parameter to convert</param>
 <returns>(float * float) normalized surface parameter</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceNormal.Static(System.Guid)">
+<summary>Returns 3D vector that is the normal to a surface at mid parameter</summary>
+<param name="surfaceId">(Guid) The surface's identifier</param>
+<returns>(Vector3d) Normal vector on success</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceNormal.Static(System.Guid,System.Tuple{System.Double,System.Double})">
 <summary>Returns 3D vector that is the normal to a surface at a parameter</summary>
@@ -6412,7 +6393,7 @@ If True all surface edit points are returned. If False,
     -1: Hides the surface isocurves
     0: Display boundary and knot wires
     1: Display boundary and knot wires and one interior wire if there are no interior knots
-    bigger than 1: Display boundary and knot wires and (N+1) interior wires</param>
+    bigger than 1: Display boundary and knot wires and (N + 1) interior wires</param>
 <returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceIsocurveDensity.Static(System.Guid,System.Int32)">
@@ -6425,7 +6406,7 @@ If True all surface edit points are returned. If False,
     -1: Hides the surface isocurves
     0: Display boundary and knot wires
     1: Display boundary and knot wires and one interior wire if there are no interior knots
-    bigger than 1: Display boundary and knot wires and (N+1) interior wires</param>
+    bigger than 1: Display boundary and knot wires and (N + 1) interior wires</param>
 <returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceIsocurveDensity.Static(System.Guid)">
@@ -6438,7 +6419,7 @@ If True all surface edit points are returned. If False,
     -1: Hides the surface isocurves
     0: Display boundary and knot wires
     1: Display boundary and knot wires and one interior wire if there are no interior knots
-    bigger than 1: Display boundary and knot wires and (N+1) interior wires</returns>
+    bigger than 1: Display boundary and knot wires and (N + 1) interior wires</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.SurfaceFrame.Static(System.Guid,System.Tuple{System.Double,System.Double})">
 <summary>Returns a plane based on the normal, u, and v directions at a surface
@@ -6452,7 +6433,7 @@ If True all surface edit points are returned. If False,
 <param name="surfaceId">(Guid) The surface's identifier</param>
 <param name="parameter">(float * float) U, v parameter to evaluate</param>
 <param name="derivative">(int) Number of derivatives to evaluate</param>
-<returns>(Point3d * Vector3d ResizeArray) list length (derivative+1)*(derivative+2)/2 .  The elements are as follows:
+<returns>(Point3d * Vector3d ResizeArray) list length (derivative + 1)*(derivative + 2)/2 .  The elements are as follows:
   firts Element of tuple
   [fst]      The 3-D point.
   [snd]   Vectors in List:
@@ -6749,7 +6730,7 @@ Tolerance used when checked. If omitted, the current absolute
 <returns>(bool) True , otherwise False</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsSurface.RhinoScriptSyntax.IsPointInSurface.Static(System.Guid,Rhino.Geometry.Point3d,System.Boolean,System.Double)">
-<summary>Verifies that a point is inside a closed mesh ,surface or polysurface</summary>
+<summary>Verifies that a point is inside a closed mesh , surface or polysurface</summary>
 <param name="objectId">(Guid) The object's identifier</param>
 <param name="point">(Point3d) The test, or sampling point</param>
 <param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
@@ -8168,7 +8149,7 @@ Minimum distance between points. Points that fall within this tolerance
 <member name="M:Rhino.Scripting.ExtensionsUtility.RhinoScriptSyntax.CullDuplicatePoints.Static(System.Collections.Generic.IEnumerable{Rhino.Geometry.Point3d},System.Double)">
 <summary>Removes duplicates from a list of 3D points</summary>
 <param name="points">(Point3d seq) A list of 3D points</param>
-<param name="tolerance">(float) Optional,Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
+<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
  Points within this tolerance will be discarded.</param>
 <returns>(Point3d array) of 3D points with duplicates removed</returns>
 </member>
@@ -8741,6 +8722,28 @@ Type of initial view projection for the detail
   7 = perspective view</param>
 <returns>(Guid) identifier of the newly created detail on success</returns>
 </member>
+<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.draw.Static(System.String,Rhino.Geometry.GeometryBase)">
+<summary>Draws any Geometry object to a given or current layer</summary>
+<param name="layer">(string) Name of an layer or empty string for current layer</param>
+<param name="geo">(GeometryBase) Geometry</param>    
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.setLayer.Static(System.String,System.Guid)">
+<summary>Modifies the layer of an object, creates layer if not yet existing</summary>
+<param name="layer">(string) Name of layer or empty string for current layer</param>
+<param name="objectId">(Guid) The identifier of the object</param>    
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.printFull``1(``0)">
+<summary>
+RhinoScriptSyntax.PrintFull (shadowing in printFull from FsEx)
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.print``1(``0)">
+<summary>
+RhinoScriptSyntax.Print (shadowing in print from FsEx)
+</summary>
+</member>
 <member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Double,System.Double,System.Boolean)">
 <summary>
 auto detects points from closed polylines and loops them
@@ -8749,7 +8752,7 @@ auto detects points from closed polylines and loops them
 <member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.OffsetPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d},System.Collections.Generic.IEnumerable{System.Double},System.Collections.Generic.IEnumerable{System.Double},System.Boolean)">
 <summary>
 Auto detects points from closed polylines and loops them
-Distance must have exact length or be singelton or empty
+Distance must have exact length, be singelton or empty seq
 </summary>
 </member>
 <member name="M:Rhino.Scripting.ExtrasVector.RhinoScriptSyntax.NormalOfPoints.Static(System.Collections.Generic.IList{Rhino.Geometry.Point3d})">
@@ -8785,9 +8788,52 @@ Unitize vector, if input vector is shorter than 1e-6 alternative vector is retur
  Fails on zero length vectors
 </summary>
 </member>
-<member name="M:Rhino.Scripting.ExtrasVector.saveIdx(System.Int32,System.Int32)">
+<member name="M:Rhino.Scripting.ExtrasVector.snapIfClose(Rhino.Geometry.Point3d,Rhino.Geometry.Point3d)">
 <summary>
- Any int will give a valid index for given collection size.
+ snap to point if within Doc.ModelAbsoluteTolerance
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.projectToLine(Rhino.Geometry.Line,Rhino.Geometry.Vector3d,Rhino.Geometry.Point3d)">
+<summary>
+ project point onto line in directin of v
+ fails if line is missed
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasVector.projectToPlane(Rhino.Geometry.Plane,Rhino.Geometry.Vector3d)">
+<summary>
+project vector to plane
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasLine.intersect(Rhino.Geometry.Line,Rhino.Geometry.Line)">
+<summary>
+Fails if lines are skew or paralell
+Considers Lines infinte
+Retuns point on lnB
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasLine.translate(Rhino.Geometry.Vector3d,Rhino.Geometry.Line)">
+<summary>
+ same as move
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasLine.move(Rhino.Geometry.Vector3d,Rhino.Geometry.Line)">
+<summary>
+ same as translate
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasLine.mid(Rhino.Geometry.Line)">
+<summary>
+ Mid point
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasLine.flip(Rhino.Geometry.Line)">
+<summary>
+ same as reverse
+</summary>
+</member>
+<member name="M:Rhino.Scripting.ExtrasLine.reverse(Rhino.Geometry.Line)">
+<summary>
+ same as flip
 </summary>
 </member>
 <member name="M:Rhino.Scripting.ExtrasBrep.RhinoScriptSyntax.SlotedHole.Static(Rhino.Geometry.Plane,System.Double,System.Double,System.Double)">
@@ -8798,20 +8844,21 @@ Unitize vector, if input vector is shorter than 1e-6 alternative vector is retur
 <param name="height">(float) height of sloted hole volume</param> 
 <returns>(Brep) Brep Geometry</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.setLayer.Static(System.String,System.Guid)">
-<summary>Modifies the layer of an object, creates layer if not yet existing</summary>
-<param name="layer">(string) Name of an existing layer</param>
-<param name="objectId">(Guid) The identifier of the object</param>    
-<returns>(unit) void, nothing</returns>
+<member name="M:Rhino.Scripting.ExtrasBrep.freeFillet(System.Boolean,System.Double,Rhino.Geometry.Vector3d,Rhino.Geometry.Line,Rhino.Geometry.Line)">
+<summary>Creates a fillet curve between two lines, 
+the fillet might be an ellipse or free form 
+but it always lies on the surface of a cylinder with the given direction and radius </summary>
+<param name="makeSCurve">(bool)only relevant if curves are skew: make S-curve if true or kink if false</param>
+<param name="radius">(float) radius of filleting zylinder</param>
+<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  planes to fillet<e</param>
+<param name="lineA">(Line) First line to fillet, must not be parallel to direction </param> 
+<param name="lineB">(Line) Second line to fillet, must not be parallel to direction or first line </param> 
+<returns>(NurbsCurve)Fillet curve Geometry</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtrasCurried.printFull``1(``0)">
+<member name="M:Rhino.Scripting.ExtrasBrep.getTrimForFillet(System.Double,Rhino.Geometry.Vector3d,Rhino.Geometry.Line,Rhino.Geometry.Line)">
 <summary>
-RhinoScriptSyntax.PrintFull
-</summary>
-</member>
-<member name="M:Rhino.Scripting.ExtrasCurried.print``1(``0)">
-<summary>
-RhinoScriptSyntax.Print
+Returns the needed trimming of two planar surfaces in order to fit a fillet of given radius.
+the Lines can be anywhere on plane ( except paralel to axis)
 </summary>
 </member>
 </members>

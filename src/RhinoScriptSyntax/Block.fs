@@ -7,6 +7,7 @@ open FsEx.Util
 open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx
+open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module ExtensionsBlock =

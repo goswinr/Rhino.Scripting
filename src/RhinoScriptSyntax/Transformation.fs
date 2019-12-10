@@ -6,7 +6,9 @@ open Rhino
 open Rhino.Geometry
 open FsEx.UtilMath
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
- 
+open FsEx.SaveIgnore
+
+
 [<AutoOpen>]
 module ExtensionsTransformation =
 

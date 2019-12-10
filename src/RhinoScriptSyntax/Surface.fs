@@ -6,9 +6,10 @@ open Rhino
 open Rhino.Geometry
 open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
-open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
- 
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ? 
 open System.Collections.Generic
+open FsEx.SaveIgnore
+
 
 [<AutoOpen>]
 module ExtensionsSurface =
@@ -1619,9 +1620,9 @@ module ExtensionsSurface =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         if brep.Faces.Count <> 1 then failwithf "Rhino.Scripting: ReverseSurface failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
         let face = brep.Faces.[0]
-        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore
-        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore
-        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore
+        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignoreObj
+        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignoreObj
+        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignoreObj
         Doc.Objects.Replace(surfaceId, brep)|> ignore
         Doc.Views.Redraw()
 
@@ -2146,6 +2147,16 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         surface.NormalAt(uvParameter|> fst, uvParameter|> snd)
 
+    [<Extension>]
+    ///<summary>Returns 3D vector that is the normal to a surface at mid parameter</summary>
+    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<returns>(Vector3d) Normal vector on success</returns>
+    static member SurfaceNormal(surfaceId:Guid) : Vector3d =
+        let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
+        let u = surface.Domain(0).ParameterAt(0.5)
+        let v = surface.Domain(1).ParameterAt(0.5)
+        surface.NormalAt(u,v)        
+
 
     [<Extension>]
     ///<summary>Converts surface parameter to a normalized surface parameter; one that
@@ -2167,8 +2178,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Converts normalized surface parameter to a surface parameter; or
-    ///  within the surface's domain</summary>
+    ///<summary>Converts normalized surface parameter to a surface domain specific (regular) parameter.
+    /// or a paranter within the surface's domain</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
     ///<param name="parameter">(float * float) The normalized parameter to convert</param>
     ///<returns>(float * float) surface parameter on success</returns>

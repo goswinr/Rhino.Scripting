@@ -7,6 +7,8 @@ open Rhino.Geometry
 open FsEx.Util
 open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx.SaveIgnore
+
  
 [<AutoOpen>]
 module ExtensionsSelection =
@@ -551,12 +553,12 @@ module ExtensionsSelection =
     ///A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
-    ///<returns>(Point3d ResizeArray) Option of LIst of 3d points</returns>
+    ///<returns>(Point3d ResizeArray) Option of List of 3d points</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{
             let! ids = RhinoScriptSyntax.GetObjects(message, Internals.filter.Point, preselect= preselect)
-            let rc = ResizeArray()
+            let rc = ResizeArray<Point3d>()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
                 rc.Add(pt)

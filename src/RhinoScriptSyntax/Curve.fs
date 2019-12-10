@@ -9,6 +9,7 @@ open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open Microsoft.FSharp.Core.LanguagePrimitives
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module ExtensionsCurve =
@@ -342,7 +343,10 @@ module ExtensionsCurve =
         let pl = Polyline(points)
         //pl.DeleteShortSegments(Doc.ModelAbsoluteTolerance) |>ignore
         let rc = Doc.Objects.AddPolyline(pl)
-        if rc = Guid.Empty then failwithf "Unable to add polyline to document.  points:'%A' " points
+        if rc = Guid.Empty then 
+            for i,pt in Seq.indexed(points) do
+                Doc.Objects.AddTextDot(string i, pt) |> Debug.setLayer "AddPolyline failed"
+            failwithf "Unable to add polyline to document.  points:'%A' " points
         Doc.Views.Redraw()
         rc
     
@@ -361,7 +365,10 @@ module ExtensionsCurve =
             pl.Add pl.First
         //pl.DeleteShortSegments(Doc.ModelAbsoluteTolerance) |>ignore
         let rc = Doc.Objects.AddPolyline(pl)
-        if rc = Guid.Empty then failwithf "Unable to add closed polyline to document.  points:'%A' " points
+        if rc = Guid.Empty then 
+            for i,pt in Seq.indexed(points) do
+                Doc.Objects.AddTextDot(string i, pt) |> Debug.setLayer "AddPolylineClosed failed"            
+            failwithf "Unable to add closed polyline to document.  points:'%A' " points
         Doc.Views.Redraw()
         rc
 
@@ -1247,12 +1254,13 @@ module ExtensionsCurve =
     ///<summary>Returns the average unitized direction of a curve object between start and end point, 
     ///Optionally allows non linear curves too.</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
-    ///<param name="allowNonLinear">(bool) Optional, allow non linear curves true </param>
+    ///<param name="allowNonLinear">(bool) Optional, allow non linear curves, Default Value <c>False</c> </param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Vector3d) The direction of the curve</returns>
     static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
+            if curve.IsClosed || curve.IsClosable(Doc.ModelAbsoluteTolerance) then failwithf "CurveDirection failed on closed or closable curve.  curveId:'%A' allowNonLinear '%A' segmentIndex:'%A'" curveId allowNonLinear segmentIndex
             let v = curve.PointAtEnd - curve.PointAtStart
             v.Unitized
         else

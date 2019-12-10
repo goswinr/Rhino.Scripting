@@ -9,6 +9,7 @@ open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
 open FsEx
+open FsEx.SaveIgnore
 
 /// An Integer Enum of Object types to be use in object selection functions
 /// Don't create an instance, use the instance in RhinoScriptSyntax.Filter
@@ -724,3 +725,40 @@ type RhinoScriptSyntax private () = // no constructor?
                     else Some crv
                 | :? Curve as c -> Some c
                 | _ -> None
+
+module internal Debug =   
+    
+    let setLayer( layer:string) (objectId:Guid) : unit =             
+        let layerIndex =
+            if layer="" then 
+                Doc.Layers.CurrentLayerIndex
+            else
+                let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+                if i <> RhinoMath.UnsetIntIndex then 
+                    i
+                else
+                    let names = layer.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
+                    let mutable lastparentindex =  -1
+                    let mutable lastparent      =  null : DocObjects.Layer
+                    for idx, name in Seq.indexed(names) do
+                        let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                        if idx > 0 && lastparentindex <> -1 then
+                            lastparent <- Doc.Layers.[lastparentindex]
+                        if notNull lastparent then
+                            layer.ParentLayerId <- lastparent.Id
+                        layer.Name <- name
+                        layer.Color <- Color.randomColorForRhino()
+                        layer.IsVisible <- true
+                        layer.IsLocked <- false
+                        lastparentindex <- Doc.Layers.Add(layer)                        
+                        if lastparentindex = -1 then
+                            let mutable fullpath = layer.Name
+                            if notNull lastparent then
+                                fullpath <- lastparent.FullPath + "::" + fullpath
+                            lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
+                    lastparentindex
+
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)            
+        obj.Attributes.LayerIndex <- layerIndex
+        if not <| obj.CommitChanges() then failwithf "setLayer failed for '%A' and '%A'"  layer objectId
+        Doc.Views.Redraw()

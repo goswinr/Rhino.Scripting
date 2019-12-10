@@ -8,6 +8,8 @@ open FsEx.UtilMath
 open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx.SaveIgnore
+
  
 
 [<AutoOpen>]
@@ -707,8 +709,7 @@ module ExtensionsUserinterface =
                         if drawLines then
                             gp.DynamicDraw.Add (fun args  -> if rc.Count > 1 then
                                                                 let c = ApplicationSettings.AppearanceSettings.FeedbackColor
-                                                                args.Display.DrawPolyline(rc, c)
-                                                                |>  ignore)
+                                                                args.Display.DrawPolyline(rc, c))
                         let mutable cont = true
                         while cont do
                             if maxPoints <> 0 && currentpoint>=maxPoints then cont <- false

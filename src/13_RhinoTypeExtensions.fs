@@ -5,6 +5,7 @@ open Rhino.Geometry
 open System.Runtime.CompilerServices
 open FsEx
 open FsEx.NiceString
+open FsEx.SaveIgnore
 
 
 
@@ -86,12 +87,11 @@ module TypeExtensionsRhino =
         [<Extension>]     
         ///Like the ToString function but with appropiate precision formating
         member ln.ToNiceString = 
-                sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceString.floatToString  ln.From.X) (NiceString.floatToString  ln.From.Y) (NiceString.floatToString  ln.From.Z) (NiceString.floatToString  ln.To.X) (NiceString.floatToString  ln.To.Y) (NiceString.floatToString  ln.To.Z)
+            sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceString.floatToString  ln.From.X) (NiceString.floatToString  ln.From.Y) (NiceString.floatToString  ln.From.Z) (NiceString.floatToString  ln.To.X) (NiceString.floatToString  ln.To.Y) (NiceString.floatToString  ln.To.Z)
     
         [<Extension>]     
         ///Middle point of line
-        member ln.Mid = 
-                (ln.From + ln.To)*0.5
+        member ln.Mid =  (ln.From + ln.To) * 0.5
 
     let internal formatRhinoObject (o:obj)  = 
         match o with

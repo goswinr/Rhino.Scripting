@@ -6,6 +6,7 @@ open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx.SaveIgnore
  
 [<AutoOpen>]
 module ExtensionsUserdata =
@@ -143,7 +144,7 @@ module ExtensionsUserdata =
     ///<param name="value">(string) The string value</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
-        Doc.Strings.SetString(section, entry, value) |> ignore
+        Doc.Strings.SetString(section, entry, value) |> ignoreObj
 
 
     [<Extension>]
@@ -153,7 +154,7 @@ module ExtensionsUserdata =
     ///  specified by key will be deleted</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : unit =
-        Doc.Strings.SetString(key, value) |> ignore
+        Doc.Strings.SetString(key, value) |> ignoreObj
         //TODO check null case
 
 

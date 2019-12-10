@@ -6,6 +6,8 @@ open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx.SaveIgnore
+
   
 [<AutoOpen>]
 module ExtensionsGrips =
@@ -179,7 +181,7 @@ module ExtensionsGrips =
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         grip.CurrentLocation <-  point
-        Doc.Objects.GripUpdate(rhobj, true)|> ignore
+        Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
         Doc.Views.Redraw()
 
 
@@ -218,7 +220,7 @@ module ExtensionsGrips =
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
-            Doc.Objects.GripUpdate(rhobj, true)|> ignore
+            Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
             Doc.Views.Redraw()
 
 
