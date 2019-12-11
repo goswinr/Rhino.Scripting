@@ -126,6 +126,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(null:string)>]message:string) : float option=
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let point = if point = Point3d.Origin then Point3d.Unset else point
             let referencepoint = if referencePoint = Point3d.Origin then Point3d.Unset else referencePoint
             let defaultangle = toRadians(defaultValAngleDegrees)
@@ -133,6 +134,7 @@ module ExtensionsUserinterface =
             return
                 if rc = Commands.Result.Success then Some(toDegrees(angle))
                 else None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -149,6 +151,7 @@ module ExtensionsUserinterface =
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<ResizeArray<bool>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             use go = new Input.Custom.GetOption()
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
@@ -171,6 +174,7 @@ module ExtensionsUserinterface =
                     None
                 else
                     Some (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             return res
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -196,6 +200,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(null:string)>]prompt3:string) : (Point3d []) option=
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let basePoint = if basePoint <> Point3d.Origin then basePoint else  Point3d.Unset
             let m =
                 match mode with
@@ -211,6 +216,7 @@ module ExtensionsUserinterface =
             return
                 if rc = Commands.Result.Success then Some ((!box).GetCorners())
                 else None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -221,11 +227,13 @@ module ExtensionsUserinterface =
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let zero = Drawing.Color()
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
             return
                 if rc then Some (!col) else None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
         } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -239,6 +247,7 @@ module ExtensionsUserinterface =
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()  //or skip ?
             let view = Doc.Views.ActiveView
             let screenpt = UI.MouseCursor.Location
             let clientpt = view.ScreenToClient(screenpt)
@@ -246,6 +255,7 @@ module ExtensionsUserinterface =
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
             worldpt.Transform(xf)
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Show() //or skip ?
             return worldpt, screenpt, viewport.Id, clientpt
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -265,6 +275,7 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let pt1 =
                 if firstPt = Point3d.Origin then
                     let gp1 = new Input.Custom.GetPoint()
@@ -300,7 +311,8 @@ module ExtensionsUserinterface =
                         gp2.Dispose()
                         None
                 | _ -> None
-                } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
     [<Extension>]
@@ -320,6 +332,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(false)>]select:bool) : option<ResizeArray<Guid*Guid*Point3d>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if maxCount > 0 && minCount > maxCount then failwithf "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
@@ -345,6 +358,7 @@ module ExtensionsUserinterface =
                             rhobj.Select(true)|> ignore
                         Doc.Views.Redraw()
                     Some r
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -361,6 +375,7 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF(2147482999)>]maximum:int) : int option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             use gi = new Input.Custom.GetInteger()
             if notNull message then gi.SetCommandPrompt(message)
             if number  <> 2147482999 then gi.SetDefaultInteger(number)
@@ -374,6 +389,7 @@ module ExtensionsUserinterface =
                     let rc = gi.Number()
                     gi.Dispose()
                     Some rc
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -454,6 +470,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(null:string)>]message3:string) : option<Line> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             use gl = new Input.Custom.GetLine()
             if mode = 0 then gl.EnableAllVariations(true)
             else  gl.GetLineMode <- LanguagePrimitives.EnumOfValue( mode-1)
@@ -468,6 +485,7 @@ module ExtensionsUserinterface =
                     Some line
                 else
                     None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -513,6 +531,7 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             Doc.Objects.UnselectAll() |> ignore
             Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
@@ -528,6 +547,7 @@ module ExtensionsUserinterface =
                     let objrefs = go.Objects()
                     let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                     Some rc
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
 
 
@@ -549,6 +569,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             Doc.Objects.UnselectAll() |> ignore
             Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
@@ -563,6 +584,7 @@ module ExtensionsUserinterface =
                     let objrefs = go.Objects()
                     let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                     Some rc
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -580,6 +602,7 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(false)>]inPlane:bool) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             use gp = new Input.Custom.GetPoint()
             if notNull message then gp.SetCommandPrompt(message)
             if basePoint <> Point3d.Origin then
@@ -594,6 +617,7 @@ module ExtensionsUserinterface =
                 else
                     let pt = gp.Point()
                     Some pt
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -607,6 +631,7 @@ module ExtensionsUserinterface =
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve":string)>]message:string) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
@@ -618,6 +643,7 @@ module ExtensionsUserinterface =
                 else
                     let pt = gp.Point()
                     Some pt
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -630,10 +656,12 @@ module ExtensionsUserinterface =
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             return
                 if cmdrc = Commands.Result.Success then Some point
                 else None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -647,6 +675,7 @@ module ExtensionsUserinterface =
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface":string)>]message:string) : Point3d option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
@@ -666,6 +695,7 @@ module ExtensionsUserinterface =
                 else
                     let pt = gp.Point()
                     Some pt
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -689,6 +719,7 @@ module ExtensionsUserinterface =
 
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             use gp = new Input.Custom.GetPoint()
             if notNull message1 then gp.SetCommandPrompt(message1)
             gp.EnableDrawLineFromPoint( drawLines )
@@ -734,6 +765,7 @@ module ExtensionsUserinterface =
                         Some rc
                     else
                         None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
 
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
@@ -767,6 +799,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(0)>]max:int) : option<Polyline> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let gpl = new Input.Custom.GetPolyline()
             if notNull message1 then gpl.FirstPointPrompt <- message1
             if notNull message2 then gpl.SecondPointPrompt <- message2
@@ -779,6 +812,7 @@ module ExtensionsUserinterface =
             return
               if rc = Commands.Result.Success then Some polyline
               else None
+              |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -796,6 +830,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(7e89)>]maximum:float) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let gn = new Input.Custom.GetNumber()
             if notNull message then gn.SetCommandPrompt(message)
             if number <> 7e89 then gn.SetDefaultNumber(number)
@@ -807,6 +842,7 @@ module ExtensionsUserinterface =
                     let rc = gn.Number()
                     gn.Dispose()
                     Some rc
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -832,6 +868,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(null:string)>]prompt3:string) : option<Point3d * Point3d * Point3d * Point3d> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
 
             let basePoint = if basePoint = Point3d.Origin then Point3d.Unset else basePoint
@@ -843,6 +880,7 @@ module ExtensionsUserinterface =
             return
                 if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
                 else None
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -860,6 +898,7 @@ module ExtensionsUserinterface =
                                         [<OPT;DEF(null:string seq)>]strings:string seq) : string option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let gs = new Input.Custom.GetString()
             gs.AcceptNothing(true)
             if notNull message then gs.SetCommandPrompt(message)
@@ -874,6 +913,7 @@ module ExtensionsUserinterface =
                     Some <| gs.Option().EnglishName
                 else
                     Some <| gs.StringResult()
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 
@@ -1124,6 +1164,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(7e89)>]maximum:float) : float option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             let defaultValNumber = ref <| if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
             let minimum = if minimum = 7e89 then RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
@@ -1132,7 +1173,7 @@ module ExtensionsUserinterface =
             return
                 if  rc then Some (!defaultValNumber)
                 else None
-
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on current thread
 
 

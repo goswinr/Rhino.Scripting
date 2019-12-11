@@ -47,6 +47,7 @@ module ExtensionsGrips =
                                  [<OPT;DEF(false)>]select:bool) : option<Guid * int * Point3d> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -62,6 +63,7 @@ module ExtensionsGrips =
                         Doc.Views.Redraw()
                     Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
 
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
 
 
@@ -82,6 +84,7 @@ module ExtensionsGrips =
                                   [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid * int * Point3d> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -97,6 +100,7 @@ module ExtensionsGrips =
                     rc.Add((objectId, index, location))
                     if select then grip.Select(true, true)|>ignore
                 if select then Doc.Views.Redraw()
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             return rc
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
 

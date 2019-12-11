@@ -181,6 +181,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -207,6 +208,7 @@ module ExtensionsSelection =
                         Doc.Views.Redraw()
                     obj.Select(select)  |> ignore
                     Some (objectId, presel, selmethod, point, curveparameter, viewname)
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
@@ -234,6 +236,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]subObjects:bool) : Guid option =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not  preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -250,15 +253,16 @@ module ExtensionsSelection =
                 else
                     let objref = go.Object(0)
                     let obj = objref.Object()
-                    let presel = go.ObjectsWerePreselected
+                    //let presel = go.ObjectsWerePreselected
                     go.Dispose()
-                    if not <| select && not <| preselect then
+                    //if not <| select && not <| preselect then Doc.Objects.UnselectAll() |> ignore  Doc.Views.Redraw()
+                    if select then 
+                        obj.Select(select)  |> ignore
+                    else
                         Doc.Objects.UnselectAll() |> ignore
-                        Doc.Views.Redraw()
-
-                    obj.Select(select)  |> ignore
+                    Doc.Views.Redraw()
                     Some obj.Id
-
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()            
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
     [<Extension>]
@@ -292,6 +296,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -322,6 +327,7 @@ module ExtensionsSelection =
                         Doc.Views.Redraw()
                     obj.Select(select) |> ignore
                     Some (objectId, presel, selmethod, point, viewname)
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
@@ -361,6 +367,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -391,6 +398,7 @@ module ExtensionsSelection =
                         if select && notNull obj then obj.Select(select) |> ignore
                     if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                     Some rc
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
@@ -505,6 +513,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -544,6 +553,7 @@ module ExtensionsSelection =
                         |> RhinoScriptSyntax.Print
 
                     Some rc
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 
@@ -587,6 +597,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -620,6 +631,7 @@ module ExtensionsSelection =
                       Doc.Objects.UnselectAll() |> ignore
                       Doc.Views.Redraw()
                     Some ( objectId, prepicked, selmethod, point, uv, name)
+                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
             } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
 
 

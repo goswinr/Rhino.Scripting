@@ -6,6 +6,8 @@ open Rhino
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
+
+
 type internal OPT = Runtime.InteropServices.OptionalAttribute
 type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 
@@ -27,18 +29,29 @@ module ActiceDocument =
 
     ///SynchronizationContext  of the currently Running Rhino Instance, set via reflection on Seff.Rhino
     let mutable internal syncContext: Threading.SynchronizationContext  = null //Threading.SynchronizationContext.Current  //OLD:: to be set via RhinoScriptSyntax.SynchronizationContext from running script
-    
-    let private setSyncContectFromSeffRhinoPlugin() =
+    let mutable internal SeffRhinoAssembly : Reflection.Assembly = null
+    let mutable internal SeffRhinoWindow : System.Windows.Window = null
+    let private getSeffRhinoPluginSyncContext() =
         try
             let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831")
             let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
-            let ass = seffRh.Assembly
-            let modul = ass.GetType("Seff.Rhino.Sync") 
-            syncContext <- modul.GetProperty("syncContext").GetValue(ass) :?> Threading.SynchronizationContext
+            SeffRhinoAssembly <- seffRh.Assembly
+            let modul = SeffRhinoAssembly.GetType("Seff.Rhino.Sync") 
+            syncContext <- modul.GetProperty("syncContext").GetValue(SeffRhinoAssembly) :?> Threading.SynchronizationContext
         with _ ->
             "Failed to get Seff.Rhino.Sync.syncContext via Reflection, UI interactions will crash Rhino!"
             |>> RhinoApp.WriteLine 
             |> printfn "%s"
+
+    let private getSeffRhinoPluginWindow() =
+        try            
+            let modul = SeffRhinoAssembly.GetType("Seff.Rhino.Sync") 
+            SeffRhinoWindow <- modul.GetProperty("window").GetValue(SeffRhinoAssembly)  :?> System.Windows.Window
+        with _ ->
+            "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
+            |>> RhinoApp.WriteLine 
+            |> printfn "%s"
+
 
 
     /// to store last created object form executing a rs.Command(...)
@@ -60,14 +73,16 @@ module ActiceDocument =
     
     ///if second value is 0.0 return first else second
     let internal ifZero2 a b = if b = 0.0 then a else b
-
-
+    
 
     do
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
-            if isNull syncContext then setSyncContectFromSeffRhinoPlugin()
-            
+            if isNull syncContext then getSeffRhinoPluginSyncContext()
+            if isNull SeffRhinoWindow then getSeffRhinoPluginWindow()
+            "Rhino.Scripting is set up."
+            |>> RhinoApp.WriteLine 
+            |> printfn "%s"
             
             //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwith "Esc Key was pressed, Exception raised via Rhino.Scripting") // done in Seff.Rhino
 
