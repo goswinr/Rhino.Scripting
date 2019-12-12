@@ -7,6 +7,8 @@ open Rhino.Geometry
 open FsEx.UtilMath
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
+open IniParser
+open IniParser.Model
 
 
 [<AutoOpen>]
@@ -204,16 +206,42 @@ module ExtensionsUtility =
     static member Distance(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).Length
 
-
+        //list(str, ...): If section is not specified, a list containing all section names
+        //list(str, ...): If entry is not specified, a list containing all entry names for a given section
+        //str: If section and entry are specified, a value for entry
     [<Extension>]
-    ///<summary>NOT IMPLEMENTED YET.Returns string from a specified section in a initialization file</summary>
+    ///<summary>Returns string from a specified section in a initialization file</summary>
     ///<param name="filename">(string) Name of the initialization file</param>
     ///<param name="section">(string) Optional, Section containing the entry</param>
     ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
     ///<returns>(string array) A list containing all section names</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : string [] =
-        raise <| NotImplementedException( "getSettings is missing implementation") // TODO!
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string ResizeArray =  
+        //https://github.com/rickyah/ini-parser:
+        if not <| IO.File.Exists(filename) then failwithf "GetSettings file '%s' not found" filename
+        let parser = new FileIniDataParser()
+        let data = parser.ReadFile(filename)
+        if isNull section then 
+            resizeArray{ for s in data.Sections do s.SectionName }
+        else
+            let s = data.[section]
+            if isNull s then failwithf "GetSettings section  '%s' not found in file %s" section filename
+            resizeArray{}
 
+            save settings ???
+
+    ///<summary>Returns string from a specified section in a initialization file</summary>
+    ///<param name="filename">(string) Name of the initialization file</param>
+    ///<param name="section">(string) Optional, Section containing the entry</param>
+    ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
+    ///<returns>(string array) A list containing all section names</returns>
+    static member GetSettings(filename:string, section:string, entry:string) : string =  
+        //https://github.com/rickyah/ini-parser:
+        if not <| IO.File.Exists(filename) then failwithf "GetSettings file '%s' not found" filename
+        let parser = new FileIniDataParser()
+        let data = parser.ReadFile(filename)
+        let s = data.[section].[entry]
+        if isNull s then failwithf "GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
+        else s
 
     [<Extension>]
     ///<summary>Returns 3D point that is a specified angle and distance from a 3D point</summary>
