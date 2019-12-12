@@ -107,7 +107,7 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///Include grips objects</param>  
     ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
-    static member VisibleObjects(   [<OPT;DEF(0)>]filter:int,
+    static member ShownObjects(     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
                                     [<OPT;DEF(true)>]includeLockedObjects:bool,
@@ -131,7 +131,7 @@ module ExtensionsSelection =
                 if Vis.Contains(object.Attributes.LayerIndex) then 
                     objectIds.Add(object.Id)                    
             if printCount then
-                RhinoScriptSyntax.Print ("VisibleObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))
+                RhinoScriptSyntax.Print ("ShownObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds
 
 

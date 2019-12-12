@@ -78,23 +78,23 @@ module ExtensionsDocument =
 
 
     [<Extension>]
-     ///<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
-    ///<returns>(string) the name of the currently loaded Rhino document (3DM file)</returns>
+     ///<summary>Returns the name of the currently loaded Rhino document (3dm file)</summary>
+    ///<returns>(string) the name of the currently loaded Rhino document (3dm file)</returns>
     static member DocumentName() : string =
         Doc.Name |? ""
 
 
 
     [<Extension>]
-     ///<summary>Returns path of the currently loaded Rhino document (3DM file)</summary>
-    ///<returns>(string) the path of the currently loaded Rhino document (3DM file)</returns>
+     ///<summary>Returns full path of the currently loaded Rhino document including the file name (3dm file)</summary>
+    ///<returns>(string) the path of the currently loaded Rhino document  including the file name(3dm file)</returns>
     static member DocumentPath() : string =
         let p = Doc.Path
         if isNull p then ""
-        else
-            let slash = string Path.DirectorySeparatorChar
-            if p.EndsWith slash then p
-            else p + slash // add \ or / at the ende to be consistent with RhinoScript
+        else p
+            //let slash = string Path.DirectorySeparatorChar
+            //if p.EndsWith slash then p
+            //else p + slash // add \ or / at the ende to be consistent with RhinoScript
 
 
 
