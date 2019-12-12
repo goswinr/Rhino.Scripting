@@ -58,13 +58,12 @@ module ExtensionsUserdata =
         Doc.Strings.GetValue(section, entry)
 
 
-
     [<Extension>]
     ///<summary>Returns user text stored in the document</summary>
     ///<param name="key">(string) Key to use for retrieving user text</param>
     ///<returns>(string) If key is specified, then the associated value</returns>
     static member GetDocumentUserText(key:string) : string =
-        Doc.Strings.GetValue(key)
+        Doc.Strings.GetValue(key) //TODO add null checking
 
     [<Extension>]
     ///<summary>Returns all document user text keys</summary>
@@ -73,7 +72,6 @@ module ExtensionsUserdata =
         resizeArray { for  i = 0 to Doc.Strings.Count-1  do
                           let k = Doc.Strings.GetKey(i)
                           if not <| k.Contains "\\" then  yield k }
-
 
 
     [<Extension>]
@@ -93,18 +91,58 @@ module ExtensionsUserdata =
 
 
     [<Extension>]
-    ///<summary>Returns user text stored on an object</summary>
+    ///<summary>Returns user text stored on an object, fails if non existing</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///Location on the object to retrieve the user text</param>
-    ///<returns>(string) if key is specified, the associated value</returns>
+    ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
     static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let s = 
+            if attachedToGeometry then
+                obj.Geometry.GetUserString(key)
+            else
+                obj.Attributes.GetUserString(key)
+        
+        if isNull s then 
+            printfn "**Available keys on Object are:"
+            RhinoScriptSyntax.GetUserTextKeys(objectId,false) |> Seq.iter (printfn "'%s'") 
+            printfn "on Geometry:"
+            RhinoScriptSyntax.GetUserTextKeys(objectId,true) |> Seq.iter (printfn "'%s'") 
+            failwithf " GetUserText key: '%s' does not exist on %A: %A" key obj objectId
+        s
+    
+    [<Extension>]
+    ///<summary>Returns user text stored on an object, returns Option.None if non existing</summary>
+    ///<param name="objectId">(Guid) The object's identifies</param>
+    ///<param name="key">(string) The key name</param>
+    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///Location on the object to retrieve the user text</param>
+    ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
+    static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option=
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let s = 
+            if attachedToGeometry then
+                obj.Geometry.GetUserString(key)
+            else
+                obj.Attributes.GetUserString(key)
+        if isNull s then None
+        else Some s
+
+    [<Extension>]
+    ///<summary>Checks if a User Text key is stored on an object</summary>
+    ///<param name="objectId">(Guid) The object's identifies</param>
+    ///<param name="key">(string) The key name</param>
+    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///Location on the object to retrieve the user text</param>
+    ///<returns>(bool) if key exist true</returns>
+    static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool =
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
-            obj.Geometry.GetUserString(key)
+            notNull <| obj.Geometry.GetUserString(key)
         else
-            obj.Attributes.GetUserString(key)
+            notNull <| obj.Attributes.GetUserString(key)
 
 
     [<Extension>]
