@@ -195,7 +195,7 @@ module ExtensionsUtility =
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) the square distance</returns>
-    static member DistanceSquare(point1:Point3d, point2:Point3d) : float =
+    static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).SquareLength
 
     [<Extension>]
@@ -203,45 +203,72 @@ module ExtensionsUtility =
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) the distance</returns>
-    static member Distance(point1:Point3d, point2:Point3d) : float =
+    static member inline Distance(point1:Point3d, point2:Point3d) : float =
         (point1 - point2).Length
 
-        //list(str, ...): If section is not specified, a list containing all section names
-        //list(str, ...): If entry is not specified, a list containing all entry names for a given section
-        //str: If section and entry are specified, a value for entry
     [<Extension>]
-    ///<summary>Returns string from a specified section in a initialization file</summary>
-    ///<param name="filename">(string) Name of the initialization file</param>
-    ///<param name="section">(string) Optional, Section containing the entry</param>
-    ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
-    ///<returns>(string array) A list containing all section names</returns>
+    ///<summary>Returns section names or keys in one section of an ini file</summary>
+    ///<param name="filename">(string) Name  and path of the inifile</param>
+    ///<param name="section">(string) Optional, Section to list keys from</param>
+    ///<returns>(string array)
+    ///  If section is NOT specified, a list containing all section names
+    ///  If section is specified, a list containing all entry names for the given section</returns>
     static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string ResizeArray =  
-        //https://github.com/rickyah/ini-parser:
-        if not <| IO.File.Exists(filename) then failwithf "GetSettings file '%s' not found" filename
+        //https://github.com/rickyah/ini-parser
+        
+        //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
         let parser = new FileIniDataParser()
         let data = parser.ReadFile(filename)
+        data.Configuration.ThrowExceptionsOnError <-true
         if isNull section then 
-            resizeArray{ for s in data.Sections do s.SectionName }
-        else
-            let s = data.[section]
-            if isNull s then failwithf "GetSettings section  '%s' not found in file %s" section filename
-            resizeArray{}
+            resizeArray { for s in data.Sections do s.SectionName }
+        else            
+            resizeArray { for k in data.[section] do k.KeyName}
 
-            save settings ???
-
-    ///<summary>Returns string from a specified section in a initialization file</summary>
-    ///<param name="filename">(string) Name of the initialization file</param>
-    ///<param name="section">(string) Optional, Section containing the entry</param>
-    ///<param name="entry">(string) Optional, Entry whose associated string is to be returned</param>
-    ///<returns>(string array) A list containing all section names</returns>
-    static member GetSettings(filename:string, section:string, entry:string) : string =  
-        //https://github.com/rickyah/ini-parser:
-        if not <| IO.File.Exists(filename) then failwithf "GetSettings file '%s' not found" filename
+    ///<summary>Returns string from a specified section and entry in an ini file</summary>
+    ///<param name="filename">(string) Name  and path of the ini file</param>
+    ///<param name="section">(string) Section containing the entry,for keys without section use empty string</param>
+    ///<param name="entry">(string) Entry whose associated string is to be returned</param>
+    ///<returns>(string) a value for entry</returns>
+    static member GetSettings(filename:string, section:string, entry:string) : string =
         let parser = new FileIniDataParser()
         let data = parser.ReadFile(filename)
-        let s = data.[section].[entry]
+        data.Configuration.ThrowExceptionsOnError <-true
+        let s =
+            if section = "" then 
+                data.Global.[entry]
+            else
+                data.[section].[entry]        
         if isNull s then failwithf "GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
         else s
+    
+    ///<summary>Saves a specified section and entry in an ini file</summary>
+    ///<param name="filename">(string) Name and path of the ini file</param>
+    ///<param name="section">(string) Section containing the entry. if empty string key without section will be added</param>
+    ///<param name="entry">(string) Entry whose associated string is to be returned</param>
+    ///<returns>(string) a value for entry</returns>
+    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit =
+        if IO.File.Exists filename then
+            let parser = new FileIniDataParser()
+            parser.Parser.Configuration.ThrowExceptionsOnError <-true
+            let data = parser.ReadFile(filename)
+            data.Configuration.ThrowExceptionsOnError <-true
+            if section = "" then 
+                data.Global.[entry]<- value
+            else
+                data.Configuration.AllowCreateSectionsOnFly <- true
+                data.[section].[entry] <- value
+            parser.WriteFile(filename,data)
+        else
+            let data = IniData()
+            data.Configuration.ThrowExceptionsOnError <-true
+            if section = "" then 
+                data.Global.[entry]<- value
+            else
+                data.Configuration.AllowCreateSectionsOnFly <- true
+                data.[section].[entry] <- value
+            IO.File.WriteAllText(filename,data.ToString())
+
 
     [<Extension>]
     ///<summary>Returns 3D point that is a specified angle and distance from a 3D point</summary>
