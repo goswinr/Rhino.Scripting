@@ -41,6 +41,18 @@ module ExtrasCurried =
             RhinoScriptSyntax.SetUserText(objectId, key, value)
         
         [<Extension>]
+        static member hasUserText( key:string) (objectId:Guid) : bool = 
+            RhinoScriptSyntax.HasUserText(objectId, key)
+
+        [<Extension>]
+        static member getUserText( key:string) (objectId:Guid) : string = 
+            RhinoScriptSyntax.GetUserText(objectId, key)
+        
+        [<Extension>]
+        static member tryGetUserText( key:string) (objectId:Guid) : string option= 
+            RhinoScriptSyntax.TryGetUserText(objectId, key)
+        
+        [<Extension>]
         ///<summary>Draws any Geometry object to a given or current layer</summary>
         ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
         ///<param name="geo">(GeometryBase) Geometry</param>    
@@ -53,7 +65,7 @@ module ExtrasCurried =
         ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
         ///<param name="line">(Line) Geometry</param>    
         ///<returns>(unit) void, nothing</returns>
-        static member draw (layer:string) (line:Line) : unit =  
+        static member drawLine (layer:string) (line:Line) : unit =  
             Doc.Objects.AddLine(line) |> RhinoScriptSyntax.setLayer layer  
         
         [<Extension>]
@@ -61,5 +73,5 @@ module ExtrasCurried =
         ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
         ///<param name="pt">(Point3d) Pont</param>    
         ///<returns>(unit) void, nothing</returns>
-        static member draw (layer:string) (pt:Point3d) : unit =  
+        static member drawPoint (layer:string) (pt:Point3d) : unit =  
             Doc.Objects.AddPoint(pt) |> RhinoScriptSyntax.setLayer layer  
