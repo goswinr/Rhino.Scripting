@@ -18,8 +18,6 @@ module ExtrasCurried =
 
     ///RhinoScriptSyntax.PrintFull (shadowing in printFull from FsEx)
     let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull
-    
-        
 
     //[<Extension>] //Error 3246
     type RhinoScriptSyntax with
@@ -41,16 +39,35 @@ module ExtrasCurried =
             RhinoScriptSyntax.SetUserText(objectId, key, value)
         
         [<Extension>]
-        static member hasUserText( key:string) (objectId:Guid) : bool = 
-            RhinoScriptSyntax.HasUserText(objectId, key)
-
-        [<Extension>]
         static member getUserText( key:string) (objectId:Guid) : string = 
             RhinoScriptSyntax.GetUserText(objectId, key)
         
         [<Extension>]
         static member tryGetUserText( key:string) (objectId:Guid) : string option= 
             RhinoScriptSyntax.TryGetUserText(objectId, key)
+
+        [<Extension>]
+        static member matchAllUserText (sourceId:Guid) (targetId:Guid) : unit= 
+            let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
+            let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
+            let usg = sc.Geometry.GetUserStrings()
+            for  i = 0 to usg.Count-1 do 
+                let key = usg.GetKey(i)
+                if not <|de.Geometry.SetUserString(key,sc.Geometry.GetUserString(key)) then 
+                    failwithf "matchAllUserText: Geometry failed to set key '%s' on %A from %A" key  targetId sourceId
+            let usa = sc.Attributes.GetUserStrings()
+            for  i = 0 to usa.Count-1 do 
+                let key = usa.GetKey(i)
+                if not <|de.Attributes.SetUserString(key,sc.Attributes.GetUserString(key))then 
+                    failwithf "matchAllUserText: Attributes failed to set key '%s' on %A from %A" key targetId sourceId
+        
+        [<Extension>]
+        static member matchUserText (sourceId:Guid) ( key:string) (targetId:Guid) : unit= 
+            let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
+            let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
+            let v = sc.Attributes.GetUserString(key)
+            if isNull v || v="" then failwithf "matchUserText: key '%s' not found on %A" key sourceId
+            if not <| de.Attributes.SetUserString(key,v) then failwithf "matchUserText: failed to set key '%s' to '%s' on %A" key v targetId
         
         [<Extension>]
         ///<summary>Draws any Geometry object to a given or current layer</summary>
