@@ -33,6 +33,10 @@ module ExtrasVector =
     let inline matchOrientation (orientToMatch:Vector3d) (v:Vector3d) =
         if orientToMatch * v < 0.0 then -v else v
     
+    /// computes the signed Volume of a Tetrahedron
+    let inline tetrahedronVolumeSigned(a:Point3d, b:Point3d, c:Point3d, d:Point3d) =
+        ((Vector3d.CrossProduct( b-a, c-a)) * (d-a)) / 6.0
+
     ///project vector to plane
     let projectToPlane (pl:Plane) (v:Vector3d) =
         let pt = pl.Origin + v
@@ -238,18 +242,15 @@ module ExtrasVector =
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistances: float seq, 
                                         [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
-                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  = 
-                                        
+                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  =                                         
             let offDists0  = Array.ofSeq offsetDistances           
             let normDists0 = Array.ofSeq (normalDistances |? Seq.empty<float> )
             let pointk = points.Count
             let lastIndex = pointk - 1
             let lenDist = offDists0.Length
-            let lenDistNorm = normDists0.Length
-                                        
+            let lenDistNorm = normDists0.Length                                        
             if pointk < 2 then 
-                failwithf "OffsetPoints needs at least two points but %s given" points.ToNiceString
-                                        
+                failwithf "OffsetPoints needs at least two points but %s given" points.ToNiceString                                        
             elif pointk = 2 then
                 let offDist = 
                     if   lenDist = 0 then 0.0
@@ -260,41 +261,31 @@ module ExtrasVector =
                     elif lenDistNorm = 1 then normDists0.[0]
                     else failwithf "OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm points.ToNiceString         
                 let a, b = offsetTwoPt(points.[0], points.[1] , offDist, normDist)
-                resizeArray { a; b}
-                                        
-            else // regular case more than 2 points        
-                                            
-                let lastIsFirst = (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance //auto detect closed polyline points:
-                                            
+                resizeArray { a; b}                                        
+            else // regular case more than 2 points
+                let lastIsFirst = (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance //auto detect closed polyline points:                                            
                 let distsNeeded = 
                     if lastIsFirst then pointk - 1
                     elif loop      then pointk
-                    else                pointk - 1
-                                            
+                    else                pointk - 1                                            
                 let distsNeededNorm = 
                     if lastIsFirst then pointk - 1
                     elif loop      then pointk
-                    else                pointk   // not -1 !!        
-                                            
+                    else                pointk   // not -1 !! 
                 let  offDists = 
                     if   lenDist = 0 then             Array.create distsNeeded 0.0
                     elif lenDist = 1 then             Array.create distsNeeded offDists0.[0]
                     elif lenDist = distsNeeded then   offDists0
-                    else failwithf"OffsetPoints: offsetDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeeded lastIsFirst loop
-                                                
+                    else failwithf"OffsetPoints: offsetDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeeded lastIsFirst loop                                                
                 let normDists = 
                     if   lenDistNorm = 0 then                 Array.create distsNeededNorm 0.0
                     elif lenDistNorm = 1 then                 Array.create distsNeededNorm normDists0.[0]
                     elif lenDistNorm = distsNeededNorm then   normDists0
-                    else failwithf "OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop
-                                                
-                                           
-                let refNormal = RhinoScriptSyntax.NormalOfPoints(points) //to have good starting direction, first kink might be in bad direction         
-                                    
+                    else failwithf "OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop  
+                let refNormal = RhinoScriptSyntax.NormalOfPoints(points) //to have good starting direction, first kink might be in bad direction   
                 let Pts = ResizeArray<Point3d>(pointk) 
                 let Ns = ResizeArray<Vector3d>(pointk)         
-                for i, p, t, n in Seq.iPrevThisNext(points) do 
-                                                
+                for i, p, t, n in Seq.iPrevThisNext(points) do                                                 
                     // first one:
                     if i=0 then 
                         if lastIsFirst then 
@@ -306,8 +297,7 @@ module ExtrasVector =
                             let _, sn, pt, N = findOffsetCorner(p, t, n, offDists.Last, offDists.[0], refNormal)
                             Ns.Add N 
                             if loop then Pts.Add pt
-                            else         Pts.Add (t + sn)
-                                                 
+                            else         Pts.Add (t + sn)                                                 
                     // last one:
                     elif i = lastIndex  then 
                         if lastIsFirst then
@@ -325,14 +315,12 @@ module ExtrasVector =
                     else
                         let _, _, pt, N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
                         Pts.Add pt
-                        Ns.Add N
-                                            
+                        Ns.Add N                                            
                 if lenDistNorm > 0 then 
                     for i=0 to  distsNeededNorm-1 do // ns might be shorter than pts if lastIsFirst= true
                         let n = Ns.[i]
                         if n <> Vector3d.Zero then 
-                            Pts.[i] <- Pts.[i] + n * normDists.[i] 
-                                            
+                            Pts.[i] <- Pts.[i] + n * normDists.[i]
                 // fix colinear segments by nearest neigbours that are ok
                 for i, n in Seq.indexed Ns do // ns might be shorter than pts if lastIsFirst= true
                     if n = Vector3d.Zero then                 
@@ -351,20 +339,13 @@ module ExtrasVector =
                         print (i,"is colinear")
                         print (ni,"next i")
                         if offDists.[pi] <> offDists.[saveIdx (ni-1) distsNeeded] then 
-                            failwithf "OffsetPoints: cant fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk] 
-                                                    
-                        Pts.[i] <- points.[i] + (nv + pv)*0.5
-                                            
+                            failwithf "OffsetPoints: cant fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk]                                                     
+                        Pts.[i] <- points.[i] + (nv + pv)*0.5                                            
                 if lastIsFirst then Pts.[lastIndex] <- Pts.[0]
                 Pts
 
-        
-
-
-
-
-        ///auto detects points from closed polylines and loops them
         [<Extension>]
+        ///auto detects points from closed polylines and loops them
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistance: float, 
                                         [<OPT;DEF(0.0)>]normalDistance: float ,
@@ -372,4 +353,24 @@ module ExtrasVector =
             if normalDistance = 0.0 then RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[]              , loop)
             else                         RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[normalDistance], loop)
                                         
-             
+        
+        [<Extension>]     
+        ///Calculates the intersection of a finite line with a triangle (without using Rhinocommon)        
+        static member LineTriangleIntersect(line:Line, p1 :Point3d ,p2 :Point3d, p3 :Point3d):  Point3d option  = 
+            // https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d
+            let q1 = line.From
+            let q2 = line.To
+            let s1 = sign (tetrahedronVolumeSigned(q1,p1,p2,p3))
+            let s2 = sign (tetrahedronVolumeSigned(q2,p1,p2,p3))
+            if s1 <> s2 then
+                let s3 = sign (tetrahedronVolumeSigned(q1,q2,p1,p2))
+                let s4 = sign (tetrahedronVolumeSigned(q1,q2,p2,p3))
+                let s5 = sign (tetrahedronVolumeSigned(q1,q2,p3,p1))
+                if s3 = s4 && s4 = s5 then                
+                    let n = Vector3d.CrossProduct(p2-p1,p3-p1)
+                    let t = ((p1-q1) * n) / ((q2-q1) * n)
+                    Some (q1 + t * (q2-q1))
+                else None
+            else None
+
+
