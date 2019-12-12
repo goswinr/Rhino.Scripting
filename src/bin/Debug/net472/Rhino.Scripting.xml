@@ -2954,12 +2954,12 @@ True to enable, False to disable</param>
 <returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.DocumentPath.Static">
-<summary>Returns path of the currently loaded Rhino document (3DM file)</summary>
-<returns>(string) the path of the currently loaded Rhino document (3DM file)</returns>
+<summary>Returns full path of the currently loaded Rhino document including the file name (3dm file)</summary>
+<returns>(string) the path of the currently loaded Rhino document  including the file name(3dm file)</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.DocumentName.Static">
-<summary>Returns the name of the currently loaded Rhino document (3DM file)</summary>
-<returns>(string) the name of the currently loaded Rhino document (3DM file)</returns>
+<summary>Returns the name of the currently loaded Rhino document (3dm file)</summary>
+<returns>(string) the name of the currently loaded Rhino document (3dm file)</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsDocument.RhinoScriptSyntax.DocumentModified.Static(System.Boolean)">
 <summary>Sets the document's modified flag. This flag indicates whether
@@ -6190,7 +6190,7 @@ Include light objects.  If omitted, light objects are not returned</param>
 Include grips objects.  If omitted, grips objects are not returned</param>
 <returns>(Guid) The identifier of the object</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.VisibleObjects.Static(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+<member name="M:Rhino.Scripting.ExtensionsSelection.RhinoScriptSyntax.ShownObjects.Static(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
 <summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
 <param name="filter">(int) Optional, Default Value: <c>0</c>
 The type(s) of geometry (points, curves, surfaces, meshes,...)
@@ -7557,13 +7557,29 @@ Location on the object to store the user text</param>
 <summary>Verifies the current document contains user data</summary>
 <returns>(bool) True or False indicating the presence of Script user data</returns>
 </member>
-<member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.GetUserText.Static(System.Guid,System.String,System.Boolean)">
-<summary>Returns user text stored on an object</summary>
+<member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.HasUserText.Static(System.Guid,System.String,System.Boolean)">
+<summary>Checks if a User Text key is stored on an object</summary>
 <param name="objectId">(Guid) The object's identifies</param>
 <param name="key">(string) The key name</param>
 <param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
 Location on the object to retrieve the user text</param>
-<returns>(string) if key is specified, the associated value</returns>
+<returns>(bool) if key exist true</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.TryGetUserText.Static(System.Guid,System.String,System.Boolean)">
+<summary>Returns user text stored on an object, returns Option.None if non existing</summary>
+<param name="objectId">(Guid) The object's identifies</param>
+<param name="key">(string) The key name</param>
+<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+Location on the object to retrieve the user text</param>
+<returns>(string) if key is specified, the associated value,fails if non existing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.GetUserText.Static(System.Guid,System.String,System.Boolean)">
+<summary>Returns user text stored on an object, fails if non existing</summary>
+<param name="objectId">(Guid) The object's identifies</param>
+<param name="key">(string) The key name</param>
+<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+Location on the object to retrieve the user text</param>
+<returns>(string) if key is specified, the associated value,fails if non existing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtensionsUserdata.RhinoScriptSyntax.GetUserTextKeys.Static(System.Guid,System.Boolean)">
 <summary>Returns all user text keys stored on an object</summary>
@@ -8721,6 +8737,18 @@ Type of initial view projection for the detail
   6 = parallel back view
   7 = perspective view</param>
 <returns>(Guid) identifier of the newly created detail on success</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.drawPoint.Static(System.String,Rhino.Geometry.Point3d)">
+<summary>Draws a Point to a given or current layer</summary>
+<param name="layer">(string) Name of an layer or empty string for current layer</param>
+<param name="pt">(Point3d) Pont</param>    
+<returns>(unit) void, nothing</returns>
+</member>
+<member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.drawLine.Static(System.String,Rhino.Geometry.Line)">
+<summary>Draws a Line to a given or current layer</summary>
+<param name="layer">(string) Name of an layer or empty string for current layer</param>
+<param name="line">(Line) Geometry</param>    
+<returns>(unit) void, nothing</returns>
 </member>
 <member name="M:Rhino.Scripting.ExtrasCurried.RhinoScriptSyntax.draw.Static(System.String,Rhino.Geometry.GeometryBase)">
 <summary>Draws any Geometry object to a given or current layer</summary>
