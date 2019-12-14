@@ -223,30 +223,30 @@ module ExtensionsGeometry =
     ///Return the bounding box as world coordinates or
     ///  construction plane coordinates. Note, this option does not apply to
     ///  world axis-aligned bounding boxes</param>
-    ///<returns>(Point3d array) Eight 3D points that define the bounding box.
+    ///<returns>(Geometry.Box) The Box (oriented to the plane) to get the eight 3D points that define the bounding box call box.GetCorners()
     ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
-    static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Point3d array =
+    static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
 
         if plane.IsValid then
-            let xform = Transform.ChangeBasis(Plane.WorldXY, plane)
+            let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
             objects
             |> Seq.map RhinoScriptSyntax.CoerceGeometry
-            |> Seq.iter (fun g ->
-                bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(xform)) )
-                hjgjhjkh
-            bbox.GetCorners()
-        else
-            let xform = Transform.ChangeBasis(Plane.WorldXY, plane)
+            |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)) )
+        else            
             objects
             |> Seq.map RhinoScriptSyntax.CoerceGeometry
             |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true)) )
 
-            if inWorldCoords then
-                let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
-                bbox.GetCorners() |> Array.map(fun p -> p.Transform(planetoworld);p)
-            else
-                bbox.GetCorners()
+        if inWorldCoords then
+            let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
+            let box = Box(bbox)
+            box.Transform(planetoworld) |> failIfFalse "plane Transform in rs.BoundingBox()"
+            box
+            //bbox.GetCorners() |> Array.map(fun p -> p.Transform(planetoworld);p)
+        else
+            Box(bbox)
+            //bbox.GetCorners()
 
 
 
