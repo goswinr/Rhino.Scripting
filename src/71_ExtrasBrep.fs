@@ -72,9 +72,9 @@ module ExtrasBrep =
         let arcEnd   =  arcEnd0   |> projectToLine lineB direction |> snapIfClose lineB.From |> snapIfClose lineB.To
     
     
-        if alphaDouble > Math.PI * 0.49999 && not makeSCurve then // bigger or equal to 90 degrees, 1 arc
-            let miA = intersect lineA axis
-            let miB = intersect lineB axis
+        if alphaDouble > Math.PI * 0.49999 && not makeSCurve then // fillet bigger than 89.999 degrees, one arc from 3 points
+            let miA = intersectInOnePoint lineA axis
+            let miB = intersectInOnePoint lineB axis
             let miPt  = (miA + miB) * 0.5 // if lines are skew
             let midWei = sin alpha
             let knots=    [| 0. ; 0. ; 1. ; 1.|]
@@ -82,7 +82,7 @@ module ExtrasBrep =
             let pts =     [| arcStart; miPt ; arcEnd |]
             RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights)
     
-        else // smaller than 90 degrees, 2 arcs
+        else // fillet smaller than 89.999 degrees, two arc from 5 points
             let betaH = beta*0.5
             let trim2 = trim - radius * tan(betaH)
             let ma, mb = 
@@ -90,12 +90,11 @@ module ExtrasBrep =
                     arcPl.Origin + uA * trim2 |> projectToLine lineA direction ,
                     arcPl.Origin + uB * trim2 |> projectToLine lineB direction 
                 else
-                    let miA = intersect lineA axis
-                    let miB = intersect lineB axis
+                    let miA = intersectInOnePoint lineA axis
+                    let miB = intersectInOnePoint lineB axis
                     let miPt  = (miA + miB) * 0.5 // if lines are skew
                     arcPl.Origin + uA * trim2 |> projectToLine (Line(miPt,arcStart)) direction ,
-                    arcPl.Origin + uB * trim2 |> projectToLine (Line(miPt,arcEnd  )) direction 
-             
+                    arcPl.Origin + uB * trim2 |> projectToLine (Line(miPt,arcEnd  )) direction              
         
             let gamma = Math.PI*0.5 - betaH
             let midw= sin(gamma)

@@ -32,8 +32,8 @@ module ExtrasLine =
 
     ///Fails if lines are skew or paralell
     ///Considers Lines infinte
-    ///Retuns point on lnB
-    let intersect (lnA:Line) (lnB:Line) = 
+    ///Returns point on lnB
+    let intersectInOnePoint (lnA:Line) (lnB:Line):Point3d = 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
         if not ok then failwithf "Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
         let a = lnA.PointAt(ta)
@@ -41,3 +41,23 @@ module ExtrasLine =
         if (a-b).SquareLength > RhinoMath.ZeroTolerance then // = Length > 1e-6
             failwithf "Line.intersect failed, they are skew. distance: %g  on %s and %s" (a-b).Length lnA.ToNiceString lnB.ToNiceString
         b
+    ///Considers Lines infinte
+    let intersectSkew (lnA:Line) (lnB:Line) :Point3d*Point3d= 
+        let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
+        if not ok then failwithf "Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
+        let a = lnA.PointAt(ta)
+        let b = lnB.PointAt(tb)        
+        a,b
+    
+    ///Considers Lines infinte
+    let distanceToLine (lnA:Line) (lnB:Line) :float= 
+        let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
+        if not ok then failwithf "Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
+        let a = lnA.PointAt(ta)
+        let b = lnB.PointAt(tb)
+        (a-b).Length
+    
+    ///Considers Lines infinte
+    let distanceToPoint (pt:Point3d) (ln:Line) :float= 
+        let cl = ln.ClosestPoint(pt,false)
+        (cl-pt).Length
