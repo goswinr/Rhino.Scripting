@@ -66,7 +66,7 @@
     </Reference>  
 
     <Reference Include="FsEx">
-      <HintPath>..\..\FsEx\src\bin\Release\net45\FsEx.dll</HintPath>
+      <HintPath>..\..\FsEx\src\bin\Debug\net45\FsEx.dll</HintPath>
       <Private>true</Private>
     </Reference>
 
