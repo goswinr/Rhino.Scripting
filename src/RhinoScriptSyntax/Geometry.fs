@@ -234,7 +234,7 @@ module ExtensionsGeometry =
             |> Seq.map RhinoScriptSyntax.CoerceGeometry
             |> Seq.iter (fun g ->
                 bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(xform)) )
-
+                hjgjhjkh
             bbox.GetCorners()
         else
             let xform = Transform.ChangeBasis(Plane.WorldXY, plane)
