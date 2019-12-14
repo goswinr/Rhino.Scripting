@@ -181,7 +181,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
         async{
             if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then dont even hide and show
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
