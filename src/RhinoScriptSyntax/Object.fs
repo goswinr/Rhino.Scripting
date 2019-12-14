@@ -882,12 +882,15 @@ module ExtensionsObject =
 
 
     [<Extension>]
-    ///<summary>Returns the name of an object</summary>
+    ///<summary>Returns the name of an object or "" if none given</summary>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(string) The current object name</returns>
+    ///<returns>(string) The current object name, empty string if no name given </returns>
     static member ObjectName(objectId:Guid) : string = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.Name
+        let n = rhinoobject.Attributes.Name
+        if isNull n then ""
+        else n
+        
 
     [<Extension>]
     ///<summary>Modifies the name of an object</summary>
@@ -910,6 +913,8 @@ module ExtensionsObject =
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoobject.Attributes.Name <- name
             if not <| rhinoobject.CommitChanges() then failwithf "Set ObjectName failed for '%A' and '%A'"  name objectId
+
+
 
     [<Extension>]
     ///<summary>Returns the print color of an object</summary>
@@ -1261,7 +1266,6 @@ module ExtensionsObject =
 
 
 
-
     [<Extension>]
     ///<summary>Selects a single object</summary>
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
@@ -1270,8 +1274,6 @@ module ExtensionsObject =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 = rhobj.Select(true) then failwithf "SelectObject failed on %A" objectId
         Doc.Views.Redraw()
-
-
 
     [<Extension>]
     ///<summary>Selects one or more objects</summary>

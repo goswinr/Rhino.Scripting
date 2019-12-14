@@ -811,7 +811,7 @@ module ExtensionsCurve =
                     if rc = Guid.Empty then failwithf "curveBooleanUnion: Unable to add curve to document.  curveIds:'%A' " curveIds
                     curves.Add(rc)
             Doc.Views.Redraw()
-        curves
+        curves 
 
 
     [<Extension>]
@@ -821,28 +821,30 @@ module ExtensionsCurve =
     ///<param name="brepId">(Guid) Identifier of a brep object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///Distance tolerance at segment midpoints.</param>
-    ///<returns>(Guid ResizeArray * Guid ResizeArray) List of Curves and List of points</returns>
-    static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray * Guid ResizeArray=
+    ///<returns>(Point3d ResizeArray * Curve ResizeArray) List of points and List of Curves</returns>
+    static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Point3d ResizeArray * Curve ResizeArray=
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let rc, outCurves, outPoints = Intersect.Intersection.CurveBrep(curve, brep, tolerance0)
-        if not <| rc then  failwithf "curveBrepIntersect: Unable to add curve to document.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
+        if not <| rc then  failwithf "curveBrepIntersect: Intersection failed.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
 
-        let curves = ResizeArray()
-        let points = ResizeArray()
+        let curves = ResizeArray(0)
+        let points = ResizeArray(0)
         for curve in outCurves do
             if notNull curve && curve.IsValid then
-                let rc = Doc.Objects.AddCurve(curve)
-                curve.Dispose()
-                if rc = Guid.Empty then failwithf "curveBrepIntersect: Unable to add curve to document.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
-                curves.Add(rc)
+                curves.Add(curve)
+                //let rc = Doc.Objects.AddCurve(curve)
+                //curve.Dispose()
+                //if rc = Guid.Empty then failwithf "curveBrepIntersect: Unable to add curve to document.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
+                //curves.Add(rc)
         for point in outPoints do
             if point.IsValid then
-                let rc = Doc.Objects.AddPoint(point)
-                points.Add(rc)
-        Doc.Views.Redraw()
-        curves, points
+                points.Add(point)
+                //let rc = Doc.Objects.AddPoint(point)
+                //points.Add(rc)
+        //Doc.Views.Redraw()
+        points, curves //TODO or  Guid as originaly done ??
 
 
     [<Extension>]

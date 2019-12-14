@@ -148,9 +148,27 @@ type RhinoScriptSyntax private () = // no constructor?
     static member Frange (start:float, stop:float, step:float) : float ResizeArray =
         RhinoScriptSyntax.Fxrange (start, stop, step) |> ResizeArray.ofSeq
     
+    ///<summary>Add any geometry object (stuct or class) to the document</summary>
+    ///<param name="geo">the Geometry</param> 
+    ///<returns>(Guid) The Guid of the added Object</returns>
+    static member Add (geo:'AnyRhinoGeometry) : Guid = 
+        match box geo with
+        | :? GeometryBase as g -> Doc.Objects.Add(g)
+        | :? Point3d    as pt->   Doc.Objects.AddPoint pt
+        | :? Point3f    as pt->   Doc.Objects.AddPoint(pt)
+        | :? Line       as ln->   Doc.Objects.AddLine(ln)
+        | :? Arc        as a->    Doc.Objects.AddArc(a)
+        | :? Circle     as c->    Doc.Objects.AddCircle(c)
+        | :? Polyline   as pl ->  Doc.Objects.AddPolyline(pl)
+        | :? Box        as b ->   Doc.Objects.AddBox(b)
+        | :? BoundingBox as b ->  Doc.Objects.AddBox(Box(b))
+        | :? Sphere     as b ->   Doc.Objects.AddSphere(b)
+        | :? Cylinder    as cl -> Doc.Objects.AddSurface (cl.ToNurbsSurface())
+        | :? Cone       as c ->   Doc.Objects.AddSurface (c.ToNurbsSurface())
+        | _ -> failwithf "RhinoScriptSyntax.Add: object of type %A not implemented" (geo.GetType())
 
     //-------------------------------------------------------
-    //------------COERCE-------------------------------------
+    //------------COERCE-----------------------------------
     //-------------------------------------------------------
 
 
@@ -517,15 +535,15 @@ type RhinoScriptSyntax private () = // no constructor?
         if segmentIndex < 0 then 
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? Curve as c -> c
-            | g -> failwithf "CoerceHatch failed on %A : %A " g.ObjectType objectId
+            | g -> failwithf "CoerceCurve failed on %A : %A " g.ObjectType objectId
         else
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? PolyCurve as c -> 
                 let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then failwithf "CoerceHatch failed on segment index %d from curve %A" segmentIndex objectId
+                if isNull crv then failwithf "CoerceCurve failed on segment index %d from curve %A" segmentIndex objectId
                 crv
             | :? Curve as c -> c
-            | g -> failwithf "CoerceHatch failed on %A : %A with segment index %d" g.ObjectType objectId segmentIndex
+            | g -> failwithf "CoerceCurve failed on %A : %A with segment index %d" g.ObjectType objectId segmentIndex
 
   
 

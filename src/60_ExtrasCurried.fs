@@ -70,6 +70,16 @@ module ExtrasCurried =
             if not <| de.Attributes.SetUserString(key,v) then failwithf "matchUserText: failed to set key '%s' to '%s' on %A" key v targetId
         
         [<Extension>]
+        /// copies the object name
+        static member matchName (sourceId:Guid) (targetId:Guid) : unit = 
+            let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
+            let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
+            let n = sc.Attributes.Name 
+            if isNull n then failwithf "matchUserText: scource object '%A' has no name. Targets name: '%A'"  sourceId de.Attributes.Name
+            de.Attributes.Name <- n
+            if not <| de.CommitChanges() then failwithf "matchUserText failed for '%A' and '%A'"  sourceId targetId
+        
+        [<Extension>]
         ///<summary>Draws any Geometry object to a given or current layer</summary>
         ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
         ///<param name="geo">(GeometryBase) Geometry</param>    
