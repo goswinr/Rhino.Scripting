@@ -15,7 +15,13 @@ open FsEx.SaveIgnore
 module ExtrasVector =
         
        
-    let inline scale (sc:float) (v:Vector3d) = v * sc        
+    let inline scale (sc:float) (v:Vector3d) = v * sc  
+    
+    ///Same as reverse
+    let inline flip  (v:Vector3d) = -v 
+    
+    ///Same as flip
+    let inline reverse  (v:Vector3d) = -v     
     
     let inline distance (a:Point3d) (b:Point3d) = let v = a-b in sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
     
