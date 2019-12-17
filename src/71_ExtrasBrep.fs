@@ -44,8 +44,10 @@ module ExtrasBrep =
     ///<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  planes to fillet<e</param>
     ///<param name="lineA">(Line) First line to fillet, must not be parallel to direction </param> 
     ///<param name="lineB">(Line) Second line to fillet, must not be parallel to direction or first line </param> 
-    ///<returns>(NurbsCurve)Fillet curve Geometry</returns>
-    let freeFillet makeSCurve (radius:float)  (direction:Vector3d) (lineA:Line) (lineB:Line): NurbsCurve   =         
+    ///<returns>(NurbsCurve)Fillet curve Geometry, 
+    ///  the true fillet arc on cylinder(wrong ends), 
+    ///  the point where fillet would be at radius 0, (same plane as arc) </returns>
+    let freeFillet makeSCurve (radius:float)  (direction:Vector3d) (lineA:Line) (lineB:Line): NurbsCurve*Arc*Point3d   =         
         let ok,axis = 
            let pla = Plane(lineA.From, lineA.Direction, direction)
            let plb = Plane(lineB.From, lineB.Direction, direction)            
@@ -64,13 +66,13 @@ module ExtrasBrep =
            acos dot
         let alpha = alphaDouble * 0.5
         let beta  = Math.PI * 0.5 - alpha
-        let trim = tan(beta) * radius // the seback distance from intersection         
+        let trim = tan(beta) * radius // the setback distance from intersection         
     
         let arcStart0 =  arcPl.Origin + uA * trim // still on arc plane
         let arcEnd0 =    arcPl.Origin + uB * trim
         let arcStart =  arcStart0 |> projectToLine lineA direction |> snapIfClose lineA.From |> snapIfClose lineA.To
         let arcEnd   =  arcEnd0   |> projectToLine lineB direction |> snapIfClose lineB.From |> snapIfClose lineB.To
-    
+        let arc = Arc(arcStart0, - uA , arcEnd0)
     
         if alphaDouble > Math.PI * 0.49999 && not makeSCurve then // fillet bigger than 89.999 degrees, one arc from 3 points
             let miA = intersectInOnePoint lineA axis
@@ -80,7 +82,7 @@ module ExtrasBrep =
             let knots=    [| 0. ; 0. ; 1. ; 1.|]
             let weights = [| 1. ; midWei; 1.|]             
             let pts =     [| arcStart; miPt ; arcEnd |]
-            RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights)
+            RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights), arc, arcPl.Origin
     
         else // fillet smaller than 89.999 degrees, two arc from 5 points
             let betaH = beta*0.5
@@ -102,7 +104,7 @@ module ExtrasBrep =
             let weights = [|1. ; midw ; 1. ; midw ; 1.|]             
             let mid = (ma + mb)*0.5
             let pts = [|arcStart; ma; mid; mb; arcEnd|]
-            RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights)
+            RhinoScriptSyntax.CreateNurbsCurve(pts, knots, 2, weights),arc,arcPl.Origin
    
    
    
