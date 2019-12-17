@@ -118,7 +118,7 @@ module ExtensionsSelection =
                 if not layer.IsDeleted && layer.IsVisible then 
                     Vis.Add(layer.Index) |> ignore
             let it = DocObjects.ObjectEnumeratorSettings()
-            it.IncludeLights <- includeLights
+            it.IncludeLights <- includeLights //TODO check what happens to layout objects !!! included ?
             it.IncludeGrips <- includeGrips
             it.NormalObjects <- true
             it.LockedObjects <- includeLockedObjects
