@@ -84,21 +84,6 @@ module ExtrasCurried =
         ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
         ///<param name="geo">(GeometryBase) Geometry</param>    
         ///<returns>(unit) void, nothing</returns>
-        static member draw (layer:string) (geo:GeometryBase) : unit =  
-            Doc.Objects.Add(geo) |> RhinoScriptSyntax.setLayer layer
+        static member draw (layer:string) (geo:'AnyRhinoGeometry) : unit =  
+            RhinoScriptSyntax.Add(geo) |> RhinoScriptSyntax.setLayer layer
         
-        [<Extension>]
-        ///<summary>Draws a Line to a given or current layer</summary>
-        ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
-        ///<param name="line">(Line) Geometry</param>    
-        ///<returns>(unit) void, nothing</returns>
-        static member drawLine (layer:string) (line:Line) : unit =  
-            Doc.Objects.AddLine(line) |> RhinoScriptSyntax.setLayer layer  
-        
-        [<Extension>]
-        ///<summary>Draws a Point to a given or current layer</summary>
-        ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
-        ///<param name="pt">(Point3d) Pont</param>    
-        ///<returns>(unit) void, nothing</returns>
-        static member drawPoint (layer:string) (pt:Point3d) : unit =  
-            Doc.Objects.AddPoint(pt) |> RhinoScriptSyntax.setLayer layer  
