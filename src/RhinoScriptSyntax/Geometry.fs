@@ -209,11 +209,12 @@ module ExtensionsGeometry =
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
         if mp |> isNull then failwithf "Rhino.Scripting: Unable to compute area mass properties.  objectId:'%A'" objectId
         mp.Area
-
+    
+    
 
     [<Extension>]
     ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
-    ///  bounding box of an object or of several objects</summary>
+    ///  bounding box of several objects</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///  plane to which the bounding box should be aligned
@@ -223,7 +224,8 @@ module ExtensionsGeometry =
     ///Return the bounding box as world coordinates or
     ///  construction plane coordinates. Note, this option does not apply to
     ///  world axis-aligned bounding boxes</param>
-    ///<returns>(Geometry.Box) The Box (oriented to the plane) to get the eight 3D points that define the bounding box call box.GetCorners()
+    ///<returns>(Geometry.Box) The Box (oriented to the plane). 
+    ///  To get the eight 3D points that define the bounding box call box.GetCorners()
     ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
@@ -238,17 +240,31 @@ module ExtensionsGeometry =
             |> Seq.map RhinoScriptSyntax.CoerceGeometry
             |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true)) )
 
-        if inWorldCoords then
+        if plane.IsValid && inWorldCoords then
             let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
             let box = Box(bbox)
             box.Transform(planetoworld) |> failIfFalse "plane Transform in rs.BoundingBox()"
             box
-            //bbox.GetCorners() |> Array.map(fun p -> p.Transform(planetoworld);p)
         else
             Box(bbox)
-            //bbox.GetCorners()
 
-
+    [<Extension>]
+    ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
+    ///  bounding box of an object</summary>
+    ///<param name="object">(Guid) The identifier of the object</param>
+    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
+    ///  plane to which the bounding box should be aligned
+    ///  If omitted, a world axis-aligned bounding box
+    ///  will be calculated</param>
+    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
+    ///Return the bounding box as world coordinates or
+    ///  construction plane coordinates. Note, this option does not apply to
+    ///  world axis-aligned bounding boxes</param>
+    ///<returns>(Geometry.Box) The Box (oriented to the plane). 
+    ///  To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBox(object:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+        RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
 
     [<Extension>]
