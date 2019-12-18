@@ -118,7 +118,7 @@ module ExtrasBrep =
         ///<param name="breite">(float) width = radius of sloted hole</param>
         ///<param name="height">(float) height of sloted hole volume</param> 
         ///<returns>(Brep) Brep Geometry</returns>
-        static member SlotedHole( plane:Plane, length, width, height):Brep  =
+        static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =
             if length<width then failwithf "SlotedHole: length= %g must be more than width= %g" length width
             let root05  = sqrt 0.5
             let y05 = 0.5 * width
@@ -168,4 +168,120 @@ module ExtrasBrep =
             if isNull rb || rb.Length <> 1  then 
                 failwithf "*** Failed to Create loft part of  SlotedHole , at tolerance %f" Doc.ModelAbsoluteTolerance
             rb.[0].CapPlanarHoles(Doc.ModelAbsoluteTolerance)
+        
+
+
+        [<Extension>]
+        ///<summary>Creates a solid Brep in the Shape of a  cylinder</summary>
+        ///<param name="plane">(Plane) Origin is center of base of cylinder</param>
+        ///<param name="diameter">(float) Diameter of cylinder</param>
+        ///<param name="length">(float) total length of the screw brep</param>
+        ///<returns>(Brep) Brep Geometry</returns>
+        static member CreateCylinder ( plane:Plane, diameter, length):Brep  =            
+            let circ = Circle(plane,diameter*0.5)
+            let cy = Cylinder(circ,length)
+            Brep.CreateFromCylinder(cy, capBottom=true, capTop=true)
+
+        [<Extension>]
+        ///<summary>Creates a Brep in the Shape of a Countersunk Screw Hole , 45 degrees slope
+        ///a caped cone and a cylinder</summary>
+        ///<param name="plane">(Plane) Origin is center of conebase or head</param>
+        ///<param name="outerDiameter">(float) diameter of cone base</param>
+        ///<param name="innerDiameter">(float) Diameter of cylinder</param>
+        ///<param name="length">(float) total length of the screw brep</param>
+        ///<returns>(Brep) Brep Geometry</returns>
+        static member CreateCounterSunkScrewVolume ( plane:Plane, outerDiameter, innerDiameter, length):Brep  =
+            let r = outerDiameter*0.5
+            let mutable plco = Plane(plane)
+            plco.Origin <- plco.Origin + plco.ZAxis * r
+            plco.Flip()
+            let cone = Cone(plco, r, r)
+            let coneSrf = Brep.CreateFromCone(cone, capBottom=true)
+            plane.Rotate(Math.PI * 0.5, plane.ZAxis)|> failIfFalse "rotate plane" // so that seam of cone an cylinder align
+            let cySrf = RhinoScriptSyntax.CreateCylinder(plane, innerDiameter, length)
+            let bs = Brep.CreateBooleanUnion( [coneSrf; cySrf], Doc.ModelAbsoluteTolerance)
+            if bs.Length <> 1 then failwithf "%d items as result from creating countersunc screw" bs.Length
+            let brep = bs.[0]
+            if brep.SolidOrientation = BrepSolidOrientation.Inward then brep.Flip()
+            brep
+
+        ///<summary>if brep.SolidOrientation is inward then flip brep </summary>
+        static member OrientBrep (brep:Brep):Brep  =
+            if brep.SolidOrientation = BrepSolidOrientation.Inward then  
+                brep.Flip()
+            brep
+
+        static member CreateExrusionAtPlane(curveToExtrudeInWorldXY:Curve, plane:Plane, height, [<OPT;DEF(0.0)>]extraHeightPerSide:float): Brep =
+            let mutable pl = Plane(plane)
+            if extraHeightPerSide <> 0.0 then 
+                pl.Origin <- pl.Origin - pl.ZAxis*extraHeightPerSide
+            let xform = RhinoScriptSyntax.XformRotation1(Plane.WorldXY,pl)
+            let c = curveToExtrudeInWorldXY.DuplicateCurve()
+            c.Transform(xform) |> failIfFalse "xform in CreateExrusionAtPlane"
+            let h = extraHeightPerSide + height
+            let brep = Surface.CreateExtrusion(c, pl.ZAxis * h )
+                            .ToBrep()
+                            .CapPlanarHoles(Doc.ModelAbsoluteTolerance)
+            if brep.SolidOrientation = BrepSolidOrientation.Inward then brep.Flip()
+            brep
+            
+
+        [<Extension>]
+        ///<summary>Subtracts trimmer from brep (= BooleanDifference), 
+        /// so that a single brep is returned, 
+        /// draws objects and zooms on them if an error occures</summary>
+        ///<param name="trimmer">(Brep)the volume to cut out</param>
+        ///<param name="keep">(Brep) the volume to keep</param>
+        ///<param name="subtractionLocations">(int) Optional, The amount of locations where the brep is expected to be cut
+        /// This is an optional safety check that makes it twice as slow. 
+        //  It ensures that the count of breps from  Brep.CreateBooleanIntersection is equal to subtractionLocations </param>
+        ///<returns>(Brep) Brep Geometry</returns>
+        static member substractBrep (keep:Brep,trimmer:Brep,[<OPT;DEF(0)>]subtractionLocations:int)  :Brep =
+            if not trimmer.IsSolid then
+                RhinoScriptSyntax.draw "debug trimmer" trimmer
+                RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                failwithf "substractBrep:CreateBooleanDifference trimmer is NOT a closed polysurface" 
+            if not keep.IsSolid then
+                RhinoScriptSyntax.draw "debug keep" keep
+                RhinoScriptSyntax.ZoomBoundingBox(keep.GetBoundingBox(false))
+                failwithf "substractBrep:CreateBooleanDifference keep Volume is NOT a closed polysurface" 
+            
+            if subtractionLocations <> 0 then 
+                let xs = Brep.CreateBooleanIntersection (keep,trimmer,Doc.ModelAbsoluteTolerance) // TODO expensive extra check
+                if isNull xs then
+                    RhinoScriptSyntax.draw "debug trimmer no Intersection" trimmer
+                    RhinoScriptSyntax.draw "debug keep no Intersection" keep
+                    RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                    failwithf "substractBrep:CreateBooleanIntersection check isnull, no intersection found, tolerance = %g" Doc.ModelAbsoluteTolerance
+                if xs.Length <> subtractionLocations then
+                    RhinoScriptSyntax.draw "debug trimer empty Intersection" trimmer
+                    RhinoScriptSyntax.draw "debug keep empty Intersection" keep
+                    RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                    failwithf "substractBrep:CreateBooleanIntersection check returned %d breps instead of one , tolerance = %g" xs.Length Doc.ModelAbsoluteTolerance
+                for x in xs do x.Dispose()
+
+            let bs =  Brep.CreateBooleanDifference(keep,trimmer,Doc.ModelAbsoluteTolerance)
+            if isNull bs then
+                RhinoScriptSyntax.draw "debug trimmer" trimmer
+                RhinoScriptSyntax.draw "debug keep" keep
+                RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                failwithf "substractBrep:CreateBooleanDifference is null, tolerance = %g" Doc.ModelAbsoluteTolerance
+            if bs.Length = 0 then
+                RhinoScriptSyntax.draw "debug trimer for empty result" trimmer
+                RhinoScriptSyntax.draw "debug keep for empty result" keep
+                RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                failwithf "substractBrep:CreateBooleanDifference returned 0 breps instead of one , tolerance = %g" Doc.ModelAbsoluteTolerance
+            if bs.Length <> 1 then 
+                bs |> Seq.iter (RhinoScriptSyntax.draw "debug more than one")
+                RhinoScriptSyntax.draw "debug trimer for more than one" trimmer
+                RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                failwithf "substractBrep:CreateBooleanDifference returned %d breps instead of one , tolerance = %g" bs.Length Doc.ModelAbsoluteTolerance            
+            let brep = bs.[0]
+            if subtractionLocations = 0 && brep.Vertices.Count = keep.Vertices.Count then // extra test if 
+                RhinoScriptSyntax.draw "debug trimmer same vertex count on  result" trimmer
+                RhinoScriptSyntax.draw "debug keep same vertex count on  result" keep
+                RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
+                failwithf "substractBrep:CreateBooleanDifference returned same vertex count on input and output brep is this desired ?, tolerance = %g" Doc.ModelAbsoluteTolerance
+            if brep.SolidOrientation = BrepSolidOrientation.Inward then  brep.Flip()
+            brep
       

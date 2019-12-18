@@ -63,10 +63,8 @@ module ExtrasCurried =
         
         [<Extension>]
         static member matchUserText (sourceId:Guid) ( key:string) (targetId:Guid) : unit= 
-            let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
             let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
-            let v = sc.Attributes.GetUserString(key)
-            if isNull v || v="" then failwithf "matchUserText: key '%s' not found on %A" key sourceId
+            let v = RhinoScriptSyntax.GetUserText(sourceId,key)
             if not <| de.Attributes.SetUserString(key,v) then failwithf "matchUserText: failed to set key '%s' to '%s' on %A" key v targetId
         
         [<Extension>]

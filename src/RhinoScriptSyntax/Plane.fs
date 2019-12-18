@@ -56,7 +56,7 @@ module ExtensionsPlane =
 
     [<Extension>]
     ///<summary>Moves the origin of a plane</summary>
-    ///<param name="plane">(Plane) Plane or ConstructionPlane</param>
+    ///<param name="plane">(Plane) Plane </param>
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
     ///<returns>(Plane) moved plane</returns>
     static member MovePlane(plane:Plane, origin:Point3d) : Plane =
@@ -65,6 +65,16 @@ module ExtensionsPlane =
         let mutable rc = Plane(plane)
         rc.Origin <- origin
         rc
+
+    [<Extension>]
+    ///<summary>Flip this plane by swapping out the X and Y axes and inverting the Z axis.</summary>
+    ///<param name="plane">(Plane) Plane </param>
+    ///<returns>(Plane) moved plane</returns>
+    static member FlipPlane(plane:Plane) : Plane =
+        let pl = Plane(plane)
+        pl.Flip()
+        pl
+
 
     [<Extension>]
     ///<summary>Returns the point on a plane that is closest to a test point</summary>
