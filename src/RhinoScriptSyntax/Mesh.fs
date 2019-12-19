@@ -223,6 +223,7 @@ module ExtensionsMesh =
         let joinedmesh = new Mesh()
         joinedmesh.Append(meshes)
         let rc = Doc.Objects.AddMesh(joinedmesh)
+        if rc = Guid.Empty then failwithf "Failed to join Meshes %A" objectIds
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.Coerceguid(objectId)

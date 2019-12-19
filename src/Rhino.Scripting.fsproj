@@ -52,6 +52,7 @@
     <Compile Include="70_ExtraVector.fs" />
     <Compile Include="71_ExtrasLine.fs" />
     <Compile Include="71_ExtrasBrep.fs" />
+    <Compile Include="ExtrasMesh.fs" />
   </ItemGroup>
   
   <ItemGroup>

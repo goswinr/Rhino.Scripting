@@ -109,7 +109,7 @@ module ExtrasBrep =
    
    
     //[<Extension>] //Error 3246  
-    type RhinoScriptSyntax with
+    type RhinoScriptSyntax with // TODO chnage to Brep extensions ??!!
    
         [<Extension>]
         ///<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
@@ -284,4 +284,36 @@ module ExtrasBrep =
                 failwithf "substractBrep:CreateBooleanDifference returned same vertex count on input and output brep is this desired ?, tolerance = %g" Doc.ModelAbsoluteTolerance
             if brep.SolidOrientation = BrepSolidOrientation.Inward then  brep.Flip()
             brep
-      
+        
+        
+        ///<summary> If Mesh.CreateFromBrep fails it uses ExtractRenderMesh command and returns both mesh and temporay created brep Guid</summary>
+        static member getRenderMesh (brep:Brep) :Result<Guid,Guid*Guid> =
+            //https://discourse.mcneel.com/t/failed-to-create-closed-mesh-with-mesh-createfrombrep-brep-meshing-params-while-sucessfull-with-rhino-command--mesh/35481/8
+            let meshing =                
+                let m = MeshingParameters.FastRenderMesh  
+                //m.MinimumEdgeLength <- 1.5
+                m.JaggedSeams <- false
+                m.ClosedObjectPostProcess <- true
+                //m.GridMinCount <- 1
+                //m.GridAspectRatio <- 1e4
+                //m.Tolerance <- 1.0
+                m  
+            let ms = Mesh.CreateFromBrep(brep,meshing)
+            let m0 = new Mesh()
+            for p in ms do 
+                m0.Append p 
+            let g = ref Guid.Empty
+            if  m0.IsValid && m0.IsClosed && ( g := Doc.Objects.AddMesh m0 ; !g <> Guid.Empty) then 
+                Ok !g 
+            else                        
+                let mb = brep |> Doc.Objects.AddBrep 
+                RhinoScriptSyntax.EnableRedraw(true)
+                Doc.Views.Redraw()
+                RhinoScriptSyntax.SelectObject(mb)
+                RhinoScriptSyntax.Command("ExtractRenderMesh ") |> failIfFalse "mesh render"
+                let ms = RhinoScriptSyntax.LastCreatedObjects()
+                if ms.Count <> 1 then failwithf "getRenderMesh: %d in LastCreatedObjects" ms.Count 
+                RhinoScriptSyntax.EnableRedraw(false)
+                let k = RhinoScriptSyntax.UnselectAllObjects()
+                if k <> 1 then failwithf "getRenderMesh: %d Unselected" k
+                Error (ms.[0],mb) 
