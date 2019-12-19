@@ -2069,14 +2069,14 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Joins multiple curves together to form one or more curves or polycurves</summary>
-    ///<param name="curveIds">(Guid) List of multiple curves</param>
+    ///<param name="curveIds">(Guid seq) List of multiple curves</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Delete input objects after joining</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>2.1 * Doc.ModelAbsoluteTolerance</c>
     ///Join tolerance. If omitted, 2.1 * document absolute
     ///  tolerance is used</param>
     ///<returns>(Guid ResizeArray) Object objectId representing the new curves</returns>
-    static member JoinCurves(curveIds:Guid [], [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
+    static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         if Seq.length(curveIds)<2 then
             failwithf "curveIds must contain at least 2 items.  curveIds:'%A' deleteInput:'%A' tolerance:'%A'" curveIds deleteInput tolerance
 

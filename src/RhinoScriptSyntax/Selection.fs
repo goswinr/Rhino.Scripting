@@ -131,7 +131,7 @@ module ExtensionsSelection =
                 if Vis.Contains(object.Attributes.LayerIndex) then 
                     objectIds.Add(object.Id)                    
             if printCount then
-                RhinoScriptSyntax.Print ("ShownObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))
+                RhinoScriptSyntax.Print ("ShownObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))                   
             objectIds
 
 
