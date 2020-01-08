@@ -46,7 +46,6 @@ module ExtrasVector =
     ///project vector to plane
     let projectToPlane (pl:Plane) (v:Vector3d) =
         let pt = pl.Origin + v
-
         let clpt = pl.ClosestPoint(pt)
         clpt-pl.Origin
     
@@ -168,7 +167,22 @@ module ExtrasVector =
 
     //[<Extension>] //Error 3246
     type RhinoScriptSyntax with
+        
+        ///projects to plane an retuns angle in degrees in plane betwen -180 and + 180
+        [<Extension>]        
+        static member AngleInPlane180( plane:Plane, vector:Vector3d):float  = 
+            let v = projectToPlane plane vector |> unitize
+            let dot = v * plane.XAxis 
+            let ang = acos dot  |> toDegrees
+            if v*plane.YAxis < 0.0 then -ang else ang
 
+        ///projects to plane an retuns angle in degrees in plane betwen 0 and 360
+        [<Extension>]        
+        static member AngleInPlane360( plane:Plane, vector:Vector3d):float  = 
+            let v = projectToPlane plane vector |> unitize
+            let dot = v * plane.XAxis 
+            let ang = acos dot  |> toDegrees
+            if v*plane.YAxis < 0.0 then 360.0-ang else ang
 
         [<Extension>]
         static member DrawVector(   vector:Vector3d, 
@@ -201,8 +215,8 @@ module ExtrasVector =
             let sc = distance/v.Length
             from + v*sc
     
-        [<Extension>]
-        static member DivPt(from:Point3d, dir:Point3d, rel:float) : Point3d  =
+        [<Extension>] //TODO add xml doc
+        static member DivPt(from:Point3d, dir:Point3d, [<OPT;DEF(0.5)>]rel:float) : Point3d  =
             let v = dir - from
             from + v*rel
         
@@ -244,7 +258,7 @@ module ExtrasVector =
         
         ///Auto detects points from closed polylines and loops them
         ///Distance must have exact length, be singelton or empty seq
-        [<Extension>]
+        [<Extension>] //TODO docstring
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistances: float seq, 
                                         [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
