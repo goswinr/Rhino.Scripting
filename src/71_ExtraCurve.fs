@@ -18,8 +18,8 @@ module ExtrasCurve =
 
         ///<summary>returns the Fillet Arc if it fits within the points</summary>
         static member filletArc  (prevPt:Point3d, midPt:Point3d, nextPt:Point3d, radius:float)  : Arc   = 
-            let A = midPt-prevPt
-            let B = midPt-nextPt
+            let A = prevPt-midPt
+            let B = nextPt-midPt
             let uA = A |> unitize 
             let uB = B |> unitize      
             // calculate trim       
@@ -40,32 +40,29 @@ module ExtrasCurve =
         ///<param name="fillets">(ResizeArray<int*float>)The indix of the cornes to filet and the fillet radius</param>
         ///<param name="polyline">(ResizeArray<Point3d>) The polyline as pointlist </param> 
         ///<returns>a PolyCurve object</returns>
-        static member filletPolyline (fillets: ResizeArray<int*float>, polyline:IList<Point3d>): PolyCurve = 
-            let R=dict()
-            for i,rad in fillets do 
-                if i >= polyline.LastIndex then failwithf "cannot fillet corner %d . in polyline of %d points" i polyline.Count
-                R.[i]<-rad
+        static member filletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
+            for i in fillets.Keys do 
+                if i >= polyline.LastIndex then failwithf "cannot fillet corner %d . in polyline of %d points" i polyline.Count                
         
             let closed = RhinoScriptSyntax.Distance(polyline.[0], polyline.Last) < Doc.ModelAbsoluteTolerance 
             let mutable prevPt = polyline.[0]
             let mutable endPt = polyline.Last
-            let plc = new PolyCurve()
-        
-            if R.ContainsKey 0 then
+            let plc = new PolyCurve()        
+            if fillets.ContainsKey 0 then
                 if closed then 
-                    let arc = RhinoScriptSyntax.filletArc (polyline.Last, polyline.[0], polyline.[1], R.[0])
+                    let arc = RhinoScriptSyntax.filletArc (polyline.Last, polyline.[0], polyline.[1], fillets.[0])
                     plc.Append arc  |> ignore 
                     prevPt <- arc.EndPoint
                     endPt <- arc.StartPoint
-                    if R.ContainsKey polyline.LastIndex then failwithf "filletPolyline:Cannot set last and first radius on closed polyline fillet"
+                    if fillets.ContainsKey polyline.LastIndex then failwithf "filletPolyline:Cannot set last and first radius on closed polyline fillet"
                 else
                     failwithf "filletPolyline: Cannot set radius at index 0 on open polyline"
         
             for i = 1 to polyline.Count - 2 do  
                 let pt = polyline.[i]
-                if R.ContainsKey i then 
+                if fillets.ContainsKey i then 
                     let ptn = polyline.[i+1]
-                    let arc = RhinoScriptSyntax.filletArc (prevPt, pt, ptn, R.[i])
+                    let arc = RhinoScriptSyntax.filletArc (prevPt, pt, ptn, fillets.[i])
                     plc.Append (Line (prevPt,arc.StartPoint)) |> ignore 
                     plc.Append arc |> ignore 
                     prevPt <- arc.EndPoint
