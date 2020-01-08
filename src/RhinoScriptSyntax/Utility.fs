@@ -196,7 +196,10 @@ module ExtensionsUtility =
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) the square distance</returns>
     static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float =
-        (point1 - point2).SquareLength
+        let x = point1.X - point2.X
+        let y = point1.Y - point2.Y        
+        let z = point1.Z - point2.Z          
+        x*x + y*y + z*z
 
     [<Extension>]
     ///<summary>Measures distance between two 3D points</summary>
@@ -204,7 +207,10 @@ module ExtensionsUtility =
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) the distance</returns>
     static member inline Distance(point1:Point3d, point2:Point3d) : float =
-        (point1 - point2).Length
+        let x = point1.X - point2.X
+        let y = point1.Y - point2.Y        
+        let z = point1.Z - point2.Z          
+        sqrt (x*x + y*y + z*z)
 
     [<Extension>]
     ///<summary>Returns section names or keys in one section of an ini file</summary>
