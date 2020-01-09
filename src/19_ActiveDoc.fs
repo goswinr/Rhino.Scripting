@@ -63,6 +63,8 @@ module Synchronisation =
     let mutable internal SeffRhinoWindow : System.Windows.Window = null
 
     let private getSeffRhinoPluginSyncContext() =
+        // some reflection hacks because Rhinocommon does not expose a UI sync context
+        // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7
         try
             let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831")
             let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
@@ -70,7 +72,7 @@ module Synchronisation =
             let modul = SeffRhinoAssembly.GetType("Seff.Rhino.Sync") 
             syncContext <- modul.GetProperty("syncContext").GetValue(SeffRhinoAssembly) :?> Threading.SynchronizationContext
         with _ ->
-            "Failed to get Seff.Rhino.Sync.syncContext via Reflection, UI interactions will crash Rhino!"
+            "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Async UI interactions like selecting objects might crash Rhino!"
             |>> RhinoApp.WriteLine 
             |> printfn "%s"
 
@@ -103,10 +105,7 @@ module Synchronisation =
                 if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
                 return res
                 } |> Async.RunSynchronously 
-    
-    
-    
-    
+        
     do
         if HostUtils.RunningInRhino  then
             if isNull syncContext then getSeffRhinoPluginSyncContext()
