@@ -41,10 +41,10 @@ module ExtensionsDocument =
             match width, height with
             | 0, 0 -> rhview.ClientRectangle.Size
             | x, 0 ->
-                let sc = x /. rhview.ClientRectangle.Size.Width
+                let sc = x ./. rhview.ClientRectangle.Size.Width
                 Drawing.Size(x, rhview.ClientRectangle.Size.Height *. sc)
             | 0, y ->
-                let sc = y /. rhview.ClientRectangle.Size.Height
+                let sc = y ./. rhview.ClientRectangle.Size.Height
                 Drawing.Size(rhview.ClientRectangle.Size.Width *. sc , y)
             | x, y -> Drawing.Size(x, y)
         let ignoreHighlights =  (flags &&& 1) <> 1
