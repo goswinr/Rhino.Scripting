@@ -43,6 +43,10 @@ module ExtrasCurried =
             RhinoScriptSyntax.GetUserText(objectId, key)
         
         [<Extension>]
+        static member hasUserText( key:string) (objectId:Guid) : bool = 
+            RhinoScriptSyntax.HasUserText(objectId, key)
+        
+        [<Extension>]
         static member tryGetUserText( key:string) (objectId:Guid) : string option= 
             RhinoScriptSyntax.TryGetUserText(objectId, key)
 
