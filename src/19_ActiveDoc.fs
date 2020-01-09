@@ -15,6 +15,8 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 [<AutoOpen>]
 module ActiceDocument =
     
+    /// to store last created object form executing a rs.Command(...)
+    let mutable internal commandSerialNumbers : option<uint32*uint32> = None // to store last created object form executing a rs.Command(...)
 
     /// the current active Rhino document (= the file currently open)
     let mutable Doc = 
@@ -23,14 +25,43 @@ module ActiceDocument =
         else 
             failwith "failed to find the active Rhino document, is this dll running inside Rhino? " 
     
-    ///Redraws all Rhino viewports
-    let redraw() = Doc.Views.Redraw()
-   
+    //Redraws all Rhino viewports
+    //let redraw() = Doc.Views.Redraw()
 
+    /// gets a localised descritipn on rhino object type (curve , point, surface ....)
+    let internal rhtype (g:Guid)=
+        if g = Guid.Empty then "-Guid.Empty-"
+        else
+            let o = Doc.Objects.FindId(g) 
+            if isNull o then sprintf "Guid does not exits in current Rhino Document"
+            else o.ShortDescription(false)
+
+    ///so that python range expressions dont need top be translated to F#
+    let internal range(l) = seq{0..(l-1)} 
+
+    ///if first value is 0.0 return second else first
+    let internal ifZero1 a b = if a = 0.0 then b else a
+    
+    ///if second value is 0.0 return first else second
+    let internal ifZero2 a b = if b = 0.0 then a else b    
+
+    do
+        if HostUtils.RunningInRhino then 
+            Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
+            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwith "Esc Key was pressed, Exception raised via Rhino.Scripting") // done in Seff.Rhino
+
+        
+[<AutoOpen>]
+/// To acces the UI therad from other therads
+module Synchronisation =
+    
     ///SynchronizationContext  of the currently Running Rhino Instance, set via reflection on Seff.Rhino
     let mutable internal syncContext: Threading.SynchronizationContext  = null //Threading.SynchronizationContext.Current  //OLD:: to be set via RhinoScriptSyntax.SynchronizationContext from running script
+    
     let mutable internal SeffRhinoAssembly : Reflection.Assembly = null
+    
     let mutable internal SeffRhinoWindow : System.Windows.Window = null
+
     let private getSeffRhinoPluginSyncContext() =
         try
             let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831")
@@ -50,40 +81,36 @@ module ActiceDocument =
         with _ ->
             "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
             |>> RhinoApp.WriteLine 
-            |> printfn "%s"
-
-
-
-    /// to store last created object form executing a rs.Command(...)
-    let mutable internal commandSerialNumbers : option<uint32*uint32> = None // to store last created object form executing a rs.Command(...)
-
-    /// gets a localised descritipn on rhino object type (curve , point, surface ....)
-    let internal rhtype (g:Guid)=
-        if g = Guid.Empty then "-Guid.Empty-"
+            |> printfn "%s"        
+    
+    ///Hides Seff editor window if it exists, optinally enables redraw and evaluates a function on UI Thread
+    let doSync enableRedraw (f:unit->'T): 'T =
+        let redraw = Doc.Views.RedrawEnabled
+        if not RhinoApp.InvokeRequired then 
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+            if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true
+            let res = f()
+            if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
+            if notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
+            res
         else
-            let o = Doc.Objects.FindId(g) 
-            if isNull o then sprintf "Guid does not exits in current Rhino Document"
-            else o.ShortDescription(false)
-
-    ///so that python range expressions dont need top be translated to F#
-    let internal range(l) = seq{0..(l-1)} 
-
-    ///if first value is 0.0 return second else first
-    let internal ifZero1 a b = if a = 0.0 then b else a
+            async{
+                do! Async.SwitchToContext syncContext
+                if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+                if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true                
+                let res = f()
+                if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
+                if notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
+                return res
+                } |> Async.RunSynchronously 
     
-    ///if second value is 0.0 return first else second
-    let internal ifZero2 a b = if b = 0.0 then a else b
     
-
+    
+    
     do
-        if HostUtils.RunningInRhino then 
-            Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
+        if HostUtils.RunningInRhino  then
             if isNull syncContext then getSeffRhinoPluginSyncContext()
             if isNull SeffRhinoWindow then getSeffRhinoPluginWindow()
-            "Rhino.Scripting is set up."
+            "Rhino.Scripting SynchronizationContext is set up."
             |>> RhinoApp.WriteLine 
             |> printfn "%s"
-            
-            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwith "Esc Key was pressed, Exception raised via Rhino.Scripting") // done in Seff.Rhino
-
-        

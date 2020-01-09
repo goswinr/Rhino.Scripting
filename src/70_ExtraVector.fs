@@ -13,8 +13,7 @@ open FsEx.SaveIgnore
 
 
 module ExtrasVector =
-        
-       
+               
     let inline scale (sc:float) (v:Vector3d) = v * sc  
     
     ///Same as reverse
