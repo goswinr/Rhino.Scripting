@@ -179,9 +179,7 @@ module ExtensionsSelection =
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then dont even hide and show
+        let get () =  // TODO Add check if already hidden, then dont even hide and show
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -190,26 +188,25 @@ module ExtensionsSelection =
             go.GeometryFilter <- DocObjects.ObjectType.Curve
             go.SubObjectSelect <- false
             go.GroupSelect <- false
-            go.AcceptNothing(true)
-            return
-                if go.Get() <> Input.GetResult.Object then None
-                else
-                    let objref = go.Object(0)
-                    let objectId = objref.ObjectId
-                    let presel = go.ObjectsWerePreselected
-                    let selmethod = objref.SelectionMethod()
-                    let point = objref.SelectionPoint()
-                    let crv, curveparameter = objref.CurveParameter()
-                    let viewname = go.View().ActiveViewport.Name
-                    let obj = go.Object(0).Object()
-                    go.Dispose()
-                    if not <| select && not <| preselect then
-                        Doc.Objects.UnselectAll()|> ignore
-                        Doc.Views.Redraw()
-                    obj.Select(select)  |> ignore
-                    Some (objectId, presel, selmethod, point, curveparameter, viewname)
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+            go.AcceptNothing(true)            
+            if go.Get() <> Input.GetResult.Object then None
+            else
+                let objref = go.Object(0)
+                let objectId = objref.ObjectId
+                let presel = go.ObjectsWerePreselected
+                let selmethod = objref.SelectionMethod()
+                let point = objref.SelectionPoint()
+                let crv, curveparameter = objref.CurveParameter()
+                let viewname = go.View().ActiveViewport.Name
+                let obj = go.Object(0).Object()
+                go.Dispose()
+                if not <| select && not <| preselect then
+                    Doc.Objects.UnselectAll()|> ignore
+                    Doc.Views.Redraw()
+                obj.Select(select)  |> ignore
+                Some (objectId, presel, selmethod, point, curveparameter, viewname)
+            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+        doSync true true get
 
 
     [<Extension>]
@@ -259,7 +256,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
                 Some obj.Id
-        doSync true get
+        doSync true true get
                 
 
     [<Extension>]
@@ -291,9 +288,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * string> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -307,25 +302,24 @@ module ExtensionsSelection =
                 go.GeometryFilter <- RhinoScriptSyntax.FilterHelper(filter)
             go.SubObjectSelect <- false
             go.GroupSelect <- false
-            go.AcceptNothing(true)
-            return
-                if go.Get() <> Input.GetResult.Object then None
-                else
-                    let objref = go.Object(0)
-                    let objectId = objref.ObjectId
-                    let presel = go.ObjectsWerePreselected
-                    let selmethod = objref.SelectionMethod()
-                    let point = objref.SelectionPoint()
-                    let viewname = go.View().ActiveViewport.Name
-                    let obj = go.Object(0).Object()
-                    go.Dispose()
-                    if not <| select && not <| presel then
-                        Doc.Objects.UnselectAll() |> ignore
-                        Doc.Views.Redraw()
-                    obj.Select(select) |> ignore
-                    Some (objectId, presel, selmethod, point, viewname)
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+            go.AcceptNothing(true)            
+            if go.Get() <> Input.GetResult.Object then None
+            else
+                let objref = go.Object(0)
+                let objectId = objref.ObjectId
+                let presel = go.ObjectsWerePreselected
+                let selmethod = objref.SelectionMethod()
+                let point = objref.SelectionPoint()
+                let viewname = go.View().ActiveViewport.Name
+                let obj = go.Object(0).Object()
+                go.Dispose()
+                if not <| select && not <| presel then
+                    Doc.Objects.UnselectAll() |> ignore
+                    Doc.Views.Redraw()
+                obj.Select(select) |> ignore
+                Some (objectId, presel, selmethod, point, viewname)
+            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+        doSync true true get
 
 
     [<Extension>]
@@ -362,9 +356,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(0)>]maximumCount:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -380,23 +372,22 @@ module ExtensionsSelection =
             go.SubObjectSelect <- false
             go.GroupSelect <- group
             go.AcceptNothing(true)
-            return
-                if go.GetMultiple(minimumCount, maximumCount) <> Input.GetResult.Object then None
-                else
-                    if not <| select && not <| go.ObjectsWerePreselected then
-                        Doc.Objects.UnselectAll() |> ignore
-                        Doc.Views.Redraw()
-                    let rc = ResizeArray()
-                    let count = go.ObjectCount
-                    for i in range(count) do
-                        let objref = go.Object(i)
-                        rc.Add(objref.ObjectId)
-                        let obj = objref.Object()
-                        if select && notNull obj then obj.Select(select) |> ignore
-                    if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
-                    Some rc
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+            if go.GetMultiple(minimumCount, maximumCount) <> Input.GetResult.Object then None
+            else
+                if not <| select && not <| go.ObjectsWerePreselected then
+                    Doc.Objects.UnselectAll() |> ignore
+                    Doc.Views.Redraw()
+                let rc = ResizeArray()
+                let count = go.ObjectCount
+                for i in range(count) do
+                    let objref = go.Object(i)
+                    rc.Add(objref.ObjectId)
+                    let obj = objref.Object()
+                    if select && notNull obj then obj.Select(select) |> ignore
+                if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
+                Some rc
+            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+        doSync true true get
 
 
     [<Extension>]
@@ -508,9 +499,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -523,35 +512,34 @@ module ExtensionsSelection =
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
-            go.AcceptNothing(true)
-            return
-                if go.GetMultiple(1, 0) <> Input.GetResult.Object then None
-                else
-                    if not <| select && not <| go.ObjectsWerePreselected then
-                        Doc.Objects.UnselectAll() |> ignore
-                        Doc.Views.Redraw()
-                    let rc = ResizeArray()
-                    let count = go.ObjectCount
-                    for i in range(count) do
-                        let objref = go.Object(i)
-                        let objectId = objref.ObjectId
-                        let presel = go.ObjectsWerePreselected
-                        let selmethod = objref.SelectionMethod()
-                        let point = objref.SelectionPoint()
-                        let viewname = go.View().ActiveViewport.Name
-                        rc.Add( (objectId, presel, selmethod, point, viewname) )
-                        let obj = objref.Object()
-                        if select && notNull obj then obj.Select(select) |> ignore
-                    if printCount then 
-                        rc 
-                        |> ResizeArray.map ( fun (id, _, _, _, _) -> id )
-                        |> RhinoScriptSyntax.ObjectDescription
-                        |> (+) "GetObjectsEx got " 
-                        |> RhinoScriptSyntax.Print
+            go.AcceptNothing(true)            
+            if go.GetMultiple(1, 0) <> Input.GetResult.Object then None
+            else
+                if not <| select && not <| go.ObjectsWerePreselected then
+                    Doc.Objects.UnselectAll() |> ignore
+                    Doc.Views.Redraw()
+                let rc = ResizeArray()
+                let count = go.ObjectCount
+                for i in range(count) do
+                    let objref = go.Object(i)
+                    let objectId = objref.ObjectId
+                    let presel = go.ObjectsWerePreselected
+                    let selmethod = objref.SelectionMethod()
+                    let point = objref.SelectionPoint()
+                    let viewname = go.View().ActiveViewport.Name
+                    rc.Add( (objectId, presel, selmethod, point, viewname) )
+                    let obj = objref.Object()
+                    if select && notNull obj then obj.Select(select) |> ignore
+                if printCount then 
+                    rc 
+                    |> ResizeArray.map ( fun (id, _, _, _, _) -> id )
+                    |> RhinoScriptSyntax.ObjectDescription
+                    |> (+) "GetObjectsEx got " 
+                    |> RhinoScriptSyntax.Print
 
-                    Some rc
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+                Some rc
+            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+        doSync true true get
 
 
     [<Extension>]
@@ -592,9 +580,7 @@ module ExtensionsSelection =
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -604,32 +590,31 @@ module ExtensionsSelection =
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)
-            return
-                if go.Get() <> Input.GetResult.Object then
-                    None
-                else
-                    let objref = go.Object(0)
-                    let rhobj = objref.Object()
-                    rhobj.Select(select) |> ignore
+            if go.Get() <> Input.GetResult.Object then
+                None
+            else
+                let objref = go.Object(0)
+                let rhobj = objref.Object()
+                rhobj.Select(select) |> ignore
+                Doc.Views.Redraw()
+                let objectId = rhobj.Id
+                let prepicked = go.ObjectsWerePreselected
+                let selmethod = objref.SelectionMethod()
+                let mutable point = objref.SelectionPoint()
+                let surf, u, v = objref.SurfaceParameter()
+                let mutable uv = (u, v)
+                if not <| point.IsValid then
+                    point <- Point3d.Unset
+                    uv <- RhinoMath.UnsetValue, RhinoMath.UnsetValue
+                let view = go.View()
+                let name = view.ActiveViewport.Name
+                go.Dispose()
+                if not <| select && not <| prepicked then
+                    Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
-                    let objectId = rhobj.Id
-                    let prepicked = go.ObjectsWerePreselected
-                    let selmethod = objref.SelectionMethod()
-                    let mutable point = objref.SelectionPoint()
-                    let surf, u, v = objref.SurfaceParameter()
-                    let mutable uv = (u, v)
-                    if not <| point.IsValid then
-                        point <- Point3d.Unset
-                        uv <- RhinoMath.UnsetValue, RhinoMath.UnsetValue
-                    let view = go.View()
-                    let name = view.ActiveViewport.Name
-                    go.Dispose()
-                    if not <| select && not <| prepicked then
-                      Doc.Objects.UnselectAll() |> ignore
-                      Doc.Views.Redraw()
-                    Some ( objectId, prepicked, selmethod, point, uv, name)
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+                Some ( objectId, prepicked, selmethod, point, uv, name)
+            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+        doSync true true get
 
 
     [<Extension>]

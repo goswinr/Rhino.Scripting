@@ -45,26 +45,23 @@ module ExtensionsGrips =
     static member GetObjectGrip( [<OPT;DEF(null:string)>]message:string,
                                  [<OPT;DEF(false)>]preselect:bool,
                                  [<OPT;DEF(false)>]select:bool) : option<Guid * int * Point3d> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
             let grip = ref null
             let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
-            return
-                if rc <> Commands.Result.Success || isNull grip then
-                    None
-                else
-                    if select then
-                        grip.Select(true, true)|> ignore
-                        Doc.Views.Redraw()
-                    Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
+            if rc <> Commands.Result.Success || isNull grip then
+                None
+            else
+                if select then
+                    grip.Select(true, true)|> ignore
+                    Doc.Views.Redraw()
+                Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
 
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
+            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+        doSync true true get
 
 
 
@@ -82,9 +79,7 @@ module ExtensionsGrips =
     static member GetObjectGrips( [<OPT;DEF(null:string)>]message:string,
                                   [<OPT;DEF(false)>]preselect:bool,
                                   [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid * int * Point3d> =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -101,8 +96,8 @@ module ExtensionsGrips =
                     if select then grip.Select(true, true)|>ignore
                 if select then Doc.Views.Redraw()
             if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
-            return rc
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously
+            rc
+        doSync true true get
 
 
 

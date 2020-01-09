@@ -233,16 +233,15 @@ module ExtensionsApplication =
     ///The command echo mode True will display the commands on the commandline. If omitted, command prompts are echoed (True)</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member Command(commandString:string, [<OPT;DEF(true)>]echo:bool) : bool =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
+        let getKeepEditor () = 
             //if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then dont even hide and show
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
             let rc = RhinoApp.RunScript(commandString, echo)
             let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
             commandSerialNumbers <- None
             if start<>ende then  commandSerialNumbers <- Some(start, ende)
-            return rc
-        } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+            rc
+        doSync false false getKeepEditor
 
 
     [<Extension>]
