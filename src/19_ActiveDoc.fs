@@ -83,24 +83,24 @@ module Synchronisation =
             |>> RhinoApp.WriteLine 
             |> printfn "%s"        
     
-    ///Hides Seff editor window if it exists, optinally enables redraw and evaluates a function on UI Thread
-    let doSync enableRedraw (f:unit->'T): 'T =
+    ///Evaluates a function on UI Thread. Optionally enables redraw . Optionally hides Seff editor window if it exists. 
+    let doSync enableRedraw hideEditor (f:unit->'T): 'T =
         let redraw = Doc.Views.RedrawEnabled
         if not RhinoApp.InvokeRequired then 
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+            if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
             if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true
             let res = f()
             if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
+            if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
             res
         else
             async{
                 do! Async.SwitchToContext syncContext
-                if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+                if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
                 if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true                
                 let res = f()
                 if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
-                if notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
+                if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
                 return res
                 } |> Async.RunSynchronously 
     
