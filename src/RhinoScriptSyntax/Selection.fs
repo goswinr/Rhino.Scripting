@@ -234,9 +234,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
                                     [<OPT;DEF(false)>]subObjects:bool) : Guid option =
-        async{
-            if RhinoApp.InvokeRequired then do! Async.SwitchToContext syncContext
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+        let get () = 
             if not  preselect then
                 Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
@@ -247,23 +245,22 @@ module ExtensionsSelection =
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- subObjects
             go.GroupSelect <- false
-            go.AcceptNothing(true)
-            return
-                if go.Get() <> Input.GetResult.Object then None
+            go.AcceptNothing(true)            
+            if go.Get() <> Input.GetResult.Object then None
+            else
+                let objref = go.Object(0)
+                let obj = objref.Object()
+                //let presel = go.ObjectsWerePreselected
+                go.Dispose()
+                //if not <| select && not <| preselect then Doc.Objects.UnselectAll() |> ignore  Doc.Views.Redraw()
+                if select then 
+                    obj.Select(select)  |> ignore
                 else
-                    let objref = go.Object(0)
-                    let obj = objref.Object()
-                    //let presel = go.ObjectsWerePreselected
-                    go.Dispose()
-                    //if not <| select && not <| preselect then Doc.Objects.UnselectAll() |> ignore  Doc.Views.Redraw()
-                    if select then 
-                        obj.Select(select)  |> ignore
-                    else
-                        Doc.Objects.UnselectAll() |> ignore
-                    Doc.Views.Redraw()
-                    Some obj.Id
-                |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()            
-            } |> Async.StartImmediateAsTask |> Async.AwaitTask |> Async.RunSynchronously // to start on same thread
+                    Doc.Objects.UnselectAll() |> ignore
+                Doc.Views.Redraw()
+                Some obj.Id
+        doSync true get
+                
 
     [<Extension>]
     ///<summary>Prompts user to pick, or select a single object</summary>
