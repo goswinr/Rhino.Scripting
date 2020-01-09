@@ -140,16 +140,16 @@ module ExtensionsGeometry =
     ///  1 = bold
     ///  2 = italic
     ///  3 = bold and italic</param>
-    ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) Optional, Default Value: <c>DocObjects.TextHorizontalAlignment.Left</c></param>
-    ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) Optional, Default Value: <c>DocObjects.TextVerticalAlignment.Top</c></param>
+    ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte. Optional, Default Value: <c>TextHorizontalAlignment.Center</c></param>
+    ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte. Optional, Default Value: <c>TextVerticalAlignment.Middle</c></param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
     static member AddText(  text:string,
                             plane:Plane,
                             [<OPT;DEF(1.0)>]height:float,
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
-                            [<OPT;DEF(1)>]horizontalAlignment:DocObjects.TextHorizontalAlignment,
-                            [<OPT;DEF(1)>]verticalAlignment:DocObjects.TextVerticalAlignment) : Guid =
+                            [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep paramter optional ???
+                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid =
 
         if isNull text || text = "" then failwithf "Rhino.Scripting: Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let bold = (1 = fontStyle || 3 = fontStyle)
@@ -180,8 +180,8 @@ module ExtensionsGeometry =
             else
               te.SetItalic(italic)|> ignore
 
-        te.TextHorizontalAlignment <- horizontalAlignment
-        te.TextVerticalAlignment <- verticalAlignment
+        te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
+        te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
         let objectId = Doc.Objects.Add(te);
         if objectId = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         Doc.Views.Redraw()
