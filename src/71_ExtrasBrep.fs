@@ -191,35 +191,43 @@ module ExtrasBrep =
             if brep.SolidOrientation = BrepSolidOrientation.Inward then  brep.Flip()
             brep
         
-        
-        ///<summary> If Mesh.CreateFromBrep fails it uses ExtractRenderMesh command and returns both mesh and temporay created brep Guid</summary>
-        static member getRenderMesh (brep:Brep) :Result<Guid,Guid*Guid> =
-            //https://discourse.mcneel.com/t/failed-to-create-closed-mesh-with-mesh-createfrombrep-brep-meshing-params-while-sucessfull-with-rhino-command--mesh/35481/8
+        [<Extension>]
+        ///<summary> Calls Mesh.CreateFromBrep, summary>
+        ///<param name="brep">(Brep)the Polysurface to extract mesh from</param>
+        ///<param name="meshingParameters">(MeshingParameters) Optional, The meshing parameters , if omitted the current meshing parameters are used </param>
+        ///<returns>(Mesh) Mesh Geometry</returns>
+        static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Mesh =            
             let meshing =                
-                let m = MeshingParameters.FastRenderMesh  
-                //m.MinimumEdgeLength <- 1.5
-                m.JaggedSeams <- false
-                m.ClosedObjectPostProcess <- true
-                //m.GridMinCount <- 1
-                //m.GridAspectRatio <- 1e4
-                //m.Tolerance <- 1.0
-                m  
+                if notNull meshingParameters then meshingParameters
+                else
+                    Doc.GetCurrentMeshingParameters()
+            meshing.ClosedObjectPostProcess <- true // not needed use heal instead
             let ms = Mesh.CreateFromBrep(brep,meshing)
-            let m0 = new Mesh()
+            let m = new Mesh()
             for p in ms do 
-                m0.Append p 
+                m.Append p 
             let g = ref Guid.Empty
-            if  m0.IsValid && m0.IsClosed && ( g := Doc.Objects.AddMesh m0 ; !g <> Guid.Empty) then 
-                Ok !g 
-            else                        
-                let mb = brep |> Doc.Objects.AddBrep 
-                RhinoScriptSyntax.EnableRedraw(true)
-                Doc.Views.Redraw()
-                RhinoScriptSyntax.SelectObject(mb)
-                RhinoScriptSyntax.Command("ExtractRenderMesh ") |> failIfFalse "mesh render"
-                let ms = RhinoScriptSyntax.LastCreatedObjects()
-                if ms.Count <> 1 then failwithf "getRenderMesh: %d in LastCreatedObjects" ms.Count 
-                RhinoScriptSyntax.EnableRedraw(false)
-                let k = RhinoScriptSyntax.UnselectAllObjects()
-                if k <> 1 then failwithf "getRenderMesh: %d Unselected" k
-                Error (ms.[0],mb) 
+            if brep.IsSolid && not m.IsClosed then // https://discourse.mcneel.com/t/failed-to-create-closed-mesh-with-mesh-createfrombrep-brep-meshing-params-while-sucessfull-with-rhino-command--mesh/35481/8
+                m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 100.0) |> ignore // see https://discourse.mcneel.com/t/mesh-createfrombrep-fails/93926
+                if not m.IsClosed then 
+                    m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 100.0 + meshing.MinimumEdgeLength * 100.0) |> ignore             
+            if  not m.IsValid || (brep.IsSolid && not m.IsClosed) then 
+                //if  m0.IsValid && m0.IsClosed && ( g := Doc.Objects.AddMesh m0 ; !g <> Guid.Empty) then 
+                //    Ok !g 
+                //else                        //if it fails it uses ExtractRenderMesh command and returns both mesh and temporay created brep Guid</
+                //    let mb = brep |> Doc.Objects.AddBrep 
+                //    RhinoScriptSyntax.EnableRedraw(true)
+                //    Doc.Views.Redraw()
+                //    RhinoScriptSyntax.SelectObject(mb)
+                //    RhinoScriptSyntax.Command("ExtractRenderMesh ") |> failIfFalse "mesh render"
+                //    let ms = RhinoScriptSyntax.LastCreatedObjects()
+                //    if ms.Count <> 1 then failwithf "getRenderMesh: %d in LastCreatedObjects" ms.Count 
+                //    RhinoScriptSyntax.EnableRedraw(false)
+                //    let k = RhinoScriptSyntax.UnselectAllObjects()
+                //    if k <> 1 then failwithf "getRenderMesh: %d Unselected" k
+                //    Error (ms.[0],mb) 
+                Doc.Objects.AddMesh m|> RhinoScriptSyntax.setLayer "Exceptions from RhinoScriptSyntax.ExtractRenderMesh"
+                failwithf "RhinoScriptSyntax.ExtractRenderMesh: failed to create cloase mesh from closed brep"
+            else
+                m
+           
