@@ -142,7 +142,7 @@ module ExtrasBrep =
         /// This is an optional safety check that makes it twice as slow. 
         //  It ensures that the count of breps from  Brep.CreateBooleanIntersection is equal to subtractionLocations </param>
         ///<returns>(Brep) Brep Geometry</returns>
-        static member substractBrep (keep:Brep,trimmer:Brep,[<OPT;DEF(0)>]subtractionLocations:int)  :Brep =
+        static member SubstractBrep (keep:Brep,trimmer:Brep,[<OPT;DEF(0)>]subtractionLocations:int)  :Brep =
             if not trimmer.IsSolid then
                 RhinoScriptSyntax.draw "debug trimmer" trimmer
                 RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
@@ -192,11 +192,11 @@ module ExtrasBrep =
             brep
         
         [<Extension>]
-        ///<summary> Calls Mesh.CreateFromBrep, summary>
+        ///<summary> Calls Mesh.CreateFromBrep, and mesh.HealNakedEdges() to try to ensure mesh is closed if input is closed</summary>
         ///<param name="brep">(Brep)the Polysurface to extract mesh from</param>
         ///<param name="meshingParameters">(MeshingParameters) Optional, The meshing parameters , if omitted the current meshing parameters are used </param>
-        ///<returns>(Mesh) Mesh Geometry</returns>
-        static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Mesh =            
+        ///<returns>(Result<Mesh,Mesh> ) Ok Mesh Geometry or Error Mesh if input brep is closed but output mesh not</returns>
+        static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Result<Mesh,Mesh> =            
             let meshing =                
                 if notNull meshingParameters then meshingParameters
                 else
@@ -210,8 +210,14 @@ module ExtrasBrep =
             if brep.IsSolid && not m.IsClosed then // https://discourse.mcneel.com/t/failed-to-create-closed-mesh-with-mesh-createfrombrep-brep-meshing-params-while-sucessfull-with-rhino-command--mesh/35481/8
                 m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 100.0) |> ignore // see https://discourse.mcneel.com/t/mesh-createfrombrep-fails/93926
                 if not m.IsClosed then 
-                    m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 100.0 + meshing.MinimumEdgeLength * 100.0) |> ignore             
-            if  not m.IsValid || (brep.IsSolid && not m.IsClosed) then 
+                    m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 1000.0 + meshing.MinimumEdgeLength * 100.0) |> ignore             
+            if  not m.IsValid then
+                Doc.Objects.AddBrep brep|> RhinoScriptSyntax.setLayer "RhinoScriptSyntax.ExtractRenderMesh mesh from Brep invalid"                    
+                failwithf "RhinoScriptSyntax.ExtractRenderMesh: failed to create valid mesh from brep"
+            elif brep.IsSolid && not m.IsClosed then 
+                Error m
+                //Doc.Objects.AddMesh m |> RhinoScriptSyntax.setLayer "RhinoScriptSyntax.ExtractRenderMesh not closed"
+                //printf "Mesh from closed Brep is not closed, see debug layer"
                 //if  m0.IsValid && m0.IsClosed && ( g := Doc.Objects.AddMesh m0 ; !g <> Guid.Empty) then 
                 //    Ok !g 
                 //else                        //if it fails it uses ExtractRenderMesh command and returns both mesh and temporay created brep Guid</
@@ -226,8 +232,6 @@ module ExtrasBrep =
                 //    let k = RhinoScriptSyntax.UnselectAllObjects()
                 //    if k <> 1 then failwithf "getRenderMesh: %d Unselected" k
                 //    Error (ms.[0],mb) 
-                Doc.Objects.AddMesh m|> RhinoScriptSyntax.setLayer "Exceptions from RhinoScriptSyntax.ExtractRenderMesh"
-                failwithf "RhinoScriptSyntax.ExtractRenderMesh: failed to create cloase mesh from closed brep"
             else
-                m
+                Ok m
            
