@@ -205,7 +205,7 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
                 Some (objectId, presel, selmethod, point, curveparameter, viewname)
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -318,7 +318,7 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select) |> ignore
                 Some (objectId, presel, selmethod, point, viewname)
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -386,7 +386,7 @@ module ExtensionsSelection =
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                 Some rc
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -538,7 +538,7 @@ module ExtensionsSelection =
                     |> RhinoScriptSyntax.Print
 
                 Some rc
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -613,7 +613,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
                 Some ( objectId, prepicked, selmethod, point, uv, name)
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 

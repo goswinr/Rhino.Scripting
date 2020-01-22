@@ -125,7 +125,7 @@ module ExtensionsUserinterface =
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then Some(toDegrees(angle))
             else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -163,7 +163,7 @@ module ExtensionsUserinterface =
                     None
                 else
                     Some (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            if notNull seffRhinoWindow then seffRhinoWindow.Show()
             res
         doSync true true get
 
@@ -202,7 +202,7 @@ module ExtensionsUserinterface =
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then Some ((!box).GetCorners())
             else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -216,7 +216,7 @@ module ExtensionsUserinterface =
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
             if rc then Some (!col) else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -236,7 +236,7 @@ module ExtensionsUserinterface =
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
             worldpt.Transform(xf)
-            if notNull SeffRhinoWindow then SeffRhinoWindow.Show() //or skip ?
+            if notNull seffRhinoWindow then seffRhinoWindow.Show() //or skip ?
             worldpt, screenpt, viewport.Id, clientpt
         doSync true true get
 
@@ -289,7 +289,7 @@ module ExtensionsUserinterface =
                     gp2.Dispose()
                     None
             | _ -> None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -333,7 +333,7 @@ module ExtensionsUserinterface =
                         rhobj.Select(true)|> ignore
                     Doc.Views.Redraw()
                 Some r
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -361,7 +361,7 @@ module ExtensionsUserinterface =
                 let rc = gi.Number()
                 gi.Dispose()
                 Some rc
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -450,7 +450,7 @@ module ExtensionsUserinterface =
                 Some line
             else
                 None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -506,7 +506,7 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -540,7 +540,7 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -570,7 +570,7 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -593,7 +593,7 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -608,7 +608,7 @@ module ExtensionsUserinterface =
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             if cmdrc = Commands.Result.Success then Some point
             else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -639,7 +639,7 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -706,7 +706,7 @@ module ExtensionsUserinterface =
                     Some rc
                 else
                     None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
 
         doSync true true get
 
@@ -750,7 +750,7 @@ module ExtensionsUserinterface =
             Doc.Views.Redraw()
             if rc = Commands.Result.Success then Some polyline
             else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -777,7 +777,7 @@ module ExtensionsUserinterface =
                 let rc = gn.Number()
                 gn.Dispose()
                 Some rc
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -812,7 +812,7 @@ module ExtensionsUserinterface =
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
             else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -842,7 +842,7 @@ module ExtensionsUserinterface =
                 Some <| gs.Option().EnglishName
             else
                 Some <| gs.StringResult()
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 
@@ -1086,7 +1086,7 @@ module ExtensionsUserinterface =
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)            
             if  rc then Some (!defaultValNumber)
             else None
-            |>> fun _ -> if notNull SeffRhinoWindow then SeffRhinoWindow.Show()
+            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
         doSync true true get
 
 

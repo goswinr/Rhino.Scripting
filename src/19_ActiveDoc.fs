@@ -55,12 +55,14 @@ module ActiceDocument =
 /// To acces the UI therad from other therads
 module Synchronisation =
     
-    ///SynchronizationContext  of the currently Running Rhino Instance, set via reflection on Seff.Rhino
-    let mutable internal syncContext: Threading.SynchronizationContext  = null //Threading.SynchronizationContext.Current  //OLD:: to be set via RhinoScriptSyntax.SynchronizationContext from running script
+    ///the SynchronizationContext of the currently Running Rhino Instance, 
+    let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection on Seff.Rhino
     
-    let mutable internal SeffRhinoAssembly : Reflection.Assembly = null
+    ///the Assembly currently running Seff Editor Window
+    let mutable seffRhinoAssembly : Reflection.Assembly = null //set via reflection on Seff.Rhino
     
-    let mutable internal SeffRhinoWindow : System.Windows.Window = null
+    ///the WPF Window of currently running Seff Editor
+    let mutable seffRhinoWindow : System.Windows.Window = null //set via reflection on Seff.Rhino
 
     let private getSeffRhinoPluginSyncContext() =
         // some reflection hacks because Rhinocommon does not expose a UI sync context
@@ -68,9 +70,9 @@ module Synchronisation =
         try
             let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831")
             let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
-            SeffRhinoAssembly <- seffRh.Assembly
-            let modul = SeffRhinoAssembly.GetType("Seff.Rhino.Sync") 
-            syncContext <- modul.GetProperty("syncContext").GetValue(SeffRhinoAssembly) :?> Threading.SynchronizationContext
+            seffRhinoAssembly <- seffRh.Assembly
+            let modul = seffRhinoAssembly.GetType("Seff.Rhino.Sync") 
+            syncContext <- modul.GetProperty("syncContext").GetValue(seffRhinoAssembly) :?> Threading.SynchronizationContext
         with _ ->
             "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Async UI interactions like selecting objects might crash Rhino!"
             |>> RhinoApp.WriteLine 
@@ -78,8 +80,8 @@ module Synchronisation =
 
     let private getSeffRhinoPluginWindow() =
         try            
-            let modul = SeffRhinoAssembly.GetType("Seff.Rhino.Sync") 
-            SeffRhinoWindow <- modul.GetProperty("window").GetValue(SeffRhinoAssembly)  :?> System.Windows.Window
+            let modul = seffRhinoAssembly.GetType("Seff.Rhino.Sync") 
+            seffRhinoWindow <- modul.GetProperty("window").GetValue(seffRhinoAssembly)  :?> System.Windows.Window
         with _ ->
             "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
             |>> RhinoApp.WriteLine 
@@ -89,27 +91,27 @@ module Synchronisation =
     let doSync enableRedraw hideEditor (f:unit->'T): 'T =
         let redraw = Doc.Views.RedrawEnabled
         if not RhinoApp.InvokeRequired then 
-            if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+            if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Hide()
             if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true
             let res = f()
             if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
-            if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
+            if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Show() 
             res
         else
             async{
                 do! Async.SwitchToContext syncContext
-                if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Hide()
+                if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Hide()
                 if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true                
                 let res = f()
                 if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
-                if hideEditor && notNull SeffRhinoWindow then SeffRhinoWindow.Show() 
+                if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Show() 
                 return res
                 } |> Async.RunSynchronously 
         
     do
         if HostUtils.RunningInRhino  then
             if isNull syncContext then getSeffRhinoPluginSyncContext()
-            if isNull SeffRhinoWindow then getSeffRhinoPluginWindow()
+            if isNull seffRhinoWindow then getSeffRhinoPluginWindow()
             "Rhino.Scripting SynchronizationContext is set up."
             |>> RhinoApp.WriteLine 
             |> printfn "%s"
