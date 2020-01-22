@@ -1271,20 +1271,45 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
     ///<returns>(unit) void, nothing</returns>
     static member SelectObject(objectId:Guid) : unit =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if 0 = rhobj.Select(true) then failwithf "SelectObject failed on %A" objectId
-        Doc.Views.Redraw()
+        doSync false false (fun () -> 
+            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            if 0 = rhobj.Select(true) then 
+                let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
+                if rhobj.IsHidden then 
+                    failwithf "SelectObject failed on hidden object %A " objectId 
+                elif rhobj.IsLocked then 
+                    failwithf "SelectObject failed on locked object %A " objectId 
+                elif not lay.IsVisible then 
+                    failwithf "SelectObject failed on invisible layer %s for object %A " lay.FullPath objectId 
+                elif not lay.IsLocked then 
+                    failwithf "SelectObject failed on locked layer %s for object %A " lay.FullPath objectId 
+                else
+                    failwithf "SelectObject failed on object %A " objectId 
+            Doc.Views.Redraw()
+            )
 
     [<Extension>]
     ///<summary>Selects one or more objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
     ///<returns>(unit) void, nothing</returns>
     static member SelectObject(objectIds:Guid seq) : unit =  //PLURAL
-        let mutable rc = 0
-        for objectId in objectIds do
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            if 0 = rhobj.Select(true) then failwithf "SelectObject failed on %A" objectId
-        Doc.Views.Redraw()
+        doSync false false (fun () ->             
+            for objectId in objectIds do
+                let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+                if 0 = rhobj.Select(true) then 
+                    let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
+                    if rhobj.IsHidden then 
+                        failwithf "SelectObject failed on hidden object %A out of %d objects" objectId (Seq.length objectIds)
+                    elif rhobj.IsLocked then 
+                        failwithf "SelectObject failed on locked object %A out of %d objects" objectId (Seq.length objectIds)
+                    elif not lay.IsVisible then 
+                        failwithf "SelectObject failed on invisible layer %s for object %A out of %d objects" lay.FullPath objectId (Seq.length objectIds)
+                    elif not lay.IsLocked then 
+                        failwithf "SelectObject failed on locked layer %s for object %A out of %d objects" lay.FullPath objectId (Seq.length objectIds)
+                    else
+                        failwithf "SelectObject failed on object %A out of %d objects" objectId (Seq.length objectIds)
+            Doc.Views.Redraw()
+            )
         
 
     [<Extension>]
