@@ -117,7 +117,7 @@ module ExtensionsGrips =
                     else
                         grip.NeighborGrip(0, i, 0, false)
                 if notNull ng && enable then
-                    ng.Select(true) |> ignore
+                    ng.Select(true) |> ignore //TODO make sync ?
                     Doc.Views.Redraw()
                 Ok ng
 

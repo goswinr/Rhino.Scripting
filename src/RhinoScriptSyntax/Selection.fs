@@ -87,7 +87,7 @@ module ExtensionsSelection =
             let e = Doc.Objects.GetObjectList(it)
             let objectids = ResizeArray()             
             for object in e do
-                if select then object.Select(true) |> ignore                
+                if select then object.Select(true) |> ignore   //TODO make sync ?             
             if objectids.Count > 0 && select then Doc.Views.Redraw()           
             objectids
 
@@ -155,7 +155,7 @@ module ExtensionsSelection =
             if not <| e.MoveNext() then failwithf "FirstObject not found"
             let object = e.Current
             if isNull object then failwithf "FirstObject not found(null)"
-            if select then object.Select(true) |> ignore
+            if select then object.Select(true) |> ignore //TODO make sync ?
             object.Id
 
 
@@ -694,7 +694,7 @@ module ExtensionsSelection =
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
                 rc.Add(obj.Id)
-                obj.Select(true) |> ignore
+                obj.Select(true) |> ignore //TODO make sync ?
             else
                 obj.Select(false) |> ignore
         Doc.Views.Redraw()
@@ -719,7 +719,7 @@ module ExtensionsSelection =
                 let obj = Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
                     rc.Add(obj.Id)
-                if select then obj.Select(true) |> ignore
+                if select then obj.Select(true) |> ignore //TODO make sync ?
                 serialnumber <- serialnumber + 1u
                 if select && rc.Count > 1 then Doc.Views.Redraw()
             rc
@@ -747,7 +747,7 @@ module ExtensionsSelection =
         let firstobj = Seq.last rhobjs
         if isNull firstobj then failwithf "Rhino.Scripting: LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
-            firstobj.Select(true) |> ignore
+            firstobj.Select(true) |> ignore //TODO make sync ?
             Doc.Views.Redraw()
         firstobj.Id
 
@@ -777,7 +777,7 @@ module ExtensionsSelection =
         |>  function
             |None ->failwithf "NextObject not found for %A" objectId
             |Some (t, n) ->
-                if select then n.Select(true) |> ignore
+                if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id
 
 
@@ -811,7 +811,7 @@ module ExtensionsSelection =
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =
         let rhinoobjects = Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
-            for obj in rhinoobjects do obj.Select(true)|> ignore
+            for obj in rhinoobjects do obj.Select(true)|> ignore //TODO make sync ?
         Doc.Views.Redraw()
         resizeArray {for obj in rhinoobjects do yield obj.Id }
 
@@ -830,7 +830,7 @@ module ExtensionsSelection =
             ResizeArray()
         else
             if select then
-                for obj in rhinoobjects do obj.Select(true) |> ignore
+                for obj in rhinoobjects do obj.Select(true) |> ignore //TODO make sync ?
                 Doc.Views.Redraw()
             resizeArray { for obj in rhinoobjects do yield obj.Id }
 
@@ -847,7 +847,7 @@ module ExtensionsSelection =
         if isNull rhinoobjects then ResizeArray()
         else
             if select then
-                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore
+                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore //TODO make sync ?
                 Doc.Views.Redraw()
             resizeArray {for obj in rhinoobjects do yield obj.Id }
 
@@ -878,7 +878,7 @@ module ExtensionsSelection =
         let objects = Doc.Objects.GetObjectList(settings)
         let ids = resizeArray{ for rhobj in objects do yield rhobj.Id }
         if ids.Count>0 && select then
-            for rhobj in objects do rhobj.Select(true) |> ignore
+            for rhobj in objects do rhobj.Select(true) |> ignore //TODO make sync ?
             Doc.Views.Redraw()
         ids
 
@@ -971,7 +971,7 @@ module ExtensionsSelection =
             elif objecttyp &&& geometryfilter <> DocObjects.ObjectType.None then
                 bFound <- true
             if bFound then
-                if select then object.Select(true) |> ignore
+                if select then object.Select(true) |> ignore //TODO make sync ?
                 objectids.Add(object.Id)
         if objectids.Count > 0 && select then Doc.Views.Redraw()
         objectids
@@ -1026,7 +1026,7 @@ module ExtensionsSelection =
         for object in e do
             let bbox = object.Geometry.GetBoundingBox(true)
             if viewport.IsVisible(bbox) then
-                if select then object.Select(true) |> ignore
+                if select then object.Select(true) |> ignore //TODO make sync ?
                 objectids.Add(object.Id)
         if objectids.Count>0 && select then Doc.Views.Redraw()
         objectids
@@ -1065,7 +1065,7 @@ module ExtensionsSelection =
             let rc = ResizeArray()
             for rhobj in objects do
                 rc.Add(rhobj.Id)
-                if select then rhobj.Select(true) |> ignore
+                if select then rhobj.Select(true) |> ignore //TODO make sync ?
             if select then Doc.Views.Redraw()
         rc
 

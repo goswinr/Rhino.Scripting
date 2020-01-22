@@ -330,7 +330,7 @@ module ExtensionsUserinterface =
                 if  select then
                     for item in r do
                         let rhobj = Doc.Objects.FindId(t1 item)
-                        rhobj.Select(true)|> ignore
+                        rhobj.Select(true)|> ignore //TODO make sync ?
                     Doc.Views.Redraw()
                 Some r
             |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()

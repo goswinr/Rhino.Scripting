@@ -828,7 +828,7 @@ module ExtensionsSurface =
                 curves.Add(rc)
                 if select then
                     let rhobject = RhinoScriptSyntax.CoerceRhinoObject(rc)
-                    rhobject.Select(true)  |>  ignore
+                    rhobject.Select(true)  |>  ignore //TODO make sync ?
         if notNull curves then Doc.Views.Redraw()
         curves
 
