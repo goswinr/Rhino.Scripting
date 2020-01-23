@@ -2404,7 +2404,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Remove portions of the surface outside of the specified interval in U direction</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
-    ///<param name="interval">(float*float) Sub section of the surface to keep.
+    ///<param name="interval">(float*float) Sub section of the surface to keep.</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Should the input surface be deleted</param>
     ///<returns>(Guid) new surface identifier on success</returns>
@@ -2428,7 +2428,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Remove portions of the surface outside of the specified interval in V direction</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
-    ///<param name="interval">(float*float) Sub section of the surface to keep.
+    ///<param name="interval">(float*float) Sub section of the surface to keep.</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///Should the input surface be deleted</param>
     ///<returns>(Guid) new surface identifier on success</returns>

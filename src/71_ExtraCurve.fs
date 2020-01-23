@@ -37,8 +37,8 @@ module ExtrasCurve =
             Arc(arcStart, - uA , arcEnd)
 
         ///<summary>Fillest some corners of polyline</summary>
-        ///<param name="fillets">(ResizeArray<int*float>)The indix of the cornes to filet and the fillet radius</param>
-        ///<param name="polyline">(ResizeArray<Point3d>) The polyline as pointlist </param> 
+        ///<param name="fillets">(int*float ResizeArray)The indix of the cornes to filet and the fillet radius</param>
+        ///<param name="polyline">(Point3d ResizeArray) The polyline as pointlist </param> 
         ///<returns>a PolyCurve object</returns>
         static member filletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
             for i in fillets.Keys do 

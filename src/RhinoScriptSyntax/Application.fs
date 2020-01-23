@@ -29,7 +29,7 @@ module ExtensionsApplication =
     ///  using Rhino's Options command and modifying the contents of the files tab</summary>
     ///<param name="folder">(string) A valid folder, or path, to add</param>
     ///<param name="index">(int) Optional, Zero-based position in the search path list to insert.
-    ///  If omitted, path will be appended to the end of the search path list.
+    ///  If omitted, path will be appended to the end of the search path list.</param>
     ///<returns>(int) The index where the item was inserted.
     ///  -1 on failure</returns>
     static member AddSearchPath(folder:string, [<OPT;DEF(-1)>]index:int) : int =
