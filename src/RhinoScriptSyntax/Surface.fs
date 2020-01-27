@@ -218,34 +218,34 @@ module ExtensionsSurface =
         Doc.Views.Redraw()
         objectId
 
-      [<Extension>]
-      ///<summary>Fits a surface through curve, point, point cloud, and mesh objects</summary>
-      ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
-      ///  Acceptable object types include curves, points, point clouds, and meshes</param>
-      ///<param name="startSurfaceId">(Guid) The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
-      ///  to the surface you are trying to create</param>
-      ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-      ///The tolerance used by input analysis functions.</param>
-      ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-      ///Try to find an outside curve and trims the surface to it.  The default value is True</param>
-      ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
-      ///The basic distance between points sampled from input curves.  The default value is 0.1</param>
-      ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
-      ///Determines the behavior of the surface in areas where its not otherwise controlled by the input.
-      ///  Lower numbers make the surface behave more like a stiff material, higher, more like a flexible material.
-      ///  That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
-      ///  mapping to that area of the surface when the flexibility value is low.  The scale is logarithmic.
-      ///  For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
-      ///  make the surface flexible.  The default value is 1.0</param>
-      ///<param name="surfacePull">(float) Optional, Default Value: <c>1.0</c>
-      ///Similar to stiffness, but applies to the starting surface. The bigger the pull, the closer
-      ///  the resulting surface shape will be to the starting surface.  The default value is 1.0</param>
-      ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
-      ///Clamps the edges of the starting surface in place. This option is useful if you are using a
-      ///  curve or points for deforming an existing surface, and you do not want the edges of the starting surface
-      ///  to move.  The default if False</param>
-      ///<returns>(Guid) Identifier of the new surface object</returns>
-      static member AddPatch( objectIds:Guid seq,
+    [<Extension>]
+    ///<summary>Fits a surface through curve, point, point cloud, and mesh objects</summary>
+    ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
+    ///  Acceptable object types include curves, points, point clouds, and meshes</param>
+    ///<param name="startSurfaceId">(Guid) The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
+    ///  to the surface you are trying to create</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///The tolerance used by input analysis functions.</param>
+    ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
+    ///Try to find an outside curve and trims the surface to it.  The default value is True</param>
+    ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
+    ///The basic distance between points sampled from input curves.  The default value is 0.1</param>
+    ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
+    ///Determines the behavior of the surface in areas where its not otherwise controlled by the input.
+    ///  Lower numbers make the surface behave more like a stiff material, higher, more like a flexible material.
+    ///  That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
+    ///  mapping to that area of the surface when the flexibility value is low.  The scale is logarithmic.
+    ///  For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
+    ///  make the surface flexible.  The default value is 1.0</param>
+    ///<param name="surfacePull">(float) Optional, Default Value: <c>1.0</c>
+    ///Similar to stiffness, but applies to the starting surface. The bigger the pull, the closer
+    ///  the resulting surface shape will be to the starting surface.  The default value is 1.0</param>
+    ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
+    ///Clamps the edges of the starting surface in place. This option is useful if you are using a
+    ///  curve or points for deforming an existing surface, and you do not want the edges of the starting surface
+    ///  to move.  The default if False</param>
+    ///<returns>(Guid) Identifier of the new surface object</returns>
+    static member AddPatch( objectIds:Guid seq,
                               startSurfaceId: Guid,
                               [<OPT;DEF(0.0)>]tolerance:float,
                               [<OPT;DEF(true)>]trim:bool,
