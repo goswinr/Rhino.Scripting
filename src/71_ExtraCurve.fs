@@ -78,14 +78,14 @@ module ExtrasCurve =
 
    
     ///<summary>The needed trimming of two planar surfaces in order to fit a fillet of given radius.
-    ///the Lines can be anywhere on plane ( except paralel to axis)</summary>
+    ///    the Lines can be anywhere on plane ( except paralel to axis)</summary>
     ///<param name="makeSCurve">(bool)only relevant if curves are skew: make S-curve if true or kink if false</param>
     ///<param name="radius">(float) radius of filleting zylinder</param>
     ///<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  planes to fillet, this might be the cross profuct of the two lines, but the lines might also be skew </param>
     ///<param name="lineA">(Line) First line to fillet, must not be prependicular to direction, the lines might also be skew  </param> 
     ///<param name="lineB">(Line) Second line to fillet, must not be prependicular to direction or first line, the lines might also be skew  </param> 
     ///<returns>The needed trimming of two planar surfaces in order to fit a fillet of given radius.
-    ///the Lines can be anywhere on plane ( except paralel to axis)</returns>
+    ///    the Lines can be anywhere on plane ( except paralel to axis)</returns>
     static member filletSkewLinesTrims (radius:float) (direction:Vector3d) (lineA:Line) (lineB:Line): float  =         
         let ok,axis = 
             let pla = Plane(lineA.From, lineA.Direction, direction)
@@ -108,16 +108,16 @@ module ExtrasCurve =
         tan(beta) * radius // the setback distance from intersection   
    
     ///<summary>Creates a fillet curve between two lines, 
-    ///the fillet might be an ellipse or free form 
-    ///but it always lies on the surface of a cylinder with the given direction and radius </summary>
+    ///    the fillet might be an ellipse or free form 
+    ///    but it always lies on the surface of a cylinder with the given direction and radius </summary>
     ///<param name="makeSCurve">(bool)only relevant if curves are skew: make S-curve if true or kink if false</param>
     ///<param name="radius">(float) radius of filleting zylinder</param>
     ///<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  planes to fillet, this might be the cross profuct of the two lines, but the lines might also be skew </param>
     ///<param name="lineA">(Line) First line to fillet, must not be prependicular to direction, the lines might also be skew  </param> 
     ///<param name="lineB">(Line) Second line to fillet, must not be prependicular to direction or first line, the lines might also be skew  </param> 
     ///<returns>(NurbsCurve)Fillet curve Geometry, 
-    ///  the true fillet arc on cylinder(wrong ends), 
-    ///  the point where fillet would be at radius 0, (same plane as arc) </returns>
+    ///    the true fillet arc on cylinder(wrong ends), 
+    ///    the point where fillet would be at radius 0, (same plane as arc) </returns>
     static member filletSkewLines makeSCurve (radius:float)  (direction:Vector3d) (lineA:Line) (lineB:Line): NurbsCurve*Arc*Point3d   = 
         let ok,axis = 
             let pla = Plane(lineA.From, lineA.Direction, direction)

@@ -26,8 +26,8 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
-    ///  transformation can be broken into a sequence of dialations, translations,
-    ///  rotations, and reflections</summary>
+    ///    transformation can be broken into a sequence of dialations, translations,
+    ///    rotations, and reflections</summary>
     ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False</returns>
     static member IsXformSimilarity(xform:Transform) : bool =
@@ -88,8 +88,8 @@ module ExtensionsTransformation =
     ///<param name="xform1">(Transform) First matrix to compare</param>
     ///<param name="xform2">(Transform) Second matrix to compare</param>
     ///<returns>(int) -1 if xform1 is smaller than xform2
-    ///  1 if xform1 bigger than xform2
-    ///  0 if xform1 = xform2</returns>
+    ///    1 if xform1 bigger than xform2
+    ///    0 if xform1 = xform2</returns>
     static member XformCompare(xform1:Transform, xform2:Transform) : int =
         //xform1 = RhinoScriptSyntax.Coercexform(xform1)
         //xform2 = RhinoScriptSyntax.Coercexform(xform2)
@@ -109,8 +109,8 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Returns the determinant of a transformation matrix. If the determinant
-    ///  of a transformation matrix is 0, the matrix is said to be singular. Singular
-    ///  matrices do not have inverses</summary>
+    ///    of a transformation matrix is 0, the matrix is said to be singular. Singular
+    ///    matrices do not have inverses</summary>
     ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant</returns>
     static member XformDeterminant(xform:Transform) : float =
@@ -120,7 +120,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Returns a diagonal transformation matrix. Diagonal matrices are 3x3 with
-    ///  the bottom row [0, 0, 0, 1]</summary>
+    ///    the bottom row [0, 0, 0, 1]</summary>
     ///<param name="diagonalValue">(float) The diagonal value</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformDiagonal(diagonalValue:float) : Transform =
@@ -178,7 +178,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Returns a rotation transformation that maps initialPlane to finalPlane.
-    ///  The planes should be right hand orthonormal planes</summary>
+    ///    The planes should be right hand orthonormal planes</summary>
     ///<param name="initialPlane">(Plane) Plane to rotate from</param>
     ///<param name="finalPlane">(Plane) Plane to rotate to</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
@@ -209,7 +209,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Calculate the minimal transformation that rotates startDirection to
-    ///  endDirection while fixing centerPoint</summary>
+    ///    endDirection while fixing centerPoint</summary>
     ///<param name="startDirection">(Vector3d) Start direction</param>
     ///<param name="endDirection">(Vector3d) End direction</param>
     ///<param name="centerPoint">(Point3d) The rotation center</param>
@@ -264,13 +264,13 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Transforms a point from either client-area coordinates of the specified view
-    ///  or screen coordinates to world coordinates. The resulting coordinates are represented
-    ///  as a 3-D point</summary>
+    ///    or screen coordinates to world coordinates. The resulting coordinates are represented
+    ///    as a 3-D point</summary>
     ///<param name="point">(Point3d) 2D point</param>
     ///<param name="view">(string) Optional, Title of a view. If omitted, the active view is used</param>
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
-    ///If False, point is in client-area coordinates. If True,
-    ///  point is in screen-area coordinates</param>
+    ///    If False, point is in client-area coordinates. If True,
+    ///    point is in screen-area coordinates</param>
     ///<returns>(Point3d) on success</returns>
     static member XformScreenToWorld( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
@@ -325,13 +325,13 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Transforms a point from world coordinates to either client-area coordinates of
-    ///  the specified view or screen coordinates. The resulting coordinates are represented
-    ///  as a 2D point</summary>
+    ///    the specified view or screen coordinates. The resulting coordinates are represented
+    ///    as a 2D point</summary>
     ///<param name="point">(Point3d) 3D point in world coordinates</param>
     ///<param name="view">(string) Optional, Title of a view. If omitted, the active view is used</param>
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
-    ///If False, the function returns the results as
-    ///  client-area coordinates. If True, the result is in screen-area coordinates</param>
+    ///    If False, the function returns the results as
+    ///    client-area coordinates. If True, the result is in screen-area coordinates</param>
     ///<returns>(Point2d) 2D point on success</returns>
     static member XformWorldToScreen( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,

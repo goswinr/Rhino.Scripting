@@ -17,7 +17,7 @@ module ExtensionsUserdata =
     [<Extension>]
     ///<summary>Removes user data strings from the current document</summary>
     ///<param name="section">(string) Optional, Section name. If omitted, all sections and their corresponding
-    ///  entries are removed</param>
+    ///    entries are removed</param>
     ///<param name="entry">(string) Optional, Entry name. If omitted, all entries for section are removed</param>
     ///<returns>(unit) void, nothing</returns>
     static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit =
@@ -78,7 +78,7 @@ module ExtensionsUserdata =
     ///<summary>Returns all user text keys stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///Location on the object to retrieve the user text</param>
+    ///    Location on the object to retrieve the user text</param>
     ///<returns>(string ResizeArray) all keys</returns>
     static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string ResizeArray =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -95,7 +95,7 @@ module ExtensionsUserdata =
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///Location on the object to retrieve the user text</param>
+    ///    Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
     static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -118,7 +118,7 @@ module ExtensionsUserdata =
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///Location on the object to retrieve the user text</param>
+    ///    Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
     static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option=
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -135,7 +135,7 @@ module ExtensionsUserdata =
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///Location on the object to retrieve the user text</param>
+    ///    Location on the object to retrieve the user text</param>
     ///<returns>(bool) if key exist true</returns>
     static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -163,10 +163,10 @@ module ExtensionsUserdata =
     ///<summary>Verifies that an object contains user text</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(int) result of test:
-    ///  0 = no user text
-    ///  1 = attribute user text
-    ///  2 = geometry user text
-    ///  3 = both attribute and geometry user text</returns>
+    ///    0 = no user text
+    ///    1 = attribute user text
+    ///    2 = geometry user text
+    ///    3 = both attribute and geometry user text</returns>
     static member IsUserText(objectId:Guid) : int =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable rc = 0
@@ -189,7 +189,7 @@ module ExtensionsUserdata =
     ///<summary>Sets or removes user text stored in the document</summary>
     ///<param name="key">(string) Key name to set</param>
     ///<param name="value">(string) Optional, The string value to set. If omitted the key/value pair
-    ///  specified by key will be deleted</param>
+    ///    specified by key will be deleted</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentUserText(key:string, [<OPT;DEF(null:string)>]value:string) : unit =
         Doc.Strings.SetString(key, value) |> ignoreObj
@@ -201,9 +201,9 @@ module ExtensionsUserdata =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair
-    ///  specified by key will be deleted</param>
+    ///    specified by key will be deleted</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///Location on the object to store the user text</param>
+    ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetUserText(objectId:Guid, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -217,9 +217,9 @@ module ExtensionsUserdata =
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair
-    ///  specified by key will be deleted</param>
+    ///    specified by key will be deleted</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///Location on the object to store the user text</param>
+    ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetUserText(objectIds:Guid seq, key:string, [<OPT;DEF(null:string)>]value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
         for objectId in objectIds do

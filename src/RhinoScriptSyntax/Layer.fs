@@ -17,15 +17,15 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Add a new layer to the document</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
-    ///  generates the layer name</param>
+    ///    generates the layer name</param>
     ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.
-    ///  If omitted a random color wil be choosen</param>
+    ///    If omitted a random color wil be choosen</param>
     ///<param name="visible">(bool) Optional, Default Value: <c>true</c>
-    ///Layer's visibility</param>
+    ///    Layer's visibility</param>
     ///<param name="locked">(bool) Optional, Default Value: <c>false</c>
-    ///Layer's locked state</param>
+    ///    Layer's locked state</param>
     ///<param name="parent">(string) Optional, Name of the new layer's parent layer. If omitted, the new
-    ///  layer will not have a parent layer</param>
+    ///    layer will not have a parent layer</param>
     ///<returns>(string) The full name of the new layer</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,
                             [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
@@ -83,10 +83,10 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Removes an existing layer from the document. The layer to be removed
-    ///  cannot be the current layer. Unlike the PurgeLayer method, the layer must
-    ///  be empty, or contain no objects, before it can be removed. Any layers that
-    ///  are children of the specified layer will also be removed if they are also
-    ///  empty</summary>
+    ///    cannot be the current layer. Unlike the PurgeLayer method, the layer must
+    ///    be empty, or contain no objects, before it can be removed. Any layers that
+    ///    are children of the specified layer will also be removed if they are also
+    ///    empty</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteLayer(layer:string) : bool =
@@ -161,7 +161,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
-    ///  Rhino's layer dialog</summary>
+    ///    Rhino's layer dialog</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success otherwise False</returns>
     static member IsLayerExpanded(layer:string) : bool =
@@ -372,7 +372,7 @@ module ExtensionsLayer =
     ///<summary>Return the name of a layer given it's identifier</summary>
     ///<param name="layerId">(Guid) Layer identifier</param>
     ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
-    ///Return the full path name `True` or short name `False`</param>
+    ///    Return the full path name `True` or short name `False`</param>
     ///<returns>(string) the layer's name</returns>
     static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullpath:bool) : string =
         let layer = RhinoScriptSyntax.CoerceLayer(layerId)
@@ -392,8 +392,8 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the current display order index of a layer as displayed in Rhino's
-    ///  layer dialog box. A display order index of -1 indicates that the current
-    ///  layer dialog filter does not allow the layer to appear in the layer list</summary>
+    ///    layer dialog box. A display order index of -1 indicates that the current
+    ///    layer dialog filter does not allow the layer to appear in the layer list</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(int) 0 based index of layer</returns>
     static member LayerOrder(layer:string) : int =
@@ -496,7 +496,7 @@ module ExtensionsLayer =
     ///<summary>Modify the parent layer of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="parent">(string) Name of new parent layer. To remove the parent layer,
-    ///  thus making a root-level layer, specify an empty string</param>
+    ///    thus making a root-level layer, specify an empty string</param>
     ///<returns>(unit) void, nothing</returns>
     static member ParentLayer(layer:string, parent:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
@@ -510,9 +510,9 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Removes an existing layer from the document. The layer will be removed
-    ///  even if it contains geometry objects. The layer to be removed cannot be the
-    ///  current layer
-    ///  empty</summary>
+    ///    even if it contains geometry objects. The layer to be removed cannot be the
+    ///    current layer
+    ///    empty</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member PurgeLayer(layer:string) : bool =

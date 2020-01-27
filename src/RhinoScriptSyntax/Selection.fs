@@ -65,13 +65,13 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Returns identifiers of all objects in the document</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects</param>
+    ///    Include grips objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
+    ///    Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) Identifiers for all the objects in the document</returns>
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
@@ -94,18 +94,18 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///    The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
+    ///    Include refrence objects such as work session objects</param>
     ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
-    ///Include locked objects</param>
+    ///    Include locked objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects</param>  
+    ///    Include grips objects</param>  
     ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
     static member ShownObjects(     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
@@ -137,13 +137,13 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifier of the first object in the document. The first
-    ///  object is the last object created by the user</summary>
+    ///    object is the last object created by the user</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object.  If omitted, the object is not selected</param>
+    ///    Select the object.  If omitted, the object is not selected</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted, light objects are not returned</param>
+    ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted, grips objects are not returned</param>
+    ///    Include grips objects.  If omitted, grips objects are not returned</param>
     ///<returns>(Guid) The identifier of the object</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
@@ -165,17 +165,17 @@ module ExtensionsSelection =
     ///<summary>Prompts user to pick or select a single curve object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects. If False, objects that
-    ///  are picked are not selected</param>
+    ///    Select the picked objects. If False, objects that
+    ///    are picked are not selected</param>
     ///<returns>(Guid * bool * int * Point3d * float * string) Option of Tuple containing the following information
-    ///  [0]  guid     identifier of the curve object
-    ///  [1]  bool     True if the curve was preselected, otherwise False
-    ///  [2]  Enum     DocObjects.SelectionMethod
-    ///  [3]  point    selection point
-    ///  [4]  number   the curve parameter of the selection point
-    ///  [5]  str      name of the view selection was made</returns>
+    ///    [0]  guid     identifier of the curve object
+    ///    [1]  bool     True if the curve was preselected, otherwise False
+    ///    [2]  Enum     DocObjects.SelectionMethod
+    ///    [3]  point    selection point
+    ///    [4]  number   the curve parameter of the selection point
+    ///    [5]  str      name of the view selection was made</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
@@ -213,17 +213,17 @@ module ExtensionsSelection =
     ///<summary>Prompts user to pick, or select, a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects.  If False, the objects that are
-    ///  picked are not selected</param>
+    ///    Select the picked objects.  If False, the objects that are
+    ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
-    ///If True, subobjects can be selected. When this is the
-    ///  case, for tracking  of the subobject go via the Object Ref</param>
+    ///    If True, subobjects can be selected. When this is the
+    ///    case, for tracking  of the subobject go via the Object Ref</param>
     ///<returns>(Guid option) Identifier of the picked object</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
@@ -263,26 +263,26 @@ module ExtensionsSelection =
     ///<summary>Prompts user to pick, or select a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the filter class to get values</param>
+    ///    The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the filter class to get values</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects.  If False, the objects that are
-    ///  picked are not selected</param>
+    ///    Select the picked objects.  If False, the objects that are
+    ///    picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
-    ///  allowed to be selected</param>
+    ///    allowed to be selected</param>
     ///<returns>(Guid * bool * float * Point3d * string) Option of Tuple containing the following information
-    ///  [0] identifier of the object
-    ///  [1] True if the object was preselected, otherwise False
-    ///  [2] selection method Enum DocObjects.SelectionMethod
-    ///       (0) selected by non-mouse method (SelAll, etc.).
-    ///       (1) selected by mouse click on theobject.
-    ///       (2) selected by being inside of amouse window.
-    ///       (3) selected by intersecting a mousecrossing window.
-    ///  [3] selection point
-    ///  [4] name of the view selection was made</returns>
+    ///    [0] identifier of the object
+    ///    [1] True if the object was preselected, otherwise False
+    ///    [2] selection method Enum DocObjects.SelectionMethod
+    ///         (0) selected by non-mouse method (SelAll, etc.).
+    ///         (1) selected by mouse click on theobject.
+    ///         (2) selected by being inside of amouse window.
+    ///         (3) selected by intersecting a mousecrossing window.
+    ///    [3] selection point
+    ///    [4] name of the view selection was made</returns>
     static member GetObjectEx(      [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
@@ -325,24 +325,24 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Prompts user to pick or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
-    ///A prompt or message</param>
+    ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
-    ///Honor object grouping.  If omitted and the user picks a group,
-    ///  the entire group will be picked (True). Note, if filter is set to a
-    ///  value other than 0 (All objects), then group selection will be disabled</param>
+    ///    Honor object grouping.  If omitted and the user picks a group,
+    ///    the entire group will be picked (True). Note, if filter is set to a
+    ///    value other than 0 (All objects), then group selection will be disabled</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects.  If False, the objects that are
-    ///  picked are not selected</param>
+    ///    Select the picked objects.  If False, the objects that are
+    ///    picked are not selected</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
-    ///Minimum count of objects allowed to be selected</param>
+    ///    Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
-    ///Maximum count of objects allowed to be selected</param>
+    ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
@@ -395,22 +395,22 @@ module ExtensionsSelection =
     /// If none found, Prompts user to pick or select one or more objects and remembers them.</summary>
     ///<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber objects</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
-    ///Honor object grouping.  If omitted and the user picks a group,
-    ///  the entire group will be picked (True). Note, if filter is set to a
-    ///  value other than 0 (All objects), then group selection will be disabled</param>
+    ///    Honor object grouping.  If omitted and the user picks a group,
+    ///    the entire group will be picked (True). Note, if filter is set to a
+    ///    value other than 0 (All objects), then group selection will be disabled</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects.  If False, the objects that are
-    ///  picked are not selected</param>
+    ///    Select the picked objects.  If False, the objects that are
+    ///    picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
-    ///Minimum count of objects allowed to be selected</param>
+    ///    Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
-    ///Maximum count of objects allowed to be selected</param>
+    ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
@@ -441,13 +441,13 @@ module ExtensionsSelection =
     /// If none found, Prompts user to pick one object and remembers it.</summary>
     ///<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber object</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects.  If False, the objects that are
-    ///  picked are not selected</param>
+    ///    Select the picked objects.  If False, the objects that are
+    ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<returns>(Guid) Option of a identifier of the picked object</returns>
     static member GetObjectAndRemember( message:string,
@@ -469,29 +469,29 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Prompts user to pick, or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
-    ///A prompt or message</param>
+    ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///The type(s) of geometry (points, curves, surfaces, meshes,...)
-    ///  that can be selected. Object types can be added together to filter
-    ///  several different kinds of geometry. use the filter class to get values</param>
+    ///    The type(s) of geometry (points, curves, surfaces, meshes,...)
+    ///    that can be selected. Object types can be added together to filter
+    ///    several different kinds of geometry. use the filter class to get values</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
-    ///Honor object grouping.  If omitted and the user picks a group,
-    ///  the entire group will be picked (True). Note, if filter is set to a
-    ///  value other than 0 (All objects), then group selection will be disabled</param>
+    ///    Honor object grouping.  If omitted and the user picks a group,
+    ///    the entire group will be picked (True). Note, if filter is set to a
+    ///    value other than 0 (All objects), then group selection will be disabled</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects</param>
+    ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked objects. If False, the objects that are
-    ///  picked are not selected</param>
+    ///    Select the picked objects. If False, the objects that are
+    ///    picked are not selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
-    ///  allowed to be selected</param>
+    ///    allowed to be selected</param>
     ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
-    ///  [n][0]  identifier of the object
-    ///  [n][1]  True if the object was preselected, otherwise False
-    ///  [n][2]  selection method (DocObjects.SelectionMethod)
-    ///  [n][3]  selection point
-    ///  [n][4]  name of the view selection was made</returns>
+    ///    [n][0]  identifier of the object
+    ///    [n][1]  True if the object was preselected, otherwise False
+    ///    [n][2]  selection method (DocObjects.SelectionMethod)
+    ///    [n][3]  selection point
+    ///    [n][4]  name of the view selection was made</returns>
     static member GetObjectsEx(     [<OPT;DEF("Select objects":string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -545,9 +545,9 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Prompts the user to select one or more point objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
-    ///A prompt message</param>
+    ///    A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
+    ///    Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d ResizeArray) Option of List of 3d points</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
@@ -565,18 +565,18 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Prompts the user to select a single surface</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select surface"</c>
-    ///Prompt displayed</param>
+    ///    Prompt displayed</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///Allow for preselected objects</param>
+    ///    Allow for preselected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the picked object</param>
+    ///    Select the picked object</param>
     ///<returns>(option of (Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string)):
-    ///  [0]  identifier of the surface
-    ///  [1]  True if the surface was preselected, otherwise False
-    ///  [2]  selection method ( DocObjects.SelectionMethod )
-    ///  [3]  selection point
-    ///  [4]  u, v surface parameter of the selection point
-    ///  [5]  name of the view in which the selection was made</returns>
+    ///    [0]  identifier of the surface
+    ///    [1]  True if the surface was preselected, otherwise False
+    ///    [2]  selection method ( DocObjects.SelectionMethod )
+    ///    [3]  selection point
+    ///    [4]  u, v surface parameter of the selection point
+    ///    [5]  name of the view in which the selection was made</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
@@ -619,13 +619,13 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
-    ///  cannot be snapped to, and cannot be selected</summary>
+    ///    cannot be snapped to, and cannot be selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grip objects</param>
+    ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
+    ///    Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers the locked objects</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
@@ -647,13 +647,13 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
-    ///  are not visible, cannot be snapped to, and cannot be selected</summary>
+    ///    are not visible, cannot be snapped to, and cannot be selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grip objects</param>
+    ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
+    ///    Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the hidden objects</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
@@ -673,13 +673,13 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Inverts the current object selection. The identifiers of the newly
-    ///  selected objects are returned</summary>
+    ///    selected objects are returned</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted, light objects are not returned</param>
+    ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted, grips objects are not returned</param>
+    ///    Include grips objects.  If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
+    ///    Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the newly selected objects</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
@@ -703,11 +703,11 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of the objects that were most recently created or changed
-    ///  by scripting a Rhino command using the Command function. It is important to
-    ///  call this function immediately after calling the Command function as only the
-    ///  most recently created or changed object identifiers will be returned</summary>
+    ///    by scripting a Rhino command using the Command function. It is important to
+    ///    call this function immediately after calling the Command function as only the
+    ///    most recently created or changed object identifiers will be returned</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object.  If omitted, the object is not selected</param>
+    ///    Select the object.  If omitted, the object is not selected</param>
     ///<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects</returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         match commandSerialNumbers with
@@ -727,13 +727,13 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns the identifier of the last object in the document. The last object
-    ///  in the document is the first object created by the user</summary>
+    ///    in the document is the first object created by the user</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object</param>
+    ///    Select the object</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include lights in the potential set</param>
+    ///    Include lights in the potential set</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips in the potential set</param>
+    ///    Include grips in the potential set</param>
     ///<returns>(Guid) identifier of the object on success</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
@@ -756,11 +756,11 @@ module ExtensionsSelection =
     ///<summary>Returns the identifier of the next object in the document</summary>
     ///<param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the object</param>
+    ///    Select the object</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include lights in the potential set</param>
+    ///    Include lights in the potential set</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips in the potential set</param>
+    ///    Include grips in the potential set</param>
     ///<returns>(Guid) identifier of the object on success</returns>
     static member NextObject( objectId:Guid,
                               [<OPT;DEF(false)>]select:bool,
@@ -783,11 +783,11 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
-    ///  are visible, can be snapped to, and are independent of selection state</summary>
+    ///    are visible, can be snapped to, and are independent of selection state</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects.  If omitted, light objects are not returned</param>
+    ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grips objects.  If omitted, grips objects are not returned</param>
+    ///    Include grips objects.  If omitted, grips objects are not returned</param>
     ///<returns>(Guid ResizeArray) identifier of normal objects</returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let iter = DocObjects.ObjectEnumeratorSettings()
@@ -802,9 +802,9 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of all objects based on color</summary>
     ///<param name="color">(Drawing.Color) Color to get objects by</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include lights in the set</param>
+    ///    Include lights in the set</param>
     ///<returns>(Guid ResizeArray) identifiers of objects of the selected color</returns>
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
@@ -820,7 +820,7 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of all objects based on the objects' group name</summary>
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<returns>(Guid ResizeArray) identifiers for objects in the group on success</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let groupinstance = Doc.Groups.FindName(groupName)
@@ -839,7 +839,7 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of all objects based on the objects' layer name</summary>
     ///<param name="layerName">(string) Name of the layer</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<returns>(Guid ResizeArray) identifiers for objects in the specified layer</returns>
     static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
@@ -857,11 +857,11 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of all objects based on user-assigned name</summary>
     ///<param name="name">(string) Name of the object or objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///Include refrence objects such as work session objects</param>
+    ///    Include refrence objects such as work session objects</param>
     ///<returns>(Guid ResizeArray) identifiers for objects with the specified name</returns>
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,
@@ -885,38 +885,38 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Returns identifiers of all objects based on the objects' geometry type</summary>
     ///<param name="geometryType">(int) The type(s) of geometry objects (points, curves, surfaces,
-    ///  meshes, etc.) that can be selected. Object types can be
-    ///  added together as bit-coded flags to filter several different kinds of geometry.
-    ///    Value        Description
-    ///      0           All objects
-    ///      1           Point
-    ///      2           Point cloud
-    ///      4           Curve
-    ///      8           Surface or single-face brep
-    ///      16          Polysurface or multiple-face
-    ///      32          Mesh
-    ///      256         Light
-    ///      512         Annotation
-    ///      4096        Instance or block reference
-    ///      8192        Text dot object
-    ///      16384       Grip object
-    ///      32768       Detail
-    ///      65536       Hatch
-    ///      131072      Morph control
-    ///      134217728   Cage
-    ///      268435456   Phantom
-    ///      536870912   Clipping plane
-    ///      1073741824  Extrusion</param>
+    ///    meshes, etc.) that can be selected. Object types can be
+    ///    added together as bit-coded flags to filter several different kinds of geometry.
+    ///      Value        Description
+    ///        0           All objects
+    ///        1           Point
+    ///        2           Point cloud
+    ///        4           Curve
+    ///        8           Surface or single-face brep
+    ///        16          Polysurface or multiple-face
+    ///        32          Mesh
+    ///        256         Light
+    ///        512         Annotation
+    ///        4096        Instance or block reference
+    ///        8192        Text dot object
+    ///        16384       Grip object
+    ///        32768       Detail
+    ///        65536       Hatch
+    ///        131072      Morph control
+    ///        134217728   Cage
+    ///        268435456   Phantom
+    ///        536870912   Clipping plane
+    ///        1073741824  Extrusion</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<param name="state">(int) Optional, Default Value: <c>0</c>
-    ///The object state (normal, locked, and hidden). Object states can be
-    ///  added together to filter several different states of geometry.
-    ///    Value     Description
-    ///    0         All objects
-    ///    1         Normal objects
-    ///    2         Locked objects
-    ///    4         Hidden objects</param>
+    ///    The object state (normal, locked, and hidden). Object states can be
+    ///    added together to filter several different states of geometry.
+    ///      Value     Description
+    ///      0         All objects
+    ///      1         Normal objects
+    ///      2         Locked objects
+    ///      4         Hidden objects</param>
     ///<returns>(Guid ResizeArray) identifiers of object that fit the specified type(s)</returns>
     static member ObjectsByType( geometryType:int,
                                  [<OPT;DEF(false)>]select:bool,
@@ -980,9 +980,9 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Returns the identifiers of all objects that are currently selected</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grip objects</param>
+    ///    Include grip objects</param>
     ///<returns>(Guid ResizeArray) identifiers of selected objects</returns>
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let selobjects = Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
@@ -1002,11 +1002,11 @@ module ExtensionsSelection =
     ///<summary>Return identifiers of all objects that are visible in a specified view</summary>
     ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the objects</param>
+    ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///Include light objects</param>
+    ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///Include grip objects</param>
+    ///    Include grip objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the visible objects</returns>
     static member VisibleObjects( [<OPT;DEF(null:string)>]view:string,
                                   [<OPT;DEF(false)>]select:bool,
@@ -1038,9 +1038,9 @@ module ExtensionsSelection =
     ///<param name="corner2">(Point3d) Corner2 of selection window</param>
     ///<param name="view">(string) Optional, View to perform the selection in</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select picked objects</param>
+    ///    Select picked objects</param>
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
-    ///If False, then a crossing window selection is performed</param>
+    ///    If False, then a crossing window selection is performed</param>
     ///<returns>(Guid ResizeArray) identifiers of selected objects on success</returns>
     static member WindowPick( corner1:Point3d,
                               corner2:Point3d,

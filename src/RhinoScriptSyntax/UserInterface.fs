@@ -91,7 +91,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display dialog prompting the user to enter a string. The
-    ///  string value may span multiple lines</summary>
+    ///    string value may span multiple lines</summary>
     ///<param name="defaultValString">(string) Optional, A default string value</param>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -108,9 +108,9 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Pause for user input of an angle</summary>
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
-    ///Starting, or base point</param>
+    ///    Starting, or base point</param>
     ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
-    ///If specified, the reference angle is calculated from it and the base point</param>
+    ///    If specified, the reference angle is calculated from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
     ///<param name="message">(string) Optional, A prompt to display</param>
     ///<returns>(float option) Option of angle in degree</returns>
@@ -131,12 +131,12 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
-    ///  displayed as click-able command line option toggles</summary>
+    ///    displayed as click-able command line option toggles</summary>
     ///<param name="message">(string) A prompt</param>
     ///<param name="items">((string*string*string) array) List of options. Each option is a tuple of three strings
-    ///  [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
-    ///  [n][2]    string identifying the false value
-    ///  [n][3]    string identifying the true value</param>
+    ///    [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
+    ///    [n][2]    string identifying the false value
+    ///    [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool ResizeArray) Option of a list of values that represent the boolean values</returns>
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<ResizeArray<bool>> =
@@ -171,12 +171,12 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Pauses for user input of a box</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
-    ///The box selection mode.
-    ///  0 = All modes
-    ///  1 = Corner. The base rectangle is created by picking two corner points
-    ///  2 = 3-Point. The base rectangle is created by picking three points
-    ///  3 = Vertical. The base vertical rectangle is created by picking three points.
-    ///  4 = Center. The base rectangle is created by picking a center point and a corner point</param>
+    ///    The box selection mode.
+    ///    0 = All modes
+    ///    1 = Corner. The base rectangle is created by picking two corner points
+    ///    2 = 3-Point. The base rectangle is created by picking three points
+    ///    3 = Vertical. The base vertical rectangle is created by picking three points.
+    ///    4 = Center. The base rectangle is created by picking a center point and a corner point</param>
     ///<param name="basePoint">(Point3d) Optional, Optional 3D base point</param>
     ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
@@ -223,10 +223,10 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Retrieves the cursor's position</summary>
     ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
-    ///  0  Point3d: cursor position in world coordinates
-    ///  1  Point2d: cursor position in screen coordinates
-    ///  2  Guid:    objectId of the active viewport
-    ///  3  Point2d: cursor position in client coordinates</returns>
+    ///    0  Point3d: cursor position in world coordinates
+    ///    1  Point2d: cursor position in screen coordinates
+    ///    2  Guid:    objectId of the active viewport
+    ///    3  Point2d: cursor position in client coordinates</returns>
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
             let view = Doc.Views.ActiveView
@@ -246,9 +246,9 @@ module ExtensionsUserinterface =
     ///<param name="firstPt">(Point3d) Optional, First distance point</param>
     ///<param name="distance">(float) Optional, Default distance</param>
     ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
-    ///Prompt for the first distance point</param>
+    ///    Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
-    ///Prompt for the second distance point</param>
+    ///    Prompt for the second distance point</param>
     ///<returns>(float option) an Option of The distance between the two points</returns>
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d,
                                 [<OPT;DEF(0.0)>]distance:float,
@@ -296,13 +296,13 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
-    ///A prompt or message</param>
+    ///    A prompt or message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
-    ///Minimum number of edges to select</param>
+    ///    Minimum number of edges to select</param>
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
-    ///Maximum number of edges to select</param>
+    ///    Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///Select the duplicated edge curves</param>
+    ///    Select the duplicated edge curves</param>
     ///<returns>((Guid*Guid*Point3d) ResizeArray) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges":string)>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -368,12 +368,12 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Displays dialog box prompting the user to select a layer</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
-    ///Dialog box title</param>
+    ///    Dialog box title</param>
     ///<param name="layer">(string) Optional, Name of a layer to preselect. If omitted, the current layer will be preselected</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
-    ///Show new button of on the dialog</param>
+    ///    Show new button of on the dialog</param>
     ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
-    ///Show set current  button on the dialog</param>
+    ///    Show set current  button on the dialog</param>
     ///<returns>(string option) an Option of name of selected layer</returns>
     static member GetLayer( [<OPT;DEF("Select Layer")>]title:string,
                             [<OPT;DEF(null:string)>]layer:string,
@@ -396,9 +396,9 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Displays a dialog box prompting the user to select one or more layers</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
-    ///Dialog box title</param>
+    ///    Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
-    ///Optional button to show on the dialog</param>
+    ///    Optional button to show on the dialog</param>
     ///<returns>(string ResizeArray) an Option of The names of selected layers</returns>
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string ResizeArray> =
         let getKeepEditor () = 
@@ -415,17 +415,17 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Prompts the user to pick points that define a line</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
-    ///Line definition mode.
-    ///  0  Default - Show all modes, start in two-point mode
-    ///  1  Two-point - Defines a line from two points.
-    ///  2  Normal - Defines a line normal to a location on a surface.
-    ///  3  Angled - Defines a line at a specified angle from a reference line.
-    ///  4  Vertical - Defines a line vertical to the construction plane.
-    ///  5  Four-point - Defines a line using two points to establish direction and two points to establish length.
-    ///  6  Bisector - Defines a line that bisects a specified angle.
-    ///  7  Perpendicular - Defines a line perpendicular to or from a curve
-    ///  8  Tangent - Defines a line tangent from a curve.
-    ///  9  Extension - Defines a line that extends from a curve</param>
+    ///    Line definition mode.
+    ///    0  Default - Show all modes, start in two-point mode
+    ///    1  Two-point - Defines a line from two points.
+    ///    2  Normal - Defines a line normal to a location on a surface.
+    ///    3  Angled - Defines a line at a specified angle from a reference line.
+    ///    4  Vertical - Defines a line vertical to the construction plane.
+    ///    5  Four-point - Defines a line using two points to establish direction and two points to establish length.
+    ///    6  Bisector - Defines a line that bisects a specified angle.
+    ///    7  Perpendicular - Defines a line perpendicular to or from a curve
+    ///    8  Tangent - Defines a line tangent from a curve.
+    ///    9  Extension - Defines a line that extends from a curve</param>
     ///<param name="point">(Point3d) Optional, Optional starting point</param>
     ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
@@ -458,7 +458,7 @@ module ExtensionsUserinterface =
     ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
-    ///If True, the "by Layer" linetype will show. Defaults to False</param>
+    ///    If True, the "by Layer" linetype will show. Defaults to False</param>
     ///<returns>(string option) an Option of The names of selected linetype</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
                                 [<OPT;DEF(false)>]showByLayer:bool) : string option =
@@ -480,13 +480,13 @@ module ExtensionsUserinterface =
     ///<summary>Prompts the user to pick one or more mesh faces</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Faces"</c>
-    ///A prompt of message</param>
+    ///    A prompt of message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
-    ///The minimum number of faces to select</param>
+    ///    The minimum number of faces to select</param>
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
-    ///The maximum number of faces to select.
-    ///  If 0, the user must press enter to finish selection.
-    ///  If -1, selection stops as soon as there are at least minCount faces selected</param>
+    ///    The maximum number of faces to select.
+    ///    If 0, the user must press enter to finish selection.
+    ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
     ///<returns>(int ResizeArray) an Option of of mesh face indices on success</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
@@ -514,13 +514,13 @@ module ExtensionsUserinterface =
     ///<summary>Prompts the user to pick one or more mesh vertices</summary>
     ///<param name="objectId">(Guid) The mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Vertices"</c>
-    ///A prompt of message</param>
+    ///    A prompt of message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
-    ///The minimum number of vertices to select</param>
+    ///    The minimum number of vertices to select</param>
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
-    ///The maximum number of vertices to select. If 0, the user must
-    ///  press enter to finish selection. If -1, selection stops as soon as there
-    ///  are at least minCount vertices selected</param>
+    ///    The maximum number of vertices to select. If 0, the user must
+    ///    press enter to finish selection. If -1, selection stops as soon as there
+    ///    are at least minCount vertices selected</param>
     ///<returns>(int ResizeArray) an Option of of mesh vertex indices on success</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
@@ -550,7 +550,7 @@ module ExtensionsUserinterface =
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
-    ///Constrains the point selections to the active construction plane</param>
+    ///    Constrains the point selections to the active construction plane</param>
     ///<returns>(Point3d option) an Option of point on success</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -579,7 +579,7 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a point constrainted to a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
-    ///A prompt of message</param>
+    ///    A prompt of message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve":string)>]message:string) : Point3d option =
         let get () = 
@@ -601,7 +601,7 @@ module ExtensionsUserinterface =
     ///<summary>Pauses for user input of a point constrained to a mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
-    ///A prompt or message</param>
+    ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : Point3d option =
         let get () = 
@@ -614,10 +614,10 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Pauses for user input of a point constrained to a surface or polysurface
-    ///  object</summary>
+    ///    object</summary>
     ///<param name="surfaceId">(Guid) Identifier of the surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
-    ///A prompt or message</param>
+    ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface":string)>]message:string) : Point3d option =
         let get () = 
@@ -646,13 +646,13 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Pauses for user input of one or more points</summary>
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
-    ///Draw lines between points</param>
+    ///    Draw lines between points</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
-    ///Constrain point selection to the active construction plane</param>
+    ///    Constrain point selection to the active construction plane</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
     ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
-    ///  unlimited number of points can be picked</param>
+    ///    unlimited number of points can be picked</param>
     ///<returns>(Point3d array) an Option of of 3d points</returns>
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
@@ -716,20 +716,20 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Prompts the user to pick points that define a polyline</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
-    ///The options are bit coded flags. Values can be added together to specify more than one option. 
-    ///  value description
-    ///  1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
-    ///  2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
-    ///  4     Force close. If specified, then the returned polyline is always closed. If specified, then max must bebet 0 or bigger than 4.
-    ///  Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
+    ///    The options are bit coded flags. Values can be added together to specify more than one option. 
+    ///    value description
+    ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
+    ///    2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
+    ///    4     Force close. If specified, then the returned polyline is always closed. If specified, then max must bebet 0 or bigger than 4.
+    ///    Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
     ///<param name="message3">(string) Optional, A prompt or message for the third point</param>
     ///<param name="message4">(string) Optional, A prompt or message for the 'next' point</param>
     ///<param name="min">(int) Optional, Default Value: <c>2</c>
-    ///The minimum number of points to require. The default is 2</param>
+    ///    The minimum number of points to require. The default is 2</param>
     ///<param name="max">(int) Optional, Default Value: <c>0</c>
-    ///The maximum number of points to require; 0 for no limit.</param>
+    ///    The maximum number of points to require; 0 for no limit.</param>
     ///<returns>(Polyline option) an Option of a  polyline</returns>
     static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
                                         [<OPT;DEF(null:string)>]message1:string,
@@ -757,7 +757,7 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Pauses for user input of a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
-    ///A prompt or message</param>
+    ///    A prompt or message</param>
     ///<param name="number">(float) Optional, A default number value</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
@@ -784,12 +784,12 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Pauses for user input of a rectangle</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
-    ///The rectangle selection mode. The modes are as follows
-    ///  0 = All modes
-    ///  1 = Corner - a rectangle is created by picking two corner points
-    ///  2 = 3Point - a rectangle is created by picking three points
-    ///  3 = Vertical - a vertical rectangle is created by picking three points
-    ///  4 = Center - a rectangle is created by picking a center point and a corner point</param>
+    ///    The rectangle selection mode. The modes are as follows
+    ///    0 = All modes
+    ///    1 = Corner - a rectangle is created by picking two corner points
+    ///    2 = 3Point - a rectangle is created by picking three points
+    ///    3 = Vertical - a vertical rectangle is created by picking three points
+    ///    4 = Center - a rectangle is created by picking a center point and a corner point</param>
     ///<param name="basePoint">(Point3d) Optional, A 3d base point</param>
     ///<param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
@@ -821,9 +821,9 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="defaultValString">(string) Optional, A default value</param>
     ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
-    ///  Note, strings cannot begin with a numeric character</param>
+    ///    Note, strings cannot begin with a numeric character</param>
     ///<returns>(string option) an Option of The string either input or selected by the user .
-    ///  If the user presses the Enter key without typing in a string, an empty string "" is returned</returns>
+    ///    If the user presses the Enter key without typing in a string, an empty string "" is returned</returns>
     static member GetString(
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]defaultValString:string,
@@ -868,39 +868,39 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Displays a message box. A message box contains a message and
-    ///  title, plus any combination of predefined icons and push buttons</summary>
+    ///    title, plus any combination of predefined icons and push buttons</summary>
     ///<param name="message">(string) A prompt or message</param>
     ///<param name="buttons">(int) Optional, Default Value: <c>0</c>
-    ///Buttons and icon to display as a bit coded flag. Can be a combination of the
-    ///  following flags. If omitted, an OK button and no icon is displayed
-    ///  0      Display OK button only.
-    ///  1      Display OK and Cancel buttons.
-    ///  2      Display Abort, Retry, and Ignore buttons.
-    ///  3      Display Yes, No, and Cancel buttons.
-    ///  4      Display Yes and No buttons.
-    ///  5      Display Retry and Cancel buttons.
-    ///  16     Display Critical Message icon.
-    ///  32     Display Warning Query icon.
-    ///  48     Display Warning Message icon.
-    ///  64     Display Information Message icon.
-    ///  0      First button is the default.
-    ///  256    Second button is the default.
-    ///  512    Third button is the default.
-    ///  768    Fourth button is the default.
-    ///  0      Application modal. The user must respond to the message box
-    ///    before continuing work in the current application.
-    ///  4096   System modal. The user must respond to the message box
-    ///    before continuing work in any application</param>
+    ///    Buttons and icon to display as a bit coded flag. Can be a combination of the
+    ///    following flags. If omitted, an OK button and no icon is displayed
+    ///    0      Display OK button only.
+    ///    1      Display OK and Cancel buttons.
+    ///    2      Display Abort, Retry, and Ignore buttons.
+    ///    3      Display Yes, No, and Cancel buttons.
+    ///    4      Display Yes and No buttons.
+    ///    5      Display Retry and Cancel buttons.
+    ///    16     Display Critical Message icon.
+    ///    32     Display Warning Query icon.
+    ///    48     Display Warning Message icon.
+    ///    64     Display Information Message icon.
+    ///    0      First button is the default.
+    ///    256    Second button is the default.
+    ///    512    Third button is the default.
+    ///    768    Fourth button is the default.
+    ///    0      Application modal. The user must respond to the message box
+    ///      before continuing work in the current application.
+    ///    4096   System modal. The user must respond to the message box
+    ///      before continuing work in any application</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
-    ///The dialog box title</param>
+    ///    The dialog box title</param>
     ///<returns>(int option) an Option of indicating which button was clicked:
-    ///  1      OK button was clicked.
-    ///  2      Cancel button was clicked.
-    ///  3      Abort button was clicked.
-    ///  4      Retry button was clicked.
-    ///  5      Ignore button was clicked.
-    ///  6      Yes button was clicked.
-    ///  7      No button was clicked</returns>
+    ///    1      OK button was clicked.
+    ///    2      Cancel button was clicked.
+    ///    3      Abort button was clicked.
+    ///    4      Retry button was clicked.
+    ///    5      Ignore button was clicked.
+    ///    6      Yes button was clicked.
+    ///    7      No button was clicked</returns>
     static member MessageBox(           message:string,
                                         [<OPT;DEF(0)>]buttons:int,
                                         [<OPT;DEF("")>]title:string) : int option =
@@ -977,11 +977,11 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
-    ///  Note, this function does not open the file</summary>
+    ///    Note, this function does not open the file</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
-    ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
-    ///  If omitted, the filter (*.*) is used</param>
+    ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+    ///    If omitted, the filter (*.*) is used</param>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
@@ -1005,11 +1005,11 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
-    ///  Note, this function does not open the file</summary>
+    ///    Note, this function does not open the file</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
-    ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
-    ///  If omitted, the filter (*.*) is used</param>
+    ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+    ///    If omitted, the filter (*.*) is used</param>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
@@ -1034,19 +1034,19 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
-    ///  anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
+    ///    anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
     ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
-    ///  will create a separator</param>
+    ///    will create a separator</param>
     ///<param name="modes">(int seq) Optional, List of numbers identifying the display modes. If omitted, all
-    ///  modes are enabled.
-    ///    0 = menu item is enabled
-    ///    1 = menu item is disabled
-    ///    2 = menu item is checked
-    ///    3 = menu item is disabled and checked</param>
+    ///    modes are enabled.
+    ///      0 = menu item is enabled
+    ///      1 = menu item is disabled
+    ///      2 = menu item is checked
+    ///      3 = menu item is disabled and checked</param>
     ///<param name="point">(Point3d) Optional, A 3D point where the menu item will appear. If omitted, the menu
-    ///  will appear at the current cursor position</param>
+    ///    will appear at the current cursor position</param>
     ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
-    ///  If omitted, the active view is used</param>
+    ///    If omitted, the active view is used</param>
     ///<returns>(int) index of the menu item picked or -1 if no menu item was picked</returns>
     static member PopupMenu(        items:string seq,
                                     [<OPT;DEF(null:int seq)>]modes:int seq,
@@ -1066,10 +1066,10 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Display a dialog box prompting the user to enter a number</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
-    ///A prompt message</param>
+    ///    A prompt message</param>
     ///<param name="defaultValNumber">(float) Optional, A default number</param>
     ///<param name="title">(string) Optional, Default Value: <c>""</c>
-    ///A dialog box title</param>
+    ///    A dialog box title</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
     ///<returns>(float option) an Option of The newly entered number on success</returns>
@@ -1092,11 +1092,11 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display a save dialog box allowing the user to enter a file name.
-    ///  Note, this function does not save the file</summary>
+    ///    Note, this function does not save the file</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
-    ///  "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
-    ///  If omitted, the filter (*.*) is used</param>
+    ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
+    ///    If omitted, the filter (*.*) is used</param>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>

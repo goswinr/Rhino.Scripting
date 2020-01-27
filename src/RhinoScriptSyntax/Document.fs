@@ -27,13 +27,13 @@ module ExtensionsDocument =
     ///<param name="height">(int) Optional, Default Value: <c>0</c>
     /// integer that specifies height of the bitmap in pixel. if only height given width will be scaled to kepp screen ratio</param>
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
-    ///  Bitmap creation flags. Can be the combination of:
-    ///  1 = honor object highlighting
-    ///  2 = draw construction plane
-    ///  4 = use ghosted shading</param>
+    ///    Bitmap creation flags. Can be the combination of:
+    ///    1 = honor object highlighting
+    ///    2 = draw construction plane
+    ///    4 = use ghosted shading</param>
     ///<param name="wireframe">(bool) Optional, Default Value: <c>false</c>
-    ///  If True then a wireframe preview image. If False,
-    ///  a rendered image will be created</param>
+    ///    If True then a wireframe preview image. If False,
+    ///    a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CreatePreviewImage(fileName:string, [<OPT;DEF("":string)>]view:string, [<OPT;DEF(0:int)>]width:int,[<OPT;DEF(0:int)>]height:int, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
         let rhview = RhinoScriptSyntax.CoerceView(view)
@@ -101,7 +101,7 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Enables or disables screen redrawing</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
-    ///True to enable, False to disable</param>
+    ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
         Doc.Views.RedrawEnabled <- enable
@@ -110,10 +110,10 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Extracts the bitmap preview image from the specified model (.3dm)</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create. The extension of
-    ///  the fileName controls the format of the bitmap file created.
-    ///  (.bmp, .tga, .jpg, .jpeg, .pcx, .png, .tif, .tiff)</param>
+    ///    the fileName controls the format of the bitmap file created.
+    ///    (.bmp, .tga, .jpg, .jpeg, .pcx, .png, .tif, .tiff)</param>
     ///<param name="modelName">(string) Optional, The model (.3dm) from which to extract the
-    ///  preview image. If omitted, the currently loaded model is used</param>
+    ///    preview image. If omitted, the currently loaded model is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit =
         let bmp =
@@ -151,8 +151,8 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the file version of the current document. Use this function to
-    ///  determine which version of Rhino last saved the document. Note, this
-    ///  function will not return values from referenced or merged files</summary>
+    ///    determine which version of Rhino last saved the document. Note, this
+    ///    function will not return values from referenced or merged files</summary>
     ///<returns>(int) the file version of the current document</returns>
     static member ReadFileVersion() : int =
         Doc.ReadFileVersion()
@@ -386,9 +386,9 @@ module ExtensionsDocument =
     ///<summary>Returns the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render mesh quality .
-    ///  0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
-    ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
-    ///  2: Custom</returns>
+    ///    0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
+    ///    1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
+    ///    2: Custom</returns>
     static member RenderMeshQuality() : int = //GET
         let current = Doc.MeshingParameterStyle
         if current = MeshingParameterStyle.Fast then 0
@@ -400,9 +400,9 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh quality of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="quality">(int) The render mesh quality, either:
-    ///  0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
-    ///  1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
-    ///  2: Custom</param>
+    ///    0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
+    ///    1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
+    ///    2: Custom</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshQuality(quality:int) : unit = //SET
         let newValue =
@@ -421,11 +421,11 @@ module ExtensionsDocument =
     ///<summary>Returns the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render mesh settings .
-    ///    0: No settings enabled.
-    ///    1: Refine mesh enabled.
-    ///    2: Jagged seams enabled.
-    ///    4: Simple planes enabled.
-    ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized</returns>
+    ///      0: No settings enabled.
+    ///      1: Refine mesh enabled.
+    ///      2: Jagged seams enabled.
+    ///      4: Simple planes enabled.
+    ///      8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized</returns>
     static member RenderMeshSettings() : int = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         let mutable rc = 0
@@ -438,12 +438,12 @@ module ExtensionsDocument =
     ///<summary>Sets the render mesh settings of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="settings">(int) The render mesh settings, which is a bit-coded number that allows or disallows certain features.
-    ///  The bits can be added together in any combination to form a value between 0 and 7.  The bit values are as follows:
-    ///    0: No settings enabled.
-    ///    1: Refine mesh enabled.
-    ///    2: Jagged seams enabled.
-    ///    4: Simple planes enabled.
-    ///    8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized</param>
+    ///    The bits can be added together in any combination to form a value between 0 and 7.  The bit values are as follows:
+    ///      0: No settings enabled.
+    ///      1: Refine mesh enabled.
+    ///      2: Jagged seams enabled.
+    ///      4: Simple planes enabled.
+    ///      8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshSettings(settings:int) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -457,11 +457,11 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Returns render settings</summary>
     ///<returns>(int) if settings are not specified, the current render settings in bit-coded flags
-    ///  0= none,
-    ///  1= create shadows,
-    ///  2= use lights on layers that are off,
-    ///  4= render curves and isocurves,
-    ///  8= render dimensions and text</returns>
+    ///    0= none,
+    ///    1= create shadows,
+    ///    2= use lights on layers that are off,
+    ///    4= render curves and isocurves,
+    ///    8= render dimensions and text</returns>
     static member RenderSettings() : int = //GET
         let mutable rc = 0
         let rendersettings = Doc.RenderSettings
@@ -474,11 +474,11 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Sets render settings</summary>
     ///<param name="settings">(int) Bit-coded flags of render settings to modify.
-    ///  0= none,
-    ///  1= create shadows,
-    ///  2= use lights on layers that are off,
-    ///  4= render curves and isocurves,
-    ///  8= render dimensions and text</param>
+    ///    0= none,
+    ///    1= create shadows,
+    ///    2= use lights on layers that are off,
+    ///    4= render curves and isocurves,
+    ///    8= render dimensions and text</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
         let rendersettings = Doc.RenderSettings
@@ -541,8 +541,8 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Set the document's distance display precision</summary>
     ///<param name="precision">(int) The distance display precision.  If the current distance display mode is Decimal, then precision is the number of decimal places.
-    ///  If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
-    ///  Use UnitDistanceDisplayMode to get the current distance display mode</param>
+    ///    If the current distance display mode is Fractional (including Feet and Inches), then the denominator = (1/2)^precision.
+    ///    Use UnitDistanceDisplayMode to get the current distance display mode</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitDistanceDisplayPrecision(precision:int) : unit = //SET
             Doc.ModelDistanceDisplayPrecision <- precision
@@ -572,32 +572,32 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Return the scale factor for changing between unit systems</summary>
     ///<param name="toSystem">(int) The unit system to convert to. The unit systems are are:
-    ///  0 - No unit system
-    ///  1 - Microns (1.0e-6 meters)
-    ///  2 - Millimeters (1.0e-3 meters)
-    ///  3 - Centimeters (1.0e-2 meters)
-    ///  4 - Meters
-    ///  5 - Kilometers (1.0e + 3 meters)
-    ///  6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
-    ///  7 - Mils (2.54e-5 meters, 0.001 inches)
-    ///  8 - Inches (0.0254 meters)
-    ///  9 - Feet (0.3408 meters, 12 inches)
-    ///    10 - Miles (1609.344 meters, 5280 feet)
-    ///    11 - *Reserved for custom Unit System*
-    ///    12 - Angstroms (1.0e-10 meters)
-    ///    13 - Nanometers (1.0e-9 meters)
-    ///    14 - Decimeters (1.0e-1 meters)
-    ///    15 - Dekameters (1.0e + 1 meters)
-    ///    16 - Hectometers (1.0e + 2 meters)
-    ///    17 - Megameters (1.0e + 6 meters)
-    ///    18 - Gigameters (1.0e + 9 meters)
-    ///    19 - Yards (0.9144  meters, 36 inches)
-    ///    20 - Printer point (1/72 inches, computer points)
-    ///    21 - Printer pica (1/6 inches, (computer picas)
-    ///    22 - Nautical mile (1852 meters)
-    ///    23 - Astronomical (1.4959787e + 11)
-    ///    24 - Lightyears (9.46073e + 15 meters)
-    ///    25 - Parsecs (3.08567758e + 16)</param>
+    ///    0 - No unit system
+    ///    1 - Microns (1.0e-6 meters)
+    ///    2 - Millimeters (1.0e-3 meters)
+    ///    3 - Centimeters (1.0e-2 meters)
+    ///    4 - Meters
+    ///    5 - Kilometers (1.0e + 3 meters)
+    ///    6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
+    ///    7 - Mils (2.54e-5 meters, 0.001 inches)
+    ///    8 - Inches (0.0254 meters)
+    ///    9 - Feet (0.3408 meters, 12 inches)
+    ///      10 - Miles (1609.344 meters, 5280 feet)
+    ///      11 - *Reserved for custom Unit System*
+    ///      12 - Angstroms (1.0e-10 meters)
+    ///      13 - Nanometers (1.0e-9 meters)
+    ///      14 - Decimeters (1.0e-1 meters)
+    ///      15 - Dekameters (1.0e + 1 meters)
+    ///      16 - Hectometers (1.0e + 2 meters)
+    ///      17 - Megameters (1.0e + 6 meters)
+    ///      18 - Gigameters (1.0e + 9 meters)
+    ///      19 - Yards (0.9144  meters, 36 inches)
+    ///      20 - Printer point (1/72 inches, computer points)
+    ///      21 - Printer pica (1/6 inches, (computer picas)
+    ///      22 - Nautical mile (1852 meters)
+    ///      23 - Astronomical (1.4959787e + 11)
+    ///      24 - Lightyears (9.46073e + 15 meters)
+    ///      25 - Parsecs (3.08567758e + 16)</param>
     ///<param name="fromSystem">(int) The unit system to convert from (see above)</param>
     ///<returns>(float) scale factor for changing between unit systems</returns>
     static member UnitScale(toSystem:int, fromSystem:int) : float =
@@ -610,32 +610,32 @@ module ExtensionsDocument =
     ///<summary>Return the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
     ///<returns>(int) The current unit system
-    ///  0 - No unit system
-    ///  1 - Microns (1.0e-6 meters)
-    ///  2 - Millimeters (1.0e-3 meters)
-    ///  3 - Centimeters (1.0e-2 meters)
-    ///  4 - Meters
-    ///  5 - Kilometers (1.0e + 3 meters)
-    ///  6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
-    ///  7 - Mils (2.54e-5 meters, 0.001 inches)
-    ///  8 - Inches (0.0254 meters)
-    ///  9 - Feet (0.3408 meters, 12 inches)
-    ///    10 - Miles (1609.344 meters, 5280 feet)
-    ///    11 - *Reserved for custom Unit System*
-    ///    12 - Angstroms (1.0e-10 meters)
-    ///    13 - Nanometers (1.0e-9 meters)
-    ///    14 - Decimeters (1.0e-1 meters)
-    ///    15 - Dekameters (1.0e + 1 meters)
-    ///    16 - Hectometers (1.0e + 2 meters)
-    ///    17 - Megameters (1.0e + 6 meters)
-    ///    18 - Gigameters (1.0e + 9 meters)
-    ///    19 - Yards (0.9144  meters, 36 inches)
-    ///    20 - Printer point (1/72 inches, computer points)
-    ///    21 - Printer pica (1/6 inches, (computer picas)
-    ///    22 - Nautical mile (1852 meters)
-    ///    23 - Astronomical (1.4959787e + 11)
-    ///    24 - Lightyears (9.46073e + 15 meters)
-    ///    25 - Parsecs (3.08567758e + 16)</returns>
+    ///    0 - No unit system
+    ///    1 - Microns (1.0e-6 meters)
+    ///    2 - Millimeters (1.0e-3 meters)
+    ///    3 - Centimeters (1.0e-2 meters)
+    ///    4 - Meters
+    ///    5 - Kilometers (1.0e + 3 meters)
+    ///    6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
+    ///    7 - Mils (2.54e-5 meters, 0.001 inches)
+    ///    8 - Inches (0.0254 meters)
+    ///    9 - Feet (0.3408 meters, 12 inches)
+    ///      10 - Miles (1609.344 meters, 5280 feet)
+    ///      11 - *Reserved for custom Unit System*
+    ///      12 - Angstroms (1.0e-10 meters)
+    ///      13 - Nanometers (1.0e-9 meters)
+    ///      14 - Decimeters (1.0e-1 meters)
+    ///      15 - Dekameters (1.0e + 1 meters)
+    ///      16 - Hectometers (1.0e + 2 meters)
+    ///      17 - Megameters (1.0e + 6 meters)
+    ///      18 - Gigameters (1.0e + 9 meters)
+    ///      19 - Yards (0.9144  meters, 36 inches)
+    ///      20 - Printer point (1/72 inches, computer points)
+    ///      21 - Printer pica (1/6 inches, (computer picas)
+    ///      22 - Nautical mile (1852 meters)
+    ///      23 - Astronomical (1.4959787e + 11)
+    ///      24 - Lightyears (9.46073e + 15 meters)
+    ///      25 - Parsecs (3.08567758e + 16)</returns>
     static member UnitSystem() : int = //GET
             int(Doc.ModelUnitSystem)
 
@@ -643,34 +643,34 @@ module ExtensionsDocument =
     ///<summary>Set the document's unit system. See Rhino's DocumentProperties
     /// command (Units and Page Units Window) for details</summary>
     ///<param name="unitSystem">(int) The unit system to set the document to. The unit systems are:
-    ///  0 - No unit system
-    ///  1 - Microns (1.0e-6 meters)
-    ///  2 - Millimeters (1.0e-3 meters)
-    ///  3 - Centimeters (1.0e-2 meters)
-    ///  4 - Meters
-    ///  5 - Kilometers (1.0e + 3 meters)
-    ///  6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
-    ///  7 - Mils (2.54e-5 meters, 0.001 inches)
-    ///  8 - Inches (0.0254 meters)
-    ///  9 - Feet (0.3408 meters, 12 inches)
-    ///    10 - Miles (1609.344 meters, 5280 feet)
-    ///    11 - *Reserved for custom Unit System*
-    ///    12 - Angstroms (1.0e-10 meters)
-    ///    13 - Nanometers (1.0e-9 meters)
-    ///    14 - Decimeters (1.0e-1 meters)
-    ///    15 - Dekameters (1.0e + 1 meters)
-    ///    16 - Hectometers (1.0e + 2 meters)
-    ///    17 - Megameters (1.0e + 6 meters)
-    ///    18 - Gigameters (1.0e + 9 meters)
-    ///    19 - Yards (0.9144  meters, 36 inches)
-    ///    20 - Printer point (1/72 inches, computer points)
-    ///    21 - Printer pica (1/6 inches, (computer picas)
-    ///    22 - Nautical mile (1852 meters)
-    ///    23 - Astronomical (1.4959787e + 11)
-    ///    24 - Lightyears (9.46073e + 15 meters)
-    ///    25 - Parsecs (3.08567758e + 16)</param>
+    ///    0 - No unit system
+    ///    1 - Microns (1.0e-6 meters)
+    ///    2 - Millimeters (1.0e-3 meters)
+    ///    3 - Centimeters (1.0e-2 meters)
+    ///    4 - Meters
+    ///    5 - Kilometers (1.0e + 3 meters)
+    ///    6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
+    ///    7 - Mils (2.54e-5 meters, 0.001 inches)
+    ///    8 - Inches (0.0254 meters)
+    ///    9 - Feet (0.3408 meters, 12 inches)
+    ///      10 - Miles (1609.344 meters, 5280 feet)
+    ///      11 - *Reserved for custom Unit System*
+    ///      12 - Angstroms (1.0e-10 meters)
+    ///      13 - Nanometers (1.0e-9 meters)
+    ///      14 - Decimeters (1.0e-1 meters)
+    ///      15 - Dekameters (1.0e + 1 meters)
+    ///      16 - Hectometers (1.0e + 2 meters)
+    ///      17 - Megameters (1.0e + 6 meters)
+    ///      18 - Gigameters (1.0e + 9 meters)
+    ///      19 - Yards (0.9144  meters, 36 inches)
+    ///      20 - Printer point (1/72 inches, computer points)
+    ///      21 - Printer pica (1/6 inches, (computer picas)
+    ///      22 - Nautical mile (1852 meters)
+    ///      23 - Astronomical (1.4959787e + 11)
+    ///      24 - Lightyears (9.46073e + 15 meters)
+    ///      25 - Parsecs (3.08567758e + 16)</param>
     ///<param name="scale">(bool) Scale existing geometry based on the new unit system.
-    ///  If not specified, any existing geometry is not scaled (False)</param>
+    ///    If not specified, any existing geometry is not scaled (False)</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
         if unitSystem < 1 || unitSystem > 25 then
@@ -683,13 +683,13 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Returns the name of the current unit system</summary>
     ///<param name="capitalize">(bool) Optional, Default Value: <c>false</c>
-    ///Capitalize the first character of the units system name (e.g. return "Millimeter" instead of "millimeter"). The default is not to capitalize the first character (false)</param>
+    ///    Capitalize the first character of the units system name (e.g. return "Millimeter" instead of "millimeter"). The default is not to capitalize the first character (false)</param>
     ///<param name="singular">(bool) Optional, Default Value: <c>true</c>
-    ///Return the singular form of the units system name (e.g. "millimeter" instead of "millimeters"). The default is to return the singular form of the name (true)</param>
+    ///    Return the singular form of the units system name (e.g. "millimeter" instead of "millimeters"). The default is to return the singular form of the name (true)</param>
     ///<param name="abbreviate">(bool) Optional, Default Value: <c>false</c>
-    ///Abbreviate the name of the units system (e.g. return "mm" instead of "millimeter"). The default is not to abbreviate the name (false)</param>
+    ///    Abbreviate the name of the units system (e.g. return "mm" instead of "millimeter"). The default is not to abbreviate the name (false)</param>
     ///<param name="modelUnits">(bool) Optional, Default Value: <c>true</c>
-    ///Return the document's model units (True) or the document's page units (False). The default is True</param>
+    ///    Return the document's model units (True) or the document's page units (False). The default is True</param>
     ///<returns>(string) The name of the current units system</returns>
     static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string =
         Doc.GetUnitSystemName(modelUnits, capitalize, singular, abbreviate)

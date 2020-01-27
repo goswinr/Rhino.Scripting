@@ -66,10 +66,10 @@ type RhinoScriptSyntax private () = // no constructor?
         else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
 
     ///<summary>Prints an object or value to Rhino Command line. 
-    ///  If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
     ///<param name="x">('T): the value or object to print</param>
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
-    ///If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
+    ///    If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
     ///<returns>(unit) voId, nothing</returns>
     static member Print (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, true)
@@ -79,7 +79,7 @@ type RhinoScriptSyntax private () = // no constructor?
     
 
     ///<summary>Prints an object or value to Rhino Command line. 
-    ///  If the value is a Seq the string will conatain a line for each item and per nested item</summary>
+    ///    If the value is a Seq the string will conatain a line for each item and per nested item</summary>
     ///<param name="x">('T): the value or object to print</param>   
     ///<returns>(unit) voId, nothing</returns>
     static member PrintFull (x:'T) : unit =
@@ -113,7 +113,7 @@ type RhinoScriptSyntax private () = // no constructor?
 
 
     ///<summary>Like the Python 'xrange' function for integers this creates a range of floating point values.
-    ///The last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions</summary>
+    ///    The last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions</summary>
     ///<param name="start">(float): first value of range</param> 
     ///<param name="stop">(float): end of range( this last value will not be included in range, Python semantics)</param>    
     ///<param name="step">(float): step size between two values</param>
@@ -140,7 +140,7 @@ type RhinoScriptSyntax private () = // no constructor?
             floatrange (start, 0.0, steps) 
 
     ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
-    ///This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions</summary>
+    ///    This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions</summary>
     ///<param name="start">(float): first value of range</param> 
     ///<param name="stop">(float): end of range( this last value will not be included in range, Python semantics)</param>    
     ///<param name="step">(float): step size between two values</param>

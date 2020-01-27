@@ -36,13 +36,13 @@ module ExtensionsUtility =
     ///<param name="point1">(Point3d) Point1 of input points</param>
     ///<param name="point2">(Point3d) Point2 of input points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldX</c>
-    ///  If a plane is provided, angle calculation is with respect to this plane</param>
+    ///    If a plane is provided, angle calculation is with respect to this plane</param>
     ///<returns>(float * float * float * float * float) containing the following elements:
-    ///  element 0 = the X, Y angle in degrees
-    ///  element 1 = the elevation
-    ///  element 2 = delta in the X direction
-    ///  element 3 = delta in the Y direction
-    ///  element 4 = delta in the Z direction</returns>
+    ///    element 0 = the X, Y angle in degrees
+    ///    element 1 = the elevation
+    ///    element 2 = delta in the X direction
+    ///    element 3 = delta in the Y direction
+    ///    element 4 = delta in the Z direction</returns>
     static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
         let plane = if plane.IsValid then plane else Plane.WorldXY
         let vector = point2 - point1
@@ -65,8 +65,8 @@ module ExtensionsUtility =
     ///<param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     ///<param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     ///<returns>(float * float) containing the following elements .
-    ///  0 The angle in degrees.
-    ///  1 The reflex angle in degrees</returns>
+    ///    0 The angle in degrees.
+    ///    1 The reflex angle in degrees</returns>
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
@@ -96,13 +96,13 @@ module ExtensionsUtility =
 
     [<Extension>]
     ///<summary>Changes the luminance of a red-green-blue value. Hue and saturation are
-    ///  not affected</summary>
+    ///    not affected</summary>
     ///<param name="rgb">(Drawing.Color) Initial rgb value</param>
     ///<param name="luma">(float) The luminance in units of 0.1 percent of the total range. A
-    ///  value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
+    ///    value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
     ///<param name="isScaleRelative">(bool) Optional, Default Value: <c>false</c>
-    ///If True, luma specifies how much to increment or decrement the
-    ///  current luminance. If False, luma specified the absolute luminance</param>
+    ///    If True, luma specifies how much to increment or decrement the
+    ///    current luminance. If False, luma specified the absolute luminance</param>
     ///<returns>(Drawing.Color) modified rgb value</returns>
     static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
@@ -158,7 +158,7 @@ module ExtensionsUtility =
     ///<summary>Removes duplicates from an array of numbers</summary>
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///  The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
+    ///    The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
     ///<returns>(float ResizeArray) numbers with duplicates removed</returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
         if Seq.length numbers < 2 then ResizeArray(numbers )
@@ -217,8 +217,8 @@ module ExtensionsUtility =
     ///<param name="filename">(string) Name  and path of the inifile</param>
     ///<param name="section">(string) Optional, Section to list keys from</param>
     ///<returns>(string array)
-    ///  If section is NOT specified, a list containing all section names
-    ///  If section is specified, a list containing all entry names for the given section</returns>
+    ///    If section is NOT specified, a list containing all section names
+    ///    If section is specified, a list containing all entry names for the given section</returns>
     static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string ResizeArray =  
         //https://github.com/rickyah/ini-parser
         
@@ -282,7 +282,7 @@ module ExtensionsUtility =
     ///<param name="angleDegrees">(float) Angle in degrees</param>
     ///<param name="distance">(float) Distance from point</param>
     ///<param name="plane">(Plane) Optional, Plane to base the transformation. If omitted, the world
-    ///  x-y plane is used</param>
+    ///    x-y plane is used</param>
     ///<returns>(Point3d) resulting point is successful</returns>
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)
@@ -319,8 +319,8 @@ module ExtensionsUtility =
     ///<summary>Sorts list of points so they will be connected in a "reasonable" polyline order</summary>
     ///<param name="points">(Point3d seq) The points to sort</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///Minimum distance between points. Points that fall within this tolerance
-    ///  will be discarded.</param>
+    ///    Minimum distance between points. Points that fall within this tolerance
+    ///    will be discarded.</param>
     ///<returns>(Point3d array) of sorted 3D points</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
@@ -331,16 +331,16 @@ module ExtensionsUtility =
     ///<summary>Sorts the components of an array of 3D points</summary>
     ///<param name="points">(Point3d seq) Points to sort</param>
     ///<param name="ascending">(bool) Optional, Default Value: <c>true</c>
-    ///Ascendeing if omitted (True) or True, descending if False</param>
+    ///    Ascendeing if omitted (True) or True, descending if False</param>
     ///<param name="order">(int) Optional, Default Value: <c>0</c>
-    ///The component sort order
-    ///  Value       Component Sort Order
-    ///  0 (default) X, Y, Z
-    ///  1           X, Z, Y
-    ///  2           Y, X, Z
-    ///  3           Y, Z, X
-    ///  4           Z, X, Y
-    ///  5           Z, Y, X</param>
+    ///    The component sort order
+    ///    Value       Component Sort Order
+    ///    0 (default) X, Y, Z
+    ///    1           X, Z, Y
+    ///    2           Y, X, Z
+    ///    3           Y, Z, X
+    ///    4           Z, X, Y
+    ///    5           Z, Y, X</param>
     ///<returns>(Point3d seq) sorted 3-D points</returns>
     static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq =
         let f =
@@ -402,9 +402,9 @@ module ExtensionsUtility =
     ///<summary>Converts input into a Rhino.Geometry.Plane object if possible</summary>
     ///<param name="origin">(Point3d) the Plane Center or Origin</param>
     ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d.XAxis</c>
-    ///Direction of X-Axis</param>
+    ///    Direction of X-Axis</param>
     ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>Vector3d.YAxis</c>
-    ///Direction of Y-Axis</param>
+    ///    Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane</returns>
     static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
         if xAxis.IsZero || yAxis.IsZero then
@@ -423,16 +423,16 @@ module ExtensionsUtility =
 
     [<Extension>]
     ///<summary>Converts input into a native color object if possible.
-    ///  The returned data is accessible by indexing, and that is the suggested method to interact with the type.
-    ///  Red index is [0], Green index is [1], Blue index is [2] and Alpha index is [3].
-    ///  If the provided object is already a color, its value is copied.
-    ///  Alternatively, you can also pass three coordinates singularly for an RGB color, or four
-    ///  for an RGBA color point</summary>
+    ///    The returned data is accessible by indexing, and that is the suggested method to interact with the type.
+    ///    Red index is [0], Green index is [1], Blue index is [2] and Alpha index is [3].
+    ///    If the provided object is already a color, its value is copied.
+    ///    Alternatively, you can also pass three coordinates singularly for an RGB color, or four
+    ///    for an RGBA color point</summary>
     ///<param name="red">(int) Red Value</param>
     ///<param name="green">(int) Green value</param>
     ///<param name="blue">(int) Blue value</param>
     ///<param name="alpha">(int) Optional, Default Value: <c>0</c>
-    ///Alpha value</param>
+    ///    Alpha value</param>
     ///<returns>(Drawing.Color) a Color</returns>
     static member CreateColor(red:int, green:int, blue:int, [<OPT;DEF(0)>]alpha:int) : Drawing.Color =
         RhinoScriptSyntax.CoerceColor((red, green, blue, alpha))
@@ -443,7 +443,7 @@ module ExtensionsUtility =
     ///<param name="start">(float) The lower bound</param>
     ///<param name="ende">(float) Uper bound of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
-    ///  [0] start of interval
-    ///  [1] end of interval</returns>
+    ///    [0] start of interval
+    ///    [1] end of interval</returns>
     static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval =
         Geometry.Interval(start , ende)

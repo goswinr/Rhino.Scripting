@@ -17,12 +17,12 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Create a clipping plane for visibly clipping away geometry in a specific
-    ///  view. Note, clipping planes are infinite</summary>
+    ///    view. Note, clipping planes are infinite</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uMagnitude">(float) U magnitude of the plane</param>
     ///<param name="vMagnitude">(float) V magnitude of the plane</param>
     ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
-    ///  view is used</param>
+    ///    view is used</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddClippingPlane( plane:Plane,
                                     uMagnitude:float,
@@ -49,13 +49,13 @@ module ExtensionsGeometry =
     ///<param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skiped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="height">(float) Optional, If both dblWidth and dblHeight are  0.0 or skied, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="selfIllumination">(bool) Optional, Default Value: <c>true</c>
-    ///If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow</param>
+    ///    If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow</param>
     ///<param name="embed">(bool) Optional, Default Value: <c>false</c>
-    ///If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
+    ///    If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
     ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
-    ///If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
+    ///    If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
-    ///If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
+    ///    If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
     ///<returns>(Guid) object identifier on success</returns>
     static member AddPictureFrame(  plane:Plane,
                                     filename:string,
@@ -130,16 +130,16 @@ module ExtensionsGeometry =
     ///<summary>Adds a text string to the document</summary>
     ///<param name="text">(string) The text to display</param>
     ///<param name="plane">(Plane) the plane on which the text will lie.
-    ///  The origin of the plane will be the origin point of the text</param>
+    ///    The origin of the plane will be the origin point of the text</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
-    ///The text height</param>
+    ///    The text height</param>
     ///<param name="font">(string) Optional, The text font</param>
     ///<param name="fontStyle">(int) Optional, Default Value: <c>0</c>
-    ///Any of the following flags
-    ///  0 = normal
-    ///  1 = bold
-    ///  2 = italic
-    ///  3 = bold and italic</param>
+    ///    Any of the following flags
+    ///    0 = normal
+    ///    1 = bold
+    ///    2 = italic
+    ///    3 = bold and italic</param>
     ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte. Optional, Default Value: <c>TextHorizontalAlignment.Center</c></param>
     ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte. Optional, Default Value: <c>TextVerticalAlignment.Middle</c></param>
     ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
@@ -214,19 +214,19 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
-    ///  bounding box of several objects</summary>
+    ///    bounding box of several objects</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///  plane to which the bounding box should be aligned
-    ///  If omitted, a world axis-aligned bounding box
-    ///  will be calculated</param>
+    ///    plane to which the bounding box should be aligned
+    ///    If omitted, a world axis-aligned bounding box
+    ///    will be calculated</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///Return the bounding box as world coordinates or
-    ///  construction plane coordinates. Note, this option does not apply to
-    ///  world axis-aligned bounding boxes</param>
+    ///    Return the bounding box as world coordinates or
+    ///    construction plane coordinates. Note, this option does not apply to
+    ///    world axis-aligned bounding boxes</param>
     ///<returns>(Geometry.Box) The Box (oriented to the plane). 
-    ///  To get the eight 3D points that define the bounding box call box.GetCorners()
-    ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
 
@@ -250,19 +250,19 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
-    ///  bounding box of an object</summary>
+    ///    bounding box of an object</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///  plane to which the bounding box should be aligned
-    ///  If omitted, a world axis-aligned bounding box
-    ///  will be calculated</param>
+    ///    plane to which the bounding box should be aligned
+    ///    If omitted, a world axis-aligned bounding box
+    ///    will be calculated</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///Return the bounding box as world coordinates or
-    ///  construction plane coordinates. Note, this option does not apply to
-    ///  world axis-aligned bounding boxes</param>
+    ///    Return the bounding box as world coordinates or
+    ///    construction plane coordinates. Note, this option does not apply to
+    ///    world axis-aligned bounding boxes</param>
     ///<returns>(Geometry.Box) The Box (oriented to the plane). 
-    ///  To get the eight 3D points that define the bounding box call box.GetCorners()
-    ///  Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(object:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
@@ -282,7 +282,7 @@ module ExtensionsGeometry =
     ///<summary>Creates outline curves for a given text entity</summary>
     ///<param name="textId">(Guid) Identifier of Text object to explode</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
-    ///Delete the text object after the curves have been created</param>
+    ///    Delete the text object after the curves have been created</param>
     ///<returns>(Guid array) of outline curves</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
@@ -441,7 +441,7 @@ module ExtensionsGeometry =
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud.
     /// This can also be specified as a point cloud</param>
     ///<param name="amount">(int) Optional, Default Value: <c>1</c>
-    ///The amount of required closest points. Defaults to 1</param>
+    ///    The amount of required closest points. Defaults to 1</param>
     ///<returns>(int array seq) nested lists with amount items within a list, with the indices of the found points</returns>
     static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
         if Seq.length(needlePoints) > 100 then
@@ -456,7 +456,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
-    ///  closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius</summary>
+    ///    closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>
@@ -731,10 +731,10 @@ module ExtensionsGeometry =
     ///<summary>Returns the font style of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(int) The current font style
-    ///  0 = Normal
-    ///  1 = Bold
-    ///  2 = Italic
-    ///  3 = Bold and Italic</returns>
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic</returns>
     static member TextObjectStyle(objectId:Guid) : int = //GET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
@@ -747,10 +747,10 @@ module ExtensionsGeometry =
     ///<summary>Modifies the font style of a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
-    ///  0 = Normal
-    ///  1 = Bold
-    ///  2 = Italic
-    ///  3 = Bold and Italic</param>
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
@@ -772,10 +772,10 @@ module ExtensionsGeometry =
     ///<summary>Modifies the font style of multiple text objects</summary>
     ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
-    ///  0 = Normal
-    ///  1 = Bold
-    ///  2 = Italic
-    ///  3 = Bold and Italic</param>
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
         for objectId in objectIds do 

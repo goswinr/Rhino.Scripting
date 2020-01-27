@@ -21,9 +21,9 @@ module ExtensionsBlock =
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
     ///<param name="basePoint">(Point3d) 3D base point for the block definition</param>
     ///<param name="name">(string) Optional, Default Value: <c>InstanceDefinitions.GetUnusedInstanceDefinitionName()</c>
-    ///Name of the block definition. If omitted a name will be automatically generated</param>
+    ///    Name of the block definition. If omitted a name will be automatically generated</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///If True, the objectIds will be deleted</param>
+    ///    If True, the objectIds will be deleted</param>
     ///<returns>(string) name of new block definition on success</returns>
     static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
         let name = if name="" then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
@@ -63,7 +63,7 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns names of the block definitions that contain a specified block
-    ///  definition</summary>
+    ///    definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string ResizeArray) A list of block definition names</returns>
     static member BlockContainers(blockName:string) : string ResizeArray =
@@ -77,7 +77,7 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns number of block definitions that contain a specified
-    ///  block definition</summary>
+    ///    block definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(int) the number of block definitions that contain a specified block definition</returns>
     static member BlockContainerCount(blockName:string) : int =
@@ -113,13 +113,13 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Counts number of instances of the block in the document.
-    ///  Nested instances are not included in the count. Attention this may include deleted blocks</summary>
+    ///    Nested instances are not included in the count. Attention this may include deleted blocks</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
-    ///0 = get top level references in active document.
-    ///  1 = get top level and nested references in active document.
-    ///    If a block is nested more than once within another block it will be counted only once.
-    ///  2 = check for references from other instance definitions, counts every instance of nested block</param>
+    ///    0 = get top level references in active document.
+    ///    1 = get top level and nested references in active document.
+    ///      If a block is nested more than once within another block it will be counted only once.
+    ///    2 = check for references from other instance definitions, counts every instance of nested block</param>
     ///<returns>(int) the number of instances of the block in the document</returns>
     static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int =
         let idef = Doc.InstanceDefinitions.Find(blockName)
@@ -154,9 +154,9 @@ module ExtensionsBlock =
     ///<summary>Returns the identifiers of the inserted instances of a block</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
-    ///0 = get top level references in active document.
-    ///  1 = get top level and nested references in active document.
-    ///  2 = check for references from other instance definitions</param>
+    ///    0 = get top level references in active document.
+    ///    1 = get top level and nested references in active document.
+    ///    2 = check for references from other instance definitions</param>
     ///<returns>(Guid ResizeArray) Ids identifying the instances of a block in the model</returns>
     static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
@@ -167,11 +167,11 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns the location of a block instance relative to the world coordinate
-    ///  system origin (0, 0, 0). The position is returned as a 4x4 transformation
-    ///  matrix</summary>
+    ///    system origin (0, 0, 0). The position is returned as a 4x4 transformation
+    ///    matrix</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Transform) the location, as a transform matrix, of a block instance relative to the world coordinate
-    ///  system origin</returns>
+    ///    system origin</returns>
     static member BlockInstanceXform(objectId:Guid) : Transform =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         instance.InstanceXform
@@ -209,8 +209,8 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns path to the source of a linked or embedded block definition.
-    ///  A linked or embedded block definition is a block definition that was
-    ///  inserted from an external file</summary>
+    ///    A linked or embedded block definition is a block definition that was
+    ///    inserted from an external file</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block on success</returns>
     static member BlockPath(blockName:string) : string =
@@ -223,14 +223,14 @@ module ExtensionsBlock =
     ///<summary>Returns the status of a linked block</summary>
     ///<param name="blockName">(string) Name of an existing block</param>
     ///<returns>(int) the status of a linked block
-    ///  Value Description
-    ///  -3    Not a linked block definition.
-    ///  -2    The linked block definition's file could not be opened or could not be read.
-    ///  -1    The linked block definition's file could not be found.
-    ///    0    The linked block definition is up-to-date.
-    ///    1    The linked block definition's file is newer than definition.
-    ///    2    The linked block definition's file is older than definition.
-    ///    3    The linked block definition's file is different than definition</returns>
+    ///    Value Description
+    ///    -3    Not a linked block definition.
+    ///    -2    The linked block definition's file could not be opened or could not be read.
+    ///    -1    The linked block definition's file could not be found.
+    ///      0    The linked block definition is up-to-date.
+    ///      1    The linked block definition's file is newer than definition.
+    ///      2    The linked block definition's file is older than definition.
+    ///      3    The linked block definition's file is different than definition</returns>
     static member BlockStatus(blockName:string) : int =
         let  idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  -3
@@ -251,10 +251,10 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Explodes a block instance into it's geometric components. The
-    ///  exploded objects are added to the document</summary>
+    ///    exploded objects are added to the document</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
-    ///By default nested blocks are not exploded</param>
+    ///    By default nested blocks are not exploded</param>
     ///<returns>(Guid array) identifiers for the newly exploded objects on success</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
@@ -283,11 +283,11 @@ module ExtensionsBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
     ///<param name="scale">(Vector3d) Optional, Default Value: <c>Vector3d(1.0 , 1.0 , 1.0)</c>
-    ///  X, y, z scale factors</param>
+    ///    X, y, z scale factors</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>0</c>
-    ///  Rotation angle in degrees</param>
+    ///    Rotation angle in degrees</param>
     ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c> Vector3d.ZAxis</c>
-    ///  The axis of rotation</param>
+    ///    The axis of rotation</param>
     ///<returns>(Guid) objectId for the block that was added to the doc</returns>
     static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
@@ -336,10 +336,10 @@ module ExtensionsBlock =
     ///<summary>Verifies that a block definition is being used by an inserted instance</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
-    ///One of the following values
-    ///  0 = Check for top level references in active document
-    ///  1 = Check for top level and nested references in active document
-    ///  2 = Check for references in other instance definitions</param>
+    ///    One of the following values
+    ///    0 = Check for top level references in active document
+    ///    1 = Check for top level and nested references in active document
+    ///    2 = Check for references in other instance definitions</param>
     ///<returns>(bool) True or False</returns>
     static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)

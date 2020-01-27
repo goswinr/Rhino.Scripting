@@ -15,9 +15,9 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Add new command alias to Rhino. Command aliases can be added manually by
-    ///  using Rhino's Options command and modifying the contents of the Aliases tab</summary>
+    ///    using Rhino's Options command and modifying the contents of the Aliases tab</summary>
     ///<param name="alias">(string) Name of new command alias. Cannot match command names or existing
-    ///  aliases</param>
+    ///    aliases</param>
     ///<param name="macro">(string) The macro to run when the alias is executed</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member AddAlias(alias:string, macro:string) : bool =
@@ -26,12 +26,12 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Add new path to Rhino's search path list. Search paths can be added by
-    ///  using Rhino's Options command and modifying the contents of the files tab</summary>
+    ///    using Rhino's Options command and modifying the contents of the files tab</summary>
     ///<param name="folder">(string) A valid folder, or path, to add</param>
     ///<param name="index">(int) Optional, Zero-based position in the search path list to insert.
-    ///  If omitted, path will be appended to the end of the search path list.</param>
+    ///    If omitted, path will be appended to the end of the search path list.</param>
     ///<returns>(int) The index where the item was inserted.
-    ///  -1 on failure</returns>
+    ///    -1 on failure</returns>
     static member AddSearchPath(folder:string, [<OPT;DEF(-1)>]index:int) : int =
         ApplicationSettings.FileSettings.AddSearchPath(folder, index)
 
@@ -70,35 +70,35 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Returns an application interface item's color</summary>
     ///<param name="item">(int) Item number to either query or modify
-    ///  0  = View background
-    ///  1  = Major grid line
-    ///  2  = Minor grid line
-    ///  3  = X-Axis line
-    ///  4  = Y-Axis line
-    ///  5  = Selected Objects
-    ///  6  = Locked Objects
-    ///  7  = New layers
-    ///  8  = Feedback
-    ///  9  = Tracking
-    ///  10 = Crosshair
-    ///  11 = Text
-    ///  12 = Text Background
-    ///  13 = Text hover</param>
+    ///    0  = View background
+    ///    1  = Major grid line
+    ///    2  = Minor grid line
+    ///    3  = X-Axis line
+    ///    4  = Y-Axis line
+    ///    5  = Selected Objects
+    ///    6  = Locked Objects
+    ///    7  = New layers
+    ///    8  = Feedback
+    ///    9  = Tracking
+    ///    10 = Crosshair
+    ///    11 = Text
+    ///    12 = Text Background
+    ///    13 = Text hover</param>
     ///<returns>(Drawing.Color) The current item color.
-    ///  0  = View background
-    ///  1  = Major grid line
-    ///  2  = Minor grid line
-    ///  3  = X-Axis line
-    ///  4  = Y-Axis line
-    ///  5  = Selected Objects
-    ///  6  = Locked Objects
-    ///  7  = New layers
-    ///  8  = Feedback
-    ///  9  = Tracking
-    ///  10 = Crosshair
-    ///  11 = Text
-    ///  12 = Text Background
-    ///  13 = Text hover</returns>
+    ///    0  = View background
+    ///    1  = Major grid line
+    ///    2  = Minor grid line
+    ///    3  = X-Axis line
+    ///    4  = Y-Axis line
+    ///    5  = Selected Objects
+    ///    6  = Locked Objects
+    ///    7  = New layers
+    ///    8  = Feedback
+    ///    9  = Tracking
+    ///    10 = Crosshair
+    ///    11 = Text
+    ///    12 = Text Background
+    ///    13 = Text hover</returns>
     static member AppearanceColor(item:int) : Drawing.Color = //GET
         if   item = 0 then AppearanceSettings.ViewportBackgroundColor
         elif item = 1 then AppearanceSettings.GridThickLineColor
@@ -119,20 +119,20 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Modifies an application interface item's color</summary>
     ///<param name="item">(int) Item number to either query or modify
-    ///  0  = View background
-    ///  1  = Major grid line
-    ///  2  = Minor grid line
-    ///  3  = X-Axis line
-    ///  4  = Y-Axis line
-    ///  5  = Selected Objects
-    ///  6  = Locked Objects
-    ///  7  = New layers
-    ///  8  = Feedback
-    ///  9  = Tracking
-    ///  10 = Crosshair
-    ///  11 = Text
-    ///  12 = Text Background
-    ///  13 = Text hover</param>
+    ///    0  = View background
+    ///    1  = Major grid line
+    ///    2  = Minor grid line
+    ///    3  = X-Axis line
+    ///    4  = Y-Axis line
+    ///    5  = Selected Objects
+    ///    6  = Locked Objects
+    ///    7  = New layers
+    ///    8  = Feedback
+    ///    9  = Tracking
+    ///    10 = Crosshair
+    ///    11 = Text
+    ///    12 = Text Background
+    ///    13 = Text hover</param>
     ///<param name="color">(Drawing.Color ) The new color value as System.Drawing.Color</param>
     ///<returns>(unit) void, nothing</returns>
     static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
@@ -198,7 +198,7 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Clears contents of Rhino's command history window. You can view the
-    ///  command history window by using the CommandHistory command in Rhino</summary>
+    ///    command history window by using the CommandHistory command in Rhino</summary>
     ///<returns>(unit) void, nothing</returns>
     static member ClearCommandHistory() : unit =
         RhinoApp.ClearCommandHistoryWindow()
@@ -206,31 +206,31 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Runs a Rhino command script. All Rhino commands can be used in command
-    ///  scripts. The command can be a built-in Rhino command or one provided by a
-    ///  3rd party plug-in.
-    ///  Write command scripts just as you would type the command sequence at the
-    ///  command line. A space or a new line acts like pressing 'Enter' at the
-    ///  command line. For more information, see "Scripting" in Rhino help.
-    ///  Note, this function is designed to run one command and one command only.
-    ///  Do not combine multiple Rhino commands into a single call to this method.
-    ///    WRONG:
-    ///      rs.Command("_Line _SelLast _Invert")
-    ///    CORRECT:
-    ///      rs.Command("_Line")
-    ///      rs.Command("_SelLast")
-    ///      rs.Command("_Invert")
-    ///  Also, the exclamation point and space character ( ! ) combination used by
-    ///  button macros and batch-driven scripts to cancel the previous command is
-    ///  not valid.
-    ///    WRONG:
-    ///      rs.Command("! _Line _Pause _Pause")
-    ///    CORRECT:
-    ///      rs.Command("_Line _Pause _Pause")
-    ///  After the command script has run, you can obtain the identifiers of most
-    ///  recently created or changed object by calling LastCreatedObjects</summary>
+    ///    scripts. The command can be a built-in Rhino command or one provided by a
+    ///    3rd party plug-in.
+    ///    Write command scripts just as you would type the command sequence at the
+    ///    command line. A space or a new line acts like pressing 'Enter' at the
+    ///    command line. For more information, see "Scripting" in Rhino help.
+    ///    Note, this function is designed to run one command and one command only.
+    ///    Do not combine multiple Rhino commands into a single call to this method.
+    ///      WRONG:
+    ///        rs.Command("_Line _SelLast _Invert")
+    ///      CORRECT:
+    ///        rs.Command("_Line")
+    ///        rs.Command("_SelLast")
+    ///        rs.Command("_Invert")
+    ///    Also, the exclamation point and space character ( ! ) combination used by
+    ///    button macros and batch-driven scripts to cancel the previous command is
+    ///    not valid.
+    ///      WRONG:
+    ///        rs.Command("! _Line _Pause _Pause")
+    ///      CORRECT:
+    ///        rs.Command("_Line _Pause _Pause")
+    ///    After the command script has run, you can obtain the identifiers of most
+    ///    recently created or changed object by calling LastCreatedObjects</summary>
     ///<param name="commandString">(string) A Rhino command including any arguments</param>
     ///<param name="echo">(bool) Optional, Default Value: <c>true</c>
-    ///The command echo mode True will display the commands on the commandline. If omitted, command prompts are echoed (True)</param>
+    ///    The command echo mode True will display the commands on the commandline. If omitted, command prompts are echoed (True)</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member Command(commandString:string, [<OPT;DEF(true)>]echo:bool) : bool =
         let getKeepEditor () = 
@@ -278,8 +278,8 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Removes existing path from Rhino's search path list. Search path items
-    ///  can be removed manually by using Rhino's options command and modifying the
-    ///  contents of the files tab</summary>
+    ///    can be removed manually by using Rhino's options command and modifying the
+    ///    contents of the files tab</summary>
     ///<param name="folder">(string) A folder to remove</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteSearchPath(folder:string) : bool =
@@ -311,16 +311,16 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Returns edge analysis mode displayed by the ShowEdges command</summary>
     ///<returns>(int) The current edge analysis mode
-    ///  0 - display all edges
-    ///  1 - display naked edges</returns>
+    ///    0 - display all edges
+    ///    1 - display naked edges</returns>
     static member EdgeAnalysisMode() : int = //GET
         ApplicationSettings.EdgeAnalysisSettings.ShowEdges
 
     [<Extension>]
     ///<summary>Modifies edge analysis mode displayed by the ShowEdges command</summary>
     ///<param name="mode">(int) The new display mode. The available modes are
-    ///  0 - display all edges
-    ///  1 - display naked edges</param>
+    ///    0 - display all edges
+    ///    1 - display naked edges</param>
     ///<returns>(unit) void, nothing</returns>
     static member EdgeAnalysisMode(mode:int) : unit = //SET
         if mode = 1 || mode = 2 then
@@ -332,7 +332,7 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Enables or disables Rhino's automatic file saving mechanism</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
-    ///The autosave state. If omitted automatic saving is enabled (True)</param>
+    ///    The autosave state. If omitted automatic saving is enabled (True)</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit =
         ApplicationSettings.FileSettings.AutoSaveEnabled <- enable
@@ -399,9 +399,9 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Searches for a file using Rhino's search path. Rhino will look for a file in the following locations:
-    ///    1. The current document's folder.
-    ///    2. Folder's specified in Options dialog, File tab.
-    ///    3. Rhino's System folders</summary>
+    ///      1. The current document's folder.
+    ///      2. Folder's specified in Options dialog, File tab.
+    ///      3. Rhino's System folders</summary>
     ///<param name="filename">(string) A short file name to search for</param>
     ///<returns>(string) full path on success</returns>
     static member FindFile(filename:string) : string =
@@ -410,10 +410,10 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Returns a scriptable object from a specified plug-in. Not all plug-ins
-    ///  contain scriptable objects. Check with the manufacturer of your plug-in
-    ///  to see if they support this capability</summary>
+    ///    contain scriptable objects. Check with the manufacturer of your plug-in
+    ///    to see if they support this capability</summary>
     ///<param name="plugIn">(string) The name of a registered plug-in that supports scripting.
-    ///  If the plug-in is registered but not loaded, it will be loaded</param>
+    ///    If the plug-in is registered but not loaded, it will be loaded</param>
     ///<returns>(object) a scriptable plugin object</returns>
     static member GetPlugInObject(plugIn:string) : obj =
         RhinoApp.GetPlugInObject(plugIn)
@@ -421,8 +421,8 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Determines if Rhino is currently running a command. Because Rhino allows
-    ///  for transparent commands (commands run from inside of other commands), this
-    ///  method returns the total number of active commands</summary>
+    ///    for transparent commands (commands run from inside of other commands), this
+    ///    method returns the total number of active commands</summary>
     ///<returns>(int) the number of active commands</returns>
     static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int =
         //<param name="ignoreRunners">(bool) Optional, Default Value: <c>true</c>
@@ -455,7 +455,7 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Verifies that a command exists in Rhino. Useful when scripting commands
-    ///  found in 3rd party plug-ins</summary>
+    ///    found in 3rd party plug-ins</summary>
     ///<param name="commandName">(string) The command name to test</param>
     ///<returns>(bool) True if the string is a command or False if it is not a command</returns>
     static member IsCommand(commandName:string) : bool =
@@ -492,28 +492,28 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Returns the result code for the last executed command</summary>
     ///<returns>(int) the result code for the last executed command.
-    ///  0 = success (command successfully completed)
-    ///  1 = cancel (command was cancelled by the user)
-    ///  2 = nothing (command did nothing, but was not cancelled)
-    ///  3 = failure (command failed due to bad input, computational problem...)
-    ///  4 = unknown command (the command was not found)</returns>
+    ///    0 = success (command successfully completed)
+    ///    1 = cancel (command was cancelled by the user)
+    ///    2 = nothing (command did nothing, but was not cancelled)
+    ///    3 = failure (command failed due to bad input, computational problem...)
+    ///    4 = unknown command (the command was not found)</returns>
     static member LastCommandResult() : int =
         int(Commands.Command.LastCommandResult)
 
 
     [<Extension>]
     ///<summary>Returns the current language used for the Rhino interface.  The current
-    ///  language is returned as a locale ID, or LCID, value</summary>
+    ///    language is returned as a locale ID, or LCID, value</summary>
     ///<returns>(int) the current language used for the Rhino interface as a locale ID, or LCID.
-    ///  1029  Czech
-    ///  1031  German-Germany
-    ///  1033  English-United States
-    ///  1034  Spanish-Spain
-    ///  1036  French-France
-    ///  1040  Italian-Italy
-    ///  1041  Japanese
-    ///  1042  Korean
-    ///  1045  Polish</returns>
+    ///    1029  Czech
+    ///    1031  German-Germany
+    ///    1033  English-United States
+    ///    1034  Spanish-Spain
+    ///    1036  French-France
+    ///    1040  Italian-Italy
+    ///    1041  Japanese
+    ///    1042  Korean
+    ///    1045  Polish</returns>
     static member LocaleID() : int =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
 
@@ -534,14 +534,14 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Get status of Rhino's object snap modeling aid.
-    ///  Object snaps are tools for specifying points on existing objects</summary>
+    ///    Object snaps are tools for specifying points on existing objects</summary>
     ///<returns>(bool) The current osnap status</returns>
     static member Osnap() : bool = //GET
         ModelAidSettings.Osnap
 
     [<Extension>]
     ///<summary>Enables or disables Rhino's object snap modeling aid.
-    ///  Object snaps are tools for specifying points on existing objects</summary>
+    ///    Object snaps are tools for specifying points on existing objects</summary>
     ///<param name="enable">(bool) The new enabled status</param>
     ///<returns>(unit) void, nothing</returns>
     static member Osnap(enable:bool) : unit = //SET
@@ -566,20 +566,20 @@ module ExtensionsApplication =
     ///<summary>Returns the object snap mode. Object snaps are tools for
     /// specifying points on existing objects</summary>
     ///<returns>(int) The current object snap mode(s)
-    ///  0          None
-    ///  2          Near
-    ///  8          Focus
-    ///  32         Center
-    ///  64         Vertex
-    ///  128        Knot
-    ///  512        Quadrant
-    ///  2048       Midpoint
-    ///  8192       Intersection
-    ///  131072     End
-    ///  524288     Perpendicular
-    ///  2097152    Tangent
-    ///  134217728  Point
-    ///  Object snap modes can be added together to set multiple modes</returns>
+    ///    0          None
+    ///    2          Near
+    ///    8          Focus
+    ///    32         Center
+    ///    64         Vertex
+    ///    128        Knot
+    ///    512        Quadrant
+    ///    2048       Midpoint
+    ///    8192       Intersection
+    ///    131072     End
+    ///    524288     Perpendicular
+    ///    2097152    Tangent
+    ///    134217728  Point
+    ///    Object snap modes can be added together to set multiple modes</returns>
     static member OsnapMode() : int = //GET
         int(ModelAidSettings.OsnapModes)
 
@@ -587,20 +587,20 @@ module ExtensionsApplication =
     ///<summary>Sets the object snap mode. Object snaps are tools for
     /// specifying points on existing objects</summary>
     ///<param name="mode">(int) The object snap mode or modes to set.
-    ///  0          None
-    ///  2          Near
-    ///  8          Focus
-    ///  32         Center
-    ///  64         Vertex
-    ///  128        Knot
-    ///  512        Quadrant
-    ///  2048       Midpoint
-    ///  8192       Intersection
-    ///  131072     End
-    ///  524288     Perpendicular
-    ///  2097152    Tangent
-    ///  134217728  Point
-    ///  Object snap modes can be added together to set multiple modes</param>
+    ///    0          None
+    ///    2          Near
+    ///    8          Focus
+    ///    32         Center
+    ///    64         Vertex
+    ///    128        Knot
+    ///    512        Quadrant
+    ///    2048       Midpoint
+    ///    8192       Intersection
+    ///    131072     End
+    ///    524288     Perpendicular
+    ///    2097152    Tangent
+    ///    134217728  Point
+    ///    Object snap modes can be added together to set multiple modes</param>
     ///<returns>(unit) void, nothing</returns>
     static member OsnapMode(mode:int) : unit = //SET
         ModelAidSettings.OsnapModes <- LanguagePrimitives.EnumOfValue mode
@@ -633,14 +633,14 @@ module ExtensionsApplication =
     [<Extension>]
     ///<summary>Returns a array of registered Rhino plug-ins</summary>
     ///<param name="types">(int) Optional, Default Value: <c>0</c>
-    ///The type of plug-ins to return.
-    ///  0= all
-    ///  1= render
-    ///  2= file export
-    ///  4= file import
-    ///  8= digitizer
-    ///  16= utility.
-    ///  If omitted, all are returned</param>
+    ///    The type of plug-ins to return.
+    ///    0= all
+    ///    1= render
+    ///    2= file export
+    ///    4= file import
+    ///    8= digitizer
+    ///    16= utility.
+    ///    If omitted, all are returned</param>
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
     /// 0= both loaded and unloaded, 
     /// 1= loaded, 
@@ -696,7 +696,7 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Returns the number of path items in Rhino's search path list.
-    ///  See "Options Files settings" in the Rhino help file for more details</summary>
+    ///    See "Options Files settings" in the Rhino help file for more details</summary>
     ///<returns>(int) the number of path items in Rhino's search path list</returns>
     static member SearchPathCount() : int =
         ApplicationSettings.FileSettings.SearchPathCount
@@ -704,7 +704,7 @@ module ExtensionsApplication =
 
     [<Extension>]
     ///<summary>Returns all of the path items in Rhino's search path list.
-    ///  See "Options Files settings" in the Rhino help file for more details</summary>
+    ///    See "Options Files settings" in the Rhino help file for more details</summary>
     ///<returns>(string array) list of search paths</returns>
     static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
@@ -714,7 +714,7 @@ module ExtensionsApplication =
     ///<summary>Sends a string of printable characters to Rhino's command line</summary>
     ///<param name="keys">(string) A string of characters to send to the command line</param>
     ///<param name="addReturn">(bool) Optional, Default Value: <c>true</c>
-    ///Append a return character to the end of the string. If omitted an return character will be added (True)</param>
+    ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) void, nothing</returns>
     static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoApp.SendKeystrokes(keys, addReturn)
@@ -763,10 +763,10 @@ module ExtensionsApplication =
     ///<param name="lower">(int) Lower limit of the progress meter's range</param>
     ///<param name="upper">(int) Upper limit of the progress meter's range</param>
     ///<param name="embedLabel">(bool) Optional, Default Value: <c>true</c>
-    ///  If true, the label will show inside the meter.
-    ///  If false, the label will show to the left of the meter</param>
+    ///    If true, the label will show inside the meter.
+    ///    If false, the label will show to the left of the meter</param>
     ///<param name="showPercent">(bool) Optional, Default Value: <c>true</c>
-    ///  Show the percent complete if True</param>
+    ///    Show the percent complete if True</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         let mutable rc = UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
@@ -777,7 +777,7 @@ module ExtensionsApplication =
     ///<summary>Set the current position of the progress meter</summary>
     ///<param name="position">(int) The new position in the progress meter</param>
     ///<param name="absolute">(bool) Optional, Default Value: <c>true</c>
-    ///The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used</param>
+    ///    The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
         UI.StatusBar.UpdateProgressMeter(position, absolute)

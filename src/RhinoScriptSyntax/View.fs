@@ -22,14 +22,14 @@ module ExtensionsView =
     ///<param name="corner2">(Point2d) Corner2 of the detail in the layout's unit system</param>
     ///<param name="title">(string) Optional, Title of the new detail</param>
     ///<param name="projection">(int) Optional, Default Value: <c>1</c>
-    ///Type of initial view projection for the detail
-    ///  1 = parallel top view
-    ///  2 = parallel bottom view
-    ///  3 = parallel left view
-    ///  4 = parallel right view
-    ///  5 = parallel front view
-    ///  6 = parallel back view
-    ///  7 = perspective view</param>
+    ///    Type of initial view projection for the detail
+    ///    1 = parallel top view
+    ///    2 = parallel bottom view
+    ///    3 = parallel left view
+    ///    4 = parallel right view
+    ///    5 = parallel front view
+    ///    6 = parallel back view
+    ///    7 = perspective view</param>
     ///<returns>(Guid) identifier of the newly created detail on success</returns>
     static member AddDetail( layoutName:string,
                              corner1:Point2d,
@@ -75,7 +75,7 @@ module ExtensionsView =
     ///<summary>Adds a new named view to the document</summary>
     ///<param name="name">(string) The name of the new named view</param>
     ///<param name="view">(string) Optional, The title of the view to save. If omitted, the current
-    ///  active view is saved</param>
+    ///    active view is saved</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddNamedView(name:string, [<OPT;DEF("":string)>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -232,9 +232,9 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Verifies that the specified view is maximized (enlarged so as to fill
-    ///  the entire Rhino window)</summary>
+    ///    the entire Rhino window)</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current
-    ///  view is used</param>
+    ///    view is used</param>
     ///<returns>(bool) True of False</returns>
     static member IsViewMaximized([<OPT;DEF("":string)>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -253,7 +253,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Verifies that the specified view's title window is visible</summary>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
-    ///  active view is used</param>
+    ///    active view is used</param>
     ///<returns>(bool) True of False</returns>
     static member IsViewTitleVisible([<OPT;DEF("":string)>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -272,7 +272,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Toggles a view's maximized/restore window state of the specified view</summary>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
-    ///  active view is used</param>
+    ///    active view is used</param>
     ///<returns>(unit)</returns>
     static member MaximizeRestoreView([<OPT;DEF("":string)>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -322,7 +322,7 @@ module ExtensionsView =
     ///<summary>Restores a named construction plane to the specified view</summary>
     ///<param name="cplaneName">(string) Name of the construction plane to restore</param>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
-    ///  active view is used</param>
+    ///    active view is used</param>
     ///<returns>(string) name of the restored named construction plane</returns>
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("":string)>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -338,9 +338,9 @@ module ExtensionsView =
     ///<summary>Restores a named view to the specified view</summary>
     ///<param name="namedView">(string) Name of the named view to restore</param>
     ///<param name="view">(string) Optional, Title of the view to restore the named view.
-    ///  If omitted, the current active view is used</param>
+    ///    If omitted, the current active view is used</param>
     ///<param name="restoreBitmap">(bool) Optional, Default Value: <c>false</c>
-    ///Restore the named view's background bitmap</param>
+    ///    Restore the named view's background bitmap</param>
     ///<returns>(unit) void, nothing</returns>
     static member RestoreNamedView( namedView:string,
                                     [<OPT;DEF("":string)>]view:string,
@@ -358,13 +358,13 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Rotates a perspective-projection view's camera. See the RotateCamera
-    ///  command in the Rhino help file for more details</summary>
+    ///    command in the Rhino help file for more details</summary>
     ///<param name="direction">(int)
-    ///The direction to rotate the camera where
-    ///  0= right
-    ///  1= left
-    ///  2= down
-    ///  3= up</param>
+    ///    The direction to rotate the camera where
+    ///    0= right
+    ///    1= left
+    ///    2= down
+    ///    3= up</param>
     ///<param name="angle">(float) The angle to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
@@ -399,13 +399,13 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Rotates a view. See RotateView command in Rhino help for more information</summary>
     ///<param name="direction">(int) Optional, The direction to rotate the view where
-    ///  0= right
-    ///  1= left
-    ///  2= down
-    ///  3= up</param>
+    ///    0= right
+    ///    1= left
+    ///    2= down
+    ///    3= up</param>
     ///<param name="angle">(float) Angle to rotate. If omitted, the angle of rotation is specified
-    ///  by the "Increment in divisions of a circle" parameter specified in
-    ///  Options command's View tab</param>
+    ///    by the "Increment in divisions of a circle" parameter specified in
+    ///    Options command's View tab</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
     static member RotateView( direction:int,
@@ -516,10 +516,10 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Tilts a view by rotating the camera up vector. See the TiltView command in
-    ///  the Rhino help file for more details</summary>
+    ///    the Rhino help file for more details</summary>
     ///<param name="direction">(int) The direction to rotate the view where
-    ///  0= right
-    ///  1= left</param>
+    ///    0= right
+    ///    1= left</param>
     ///<param name="angle">(float) The angle in degrees to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
@@ -709,10 +709,10 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return the names/titles, of all views in the document</summary>
     ///<param name="viewType">(int) Optional, Default: standard model views: <c>0</c>
-    ///The type of view to return
-    ///  0 = standard model views
-    ///  1 = page layout views
-    ///  2 = both standard and page layout views</param>
+    ///    The type of view to return
+    ///    0 = standard model views
+    ///    1 = page layout views
+    ///    2 = both standard and page layout views</param>
     ///<returns>(string ResizeArray) of the view names on success</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
@@ -723,7 +723,7 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Return 3d corners of a view's near clipping plane rectangle. Useful
-    ///  in determining the "real world" size of a parallel-projected view</summary>
+    ///    in determining the "real world" size of a parallel-projected view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order)</returns>
     static member ViewNearCorners([<OPT;DEF("":string)>]view:string) : Point3d * Point3d * Point3d * Point3d =
@@ -736,9 +736,9 @@ module ExtensionsView =
     ///<summary>Return a view's projection mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(int) The current projection mode for the specified view
-    ///  1 = parallel
-    ///  2 = perspective
-    ///  3 = two point perspective</returns>
+    ///    1 = parallel
+    ///    2 = perspective
+    ///    3 = two point perspective</returns>
     static member ViewProjection(view:string) : int = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -751,9 +751,9 @@ module ExtensionsView =
     ///<summary>Set a view's projection mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="mode">(int) The projection mode
-    ///  1 = parallel
-    ///  2 = perspective
-    ///  3 = two point perspective</param>
+    ///    1 = parallel
+    ///    2 = perspective
+    ///    3 = two point perspective</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewProjection(view:string, mode:int) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -786,9 +786,9 @@ module ExtensionsView =
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="radius">(float) The view radius</param>
     ///<param name="mode">(bool) Perform a "dolly" magnification by moving the camera
-    ///  towards/away from the target so that the amount of the screen
-    ///  subtended by an object changes.  true = perform a "zoom"
-    ///  magnification by adjusting the "lens" angle</param>
+    ///    towards/away from the target so that the amount of the screen
+    ///    subtended by an object changes.  true = perform a "zoom"
+    ///    magnification by adjusting the "lens" angle</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -819,17 +819,17 @@ module ExtensionsView =
     ///<summary>Test's Rhino's display performance</summary>
     ///<param name="view">(string) Optional, The title of the view.  If omitted, the current active view is used</param>
     ///<param name="frames">(int) Optional, Default Value: <c>100</c>
-    ///The number of frames, or times to regenerate the view. If omitted, the view will be regenerated 100 times</param>
+    ///    The number of frames, or times to regenerate the view. If omitted, the view will be regenerated 100 times</param>
     ///<param name="freeze">(bool) Optional, Default Value: <c>true</c>
-    ///If True (Default), then Rhino's display list will not be updated with every frame redraw. If False, then Rhino's display list will be updated with every frame redraw</param>
+    ///    If True (Default), then Rhino's display list will not be updated with every frame redraw. If False, then Rhino's display list will be updated with every frame redraw</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
-    ///The direction to rotate the view. The default direction is Right (0). Modes:
-    ///  0 = Right
-    ///  1 = Left
-    ///  2 = Down
-    ///  3 = Up</param>
+    ///    The direction to rotate the view. The default direction is Right (0). Modes:
+    ///    0 = Right
+    ///    1 = Left
+    ///    2 = Down
+    ///    3 = Up</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>5</c>
-    ///The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
+    ///    The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
     ///<returns>(float) The number of seconds it took to regenerate the view frames number of times</returns>
     static member ViewSpeedTest( [<OPT;DEF("":string)>]view:string,
                                  [<OPT;DEF(100)>]frames:int,
@@ -947,7 +947,7 @@ module ExtensionsView =
     ///<param name="boundingBox">(Geometry.BoundingBox) a BoundingBox class instance</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
-    ///Zoom extents in all views</param>
+    ///    Zoom extents in all views</param>
     ///<returns>(unit)</returns>
     static member ZoomBoundingBox( boundingBox:BoundingBox,
                                    [<OPT;DEF("":string)>]view:string,
@@ -965,7 +965,7 @@ module ExtensionsView =
     ///<summary>Zooms to extents of visible objects in the specified view</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
-    ///Zoom extents in all views</param>
+    ///    Zoom extents in all views</param>
     ///<returns>(unit)</returns>
     static member ZoomExtents([<OPT;DEF("":string)>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
@@ -981,7 +981,7 @@ module ExtensionsView =
     ///<summary>Zoom to extents of selected objects in a view</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
-    ///Zoom extents in all views</param>
+    ///    Zoom extents in all views</param>
     ///<returns>(unit)</returns>
     static member ZoomSelected([<OPT;DEF("":string)>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then

@@ -17,8 +17,8 @@ module ExtensionsMaterial =
 
     [<Extension>]
     ///<summary>Add material to a layer and returns the new material's index. If the
-    ///  layer already has a material, then the layer's current material index is
-    ///  returned</summary>
+    ///    layer already has a material, then the layer's current material index is
+    ///    returned</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(int) Material index of the layer</returns>
     static member AddMaterialToLayer(layer:string) : int =
@@ -32,7 +32,7 @@ module ExtensionsMaterial =
 
     [<Extension>]
     ///<summary>Adds material to an object and returns the new material's index. If the
-    ///  object already has a material, the the object's current material index is returned</summary>
+    ///    object already has a material, the the object's current material index is returned</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) material index of the object</returns>
     static member AddMaterialToObject(objectId:Guid) : int =
@@ -69,8 +69,8 @@ module ExtensionsMaterial =
 
     [<Extension>]
     ///<summary>Verifies a material is a copy of Rhino's built-in "default" material.
-    ///  The default material is used by objects and layers that have not been
-    ///  assigned a material</summary>
+    ///    The default material is used by objects and layers that have not been
+    ///    assigned a material</summary>
     ///<param name="materialIndex">(int) The zero-based material index</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member IsMaterialDefault(materialIndex:int) : bool =
@@ -90,7 +90,7 @@ module ExtensionsMaterial =
     [<Extension>]
     ///<summary>Copies the material definition from one material to one or more objects</summary>
     ///<param name="source">(Guid) Source material index -or- identifier of the source object.
-    ///  The object must have a material assigned</param>
+    ///    The object must have a material assigned</param>
     ///<param name="destination">(Guid seq) Id of the destination object</param>
     ///<returns>(unit) void, nothing</returns>
     static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
@@ -238,7 +238,7 @@ module ExtensionsMaterial =
     ///<summary>Returns a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(float) The current material shine value
-    ///  0.0 being matte and 255.0 being glossy</returns>
+    ///    0.0 being matte and 255.0 being glossy</returns>
     static member MaterialShine(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialShine failed.  materialIndex:'%A' " materialIndex
@@ -249,7 +249,7 @@ module ExtensionsMaterial =
     ///<summary>Modifies a material's shine value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="shine">(float) The new shine value. A material's shine value ranges from 0.0 to 255.0, with
-    ///  0.0 being matte and 255.0 being glossy</param>
+    ///    0.0 being matte and 255.0 being glossy</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
@@ -291,7 +291,7 @@ module ExtensionsMaterial =
     ///<summary>Returns a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(float) The current material transparency value
-    ///  0.0 being opaque and 1.0 being transparent</returns>
+    ///    0.0 being opaque and 1.0 being transparent</returns>
     static member MaterialTransparency(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTransparency failed.  materialIndex:'%A' " materialIndex
@@ -302,7 +302,7 @@ module ExtensionsMaterial =
     ///<summary>Modifies a material's transparency value</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="transparency">(float) The new transparency value. A material's transparency value ranges from 0.0 to 1.0, with
-    ///  0.0 being opaque and 1.0 being transparent</param>
+    ///    0.0 being opaque and 1.0 being transparent</param>
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTransparency(materialIndex:int, transparency:float) : unit = //SET
         let mat = Doc.Materials.[materialIndex]

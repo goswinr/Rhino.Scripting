@@ -101,30 +101,30 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///The intersection tolerance.</param>
+    ///    The intersection tolerance.</param>
     ///<returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
-    ///  Element Type        Description
-    ///  [0]       Number      The intersection event type, either Point (1) or Overlap (2).
-    ///  [1]       Point3d     If the event type is Point (1), then the intersection point on the curve.
-    ///    If the event type is Overlap (2), then intersection start point on the curve.
-    ///  [2]       Point3d     If the event type is Point (1), then the intersection point on the curve.
-    ///    If the event type is Overlap (2), then intersection end point on the curve.
-    ///  [3]       Point3d     If the event type is Point (1), then the intersection point on the plane.
-    ///    If the event type is Overlap (2), then intersection start point on the plane.
-    ///  [4]       Point3d     If the event type is Point (1), then the intersection point on the plane.
-    ///    If the event type is Overlap (2), then intersection end point on the plane.
-    ///  [5]       Number      If the event type is Point (1), then the curve parameter.
-    ///    If the event type is Overlap (2), then the start value of the curve parameter range.
-    ///  [6]       Number      If the event type is Point (1), then the curve parameter.
-    ///    If the event type is Overlap (2), then the end value of the curve parameter range.
-    ///  [7]       Number      If the event type is Point (1), then the U plane parameter.
-    ///    If the event type is Overlap (2), then the U plane parameter for curve at (n, 5).
-    ///  [8]       Number      If the event type is Point (1), then the V plane parameter.
-    ///    If the event type is Overlap (2), then the V plane parameter for curve at (n, 5).
-    ///  [9]       Number      If the event type is Point (1), then the U plane parameter.
-    ///    If the event type is Overlap (2), then the U plane parameter for curve at (n, 6).
-    ///  [10]      Number      If the event type is Point (1), then the V plane parameter.
-    ///    If the event type is Overlap (2), then the V plane parameter for curve at (n, 6)</returns>
+    ///    Element Type        Description
+    ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
+    ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the curve.
+    ///      If the event type is Overlap (2), then intersection start point on the curve.
+    ///    [2]       Point3d     If the event type is Point (1), then the intersection point on the curve.
+    ///      If the event type is Overlap (2), then intersection end point on the curve.
+    ///    [3]       Point3d     If the event type is Point (1), then the intersection point on the plane.
+    ///      If the event type is Overlap (2), then intersection start point on the plane.
+    ///    [4]       Point3d     If the event type is Point (1), then the intersection point on the plane.
+    ///      If the event type is Overlap (2), then intersection end point on the plane.
+    ///    [5]       Number      If the event type is Point (1), then the curve parameter.
+    ///      If the event type is Overlap (2), then the start value of the curve parameter range.
+    ///    [6]       Number      If the event type is Point (1), then the curve parameter.
+    ///      If the event type is Overlap (2), then the end value of the curve parameter range.
+    ///    [7]       Number      If the event type is Point (1), then the U plane parameter.
+    ///      If the event type is Overlap (2), then the U plane parameter for curve at (n, 5).
+    ///    [8]       Number      If the event type is Point (1), then the V plane parameter.
+    ///      If the event type is Overlap (2), then the V plane parameter for curve at (n, 5).
+    ///    [9]       Number      If the event type is Point (1), then the U plane parameter.
+    ///      If the event type is Overlap (2), then the U plane parameter for curve at (n, 6).
+    ///    [10]      Number      If the event type is Point (1), then the V plane parameter.
+    ///      If the event type is Overlap (2), then the V plane parameter for curve at (n, 6)</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
@@ -154,7 +154,7 @@ module ExtensionsPlane =
 
     [<Extension>]
     ///<summary>Returns the equation of a plane as a tuple of four numbers. The standard
-    ///  equation of a plane with a non-zero vector is Ax + By + Cz + D = 0</summary>
+    ///    equation of a plane with a non-zero vector is Ax + By + Cz + D = 0</summary>
     ///<param name="plane">(Plane) The plane to deconstruct</param>
     ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D)</returns>
     static member PlaneEquation(plane:Plane) : float * float * float * float =
@@ -178,10 +178,10 @@ module ExtensionsPlane =
     ///<summary>Construct a plane from a point, and two vectors in the plane</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the plane</param>
     ///<param name="xAxis">(Vector3d) A non-zero 3D vector in the plane that determines the X axis
-    ///  direction</param>
+    ///    direction</param>
     ///<param name="yAxis">(Vector3d) A non-zero 3D vector not parallel to xAxis that is used
-    ///  to determine the Y axis direction. Note, yAxis does not
-    ///  have to be perpendicular to xAxis</param>
+    ///    to determine the Y axis direction. Note, yAxis does not
+    ///    have to be perpendicular to xAxis</param>
     ///<returns>(Plane) The plane</returns>
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
@@ -247,14 +247,14 @@ module ExtensionsPlane =
     ///<summary>Calculates the intersection of a plane and a sphere</summary>
     ///<param name="plane">(Plane) The plane to intersect</param>
     ///<param name="spherePlane">(Plane) Equatorial plane of the sphere. origin of the plane is
-    ///  the center of the sphere</param>
+    ///    the center of the sphere</param>
     ///<param name="sphereRadius">(float) Radius of the sphere</param>
     ///<returns>(int * Plane * float) of intersection results
-    ///  Element  Type      Description
-    ///  [0]      number     The type of intersection, where 0 = point and 1 = circle.
-    ///  [1]      plane      If a point intersection, the a Point3d identifying the 3-D intersection location is plane.Origin
-    ///                      If a circle intersection, then the circle's plane. The origin of the plane will be the center point of the circle
-    ///  [2]      number     If a circle intersection, then the radius of the circle</returns>
+    ///    Element  Type      Description
+    ///    [0]      number     The type of intersection, where 0 = point and 1 = circle.
+    ///    [1]      plane      If a point intersection, the a Point3d identifying the 3-D intersection location is plane.Origin
+    ///                        If a circle intersection, then the circle's plane. The origin of the plane will be the center point of the circle
+    ///    [2]      number     If a circle intersection, then the radius of the circle</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
                                            sphereRadius:float) : int * Plane * float =

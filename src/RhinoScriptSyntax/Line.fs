@@ -61,23 +61,23 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Determines if the shortest distance from a line to a point or another
-    ///  line is greater than a specified distance</summary>
+    ///    line is greater than a specified distance</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line</param>
     ///<param name="distance">(float) The distance</param>
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(bool) True if the shortest distance from the line to the other project is
-    ///  greater than distance, False otherwise</returns>
+    ///    greater than distance, False otherwise</returns>
     static member LineIsFartherThan(line:Line, distance:float, point:Point3d) : bool =
         let minDist = line.MinimumDistanceTo(point)
         minDist > distance
     [<Extension>]
     ///<summary>Determines if the shortest distance from a line to a point or another
-    ///  line is greater than a specified distance</summary>
+    ///    line is greater than a specified distance</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line</param>
     ///<param name="distance">(float) The distance</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(bool) True if the shortest distance from the line to the other project is
-    ///  greater than distance, False otherwise</returns>
+    ///    greater than distance, False otherwise</returns>
     static member LineIsFartherThan(line:Line, distance:float, line2:Line) : bool =
         let minDist = line.MinimumDistanceTo(line2)
         minDist > distance
@@ -86,7 +86,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Calculates the intersection of two non-parallel lines. The lines are considered endless.
-    ///  If the two lines do not actually intersect the closest point on each is returned</summary>
+    ///    If the two lines do not actually intersect the closest point on each is returned</summary>
     ///<param name="lineA">(Geometry.Line) LineA of lines to intersect</param>
     ///<param name="lineB">(Geometry.Line) LineB of lines to intersect</param>
     ///<returns>(Point3d * Point3d) containing a point on the first line and a point on the second line</returns>
@@ -115,7 +115,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
-    ///  or another line</summary>
+    ///    or another line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -125,7 +125,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
-    ///  or another line</summary>
+    ///    or another line</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -137,7 +137,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Returns a plane that contains the line. The origin of the plane is at the start of
-    ///  the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
+    ///    the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
     ///<param name="line">(Geometry.Line) a Line</param>
     ///<returns>(Plane) the plane</returns>
     static member LinePlane(line:Line) : Plane =

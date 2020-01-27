@@ -21,11 +21,11 @@ module ExtensionsPointvector =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
     ///<param name="toleranceDegree">(float) Optional, Default Value: <c>1.0</c>
-    ///  Angle Tolerance in degree</param>
+    ///    Angle Tolerance in degree</param>
     ///<returns>(int) the value represents
-    ///   -1 = the vectors are anti-parallel
-    ///    0 = the vectors are not parallel
-    ///    1 = the vectors are parallel</returns>
+    ///     -1 = the vectors are anti-parallel
+    ///      0 = the vectors are not parallel
+    ///      1 = the vectors are parallel</returns>
     static member IsVectorParallelTo(   vector1:Vector3d,
                                         vector2:Vector3d,
                                         [<OPT;DEF(0.0)>]toleranceDegree:float) : int =
@@ -40,7 +40,7 @@ module ExtensionsPointvector =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
     ///<param name="toleranceDegree">(float) Optional, Default Value: <c>1.0</c>
-    ///  Angle Tolerance in degree</param>
+    ///    Angle Tolerance in degree</param>
     ///<returns>(bool) True if vectors are perpendicular, otherwise False</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
@@ -109,9 +109,9 @@ module ExtensionsPointvector =
     ///<param name="point">(Point3d) Point to test</param>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more objects</param>
     ///<returns>(Guid * Point3d * float) Tuple of 3 values
-    ///    [0] Guid, closest  objectId
-    ///    [1] the point on object
-    ///    [2] the distance</returns>
+    ///      [0] Guid, closest  objectId
+    ///      [1] the point on object
+    ///      [2] the distance</returns>
     static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float =
         //objectIds = RhinoScriptSyntax.Coerceguidlist(objectIds)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
@@ -170,7 +170,7 @@ module ExtensionsPointvector =
     ///<param name="point1">(Point3d) Point1 of the points to compare</param>
     ///<param name="point2">(Point3d) Point2 of the points to compare</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///Tolerance to use for comparison.</param>
+    ///    Tolerance to use for comparison.</param>
     ///<returns>(bool) True or False</returns>
     static member PointCompare( point1:Point3d,
                                 point2:Point3d,
@@ -198,7 +198,7 @@ module ExtensionsPointvector =
     ///<summary>Verifies that a list of 3D points are coplanar</summary>
     ///<param name="points">(Point3d seq) 3D points to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
-    ///Tolerance to use when verifying</param>
+    ///    Tolerance to use when verifying</param>
     ///<returns>(bool) True or False</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
@@ -270,7 +270,7 @@ module ExtensionsPointvector =
 
     [<Extension>]
     ///<summary>Pulls an array of points to a surface or mesh object. For more
-    ///  information, see the Rhino help file Pull command</summary>
+    ///    information, see the Rhino help file Pull command</summary>
     ///<param name="objectId">(Guid) The identifier of the surface or mesh object that pulls</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<returns>(Point3d array) 3D points pulled onto surface or mesh</returns>
@@ -325,9 +325,9 @@ module ExtensionsPointvector =
     ///<param name="vector1">(Vector3d) Vector1 of the two vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the two vectors to compare</param>
     ///<returns>(int) result of comparing the vectors.
-    ///  -1 if vector1 is less than vector2
-    ///  0 if vector1 is equal to vector2
-    ///  1 if vector1 is greater than vector2</returns>
+    ///    -1 if vector1 is less than vector2
+    ///    0 if vector1 is equal to vector2
+    ///    1 if vector1 is greater than vector2</returns>
     static member VectorCompare(vector1:Vector3d, vector2:Vector3d) : int =
         //vector1 = RhinoScriptSyntax.Coerce3dvector(vector1)
         //vector2 = RhinoScriptSyntax.Coerce3dvector(vector2)
@@ -470,12 +470,12 @@ module ExtensionsPointvector =
 
     [<Extension>]
     ///<summary>Returns either a world axis-aligned or a construction plane axis-aligned
-    ///  bounding box of an array of 3-D point locations</summary>
+    ///    bounding box of an array of 3-D point locations</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///  Plane to which the bounding box should be aligned,
+    ///    Plane to which the bounding box should be aligned,
     /// If omitted, a world axis-aligned bounding box
-    ///  will be calculated</param>
+    ///    will be calculated</param>
     ///<returns>(Box) A Rhino.Geometry.Box</returns>
     static member PointArrayBoundingBox( points:Point3d seq, [<OPT;DEF(Plane())>]plane:Plane) : Box = // TODO verify this works the same way as python !!
         if plane.IsValid then

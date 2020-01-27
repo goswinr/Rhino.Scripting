@@ -17,12 +17,12 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Adds an aligned dimension object to the document. An aligned dimension
-    ///  is a linear dimension lined up with two points</summary>
+    ///    is a linear dimension lined up with two points</summary>
     ///<param name="startPoint">(Point3d) First point of dimension</param>
     ///<param name="endPoint">(Point3d) Second point of dimension</param>
     ///<param name="pointOnDimensionLine">(Point3d) Location point of dimension line</param>
     ///<param name="style">(string) Optional, Default Value: <c>""</c>
-    ///Name of dimension style</param>
+    ///    Name of dimension style</param>
     ///<returns>(Guid) identifier of new dimension on success</returns>
     static member AddAlignedDimension(startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF("")>]style:string) : Guid =
         let mutable start = startPoint
@@ -50,7 +50,7 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Adds a new dimension style to the document. The new dimension style will
-    ///  be initialized with the current default dimension style properties</summary>
+    ///    be initialized with the current default dimension style properties</summary>
     ///<param name="dimStyleName">(string) Name of the new dimension style</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddDimStyle(dimStyleName:string) : unit =
@@ -62,11 +62,11 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Adds a leader to the document. Leader objects are planar.
-    ///  The 3D points passed will define the plane if no Plane given</summary>
+    ///    The 3D points passed will define the plane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
-    ///  If points will be projected to this plane</param>
+    ///    If points will be projected to this plane</param>
     ///<returns>(Guid) identifier of the new leader on success</returns>
     static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points2d = ResizeArray()
@@ -143,7 +143,7 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Removes an existing dimension style from the document. The dimension style
-    ///  to be removed cannot be referenced by any dimension objects</summary>
+    ///    to be removed cannot be referenced by any dimension objects</summary>
     ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
     ///<returns>(unit) void, nothing (fails on error)</returns>
     static member DeleteDimStyle(dimStyleName:string) : unit =
@@ -460,16 +460,16 @@ module ExtensionsDimension =
     ///<summary>Returns the number display format of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current display format
-    ///   ModelUnits       0  Decimal current model units
-    ///   Millmeters       3  Decimal Millimeters
-    ///   Centimeters      4  Decimal Centimeters
-    ///   Meters           5  Decimal Meters
-    ///   Kilometers       6  Decimal Kilometers
-    ///   InchesDecimal    7  Decimal Inches
-    ///   InchesFractional 1  Fractional Inches ( 1.75 inches displays as 1-3/4 )
-    ///   FeetDecimal      8  Decimal Feet
-    ///   FeetAndInches    2  Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
-    ///   Miles            9  Decimal Miles</returns>
+    ///     ModelUnits       0  Decimal current model units
+    ///     Millmeters       3  Decimal Millimeters
+    ///     Centimeters      4  Decimal Centimeters
+    ///     Meters           5  Decimal Meters
+    ///     Kilometers       6  Decimal Kilometers
+    ///     InchesDecimal    7  Decimal Inches
+    ///     InchesFractional 1  Fractional Inches ( 1.75 inches displays as 1-3/4 )
+    ///     FeetDecimal      8  Decimal Feet
+    ///     FeetAndInches    2  Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
+    ///     Miles            9  Decimal Miles</returns>
     static member DimStyleNumberFormat(dimStyle:string) : int = //GET
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  failwithf "get DimStyleNumberFormat failed.  dimStyle:'%A'" dimStyle
@@ -480,16 +480,16 @@ module ExtensionsDimension =
     ///<summary>Changes the number display format of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="format">(int) The new number format
-    ///   ModelUnits       0  Decimal current model units
-    ///   Millmeters       3  Decimal Millimeters
-    ///   Centimeters      4  Decimal Centimeters
-    ///   Meters           5  Decimal Meters
-    ///   Kilometers       6  Decimal Kilometers
-    ///   InchesDecimal    7  Decimal Inches
-    ///   InchesFractional 1  Fractional Inches ( 1.75 inches displays as 1-3/4 )
-    ///   FeetDecimal      8  Decimal Feet
-    ///   FeetAndInches    2  Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
-    ///   Miles            9  Decimal Miles</param>
+    ///     ModelUnits       0  Decimal current model units
+    ///     Millmeters       3  Decimal Millimeters
+    ///     Centimeters      4  Decimal Centimeters
+    ///     Meters           5  Decimal Meters
+    ///     Kilometers       6  Decimal Kilometers
+    ///     InchesDecimal    7  Decimal Inches
+    ///     InchesFractional 1  Fractional Inches ( 1.75 inches displays as 1-3/4 )
+    ///     FeetDecimal      8  Decimal Feet
+    ///     FeetAndInches    2  Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
+    ///     Miles            9  Decimal Miles</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleNumberFormat(dimStyle:string, format:int) : unit = //SET
         let ds = Doc.DimStyles.FindName(dimStyle)
@@ -577,13 +577,13 @@ module ExtensionsDimension =
     ///<summary>Returns the text alignment mode of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current text alignment
-    ///   Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///   MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///   BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
-    ///   Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
-    ///   MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///   Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
-    ///   BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</returns>
+    ///     Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///     MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
+    ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
+    ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
+    ///     Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
+    ///     BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</returns>
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
         let ds = Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  failwithf "get DimStyleTextAlignment failed.  dimStyle:'%A'" dimStyle
@@ -593,13 +593,13 @@ module ExtensionsDimension =
     ///<summary>Changes the text alignment mode of a dimension style</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="alignment">(int) The new text alignment
-    ///   Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///   MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
-    ///   BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
-    ///   Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
-    ///   MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///   Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
-    ///   BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</param>
+    ///     Top                   0   Attach to top of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///     MiddleOfTop           1   Attach to middle of an 'I' on the first line. (Independent of glyphs being displayed.)
+    ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
+    ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
+    ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
+    ///     Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
+    ///     BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
         let ds = Doc.DimStyles.FindName(dimStyle)
