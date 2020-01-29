@@ -45,10 +45,15 @@ module ActiceDocument =
     ///if second value is 0.0 return first else second
     let internal ifZero2 a b = if b = 0.0 then a else b    
 
+
+    let mutable internal escapePressed = false   
+
     do
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
-            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwith "Esc Key was pressed, Exception raised via Rhino.Scripting") // done in Seff.Rhino
+            RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
+            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") 
+            
 
         
 [<AutoOpen>]
@@ -56,13 +61,13 @@ module ActiceDocument =
 module Synchronisation =
     
     ///the SynchronizationContext of the currently Running Rhino Instance, 
-    let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection on Seff.Rhino
+    let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below from Seff.Rhino
     
     ///the Assembly currently running Seff Editor Window
-    let mutable seffRhinoAssembly : Reflection.Assembly = null //set via reflection on Seff.Rhino
+    let mutable seffRhinoAssembly : Reflection.Assembly = null //set via reflection below from Seff.Rhino
     
     ///the WPF Window of currently running Seff Editor
-    let mutable seffRhinoWindow : System.Windows.Window = null //set via reflection on Seff.Rhino
+    let mutable seffRhinoWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
 
     let private getSeffRhinoPluginSyncContext() =
         // some reflection hacks because Rhinocommon does not expose a UI sync context
@@ -110,7 +115,7 @@ module Synchronisation =
         
     do
         if HostUtils.RunningInRhino  then
-            if isNull syncContext then getSeffRhinoPluginSyncContext()
+            if isNull syncContext     then getSeffRhinoPluginSyncContext()
             if isNull seffRhinoWindow then getSeffRhinoPluginWindow()
             "Rhino.Scripting SynchronizationContext is set up."
             |>> RhinoApp.WriteLine 

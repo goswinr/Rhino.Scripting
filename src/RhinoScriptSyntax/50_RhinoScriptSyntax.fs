@@ -44,6 +44,8 @@ module private Internals =
 [<AbstractClass; Sealed>]
 /// A static class with static members provIding functions Identical to RhinoScript in Pyhton or VBscript 
 type RhinoScriptSyntax private () = // no constructor?     
+    
+    
 
     /// A Dictionary to store state between scripting session
     static member Sticky:Dictionary<string, obj> = Internals.sticky
@@ -51,11 +53,16 @@ type RhinoScriptSyntax private () = // no constructor?
     /// An Integer Enum of Object types to be use in object selection functions
     static member Filter:Filter = Internals.filter
     
-    //NOT neded anymore, done via reflection ActiceDoc.fs
-    //static member SynchronizationContext //<summary>The Synchronization Context of the Rhino UI Therad.    //This MUST be set at the  beginning of every Script if using UI dialogs and script is not running on UI thread</summary>
-    //    with get (): Threading.SynchronizationContext = syncContext
-    //    and  set v : unit                             = syncContext <- v
-
+    //Tests to see if the user has pressed the escape key
+    static member EscapeTest():unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool = 
+        RhinoApp.Wait()
+        let v = escapePressed
+        //if reset then 
+        escapePressed<-false //allways reset is needed otherwise in next run of sript will not be reset
+        if v  then //&& throwException then 
+            raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
+        //v
+        
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
@@ -83,6 +90,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="x">('T): the value or object to print</param>   
     ///<returns>(unit) voId, nothing</returns>
     static member PrintFull (x:'T) : unit =
+
         RhinoScriptSyntax.ToNiceString(x, false)
         |>> RhinoApp.WriteLine 
         |> printfn "%s"  
