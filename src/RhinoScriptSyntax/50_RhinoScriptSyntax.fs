@@ -52,16 +52,15 @@ type RhinoScriptSyntax private () = // no constructor?
     /// An Integer Enum of Object types to be use in object selection functions
     static member Filter:Filter = Internals.filter
     
-    //Tests to see if the user has pressed the escape key
-    static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool = 
-        RhinoApp.Wait()
-        if escapePressed  then 
+    ///Tests to see if the user has pressed the escape key
+    ///raises OperationCanceledException
+    static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool =         
+        if escapePressed  then //check bool to avoid reflection test on vevery call
+            RhinoApp.Wait()
             escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset
-            if Synchronisation.mayFsiBeCancelled() then //extra reflection check because when using async the reset is not done becaus of thread abort
+            if Synchronisation.isCancelRequested() then //extra reflection check because when using async in Seff the reset is not done because the thread is aborted
                 raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
-            //else
-            //    print "wasAsyncFsiCancelled=false"
-
+                
         
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>

@@ -45,14 +45,13 @@ module ActiceDocument =
     ///if second value is 0.0 return first else second
     let internal ifZero2 a b = if b = 0.0 then a else b    
 
-
-    let mutable internal escapePressed = false   
-
+    let mutable internal escapePressed = false
+    
     do
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
-            RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
-            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Synch thread
+            RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) // to have a quick check value too without the neeed to do reflection for check
+            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Sync thread
             
 
         
@@ -60,7 +59,7 @@ module ActiceDocument =
 /// To acces the UI therad from other therads
 module Synchronisation =
     
-    let mutable internal seffRhinoSyncModule:Type = null
+    let mutable private seffRhinoSyncModule:Type = null
 
     ///the SynchronizationContext of the currently Running Rhino Instance, 
     let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below from Seff.Rhino
@@ -94,11 +93,11 @@ module Synchronisation =
             |>> RhinoApp.WriteLine 
             |> printfn "%s"    
             
-    let internal mayFsiBeCancelled() = //To avoid that the next runn of an async script gets cancelled on the first occurence of rs.EscapeTest
+    let internal isCancelRequested() = //To avoid that the next runn of an async script gets cancelled on the first occurence of rs.EscapeTest
         try 
-            seffRhinoSyncModule.GetProperty("rhinoScriptSyntaxCanCancel").GetValue(seffRhinoAssembly)  :?> bool
+            seffRhinoSyncModule.GetProperty("isCancelRequested").GetValue(seffRhinoAssembly)  :?> bool
         with _ ->
-            "Failed to get Seff.Rhino.Sync.rhinoScriptSyntaxCanCancel via Reflection, cancel will repeat once if in async"
+            "Failed to get Seff.Rhino.Sync.isSyncCancelRequested via Reflection, cancel will repeat once if in async"
             |>> RhinoApp.WriteLine 
             |> printfn "%s" 
             true
