@@ -10,6 +10,7 @@ open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
 open FsEx
 open FsEx.SaveIgnore
+open System
 
 /// An Integer Enum of Object types to be use in object selection functions
 /// Don't create an instance, use the instance in RhinoScriptSyntax.Filter
@@ -43,9 +44,7 @@ module private Internals =
 
 [<AbstractClass; Sealed>]
 /// A static class with static members provIding functions Identical to RhinoScript in Pyhton or VBscript 
-type RhinoScriptSyntax private () = // no constructor?     
-    
-    
+type RhinoScriptSyntax private () = // no constructor? 
 
     /// A Dictionary to store state between scripting session
     static member Sticky:Dictionary<string, obj> = Internals.sticky
@@ -54,14 +53,15 @@ type RhinoScriptSyntax private () = // no constructor?
     static member Filter:Filter = Internals.filter
     
     //Tests to see if the user has pressed the escape key
-    static member EscapeTest():unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool = 
+    static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool = 
         RhinoApp.Wait()
-        let v = escapePressed
-        //if reset then 
-        escapePressed<-false //allways reset is needed otherwise in next run of sript will not be reset
-        if v  then //&& throwException then 
-            raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
-        //v
+        if escapePressed  then 
+            escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset
+            if Synchronisation.mayFsiBeCancelled() then //extra reflection check because when using async the reset is not done becaus of thread abort
+                raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
+            //else
+            //    print "wasAsyncFsiCancelled=false"
+
         
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>

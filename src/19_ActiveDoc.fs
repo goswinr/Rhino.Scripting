@@ -52,7 +52,7 @@ module ActiceDocument =
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
             RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
-            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") 
+            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Synch thread
             
 
         
@@ -60,6 +60,8 @@ module ActiceDocument =
 /// To acces the UI therad from other therads
 module Synchronisation =
     
+    let mutable internal seffRhinoSyncModule:Type = null
+
     ///the SynchronizationContext of the currently Running Rhino Instance, 
     let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below from Seff.Rhino
     
@@ -69,6 +71,7 @@ module Synchronisation =
     ///the WPF Window of currently running Seff Editor
     let mutable seffRhinoWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
 
+    
     let private getSeffRhinoPluginSyncContext() =
         // some reflection hacks because Rhinocommon does not expose a UI sync context
         // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7
@@ -76,21 +79,30 @@ module Synchronisation =
             let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831")
             let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
             seffRhinoAssembly <- seffRh.Assembly
-            let modul = seffRhinoAssembly.GetType("Seff.Rhino.Sync") 
-            syncContext <- modul.GetProperty("syncContext").GetValue(seffRhinoAssembly) :?> Threading.SynchronizationContext
+            seffRhinoSyncModule <- seffRhinoAssembly.GetType("Seff.Rhino.Sync") 
+            syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffRhinoAssembly) :?> Threading.SynchronizationContext
         with _ ->
             "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Async UI interactions like selecting objects might crash Rhino!"
             |>> RhinoApp.WriteLine 
             |> printfn "%s"
 
     let private getSeffRhinoPluginWindow() =
-        try            
-            let modul = seffRhinoAssembly.GetType("Seff.Rhino.Sync") 
-            seffRhinoWindow <- modul.GetProperty("window").GetValue(seffRhinoAssembly)  :?> System.Windows.Window
+        try   
+            seffRhinoWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffRhinoAssembly)  :?> System.Windows.Window
         with _ ->
             "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
             |>> RhinoApp.WriteLine 
-            |> printfn "%s"        
+            |> printfn "%s"    
+            
+    let internal mayFsiBeCancelled() = //To avoid that the next runn of an async script gets cancelled on the first occurence of rs.EscapeTest
+        try 
+            seffRhinoSyncModule.GetProperty("rhinoScriptSyntaxCanCancel").GetValue(seffRhinoAssembly)  :?> bool
+        with _ ->
+            "Failed to get Seff.Rhino.Sync.rhinoScriptSyntaxCanCancel via Reflection, cancel will repeat once if in async"
+            |>> RhinoApp.WriteLine 
+            |> printfn "%s" 
+            true
+
     
     ///Evaluates a function on UI Thread. Optionally enables redraw . Optionally hides Seff editor window if it exists. 
     let doSync enableRedraw hideEditor (f:unit->'T): 'T =
