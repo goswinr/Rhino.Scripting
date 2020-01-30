@@ -55,11 +55,11 @@ type RhinoScriptSyntax private () = // no constructor?
     ///Tests to see if the user has pressed the escape key
     ///raises OperationCanceledException
     static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool =         
-        RhinoApp.Wait()
-        if escapePressed  then //check bool to avoid reflection test on vevery call            
-            escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset            
-            raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
-                
+        RhinoApp.Wait() //does not need to be on  UI thread
+        if escapePressed  then           
+            escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset 
+            raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest()"))
+
         
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>

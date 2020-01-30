@@ -51,7 +51,6 @@ module ExtensionsView =
     ///<param name="title">(string) Optional, Title of new layout</param>
     ///<param name="width">(float)  Optional, width  of paper for the new layout</param>
     ///<param name="height">(floatt) Optional, height of paper for the new layout</param>
-
     ///<returns>(Guid*string) Id and Name of new layout</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string, 
                             [<OPT;DEF(0.0)>]width:float, 

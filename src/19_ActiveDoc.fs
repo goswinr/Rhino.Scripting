@@ -48,77 +48,24 @@ module ActiceDocument =
     let mutable internal escapePressed = false
     
     do
-        if HostUtils.RunningInRhino then 
-            Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
-            RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) // to have a quick check value too without the neeed to do reflection for check
-            //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Sync thread
+        if HostUtils.RunningInRhino then
+            let setup() = 
+                Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
+                RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) // can only be done synchronous
+                //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Sync thread
             
-
+            if RhinoApp.InvokeRequired then 
+                if isNull Synchronisation.syncContext then                    
+                    "Rhino.Scripting.dll is not loaded from main thread, it failed to set up callbacks for pressing Esc key"
+                    |>> RhinoApp.WriteLine 
+                    |> printfn "%s"  
+                else
+                    async{
+                        do! Async.SwitchToContext Synchronisation.syncContext // ensure its done on UI thread
+                        setup() 
+                        } |> Async.RunSynchronously
+            else
+                setup()
         
-[<AutoOpen>]
-/// To acces the UI therad from other therads
-module Synchronisation =
-    
-    let mutable private seffRhinoSyncModule:Type = null
 
-    ///the SynchronizationContext of the currently Running Rhino Instance, 
-    let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below from Seff.Rhino
-    
-    ///the Assembly currently running Seff Editor Window
-    let mutable seffRhinoAssembly : Reflection.Assembly = null //set via reflection below from Seff.Rhino
-    
-    ///the WPF Window of currently running Seff Editor
-    let mutable seffRhinoWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
-
-    
-    let private getSeffRhinoPluginSyncContext() =
-        // some reflection hacks because Rhinocommon does not expose a UI sync context
-        // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7
-        try
-            let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831")
-            let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
-            seffRhinoAssembly <- seffRh.Assembly
-            seffRhinoSyncModule <- seffRhinoAssembly.GetType("Seff.Rhino.Sync") 
-            syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffRhinoAssembly) :?> Threading.SynchronizationContext
-        with _ ->
-            "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Async UI interactions like selecting objects might crash Rhino!"
-            |>> RhinoApp.WriteLine 
-            |> printfn "%s"
-
-    let private getSeffRhinoPluginWindow() =
-        try   
-            seffRhinoWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffRhinoAssembly)  :?> System.Windows.Window
-        with _ ->
-            "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
-            |>> RhinoApp.WriteLine 
-            |> printfn "%s"    
-            
-    
-    ///Evaluates a function on UI Thread. Optionally enables redraw . Optionally hides Seff editor window if it exists. 
-    let doSync enableRedraw hideEditor (f:unit->'T): 'T =
-        let redraw = Doc.Views.RedrawEnabled
-        if not RhinoApp.InvokeRequired then 
-            if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Hide()
-            if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true
-            let res = f()
-            if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
-            if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Show() 
-            res
-        else
-            async{
-                do! Async.SwitchToContext syncContext
-                if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Hide()
-                if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- true                
-                let res = f()
-                if enableRedraw && not redraw then Doc.Views.RedrawEnabled <- false
-                if hideEditor && notNull seffRhinoWindow then seffRhinoWindow.Show() 
-                return res
-                } |> Async.RunSynchronously 
-        
-    do
-        if HostUtils.RunningInRhino  then
-            if isNull syncContext     then getSeffRhinoPluginSyncContext()
-            if isNull seffRhinoWindow then getSeffRhinoPluginWindow()
-            "Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
-            |>> RhinoApp.WriteLine 
-            |> printfn "%s"
+   
