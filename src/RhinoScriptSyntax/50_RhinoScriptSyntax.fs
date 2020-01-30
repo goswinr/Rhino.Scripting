@@ -55,11 +55,10 @@ type RhinoScriptSyntax private () = // no constructor?
     ///Tests to see if the user has pressed the escape key
     ///raises OperationCanceledException
     static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool =         
-        if escapePressed  then //check bool to avoid reflection test on vevery call
-            RhinoApp.Wait()
-            escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset
-            if Synchronisation.isCancelRequested() then //extra reflection check because when using async in Seff the reset is not done because the thread is aborted
-                raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
+        RhinoApp.Wait()
+        if escapePressed  then //check bool to avoid reflection test on vevery call            
+            escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset            
+            raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest "))
                 
         
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>

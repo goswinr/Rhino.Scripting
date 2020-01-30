@@ -50,7 +50,7 @@ module ActiceDocument =
     do
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
-            RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) // to have a quick check value too without the neeed to do reflection for check
+            RhinoApp.EscapeKeyPressed.Add ( fun _ -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) // to have a quick check value too without the neeed to do reflection for check
             //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Sync thread
             
 
@@ -93,15 +93,6 @@ module Synchronisation =
             |>> RhinoApp.WriteLine 
             |> printfn "%s"    
             
-    let internal isCancelRequested() = //To avoid that the next runn of an async script gets cancelled on the first occurence of rs.EscapeTest
-        try 
-            seffRhinoSyncModule.GetProperty("isCancelRequested").GetValue(seffRhinoAssembly)  :?> bool
-        with _ ->
-            "Failed to get Seff.Rhino.Sync.isSyncCancelRequested via Reflection, cancel will repeat once if in async"
-            |>> RhinoApp.WriteLine 
-            |> printfn "%s" 
-            true
-
     
     ///Evaluates a function on UI Thread. Optionally enables redraw . Optionally hides Seff editor window if it exists. 
     let doSync enableRedraw hideEditor (f:unit->'T): 'T =
