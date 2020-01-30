@@ -526,21 +526,22 @@ module ExtensionsSurface =
     ///<summary>Creates a surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u, v directions</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<param name="degree">(int * int) Optional, Default Value: <c>3*3</c>
-    ///    Two numbers defining degree of the surface in the u, v directions</param>
+    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the surface in the U directions</param>
+    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the surface in the V directions</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfControlPtGrid( count:int * int,
-                                       points:Point3d seq,
-                                       [<OPT;DEF(null)>]degree:int * int) : Guid =
+                                       points:Point3d seq,                                       
+                                       [<OPT;DEF(3)>]degreeU:int,
+                                       [<OPT;DEF(3)>]degreeV:int           ) : Guid =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
-        let surf = NurbsSurface.CreateFromPoints(points, fst count, snd count, fst degree, snd degree)
-        if isNull surf then failwithf "Rhino.Scripting: AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points degree
+        let surf = NurbsSurface.CreateFromPoints(points, fst count, snd count,  degreeU,  degreeV)
+        if isNull surf then failwithf "Rhino.Scripting: AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
         let objectId = Doc.Objects.AddSurface(surf)
         if objectId <> Guid.Empty then
             Doc.Views.Redraw()
             objectId
         else
-            failwithf "Rhino.Scripting: AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points degree
+            failwithf "Rhino.Scripting: AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
 
     [<Extension>]
     ///<summary>Creates a new surface from four corner points</summary>
@@ -576,24 +577,26 @@ module ExtensionsSurface =
     ///<summary>Creates a surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u, v directions</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<param name="degree">(int * int) Optional, Default Value: <c>3*3</c>
-    ///    Two numbers defining degree of the surface in the u, v directions</param>
-    ///<param name="closed">(bool * bool) Optional, Default Value: <c>false*false</c>
-    ///    Two booleans defining if the surface is closed in the u, v directions</param>
+    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the surface in the U directions</param>
+    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the surface in the V directions</param>
+    ///<param name="closedU">(bool * bool) Optional, Default Value: <c>false</c>  boolean defining if the surface is closed in the U directions</param>
+    ///<param name="closedV">(bool * bool) Optional, Default Value: <c>false</c>  boolean defining if the surface is closed in the V directions</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPtGrid( count:int * int,
                                 points:Point3d seq,
-                                [<OPT;DEF(null)>]degree:int * int,
-                                [<OPT;DEF(null)>]closed:bool * bool) : Guid =
+                                [<OPT;DEF(3)>]degreeU:int,
+                                [<OPT;DEF(3)>]degreeV:int,
+                                [<OPT;DEF(false)>]closedU:bool,
+                                [<OPT;DEF(false)>]closedV:bool) : Guid =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
-        let surf = NurbsSurface.CreateThroughPoints(points, fst count, snd count, fst degree, snd degree, fst closed, snd closed)
-        if isNull surf then failwithf "Rhino.Scripting: AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points degree closed
+        let surf = NurbsSurface.CreateThroughPoints(points, fst count, snd count, degreeU, degreeV, closedU, closedV)
+        if isNull surf then failwithf "Rhino.Scripting: AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
         let objectId = Doc.Objects.AddSurface(surf)
         if objectId <> Guid.Empty then
             Doc.Views.Redraw()
             objectId
         else
-            failwithf "Rhino.Scripting: AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points degree closed
+            failwithf "Rhino.Scripting: AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
 
 
     [<Extension>]
@@ -1559,18 +1562,19 @@ module ExtensionsSurface =
     ///<summary>Rebuilds a surface to a given degree and control point count. For more
     ///    information see the Rhino help file for the Rebuild command</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
-    ///<param name="degree">(int * int) Optional, Default Value: <c>3*3</c>
-    ///    Two numbers that identify surface degree in both U and V directions</param>
-    ///<param name="pointcount">(int * int) Optional, Default Value: <c>10*10</c>
-    ///    Two numbers that identify the surface point count in both the U and V directions</param>
+    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the surface in the U directions</param>
+    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the surface in the V directions</param>
+    ///<param name="pointcountU">(int) Optional, Default Value: <c>10*</c> the surface point count in U  directions</param>
+    ///<param name="pointcountV">(int) Optional, Default Value: <c>10*</c> the surface point count in V  directions</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RebuildSurface( objectId:Guid,
-                                  [<OPT;DEF(null)>]degree:int * int,
-                                  [<OPT;DEF(null)>]pointcount:int * int) : bool =
-        let degree = degree |? (3, 3)
-        let pointcount = pointcount |? (10, 10)
+                                  [<OPT;DEF(3)>]degreeU:int,
+                                  [<OPT;DEF(3)>]degreeV:int,
+                                  [<OPT;DEF(10)>]pointcountU:int ,
+                                  [<OPT;DEF(10)>]pointcountV:int ) : bool =        
+        
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
-        let newsurf = surface.Rebuild( degree|> fst, degree|> snd, pointcount|> fst, pointcount|> snd )
+        let newsurf = surface.Rebuild( degreeU, degreeV, pointcountU, pointcountV )
         if newsurf|> isNull  then false
         else
             //objectId = RhinoScriptSyntax.Coerceguid(objectId)

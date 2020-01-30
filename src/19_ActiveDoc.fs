@@ -119,6 +119,6 @@ module Synchronisation =
         if HostUtils.RunningInRhino  then
             if isNull syncContext     then getSeffRhinoPluginSyncContext()
             if isNull seffRhinoWindow then getSeffRhinoPluginWindow()
-            "Rhino.Scripting SynchronizationContext is set up."
+            "Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
             |>> RhinoApp.WriteLine 
             |> printfn "%s"

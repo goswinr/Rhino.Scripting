@@ -49,14 +49,18 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Adds a new page layout view</summary>
     ///<param name="title">(string) Optional, Title of new layout</param>
-    ///<param name="size">(float * float) Optional, Width and height of paper for the new layout</param>
+    ///<param name="width">(float)  Optional, width  of paper for the new layout</param>
+    ///<param name="height">(floatt) Optional, height of paper for the new layout</param>
+
     ///<returns>(Guid*string) Id and Name of new layout</returns>
-    static member AddLayout([<OPT;DEF(null:string)>]title:string, [<OPT;DEF(null)>]size:float * float) : Guid*string =
+    static member AddLayout([<OPT;DEF(null:string)>]title:string, 
+                            [<OPT;DEF(0.0)>]width:float, 
+                            [<OPT;DEF(0.0)>]height:float) : Guid*string =
         let page =
-            if Object.ReferenceEquals(size, null)  then Doc.Views.AddPageView(title)
-            else  Doc.Views.AddPageView(title, size|> fst, size|> snd)
+            if width=0.0 || height=0.0  then Doc.Views.AddPageView(title)
+            else                             Doc.Views.AddPageView(title, width, height)
         if notNull page then page.MainViewport.Id, page.PageName
-        else failwithf "AddLayout failed for %A %A" title size
+        else failwithf "AddLayout failed for %A %A" title (width, height)
 
 
     [<Extension>]
