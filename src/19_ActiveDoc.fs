@@ -25,9 +25,7 @@ module ActiceDocument =
         else 
             failwith "failed to find the active Rhino document, is this dll running inside Rhino? " 
     
-    //Redraws all Rhino viewports
-    //let redraw() = Doc.Views.Redraw()
-
+   
     /// gets a localised descritipn on rhino object type (curve , point, surface ....)
     let internal rhtype (g:Guid)=
         if g = Guid.Empty then "-Guid.Empty-"
@@ -51,18 +49,23 @@ module ActiceDocument =
         if HostUtils.RunningInRhino then
             let setup() = 
                 Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
-                RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) // can only be done synchronous
-                //RhinoApp.EscapeKeyPressed.Add ( fun _ -> RhinoApp.Wait(); if not <| Input.RhinoGet.InGet(Doc) then failwithf "immediate escape pressed fail") // this does not work on Sync thread
+                RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
+                //this does not work on Sync evaluation, useless:  RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwithf "Esc pressed") 
             
             if RhinoApp.InvokeRequired then 
                 if isNull Synchronisation.syncContext then                    
-                    "Rhino.Scripting.dll is not loaded from main thread, it failed to set up callbacks for pressing Esc key"
+                    "Synchronisation.syncContext could not be set via reflection and"+
+                    "Rhino.Scripting.dll is not loaded from main thread, it did to set up callbacks for pressing Esc key and changing the active document. \r\n"+
+                    "Setting up these event handlers async can trigger a fatal access violation exception if its the first time you access the event.\r\n"+
+                    "Try to set them up yourself on main thread or after you have already attached a dummy handler from main thread:\r\n"+
+                    "Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"+
+                    "RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)" 
                     |>> RhinoApp.WriteLine 
                     |> printfn "%s"  
                 else
-                    async{
+                    async{ 
                         do! Async.SwitchToContext Synchronisation.syncContext // ensure its done on UI thread
-                        setup() 
+                        setup() //doing this in sync is only required if no handler has been added in sync before
                         } |> Async.RunSynchronously
             else
                 setup()
