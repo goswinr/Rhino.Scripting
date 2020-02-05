@@ -790,13 +790,13 @@ module ExtensionsDimension =
     ///<returns>(string) The current text string</returns>
     static member LeaderText(objectId:Guid) : string = //GET
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+        | None -> failwithf "LeaderText failed.  objectId:'%A'" objectId
         | Some g ->
             match g with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
-            | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+            | _ -> failwithf "get LeaderText failed.  objectId:'%A'" objectId
 
     [<Extension>]
     ///<summary>Modifies the text string of a dimension leader object</summary>
@@ -805,15 +805,16 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectId:Guid, text:string) : unit = //SET
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+        | None -> failwithf "set LeaderText failed. objectId:'%A'" objectId
         | Some g ->
             match g with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
+                if not <| Doc.Objects.Replace(objectId,g) then failwithf "get LeaderText: Objects.Replace(objectId,g) failed. objectId:'%A'" objectId                
                 annotationObject.CommitChanges()|> ignore
                 Doc.Views.Redraw()
-            | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
+            | _ -> failwithf "set LeaderText failed. objectId:'%A' of type %s" objectId (rhtype objectId)
     [<Extension>]
     ///<summary>Modifies the text string of multiple dimension leader objects</summary>
     ///<param name="objectsIds">(Guid seq) The objects's identifiers</param>
@@ -821,17 +822,7 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectIds:Guid seq, text:string) : unit = //MULTISET
         for objectId in objectIds do 
-            match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-            | None -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
-            | Some g ->
-                match g with
-                | :? Leader as g ->
-                    let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-                    g.PlainText <- text               // TODO or use rich text?
-                    annotationObject.CommitChanges()|> ignore
-                    Doc.Views.Redraw()
-                | _ -> failwithf "getLeaderText failed.  objectId:'%A'" objectId
-
+            RhinoScriptSyntax.LeaderText(objectId,text) 
 
     [<Extension>]
     ///<summary>Renames an existing dimension style</summary>
