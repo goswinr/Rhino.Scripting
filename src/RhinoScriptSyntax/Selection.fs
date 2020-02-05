@@ -84,10 +84,11 @@ module ExtensionsSelection =
             it.LockedObjects <- true
             it.HiddenObjects <- true
             it.ReferenceObjects <- includeReferences
-            let e = Doc.Objects.GetObjectList(it)
-            let objectids = ResizeArray()             
-            for object in e do
-                if select then object.Select(true) |> ignore   //TODO make sync ?             
+            let es = Doc.Objects.GetObjectList(it)
+            let objectids = ResizeArray()            
+            for ob in es do
+                objectids.Add ob.Id
+                if select then ob.Select(true) |> ignore   //TODO make sync ?             
             if objectids.Count > 0 && select then Doc.Views.Redraw()           
             objectids
 
