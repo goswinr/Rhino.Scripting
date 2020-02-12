@@ -80,7 +80,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, The title of the view to save. If omitted, the current
     ///    active view is saved</param>
     ///<returns>(unit) void, nothing</returns>
-    static member AddNamedView(name:string, [<OPT;DEF("":string)>]view:string) : unit =
+    static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         if isNull name then failwithf "Rhino.Scripting: Name = empty.  name:'%A' view:'%A'" name view
         let viewportId = view.MainViewport.Id
@@ -239,7 +239,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current
     ///    view is used</param>
     ///<returns>(bool) True of False</returns>
-    static member IsViewMaximized([<OPT;DEF("":string)>]view:string) : bool =
+    static member IsViewMaximized([<OPT;DEF("")>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.Maximized
 
@@ -258,7 +258,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(bool) True of False</returns>
-    static member IsViewTitleVisible([<OPT;DEF("":string)>]view:string) : bool =
+    static member IsViewTitleVisible([<OPT;DEF("")>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible
 
@@ -277,7 +277,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(unit)</returns>
-    static member MaximizeRestoreView([<OPT;DEF("":string)>]view:string) : unit =
+    static member MaximizeRestoreView([<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.Maximized <- not view.Maximized
 
@@ -327,7 +327,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(string) name of the restored named construction plane</returns>
-    static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("":string)>]view:string) : string =
+    static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = Doc.NamedConstructionPlanes.Find(cplaneName)
         if index<0 then failwithf "Rhino.Scripting: RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
@@ -346,7 +346,7 @@ module ExtensionsView =
     ///    Restore the named view's background bitmap</param>
     ///<returns>(unit) void, nothing</returns>
     static member RestoreNamedView( namedView:string,
-                                    [<OPT;DEF("":string)>]view:string,
+                                    [<OPT;DEF("")>]view:string,
                                     [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = Doc.NamedViews.FindByName(namedView)
@@ -373,7 +373,7 @@ module ExtensionsView =
     ///<returns>(unit) void, nothing</returns>
     static member RotateCamera( direction:int,
                                 angle:float,
-                                [<OPT;DEF("":string)>]view:string) : unit =
+                                [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle = RhinoMath.ToRadians( abs(angle) )
@@ -413,7 +413,7 @@ module ExtensionsView =
     ///<returns>(unit) void, nothing</returns>
     static member RotateView( direction:int,
                               angle:float,
-                              [<OPT;DEF("":string)>]view:string) : unit =
+                              [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle =  RhinoMath.ToRadians( abs(angle) )
@@ -528,7 +528,7 @@ module ExtensionsView =
     ///<returns>(unit) void, nothing</returns>
     static member TiltView( direction:int,
                             angle:float,
-                            [<OPT;DEF("":string)>]view:string) : unit =
+                            [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle = angle
@@ -586,7 +586,7 @@ module ExtensionsView =
     ///<summary>Returns the orientation of a view's camera</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(Plane) the view's camera plane</returns>
-    static member ViewCameraPlane([<OPT;DEF("":string)>]view:string) : Plane =
+    static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
         if not rc then failwithf "Rhino.Scripting: ViewCameraPlane failed.  view:'%A'" view
@@ -729,7 +729,7 @@ module ExtensionsView =
     ///    in determining the "real world" size of a parallel-projected view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order)</returns>
-    static member ViewNearCorners([<OPT;DEF("":string)>]view:string) : Point3d * Point3d * Point3d * Point3d =
+    static member ViewNearCorners([<OPT;DEF("")>]view:string) : Point3d * Point3d * Point3d * Point3d =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc = view.ActiveViewport.GetNearRect()
         rc.[0], rc.[1], rc.[3], rc.[2]
@@ -834,7 +834,7 @@ module ExtensionsView =
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>5</c>
     ///    The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
     ///<returns>(float) The number of seconds it took to regenerate the view frames number of times</returns>
-    static member ViewSpeedTest( [<OPT;DEF("":string)>]view:string,
+    static member ViewSpeedTest( [<OPT;DEF("")>]view:string,
                                  [<OPT;DEF(100)>]frames:int,
                                  [<OPT;DEF(true)>]freeze:bool,
                                  [<OPT;DEF(0)>]direction:int,
@@ -953,7 +953,7 @@ module ExtensionsView =
     ///    Zoom extents in all views</param>
     ///<returns>(unit)</returns>
     static member ZoomBoundingBox( boundingBox:BoundingBox,
-                                   [<OPT;DEF("":string)>]view:string,
+                                   [<OPT;DEF("")>]view:string,
                                    [<OPT;DEF(false)>]all:bool) : unit =
           if all then
               let views = Doc.Views.GetViewList(true, true)
@@ -970,7 +970,7 @@ module ExtensionsView =
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///    Zoom extents in all views</param>
     ///<returns>(unit)</returns>
-    static member ZoomExtents([<OPT;DEF("":string)>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
+    static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
             let views = Doc.Views.GetViewList(true, true)
             for view in views do view.ActiveViewport.ZoomExtents()|> ignore
@@ -986,7 +986,7 @@ module ExtensionsView =
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///    Zoom extents in all views</param>
     ///<returns>(unit)</returns>
-    static member ZoomSelected([<OPT;DEF("":string)>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
+    static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
             let views = Doc.Views.GetViewList(true, true)
             for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore

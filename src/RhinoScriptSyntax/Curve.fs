@@ -566,7 +566,7 @@ module ExtensionsCurve =
     ///<returns>(int) 1 if the curve's orientation is clockwise
     ///    -1 if the curve's orientation is counter-clockwise
     ///     0 if unable to compute the curve's orientation</returns>
-    static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Plane())>]direction:Vector3d) : int =
+    static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int =
         let direction0 =if direction.IsZero then Vector3d.Unset else direction
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <| curve.IsClosed then  0

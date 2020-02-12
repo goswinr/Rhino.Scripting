@@ -35,7 +35,12 @@ module ExtensionsDocument =
     ///    If True then a wireframe preview image. If False,
     ///    a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member CreatePreviewImage(fileName:string, [<OPT;DEF("":string)>]view:string, [<OPT;DEF(0:int)>]width:int,[<OPT;DEF(0:int)>]height:int, [<OPT;DEF(0)>]flags:int, [<OPT;DEF(false)>]wireframe:bool) : bool =
+    static member CreatePreviewImage(   fileName:string, 
+                                        [<OPT;DEF("")>]view:string, 
+                                        [<OPT;DEF(0)>]width:int,
+                                        [<OPT;DEF(0)>]height:int, 
+                                        [<OPT;DEF(0)>]flags:int, 
+                                        [<OPT;DEF(false)>]wireframe:bool) : bool =
         let rhview = RhinoScriptSyntax.CoerceView(view)
         let rhsize =
             match width, height with

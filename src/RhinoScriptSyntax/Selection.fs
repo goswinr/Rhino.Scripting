@@ -347,7 +347,7 @@ module ExtensionsSelection =
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
-    static member GetObjects(       [<OPT;DEF("Select objects":string)>]message:string,
+    static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
                                     [<OPT;DEF(true)>]preselect:bool,
@@ -493,7 +493,7 @@ module ExtensionsSelection =
     ///    [n][2]  selection method (DocObjects.SelectionMethod)
     ///    [n][3]  selection point
     ///    [n][4]  name of the view selection was made</returns>
-    static member GetObjectsEx(     [<OPT;DEF("Select objects":string)>]message:string,
+    static member GetObjectsEx(     [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
                                     [<OPT;DEF(true)>]preselect:bool,

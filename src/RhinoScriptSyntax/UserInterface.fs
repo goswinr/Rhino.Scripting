@@ -304,7 +304,7 @@ module ExtensionsUserinterface =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge curves</param>
     ///<returns>((Guid*Guid*Point3d) ResizeArray) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
-    static member GetEdgeCurves(    [<OPT;DEF("Select Edges":string)>]message:string,
+    static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
                                     [<OPT;DEF(false)>]select:bool) : option<ResizeArray<Guid*Guid*Point3d>> =
@@ -581,7 +581,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>
-    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve":string)>]message:string) : Point3d option =
+    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d option =
         let get () = 
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
@@ -603,7 +603,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>
-    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh":string)>]message:string) : Point3d option =
+    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d option =
         let get () = 
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             if cmdrc = Commands.Result.Success then Some point
@@ -619,7 +619,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>
-    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface":string)>]message:string) : Point3d option =
+    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d option =
         let get () = 
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)

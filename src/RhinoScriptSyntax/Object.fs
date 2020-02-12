@@ -1132,7 +1132,7 @@ module ExtensionsObject =
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
                                 rotationAngle:float,
-                                [<OPT;DEF(Plane())>]axis:Vector3d,
+                                [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
         let axis =
             if not axis.IsZero then

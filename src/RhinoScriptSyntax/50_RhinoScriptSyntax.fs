@@ -66,12 +66,13 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(stirng) the string</returns>
-    static member ToNiceString (x:'T,[<OPT;DEF(true)>]trim:bool) : string =
+    static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string =
         if trim then NiceString.toNiceStringWithFormater(x, formatRhinoObject)
         else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
 
     ///<summary>Prints an object or value to Rhino Command line. 
-    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq
+    ///    You could also use the curried print, print2 or print3 functions</summary>
     ///<param name="x">('T): the value or object to print</param>
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
     ///    If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
@@ -81,14 +82,15 @@ type RhinoScriptSyntax private () = // no constructor?
         |>> RhinoApp.WriteLine 
         |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
-    
+
+
+    //static member Print2 (x:'T,y'T) : unit = // use curried print 2 instead, rs.Print can also take a tuple or triple, so rs.Print2 is not useful here
 
     ///<summary>Prints an object or value to Rhino Command line. 
     ///    If the value is a Seq the string will conatain a line for each item and per nested item</summary>
     ///<param name="x">('T): the value or object to print</param>   
     ///<returns>(unit) voId, nothing</returns>
     static member PrintFull (x:'T) : unit =
-
         RhinoScriptSyntax.ToNiceString(x, false)
         |>> RhinoApp.WriteLine 
         |> printfn "%s"  
@@ -99,7 +101,7 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space charcater <c>" "</c></param>
     ///<returns>(unit) voId, nothing</returns>
-    static member PrintSeq (xs:'T seq, [<OPT;DEF(" ":string)>]separator:string) : unit =
+    static member PrintSeq (xs:'T seq, [<OPT;DEF(" ")>]separator:string) : unit =
         xs
         |> Seq.map RhinoScriptSyntax.ToNiceString
         |> String.concat separator

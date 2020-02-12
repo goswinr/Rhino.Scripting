@@ -7,6 +7,7 @@ open Rhino.Geometry
 open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -97,9 +98,9 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Adds point cloud object to the document</summary>
     ///<param name="points">(Point3d array) List of values where every multiple of three represents a point</param>
-    ///<param name="colors">(Drawing.Color array) Optional, List of colors to apply to each point</param>
+    ///<param name="colors">(Drawing.Color IList) Optional, List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud on success</returns>
-    static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color seq)>]colors:Drawing.Color []) : Guid =
+    static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color IList)>]colors:Drawing.Color IList) : Guid =
         if notNull colors && Seq.length(colors) = Seq.length(points) then
             let pc = new PointCloud()
             for i = 0  to -1 + (Seq.length(points)) do

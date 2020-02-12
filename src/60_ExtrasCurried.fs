@@ -13,10 +13,18 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 [<AutoOpen>]
 module ExtrasCurried =
 
-  ///RhinoScriptSyntax.Print (shadowing in print from FsEx)
-  let print x = RhinoScriptSyntax.Print x //shadows FsEx.TypeExtensionsObject.print
+  ///RhinoScriptSyntax.Print (shadows print from FsEx)
+  let print x = RhinoScriptSyntax.Print x 
 
-  ///RhinoScriptSyntax.PrintFull (shadowing in printFull from FsEx)
+  /// prints two values separated by a space using FsEx.NiceString.toNiceString
+  ///(shadows print2 from FsEx)
+  let print2 x y = RhinoScriptSyntax.Print (sprintf "%s %s" (NiceString.toNiceString x) (NiceString.toNiceString y))
+    
+  /// prints three values separated by a space using FsEx.NiceString.toNiceString
+  ///(shadows print3 from FsEx)
+  let print3 x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s" (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
+
+  ///RhinoScriptSyntax.PrintFull (shadows printFull from FsEx)
   let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull
 
   //[<Extension>] //Error 3246
