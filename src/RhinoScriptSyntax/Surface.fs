@@ -410,7 +410,7 @@ module ExtensionsSurface =
                               [<OPT;DEF(Point3d())>]ende:Point3d,
                               [<OPT;DEF(0)>]loftType:int,
                               [<OPT;DEF(0)>]rebuild:int,
-                              [<OPT;DEF(0)>]refit:float,
+                              [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         if loftType<0 || loftType>4 then failwithf "Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
         if rebuild<>0 && refit<>0.0 then failwithf "Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed

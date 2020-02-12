@@ -838,7 +838,7 @@ module ExtensionsView =
                                  [<OPT;DEF(100)>]frames:int,
                                  [<OPT;DEF(true)>]freeze:bool,
                                  [<OPT;DEF(0)>]direction:int,
-                                 [<OPT;DEF(5)>]angleDegrees:float) : float =
+                                 [<OPT;DEF(5.0)>]angleDegrees:float) : float =
         let view = RhinoScriptSyntax.CoerceView(view)
         let angleradians = toRadians(angleDegrees)
         view.SpeedTest(frames, freeze, direction, angleradians)
