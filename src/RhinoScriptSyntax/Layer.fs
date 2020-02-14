@@ -474,6 +474,7 @@ module ExtensionsLayer =
         if not visible && not forcevisibleOrDonotpersist then
             if layer.ParentLayerId <> Guid.Empty then
                 layer.SetPersistentVisibility(visible)
+            // layer.CommitChanges() |> ignore //obsolete !!
         Doc.Views.Redraw()
 
 
