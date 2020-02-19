@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework> 
+    <TargetFramework>net472</TargetFramework>    <!--4.7.2 because ini-parser is netstandard 2.0-->
     <LangVersion>preview</LangVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!--to only have the english resources--> 
     <AssemblyName>Rhino.Scripting</AssemblyName>   
