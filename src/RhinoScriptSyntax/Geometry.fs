@@ -79,7 +79,7 @@ module ExtensionsGeometry =
     ///<param name="z">(float) Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid =
-        let rc = Doc.Objects.AddPoint(Point3d(x, y, x))
+        let rc = Doc.Objects.AddPoint(Point3d(x, y, z))
         if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add point to document.  x:'%A' y:'%A' z:'%A'" x y z
         Doc.Views.Redraw()
         rc
