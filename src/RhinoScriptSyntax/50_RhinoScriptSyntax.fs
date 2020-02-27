@@ -520,7 +520,28 @@ type RhinoScriptSyntax private () = // no constructor?
         | g -> failwithf "CoerceDetailViewObject failed on %A : %A " g.ObjectType objectId
    
 
+    ///<summary>attempt to get Rhino Point Object</summary>
+    ///<param name="objectId">(Guid): objectId of Point object</param> 
+    ///<returns>a ) Fails on bad input</returns>
+    static member CoercePointObject (objectId:Guid) : DocObjects.PointObject =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
+        | :?  DocObjects.PointObject as a -> a
+        | g -> failwithf "CoercePointObject failed on %A : %A " g.ObjectType objectId
+    
+
+
     //---------Geometry Base------------
+
+
+    ///<summary>attempt to get TextDot Geometry</summary>
+    ///<param name="objectId">(Guid): objectId of TextDot object</param> 
+    ///<returns>a Geometry.TextDot) Fails on bad input</returns>
+    static member CoerceTextDot (objectId:'T) : TextDot =
+       match RhinoScriptSyntax.CoerceGeometry objectId with
+       | :?  TextDot as a -> a
+       | g -> failwithf "CoerceTextDot failed on %A : %A " g.ObjectType objectId
+
+
 
     
     ///<summary>attempt to get polysurface geometry from the document with a given objectId</summary>
@@ -605,14 +626,6 @@ type RhinoScriptSyntax private () = // no constructor?
         | :?  PointCloud as a -> a
         | g -> failwithf "CoercePointCloud failed on %A : %A " g.ObjectType objectId
                 
-
-    ///<summary>attempt to get TextDot Geometry</summary>
-    ///<param name="objectId">(Guid): objectId of TextDot object</param> 
-    ///<returns>a Geometry.TextDot) Fails on bad input</returns>
-    static member CoerceTextDot (objectId:'T) : TextDot =
-        match RhinoScriptSyntax.CoerceGeometry objectId with
-        | :?  TextDot as a -> a
-        | g -> failwithf "CoerceTextDot failed on %A : %A " g.ObjectType objectId
 
 
     ///<summary>attempt to get TextEntity Geometry</summary>
