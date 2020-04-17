@@ -418,13 +418,14 @@ module ExtensionsMesh =
     ///<summary>Returns face vertices of a mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="faceType">(bool) Optional, Default Value: <c>true</c>
-    ///    The face type to be returned. True = both triangles
-    ///    and quads. False = Quads are broken down into triangles</param>
-    ///<returns>(Point3d ResizeArray) 3D points that define the face vertices of the mesh. If
-    ///    faceType is True, then faces are returned as both quads and triangles
-    ///    (4 3D points). For triangles, the third and fourth vertex will be
-    ///    identical. If faceType is False, then faces are returned as only
-    ///    triangles(3 3D points). Quads will be converted to triangles</returns>
+    ///    The face type to be returned. 
+    ///    True = both triangles and quads. 
+    ///    False = Quads are broken down into triangles</param>
+    ///<returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the mesh. 
+    ///    If faceType is True, then faces are returned as both quads and triangles
+    ///    (every four  3D points). For triangles, the third and fourth vertex will be identical.     
+    ///    If faceType is False, then faces are returned as only triangles
+    ///    (very three 3D points). Quads will be converted to triangles.</returns>
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = ResizeArray()
@@ -446,12 +447,30 @@ module ExtensionsMesh =
                     rc.Add( p0 )
         rc
 
+    [<Extension>]
+    ///<summary>Returns vertices of each face in a mesh as tuple of 4 points</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the mesh. 
+    ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
+    static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) ResizeArray =
+        let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
+        let rc = ResizeArray()
+        for i in range(mesh.Faces.Count) do
+            let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            let p0 = Point3d(p0)
+            let p1 = Point3d(p1)
+            let p2 = Point3d(p2)
+            let p3 = Point3d(p3)
+            rc.Add( p0,p1,p2,p3 )
+        rc
+
+
 
     [<Extension>]
-    ///<summary>Returns the vertex indices of all faces of a Ngon mesh object</summary>
-    ///<param name="objectId">(Guid) Identifier of a mesh object</param>
+    ///<summary>Returns the vertex indices of all faces of a Ngon mesh object.</summary>
+    ///<param name="objectId">(Guid) Identifier of a mesh object.</param>
     ///<returns>(int ResizeArray ResizeArray) containing a nested List that define the vertex indices for
-    ///    each face of the mesh. Ngons, quad and triangle faces are returned</returns>
+    ///    each face of the mesh. Ngons, quad and triangle faces are returned.</returns>
     static member MeshNgonFaceVertices(objectId:Guid) : ResizeArray<ResizeArray<int>> = //TODO add more ngon support functions like this ???
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = ResizeArray()
@@ -465,7 +484,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns the vertex indices of all faces of a mesh object</summary>
+    ///<summary>Returns the vertex indices of all faces of a mesh object, Does not suport Ngons yet</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>((int*int*int*int) ResizeArray) containing tuples of 4 numbers that define the vertex indices for
     ///    each face of the mesh. Both quad and triangle faces are returned. If the
