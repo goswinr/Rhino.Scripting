@@ -452,7 +452,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<returns>(Point3d ResizeArray) List of 3D points that define the face vertices of the mesh. 
     ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
-    static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) ResizeArray =
+    static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) ResizeArray = // TODO mark functions not part of rhinopython
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = ResizeArray()
         for i in range(mesh.Faces.Count) do

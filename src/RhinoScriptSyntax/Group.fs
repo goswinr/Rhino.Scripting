@@ -38,7 +38,7 @@ module ExtensionsGroup =
     ///<returns>(unit) void, nothing</returns>
     static member AddObjectToGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = Doc.Groups.Find(groupName)
-        if index<0 then failwithf "Can't add objects to group, group '%s' not found" groupName
+        if index < 0 then failwithf "Can't add objects to group, group '%s' not found" groupName
         if Seq.isEmpty objectIds then failwithf "Can't add empty seq to group %s" groupName
         if not <|  Doc.Groups.AddToGroup(index, objectIds) then failwithf "AddObjectsToGroup failed '%s' and %A" groupName objectIds
 
@@ -50,7 +50,7 @@ module ExtensionsGroup =
     ///<returns>(unit) void, nothing</returns>
     static member AddObjectToGroup(objectId:Guid, groupName:string) : unit =
         let index = Doc.Groups.Find(groupName)
-        if index<0 then failwithf "Can't add object to group, group '%s' not found" groupName
+        if index < 0 then failwithf "Can't add object to group, group '%s' not found" groupName
         if not <|  Doc.Groups.AddToGroup(index, objectId) then failwithf "AddObjectToGroup failed '%s' and %A" groupName objectId
 
 
