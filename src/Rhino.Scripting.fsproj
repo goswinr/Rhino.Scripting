@@ -19,9 +19,9 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Include="13_RhinoTypeExtensions.fs" />
     <Compile Include="18_Synchronisation.fs" />
     <Compile Include="19_ActiveDoc.fs" />
+    <Compile Include="20_RhinoTypeExtensions.fs" />
     <Compile Include="RhinoScriptSyntax/50_RhinoScriptSyntax.fs" />
     <Compile Include="RhinoScriptSyntax/Application.fs" />
     <Compile Include="RhinoScriptSyntax/Block.fs" />
@@ -54,7 +54,6 @@
     <Compile Include="71_ExtrasLine.fs" />
     <Compile Include="71_ExtraCurve.fs" />
     <Compile Include="71_ExtrasBrep.fs" />
-    <Compile Include="ExtrasMesh.fs" />
   </ItemGroup>
   
   <ItemGroup>

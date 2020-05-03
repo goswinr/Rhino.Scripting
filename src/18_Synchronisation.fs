@@ -7,9 +7,7 @@ open Rhino.Runtime
 open FsEx.SaveIgnore
 
 
-        
-[<AutoOpen>]
-/// To acces the UI therad from other therads
+/// To acces the UI therad from other threads
 module Synchronisation =
     
     let mutable private seffRhinoSyncModule:Type = null

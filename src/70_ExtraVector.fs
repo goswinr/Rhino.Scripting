@@ -164,7 +164,7 @@ module ExtrasVector =
         
             
 
-    //[<Extension>] //Error 3246
+
     type RhinoScriptSyntax with
         
         ///projects to plane an retuns angle in degrees in plane betwen -180 and + 180

@@ -38,7 +38,7 @@ module ExtensionsUserinterface =
                 Some(dlg.SelectedPath)
             else
                 None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
         // or use ETO ??
         //let dlg = Eto.Forms.SelectFolderDialog()
         //if notNull folder then
@@ -65,7 +65,7 @@ module ExtensionsUserinterface =
 
         let newcheckstates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
-            doSync false false getKeepEditor
+            Synchronisation.doSync false false getKeepEditor
 
         if notNull newcheckstates then
             Some (Seq.zip itemstrs newcheckstates |>  ResizeArray.ofSeq)
@@ -86,7 +86,7 @@ module ExtensionsUserinterface =
             | null -> None
             | :? string as s -> Some s
             | _ -> None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -102,7 +102,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
             if rc then Some text else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -125,8 +125,8 @@ module ExtensionsUserinterface =
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then Some(toDegrees(angle))
             else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -163,9 +163,9 @@ module ExtensionsUserinterface =
                     None
                 else
                     Some (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
-            if notNull seffRhinoWindow then seffRhinoWindow.Show()
+            if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
             res
-        doSync true true get
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -202,8 +202,8 @@ module ExtensionsUserinterface =
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then Some ((!box).GetCorners())
             else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -216,8 +216,8 @@ module ExtensionsUserinterface =
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
             if rc then Some (!col) else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -236,9 +236,9 @@ module ExtensionsUserinterface =
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
             worldpt.Transform(xf)
-            if notNull seffRhinoWindow then seffRhinoWindow.Show() //or skip ?
+            if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show() //or skip ?
             worldpt, screenpt, viewport.Id, clientpt
-        doSync true true get
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -289,8 +289,8 @@ module ExtensionsUserinterface =
                     gp2.Dispose()
                     None
             | _ -> None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -333,8 +333,8 @@ module ExtensionsUserinterface =
                         rhobj.Select(true)|> ignore //TODO make sync ?
                     Doc.Views.Redraw()
                 Some r
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -361,8 +361,8 @@ module ExtensionsUserinterface =
                 let rc = gi.Number()
                 gi.Dispose()
                 Some rc
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -389,7 +389,7 @@ module ExtensionsUserinterface =
             else
                 let layer = Doc.Layers.[!layerindex]
                 Some layer.FullPath
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
 
@@ -407,7 +407,7 @@ module ExtensionsUserinterface =
                 Some (resizeArray { for index in layerindices do yield  Doc.Layers.[index].FullPath })
             else
                 None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
 
@@ -450,8 +450,8 @@ module ExtensionsUserinterface =
                 Some line
             else
                 None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -473,7 +473,7 @@ module ExtensionsUserinterface =
                 Some linetype.Name
             with _ ->
                 None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -506,8 +506,8 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -540,8 +540,8 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -570,8 +570,8 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
 
@@ -593,8 +593,8 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -608,8 +608,8 @@ module ExtensionsUserinterface =
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             if cmdrc = Commands.Result.Success then Some point
             else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -639,8 +639,8 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -706,9 +706,9 @@ module ExtensionsUserinterface =
                     Some rc
                 else
                     None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
 
-        doSync true true get
+        Synchronisation.doSync true true get
 
 
 
@@ -750,8 +750,8 @@ module ExtensionsUserinterface =
             Doc.Views.Redraw()
             if rc = Commands.Result.Success then Some polyline
             else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -777,8 +777,8 @@ module ExtensionsUserinterface =
                 let rc = gn.Number()
                 gn.Dispose()
                 Some rc
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -812,8 +812,8 @@ module ExtensionsUserinterface =
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
             else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -842,8 +842,8 @@ module ExtensionsUserinterface =
                 Some <| gs.Option().EnglishName
             else
                 Some <| gs.StringResult()
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -863,7 +863,7 @@ module ExtensionsUserinterface =
             |  :? string as s -> Some s
             | _ -> None
 
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -936,7 +936,7 @@ module ExtensionsUserinterface =
             elif dlgresult = UI.ShowMessageResult.Yes then    Some 6
             elif dlgresult = UI.ShowMessageResult.No then     Some 7
             else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -955,7 +955,7 @@ module ExtensionsUserinterface =
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null ->  None
             | s -> Some s
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -972,7 +972,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             if notNull r then Some r else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -1000,7 +1000,7 @@ module ExtensionsUserinterface =
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowOpenDialog() then Some fd.FileName
             else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -1029,7 +1029,7 @@ module ExtensionsUserinterface =
             fd.MultiSelect <- true
             if fd.ShowOpenDialog() then Some fd.FileNames
             else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -1060,7 +1060,7 @@ module ExtensionsUserinterface =
                 let point2d = viewport.WorldToClient(point)
                 screenpoint <- viewport.ClientToScreen(point2d)
             UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -1086,8 +1086,8 @@ module ExtensionsUserinterface =
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)            
             if  rc then Some (!defaultValNumber)
             else None
-            |>> fun _ -> if notNull seffRhinoWindow then seffRhinoWindow.Show()
-        doSync true true get
+            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
+        Synchronisation.doSync true true get
 
 
     [<Extension>]
@@ -1114,7 +1114,7 @@ module ExtensionsUserinterface =
             if notNull filename then fd.FileName <- filename
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowSaveDialog() then Some fd.FileName else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -1129,7 +1129,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
             if rc then Some text else None
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
     [<Extension>]
@@ -1141,6 +1141,6 @@ module ExtensionsUserinterface =
                           [<OPT;DEF(null:string)>]title:string) : unit =
         let getKeepEditor () = 
             UI.Dialogs.ShowTextDialog(message, title)
-        doSync false false getKeepEditor
+        Synchronisation.doSync false false getKeepEditor
 
 
