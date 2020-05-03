@@ -1,20 +1,18 @@
 namespace Rhino.Scripting
 
-open System
-open Rhino.Geometry
 open System.Runtime.CompilerServices
-open FsEx
-open FsEx.NiceString
-open FsEx.SaveIgnore
 
+// to expose CLI-standard extension members that can be consumed from C# or VB,
+// http://www.latkin.org/blog/2014/04/30/f-extension-methods-in-roslyn/
+// declare all Extension attributes explicitly
+[<assembly:Extension>] do () 
 
-
-[<assembly:Extension>] do() //http://www.latkin.org/blog/2014/04/30/f-extension-methods-in-roslyn/
 
 [<AutoOpen>]
 module TypeExtensionsRhino =  
+    open Rhino.Geometry
+    open FsEx
 
-    //[<Extension>] //Error 3246
     type Point3d with  
         
         [<Extension>]     
@@ -25,12 +23,13 @@ module TypeExtensionsRhino =
             else
                 sprintf "Point3d(%s, %s, %s)" (NiceString.floatToString  pt.X) (NiceString.floatToString  pt.Y) (NiceString.floatToString  pt.Z)
         
+        
+        /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in meshes)
         [<Extension>] 
         member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
+     
 
-        
-
-    //[<Extension>] //Error 3246     
+     
     type Point3f with  
         
         [<Extension>]  
@@ -41,10 +40,12 @@ module TypeExtensionsRhino =
             else
                 sprintf "Point3f(%s, %s, %s)" (NiceString.singleToString  pt.X) (NiceString.singleToString  pt.Y) (NiceString.singleToString  pt.Z)
         
+        
+        /// To convert a Point3f (as it is used in meshes) to Point3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
         member pt.ToPoint3d = Point3d(pt)
 
-    //[<Extension>] //Error 3246     
+     
     type Vector3d with  
         
         [<Extension>] 
@@ -55,6 +56,7 @@ module TypeExtensionsRhino =
             else
                 sprintf "Vector3d(%s, %s, %s)" (NiceString.floatToString  v.X) (NiceString.floatToString  v.Y) (NiceString.floatToString  v.Z)
         
+        /// To convert Vector3d (as it is used in most other Rhino Geometries) to a Vector3f (as it is used in mesh noramls)
         [<Extension>] 
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
         
@@ -66,7 +68,7 @@ module TypeExtensionsRhino =
         ///Unitizes the vector , fails if input is of zero length
         member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
 
-    //[<Extension>] //Error 3246
+
     type Vector3f with  
         
         [<Extension>] 
@@ -77,11 +79,11 @@ module TypeExtensionsRhino =
             else
                 sprintf "Vector3f(%s, %s, %s)" (NiceString.singleToString  v.X) (NiceString.singleToString  v.Y) (NiceString.singleToString  v.Z)
    
-        
+        /// To convert a Vector3f (as it is used in mesh noramls) to a Vector3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
         member v.ToVector3d = Vector3d(v)
 
-    //[<Extension>] //Error 3246  
+  
     type Line with  
         
         [<Extension>]     
@@ -93,12 +95,12 @@ module TypeExtensionsRhino =
         ///Middle point of line
         member ln.Mid =  (ln.From + ln.To) * 0.5
 
-    let internal formatRhinoObject (o:obj)  = 
-        match o with
-        | :? Point3d    as x -> Some x.ToNiceString
-        | :? Vector3d   as x -> Some x.ToNiceString
-        | :? Line       as x -> Some x.ToNiceString        
-        | :? Point3f    as x -> Some x.ToNiceString
-        | :? Vector3f   as x -> Some x.ToNiceString
-        | _ -> None
              
+
+    type Mesh with 
+
+        [<Extension>]
+        static member join (meshes:Mesh seq) : Mesh = 
+            let j = new Mesh()
+            j.Append(meshes)
+            j
