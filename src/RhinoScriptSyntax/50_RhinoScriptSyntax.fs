@@ -66,8 +66,16 @@ type RhinoScriptSyntax private () = // no constructor?
     ///<param name="state">(bool) Optional, Default Value: <c>true</c>
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(stirng) the string</returns>
-    static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string =
-        if trim then NiceString.toNiceStringWithFormater(x, formatRhinoObject)
+    static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
+        let formatRhinoObject (o:obj)  = 
+            match o with
+            | :? Point3d    as x -> Some x.ToNiceString
+            | :? Vector3d   as x -> Some x.ToNiceString
+            | :? Line       as x -> Some x.ToNiceString        
+            | :? Point3f    as x -> Some x.ToNiceString
+            | :? Vector3f   as x -> Some x.ToNiceString
+            | _ -> None        
+        if trim then NiceString.toNiceStringWithFormater    (x, formatRhinoObject)
         else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
 
     ///<summary>Prints an object or value to Rhino Command line. 
