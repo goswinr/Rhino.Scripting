@@ -582,7 +582,9 @@ module ExtensionsObject =
 
 
     [<Extension>]
-    ///<summary>Modifies the layer of an object</summary>
+    ///<summary>Modifies the layer of an object. 
+    ///Fails if Layer does not exist.
+    ///Use <c>rs.setLayer</c> to also create layer if it does not exist yet.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(unit) void, nothing</returns>
@@ -595,7 +597,9 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the layer of multiple objects</summary>
+    ///<summary>Modifies the layer of multiple objects
+    ///Fails if Layer does not exist.
+    ///Use <c>rs.setLayer</c> to also create layer if it does not exist yet</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(unit) void, nothing</returns>
@@ -1271,7 +1275,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
     ///<returns>(unit) void, nothing</returns>
     static member SelectObject(objectId:Guid) : unit =
-        Synchronisation.doSync false false (fun () -> 
+        Synchronisation. DoSync false false (fun () -> 
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if 0 = rhobj.Select(true) then 
                 let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
@@ -1293,7 +1297,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
     ///<returns>(unit) void, nothing</returns>
     static member SelectObject(objectIds:Guid seq) : unit =  //PLURAL
-        Synchronisation.doSync false false (fun () ->             
+        Synchronisation. DoSync false false (fun () ->             
             for objectId in objectIds do
                 let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 if 0 = rhobj.Select(true) then 

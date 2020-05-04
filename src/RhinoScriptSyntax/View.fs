@@ -159,7 +159,7 @@ module ExtensionsView =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
             try Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  failwithf "Rhino.Scripting: Set DetailLock failed. detailId is a %s '%A' lock:'%A'" (rhtype detailId) detailId lock
+            with _ ->  failwithf "Rhino.Scripting: Set DetailLock failed. detailId is a %s '%A' lock:'%A'" (rhType detailId) detailId lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore

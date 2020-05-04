@@ -119,7 +119,7 @@ module ExtensionsUserdata =
     ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
-    ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
+    ///<returns>(string Option) if key is specified, Some(value) else None </returns>
     static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option=
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s = 

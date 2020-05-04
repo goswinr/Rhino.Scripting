@@ -14,7 +14,7 @@ open IniParser.Model
 [<AutoOpen>]
 module ExtensionsUtility =
 
-  //[<Extension>] //Error 3246  
+   
   type RhinoScriptSyntax with
 
     [<Extension>]

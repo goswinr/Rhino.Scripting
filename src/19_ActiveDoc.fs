@@ -15,23 +15,30 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 [<AutoOpen>]
 module ActiceDocument =
     
-    /// To store last created object form executing a rs.Command(...)
-    let mutable internal commandSerialNumbers : option<uint32*uint32> = None // to store last created object form executing a rs.Command(...)
-
-    /// Tthe current active Rhino document (= the file currently open)
+    /// The current active Rhino document (= the file currently open)
     let mutable Doc = 
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.ActiveDoc 
         else 
             failwith "failed to find the active Rhino document, is this dll running inside Rhino? " 
     
-   
+    /// Object Table of the current active Rhino documents
+    let Ot = Doc.Objects
+    
+    //------------------------------------------------------------------------------------
+    // --------------- all below values and functions are internal : ------------------
+    //------------------------------------------------------------------------------------
+    
+
+    /// To store last created object form executing a rs.Command(...)
+    let mutable internal commandSerialNumbers : option<uint32*uint32> = None // to store last created object form executing a rs.Command(...)
+       
     /// Gets a localised descritipn on rhino object type (curve , point, surface ....)
-    let internal rhtype (g:Guid)=
+    let internal rhType (g:Guid)=
         if g = Guid.Empty then "-Guid.Empty-"
         else
             let o = Doc.Objects.FindId(g) 
-            if isNull o then sprintf "Guid does not exits in current Rhino Document"
+            if isNull o then sprintf "Guid %A (not a Rhino Object)" g
             else o.ShortDescription(false)
 
     /// So that python range expressions dont need top be translated to F#
@@ -48,24 +55,34 @@ module ActiceDocument =
     do
         if HostUtils.RunningInRhino then
             let setup() = 
+                // keep the reference to the active Document (3d file ) updated.
                 Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
+                
+                // listen to Esc Key press.
+                // doing this "Add" in sync is only required if no handler has been added in sync before. Adding the first handler to this from async thread cause a Access violation exeption that can only be seen with the window event log.
+                // This his handler does not work on Sync evaluationmode , TODO: test!
+                //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwithf "Esc pressed") 
                 RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
-                //this does not work on Sync evaluation, useless:  RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwithf "Esc pressed") 
-            
+                
+            Synchronisation.Initialize()
             if RhinoApp.InvokeRequired then 
-                if isNull Synchronisation.syncContext then                    
-                    "Synchronisation.syncContext could not be set via reflection and"+
-                    "Rhino.Scripting.dll is not loaded from main thread, it did to set up callbacks for pressing Esc key and changing the active document. \r\n"+
-                    "Setting up these event handlers async can trigger a fatal access violation exception if its the first time you access the event.\r\n"+
-                    "Try to set them up yourself on main thread or after you have already attached a dummy handler from main thread:\r\n"+
+                if isNull Synchronisation.SyncContext then                    
+                    "Synchronisation.syncContext could not be set via reflection.\r\n"+
+                    "Rhino.Scripting.dll is not loaded from main thread \r\n"+
+                    "it need to set up callbacks for pressing Esc key and changing the active document. \r\n"+
+                    "Setting up these event handlers async can trigger a fatal access violation exception \r\n"+
+                    "if its the first time you access the event.\r\n"+
+                    "Try to set them up yourself on main thread \r\n"+
+                    "or after you have already attached a dummy handler from main thread:\r\n"+
                     "Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"+
-                    "RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)" 
+                    "RhinoApp.EscapeKeyPressed.Add     ( fun _    ->  \r\n"+
+                    "          if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)" 
                     |>> RhinoApp.WriteLine 
                     |> printfn "%s"  
                 else
                     async{ 
-                        do! Async.SwitchToContext Synchronisation.syncContext // ensure its done on UI thread
-                        setup() //doing this in sync is only required if no handler has been added in sync before
+                        do! Async.SwitchToContext Synchronisation.SyncContext // ensure its done on UI thread
+                        setup() 
                         } |> Async.RunSynchronously
             else
                 setup()

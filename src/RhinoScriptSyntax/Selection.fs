@@ -206,8 +206,8 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
                 Some (objectId, presel, selmethod, point, curveparameter, viewname)
-            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
-        Synchronisation.doSync true true get
+            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+        Synchronisation. DoSync true true get
 
 
     [<Extension>]
@@ -257,7 +257,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
                 Some obj.Id
-        Synchronisation.doSync true true get
+        Synchronisation. DoSync true true get
                 
 
     [<Extension>]
@@ -319,8 +319,8 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select) |> ignore
                 Some (objectId, presel, selmethod, point, viewname)
-            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
-        Synchronisation.doSync true true get
+            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+        Synchronisation. DoSync true true get
 
 
     [<Extension>]
@@ -387,8 +387,8 @@ module ExtensionsSelection =
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
-        Synchronisation.doSync true true get
+            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+        Synchronisation. DoSync true true get
 
 
     [<Extension>]
@@ -426,13 +426,13 @@ module ExtensionsSelection =
                                         [<OPT;DEF(true)>]printCount:bool,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
         try 
-            let objectIds = Internals.sticky.[message] :?> ResizeArray<Guid>
+            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> ResizeArray<Guid>
             if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             Some objectIds
         with | _ -> 
             match RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) with
             |Some ids ->
-                Internals.sticky.[message] <- ids
+                RhinoScriptSyntax.Sticky.[message] <- ids
                 Some ids
             | None -> None
 
@@ -457,13 +457,13 @@ module ExtensionsSelection =
                                         [<OPT;DEF(false)>]select:bool,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid> =
         try 
-            let objectIds = Internals.sticky.[message] :?> ResizeArray<Guid>
+            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> ResizeArray<Guid>
             //if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             Some objectIds.[0]
         with | _ -> 
             match RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter,false) with
             |Some id ->
-                Internals.sticky.[message] <- resizeArray {id}
+                RhinoScriptSyntax.Sticky.[message] <- resizeArray {id}
                 Some id
             | None -> None
 
@@ -539,8 +539,8 @@ module ExtensionsSelection =
                     |> RhinoScriptSyntax.Print
 
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
-        Synchronisation.doSync true true get
+            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+        Synchronisation. DoSync true true get
 
 
     [<Extension>]
@@ -553,7 +553,7 @@ module ExtensionsSelection =
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
         maybe{
-            let! ids = RhinoScriptSyntax.GetObjects(message, Internals.filter.Point, preselect= preselect)
+            let! ids = RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect= preselect)
             let rc = ResizeArray<Point3d>()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
@@ -614,8 +614,8 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
                 Some ( objectId, prepicked, selmethod, point, uv, name)
-            |>> fun _ -> if notNull Synchronisation.seffRhinoWindow then Synchronisation.seffRhinoWindow.Show()
-        Synchronisation.doSync true true get
+            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+        Synchronisation. DoSync true true get
 
 
     [<Extension>]

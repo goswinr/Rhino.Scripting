@@ -1,27 +1,28 @@
-namespace Rhino.Scripting
+namespace Rhino.Scripting.Extra
 
 open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.ActiceDocument
+open Rhino.Scripting
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
-open Rhino.Scripting.ExtrasVector
-open Rhino.Scripting.ExtrasLine
 open System.Collections.Generic
 open FsEx.SaveIgnore
 
+[<AutoOpen>]
 module ExtrasCurve = 
-    
-  //[<Extension>] //Error 3246  
+  open Line
+  open Vec
+   
   type RhinoScriptSyntax with 
-
+    
+    [<Extension>]
     ///<summary>returns the Fillet Arc if it fits within the points</summary>
     static member filletArc  (prevPt:Point3d, midPt:Point3d, nextPt:Point3d, radius:float)  : Arc   = 
         let A = prevPt-midPt
         let B = nextPt-midPt
-        let uA = A |> unitize 
-        let uB = B |> unitize      
+        let uA = A |> Vec.unitize 
+        let uB = B |> Vec.unitize      
         // calculate trim       
         let alphaDouble = 
             let dot = uA*uB
@@ -35,7 +36,8 @@ module ExtrasCurve =
         let arcStart =  midPt + uA * trim // still on arc plane
         let arcEnd =    midPt + uB * trim
         Arc(arcStart, - uA , arcEnd)
-
+    
+    [<Extension>]
     ///<summary>Fillest some corners of polyline</summary>
     ///<param name="fillets">(int*float ResizeArray)The indix of the cornes to filet and the fillet radius</param>
     ///<param name="polyline">(Point3d ResizeArray) The polyline as pointlist </param> 
@@ -76,8 +78,8 @@ module ExtrasCurve =
             
 
 
-   
-    ///<summary>The needed trimming of two planar surfaces in order to fit a fillet of given radius.
+    [<Extension>]
+    ///<summary>Returns the needed trimming of two planar surfaces in order to fit a fillet of given radius.
     ///    the Lines can be anywhere on plane ( except paralel to axis)</summary>
     ///<param name="makeSCurve">(bool)only relevant if curves are skew: make S-curve if true or kink if false</param>
     ///<param name="radius">(float) radius of filleting zylinder</param>
@@ -95,8 +97,8 @@ module ExtrasCurve =
 
 
         let arcPl = Plane(axis.From,axis.Direction)
-        let uA = (lineA.Mid - arcPl.Origin) |> projectToPlane arcPl |> unitize // vector of line A projected in arc plane 
-        let uB = (lineB.Mid - arcPl.Origin) |> projectToPlane arcPl |> unitize // vector of line B projected in arc plane  
+        let uA = (lineA.Mid - arcPl.Origin) |> Vec.projectToPlane arcPl |> unitize // vector of line A projected in arc plane 
+        let uB = (lineB.Mid - arcPl.Origin) |> Vec.projectToPlane arcPl |> unitize // vector of line B projected in arc plane  
 
         // calculate trim       
         let alphaDouble = 
@@ -106,7 +108,8 @@ module ExtrasCurve =
         let alpha = alphaDouble * 0.5
         let beta  = Math.PI * 0.5 - alpha
         tan(beta) * radius // the setback distance from intersection   
-   
+    
+    [<Extension>]
     ///<summary>Creates a fillet curve between two lines, 
     ///    the fillet might be an ellipse or free form 
     ///    but it always lies on the surface of a cylinder with the given direction and radius </summary>
@@ -141,8 +144,8 @@ module ExtrasCurve =
     
         let arcStart0 =  arcPl.Origin + uA * trim // still on arc plane
         let arcEnd0 =    arcPl.Origin + uB * trim
-        let arcStart =  arcStart0 |> projectToLine lineA direction |> snapIfClose lineA.From |> snapIfClose lineA.To
-        let arcEnd   =  arcEnd0   |> projectToLine lineB direction |> snapIfClose lineB.From |> snapIfClose lineB.To
+        let arcStart =  arcStart0 |> projectToLine lineA direction |> Pnt.snapIfClose lineA.From |> Pnt.snapIfClose lineA.To
+        let arcEnd   =  arcEnd0   |> projectToLine lineB direction |> Pnt.snapIfClose lineB.From |> Pnt.snapIfClose lineB.To
         let arc = Arc(arcStart0, - uA , arcEnd0)
     
         if alphaDouble > Math.PI * 0.49999 && not makeSCurve then // fillet bigger than 89.999 degrees, one arc from 3 points

@@ -208,7 +208,7 @@ module ExtensionsLight =
     ///<returns>(bool) True or False</returns>
     static member IsLightReference(objectId:Guid) : bool =
         let light = Doc.Lights.FindId(objectId)
-        if isNull light then failwithf "IsLightReference light %A (a %s) not found" objectId (rhtype objectId)
+        if isNull light then failwithf "IsLightReference light %A (a %s) not found" objectId (rhType objectId)
         light.IsReference
 
 

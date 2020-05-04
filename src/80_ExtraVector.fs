@@ -11,164 +11,14 @@ open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore 
 
-
+[<AutoOpen>]
 module ExtrasVector =
-               
-    let inline scale (sc:float) (v:Vector3d) = v * sc  
-    
-    ///Same as reverse
-    let inline flip  (v:Vector3d) = -v 
-    
-    ///Same as flip
-    let inline reverse  (v:Vector3d) = -v     
-    
-    let inline distance (a:Point3d) (b:Point3d) = let v = a-b in sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
-    
-    let inline distanceSq (a:Point3d) (b:Point3d) = let v = a-b in    v.X*v.X + v.Y*v.Y + v.Z*v.Z
-
-    let inline unitize (v:Vector3d) =
-        let f = 1. / sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)   
-        
-    let inline setLength (len:float) (v:Vector3d) =
-        let f = len / sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f) 
-            
-    let inline orientUp (v:Vector3d) =
-        if v.Z < 0.0 then -v else v
-        
-    let inline matchOrientation (orientToMatch:Vector3d) (v:Vector3d) =
-        if orientToMatch * v < 0.0 then -v else v
-    
-    /// computes the signed Volume of a Tetrahedron
-    let inline tetrahedronVolumeSigned(a:Point3d, b:Point3d, c:Point3d, d:Point3d) =
-        ((Vector3d.CrossProduct( b-a, c-a)) * (d-a)) / 6.0
-
-    ///project vector to plane
-    let projectToPlane (pl:Plane) (v:Vector3d) =
-        let pt = pl.Origin + v
-        let clpt = pl.ClosestPoint(pt)
-        clpt-pl.Origin
-    
-    /// project point onto line in directin of v
-    /// fails if line is missed
-    let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
-        let h = Line(pt,v)
-        let ok,tln,th = Intersect.Intersection.LineLine(ln,h)
-        if not ok then failwithf "projectToLine: project in direction faild. (paralell?)"
-        let a = ln.PointAt(tln)
-        let b = h.PointAt(th)
-        if (a-b).SquareLength > RhinoMath.ZeroTolerance then 
-            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "projectToLine"
-            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "projectToLineDirection"
-            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "projectToLineFrom"            
-            failwithf "projectToLine: missed Line by: %g " (a-b).Length
-        a
-    
-    /// snap to point if within Doc.ModelAbsoluteTolerance
-    let snapIfClose (snapTo:Point3d) (pt:Point3d) =
-        if (snapTo-pt).Length < Doc.ModelAbsoluteTolerance then snapTo else pt
-
-    /// Fails on zero length vectors
-    let isAngleBelow1Degree(a:Vector3d, b:Vector3d) = //(prevPt:Point3d, thisPt:Point3d, nextPt:Point3d) =                        
-        //let a = prevPt - thisPt 
-        //let b = nextPt - thisPt                       
-        let sa = a.SquareLength
-        if sa < RhinoMath.SqrtEpsilon then 
-            failwithf "Duplicate points: isAngleBelow1Degree: prevPt - thisPt: %s.SquareLength < RhinoMath.SqrtEpsilon; nextPt - thisPt:%s " a.ToNiceString b.ToNiceString
-        let sb = b.SquareLength
-        if sb < RhinoMath.SqrtEpsilon then 
-            failwithf "Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s.SquareLength < RhinoMath.SqrtEpsilon; prevPt - thisPt:%s " b.ToNiceString a.ToNiceString
-        let lena = sqrt sa
-        let lenb = sqrt sb
-        if lena < Doc.ModelAbsoluteTolerance then 
-            failwithf "Duplicate points: isAngleBelow1Degree: prevPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; nextPt - thisPt:%s " a.ToNiceString Doc.ModelAbsoluteTolerance b.ToNiceString
-        if lenb < Doc.ModelAbsoluteTolerance then 
-            failwithf "Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; prevPt - thisPt:%s " b.ToNiceString Doc.ModelAbsoluteTolerance a.ToNiceString  
-        let au = a * (1.0 / lena)
-        let bu = b * (1.0 / lenb)
-        abs(bu*au) > 0.999847695156391 // = cosine of 1 degree (2 degrees would be =  0.999390827019096)
-        
-    ///Unitize vector, if input vector is shorter than 1e-6 alternative vector is returned UN-unitized.
-    let inline unitizeWithAlternative (unitVectorAlt:Vector3d) (v:Vector3d) =
-        let l = v.SquareLength
-        if l < RhinoMath.ZeroTolerance  then  //sqrt RhinoMath.ZeroTolerance = 1e-06
-            unitVectorAlt //|> unitize
-        else  
-            let f = 1.0 / sqrt(l)
-            Vector3d(v.X*f , v.Y*f , v.Z*f)
-                
-    ///Every line has a normal vector in XY Plane.
-    ///If line is vertical then XAxis
-    ///result is unitized
-    let normalOfTwoPointsInXY(fromPt:Point3d, toPt:Point3d) =
-        let v = toPt - fromPt
-        Vector3d.CrossProduct(v, Vector3d.ZAxis)
-        |> unitizeWithAlternative Vector3d.XAxis
-            
-    /// distHor in XY plane, 
-    /// distNormal in free Normal ( ZAxis for Flat line)
-    let offsetTwoPt(    fromPt:Point3d, 
-                        toPt:Point3d, 
-                        distHor:float,
-                        distNormal:float) : Point3d*Point3d= 
-        let v = toPt - fromPt
-        let normHor =
-            Vector3d.CrossProduct(v, Vector3d.ZAxis)
-            |> unitizeWithAlternative Vector3d.XAxis
-                
-        let normFree = 
-            Vector3d.CrossProduct(v, normHor)
-            |> unitize        
-        
-        let shift = distHor * normHor + distNormal * normFree
-        fromPt +  shift, toPt + shift 
-        
-        
-    ///Points  must not be colinear !
-    let findOffsetCorner(   prevPt:Point3d,
-                            thisPt:Point3d, 
-                            nextPt:Point3d, 
-                            prevDist:float, 
-                            nextDist:float,
-                            orientation:Vector3d) : Vector3d* Vector3d * Point3d * Vector3d=
-        let vp = prevPt - thisPt
-        let vn = nextPt - thisPt    
-        if isAngleBelow1Degree(vp, vn) then 
-            Vector3d.Zero, Vector3d.Zero, Point3d.Origin, Vector3d.Zero
-        else 
-            let n = 
-                Vector3d.CrossProduct(vp, vn)
-                |> unitize
-                |> matchOrientation orientation            
-                
-            let sp = Vector3d.CrossProduct(vp, n) |> setLength prevDist 
-            let sn = Vector3d.CrossProduct(n, vn) |> setLength nextDist    
-            let lp = Line(thisPt + sp , vp)  //|>> (Doc.Objects.AddLine>>ignore)
-            let ln = Line(thisPt + sn , vn)  //|>> (Doc.Objects.AddLine>> ignore)               
-            let ok, tp , tn = Intersect.Intersection.LineLine(lp, ln) //could also be solved with trigonometry functions            
-            if not ok then failwithf "findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
-            sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
-             
-                
-        
-    let rec internal searchBack i (ns:ResizeArray<Vector3d>) = 
-        let ii = saveIdx (i) ns.Count
-        let v = ns.[ii]
-        if v <> Vector3d.Zero || i < -ns.Count then ii
-        else searchBack (i-1) ns
-        
-    let rec internal searchForward i (ns:ResizeArray<Vector3d>) = 
-        let ii = saveIdx (i) ns.Count
-        let v = ns.[ii]
-        if v <> Vector3d.Zero || i > (2 * ns.Count) then ii
-        else searchForward (i + 1) ns        
-        
-            
-
+    open Vec
 
     type RhinoScriptSyntax with
         
-        ///projects to plane an retuns angle in degrees in plane betwen -180 and + 180
-        [<Extension>]        
+        [<Extension>] 
+        ///projects to plane an retuns angle in degrees in plane betwen -180 and + 180               
         static member AngleInPlane180( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -229,9 +79,8 @@ module ExtrasVector =
                 p <- p + pt
             p/k
 
-    
-        ///considers current order of points too, counterclockwise in xy plane is z
         [<Extension>]
+        ///considers current order of points too, counterclockwise in xy plane is z        
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
             let k = Seq.length pts
             if k < 2 then 
@@ -254,8 +103,32 @@ module ExtrasVector =
                 else
                     v.UnitizedUnchecked
 
-        
-        ///Auto detects points from closed polylines and loops them
+        [<Extension>]     
+        /// Calculates the intersection of a finite line with a triangle (without using Rhinocommon) 
+        /// Returns Some(Point3d) or None if no intersection found
+        static member LineTriangleIntersect(line:Line, p1 :Point3d ,p2 :Point3d, p3 :Point3d):  Point3d option  = 
+            
+            // https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d
+            /// computes the signed Volume of a Tetrahedron
+            let inline tetrahedronVolumeSigned(a:Point3d, b:Point3d, c:Point3d, d:Point3d) =
+                ((Vector3d.CrossProduct( b-a, c-a)) * (d-a)) / 6.0
+
+            let q1 = line.From
+            let q2 = line.To
+            let s1 = sign (tetrahedronVolumeSigned(q1,p1,p2,p3))
+            let s2 = sign (tetrahedronVolumeSigned(q2,p1,p2,p3))
+            if s1 <> s2 then
+                let s3 = sign (tetrahedronVolumeSigned(q1,q2,p1,p2))
+                let s4 = sign (tetrahedronVolumeSigned(q1,q2,p2,p3))
+                let s5 = sign (tetrahedronVolumeSigned(q1,q2,p3,p1))
+                if s3 = s4 && s4 = s5 then                
+                    let n = Vector3d.CrossProduct(p2-p1,p3-p1)
+                    let t = ((p1-q1) * n) / ((q2-q1) * n)
+                    Some (q1 + t * (q2-q1))
+                else None
+            else None
+
+        ///Auto detects if given points are from a closed polyline (first point = last point) and loops them
         ///Distance must have exact length, be singelton or empty seq
         [<Extension>] //TODO docstring
         static member OffsetPoints(     points:Point3d IList, 
@@ -279,7 +152,7 @@ module ExtrasVector =
                     if   lenDistNorm = 0 then 0.0
                     elif lenDistNorm = 1 then normDists0.[0]
                     else failwithf "OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm points.ToNiceString         
-                let a, b = offsetTwoPt(points.[0], points.[1] , offDist, normDist)
+                let a, b = Pnt.offsetTwoPt(points.[0], points.[1] , offDist, normDist)
                 resizeArray { a; b}                                        
             else // regular case more than 2 points
                 let lastIsFirst = (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance //auto detect closed polyline points:                                            
@@ -309,30 +182,30 @@ module ExtrasVector =
                     if i=0 then 
                         if lastIsFirst then 
                             let prev = points.GetItem(-2) // because -1 is same as 0                    
-                            let _, _, pt, N = findOffsetCorner(prev, t, n, offDists.Last, offDists.[0], refNormal)
+                            let _, _, pt, N = Pnt.findOffsetCorner(prev, t, n, offDists.Last, offDists.[0], refNormal)
                             Pts.Add pt
                             Ns.Add N
                         else
-                            let _, sn, pt, N = findOffsetCorner(p, t, n, offDists.Last, offDists.[0], refNormal)
+                            let _, sn, pt, N = Pnt.findOffsetCorner(p, t, n, offDists.Last, offDists.[0], refNormal)
                             Ns.Add N 
                             if loop then Pts.Add pt
                             else         Pts.Add (t + sn)                                                 
                     // last one:
                     elif i = lastIndex  then 
                         if lastIsFirst then
-                            let _, _, pt, N = findOffsetCorner(p, t, points.[1], offDists.[i-1], offDists.[0], refNormal)
+                            let _, _, pt, N = Pnt.findOffsetCorner(p, t, points.[1], offDists.[i-1], offDists.[0], refNormal)
                             Pts.Add pt
                             Ns.Add N
                         elif loop then 
-                            let _, _, pt, N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
+                            let _, _, pt, N = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
                             Pts.Add pt
                             Ns.Add N
                         else 
-                            let sp, _, _, N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i-1], refNormal) // or any next off dist since only sp is used    
+                            let sp, _, _, N = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i-1], refNormal) // or any next off dist since only sp is used    
                             Pts.Add (t + sp)
                             Ns.Add N 
                     else
-                        let _, _, pt, N = findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
+                        let _, _, pt, N = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
                         Pts.Add pt
                         Ns.Add N                                            
                 if lenDistNorm > 0 then 
@@ -340,6 +213,19 @@ module ExtrasVector =
                         let n = Ns.[i]
                         if n <> Vector3d.Zero then 
                             Pts.[i] <- Pts.[i] + n * normDists.[i]
+                
+                let rec searchBack i (ns:ResizeArray<Vector3d>) = 
+                    let ii = saveIdx (i) ns.Count
+                    let v = ns.[ii]
+                    if v <> Vector3d.Zero || i < -ns.Count then ii
+                    else searchBack (i-1) ns
+                    
+                let rec  searchForward i (ns:ResizeArray<Vector3d>) = 
+                    let ii = saveIdx (i) ns.Count
+                    let v = ns.[ii]
+                    if v <> Vector3d.Zero || i > (2 * ns.Count) then ii
+                    else searchForward (i + 1) ns  
+
                 // fix colinear segments by nearest neigbours that are ok
                 for i, n in Seq.indexed Ns do // ns might be shorter than pts if lastIsFirst= true
                     if n = Vector3d.Zero then                 
@@ -373,23 +259,6 @@ module ExtrasVector =
             else                         RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[normalDistance], loop)
                                         
         
-        [<Extension>]     
-        ///Calculates the intersection of a finite line with a triangle (without using Rhinocommon)        
-        static member LineTriangleIntersect(line:Line, p1 :Point3d ,p2 :Point3d, p3 :Point3d):  Point3d option  = 
-            // https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d
-            let q1 = line.From
-            let q2 = line.To
-            let s1 = sign (tetrahedronVolumeSigned(q1,p1,p2,p3))
-            let s2 = sign (tetrahedronVolumeSigned(q2,p1,p2,p3))
-            if s1 <> s2 then
-                let s3 = sign (tetrahedronVolumeSigned(q1,q2,p1,p2))
-                let s4 = sign (tetrahedronVolumeSigned(q1,q2,p2,p3))
-                let s5 = sign (tetrahedronVolumeSigned(q1,q2,p3,p1))
-                if s3 = s4 && s4 = s5 then                
-                    let n = Vector3d.CrossProduct(p2-p1,p3-p1)
-                    let t = ((p1-q1) * n) / ((q2-q1) * n)
-                    Some (q1 + t * (q2-q1))
-                else None
-            else None
+
 
 

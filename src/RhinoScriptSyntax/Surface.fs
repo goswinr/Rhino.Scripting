@@ -2515,7 +2515,7 @@ module ExtensionsSurface =
                 | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
                 | :? Point as g -> unroll.AddFollowingGeometry(g)
                 | :? TextDot as g -> unroll.AddFollowingGeometry(g)
-                | _ -> failwithf "UnrollSurface: cannot add %A (a %s) as following Geometry" objectId (rhtype objectId)
+                | _ -> failwithf "UnrollSurface: cannot add %A (a %s) as following Geometry" objectId (rhType objectId)
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then failwithf "UnrollSurface: failed on  %A " surfaceId

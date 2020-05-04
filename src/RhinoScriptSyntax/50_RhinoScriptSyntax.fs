@@ -10,12 +10,17 @@ open Rhino.Scripting.ActiceDocument
 open System.Collections.Generic
 open FsEx
 open FsEx.SaveIgnore
-open System
+open System.Runtime.CompilerServices
+
+// to expose CLI-standard extension members that can be consumed from C# or VB,
+// http://www.latkin.org/blog/2014/04/30/f-extension-methods-in-roslyn/
+// declare all Extension attributes explicitly
+[<assembly:Extension>] do () 
 
 /// An Integer Enum of Object types to be use in object selection functions
 /// Don't create an instance, use the instance in RhinoScriptSyntax.Filter
 [<Sealed>] //AbstractClass;
-type Filter internal () =  
+type ObjectFilterEnum internal () =  
     member _.AllObjects = 0
     member _.Point = 1
     member _.PointCloud = 2
@@ -36,21 +41,17 @@ type Filter internal () =
     member _.ClippingPlane = 536870912
     member _.Extrusion = 1073741824
 
-module private Internals =
-    // the singelton of this class to be used below
-    let filter = Filter()
-    /// A Dictionary to store state between scripting session
-    let sticky = new Dictionary<string, obj>()
 
+/// A static class with static members providing functions Identical to RhinoScript in Pyhton or VBscript 
 [<AbstractClass; Sealed>]
-/// A static class with static members provIding functions Identical to RhinoScript in Pyhton or VBscript 
-type RhinoScriptSyntax private () = // no constructor? 
-
-    /// A Dictionary to store state between scripting session
-    static member Sticky:Dictionary<string, obj> = Internals.sticky
+type RhinoScriptSyntax private () =
     
-    /// An Integer Enum of Object types to be use in object selection functions
-    static member Filter:Filter = Internals.filter
+    /// A Dictionary to store state between scripting session
+    static member val Sticky = new Dictionary<string, obj>() with get
+    
+    /// An Integer Enum of Object types 
+    /// to be use in object selection functions such as rs.GetObjects()
+    static member val Filter = new ObjectFilterEnum ()
     
     ///Tests to see if the user has pressed the escape key
     ///raises OperationCanceledException
@@ -175,13 +176,212 @@ type RhinoScriptSyntax private () = // no constructor?
         | :? Line       as ln->   Doc.Objects.AddLine(ln)
         | :? Arc        as a->    Doc.Objects.AddArc(a)
         | :? Circle     as c->    Doc.Objects.AddCircle(c)
+        | :? Ellipse    as e->    Doc.Objects.AddEllipse(e)
         | :? Polyline   as pl ->  Doc.Objects.AddPolyline(pl)
         | :? Box        as b ->   Doc.Objects.AddBox(b)
         | :? BoundingBox as b ->  Doc.Objects.AddBox(Box(b))
         | :? Sphere     as b ->   Doc.Objects.AddSphere(b)
         | :? Cylinder    as cl -> Doc.Objects.AddSurface (cl.ToNurbsSurface())
         | :? Cone       as c ->   Doc.Objects.AddSurface (c.ToNurbsSurface())
-        | _ -> failwithf "RhinoScriptSyntax.Add: object of type %A not implemented" (geo.GetType())
+        | _ -> failwithf "RhinoScriptSyntax.Add: object of type %A not implemented yet" (geo.GetType())
+    
+
+    //---------------------------------------------------------------
+    //-------------------------------TRY COERCE-------------------
+    //---------------------------------------------------------------
+
+
+    ///<summary>attempt to get a Guids from input</summary>
+    ///<param name="objectId">objcts , Guid or string</param>
+    ///<returns>a Guid Option</returns>
+    static member TryCoerceGuid (objectId:'T) : Guid option=
+        match box objectId with
+        | :? Guid  as g -> if Guid.Empty = g then None else Some g    
+        | :? DocObjects.RhinoObject as o -> Some o.Id
+        | :? DocObjects.ObjRef      as o -> Some o.ObjectId
+        | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
+        | _ -> None
+
+    ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>
+    ///<param name="objectId">object Identifier (Guid or string)</param>
+    ///<returns>a RhinoObject Option</returns>
+    static member TryCoerceRhinoObject (objectId:Guid): DocObjects.RhinoObject option =     
+        if Guid.Empty = objectId then None 
+        else 
+            let o = Doc.Objects.FindId(objectId) 
+            if isNull o then None
+            else Some o     
+    
+    ///<summary>attempt to get GeometryBase class from given Guid</summary>
+    ///<param name="objectId">geometry Identifier (Guid)</param>
+    ///<returns>a Rhino.Geometry.GeometryBase Option</returns>
+    static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> Some o.Geometry   
+            
+    ///<summary>attempt to get Rhino LightObject from the document with a given objectId</summary>
+    ///<param name="objectId">(Guid): light Identifier</param>
+    ///<returns>a Rhino.Geometry.Light. Option</returns>
+    static member TryCoerceLight (objectId:Guid) : Light option =
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with
+        | Some g ->
+            match g with
+            | :? Geometry.Light as l -> Some l
+            | _ -> None
+        | None -> None
+
+
+
+    ///<summary>attempt to get Mesh class from given Guid</summary>
+    ///<param name="objectId">Mesh Identifier (Guid)</param>
+    ///<returns>a Rhino.Geometry.Surface Option</returns>
+    static member TryCoerceMesh (objectId:Guid) :Mesh option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> 
+                match o.Geometry with 
+                | :? Mesh as m -> Some m
+                | _ -> None
+
+    ///<summary>attempt to get Surface class from given Guid</summary>
+    ///<param name="objectId">Surface Identifier (Guid)</param>
+    ///<returns>a Rhino.Geometry.Surface Option</returns>
+    static member TryCoerceSurface (objectId:Guid) :Surface option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> 
+                match o.Geometry with          
+                | :? Surface as c -> Some c
+                | :? Brep as b -> 
+                    if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
+                    else None
+                | _ -> None
+
+    ///<summary>attempt to get a Polysurface or Brep class from given Guid</summary>
+    ///<param name="objectId">Polysurface Identifier (Guid)</param>
+    ///<returns>a Rhino.Geometry.Mesh Option</returns>
+    static member TryCoerceBrep (objectId:Guid) :Brep option =
+        if objectId = Guid.Empty then None
+        else
+            match Doc.Objects.FindId(objectId) with 
+            | null -> None
+            | o -> 
+                match o.Geometry with
+                | :? Brep as b ->  Some b
+                | _ -> None
+
+    ///<summary>attempt to get curve geometry from the document with a given objectId</summary>
+    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
+    ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
+    ///<returns>a Rhino.Geometry.Curve Option</returns>
+    static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option= 
+        match RhinoScriptSyntax.TryCoerceGeometry objectId with 
+        | None -> None
+        | Some geo -> 
+            if segmentIndex < 0 then 
+                match geo with 
+                | :? Curve as c -> Some c
+                | _ -> None
+            else
+                match geo with 
+                | :? PolyCurve as c -> 
+                    let crv = c.SegmentCurve(segmentIndex)
+                    if isNull crv then None
+                    else Some crv
+                | :? Curve as c -> Some c
+                | _ -> None
+
+    
+    ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance</summary>
+    ///<param name="line">Line, two points or Guid</param>
+    ///<returns>Geometry.Line) Fails on bad input</returns>
+    static member TryCoerceLine(line:'T) : Line option =        
+        match box line with
+        | :? Line as l -> Some l
+        | :? Curve as crv ->
+            if crv.IsLinear(Doc.ModelAbsoluteTolerance) then Some <|  Line(crv.PointAtStart, crv.PointAtEnd)
+                else None
+        | :? Guid as g ->  
+            match Doc.Objects.FindId(g).Geometry with
+            | :? Curve as crv ->
+                if crv.IsLinear(Doc.ModelAbsoluteTolerance) then Some <| Line(crv.PointAtStart, crv.PointAtEnd)
+                else None
+            //| :? Line as l -> l
+            | _ -> None
+        | :? (Point3d*Point3d) as ab -> let a, b = ab in Some <| Line(a, b)
+        |_ -> None
+    
+    ///<summary>attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance.
+    /// does not return circles as arcs.</summary>
+    ///<param name="arc">Guid, RhinoObject or Curve </param>
+    ///<returns>a Geometry.Arc Option</returns>
+    static member TryCoerceArc(arc:'T) : Arc option=
+        match box arc with
+        | :? Arc as a -> Some(a)
+        | :? Curve as crv ->
+            let a = ref (new Arc())
+            let ok = crv.TryGetArc(a,Doc.ModelAbsoluteTolerance)
+            if ok then Some(!a )
+            else None
+        | :? Guid as g ->  
+            match Doc.Objects.FindId(g).Geometry with
+            | :? Curve as crv ->
+                let a = ref (new Arc())
+                let ok = crv.TryGetArc(a,Doc.ModelAbsoluteTolerance)
+                if ok then Some(!a )
+                else None            
+            | _ -> None        
+        |_ -> None
+    
+    ///<summary>attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
+    ///<param name="cir">Guid, RhinoObject or Curve </param>
+    ///<returns>a Geometry.Circle Option</returns>
+    static member TryCoerceCircle(cir:'T) : Circle option=
+        match box cir with
+        | :? Circle as a -> Some(a)
+        | :? Curve as crv ->
+            let a = ref (new Circle())
+            let ok = crv.TryGetCircle(a,Doc.ModelAbsoluteTolerance)
+            if ok then Some(!a )
+            else None
+        | :? Guid as g ->  
+            match Doc.Objects.FindId(g).Geometry with
+            | :? Curve as crv ->
+                let a = ref (new Circle())
+                let ok = crv.TryGetCircle(a,Doc.ModelAbsoluteTolerance)
+                if ok then Some(!a )
+                else None            
+            | _ -> None        
+        |_ -> None
+
+    ///<summary>attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
+    ///<param name="cir">Guid, RhinoObject or Curve </param>
+    ///<returns>a Geometry.Ellipse Option</returns>
+    static member TryCoerceEllipse(cir:'T) :  Ellipse option=
+        match box cir with
+        | :? Ellipse as a -> Some(a)
+        | :? Curve as crv ->
+            let a = ref (new Ellipse())
+            let ok = crv.TryGetEllipse(a,Doc.ModelAbsoluteTolerance)
+            if ok then Some(!a )
+            else None
+        | :? Guid as g ->  
+            match Doc.Objects.FindId(g).Geometry with
+            | :? Curve as crv ->
+                let a = ref (new  Ellipse())
+                let ok = crv.TryGetEllipse(a,Doc.ModelAbsoluteTolerance)
+                if ok then Some(!a )
+                else None            
+            | _ -> None        
+        |_ -> None
+        
 
     //-------------------------------------------------------
     //------------COERCE-----------------------------------
@@ -380,25 +580,24 @@ type RhinoScriptSyntax private () = // no constructor?
                //     with _ -> failwithf ": could not Coerce %A to a Color" c
         | _ -> failwithf "CoerceColor:: could not Coerce %A to a Color" color
 
-    ///<summary>attempt to get Rhino Line Geometry</summary>
+    ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance</summary>
     ///<param name="line">Line, two points or Guid</param>
     ///<returns>Geometry.Line) Fails on bad input</returns>
     static member CoerceLine(line:'T) : Line=
-        match box line with
-        | :? Line as l -> l
-        | :? Curve as crv ->
-            if crv.IsLinear() then Line(crv.PointAtStart, crv.PointAtEnd)
-                else failwithf "CoerceLine: could not Coerce %A to a Line" line
-        | :? Guid as g ->  
-            match Doc.Objects.FindId(g).Geometry with
-            | :? Curve as crv ->
-                if crv.IsLinear() then Line(crv.PointAtStart, crv.PointAtEnd)
-                else failwithf "CoerceLine: could not Coerce %A to a Line" line
-            //| :? Line as l -> l
-            | _ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
-        | :? (Point3d*Point3d) as ab -> let a, b = ab in Line(a, b)
-        |_ -> failwithf "CoerceLine: could not Coerce %A to a Line" line
-    
+        match RhinoScriptSyntax.TryCoerceLine(line) with
+        | Some a -> a
+        | None -> failwithf "CoerceLine: could not Coerce %A to a Line" line
+        
+    ///<summary>attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance
+    /// does not return circles as arcs.</summary>
+    ///<param name="arc">Guid, RhinoObject or Curve </param>
+    ///<returns>Geometry.Arc) Fails on bad input</returns>
+    static member CoerceArc(arc:'T) : Arc=
+        match RhinoScriptSyntax.TryCoerceArc(arc) with
+        | Some a -> a
+        | None -> failwithf "CoerceLine: could not Coerce %A to an Arc" arc
+
+        //TODO add coerce Cirle based on try cioerce
 
     ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
@@ -491,8 +690,7 @@ type RhinoScriptSyntax private () = // no constructor?
                 else  failwithf "CoercePageView: Layout called '%s' not found" view
         
         | _ -> failwithf "Cannot get view from %A" view
-        
-    
+            
 
     
     ///<summary>attempt to get Rhino Hatch Object</summary>
@@ -663,115 +861,6 @@ type RhinoScriptSyntax private () = // no constructor?
 
 
 
-    //-------------------------------TRY COERCE-------------------
-
-
-    ///<summary>attempt to get a Guids from input</summary>
-    ///<param name="objectId">objcts , Guid or string</param>
-    ///<returns>Guid Option</returns>
-    static member TryCoerceGuid(objectId:'T) : Guid option=
-        match box objectId with
-        | :? Guid  as g -> if Guid.Empty = g then None else Some g    
-        | :? DocObjects.RhinoObject as o -> Some o.Id
-        | :? DocObjects.ObjRef      as o -> Some o.ObjectId
-        | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
-        | _ -> None
-
-    ///<summary>attempt to get RhinoObject from the document with a given objectId</summary>
-    ///<param name="objectId">object Identifier (Guid or string)</param>
-    ///<returns>a RhinoObject Option</returns>
-    static member TryCoerceRhinoObject(objectId:Guid): DocObjects.RhinoObject option =     
-        if Guid.Empty = objectId then None 
-        else 
-            let o = Doc.Objects.FindId(objectId) 
-            if isNull o then None
-            else Some o     
-    
-    ///<summary>attempt to get GeometryBase class from given Guid</summary>
-    ///<param name="objectId">geometry Identifier (Guid)</param>
-    ///<returns>(Rhino.Geometry.GeometryBase Option</returns>
-    static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
-        if objectId = Guid.Empty then None
-        else
-            match Doc.Objects.FindId(objectId) with 
-            | null -> None
-            | o -> Some o.Geometry   
-            
-    ///<summary>attempt to get Rhino LightObject from the document with a given objectId</summary>
-    ///<param name="objectId">(Guid): light Identifier</param>
-    ///<returns>a  Rhino.Geometry.Light. Option</returns>
-    static member TryCoerceLight (objectId:Guid) : Light option =
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with
-        | Some g ->
-            match g with
-            | :? Geometry.Light as l -> Some l
-            | _ -> None
-        | None -> None
-
-
-
-    ///<summary>attempt to get Mesh class from given Guid</summary>
-    ///<param name="objectId">Mesh Identifier (Guid)</param>
-    ///<returns>(Rhino.Geometry.Surface Option</returns>
-    static member TryCoerceMesh (objectId:Guid) :Mesh option =
-        if objectId = Guid.Empty then None
-        else
-            match Doc.Objects.FindId(objectId) with 
-            | null -> None
-            | o -> 
-                match o.Geometry with 
-                | :? Mesh as m -> Some m
-                | _ -> None
-
-    ///<summary>attempt to get Surface class from given Guid</summary>
-    ///<param name="objectId">Surface Identifier (Guid)</param>
-    ///<returns>(Rhino.Geometry.Surface Option</returns>
-    static member TryCoerceSurface (objectId:Guid) :Surface option =
-        if objectId = Guid.Empty then None
-        else
-            match Doc.Objects.FindId(objectId) with 
-            | null -> None
-            | o -> 
-                match o.Geometry with          
-                | :? Surface as c -> Some c
-                | :? Brep as b -> 
-                    if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
-                    else None
-                | _ -> None
-
-    ///<summary>attempt to get a Polysurface or Brep class from given Guid</summary>
-    ///<param name="objectId">Polysurface Identifier (Guid)</param>
-    ///<returns>(Rhino.Geometry.Mesh Option</returns>
-    static member TryCoerceBrep (objectId:Guid) :Brep option =
-        if objectId = Guid.Empty then None
-        else
-            match Doc.Objects.FindId(objectId) with 
-            | null -> None
-            | o -> 
-                match o.Geometry with
-                | :? Brep as b ->  Some b
-                | _ -> None
-
-    ///<summary>attempt to get curve geometry from the document with a given objectId</summary>
-    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
-    ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
-    ///<returns>(Rhino.Geometry.Curve. Option</returns>
-    static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option= 
-        match RhinoScriptSyntax.TryCoerceGeometry objectId with 
-        | None -> None
-        | Some geo -> 
-            if segmentIndex < 0 then 
-                match geo with 
-                | :? Curve as c -> Some c
-                | _ -> None
-            else
-                match geo with 
-                | :? PolyCurve as c -> 
-                    let crv = c.SegmentCurve(segmentIndex)
-                    if isNull crv then None
-                    else Some crv
-                | :? Curve as c -> Some c
-                | _ -> None
 
 module internal Debug =   
     

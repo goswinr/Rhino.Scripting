@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+namespace Rhino.Scripting.Extra
 
 open FsEx
 open System
@@ -6,16 +6,16 @@ open Rhino
 open Rhino.Geometry
 open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
-open Rhino.Scripting.ExtrasVector
-open Rhino.Scripting.ExtrasLine
+open Rhino.Scripting
+//open Rhino.Scripting.Vec
+//open Rhino.Scripting.Line
 open System.Collections.Generic
 open FsEx.SaveIgnore
 
+[<AutoOpen>]
 module ExtrasBrep = 
-    
    
-  //[<Extension>] //Error 3246  
-  type RhinoScriptSyntax with // TODO chnage to Brep extensions ??!!
+  type RhinoScriptSyntax with // TODO chnage to Brep type extensions ??!!
    
     [<Extension>]
     ///<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
