@@ -345,7 +345,8 @@ module ExtensionsCurve =
         let rc = Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then 
             for i,pt in Seq.indexed(points) do
-                Doc.Objects.AddTextDot(string i, pt) |> Debug.setLayer "AddPolyline failed"
+                let d = Doc.Objects.AddTextDot(string i, pt) 
+                RhinoScriptSyntax.ObjectLayer(d,"AddPolyline failed",true)
             failwithf "Unable to add polyline to document.  points:'%A' " points
         Doc.Views.Redraw()
         rc
@@ -367,7 +368,8 @@ module ExtensionsCurve =
         let rc = Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then 
             for i,pt in Seq.indexed(points) do
-                Doc.Objects.AddTextDot(string i, pt) |> Debug.setLayer "AddPolylineClosed failed"            
+                let d = Doc.Objects.AddTextDot(string i, pt) 
+                RhinoScriptSyntax.ObjectLayer(d,"AddPolylineClosed failed",true)            
             failwithf "Unable to add closed polyline to document.  points:'%A' " points
         Doc.Views.Redraw()
         rc

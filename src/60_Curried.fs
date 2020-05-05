@@ -40,7 +40,7 @@ module Curried =
     ///<param name="objectId">(Guid) The identifier of the object</param>    
     ///<returns>(unit) void, nothing</returns>
     static member setLayer( layer:string) (objectId:Guid) : unit = 
-        Debug.setLayer layer objectId  
+        RhinoScriptSyntax.ObjectLayer(objectId,layer,true)
         
     [<Extension>]
     ///<summary>Sets the name of an object</summary>

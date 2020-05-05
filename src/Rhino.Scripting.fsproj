@@ -8,16 +8,46 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
     <!--assembly info -->
-    <Version>0.0.0.2</Version>
+    <Version>0.1.0.2</Version>
     <Authors>Goswin Rothenthal</Authors>
     <Product>Rhino.Scripting</Product>
-    <AssemblyVersion>0.1.0.2</AssemblyVersion>
-    <FileVersion>0.1.0.2</FileVersion>
+    <AssemblyVersion>0.1.0.3</AssemblyVersion>
+    <FileVersion>0.1.0.3</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Description>Rhino Script Syntax for F# (and C#)</Description>
-    <Copyright>Copyright: Goswin Rothenthal 2019 </Copyright>
+    <Copyright>Copyright: Goswin Rothenthal 2020 </Copyright>
   </PropertyGroup>
   
+
+  
+  <ItemGroup>
+    <PackageReference Include="ini-parser" Version="2.5.2" />
+    <PackageReference Update="FSharp.Core" Version="4.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    
+    <Reference Include="RhinoCommon">
+      <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>  
+
+    <Reference Include="FsEx">
+      <HintPath>..\..\FsEx\src\bin\Debug\net45\FsEx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+
+
+    <Reference Include="WindowsBase" />  
+    <Reference Include="PresentationCore" />  
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Windows.Forms" /><!--to get screen resolution-->
+    
+
+  </ItemGroup>
+
+
+
   <ItemGroup>
     <Compile Include="18_Synchronisation.fs" />
     <Compile Include="19_ActiveDoc.fs" />
@@ -25,6 +55,7 @@
     <Compile Include="RhinoScriptSyntax/50_RhinoScriptSyntax.fs" />
     <Compile Include="RhinoScriptSyntax/Application.fs" />
     <Compile Include="RhinoScriptSyntax/Block.fs" />
+    <Compile Include="RhinoScriptSyntax/Object.fs" />
     <Compile Include="RhinoScriptSyntax/Curve.fs" />
     <Compile Include="RhinoScriptSyntax/Dimension.fs" />
     <Compile Include="RhinoScriptSyntax/Document.fs" />
@@ -38,7 +69,6 @@
     <Compile Include="RhinoScriptSyntax/Linetype.fs" />
     <Compile Include="RhinoScriptSyntax/Material.fs" />
     <Compile Include="RhinoScriptSyntax/Mesh.fs" />
-    <Compile Include="RhinoScriptSyntax/Object.fs" />
     <Compile Include="RhinoScriptSyntax/Plane.fs" />
     <Compile Include="RhinoScriptSyntax/PointVector.fs" />
     <Compile Include="RhinoScriptSyntax/Selection.fs" />
@@ -57,52 +87,5 @@
     <Compile Include="80_ExtraCurve.fs" />
     <Compile Include="80_ExtrasBrep.fs" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="ini-parser" Version="2.5.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    
-    <Reference Include="RhinoCommon">
-      <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
-      <Private>False</Private>
-    </Reference>  
-
-    <Reference Include="FsEx">
-      <HintPath>..\..\FsEx\src\bin\Debug\net45\FsEx.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-
-
-    <Reference Include="WindowsBase" />  
-    <Reference Include="PresentationCore" />  
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Windows.Forms" /><!--to get screen resolution-->
-    
-
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.0" />
-  </ItemGroup>
-
-  <!-- remove localization files: https://github.com/dotnet/fsharp/issues/6759 (After Build does not work ?)
-  </PropertyGroup>
-    <AllowedReferenceRelatedFileExtensions>
-      .mdb
-      .pdb
-    </AllowedReferenceRelatedFileExtensions>
-  </PropertyGroup>
-
-  <Target Name="AfterBuild">
-    <ItemGroup>
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\FSharp.Core.resources.dll" />
-      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
-    </ItemGroup>
-    <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
-  </Target>
-  -->
-  
 
 </Project>
