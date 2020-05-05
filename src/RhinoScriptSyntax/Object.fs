@@ -582,34 +582,93 @@ module ExtensionsObject =
 
 
     [<Extension>]
-    ///<summary>Modifies the layer of an object. 
-    ///Fails if Layer does not exist.
-    ///Use <c>rs.setLayer</c> to also create layer if it does not exist yet.</summary>
+    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+    ///     Set true to create Layer if it does not exist yet.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ObjectLayer(objectId:Guid, layer:string) : unit = //SET
-        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let index = layer.Index
-        obj.Attributes.LayerIndex <- index
+    static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
+        let layerIndex =
+            if createLayerIfMissing then            
+                if layer="" then 
+                    Doc.Layers.CurrentLayerIndex
+                else
+                    let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+                    if i <> RhinoMath.UnsetIntIndex then 
+                        i
+                    else
+                        let names = layer.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
+                        let mutable lastparentindex =  -1
+                        let mutable lastparent      =  null : DocObjects.Layer
+                        for idx, name in Seq.indexed(names) do
+                            let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                            if idx > 0 && lastparentindex <> -1 then
+                                lastparent <- Doc.Layers.[lastparentindex]
+                            if notNull lastparent then
+                                layer.ParentLayerId <- lastparent.Id
+                            layer.Name <- name
+                            layer.Color <- Color.randomColorForRhino()
+                            layer.IsVisible <- true
+                            layer.IsLocked <- false
+                            lastparentindex <- Doc.Layers.Add(layer)                        
+                            if lastparentindex = -1 then
+                                let mutable fullpath = layer.Name
+                                if notNull lastparent then
+                                    fullpath <- lastparent.FullPath + "::" + fullpath
+                                lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
+                        lastparentindex
+            else
+                RhinoScriptSyntax.CoerceLayer(layer).Index                 
+        obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
         Doc.Views.Redraw()
+       
 
     [<Extension>]
-    ///<summary>Modifies the layer of multiple objects
-    ///Fails if Layer does not exist.
-    ///Use <c>rs.setLayer</c> to also create layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+    ///     Set true to create Layer if it does not exist yet.</param>
     ///<returns>(unit) void, nothing</returns>
-    static member ObjectLayer(objectIds:Guid seq, layer:string) : unit = //MULTISET
-        let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let index = layer.Index
+    static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
+        let layerIndex =
+            if createLayerIfMissing then            
+                if layer="" then 
+                    Doc.Layers.CurrentLayerIndex
+                else
+                    let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+                    if i <> RhinoMath.UnsetIntIndex then 
+                        i
+                    else
+                        let names = layer.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
+                        let mutable lastparentindex =  -1
+                        let mutable lastparent      =  null : DocObjects.Layer
+                        for idx, name in Seq.indexed(names) do
+                            let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                            if idx > 0 && lastparentindex <> -1 then
+                                lastparent <- Doc.Layers.[lastparentindex]
+                            if notNull lastparent then
+                                layer.ParentLayerId <- lastparent.Id
+                            layer.Name <- name
+                            layer.Color <- Color.randomColorForRhino()
+                            layer.IsVisible <- true
+                            layer.IsLocked <- false
+                            lastparentindex <- Doc.Layers.Add(layer)                        
+                            if lastparentindex = -1 then
+                                let mutable fullpath = layer.Name
+                                if notNull lastparent then
+                                    fullpath <- lastparent.FullPath + "::" + fullpath
+                                lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
+                        lastparentindex
+            else
+                RhinoScriptSyntax.CoerceLayer(layer).Index 
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            obj.Attributes.LayerIndex <- index
-            if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
+            obj.Attributes.LayerIndex <- layerIndex
+            if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
         Doc.Views.Redraw()
 
 
