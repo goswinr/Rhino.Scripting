@@ -17,8 +17,13 @@ module ExtrasCurve =
   type RhinoScriptSyntax with 
     
     [<Extension>]
-    ///<summary>returns the Fillet Arc if it fits within the points</summary>
-    static member filletArc  (prevPt:Point3d, midPt:Point3d, nextPt:Point3d, radius:float)  : Arc   = 
+    ///<summary>Returns the fillet arc if it fits within three points describing two connected lines (= a polyline). Fails otherwise</summary>
+    ///<param name="prevPt">(Point3d)The first point of polyline</param>
+    ///<param name="midPt">(Point3d)The middle point of polyline, that will get the fillet</param>    
+    ///<param name="nextPt">(Point3d)The last (or third) point of polyline</param>
+    ///<param name="radius">(float)The radius of the fillet to atempt to creat</param>
+    ///<returns>An Arc Geometry</returns>
+    static member FilletArc  (prevPt:Point3d, midPt:Point3d, nextPt:Point3d, radius:float)  : Arc   = 
         let A = prevPt-midPt
         let B = nextPt-midPt
         let uA = A |> Vec.unitize 
@@ -26,25 +31,25 @@ module ExtrasCurve =
         // calculate trim       
         let alphaDouble = 
             let dot = uA*uB
-            if abs(dot) > 0.999  then failwithf "filletArc: Can't fillet points that are colinear %s,%s,%s" prevPt.ToNiceString midPt.ToNiceString nextPt.ToNiceString
+            if abs(dot) > 0.999  then failwithf "rs.FilletArc: Can't fillet points that are colinear %s,%s,%s" prevPt.ToNiceString midPt.ToNiceString nextPt.ToNiceString
             acos dot
         let alpha = alphaDouble * 0.5
         let beta  = Math.PI * 0.5 - alpha
         let trim = tan(beta) * radius // the setback distance from intersection  
-        if trim > A.Length then failwithf "filletArc: Fillet Radius %g is too big for prev %s and  %s" radius prevPt.ToNiceString midPt.ToNiceString
-        if trim > B.Length then failwithf "filletArc: Fillet Radius %g is too big for next %s and  %s" radius nextPt.ToNiceString midPt.ToNiceString    
+        if trim > A.Length then failwithf "rs.FilletArc: Fillet Radius %g is too big for prev %s and  %s" radius prevPt.ToNiceString midPt.ToNiceString
+        if trim > B.Length then failwithf "rs.FilletArc: Fillet Radius %g is too big for next %s and  %s" radius nextPt.ToNiceString midPt.ToNiceString    
         let arcStart =  midPt + uA * trim // still on arc plane
         let arcEnd =    midPt + uB * trim
         Arc(arcStart, - uA , arcEnd)
     
     [<Extension>]
     ///<summary>Fillest some corners of polyline</summary>
-    ///<param name="fillets">(int*float ResizeArray)The indix of the cornes to filet and the fillet radius</param>
+    ///<param name="fillets">(int*float ResizeArray)The index of the cornes to filet and the fillet radius</param>
     ///<param name="polyline">(Point3d ResizeArray) The polyline as pointlist </param> 
     ///<returns>a PolyCurve object</returns>
-    static member filletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
+    static member FilletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
         for i in fillets.Keys do 
-            if i >= polyline.LastIndex then failwithf "cannot fillet corner %d . in polyline of %d points" i polyline.Count                
+            if i >= polyline.LastIndex then failwithf "rs.FilletPolyline: cannot fillet corner %d . in polyline of %d points" i polyline.Count                
         
         let closed = RhinoScriptSyntax.Distance(polyline.[0], polyline.Last) < Doc.ModelAbsoluteTolerance 
         let mutable prevPt = polyline.[0]
@@ -52,19 +57,19 @@ module ExtrasCurve =
         let plc = new PolyCurve()        
         if fillets.ContainsKey 0 then
             if closed then 
-                let arc = RhinoScriptSyntax.filletArc (polyline.Last, polyline.[0], polyline.[1], fillets.[0])
+                let arc = RhinoScriptSyntax.FilletArc (polyline.Last, polyline.[0], polyline.[1], fillets.[0])
                 plc.Append arc  |> ignore 
                 prevPt <- arc.EndPoint
                 endPt <- arc.StartPoint
-                if fillets.ContainsKey polyline.LastIndex then failwithf "filletPolyline:Cannot set last and first radius on closed polyline fillet"
+                if fillets.ContainsKey polyline.LastIndex then failwithf "rs.FilletPolyline:Cannot set last and first radius on closed polyline fillet"
             else
-                failwithf "filletPolyline: Cannot set radius at index 0 on open polyline"
+                failwithf "rs.FilletPolyline: Cannot set radius at index 0 on open polyline"
         
         for i = 1 to polyline.Count - 2 do  
             let pt = polyline.[i]
             if fillets.ContainsKey i then 
                 let ptn = polyline.[i+1]
-                let arc = RhinoScriptSyntax.filletArc (prevPt, pt, ptn, fillets.[i])
+                let arc = RhinoScriptSyntax.FilletArc (prevPt, pt, ptn, fillets.[i])
                 plc.Append (Line (prevPt,arc.StartPoint)) |> ignore 
                 plc.Append arc |> ignore 
                 prevPt <- arc.EndPoint
@@ -93,7 +98,7 @@ module ExtrasCurve =
             let pla = Plane(lineA.From, lineA.Direction, direction)
             let plb = Plane(lineB.From, lineB.Direction, direction)            
             Intersect.Intersection.PlanePlane(pla,plb)
-        if not ok then failwithf "filletSkewLinesTrims: Can't intersect Planes , are lineA and lineB  paralell?"
+        if not ok then failwithf "rs.filletSkewLinesTrims: Can't intersect Planes , are lineA and lineB  paralell?"
 
 
         let arcPl = Plane(axis.From,axis.Direction)
@@ -103,7 +108,7 @@ module ExtrasCurve =
         // calculate trim       
         let alphaDouble = 
             let dot = uA*uB
-            if abs(dot) > 0.999  then failwithf "filletSkewLinesTrims: Can't fillet, lineA and lineB and direction vector are in same plane."
+            if abs(dot) > 0.999  then failwithf "rs.filletSkewLinesTrims: Can't fillet, lineA and lineB and direction vector are in same plane."
             acos dot
         let alpha = alphaDouble * 0.5
         let beta  = Math.PI * 0.5 - alpha
@@ -126,7 +131,7 @@ module ExtrasCurve =
             let pla = Plane(lineA.From, lineA.Direction, direction)
             let plb = Plane(lineB.From, lineB.Direction, direction)            
             Intersect.Intersection.PlanePlane(pla,plb)
-        if not ok then failwithf "filletSkewLines: Can't intersect Planes , are lineA and lineB  paralell?"
+        if not ok then failwithf "rs.filletSkewLines: Can't intersect Planes , are lineA and lineB  paralell?"
     
     
         let arcPl = Plane(axis.From,axis.Direction)
@@ -136,7 +141,7 @@ module ExtrasCurve =
         // calculate trim       
         let alphaDouble = 
             let dot = uA*uB
-            if abs(dot) > 0.999  then failwithf "filletSkewLines: Can't fillet, lineA and lineB and direction vector are in same plane."
+            if abs(dot) > 0.999  then failwithf "rs.filletSkewLines: Can't fillet, lineA and lineB and direction vector are in same plane."
             acos dot
         let alpha = alphaDouble * 0.5
         let beta  = Math.PI * 0.5 - alpha
