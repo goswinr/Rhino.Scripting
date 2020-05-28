@@ -10,7 +10,10 @@ open System.Collections.Generic
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
-module ExtrasCurve = 
+/// This module provides functions to create or manipulate Rhino Curves
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+module ExtrasCurve =
+
   open Line
   open Vec
    

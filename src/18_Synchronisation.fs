@@ -7,7 +7,7 @@ open Rhino.Runtime
 open FsEx.SaveIgnore
 
 
-/// A static classs to hlp access the UI thread from other threads
+/// A static classs to help access the UI thread from other threads
 type Synchronisation private () =
     
     static let mutable seffRhinoSyncModule:Type = null
@@ -59,26 +59,26 @@ type Synchronisation private () =
     ///the Assembly currently running Seff Editor Window
     static member SeffRhinoAssembly = seffAssembly
 
-    ///set up Sync Context and Refrenbec to Seff Window via reflection on Seff Plugin
-    static member Initialize() = init()
+    //set up Sync Context and Refrence to Seff Window via reflection on Seff Plugin
+    //static member Initialize() = init() // not needed ?
 
-    ///Evaluates a function on UI Thread. Optionally enables redraw . Optionally hides Seff editor window if it exists. 
-    static member DoSync enableRedraw hideEditor (f:unit->'T): 'T =
+    ///Evaluates a function on UI Thread. Optionally ensures that redraw is enabled . Optionally hides Seff editor window if it exists. 
+    static member DoSync ensureRedrawEnabled hideEditor (func:unit->'T): 'T =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if not RhinoApp.InvokeRequired then 
             if hideEditor && notNull seffWindow then seffWindow.Hide()
-            if enableRedraw && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
-            let res = f()
-            if enableRedraw && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+            if ensureRedrawEnabled && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true
+            let res = func()
+            if ensureRedrawEnabled && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
             if hideEditor && notNull seffWindow then seffWindow.Show() 
             res
         else
             async{
                 do! Async.SwitchToContext syncContext
                 if hideEditor && notNull seffWindow then seffWindow.Hide()
-                if enableRedraw && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                
-                let res = f()
-                if enableRedraw && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+                if ensureRedrawEnabled && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                
+                let res = func()
+                if ensureRedrawEnabled && not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
                 if hideEditor && notNull seffWindow then seffWindow.Show() 
                 return res
                 } |> Async.RunSynchronously 

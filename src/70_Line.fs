@@ -12,7 +12,8 @@ open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore 
 
-
+/// This module provides curried functions to manipulate Rhino Line structs
+/// It is NOT automatically opened.
 module Line =
     
     /// Reverse or flip  the Line (same as Line.flip)

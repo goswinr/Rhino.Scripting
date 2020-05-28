@@ -12,7 +12,10 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore 
 
 [<AutoOpen>]
+/// This module provides functions to manipulate Rhino Vector3d
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
 module ExtrasVector =
+    
     open Vec
 
     type RhinoScriptSyntax with
@@ -24,9 +27,9 @@ module ExtrasVector =
             let dot = v * plane.XAxis 
             let ang = acos dot  |> toDegrees
             if v*plane.YAxis < 0.0 then -ang else ang
-
-        ///projects to plane an retuns angle in degrees in plane betwen 0 and 360
-        [<Extension>]        
+        
+        [<Extension>] 
+        ///projects to plane an retuns angle in degrees in plane betwen 0 and 360               
         static member AngleInPlane360( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -34,6 +37,7 @@ module ExtrasVector =
             if v*plane.YAxis < 0.0 then 360.0-ang else ang
 
         [<Extension>]
+        /// Draws a line with a Curve Arrows
         static member DrawVector(   vector:Vector3d, 
                                     [<OPT;DEF(Point3d())>]fromPoint:Point3d, 
                                     [<OPT;DEF("")>]layer:string ) : unit  = 
@@ -43,6 +47,7 @@ module ExtrasVector =
          
     
         [<Extension>]
+        /// Draws the axes of a plane and adds TextDots to lable them.
         static member DrawPlane(    pl:Plane,
                                     [<OPT;DEF(1000.0)>]scale:float,
                                     [<OPT;DEF("")>]suffixInDot:string,
@@ -59,18 +64,23 @@ module ExtrasVector =
        
 
         [<Extension>]
-        static member DistPt(from:Point3d, dir:Point3d, distance:float) : Point3d  =
-            let v = dir - from
+        /// retuns a point that is at a given distance from a point in the direction of another point. 
+        static member DistPt(fromPt:Point3d, dirPt:Point3d, distance:float) : Point3d  =
+            let v = dirPt - fromPt
             let sc = distance/v.Length
-            from + v*sc
+            fromPt + v*sc
     
-        [<Extension>] //TODO add xml doc
-        static member DivPt(from:Point3d, dir:Point3d, [<OPT;DEF(0.5)>]rel:float) : Point3d  =
-            let v = dir - from
-            from + v*rel
+        [<Extension>] 
+        /// Retuns a Point by evaluation a line between two point with a normalized patrameter.
+        /// e.g. rel=0.5 will return the middle point, rel=1.0 the endPoint
+        /// if the rel parameter is omitted it is set to 0.5
+        static member DivPt(fromPt:Point3d, toPt:Point3d, [<OPT;DEF(0.5)>]rel:float) : Point3d  =
+            let v = toPt - fromPt
+            fromPt + v*rel
         
 
         [<Extension>]
+        /// returns the averge of many points
         static member MeanPoint(pts:Point3d seq) : Point3d  =
             let mutable p = Point3d.Origin
             let mutable k = 0.0
@@ -80,7 +90,10 @@ module ExtrasVector =
             p/k
 
         [<Extension>]
-        ///considers current order of points too, counterclockwise in xy plane is z        
+        /// Finds the mean normal of many points.
+        /// It finds the center point and then takes corossproducts iterating all points in pairs of two.
+        /// The first two points define the orientation of the normal.
+        /// Considers current order of points too, counterclockwise in xy plane is z        
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
             let k = Seq.length pts
             if k < 2 then 
@@ -91,17 +104,18 @@ module ExtrasVector =
                 let v= Vector3d.CrossProduct(b, a)
                 if v.IsTiny() then failwithf "NormalOfPoints: three points are in a line  %s" pts.ToNiceString
                 else
-                    v.UnitizedUnchecked
+                    v.Unitized
             else
                 let cen = RhinoScriptSyntax.MeanPoint(pts)
                 let mutable v = Vector3d.Zero
                 for t, n in Seq.thisNext pts do
                     let a = t-cen
                     let b = n-cen
-                    v <- v + Vector3d.CrossProduct(a, b)                
+                    let x = Vector3d.CrossProduct(a, b)  |> Vec.matchOrientation v
+                    v <- v + x              
                 if v.IsTiny() then failwithf "NormalOfPoints: points are in a line  %s"  pts.ToNiceString
                 else
-                    v.UnitizedUnchecked
+                    v.Unitized
 
         [<Extension>]     
         /// Calculates the intersection of a finite line with a triangle (without using Rhinocommon) 

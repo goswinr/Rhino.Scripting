@@ -9,6 +9,9 @@ open System.Runtime.CompilerServices
 
 
 [<AutoOpen>]
+/// This module provides  type extensions for Points , Vector,  Lines
+/// Mostly for pretty printing and coneversion to other types
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
 module TypeExtensionsRhino =  
     open Rhino.Geometry
     open FsEx
@@ -61,12 +64,15 @@ module TypeExtensionsRhino =
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
         
         [<Extension>] 
-        ///Unitizes the vector , checks input length
-        member v.Unitized = let l = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in (if l > 1e-9 then v * (1./l) else failwithf "v.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString)
+        ///Unitizes the vector , checks input length to be longer than  1e-9 units
+        member v.Unitized = 
+            let len = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) // see Vec.unitze too
+            if len > 1e-9 then v * (1./len) 
+            else failwithf "v.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString
         
-        [<Extension>] 
-        ///Unitizes the vector , fails if input is of zero length
-        member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
+        //[<Extension>] 
+        //Unitizes the vector , fails if input is of zero length
+        //member inline v.UnitizedUnchecked = let f = 1. / sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) in Vector3d(v.X*f, v.Y*f, v.Z*f)
 
 
     type Vector3f with  
@@ -96,11 +102,11 @@ module TypeExtensionsRhino =
         member ln.Mid =  (ln.From + ln.To) * 0.5
 
              
-
+    (*
     type Mesh with 
-
         [<Extension>]
-        static member join (meshes:Mesh seq) : Mesh = 
+        static member join (meshes:Mesh seq) : Mesh =  // use rs.JoinMeshes overload
             let j = new Mesh()
             j.Append(meshes)
             j
+        *)

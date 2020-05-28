@@ -211,6 +211,15 @@ module ExtensionsMesh =
         let face = mesh.ClosestPoint(point, pt, maxdistance)
         face>=0
 
+    
+    [<Extension>]
+    ///<summary>Joins two or or more mesh objects together</summary>
+    ///<param name="meshes">(Mesh seq) Mesh objects</param>
+    ///<returns>(Mesh) newly created Mesh</returns>
+    static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
+        let joinedmesh = new Mesh()
+        joinedmesh.Append(meshes)
+        joinedmesh
 
     [<Extension>]
     ///<summary>Joins two or or more mesh objects together</summary>

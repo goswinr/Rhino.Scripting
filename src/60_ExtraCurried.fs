@@ -11,7 +11,9 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 
 [<AutoOpen>] // I think it is OK to auto open this module
-module Curried =
+/// This module provides curried F# functions for easy use with pipeline operator |>
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+module ExtraCurried =
 
   ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
   let print x = RhinoScriptSyntax.Print x 

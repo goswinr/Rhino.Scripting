@@ -71,7 +71,7 @@
     <Compile Include="RhinoScriptSyntax/UserInterface.fs" />
     <Compile Include="RhinoScriptSyntax/Utility.fs" />
     <Compile Include="RhinoScriptSyntax/View.fs" />
-    <Compile Include="60_Curried.fs" />
+    <Compile Include="60_ExtraCurried.fs" />
     <Compile Include="70_Vec.fs" />
     <Compile Include="70_Line.fs" />
     <Compile Include="71_Pnt.fs" />
