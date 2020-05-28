@@ -46,8 +46,7 @@ type Synchronisation private () =
                     |>> RhinoApp.WriteLine 
                     |> printfn "%s"
     
-    do
-        init()
+    //do init() // never called sinec sttic class only
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin      
@@ -59,8 +58,8 @@ type Synchronisation private () =
     ///the Assembly currently running Seff Editor Window
     static member SeffRhinoAssembly = seffAssembly
 
-    //set up Sync Context and Refrence to Seff Window via reflection on Seff Plugin
-    //static member Initialize() = init() // not needed ?
+    ///set up Sync Context and Refrence to Seff Window via reflection on Seff Plugin
+    static member Initialize() = init() // called in ActiveDocument module
 
     ///Evaluates a function on UI Thread. Optionally ensures that redraw is enabled . Optionally hides Seff editor window if it exists. 
     static member DoSync ensureRedrawEnabled hideEditor (func:unit->'T): 'T =

@@ -54,6 +54,8 @@ module ActiceDocument =
     
     do
         if HostUtils.RunningInRhino then
+            Synchronisation.Initialize() //delared in Synchronisation static 
+            
             let setup() = 
                 // keep the reference to the active Document (3d file ) updated.
                 Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)
@@ -64,7 +66,7 @@ module ActiceDocument =
                 //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwithf "Esc pressed") 
                 RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
                 
-            Synchronisation.Initialize()
+            
             if RhinoApp.InvokeRequired then 
                 if isNull Synchronisation.SyncContext then                    
                     "Synchronisation.syncContext could not be set via reflection.\r\n"+
