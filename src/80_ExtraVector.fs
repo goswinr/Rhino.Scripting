@@ -111,7 +111,7 @@ module ExtrasVector =
                 for t, n in Seq.thisNext pts do
                     let a = t-cen
                     let b = n-cen
-                    let x = Vector3d.CrossProduct(a, b)  |> Vec.matchOrientation v
+                    let x = Vector3d.CrossProduct(a, b)  |> Vec.matchOrientation v // TODO do this matching?
                     v <- v + x              
                 if v.IsTiny() then failwithf "NormalOfPoints: points are in a line  %s"  pts.ToNiceString
                 else
@@ -141,14 +141,19 @@ module ExtrasVector =
                     Some (q1 + t * (q2-q1))
                 else None
             else None
-
-        ///Auto detects if given points are from a closed polyline (first point = last point) and loops them
-        ///Distance must have exact length, be singelton or empty seq
-        [<Extension>] //TODO docstring
+        
+        /// Offsets a Polyline in 3D space by finding th local offest in each corner.
+        /// Offset distances can vary per segment, Positive distance is offset inwards, negative outwards.
+        /// Normal distances define a perpendicular offset at each corner.
+        /// Auto detects if given points are from a closed polyline (first point = last point) and loops them
+        /// Distances Sequence  must have exact count , be a singelton ( for repeating) or empty seq ( for ignoring)
+        /// Auto detects points from closed polylines and loops them
+        [<Extension>] 
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistances: float seq, 
                                         [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
-                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  =                                         
+                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  =       
+                                        
             let offDists0  = Array.ofSeq offsetDistances           
             let normDists0 = Array.ofSeq (normalDistances |? Seq.empty<float> )
             let pointk = points.Count
@@ -262,16 +267,22 @@ module ExtrasVector =
                         Pts.[i] <- points.[i] + (nv + pv)*0.5                                            
                 if lastIsFirst then Pts.[lastIndex] <- Pts.[0]
                 Pts
-
+        
+        
         [<Extension>]
-        ///auto detects points from closed polylines and loops them
+        /// Offsets a Polyline in 3D space by finding th local offest in each corner.
+        /// Positive distance is offset inwards, negative outwards.
+        /// Normal distances define a perpendicular offset at each corner.
+        /// Auto detects if given points are from a closed polyline (first point = last point) and loops them
+        /// Auto detects points from closed polylines and loops them
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistance: float, 
                                         [<OPT;DEF(0.0)>]normalDistance: float ,
                                         [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  = 
+
             if normalDistance = 0.0 then RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[]              , loop)
             else                         RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[normalDistance], loop)
-                                        
+                                     
         
 
 
