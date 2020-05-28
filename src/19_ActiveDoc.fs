@@ -13,6 +13,8 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 
 
 [<AutoOpen>]
+/// Contains 'Doc' the active document, and 'Ot' the current Object Table
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
 module ActiceDocument =
     
     /// The current active Rhino document (= the file currently open)
@@ -20,7 +22,7 @@ module ActiceDocument =
         if HostUtils.RunningInRhino then 
             Rhino.RhinoDoc.ActiveDoc 
         else 
-            failwith "failed to find the active Rhino document, is this dll running inside Rhino? " 
+            failwith "failed to find the active Rhino document, is this dll running outside of  Rhino? " 
     
     /// Object Table of the current active Rhino documents
     let Ot = Doc.Objects
@@ -38,8 +40,8 @@ module ActiceDocument =
         if g = Guid.Empty then "-Guid.Empty-"
         else
             let o = Doc.Objects.FindId(g) 
-            if isNull o then sprintf "Guid %A (not a Rhino Object)" g
-            else o.ShortDescription(false)
+            if isNull o then sprintf "(Guid not a Rhino Object): %A" g
+            else sprintf "%s: %A" (o.ShortDescription(false)) g
 
     /// So that python range expressions dont need top be translated to F#
     let internal range(l) = seq{0..(l-1)} 

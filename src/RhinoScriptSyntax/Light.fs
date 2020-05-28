@@ -9,6 +9,8 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
  
 [<AutoOpen>]
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsLight =
 
   //[<Extension>] //Error 3246
@@ -208,7 +210,7 @@ module ExtensionsLight =
     ///<returns>(bool) True or False</returns>
     static member IsLightReference(objectId:Guid) : bool =
         let light = Doc.Lights.FindId(objectId)
-        if isNull light then failwithf "IsLightReference light %A (a %s) not found" objectId (rhType objectId)
+        if isNull light then failwithf "IsLightReference light (a %s) not found" (rhType objectId)
         light.IsReference
 
 

@@ -9,6 +9,8 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
  
 [<AutoOpen>]
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsUserdata =
 
   //[<Extension>] //Error 3246

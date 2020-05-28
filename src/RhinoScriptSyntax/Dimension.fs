@@ -9,6 +9,8 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsDimension =
 
   //[<Extension>] //Error 3246
@@ -814,7 +816,7 @@ module ExtensionsDimension =
                 if not <| Doc.Objects.Replace(objectId,g) then failwithf "get LeaderText: Objects.Replace(objectId,g) failed. objectId:'%A'" objectId                
                 annotationObject.CommitChanges()|> ignore
                 Doc.Views.Redraw()
-            | _ -> failwithf "set LeaderText failed. objectId:'%A' of type %s" objectId (rhType objectId)
+            | _ -> failwithf "set LeaderText failed for  %s"  (rhType objectId)
     [<Extension>]
     ///<summary>Modifies the text string of multiple dimension leader objects</summary>
     ///<param name="objectsIds">(Guid seq) The objects's identifiers</param>

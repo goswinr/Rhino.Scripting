@@ -70,6 +70,7 @@ type RhinoScriptSyntax private () =
     static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
         let formatRhinoObject (o:obj)  = 
             match o with
+            | :? Guid       as x -> Some (rhType x)
             | :? Point3d    as x -> Some x.ToNiceString
             | :? Vector3d   as x -> Some x.ToNiceString
             | :? Line       as x -> Some x.ToNiceString        

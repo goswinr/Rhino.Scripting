@@ -10,6 +10,8 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsView =
   
   //[<Extension>] //Error 3246
@@ -159,7 +161,7 @@ module ExtensionsView =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
             try Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  failwithf "Rhino.Scripting: Set DetailLock failed. detailId is a %s '%A' lock:'%A'" (rhType detailId) detailId lock
+            with _ ->  failwithf "Rhino.Scripting: Set DetailLock failed. detailId is a %s  lock:'%A'" (rhType detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore

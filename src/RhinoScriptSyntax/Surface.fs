@@ -12,6 +12,8 @@ open FsEx.SaveIgnore
 
 
 [<AutoOpen>]
+/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsSurface =
 
   //[<Extension>] //Error 3246
@@ -2515,7 +2517,7 @@ module ExtensionsSurface =
                 | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
                 | :? Point as g -> unroll.AddFollowingGeometry(g)
                 | :? TextDot as g -> unroll.AddFollowingGeometry(g)
-                | _ -> failwithf "UnrollSurface: cannot add %A (a %s) as following Geometry" objectId (rhType objectId)
+                | _ -> failwithf "UnrollSurface: cannot add (a %s) as following Geometry" (rhType objectId)
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then failwithf "UnrollSurface: failed on  %A " surfaceId
