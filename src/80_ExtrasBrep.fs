@@ -1,11 +1,10 @@
-/// for extra functions on Breps and Curves
 namespace Rhino.Scripting.Extra
 
 open FsEx
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.Modules
+open Rhino.Scripting.ActiceDocument
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.Scripting
 //open Rhino.Scripting.Vec
