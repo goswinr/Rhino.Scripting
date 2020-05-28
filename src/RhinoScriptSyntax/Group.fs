@@ -8,7 +8,7 @@ open FsEx.SaveIgnore
 
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namspace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsGroup =
   

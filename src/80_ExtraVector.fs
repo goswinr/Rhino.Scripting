@@ -13,7 +13,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 /// This module provides functions to manipulate Rhino Vector3d
-/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namspace is opened.
 module ExtrasVector =
     
     open Vec

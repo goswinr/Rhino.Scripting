@@ -14,7 +14,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 /// This module provides functions to create or manipulate Rhino Breps/ Polysurface 
-/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namspace is opened.
 module ExtrasBrep = 
    
   type RhinoScriptSyntax with // TODO chnage to Brep type extensions ??!!

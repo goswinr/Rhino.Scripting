@@ -13,8 +13,8 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 
 
 [<AutoOpen>]
-/// Contains 'Doc' the active document, and 'Ot' the current Object Table
-/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// This Module contains 'Doc' the active document, and 'Ot' the current Object Table
+/// This module is automatically opened when Rhino.Scripting namspace is opened.
 module ActiceDocument =
     
     /// The current active Rhino document (= the file currently open)

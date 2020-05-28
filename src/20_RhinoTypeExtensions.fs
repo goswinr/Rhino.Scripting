@@ -11,7 +11,7 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 /// This module provides  type extensions for Points , Vector,  Lines
 /// Mostly for pretty printing and coneversion to other types
-/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namspace is opened.
 module TypeExtensionsRhino =  
     open Rhino.Geometry
     open FsEx

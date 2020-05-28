@@ -12,7 +12,7 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 
 [<AutoOpen>] // I think it is OK to auto open this module
 /// This module provides curried F# functions for easy use with pipeline operator |>
-/// This module is automatically opened when Rhino.Scripting Namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namspace is opened.
 module ExtraCurried =
 
   ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
