@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+namespace Rhino.Scripting.Modules
 
 open FsEx
 open System

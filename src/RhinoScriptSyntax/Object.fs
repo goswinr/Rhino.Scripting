@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+namespace Rhino.Scripting.Modules
 
 open FsEx
 open System
@@ -6,7 +6,7 @@ open Rhino
 open Rhino.Geometry
 open FsEx.UtilMath
 open FsEx.CompareOperators
-open Rhino.Scripting.ActiceDocument
+
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
 

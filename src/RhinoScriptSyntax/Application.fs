@@ -1,9 +1,9 @@
-namespace Rhino.Scripting
+namespace Rhino.Scripting.Modules
 
 open System
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.ActiceDocument
+
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.ApplicationSettings
 open FsEx.SaveIgnore
