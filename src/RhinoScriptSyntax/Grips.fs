@@ -61,7 +61,7 @@ module ExtensionsGrips =
                 Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
 
             |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation. DoSync true true get
+        Synchronisation.DoSync true true get
 
 
 
@@ -97,7 +97,7 @@ module ExtensionsGrips =
                 if select then Doc.Views.Redraw()
             if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
             rc
-        Synchronisation. DoSync true true get
+        Synchronisation.DoSync true true get
 
 
 

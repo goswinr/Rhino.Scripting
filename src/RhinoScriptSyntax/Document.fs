@@ -104,7 +104,8 @@ module ExtensionsDocument =
 
 
     [<Extension>]
-    ///<summary>Enables or disables screen redrawing</summary>
+    ///<summary>Enables or disables screen redrawing
+    ///All UI interaccing functions of Rhino.Scripting automaticaly enable and disable redraw.</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing</returns>

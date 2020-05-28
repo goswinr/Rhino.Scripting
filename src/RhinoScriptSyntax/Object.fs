@@ -1334,7 +1334,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
     ///<returns>(unit) void, nothing</returns>
     static member SelectObject(objectId:Guid) : unit =
-        Synchronisation. DoSync false false (fun () -> 
+        Synchronisation.DoSync false false (fun () -> 
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if 0 = rhobj.Select(true) then 
                 let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
@@ -1356,7 +1356,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
     ///<returns>(unit) void, nothing</returns>
     static member SelectObject(objectIds:Guid seq) : unit =  //PLURAL
-        Synchronisation. DoSync false false (fun () ->             
+        Synchronisation.DoSync false false (fun () ->             
             for objectId in objectIds do
                 let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 if 0 = rhobj.Select(true) then 

@@ -241,7 +241,7 @@ module ExtensionsApplication =
             commandSerialNumbers <- None
             if start<>ende then  commandSerialNumbers <- Some(start, ende)
             rc
-        Synchronisation. DoSync false false getKeepEditor
+        Synchronisation.DoSync false false getKeepEditor
 
 
     [<Extension>]
