@@ -22,30 +22,22 @@
   
   <ItemGroup>
     <PackageReference Include="ini-parser" Version="2.5.2" />
-    <PackageReference Update="FSharp.Core" Version="4.7.1" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries-->
+ 
     
     <Reference Include="RhinoCommon">
       <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>  
 
-    <Reference Include="FsEx">
-      <HintPath>..\..\FsEx\src\bin\Debug\net45\FsEx.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-
+    <ProjectReference Include="D:\Git\FsEx\src\FsEx.fsproj" />      <!-- take from https://github.com/goswinr/FsEx -->   
 
     <Reference Include="WindowsBase" />  
     <Reference Include="PresentationCore" />  
     <Reference Include="PresentationFramework" />
-    <Reference Include="System.Windows.Forms" /><!--to get screen resolution-->
-    
+    <Reference Include="System.Windows.Forms" /><!--to get screen resolution-->   
 
   </ItemGroup>
-
 
 
   <ItemGroup>
