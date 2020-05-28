@@ -735,7 +735,7 @@ module ExtensionsSelection =
     ///    Include lights in the potential set</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips in the potential set</param>
-    ///<returns>(Guid) identifier of the object on success</returns>
+    ///<returns>(Guid) identifier of the object</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
@@ -762,7 +762,7 @@ module ExtensionsSelection =
     ///    Include lights in the potential set</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips in the potential set</param>
-    ///<returns>(Guid) identifier of the object on success</returns>
+    ///<returns>(Guid) identifier of the object</returns>
     static member NextObject( objectId:Guid,
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
@@ -822,7 +822,7 @@ module ExtensionsSelection =
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects in the group on success</returns>
+    ///<returns>(Guid ResizeArray) identifiers for objects in the group</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let groupinstance = Doc.Groups.FindName(groupName)
         if isNull groupinstance  then failwithf "%s does not exist in GroupTable" groupName
@@ -1042,7 +1042,7 @@ module ExtensionsSelection =
     ///    Select picked objects</param>
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
     ///    If False, then a crossing window selection is performed</param>
-    ///<returns>(Guid ResizeArray) identifiers of selected objects on success</returns>
+    ///<returns>(Guid ResizeArray) identifiers of selected objects</returns>
     static member WindowPick( corner1:Point3d,
                               corner2:Point3d,
                               [<OPT;DEF(null:string)>]view:string,

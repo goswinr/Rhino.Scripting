@@ -130,7 +130,7 @@ module ExtensionsGrips =
     ///    Direction to get the next grip index (0= U, 1= V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    If True, the next grip index found will be selected</param>
-    ///<returns>(int) index of the next grip on success</returns>
+    ///<returns>(int) index of the next grip</returns>
     static member NextObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int ,
@@ -258,7 +258,7 @@ module ExtensionsGrips =
     ///    Direction to get the next grip index (0= U, 1= V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    If True, the next grip index found will be selected</param>
-    ///<returns>(int) index of the next grip on success</returns>
+    ///<returns>(int) index of the next grip</returns>
     static member PrevObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int,
@@ -271,7 +271,7 @@ module ExtensionsGrips =
     [<Extension>]
     ///<summary>Returns a list of grip indices indentifying an object's selected grips</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(int ResizeArray) list of indices on success</returns>
+    ///<returns>(int ResizeArray) list of indices</returns>
     static member SelectedObjectGrips(objectId:Guid) : int ResizeArray =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = ResizeArray()
@@ -312,7 +312,7 @@ module ExtensionsGrips =
     ///<summary>Selects an object's grips. If the object's grips are not turned on,
     ///    they will not be selected</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(int) Number of grips selected on success</returns>
+    ///<returns>(int) Number of grips selected</returns>
     static member SelectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
@@ -354,7 +354,7 @@ module ExtensionsGrips =
     [<Extension>]
     ///<summary>Unselects an object's grips. Note, the grips will not be turned off</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(int) Number of grips unselected on success</returns>
+    ///<returns>(int) Number of grips unselected</returns>
     static member UnselectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId

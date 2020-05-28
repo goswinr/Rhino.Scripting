@@ -31,7 +31,7 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) The plane to evaluate</param>
     ///<param name="u">(float) U parameter to evaluate</param>
     ///<param name="v">(float) V parameter to evaluate</param>
-    ///<returns>(Point3d) Point3d on success</returns>
+    ///<returns>(Point3d) Point3d</returns>
     static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         plane.PointAt(u, v)
@@ -42,7 +42,7 @@ module ExtensionsPlane =
     ///<param name="plane1">(Plane) The 1st plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd plane to intersect</param>
     ///<param name="plane3">(Plane) The 3rd plane to intersect</param>
-    ///<returns>(Point3d) the intersection point between the 3 planes on success</returns>
+    ///<returns>(Point3d) the intersection point between the 3 planes</returns>
     static member IntersectPlanes( plane1:Plane,
                                    plane2:Plane,
                                    plane3:Plane) : Point3d =
@@ -288,7 +288,7 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) Plane to rotate</param>
     ///<param name="angleDegrees">(float) Rotation angle in degrees</param>
     ///<param name="axis">(Vector3d) Axis of rotation or list of three numbers</param>
-    ///<returns>(Plane) rotated plane on success</returns>
+    ///<returns>(Plane) rotated plane</returns>
     static member RotatePlane( plane:Plane,
                                angleDegrees:float,
                                axis:Vector3d) : Plane =

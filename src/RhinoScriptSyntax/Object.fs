@@ -552,7 +552,7 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Returns all of the group names that an object is assigned to</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(string ResizeArray) list of group names on success</returns>
+    ///<returns>(string ResizeArray) list of group names</returns>
     static member ObjectGroups(objectId:Guid) : string ResizeArray =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if rhinoobject.GroupCount<1 then resizeArray { () }

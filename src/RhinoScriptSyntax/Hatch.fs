@@ -59,7 +59,7 @@ module ExtensionsHatch =
     ///    Hatch pattern rotation angle in degrees</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    Tolerance for hatch fills</param>
-    ///<returns>(Guid ResizeArray) identifiers of the newly created hatch on success</returns>
+    ///<returns>(Guid ResizeArray) identifiers of the newly created hatch</returns>
     static member AddHatches( curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
@@ -97,7 +97,7 @@ module ExtensionsHatch =
     ///    Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
     ///    Hatch pattern rotation angle in degrees</param>
-    ///<returns>(Guid) identifier of the newly created hatch on success</returns>
+    ///<returns>(Guid) identifier of the newly created hatch</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,

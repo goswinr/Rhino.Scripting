@@ -77,7 +77,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a closed, planar curve</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    If True, delete the input curve defined by objectId</param>
-    ///<returns>(Guid) id of the new mesh on success</returns>
+    ///<returns>(Guid) id of the new mesh</returns>
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
         let tolerance = Doc.ModelAbsoluteTolerance
@@ -122,7 +122,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Creates curves that duplicates a mesh border</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
-    ///<returns>(Guid ResizeArray) list of curve ids on success</returns>
+    ///<returns>(Guid ResizeArray) list of curve ids</returns>
     static member DuplicateMeshBorder(meshId:Guid) : Guid ResizeArray =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let polylines = mesh.GetNakedEdges()
@@ -226,7 +226,7 @@ module ExtensionsMesh =
     ///<param name="objectIds">(Guid seq) Identifiers of two or more mesh objects</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input after joining</param>
-    ///<returns>(Guid) identifier of newly created mesh on success</returns>
+    ///<returns>(Guid) identifier of newly created mesh</returns>
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let meshes =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let joinedmesh = new Mesh()
@@ -298,7 +298,7 @@ module ExtensionsMesh =
     ///<param name="input1">(Guid seq) Meshes to intersect</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete the input meshes</param>
-    ///<returns>(Guid ResizeArray) identifiers of new meshes on success</returns>
+    ///<returns>(Guid ResizeArray) identifiers of new meshes</returns>
     static member MeshBooleanIntersection( input0:Guid seq,
                                            input1:Guid seq,
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
@@ -325,7 +325,7 @@ module ExtensionsMesh =
     ///<param name="input1">(Guid seq) Meshes to split with</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete the input meshes</param>
-    ///<returns>(Guid ResizeArray) identifiers of new meshes on success</returns>
+    ///<returns>(Guid ResizeArray) identifiers of new meshes</returns>
     static member MeshBooleanSplit( input0:Guid seq,
                                     input1:Guid seq,
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
@@ -596,7 +596,7 @@ module ExtensionsMesh =
     ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
     ///<param name="view">(string) Optional, Default Value: <c>Top View</c>
     ///    View to use for outline direction</param>
-    ///<returns>(Guid ResizeArray) polyline curve identifiers on success</returns>
+    ///<returns>(Guid ResizeArray) polyline curve identifiers</returns>
     static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid ResizeArray =
         let  meshes =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = ResizeArray()
@@ -655,7 +655,7 @@ module ExtensionsMesh =
     ///    represented by a trimmed plane</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input object</param>
-    ///<returns>(Guid ResizeArray) identifiers for the new breps on success</returns>
+    ///<returns>(Guid ResizeArray) identifiers for the new breps</returns>
     static member MeshToNurb( objectId:Guid,
                               [<OPT;DEF(true)>]trimmedTriangles:bool,
                               [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
@@ -723,7 +723,7 @@ module ExtensionsMesh =
     ///<summary>Returns the mesh faces that share a specified mesh vertex</summary>
     ///<param name="meshId">(Guid) Identifier of a mesh object</param>
     ///<param name="vertexIndex">(int) Index of the mesh vertex to find faces for</param>
-    ///<returns>(int array) face indices on success</returns>
+    ///<returns>(int array) face indices</returns>
     static member MeshVertexFaces(meshId:Guid, vertexIndex:int) : int array =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         mesh.Vertices.GetVertexFaces(vertexIndex)
@@ -787,7 +787,7 @@ module ExtensionsMesh =
     ///    the polyline. Then it "connects the points" to create a polyline on the mesh</summary>
     ///<param name="meshId">(Guid) Identifier of mesh that pulls</param>
     ///<param name="curveId">(Guid) Identifier of curve to pull</param>
-    ///<returns>(Guid) identifier new curve on success</returns>
+    ///<returns>(Guid) identifier new curve</returns>
     static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)

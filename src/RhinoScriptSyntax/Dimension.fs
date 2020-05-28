@@ -23,7 +23,7 @@ module ExtensionsDimension =
     ///<param name="pointOnDimensionLine">(Point3d) Location point of dimension line</param>
     ///<param name="style">(string) Optional, Default Value: <c>""</c>
     ///    Name of dimension style</param>
-    ///<returns>(Guid) identifier of new dimension on success</returns>
+    ///<returns>(Guid) identifier of new dimension</returns>
     static member AddAlignedDimension(startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF("")>]style:string) : Guid =
         let mutable start = startPoint
         let mutable ende = endPoint
@@ -67,7 +67,7 @@ module ExtensionsDimension =
     ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
     ///    If points will be projected to this plane</param>
-    ///<returns>(Guid) identifier of the new leader on success</returns>
+    ///<returns>(Guid) identifier of the new leader</returns>
     static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points2d = ResizeArray()
         let plane0 =
@@ -98,7 +98,7 @@ module ExtensionsDimension =
     ///<param name="endPoint">(Point3d) The offset, or second point of the dimension</param>
     ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line</param>
     ///<param name="plane">(Plane) Optional, The plane on which the dimension will lie. The default is World XY Plane</param>
-    ///<returns>(Guid) identifier of the new object on success</returns>
+    ///<returns>(Guid) identifier of the new object</returns>
     static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d,

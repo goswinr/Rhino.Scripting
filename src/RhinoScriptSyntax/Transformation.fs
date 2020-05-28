@@ -160,7 +160,7 @@ module ExtensionsTransformation =
     ///<summary>Multiplies two transformation matrices, where result = xform1 * xform2</summary>
     ///<param name="xform1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply</param>
     ///<param name="xform2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply</param>
-    ///<returns>(Transform) result transformation on success</returns>
+    ///<returns>(Transform) result transformation</returns>
     static member XformMultiply(xform1:Transform, xform2:Transform) : Transform =
         //xform1 = RhinoScriptSyntax.Coercexform(xform1)
         //xform2 = RhinoScriptSyntax.Coercexform(xform2)
@@ -255,7 +255,7 @@ module ExtensionsTransformation =
     ///<summary>Creates a scale transformation</summary>
     ///<param name="scale">(float*float*float) list of 3 numbers for x , y andf z direction</param>
     ///<param name="point">(Point3d) Optional, Center of scale. If omitted, world origin is used</param>
-    ///<returns>(Transform) The 4x4 transformation matrix on success</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformScale(scale:float*float*float, [<OPT;DEF(Point3d())>]point:Point3d) : Transform =
         let plane = Plane(point, Vector3d.ZAxis);
         let xf = Transform.Scale(plane, scale|> t1, scale|> t2, t3 scale)
@@ -271,7 +271,7 @@ module ExtensionsTransformation =
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
     ///    If False, point is in client-area coordinates. If True,
     ///    point is in screen-area coordinates</param>
-    ///<returns>(Point3d) on success</returns>
+    ///<returns>(Point3d) The transformedPoint</returns>
     static member XformScreenToWorld( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
@@ -294,7 +294,7 @@ module ExtensionsTransformation =
     ///<param name="x">(Vector3d) X axis scale vecto</param>
     ///<param name="y">(Vector3d) Y axis scale vecto</param>
     ///<param name="z">(Vector3d) Z axis scale vecto</param>
-    ///<returns>(Transform) The 4x4 transformation matrix on success</returns>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformShear( plane:Plane,
                               x:Vector3d,
                               y:Vector3d,
@@ -332,7 +332,7 @@ module ExtensionsTransformation =
     ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
     ///    If False, the function returns the results as
     ///    client-area coordinates. If True, the result is in screen-area coordinates</param>
-    ///<returns>(Point2d) 2D point on success</returns>
+    ///<returns>(Point2d) 2D point</returns>
     static member XformWorldToScreen( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d =

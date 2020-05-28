@@ -24,7 +24,7 @@ module ExtensionsGeometry =
     ///<param name="vMagnitude">(float) V magnitude of the plane</param>
     ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
     ///    view is used</param>
-    ///<returns>(Guid) object identifier on success</returns>
+    ///<returns>(Guid) object identifier</returns>
     static member AddClippingPlane( plane:Plane,
                                     uMagnitude:float,
                                     vMagnitude:float,
@@ -57,7 +57,7 @@ module ExtensionsGeometry =
     ///    If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
-    ///<returns>(Guid) object identifier on success</returns>
+    ///<returns>(Guid) object identifier</returns>
     static member AddPictureFrame(  plane:Plane,
                                     filename:string,
                                     [<OPT;DEF(0.0)>]width:float,
@@ -99,7 +99,7 @@ module ExtensionsGeometry =
     ///<summary>Adds point cloud object to the document</summary>
     ///<param name="points">(Point3d array) List of values where every multiple of three represents a point</param>
     ///<param name="colors">(Drawing.Color IList) Optional, List of colors to apply to each point</param>
-    ///<returns>(Guid) identifier of point cloud on success</returns>
+    ///<returns>(Guid) identifier of point cloud</returns>
     static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color IList)>]colors:Drawing.Color IList) : Guid =
         if notNull colors && Seq.length(colors) = Seq.length(points) then
             let pc = new PointCloud()
@@ -120,7 +120,7 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Adds one or more point objects to the document</summary>
     ///<param name="points">(Point3d seq) List of points</param>
-    ///<returns>(Guid ResizeArray) List of identifiers of the new objects on success</returns>
+    ///<returns>(Guid ResizeArray) List of identifiers of the new objects</returns>
     static member AddPoints(points:Point3d seq) : Guid ResizeArray =
         let rc = resizeArray{ for point in points do yield Doc.Objects.AddPoint(point) }
         Doc.Views.Redraw()
@@ -143,7 +143,7 @@ module ExtensionsGeometry =
     ///    3 = bold and italic</param>
     ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte. Optional, Default Value: <c>TextHorizontalAlignment.Center</c></param>
     ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte. Optional, Default Value: <c>TextVerticalAlignment.Middle</c></param>
-    ///<returns>(Guid) identifier for the object that was added to the doc on success</returns>
+    ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddText(  text:string,
                             plane:Plane,
                             [<OPT;DEF(1.0)>]height:float,

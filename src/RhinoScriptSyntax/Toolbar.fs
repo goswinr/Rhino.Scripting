@@ -167,7 +167,7 @@ module ExtensionsToolbar =
     [<Extension>]
     ///<summary>Returns full path to a currently open toolbar collection file</summary>
     ///<param name="name">(string) Name of currently open toolbar collection</param>
-    ///<returns>(string) full path on success</returns>
+    ///<returns>(string) the full path</returns>
     static member ToolbarCollectionPath(name:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then  tbfile.Path
@@ -179,7 +179,7 @@ module ExtensionsToolbar =
     ///<param name="name">(string) Name of currently open toolbar collection</param>
     ///<param name="groups">(bool) Optional, Default Value: <c>false</c>
     ///    If true, return the number of toolbar groups in the file</param>
-    ///<returns>(int) number of toolbars on success</returns>
+    ///<returns>(int) number of toolbars</returns>
     static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
@@ -195,7 +195,7 @@ module ExtensionsToolbar =
     ///<param name="name">(string) Name of currently open toolbar collection</param>
     ///<param name="groups">(bool) Optional, Default Value: <c>false</c>
     ///    If true, return the names of toolbar groups in the file</param>
-    ///<returns>(string ResizeArray) names of all toolbars (or toolbar groups) on success</returns>
+    ///<returns>(string ResizeArray) names of all toolbars (or toolbar groups)</returns>
     static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string ResizeArray =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         let rc = ResizeArray()

@@ -30,7 +30,7 @@ module ExtensionsView =
     ///    5 = parallel front view
     ///    6 = parallel back view
     ///    7 = perspective view</param>
-    ///<returns>(Guid) identifier of the newly created detail on success</returns>
+    ///<returns>(Guid) identifier of the newly created detail</returns>
     static member AddDetail( layoutName:string,
                              corner1:Point2d,
                              corner2:Point2d,
@@ -285,7 +285,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the plane geometry of the specified named construction plane</summary>
     ///<param name="name">(string) The name of the construction plane</param>
-    ///<returns>(Plane) a plane on success</returns>
+    ///<returns>(Plane) a plane</returns>
     static member NamedCPlane(name:string) : Plane =
         let index = Doc.NamedConstructionPlanes.Find(name)
         if index<0 then failwithf "Rhino.Scripting: NamedCPlane failed.  name:'%A'" name
@@ -716,7 +716,7 @@ module ExtensionsView =
     ///    0 = standard model views
     ///    1 = page layout views
     ///    2 = both standard and page layout views</param>
-    ///<returns>(string ResizeArray) of the view names on success</returns>
+    ///<returns>(string ResizeArray) of the view names</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then failwithf "Rhino.Scripting: ViewNames failed. viewType:'%A'" viewType
@@ -869,7 +869,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the name, or title, of a given view's identifier</summary>
     ///<param name="viewId">(Guid) The identifier of the view</param>
-    ///<returns>(string) name or title of the view on success</returns>
+    ///<returns>(string) name or title of the view</returns>
     static member ViewTitle(viewId:Guid) : string =
         let view = RhinoScriptSyntax.CoerceView(viewId)
         view.MainViewport.Name

@@ -24,7 +24,7 @@ module ExtensionsBlock =
     ///    Name of the block definition. If omitted a name will be automatically generated</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the objectIds will be deleted</param>
-    ///<returns>(string) name of new block definition on success</returns>
+    ///<returns>(string) name of new block definition</returns>
     static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
         let name = if name="" then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = Doc.InstanceDefinitions.Find(name)
@@ -199,7 +199,7 @@ module ExtensionsBlock =
     [<Extension>]
     ///<summary>Returns identifiers of the objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<returns>(Guid ResizeArray) list of identifiers on success</returns>
+    ///<returns>(Guid ResizeArray) list of identifiers</returns>
     static member BlockObjects(blockName:string) : ResizeArray<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
@@ -212,7 +212,7 @@ module ExtensionsBlock =
     ///    A linked or embedded block definition is a block definition that was
     ///    inserted from an external file</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<returns>(string) path to the linked block on success</returns>
+    ///<returns>(string) path to the linked block</returns>
     static member BlockPath(blockName:string) : string =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName
@@ -255,7 +255,7 @@ module ExtensionsBlock =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
     ///    By default nested blocks are not exploded</param>
-    ///<returns>(Guid array) identifiers for the newly exploded objects on success</returns>
+    ///<returns>(Guid array) identifiers for the newly exploded objects</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  guids = Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance= true)
@@ -268,7 +268,7 @@ module ExtensionsBlock =
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="xform">(Transform) 4x4 transformation matrix to apply</param>
-    ///<returns>(Guid) objectId for the block that was added to the doc on success</returns>
+    ///<returns>(Guid) objectId for the block that was added to the doc</returns>
     static member InsertBlock2(blockName:string, xform:Transform) : Guid =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  failwithf "%s does not exist in InstanceDefinitionsTable" blockName

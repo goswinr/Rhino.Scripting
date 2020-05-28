@@ -403,7 +403,7 @@ module ExtensionsApplication =
     ///      2. Folder's specified in Options dialog, File tab.
     ///      3. Rhino's System folders</summary>
     ///<param name="filename">(string) A short file name to search for</param>
-    ///<returns>(string) full path on success</returns>
+    ///<returns>(string) a full path</returns>
     static member FindFile(filename:string) : string =
         ApplicationSettings.FileSettings.FindFile(filename)
 

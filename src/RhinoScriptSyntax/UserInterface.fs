@@ -181,7 +181,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
-    ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box on success</returns>
+    ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(null:string)>]prompt1:string,
@@ -487,7 +487,7 @@ module ExtensionsUserinterface =
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int ResizeArray) an Option of of mesh face indices on success</returns>
+    ///<returns>(int ResizeArray) an Option of of mesh face indices</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
@@ -521,7 +521,7 @@ module ExtensionsUserinterface =
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int ResizeArray) an Option of of mesh vertex indices on success</returns>
+    ///<returns>(int ResizeArray) an Option of of mesh vertex indices</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -551,7 +551,7 @@ module ExtensionsUserinterface =
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///    Constrains the point selections to the active construction plane</param>
-    ///<returns>(Point3d option) an Option of point on success</returns>
+    ///<returns>(Point3d option) an Option of point3d</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(0.0)>]distance:float,
@@ -945,7 +945,7 @@ module ExtensionsUserinterface =
     ///<param name="values">(string seq) the corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string array option) an Option of of new values on success</returns>
+    ///<returns>(string array option) an Option of of new values</returns>
     static member PropertyListBox(  items:string IList,
                                     values:string seq,
                                     [<OPT;DEF(null:string)>]message:string,
@@ -1072,7 +1072,7 @@ module ExtensionsUserinterface =
     ///    A dialog box title</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(float option) an Option of The newly entered number on success</returns>
+    ///<returns>(float option) an Option of The newly entered number</returns>
     static member RealBox(          [<OPT;DEF("")>]message:string,
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,
                                     [<OPT;DEF("")>]title:string,

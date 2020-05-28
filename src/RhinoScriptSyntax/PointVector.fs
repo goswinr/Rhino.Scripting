@@ -98,7 +98,7 @@ module ExtensionsPointvector =
     ///<summary>Transforms a list of 3D points</summary>
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<param name="xform">(Transform) Transformation to apply</param>
-    ///<returns>(Point3d ResizeArray) transformed points on success</returns>
+    ///<returns>(Point3d ResizeArray) transformed points</returns>
     static member PointArrayTransform(points:Point3d seq, xform:Transform) : Point3d ResizeArray =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         //xform = RhinoScriptSyntax.Coercexform(xform)
@@ -210,7 +210,7 @@ module ExtensionsPointvector =
     ///<summary>Scales a 3D point by a value</summary>
     ///<param name="point">(Point3d) The point to divide</param>
     ///<param name="scale">(float) Scale factor to apply</param>
-    ///<returns>(Point3d) resulting point on success</returns>
+    ///<returns>(Point3d) resulting point</returns>
     static member PointScale(point:Point3d, scale:float) : Point3d =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         point*scale
@@ -232,7 +232,7 @@ module ExtensionsPointvector =
     ///<summary>Transforms a 3D point</summary>
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
-    ///<returns>(Point3d) transformed Point on success</returns>
+    ///<returns>(Point3d) transformed Point</returns>
     static member PointTransform(point:Point3d, xform:Transform) : Point3d =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         //xform = RhinoScriptSyntax.Coercexform(xform)
@@ -244,7 +244,7 @@ module ExtensionsPointvector =
     ///<param name="points">(Point3d seq) One or more 3D points</param>
     ///<param name="meshIds">(Guid seq) Identifiers of one or more meshes</param>
     ///<param name="direction">(Vector3d) Direction vector to project the points</param>
-    ///<returns>(Point3d array) projected points on success</returns>
+    ///<returns>(Point3d array) projected points</returns>
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
@@ -259,7 +259,7 @@ module ExtensionsPointvector =
     ///<param name="points">(Point3d seq) One or more 3D points</param>
     ///<param name="surfaceIds">(Guid seq) Identifiers of one or more surfaces/polysurfaces</param>
     ///<param name="direction">(Vector3d) Direction vector to project the points</param>
-    ///<returns>(Point3d array) projected points on success</returns>
+    ///<returns>(Point3d array) projected points</returns>
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
@@ -360,7 +360,7 @@ module ExtensionsPointvector =
     ///<summary>Divides a 3D vector by a value</summary>
     ///<param name="vector">(Vector3d) The vector to divide</param>
     ///<param name="divide">(float) A non-zero value to divide</param>
-    ///<returns>(Vector3d) resulting vector on success</returns>
+    ///<returns>(Vector3d) resulting vector</returns>
     static member VectorDivide(vector:Vector3d, divide:float) : Vector3d =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
@@ -401,7 +401,7 @@ module ExtensionsPointvector =
     [<Extension>]
     ///<summary>Reverses the direction of a 3D vector</summary>
     ///<param name="vector">(Vector3d) The vector to reverse</param>
-    ///<returns>(Vector3d) reversed vector on success</returns>
+    ///<returns>(Vector3d) reversed vector</returns>
     static member VectorReverse(vector:Vector3d) : Vector3d =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         Vector3d(-vector.X, -vector.Y, -vector.Z)
@@ -413,7 +413,7 @@ module ExtensionsPointvector =
     ///<param name="vector">(Vector3d) The vector to rotate</param>
     ///<param name="angleDegrees">(float) Rotation angle</param>
     ///<param name="axis">(Vector3d) Axis of rotation</param>
-    ///<returns>(Vector3d) rotated vector on success</returns>
+    ///<returns>(Vector3d) rotated vector</returns>
     static member VectorRotate( vector:Vector3d,
                                 angleDegrees:float,
                                 axis:Vector3d) : Vector3d =
@@ -429,7 +429,7 @@ module ExtensionsPointvector =
     ///<summary>Scales a 3-D vector</summary>
     ///<param name="vector">(Vector3d) The vector to scale</param>
     ///<param name="scale">(float) Scale factor to apply</param>
-    ///<returns>(Vector3d) resulting vector on success</returns>
+    ///<returns>(Vector3d) resulting vector</returns>
     static member VectorScale(vector:Vector3d, scale:float) : Vector3d =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         vector*scale
@@ -450,7 +450,7 @@ module ExtensionsPointvector =
     ///<summary>Transforms a 3D vector</summary>
     ///<param name="vector">(Vector3d) The vector to transform</param>
     ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
-    ///<returns>(Vector3d) transformed vector on success</returns>
+    ///<returns>(Vector3d) transformed vector</returns>
     static member VectorTransform(vector:Vector3d, xform:Transform) : Vector3d =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
         //xform = RhinoScriptSyntax.Coercexform(xform)
@@ -460,7 +460,7 @@ module ExtensionsPointvector =
     [<Extension>]
     ///<summary>Unitizes, or normalizes a 3D vector. Note, zero vectors cannot be unitized</summary>
     ///<param name="vector">(Vector3d) The vector to unitize</param>
-    ///<returns>(Vector3d) unitized vector on success</returns>
+    ///<returns>(Vector3d) unitized vector</returns>
     static member inline VectorUnitize(vector:Vector3d) : Vector3d =               
         let le = sqrt (vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z)
         if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then failwithf "VectorUnitize failed on zero length or very short Vector %s" vector.ToNiceString
