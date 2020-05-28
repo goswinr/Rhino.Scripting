@@ -34,8 +34,8 @@
 
     <Reference Include="WindowsBase" />  
     <Reference Include="PresentationCore" />  
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Windows.Forms" /><!--to get screen resolution-->   
+    <Reference Include="PresentationFramework" />    <!--WPF dlls because a refernce to seff editor window is held if available-->
+    <Reference Include="System.Windows.Forms" /> <!--to get screen resolution-->   
 
   </ItemGroup>
 
