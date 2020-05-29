@@ -49,8 +49,121 @@ rs.AddText("Hello, Seff", pl, height = 50.)
 ![Seff Editor Screenshot](img/HelloSeff.png)
 
 
-## How about the dynamic types from VBScript and Python?
+## How about the dynamic types and optional parameters from VBScript and Python?
 The RhinoScript function that take variable types of input parameters are implemented with various method overloads.
-
-## How about optional parameters?
 Many RhinoScript function have optional parameters the are also implemented as optional method parameters
+
+for example `rs.ObjectLayer` can be called in several ways:
+
+`rs.ObjectLayer(guid)` to get the layer of one object, returns a string  
+`rs.ObjectLayer(guid, string)` to set the layer of one object (fails if layer does not exist), no retun value  
+`rs.ObjectLayer(guid, string, createLayerIfMissing = true )` to set the layer of one object, and creat the layer if it does not exist yet, no retun value  
+`rs.ObjectLayer(list of guids, string)` to set the layer of several objects (fails if layer does not exist), no retun value    
+`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` to set the layer of several objects, and creat the layer if it does not exist yet , no retun value
+
+these are implemented with 3 overloads and optional parmeters:
+```fsharp
+///<summary>Returns the full layername of an object. 
+/// arent layers are separated by <c>::</c></summary>
+///<param name="objectId">(Guid) The identifier of the object</param>
+///<returns>(string) The object's current layer</returns>
+static member ObjectLayer(objectId:Guid) : string = //GET
+    let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+    let index = obj.Attributes.LayerIndex
+    Doc.Layers.[index].FullPath
+
+
+///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+///<param name="objectId">(Guid) The identifier of the object</param>
+///<param name="layer">(string) Name of an existing layer</param>
+///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+///     Set true to create Layer if it does not exist yet.</param>
+///<returns>(unit) void, nothing</returns>
+static member ObjectLayer(
+    objectId:Guid, 
+    layer:string, 
+    [<Optional;DefaultParameterValue(false)>]createLayerIfMissing:bool) : unit = 
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
+        let layerIndex =
+            if createLayerIfMissing then            
+                if layer="" then 
+                    Doc.Layers.CurrentLayerIndex
+                else
+                    let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+                    if i <> RhinoMath.UnsetIntIndex then 
+                        i
+                    else
+                        let names = layer.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
+                        let mutable lastparentindex =  -1
+                        let mutable lastparent      =  null : DocObjects.Layer
+                        for idx, name in Seq.indexed(names) do
+                            let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                            if idx > 0 && lastparentindex <> -1 then
+                                lastparent <- Doc.Layers.[lastparentindex]
+                            if notNull lastparent then
+                                layer.ParentLayerId <- lastparent.Id
+                            layer.Name <- name
+                            layer.Color <- Color.randomColorForRhino()
+                            layer.IsVisible <- true
+                            layer.IsLocked <- false
+                            lastparentindex <- Doc.Layers.Add(layer)                        
+                            if lastparentindex = -1 then
+                                let mutable fullpath = layer.Name
+                                if notNull lastparent then
+                                    fullpath <- lastparent.FullPath + "::" + fullpath
+                                lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
+                        lastparentindex
+            else
+                RhinoScriptSyntax.CoerceLayer(layer).Index                 
+        obj.Attributes.LayerIndex <- layerIndex
+        if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
+        Doc.Views.Redraw()
+    
+
+///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
+///<param name="layer">(string) Name of an existing layer</param>
+///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+///     Set true to create Layer if it does not exist yet.</param>
+///<returns>(unit) void, nothing</returns>
+static member ObjectLayer(
+    objectIds:Guid seq, 
+    layer:string, 
+    [<Optional;DefaultParameterValue(false)>]createLayerIfMissing:bool): unit = 
+        let layerIndex =
+            if createLayerIfMissing then            
+                if layer="" then 
+                    Doc.Layers.CurrentLayerIndex
+                else
+                    let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+                    if i <> RhinoMath.UnsetIntIndex then 
+                        i
+                    else
+                        let names = layer.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
+                        let mutable lastparentindex =  -1
+                        let mutable lastparent      =  null : DocObjects.Layer
+                        for idx, name in Seq.indexed(names) do
+                            let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                            if idx > 0 && lastparentindex <> -1 then
+                                lastparent <- Doc.Layers.[lastparentindex]
+                            if notNull lastparent then
+                                layer.ParentLayerId <- lastparent.Id
+                            layer.Name <- name
+                            layer.Color <- Color.randomColorForRhino()
+                            layer.IsVisible <- true
+                            layer.IsLocked <- false
+                            lastparentindex <- Doc.Layers.Add(layer)                        
+                            if lastparentindex = -1 then
+                                let mutable fullpath = layer.Name
+                                if notNull lastparent then
+                                    fullpath <- lastparent.FullPath + "::" + fullpath
+                                lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
+                        lastparentindex
+            else
+                RhinoScriptSyntax.CoerceLayer(layer).Index 
+        for objectId in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            obj.Attributes.LayerIndex <- layerIndex
+            if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+        Doc.Views.Redraw()
+```
