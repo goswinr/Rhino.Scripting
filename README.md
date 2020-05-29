@@ -46,6 +46,7 @@ The CoerceXXX functions will help you create types if you are too lazy to fully 
 let pl = rs.CoercePlane(0 , 80 , 0) // makes World XY plane at point
 rs.AddText("Hello, Seff", pl, height = 50.)
 ```
+![Seff Editor Screenshot](img/HelloSeff.png)
 
 
 ## How about the dynamic types from VBScript and Python?
