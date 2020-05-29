@@ -738,8 +738,15 @@ type RhinoScriptSyntax private () =
     ///<returns>(Rhino.Geometry.Plane) Fails on bad input</returns>
     static member CoercePlane(plane:'T) : Plane =
         match box plane with 
-        | :? Plane  as plane -> plane // TODO add more
-        | _ -> failwithf "CoercePlane: could not Coerce: %A can not be converted to a Plane" plane    
+        | :? Plane  as plane -> plane 
+        | _ -> 
+            try
+                let pt = RhinoScriptSyntax.Coerce3dPoint(plane)
+                let mutable pl = Plane.WorldXY
+                pl.Origin <- pt
+                pl
+            with e -> 
+                failwithf "CoercePlane: %A can not be converted to a Plane" plane    
  
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible</summary>
     ///<param name="xform">object to convert</param>
