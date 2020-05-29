@@ -41,7 +41,7 @@ open Rhino.Scripting  // to make extension members available
 type rs = RhinoScriptSyntax  // type abreviation (alias) for RhinoScriptSyntax
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
-The CoerceXXX functions will help you create types if you are too lazy to fully specify them.
+The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.
 ```fsharp
 let pl = rs.CoercePlane(0 , 80 , 0) // makes World XY plane at point
 rs.AddText("Hello, Seff", pl, height = 50.)
