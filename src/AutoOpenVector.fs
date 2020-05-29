@@ -21,7 +21,7 @@ module AutoOpenVector =
     type RhinoScriptSyntax with
         
         [<Extension>] 
-        ///projects to plane an retuns angle in degrees in plane betwen -180 and + 180               
+        ///projects to plane an retuns angle in degrees in plane between -180 and + 180               
         static member AngleInPlane180( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -29,7 +29,7 @@ module AutoOpenVector =
             if v*plane.YAxis < 0.0 then -ang else ang
         
         [<Extension>] 
-        ///projects to plane an retuns angle in degrees in plane betwen 0 and 360               
+        ///projects to plane an retuns angle in degrees in plane between 0 and 360               
         static member AngleInPlane360( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 

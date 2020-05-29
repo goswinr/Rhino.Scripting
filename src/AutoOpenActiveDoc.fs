@@ -1,10 +1,10 @@
 namespace Rhino.Scripting
 
-open FsEx
+
 open System
 open Rhino
 open Rhino.Runtime
-open FsEx.SaveIgnore
+
 
 
 // abreviations so that declarations are not so long

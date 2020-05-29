@@ -73,8 +73,8 @@
     <Compile Include="RhinoScriptSyntax/View.fs" />
     <Compile Include="AutoOpenCurried.fs" />
     <Compile Include="Vec.fs" />
-    <Compile Include="Line.fs" />
     <Compile Include="Pnt.fs" />
+    <Compile Include="Line.fs" />
     <Compile Include="AutoOpenVector.fs" />
     <Compile Include="ExtraCurve.fs" />
     <Compile Include="ExtrasBrep.fs" />
