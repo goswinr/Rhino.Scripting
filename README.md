@@ -1,7 +1,7 @@
 <!-- in VS Code press Ctrl+K and then V to see a preview-->
 # Rhino.Scripting
 Rhino.Scripting is an implementation of the **RhinoScript** syntax for F# (and C#).  
-It enables RhinoScripts in F# and all the great coding experience that come with it, like: 
+It enables the use of RhinoScript in F# and all the great coding experience that come with F#, like: 
 - automatic code completion while typing
 - automatic error checking and highlighting in the background 
 - type info on mouse over
@@ -46,6 +46,7 @@ The CoerceXXX functions will help you create types if you are too lazy to fully 
 let pl = rs.CoercePlane(0 , 80 , 0) // makes World XY plane at point
 rs.AddText("Hello, Seff", pl, height = 50.)
 ```
+Screenshot from [Seff](https://github.com/goswinr/Seff.Rhino) Editor hosted in Rhino using Rhino.Scripting:
 ![Seff Editor Screenshot](img/HelloSeff.png)
 
 
