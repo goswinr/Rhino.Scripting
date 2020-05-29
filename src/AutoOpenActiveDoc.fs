@@ -17,6 +17,10 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 module AutoOpenActiceDocument =
     
+    /// Apply function, like |> , but ignore result. 
+    /// Return original input
+    let inline (|>>) x f =  f x |> ignore ; x 
+
     /// The current active Rhino document (= the file currently open)
     let mutable Doc = 
         if HostUtils.RunningInRhino then 
