@@ -1,6 +1,6 @@
 <!-- in VS Code press Ctrl+K and then V to see a preview-->
 # Rhino.Scripting
-Rhino.Scripting is an implementation of the **RhinoScript** syntax for F# (and C#).  
+Rhino.Scripting is an implementation of the **RhinoScript** syntax in and for F# (and C#).  
 It enables the use of RhinoScript in F# and all the great coding experience that come with F#, like: 
 - automatic code completion while typing
 - automatic error checking and highlighting in the background 
