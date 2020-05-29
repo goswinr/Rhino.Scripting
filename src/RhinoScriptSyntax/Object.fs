@@ -584,7 +584,7 @@ module ExtensionsObject =
 
 
     [<Extension>]
-    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of an object , optionally creates layer if it does not exist yet</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
@@ -629,7 +629,7 @@ module ExtensionsObject =
        
 
     [<Extension>]
-    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
