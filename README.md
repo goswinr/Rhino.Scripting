@@ -20,7 +20,7 @@ This allowed the use of a modern, rich and dynamically typed programming languag
 
 ## What is this repro?
 
-This repro has **all** RhinoScript functions reimpleneted in [F#](https://fsharp.org/)  
+This repro has [all](https://developer.rhino3d.com/api/RhinoScriptSyntax/) RhinoScript functions reimpleneted in [F#](https://fsharp.org/)  
 It is literaly a translation of the open scource Ironpython [rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.  
 
 ## Get started 
