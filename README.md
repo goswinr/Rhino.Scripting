@@ -50,16 +50,16 @@ rs.AddText("Hello, Seff", pl, height = 50.)
 
 
 ## How about the dynamic types and optional parameters from VBScript and Python?
-The RhinoScript function that take variable types of input parameters are implemented with various method overloads.
-Many RhinoScript function have optional parameters the are also implemented as optional method parameters
+Many RhinoScript function take variable types of input parameters. This implemented with  method overloads.
+Many RhinoScript function have optional parameters. These are also implemented as optional method parameters.
 
 for example `rs.ObjectLayer` can be called in several ways:
 
 `rs.ObjectLayer(guid)` to get the layer of one object, returns a string  
-`rs.ObjectLayer(guid, string)` to set the layer of one object (fails if layer does not exist), no retun value  
-`rs.ObjectLayer(guid, string, createLayerIfMissing = true )` to set the layer of one object, and creat the layer if it does not exist yet, no retun value  
-`rs.ObjectLayer(list of guids, string)` to set the layer of several objects (fails if layer does not exist), no retun value    
-`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` to set the layer of several objects, and creat the layer if it does not exist yet , no retun value
+`rs.ObjectLayer(guid, string)` to set the layer of one object (fails if layer does not exist), no return value  
+`rs.ObjectLayer(guid, string, createLayerIfMissing = true )` to set the layer of one object, and create the layer if it does not exist yet, no return value  
+`rs.ObjectLayer(list of guids, string)` to set the layer of several objects (fails if layer does not exist), no return value    
+`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` to set the layer of several objects, and creat the layer if it does not exist yet , no return value
 
 these are implemented with 3 overloads and optional parmeters:
 ```fsharp
@@ -164,6 +164,7 @@ static member ObjectLayer(
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+            if not <| obj.CommitChanges() then 
+              failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
         Doc.Views.Redraw()
 ```
