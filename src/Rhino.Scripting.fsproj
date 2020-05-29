@@ -41,10 +41,10 @@
 
 
   <ItemGroup>
-    <Compile Include="18_Synchronisation.fs" />
-    <Compile Include="19_ActiveDoc.fs" />
-    <Compile Include="20_RhinoTypeExtensions.fs" />
-    <Compile Include="RhinoScriptSyntax/50_RhinoScriptSyntax.fs" />
+    <Compile Include="Sync.fs" />
+    <Compile Include="AutoOpenActiveDoc.fs" />
+    <Compile Include="AutoOpenRhinoTypeExtensions.fs" />
+    <Compile Include="RhinoScriptSyntax\RhinoScriptSyntax.fs" />
     <Compile Include="RhinoScriptSyntax/Application.fs" />
     <Compile Include="RhinoScriptSyntax/Block.fs" />
     <Compile Include="RhinoScriptSyntax/Object.fs" />
@@ -71,13 +71,13 @@
     <Compile Include="RhinoScriptSyntax/UserInterface.fs" />
     <Compile Include="RhinoScriptSyntax/Utility.fs" />
     <Compile Include="RhinoScriptSyntax/View.fs" />
-    <Compile Include="60_ExtraCurried.fs" />
-    <Compile Include="70_Vec.fs" />
-    <Compile Include="70_Line.fs" />
-    <Compile Include="71_Pnt.fs" />
-    <Compile Include="80_ExtraVector.fs" />
-    <Compile Include="80_ExtraCurve.fs" />
-    <Compile Include="80_ExtrasBrep.fs" />
+    <Compile Include="AutoOpenCurried.fs" />
+    <Compile Include="Vec.fs" />
+    <Compile Include="Line.fs" />
+    <Compile Include="Pnt.fs" />
+    <Compile Include="AutoOpenVector.fs" />
+    <Compile Include="ExtraCurve.fs" />
+    <Compile Include="ExtrasBrep.fs" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 
 open Rhino
 open Rhino.Geometry
-open Rhino.Scripting.ActiceDocument
+
 open FsEx.SaveIgnore 
 
 /// This module provides curried functions to manipulate Rhino Vector3d

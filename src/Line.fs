@@ -7,7 +7,7 @@ open Rhino
 open Rhino.Geometry
 open FsEx.Util
 open FsEx.UtilMath
-open Rhino.Scripting.ActiceDocument
+
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore 

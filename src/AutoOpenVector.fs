@@ -6,7 +6,7 @@ open Rhino
 open Rhino.Geometry
 open FsEx.Util
 open FsEx.UtilMath
-open Rhino.Scripting.ActiceDocument
+
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore 
@@ -14,7 +14,7 @@ open FsEx.SaveIgnore
 [<AutoOpen>]
 /// This module provides functions to manipulate Rhino Vector3d
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
-module ExtrasVector =
+module AutoOpenVector =
     
     open Vec
 

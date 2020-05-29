@@ -52,7 +52,7 @@ rs.AddText("Hello, Seff", pl, height = 50.)
 ## How about the dynamic types and optional parameters from VBScript and Python?
 Many RhinoScript function take variable types of input parameters. This implemented with  method overloads.
 Many RhinoScript function have optional parameters. These are also implemented as optional method parameters.
-
+### Example
 for example `rs.ObjectLayer` can be called in several ways:
 
 `rs.ObjectLayer(guid)` to get the layer of one object, returns a string  
@@ -165,6 +165,7 @@ static member ObjectLayer(
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
             if not <| obj.CommitChanges() then 
-              failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+                let len = Seq.length objectIds
+               failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects" layer objectId len
         Doc.Views.Redraw()
 ```

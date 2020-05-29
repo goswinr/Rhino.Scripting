@@ -6,7 +6,7 @@ open Rhino
 open Rhino.Geometry
 open FsEx.Util
 open FsEx.UtilMath
-open Rhino.Scripting.ActiceDocument
+
 open System.Collections.Generic
 open FsEx
 open FsEx.SaveIgnore
