@@ -59,7 +59,7 @@ for example `rs.ObjectLayer` can be called in several ways:
 `rs.ObjectLayer(guid, string)` to set the layer of one object (fails if layer does not exist), no return value  
 `rs.ObjectLayer(guid, string, createLayerIfMissing = true )` to set the layer of one object, and create the layer if it does not exist yet, no return value  
 `rs.ObjectLayer(list of guids, string)` to set the layer of several objects (fails if layer does not exist), no return value    
-`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` to set the layer of several objects, and creat the layer if it does not exist yet , no return value
+`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` to set the layer of several objects, and create the layer if it does not exist yet , no return value
 
 these are implemented with 3 overloads and optional parmeters:
 ```fsharp
@@ -169,3 +169,27 @@ static member ObjectLayer(
                failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects" layer objectId len
         Doc.Views.Redraw()
 ```
+## Extras
+in addition to all +900 functions from the rhinoscriptsyntax this library contains other useful utility functions.   
+For example the curried `rs.setLayer` or `rs.setUsername` can be used with the pipline operator:
+
+The `|>>` operator applies a function but retuns the input value:
+
+```fsharp
+rs.AddLine(a,b)
+|>> rs.setLayer    "parent::myLayer"
+|>> rs.setName     "myName"
+|>  rs.setUserText "myKey" "myValue"
+```
+instead of 
+```fsharp
+let myLine = rs.AddLine(a,b)
+rs.ObjectLayer(myLine, "parent::myLayer" )
+rs.ObjectName (myLine, "myName")
+rs.SetUserText(myLine, "myKey", "myValue")
+```
+
+All additional functionality is  directly in the `src` folder  files in [https://github.com/goswinr/Rhino.Scripting/tree/master/src](https://github.com/goswinr/Rhino.Scripting/tree/master/src).
+
+## Contributing
+Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
