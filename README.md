@@ -1,17 +1,17 @@
 <!-- in VS Code press Ctrl+K and then V to see a preview-->
 # Rhino.Scripting
-Rhino.Scripting is an implementation of the **RhinoScript** syntax for F# (and C#).  
+Rhino.Scripting is an implementation of the **RhinoScript** syntax in and for F# (and C#).  
 It enables the use of RhinoScript in F# and all the great coding experience that come with F#, like: 
 - automatic code completion while typing
 - automatic error checking and highlighting in the background 
 - type info on mouse over
-- type certainty even without type annotaion (type inference)
+- type certainty even without type annotation (type inference)
 
 ## What is RhinoScript ?
 
 RhinoScript provides application scripting for the [Rhino3D](https://www.rhino3d.com/) CAD app.  
-RhinoScript has [more than 900 functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) to controll all kind of aspects of automating Rhino3D.  
-It was orignally implemented in 2002 in VBScript.   
+RhinoScript has [more than 900 functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) to control all kind of aspects of automating Rhino3D.  
+It was orignaly implemented in 2002 in VBScript.   
 Extensive Documentation on the original VBScript based version is available [here](https://developer.rhino3d.com/guides/rhinoscript/).
 
 
@@ -20,16 +20,16 @@ This allowed the use of a modern, rich and dynamically typed programming languag
 
 ## What is this repro?
 
-This repro has [all](https://developer.rhino3d.com/api/RhinoScriptSyntax/) RhinoScript functions reimpleneted in [F#](https://fsharp.org/)  
-It is literaly a translation of the open scource Ironpython [rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.  
+This repro has [all](https://developer.rhino3d.com/api/RhinoScriptSyntax/) RhinoScript functions reimplemented in [F#](https://fsharp.org/)  
+It is literally a translation of the open source Ironpython [rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.  
 
 ## Get started 
 
-The recomended scripting use case is via the [Seff.Rhino](https://github.com/goswinr/Seff.Rhino) Editor.   
-However you can use this libray just as well in compiled F#, C# or VB.net projects.
+The recommended scripting use case is via the [Seff.Rhino](https://github.com/goswinr/Seff.Rhino) Editor.   
+However you can use this library just as well in compiled F#, C# or VB.net projects.
 Or even in Grasshopper C# VB.net scripting components.
 
-First reference the assembiles. In an F# scripting editor do
+First reference the assemblies. In an F# scripting editor do
 ```fsharp
 #r @"C:\Program Files\Rhino 6\System\RhinoCommon.dll"  // adapt path if needed
 #r @"D:\Git\Rhino.Scripting\src\bin\Debug\net472\Rhino.Scripting.dll"
@@ -38,7 +38,7 @@ open modules
 ```fsharp
 open Rhino.Scripting  // to make extension members available 
 
-type rs = RhinoScriptSyntax  // type abreviation (alias) for RhinoScriptSyntax
+type rs = RhinoScriptSyntax  // type abbreviation  (alias) for RhinoScriptSyntax
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
 The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.
@@ -62,7 +62,7 @@ for example `rs.ObjectLayer` can be called in several ways:
 `rs.ObjectLayer(list of guids, string)` to set the layer of several objects (fails if layer does not exist), no return value    
 `rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` to set the layer of several objects, and create the layer if it does not exist yet , no return value
 
-these are implemented with 3 overloads and optional parmeters:
+these are implemented with 3 overloads and optional parameters:
 ```fsharp
 ///<summary>Returns the full layername of an object. 
 /// arent layers are separated by <c>::</c></summary>
@@ -74,7 +74,7 @@ static member ObjectLayer(objectId:Guid) : string = //GET
     Doc.Layers.[index].FullPath
 
 
-///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+///<summary>Modifies the layer of an object , optionally creates layer if it does not exist yet</summary>
 ///<param name="objectId">(Guid) The identifier of the object</param>
 ///<param name="layer">(string) Name of an existing layer</param>
 ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
@@ -121,7 +121,7 @@ static member ObjectLayer(
         Doc.Views.Redraw()
     
 
-///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet</summary>
 ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
 ///<param name="layer">(string) Name of an existing layer</param>
 ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
@@ -172,9 +172,9 @@ static member ObjectLayer(
 ```
 ## Extras
 in addition to all +900 functions from the rhinoscriptsyntax this library contains other useful utility functions.   
-For example the curried `rs.setLayer` or `rs.setUsername` can be used with the pipline operator:
+For example the curried `rs.setLayer` or `rs.setUsername` can be used with the pipeline operator:
 
-The `|>>` operator applies a function but retuns the input value:
+The `|>>` operator applies a function but returns the input value:
 
 ```fsharp
 rs.AddLine(a,b)

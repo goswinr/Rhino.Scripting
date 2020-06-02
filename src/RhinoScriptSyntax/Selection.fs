@@ -19,8 +19,8 @@ module ExtensionsSelection =
   type RhinoScriptSyntax with
     
     [<Extension>]
-    ///<summary>A helper Function for DocObjects.ObjectType Enum</summary>
-    ///<param name="filter">(int) Int representing one or several Enums as used ion Rhinopython for object types</param>
+    ///<summary>A helper function for DocObjects.ObjectType Enum</summary>
+    ///<param name="filter">(int) Int representing one or several Enums as used in Rhinopython for object types</param>
     ///<returns>(DocObjects.ObjectType) translated DocObjects.ObjectType Enum</returns>
     static member private FilterHelper(filter:int) : DocObjects.ObjectType =
         let mutable geometryfilter = DocObjects.ObjectType.None
