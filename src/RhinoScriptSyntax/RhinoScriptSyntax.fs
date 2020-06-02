@@ -888,11 +888,12 @@ type RhinoScriptSyntax private () =
         | g -> failwithf "CoercePointCloud failed on %A : %A " g.ObjectType objectId
                 
 
-    // -------------------- Layer related functions moved here so that they can be used eralier. it is used in many functions to draw error fedback objects--------------------------------
+    // -------------------- Layer related functions moved here so that they can be used ealier. -------------------
+    //----------------------They is used in many functions to draw error fedback objects--------------------------------
     
     /// Creates all parent layers too if they are missing, uses same locked state and colors for all nerw layers.
     /// returns index
-    static member internal getOrCreateLayer(names, color, visible, locked) : int = 
+    static member private getOrCreateLayer(names, color, visible, locked) : int = 
         match Doc.Layers.FindByFullPath(names, -99) with
         | -99 -> 
             match names with 
