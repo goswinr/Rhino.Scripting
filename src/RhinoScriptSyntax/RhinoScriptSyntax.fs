@@ -950,7 +950,7 @@ type RhinoScriptSyntax private () =
     
     [<Extension>]
     ///<summary>Returns the full layername of an object. 
-    /// arent layers are separated by <c>::</c></summary>
+    /// parent layers are separated by <c>::</c></summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET
