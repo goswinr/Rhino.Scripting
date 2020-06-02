@@ -53,7 +53,6 @@
     <Compile Include="Src\RhinoScriptSyntax\RhinoScriptSyntax.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Application.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Block.fs" />
-    <Compile Include="Src\RhinoScriptSyntax\Object.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Curve.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Dimension.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Document.fs" />
@@ -67,6 +66,7 @@
     <Compile Include="Src\RhinoScriptSyntax\Linetype.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Material.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Mesh.fs" />
+    <Compile Include="Src\RhinoScriptSyntax\Object.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Plane.fs" />
     <Compile Include="Src\RhinoScriptSyntax\PointVector.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Selection.fs" />
@@ -77,7 +77,6 @@
     <Compile Include="Src\RhinoScriptSyntax\UserInterface.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Utility.fs" />
     <Compile Include="Src\RhinoScriptSyntax\View.fs" />
-    
     <Compile Include="Src\AutoOpenCurried.fs" />
     <Compile Include="Src\Vec.fs" />
     <Compile Include="Src\Pnt.fs" />

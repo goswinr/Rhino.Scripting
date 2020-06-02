@@ -16,53 +16,8 @@ module ExtensionsLayer =
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
-    [<Extension>]
-    ///<summary>Add a new layer to the document</summary>
-    ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically
-    ///    generates the layer name</param>
-    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.
-    ///    If omitted a random color wil be choosen</param>
-    ///<param name="visible">(bool) Optional, Default Value: <c>true</c>
-    ///    Layer's visibility</param>
-    ///<param name="locked">(bool) Optional, Default Value: <c>false</c>
-    ///    Layer's locked state</param>
-    ///<param name="parent">(string) Optional, Name of the new layer's parent layer. If omitted, the new
-    ///    layer will not have a parent layer</param>
-    ///<returns>(string) The full name of the new layer</returns>
-    static member AddLayer( [<OPT;DEF(null:string)>]name:string,
-                            [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
-                            [<OPT;DEF(true)>]visible:bool,
-                            [<OPT;DEF(false)>]locked:bool,
-                            [<OPT;DEF(null:string)>]parent:string) : string =
-        let names =
-            if isNull name then [| "" |]
-            else name.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries)
-        let mutable lastparentindex = -1
-        let mutable lastparent:DocObjects.Layer = null
-        for idx, name in Seq.indexed(names) do
-          let layer = DocObjects.Layer.GetDefaultLayerProperties()
-          if idx = 0 then
-            if notNull parent then
-              lastparent <- RhinoScriptSyntax.CoerceLayer(parent)
-          else
-            if lastparentindex <> -1 then
-              lastparent <- Doc.Layers.[lastparentindex]
-          if notNull lastparent then
-            layer.ParentLayerId <- lastparent.Id
-          if notNull name then
-            layer.Name <- name
-          //color = RhinoScriptSyntax.Coercecolor(color)
-          if not color.IsEmpty then layer.Color <- color
-          else layer.Color <- Color.randomColorForRhino()
-          layer.IsVisible <- visible
-          layer.IsLocked <- locked
-          lastparentindex <- Doc.Layers.Add(layer)
-          if lastparentindex = -1 then
-            let mutable fullpath = layer.Name
-            if notNull lastparent then
-                fullpath <- lastparent.FullPath + "::" + fullpath
-            lastparentindex <- Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex)
-        Doc.Layers.[lastparentindex].FullPath
+
+    //static member AddLayer() // moved to file RhinoScriptSyntax.fs
 
     [<Extension>]
     ///<summary>Returns the current layer</summary>

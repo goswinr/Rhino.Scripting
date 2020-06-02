@@ -888,5 +888,107 @@ type RhinoScriptSyntax private () =
         | g -> failwithf "CoercePointCloud failed on %A : %A " g.ObjectType objectId
                 
 
+    // -------------------- Layer related functions moved here so that they can be used eralier. it is used in many functions to draw error fedback objects--------------------------------
+    
+    /// Creates all parent layers too if they are missing, uses same locked state and colors for all nerw layers.
+    /// returns index
+    static member internal getOrCreateLayer(names, color, visible, locked) : int = 
+        match Doc.Layers.FindByFullPath(names, -99) with
+        | -99 -> 
+            match names with 
+            | "" -> Doc.Layers.CurrentLayerIndex
+            | _ -> 
+                match names.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries) with 
+                | [| |] -> failwithf "Cannot get or create layer for: '%s'" names
+                | ns -> 
+                    let checkedNs =
+                        ns
+                        |> Array.map (fun n -> n.Trim())
+                        |> Array.map (fun n -> if n <> "" then  n else failwithf "Cannot get or create layer from: '%s'" names)
+                        |> List.ofArray
+
+                    let rec createLayer(nameList, prevId, prevIdx, root) : int = 
+                        match nameList with 
+                        | [] -> prevIdx // exit recursion
+                        | branch :: rest -> 
+                            let fullpath = if root="" then branch else root + "::" + branch 
+                            match Doc.Layers.FindByFullPath(fullpath,-99) with
+                            | -99 -> // actually create layer:
+                                let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                                if prevId<>Guid.Empty then layer.ParentLayerId <- prevId
+                                layer.Name <- branch
+                                layer.Color <- color()// delay creation of color till actaully neded ( so random colors are not created, in most cases layer exists)
+                                layer.IsVisible <- visible
+                                layer.IsLocked <- locked
+                                let i = Doc.Layers.Add(layer)
+                                createLayer(rest , layer.Id , i,  fullpath)
+                            | i -> 
+                                createLayer(rest , Doc.Layers.[i].Id , i ,fullpath)
+                    
+                    createLayer(checkedNs, Guid.Empty, 0, "")
+        | i -> i
 
 
+    [<Extension>]
+    ///<summary>Add a new layer to the document. If layers or parent layers exist alreaday color, visibility and locking is ignored.</summary>
+    ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
+    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.  If omitted a random (non yellow)  color wil be choosen.</param>
+    ///<param name="visible">(bool) Optional, Default Value: <c>true</c>  Layer's visibility.</param>
+    ///<param name="locked">(bool) Optional, Default Value: <c>false</c>  Layer's locked state.</param>
+    ///<param name="parent">(string) Optional, Name of existing parent layer. </param>
+    ///<returns>(string) The full name of the new layer</returns>
+    static member AddLayer( [<OPT;DEF(null:string)>]name:string,
+                            [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
+                            [<OPT;DEF(true)>]visible:bool,
+                            [<OPT;DEF(false)>]locked:bool,
+                            [<OPT;DEF(null:string)>]parent:string) : string = // this member was orignally in Layer.fs
+        let names = if isNull parent then name else parent+ "::" + name
+        let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
+        let i     = RhinoScriptSyntax.getOrCreateLayer(names, (fun ()-> color), visible, locked)
+        Doc.Layers.[i].FullPath
+
+    
+    [<Extension>]
+    ///<summary>Returns the full layername of an object. 
+    /// arent layers are separated by <c>::</c></summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<returns>(string) The object's current layer</returns>
+    static member ObjectLayer(objectId:Guid) : string = //GET
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let index = obj.Attributes.LayerIndex
+        Doc.Layers.[index].FullPath
+
+
+    [<Extension>]
+    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+    ///     Set true to create Layer if it does not exist yet.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
+        let layerIndex =
+            if createLayerIfMissing then  RhinoScriptSyntax.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
+        obj.Attributes.LayerIndex <- layerIndex
+        if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
+        Doc.Views.Redraw()
+       
+
+    [<Extension>]
+    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+    ///     Set true to create Layer if it does not exist yet.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
+        let layerIndex =
+            if createLayerIfMissing then  RhinoScriptSyntax.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            else                          RhinoScriptSyntax.CoerceLayer(layer).Index   
+        for objectId in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            obj.Attributes.LayerIndex <- layerIndex
+            if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+        Doc.Views.Redraw()
