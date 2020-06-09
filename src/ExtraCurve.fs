@@ -11,7 +11,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 /// This module provides functions to create or manipulate Rhino Curves
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting.Extra namspace is opened.
 module ExtrasCurve =
 
   open Line

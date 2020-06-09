@@ -2,19 +2,14 @@ namespace Rhino.Scripting.Extra
 
 open FsEx
 open System
-open Rhino
 open Rhino.Geometry
-
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open Rhino.Scripting
-//open Rhino.Scripting.Vec
-//open Rhino.Scripting.Line
-open System.Collections.Generic
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
 /// This module provides functions to create or manipulate Rhino Breps/ Polysurface 
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting.Extra namspace is opened.
 module ExtrasBrep = 
    
   type RhinoScriptSyntax with // TODO chnage to Brep type extensions ??!!
