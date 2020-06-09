@@ -10,9 +10,9 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 
 open ZXing
 open ZXing.QrCode
-open ZXing.Common
 open ZXing.QrCode.Internal
 
+//open ZXing.Common
 //open ZXing.Aztec
 //open ZXing.Rendering
 //open ZXing.Datamatrix
@@ -52,7 +52,7 @@ module QRcode =
         let mutable yy = 0
         for y = minY to minY+dY do
             for x = minX to minX+dX do
-                printfn "%d %d ; %d %d" xx yy x y
+                //printfn "%d %d ; %d %d" xx yy x y
                 arr2d.[xx,yy] <- bm.[x,y]
                 xx <- xx+1
             xx <- 0
@@ -86,7 +86,7 @@ module QRcode =
         m
 
     /// creats Hatch of size 1 at 0,0
-    let private asRhinoHatch (ar:bool[,]):Hatch =        
+    let private asRhinoHatch (ar:bool[,]):Hatch [] =        
         let crvs = ResizeArray<Curve>()
         let sizeX = Array2D.length1 ar 
         let sizeY = Array2D.length2 ar 
@@ -113,8 +113,7 @@ module QRcode =
         if isNull pat then failwithf "Hatchpattern for QR code not found: SOLID"
         let hs = Hatch.Create (crvs, pat.Index , 0.0 , 100.0, 0.01)
         if isNull hs then failwithf "Hatchpattern for QR code is null"
-        if hs.Length <> 1 then failwithf "Hatchpattern for QR code has %d items" hs.Length
-        hs.[0]
+        hs
         
 
     type RhinoScriptSyntax with 
@@ -129,7 +128,7 @@ module QRcode =
 
         [<Extension>]
         /// creats Hatch of size 1 at 0,0
-        static member QrCodeAsHatch(txt) :Hatch =   
+        static member QrCodeAsHatch(txt) :Hatch [] =   
             txt
             |> BMofTxt 50
             |> as2dArray
