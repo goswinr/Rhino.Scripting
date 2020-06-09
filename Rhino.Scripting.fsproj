@@ -27,6 +27,7 @@
   
   <ItemGroup>
     <PackageReference Include="ini-parser" Version="2.5.2" />
+    <PackageReference Include="ZXing.Net" Version="0.16.5" />
     <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries-->
  
     
@@ -84,6 +85,8 @@
     <Compile Include="Src\AutoOpenVector.fs" />
     <Compile Include="Src\ExtraCurve.fs" />
     <Compile Include="Src\ExtrasBrep.fs" />
+    <Compile Include="Src\ExtrasMesh.fs" />
+    <Compile Include="Src\ExtraQRcode.fs" />
   </ItemGroup>
 
 </Project>
