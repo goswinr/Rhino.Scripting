@@ -554,14 +554,15 @@ module ExtensionsSelection =
     ///<returns>(Point3d ResizeArray) Option of List of 3d points</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
-        maybe{
-            let! ids = RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect= preselect)
+        match RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect) with 
+        |None -> None
+        |Some ids -> 
             let rc = ResizeArray<Point3d>()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
                 rc.Add(pt)
-            return rc
-            }
+            Some rc
+            
 
 
 
@@ -815,7 +816,7 @@ module ExtensionsSelection =
         let rhinoobjects = Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore //TODO make sync ?
-        Doc.Views.Redraw()
+            Doc.Views.Redraw()
         resizeArray {for obj in rhinoobjects do yield obj.Id }
 
 
@@ -1051,7 +1052,7 @@ module ExtensionsSelection =
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(true)>]inWindow:bool) : Guid ResizeArray =
         
-        Synchronisation.DoSync true true (fun () -> 
+        let pick () = 
             let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else Doc.Views.ActiveView
             let viewport = view.MainViewport
             let screen1 = Point2d(corner1)
@@ -1091,6 +1092,6 @@ module ExtensionsSelection =
                     if select then rhobj.Select(true) |> ignore //TODO make sync ?
                 if select then Doc.Views.Redraw()
             rc
-            )
+        Synchronisation.DoSync true true pick
 
 
