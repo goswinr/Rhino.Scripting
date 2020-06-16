@@ -1050,26 +1050,47 @@ module ExtensionsSelection =
                               [<OPT;DEF(null:string)>]view:string,
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(true)>]inWindow:bool) : Guid ResizeArray =
-        let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
-        let screen1 = Point2d(corner1)
-        let screen2 = Point2d(corner2)
-        let xf = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
-        screen1.Transform(xf)
-        screen2.Transform(xf)
+        
+        Synchronisation.DoSync true true (fun () -> 
+            let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else Doc.Views.ActiveView
+            let viewport = view.MainViewport
+            let screen1 = Point2d(corner1)
+            let screen2 = Point2d(corner2)
+            let xf = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
+            screen1.Transform(xf)
+            screen2.Transform(xf)
 
-        let filter = DocObjects.ObjectType.AnyObject
-        let objects =
-            if inWindow then
-                Doc.Objects.FindByWindowRegion(viewport, screen1, screen2, true, filter)
-            else
-                Doc.Objects.FindByCrossingWindowRegion(viewport, screen1, screen2, true, filter)
-        let rc = ResizeArray()
-        if notNull objects then
+        
+            let objects =
+                // updated from https://github.com/mcneel/rhinoscriptsyntax/pull/185
+                let pc = new Input.Custom.PickContext()
+                pc.View <- view
+                pc.PickStyle <- if inWindow then Input.Custom.PickStyle.WindowPick else Input.Custom.PickStyle.CrossingPick
+                pc.PickGroupsEnabled <- if inWindow then true else false
+                let _, frustumLine = viewport.GetFrustumLine((screen1.X + screen2.X) / 2.0, (screen1.Y + screen2.Y) / 2.0)
+                pc.PickLine <- frustumLine
+            
+        
+                let leftX = min screen1.X  screen2.X   |> round |> int
+                let topY =  min screen1.Y screen2.Y    |> round |> int
+                let w    =  abs(screen1.X - screen2.X) |> round |> int
+                let h    =  abs(screen1.Y - screen2.Y) |> round |> int
+                let rect = Drawing.Rectangle(leftX, topY, w, h)
+ 
+                pc.SetPickTransform(viewport.GetPickTransform(rect))
+                pc.UpdateClippingPlanes()
+        
+                Doc.Objects.PickObjects(pc)
+
             let rc = ResizeArray()
-            for rhobj in objects do
-                rc.Add(rhobj.Id)
-                if select then rhobj.Select(true) |> ignore //TODO make sync ?
-            if select then Doc.Views.Redraw()
-        rc
+            if notNull objects then
+                let rc = ResizeArray()
+                for rhobjr in objects do
+                    let rhobj = rhobjr.Object()
+                    rc.Add(rhobj.Id)
+                    if select then rhobj.Select(true) |> ignore //TODO make sync ?
+                if select then Doc.Views.Redraw()
+            rc
+            )
 
 
