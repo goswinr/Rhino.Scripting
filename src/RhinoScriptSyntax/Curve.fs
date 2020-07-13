@@ -856,26 +856,26 @@ module ExtensionsCurve =
     ///    each other. Note, this function provides similar functionality to that of
     ///    Rhino's ClosestPt command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object to test</param>
-    ///<param name="curveIds">(Guid seq) List of identifiers of point cloud, curve, surface, or
+    ///<param name="objectsIds">(Guid seq) List of identifiers of point cloud, curve, surface, or
     ///    polysurface to test against</param>
     ///<returns>(Guid * Point3d * Point3d) containing the results of the closest point calculation.
     ///    The elements are as follows:
     ///      [0]    The identifier of the closest object.
     ///      [1]    The 3-D point that is closest to the closest object.
     ///      [2]    The 3-D point that is closest to the test curve</returns>
-    static member CurveClosestObject(curveId:Guid, curveIds:Guid seq) : Guid * Point3d * Point3d =
+    static member CurveClosestObject(curveId:Guid, objectsIds:Guid seq) : Guid * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let geometry = ResizeArray()
-        for curveId in curveIds do
+        for curveId in objectsIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
             geometry.Add( rhobj.Geometry )
-        if Seq.isEmpty geometry then failwithf "curveIds must contain at least one item.  curveId:'%A' curveIds:'%A'" curveId curveIds
+        if Seq.isEmpty geometry then failwithf "curveIds must contain at least one item.  curveId:'%A' curveIds:'%A'" curveId objectsIds
         let curvePoint = ref Point3d.Unset
         let geomPoint  = ref Point3d.Unset
         let whichGeom = ref 0
         let success = curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom)
-        if success then  curveIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
-        else failwithf "curveClosestObject failed  curveId:'%A' curveIds:'%A'" curveId curveIds
+        if success then  objectsIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
+        else failwithf "curveClosestObject failed  curveId:'%A' curveIds:'%A'" curveId objectsIds
 
 
     [<Extension>]
@@ -2058,7 +2058,8 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a Polyline curve object</summary>
+    ///<summary>Verifies an object is a Polyline curve object or a nurbs cure with degree 1 and moer than 2 points
+    /// Lines return false</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False</returns>
@@ -2067,8 +2068,10 @@ module ExtensionsCurve =
         |None               -> false
         |Some c  ->
             match c with
-            | :? PolylineCurve  -> true
-            | _             -> false
+            | :? PolylineCurve  -> true           
+            | :? NurbsCurve as nc -> nc.Points.Count > 2 && c.Degree = 1
+            | _ -> false
+                
 
 
     [<Extension>]
