@@ -72,7 +72,44 @@ module ExtensionsMesh =
         if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         Doc.Views.Redraw()
         rc
+    
 
+
+    [<Extension>]
+    ///<summary>Creates a new mesh with just one quad face </summary>
+    ///<param name="pointA">(Point3d) First corner point</param>
+    ///<param name="pointB">(Point3d) Second  corner point</param>
+    ///<param name="pointC">(Point3d) Third corner point</param>
+    ///<param name="pointD">(Point3d) Fourth corner point</param>
+    ///<returns>(Guid) The identifier of the new mesh</returns>
+    static member AddMeshQuad(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
+          let mesh = new Mesh()
+          mesh.Vertices.Add(pointA) |> ignore
+          mesh.Vertices.Add(pointB) |> ignore
+          mesh.Vertices.Add(pointC) |> ignore
+          mesh.Vertices.Add(pointD) |> ignore
+          mesh.Faces.AddFace(0,1,2,3) |> ignore
+          let rc = Doc.Objects.AddMesh(mesh)
+          if rc = Guid.Empty then  failwithf "Rhino.Scripting: AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
+          Doc.Views.Redraw()
+          rc
+
+    [<Extension>]
+    ///<summary>Creates a new mesh with just one triangle face </summary>
+    ///<param name="pointA">(Point3d) First corner point</param>
+    ///<param name="pointB">(Point3d) Second  corner point</param>
+    ///<param name="pointC">(Point3d) Third corner point</param>
+    ///<returns>(Guid) The identifier of the new mesh</returns>
+    static member AddMeshTriangle(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
+          let mesh = new Mesh()
+          mesh.Vertices.Add(pointA) |> ignore
+          mesh.Vertices.Add(pointB) |> ignore
+          mesh.Vertices.Add(pointC) |> ignore
+          mesh.Faces.AddFace(0,1,2) |> ignore
+          let rc = Doc.Objects.AddMesh(mesh)
+          if rc = Guid.Empty then  failwithf "Rhino.Scripting: AddMeshQuad failed.  points:'%A, %A and %A" pointA pointB pointC 
+          Doc.Views.Redraw()
+          rc
 
     [<Extension>]
     ///<summary>Creates a planar mesh from a closed, planar curve</summary>
