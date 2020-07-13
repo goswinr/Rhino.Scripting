@@ -17,6 +17,21 @@ module Pnt =
     /// This operation is slighty faster than the distance function, and sufficient for many algorithms like finding closest points.
     let inline distanceSq (a:Point3d) (b:Point3d) = let v = a-b in    v.X*v.X + v.Y*v.Y + v.Z*v.Z
 
+    
+    /// retuns a point that is at a given distance from a point in the direction of another point. 
+    let inline distPt (fromPt:Point3d) ( dirPt:Point3d) ( distance:float) : Point3d  =
+        let v = dirPt - fromPt
+        let sc = distance/v.Length
+        fromPt + v*sc
+    
+    
+    /// Retuns a Point by evaluation a line between two point with a normalized patrameter.
+    /// e.g. rel=0.5 will return the middle point, rel=1.0 the endPoint
+    let inline divPt(fromPt:Point3d)( toPt:Point3d)(rel:float) : Point3d  =
+        let v = toPt - fromPt
+        fromPt + v*rel
+    
+
     /// Sets the X value and retuns new Point3d
     let inline setX (v:Point3d) x =  Point3d(x, v.Y, v.Z)
 
@@ -25,6 +40,17 @@ module Pnt =
 
     /// Sets the Z value and retuns new Point3d
     let inline setZ (v:Point3d) z =  Point3d(v.X, v.Y, z)
+
+    /// Gets the X value of  Point3d
+    let inline getX (v:Point3d)  =  v.X
+
+    /// Gets the Y value of  Point3d
+    let inline getY (v:Point3d) =  v.Y
+
+    /// Gets the Z value of  Point3d
+    let inline getZ (v:Point3d) =  v.Z
+
+
     
     /// Snap to point if within Doc.ModelAbsoluteTolerance
     let snapIfClose (snapTo:Point3d) (pt:Point3d) =
