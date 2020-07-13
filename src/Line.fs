@@ -46,6 +46,7 @@ module Line =
     
     /// Finds intersection of two infinite lines.
     /// Returns a point for each line where they are the closest to each other.
+    /// (in same order as input)
     /// Fails if lines are paralell.
     /// Considers Lines infinte
     let intersectSkew (lnA:Line) (lnB:Line) :Point3d*Point3d= 
