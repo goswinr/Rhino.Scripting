@@ -899,7 +899,7 @@ type RhinoScriptSyntax private () =
             match names with 
             | "" -> Doc.Layers.CurrentLayerIndex
             | _ -> 
-                match names.Split([| "::"|], StringSplitOptions.RemoveEmptyEntries) with 
+                match names.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
                 | [| |] -> failwithf "Cannot get or create layer for: '%s'" names
                 | ns -> 
                     let checkedNs =
@@ -922,7 +922,9 @@ type RhinoScriptSyntax private () =
                                 layer.IsVisible <- visible
                                 layer.IsLocked <- locked
                                 let i = Doc.Layers.Add(layer)
-                                createLayer(rest , layer.Id , i,  fullpath)
+                                let id = Doc.Layers.[i].Id //just using layer.Id would be empty guid                                
+                                createLayer(rest , id , i,  fullpath)
+                                
                             | i -> 
                                 createLayer(rest , Doc.Layers.[i].Id , i ,fullpath)
                     
