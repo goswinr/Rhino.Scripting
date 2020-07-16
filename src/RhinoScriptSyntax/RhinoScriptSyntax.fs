@@ -651,18 +651,18 @@ type RhinoScriptSyntax private () =
         | _ -> failwithf "CoerceGeometry: Could not Coerce %A to a Rhino.Geometry.GeometryBase base class. Is it a struct like Point3d or Plane? " objectId
     
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible</summary>
-    ///<param name="pt">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
-    ///<returns>(Rhino.Geometry.Point3d) Fails on bad input</returns>
+    ///<param name="pt">Input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
+    ///<returns>a Rhino.Geometry.Point3d, Fails on bad input</returns>
     static member Coerce3dPoint(pt:'T) : Point3d =               
         let inline  point3dOf3(x:^x, y:^y, z:^z) = 
-            try Geometry.Point3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
+            try Point3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
             with _ -> failwithf "Coerce3dPoint: Could not Coerce %A, %A and %A to Point3d" x y z
         
         let b = box pt
         match b with
         | :? Point3d    as pt               -> pt
         | :? Point3f    as pt               -> Point3d(pt)
-        | :? Vector3d   as v                -> Point3d(v)
+        //| :? Vector3d   as v                -> Point3d(v) //dont confuse vectors and points !
         | :? DocObjects.PointObject as po   -> po.PointGeometry.Location
         | :? TextDot as td                  -> td.Point
         | :? (float*float*float) as xyz     -> let x, y, z = xyz in Point3d(x, y, z)
@@ -691,7 +691,7 @@ type RhinoScriptSyntax private () =
     
     ///<summary>Attempt to get Rhino Point Object</summary>
     ///<param name="objectId">(Guid): objectId of Point object</param> 
-    ///<returns>a ) Fails on bad input</returns>
+    ///<returns>a DocObjects.PointObject, Fails on bad input</returns>
     static member CoercePointObject (objectId:Guid) : DocObjects.PointObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.PointObject as a -> a
@@ -699,7 +699,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
-    ///<returns>(Rhino.Geometry.Point2d) Fails on bad input</returns>
+    ///<returns>a Rhino.Geometry.Point2d, Fails on bad input</returns>
     static member Coerce2dPoint(point:'point2d) : Point2d =
         match box point with
         | :? Point2d    as point -> point
@@ -709,13 +709,39 @@ type RhinoScriptSyntax private () =
     
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible</summary>
     ///<param name="vector">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>    
-    ///<returns>(Rhino.Geometry.Vector3d) Fails on bad input</returns>
-    static member Coerce3dVector(vector:'T) : Vector3d =
-        match box vector with
-        | :? Vector3d   as v  -> v   
-        | _ ->         
-            try Vector3d(RhinoScriptSyntax.Coerce3dPoint(vector))
-            with _ -> failwithf "Coerce3dVector: could not Coerce: Could not convert %A to a Vector3d" vector
+    ///<returns> aRhino.Geometry.Vector3d, Fails on bad input</returns>
+    static member Coerce3dVector(vec:'T) : Vector3d =
+        let inline vecOf3(x:^x, y:^y, z:^z) = 
+            try Vector3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
+            with _ -> failwithf "Coerce3dVector: Could not Coerce %A, %A and %A to Vector3d" x y z
+        
+        let b = box vec
+        match b with
+        | :? Vector3d   as v                -> v
+        | :? Vector3f   as v                -> Vector3d(v)
+        | :? (float*float*float) as xyz     -> let x, y, z = xyz in Vector3d(x, y, z)
+        | :? (single*single*single) as xyz  -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))        
+        | :? (int*int*int) as xyz           -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))         
+        | _ ->
+            try
+                match b with
+                | :? Guid as g ->  (Doc.Objects.FindId(g).Geometry :?> LineCurve).Line.Direction
+                | :? (Vector3d option) as v   -> v.Value // from UI function
+                | :? option<Guid> as go      -> (Doc.Objects.FindId(go.Value).Geometry :?> LineCurve).Line.Direction
+                | :? (string*string*string) as xyz  -> let x, y, z = xyz in Vector3d(parseFloatEnDe(x), parseFloatEnDe(y), parseFloatEnDe(z))
+                | :? seq<float>  as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<int>  as xyz  ->    vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? seq<string> as xyz  ->  vecOf3(Seq.item 0 xyz, Seq.item 3 xyz, Seq.item 2 xyz)
+                | :? string as s  -> 
+                    let xs = s.Split(';')
+                    if Seq.length xs > 2 then 
+                        Vector3d(parseFloatEnDe(Seq.item 0 xs), parseFloatEnDe(Seq.item 1 xs), parseFloatEnDe(Seq.item 2 xs))
+                    else
+                        let ys = s.Split(',') 
+                        Vector3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))   
+                |_ -> failwithf "Coerce3dVector: could not Coerce %A to a Vector3d" vec
+            with _ ->
+                failwithf "Coerce3dVector: could not Coerce: Could not convert %A to a Vector3d" vec
         
             
     //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
@@ -933,7 +959,8 @@ type RhinoScriptSyntax private () =
 
 
     [<Extension>]
-    ///<summary>Add a new layer to the document. If layers or parent layers exist alreaday color, visibility and locking is ignored.</summary>
+    ///<summary>Add a new layer to the document. If it does not exist yet.
+    /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
     ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.  If omitted a random (non yellow)  color wil be choosen.</param>
     ///<param name="visible">(bool) Optional, Default Value: <c>true</c>  Layer's visibility.</param>
@@ -947,7 +974,7 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(null:string)>]parent:string) : string = // this member was orignally in Layer.fs
         let names = if isNull parent then name else parent+ "::" + name
         let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
-        let i     = RhinoScriptSyntax.getOrCreateLayer(names, (fun ()-> color), visible, locked)
+        let i     = RhinoScriptSyntax.getOrCreateLayer(names, col, visible, locked)
         Doc.Layers.[i].FullPath
 
     
