@@ -2233,6 +2233,7 @@ module ExtensionsCurve =
         let tol = Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, distance, tol)
         if isNull curves  then  failwithf "offsetCurveOnSurface failed.  curveId:'%A' surfaceId:'%A' distance:'%A'" curveId surfaceId distance
+        let curves = resizeArray{for curve in curves do curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) } //https://github.com/mcneel/rhinoscriptsyntax/pull/186        
         let rc = resizeArray { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
         rc
