@@ -2,7 +2,7 @@
 
 open Rhino
 open Rhino.Geometry
-open FsEx.UtilMath
+//open FsEx.UtilMath
 open FsEx.SaveIgnore 
 open System
 
@@ -10,6 +10,12 @@ open System
 /// It is NOT automatically opened.
 module Vec =    
     
+    /// Converts Angels from Degrees to Radians
+    let inline internal toRadians degrees = 0.0174532925199433 * degrees // 0.0174532925199433 = Math.PI / 180. 
+
+    /// Converts Angels from Radians to Degrees
+    let inline internal toDegrees radians = 57.2957795130823 * radians // 57.2957795130823 = 180. / Math.PI
+
     /// Sets the X value and retuns new Vector3d
     let inline setX (v:Vector3d) x =  Vector3d(x, v.Y, v.Z)
 
@@ -57,7 +63,7 @@ module Vec =
     /// Returns positive angle between 2 Vectors in Radians , takes vector orientation into account, 
     /// Range 0.0 to PI( = 0 to 180 degree)
     /// Unitizes the input vectors
-    let inline angleRad (a:Vector3d) (b:Vector3d) = 
+    let inline angle180Rad (a:Vector3d) (b:Vector3d) = 
         // The "straight forward" method of acos(u.v) has large precision
         // issues when the dot product is near +/-1.  This is due to the
         // steep slope of the acos function as we approach +/- 1.  Slight
@@ -82,15 +88,15 @@ module Vec =
     /// Returns positive angle between 2 Vectors in Degrees , takes vector orientation into account, 
     /// Range 0 to 180 degrees
     /// Unitizes the input vectors
-    let inline angleDeg (a:Vector3d) (b:Vector3d) = 
-        angleRad a b |>  toDegrees
+    let inline angle180Deg (a:Vector3d) (b:Vector3d) = 
+        angle180Rad a b |>  toDegrees
 
 
     /// Returns positive angle between 2 Vectors in Radians, 
     /// Ignores vector orientation, 
-    /// Range 0.0 to PI/2 ( = 0 to 90 degrees)
+    /// Range: 0.0 to PI/2 ( = 0 to 90 degrees)
     /// Unitizes the input vectors
-    let inline angleRadIgnoreOrient (a:Vector3d) (b:Vector3d) =   
+    let inline angle90Rad (a:Vector3d) (b:Vector3d) =   
         let a0 = unitize a
         let b0 = unitize b
         let dot =  a0 * b0
@@ -102,10 +108,69 @@ module Vec =
     
     /// Returns positive angle between 2 Vectors in Degrees, 
     /// Ignores vector orientation, 
-    /// Range 0 to 90 degrees
+    /// Range: 0 to 90 degrees
     /// Unitizes the input vectors
-    let inline angleDegIgnoreOrient (a:Vector3d) (b:Vector3d) =   
-        angleRadIgnoreOrient a b |>  toDegrees
+    let inline angle90Deg (a:Vector3d) (b:Vector3d) =   
+        angle90Rad a b |>  toDegrees
+    
+    /// Returns positive angle between 2 Vectors in Radians
+    /// Considering positve rotation round a planes ZAxis 
+    /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
+    /// Unitizes the input vectors
+    let inline angle360Rad (pl:Plane) (a:Vector3d) (b:Vector3d)  = 
+        let r = angle180Rad a b
+        if dot (cross a b) pl.ZAxis > 0.0 then  r
+        else                                    Math.PI * 2. - r
+    
+    /// Returns positive angle between 2 Vectors in Degrees
+    /// Considering positve rotation round a planes ZAxis 
+    /// Range:  0 to 360 degrees
+    /// Unitizes the input vectors
+    let inline angle360Deg (pl:Plane) (a:Vector3d) (b:Vector3d)  = 
+        let r = angle180Deg a b
+        if dot (cross a b) pl.ZAxis > 0.0 then  r
+        else                                    360. - r
+
+    /// Returns positive angle between 2 Vectors in Radians
+    /// Considering positve rotation round the World ZAxis 
+    /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
+    /// Unitizes the input vectors
+    let inline angle360RadXY (a:Vector3d) (b:Vector3d)  = 
+        let r = angle180Rad a b
+        if (cross a b).Z > 0.0 then  r
+        else                         Math.PI * 2. - r
+    
+    /// Returns positive angle between 2 Vectors in Degrees
+    /// Considering positve rotation round the World ZAxis 
+    /// Range:  0 to 360 degrees
+    /// Unitizes the input vectors
+    let inline angle360DegXY  (a:Vector3d) (b:Vector3d)  = 
+        let r = angle180Deg a b
+        if (cross a b).Z  > 0.0 then  r
+        else                          360. - r        
+    
+    /// Returns positive or negative  slope of a vector in Radians
+    /// in relation to XY Plane    
+    let slopeRad (v:Vector3d) =
+        let f = Vector3d(v.X, v.Y, 0.0)
+        if v.Z > 0.0 then   angle90Rad v f
+        else              -(angle90Rad v f)
+
+    /// Returns positive or negative slope of a vector in Degrees
+    /// in relation to XY Plane    
+    let slopeDeg (v:Vector3d) =
+        let f = Vector3d(v.X, v.Y, 0.0)
+        if v.Z > 0.0 then   angle90Deg v f
+        else              -(angle90Deg v f)
+
+    /// Returns positive or negative slope of a vector in Percent
+    /// in relation to XY Plane    
+    /// 100% = 45 degrees
+    let slopePercent (v:Vector3d) =
+        if abs(v.Z) < RhinoMath.SqrtEpsilon then failwithf " Can't get Slope from vertical vector %A" v
+        let f = Vector3d(v.X, v.Y, 0.0)
+        100.0 * (v.Z/f.Length)
+
 
     /// Set vector to a given Length
     /// Fails on tiny vectors (v.SquareLength < RhinoMath.SqrtEpsilon)
@@ -126,18 +191,35 @@ module Vec =
     let inline matchOrientation (orientToMatch:Vector3d) (v:Vector3d) =
         if orientToMatch * v < 0.0 then -v else v
     
-    /// Returns a horizontal perpendicular vector : Vector3d(v.Y, -v.X, 0.0)
-    /// Not of same length, not unitized, rotated from X to Y axis.
-    /// If input vector is vertical, result is Zero length vector
-    let inline perpendicularVecInXY (v:Vector3d) = 
-        Vector3d(v.Y, -v.X, 0.0)
+    /// Returns a horizontal vector that is perpendicular to the given vector.
+    /// just: Vector3d(v.Y, -v.X, 0.0)
+    /// Rotated counter clockwise in top view.
+    /// If input vector is vertical, result is a zero length vector.
+    /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
+    let perpendicularVecInXY (v:Vector3d) =         
+        let r = Vector3d(v.Y, -v.X, 0.0) // this si the same as: Vec.cross v Vector3d.ZAxis
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then failwithf "Cannot find perpendicularVecInXY for vertical vector %A" v
+        r
+
+    /// Returns a vector that is perpendicular to the given vector an in the same vertical plane .
+    /// Projected into the XY plane input and output vectors are parallell and of same orientation.
+    /// Not of same length, not unitized
+    /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
+    let perpendicularVecInVerticalPlane (v:Vector3d) =         
+        let hor = Vector3d(v.Y, -v.X, 0.0)
+        let r = cross v hor
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then failwithf "Cannot find perpendicularVecInVerticalPlane for vertical vector %A" v 
+        if v.Z < 0.0 then -r else r
 
     /// Project vector to plane
+    /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
     let projectToPlane (pl:Plane) (v:Vector3d) =
         let pt = pl.Origin + v
         let clpt = pl.ClosestPoint(pt)
-        clpt-pl.Origin
-    
+        let r = clpt-pl.Origin
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then failwithf "Cannot projectToPlane for perpendicular vector %A to given plane %A" v pl
+        r
+
     /// Project point onto line in directin of v
     /// Fails if line is missed , tolerance 1E-6
     let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
