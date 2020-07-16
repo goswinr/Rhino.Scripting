@@ -82,6 +82,7 @@
     <Compile Include="Src\Vec.fs" />
     <Compile Include="Src\Pnt.fs" />
     <Compile Include="Src\Line.fs" />
+    <Compile Include="Src\Quat.fs" />
     <Compile Include="Src\AutoOpenVector.fs" />
     <Compile Include="Src\ExtraCurve.fs" />
     <Compile Include="Src\ExtrasBrep.fs" />
