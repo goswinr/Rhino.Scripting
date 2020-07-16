@@ -37,34 +37,32 @@ type [<Struct>] Quat =
     member q.ScaleBy(k)  =  Quat(k * q.X, k * q.Y, k * q.Z, k * q.W)
 
     member q.Norm = let l = q.Magnitude in if l > 1e-8 then q.ScaleBy (1./l) else failwithf "Quad failed to normalize %A" q
+    
+    /// returns Angle in Degree
+    member q.AngleDeg  = 
+        // NOT !!|> Math.radToDeg // Atan2 is better than "2. * acos q.W |> Math.radToDeg" . More precise and more efficient.
+        Math.Atan2 (sqrt(q.X*q.X + q.Y*q.Y + q.Z*q.Z) , q.W) * (360.0 / Math.PI) 
+        
 
     static member scaleBy  k (q:Quat)  =  q.ScaleBy k
 
-    static member divideBy k (q:Quat)  =  if abs k > 1e-8 then q.ScaleBy (1./k) else failwithf "Cannot devide Quat %A by %f" q k 
-   
+    static member divideBy k (q:Quat)  =  if abs k > 1e-8 then q.ScaleBy (1./k) else failwithf "Cannot devide Quat %A by %f" q k    
 
     static member magnitudeSq (q:Quat) = q.MagnitudeSq
 
     static member magnitude   (q:Quat) = q.Magnitude 
 
     static member norm (q:Quat) = q.Norm
-
+    
+    /// returns Angle in Degree    
+    static member angelDeg (q:Quat) = q.AngleDeg 
+    
     static member conjugate (q:Quat) = Quat (-q.X, -q.Y, -q.Z, q.W) //|> Quat.failIfNotNorm 
 
     static member isNormalized (q:Quat) = abs (1. - q.MagnitudeSq) < 1e-8 
 
     //static member failIfNotNorm (q:Quat) = if q |> Quat.isNormalized |> not then failwithf "%A is not Unitized" q else q
-    
-    /// returns Angle in Degree
-    static member angelDeg (q:Quat) = 
-        Math.Atan2 (sqrt(q.X*q.X + q.Y*q.Y + q.Z*q.Z) , q.W) * (360.0 / Math.PI) 
-        // NOT !!|> Math.radToDeg // Atan2 is better than "2. * acos q.W |> Math.radToDeg" . More precise and more efficient.
-    
-    /// returns Angle in Degree    
-    member q.AngleDeg = Quat.angelDeg q 
-     
-    override q.ToString() = sprintf "Quat(x=%g; y=%g; z=%g; w=%g):(magnitude = %g; degree = %g)" q.X q.Y q.Z q.W q.Magnitude q.AngleDeg
-
+         
     static member fromXYZW (x, y, z, w) = 
         let l = sqrt ( x*x + y*y + z*z + w*w )
         if l < 1e-9 then failwithf "Quat.fromXYZW failed on : x:%g y:%g z:%g w:%g" x y z w
@@ -88,10 +86,10 @@ type [<Struct>] Quat =
     //static member isIdentity (q:Quat) = (q.X = 0. && q.Y = 0. && q.Z = 0. && q.W = 1.)
     //static member invert (q:Quat) = q |> Quat.conjugate |> Quat.divideBy q.MagnitudeSq |> Quat.failIfNotNorm // Inverse = Conjugate / Norm Squared
     
-    static member inline ( * ) (l:Quat,r:Quat)  = Quat(     l.W * r.X + l.X * r.W + l.Y * r.Z - l.Z * r.Y,
-                                                            l.W * r.Y + l.Y * r.W + l.Z * r.X - l.X * r.Z,
-                                                            l.W * r.Z + l.Z * r.W + l.X * r.Y - l.Y * r.X,
-                                                            l.W * r.W - l.X * r.X - l.Y * r.Y - l.Z * r.Z ) 
+    static member ( * ) (l:Quat,r:Quat)  = Quat(   l.W * r.X + l.X * r.W + l.Y * r.Z - l.Z * r.Y,
+                                                    l.W * r.Y + l.Y * r.W + l.Z * r.X - l.X * r.Z,
+                                                    l.W * r.Z + l.Z * r.W + l.X * r.Y - l.Y * r.X,
+                                                    l.W * r.W - l.X * r.X - l.Y * r.Y - l.Z * r.Z ) 
 
     /// Given a Rotation Axis(Vec) and an Angle in Radian returns a Quaternion
     static member fromVecRad (axis:Vector3d, angleRadian) =
@@ -145,3 +143,8 @@ type [<Struct>] Quat =
     static member rotatePoint (v:Point3d) (q:Quat) =        
         let  qNode = q * Quat.fromPoint v * Quat.conjugate q // kann man 0 oder W aus der multiplikation rauskürzen?
         Point3d ( qNode.X , qNode.Y , qNode.Z)
+
+
+    override q.ToString() = 
+        sprintf "Quat(x=%g; y=%g; z=%g; w=%g):(magnitude = %g; degrees = %g)" q.X q.Y q.Z q.W q.Magnitude q.AngleDeg
+    
