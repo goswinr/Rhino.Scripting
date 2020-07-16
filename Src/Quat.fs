@@ -71,11 +71,14 @@ type [<Struct>] Quat =
         let lq = 1. / l
         Quat(x*lq, y*lq, z*lq, w*lq)
         
-    static member fromVecAndW (v:Vector3d) w = //TODO add docstring
+    static member fromVectorAndW (v:Vector3d) w = //TODO add docstring
         Quat.fromXYZW (v.X, v.Y, v.Z, w)    
     
-    static member fromVec     (v:Vector3d)   = 
+    static member fromVector   (v:Vector3d)   = 
         Quat.fromXYZW (v.X, v.Y, v.Z, 0.0)  
+
+    static member fromPoint (v:Point3d)   = 
+         Quat.fromXYZW (v.X, v.Y, v.Z, 0.0)  
     
     //static member inline ( * ) (q:Quat,k:float) =  Quat(k * q.X, k * q.Y, k * q.Z, k * q.W)
     //static member inline ( / ) (q:Quat,f:float) = if abs f < 1e-9 then failwithf "Cannot devide Quat %A by %f" q f  else q * (1./f)
@@ -119,9 +122,9 @@ type [<Struct>] Quat =
                 Quat(0., 0., 0., 1.)   // Quat.fromVecAndW nn (cos ((Math.degToRad 0.) * 0.5))   
             else
                 let nn = Vec.cross u  (if abs u.Z >= abs u.X && abs u.Z >= abs u.Y then Vector3d.XAxis else Vector3d.ZAxis) // use any axis to rotate around
-                Quat.fromVecAndW nn 0. // (cos ((Math.degToRad 180.) * 0.5))                        
+                Quat.fromVectorAndW nn 0. // (cos ((Math.degToRad 180.) * 0.5))                        
         else
-           Quat.fromVecAndW n <| sqrt (u.SquareLength * v.SquareLength) + u * v 
+           Quat.fromVectorAndW n <| sqrt (u.SquareLength * v.SquareLength) + u * v 
 
     
     /// <summary>
@@ -137,3 +140,8 @@ type [<Struct>] Quat =
         UtilMath.toDegrees (Math.Atan2(2.0 * ((q.W * q.X) + (q.Y * q.Z)), (q.W * q.W) + (q.Z * q.Z) - (q.X * q.X) - (q.Y * q.Y))),
         UtilMath.toDegrees (Math.Asin(2.0 *  ((q.W * q.Y) - (q.X * q.Z)))),
         UtilMath.toDegrees (Math.Atan2(2.0 * ((q.W * q.Z) + (q.X * q.Y)), (q.W * q.W) + (q.X * q.X) - (q.Y * q.Y) - (q.Z * q.Z)))
+
+    /// Point3d -> Quaternion -> rotated Point3d (about 0,0,0)
+    static member rotatePoint (v:Point3d) (q:Quat) =        
+        let  qNode = q * Quat.fromPoint v * Quat.conjugate q // kann man 0 oder W aus der multiplikation rauskürzen?
+        Point3d ( qNode.X , qNode.Y , qNode.Z)
