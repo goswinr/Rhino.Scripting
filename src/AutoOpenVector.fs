@@ -43,7 +43,9 @@ module AutoOpenVector =
                                     [<OPT;DEF("")>]layer:string ) : unit  = 
             let l = RhinoScriptSyntax.AddLine(fromPoint, fromPoint + vector)
             RhinoScriptSyntax.CurveArrows(l, 2)
-            if layer<>"" then  RhinoScriptSyntax.ObjectLayer(l, layer)
+            if layer<>"" then  
+                RhinoScriptSyntax.AddLayer(layer)|> ignoreObj
+                RhinoScriptSyntax.ObjectLayer(l, layer)
          
     
         [<Extension>]
