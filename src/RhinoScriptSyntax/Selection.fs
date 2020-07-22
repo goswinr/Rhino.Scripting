@@ -1003,7 +1003,9 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Return identifiers of all objects that are visible in a specified view</summary>
+    ///<summary>Return identifiers of all objects that are visible in a specified view.
+    /// This function is the same as rs.VisibleObjects in Rhino Python.
+    /// use rs.ShownObjects to get all objects that are not hidden or on turned-off layers. </summary>
     ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
@@ -1012,10 +1014,10 @@ module ExtensionsSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
     ///<returns>(Guid ResizeArray) identifiers of the visible objects</returns>
-    static member VisibleObjects( [<OPT;DEF(null:string)>]view:string,
-                                  [<OPT;DEF(false)>]select:bool,
-                                  [<OPT;DEF(false)>]includeLights:bool,
-                                  [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+    static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
+                                          [<OPT;DEF(false)>]select:bool,
+                                          [<OPT;DEF(false)>]includeLights:bool,
+                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
         let it = DocObjects.ObjectEnumeratorSettings()
         it.DeletedObjects <- false
         it.ActiveObjects <- true
@@ -1030,7 +1032,7 @@ module ExtensionsSelection =
         for object in e do
             let bbox = object.Geometry.GetBoundingBox(true)
             if viewport.IsVisible(bbox) then
-                if select then object.Select(true) |> ignore //TODO make sync ?
+                if select then object.Select(true) |> ignore //TODO make sync ? TEST !!!
                 objectids.Add(object.Id)
         if objectids.Count>0 && select then Doc.Views.Redraw()
         objectids
