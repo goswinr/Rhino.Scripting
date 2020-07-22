@@ -31,6 +31,19 @@ module Pnt =
         let v = toPt - fromPt
         fromPt + v*rel
     
+    /// retuns a point that is at a given Z level, 
+    /// going from a point in the direction of another point. 
+    let atZlevel (fromPt:Point3d)( toPt:Point3d) (z:float) =
+        let v = toPt - fromPt
+        if fromPt.Z < toPt.Z && z < fromPt.Z  then failwithf "Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
+        if fromPt.Z > toPt.Z && z > fromPt.Z  then failwithf "Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
+        let dot = abs ( v * Vector3d.ZAxis)
+        if dot < 0.0001 then  failwithf "Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A  almost at same Z level. taget Z %f" fromPt toPt z
+        let diffZ = abs (fromPt.Z - z)
+        let fac = diffZ / dot 
+        fromPt + v * fac
+
+    
 
     /// Sets the X value and retuns new Point3d
     let inline setX (v:Point3d) x =  Point3d(x, v.Y, v.Z)
