@@ -112,7 +112,6 @@ type [<Struct>] Quat =
     static member fromVecToVec (u:Vector3d,v:Vector3d) =
         // http://stackoverflow.com/questions/1171849/finding-quaternion-representing-the-rotation-from-one-vector-to-another/1171995#1171995
         let n = Vec.cross u  v
-        printfn "n: %A" n
         if n.SquareLength < 1e-12 then // vectors are paralell
             if u.IsTiny 1e-8  then failwithf "u: %A (+ %A) to short in Quat.fromVecToVec" u v
             if v.IsTiny 1e-8  then failwithf "v: %A (+ %A) to short in Quat.fromVecToVec" v u
