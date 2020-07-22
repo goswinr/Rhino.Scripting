@@ -126,6 +126,11 @@ module ExtensionsPointvector =
                 distance <- point.DistanceTo( pointgeometry.Location )
                 if distance < t3 closest then
                     closest  <-  objectId, pointgeometry.Location, distance
+            
+            | :?  TextDot as dot ->
+                distance <- point.DistanceTo(dot.Point)
+                if distance < t3 closest then
+                    closest  <-  objectId, dot.Point, distance
 
             | :?  PointCloud as pointcloud ->
                 let index = pointcloud.ClosestPoint(point)
