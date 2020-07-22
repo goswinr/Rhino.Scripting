@@ -492,8 +492,14 @@ type RhinoScriptSyntax private () =
             match box nameOrId with
             | :? string as s -> 
                     let i = Doc.Layers.FindByFullPath(s, RhinoMath.UnsetIntIndex)
-                    if i = RhinoMath.UnsetIntIndex then failwithf "CoerceLayer: could not Coerce Layer from name'%A'" nameOrId  
-                    Doc.Layers.[i]
+                    if i = RhinoMath.UnsetIntIndex then 
+                        let lay = Doc.Layers.FindName s
+                        if isNull lay then 
+                            failwithf "CoerceLayer: could find name '%s'" s
+                        else
+                            lay
+                    else
+                        Doc.Layers.[i]
             | :? Guid as g   -> 
                     let l = Doc.Layers.FindId(g)            
                     if isNull l then failwithf "CoerceLayer: could not Coerce Layer from Id '%A'" nameOrId  
