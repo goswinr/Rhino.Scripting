@@ -405,8 +405,8 @@ module ExtensionsObject =
     ///<summary>Moves a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
-    ///<returns>(Guid) Identifier of the moved object</returns>
-    static member MoveObject(objectId:Guid, translation:Vector3d) : Guid =
+    ///<returns>(Guid) Identifier of the moved object, (same as the input!?)</returns>
+    static member MoveObject(objectId:Guid, translation:Vector3d) : Guid = //TODO or return unit ??
         let xf = Transform.Translation(translation)
         let res = Doc.Objects.Transform(objectId, xf, true)
         if res = Guid.Empty then failwithf "Rhino.Scripting: Cannot apply move to from objectId:'%A' translation:'%A'" objectId translation
@@ -416,7 +416,7 @@ module ExtensionsObject =
     ///<summary>Moves one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
-    ///<returns>(Guid ResizeArray) Identifiers of the moved objects</returns>
+    ///<returns>(Guid ResizeArray) Identifiers of the moved objects(same as the input!?)</returns>
     static member MoveObject(objectIds:Guid seq, translation:Vector3d) : Guid ResizeArray =  //PLURAL        
         let xf = Transform.Translation(translation)
         let rc = ResizeArray()
