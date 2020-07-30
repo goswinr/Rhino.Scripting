@@ -143,8 +143,20 @@ module ExtensionsGeometry =
     ///    1 = bold
     ///    2 = italic
     ///    3 = bold and italic</param>
-    ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte. Optional, Default Value: <c>TextHorizontalAlignment.Center</c></param>
-    ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte. Optional, Default Value: <c>TextVerticalAlignment.Middle</c></param>
+    ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte. 
+    ///    Optional, Default Value: <c>TextHorizontalAlignment.Center = 1uy</c>
+    ///    0uy = Left
+    ///    1uy = Center
+    ///    2uy = Right</param>
+    ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte. 
+    ///    Optional, Default Value: <c>TextVerticalAlignment.Middle = 3uy</c>
+    ///    0uy = Top:                    Attach to top of an "I" on the first line.
+    ///    1uy = MiddleOfTop:            Attach to middle of an "I" on the first line.
+    ///    2uy = BottomOfTop:            Attach to baseline of first line.
+    ///    3uy = Middle:                 Attach to middle of text vertical advance.
+    ///    4uy = MiddleOfBottom:         Attach to middle of an "I" on the last line. 
+    ///    5uy = Bottom:                 Attach to the basline of the last line. 
+    ///    6uy = BottomOfBoundingBox:    Attach to the bottom of the boudning box of the visible glyphs.</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
     static member AddText(  text:string,
                             plane:Plane,
@@ -189,7 +201,44 @@ module ExtensionsGeometry =
         if objectId = Guid.Empty then failwithf "Rhino.Scripting: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         Doc.Views.Redraw()
         objectId
-
+    
+    [<Extension>]
+    ///<summary>Adds a text string to the document</summary>
+    ///<param name="text">(string) The text to display</param>
+    ///<param name="point">(Point3d) a ponit where to add text. It will be paralell to XY plane.</param>
+    ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
+    ///    The text height</param>
+    ///<param name="font">(string) Optional, The text font</param>
+    ///<param name="fontStyle">(int) Optional, Default Value: <c>0</c>
+    ///    Any of the following flags
+    ///    0 = normal
+    ///    1 = bold
+    ///    2 = italic
+    ///    3 = bold and italic</param>
+    ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte. 
+    ///    Optional, Default Value: <c>TextHorizontalAlignment.Center = 1uy</c>
+    ///    0uy = Left
+    ///    1uy = Center
+    ///    2uy = Right</param>
+    ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte. 
+    ///    Optional, Default Value: <c>TextVerticalAlignment.Middle = 3uy</c>
+    ///    0uy = Top:                    Attach to top of an "I" on the first line.
+    ///    1uy = MiddleOfTop:            Attach to middle of an "I" on the first line.
+    ///    2uy = BottomOfTop:            Attach to baseline of first line.
+    ///    3uy = Middle:                 Attach to middle of text vertical advance.
+    ///    4uy = MiddleOfBottom:         Attach to middle of an "I" on the last line. 
+    ///    5uy = Bottom:                 Attach to the basline of the last line. 
+    ///    6uy = BottomOfBoundingBox:    Attach to the bottom of the boudning box of the visible glyphs.</param>
+    ///<returns>(Guid) identifier for the object that was added to the doc</returns>
+    static member AddText(  text:string,
+                            pt:Point3d,
+                            [<OPT;DEF(1.0)>]height:float,
+                            [<OPT;DEF(null:string)>]font:string,
+                            [<OPT;DEF(0)>]fontStyle:int,
+                            [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep paramter optional ???
+                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = 
+        let pl = Plane(pt,Vector3d.XAxis,Vector3d.YAxis)
+        RhinoScriptSyntax.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
 
     [<Extension>]
     ///<summary>Add a text dot to the document</summary>
