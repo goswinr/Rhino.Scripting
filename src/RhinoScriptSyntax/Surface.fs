@@ -1729,24 +1729,39 @@ module ExtensionsSurface =
         let rc =  resizeArray { for piece in pieces do yield Doc.Objects.AddBrep(piece) }
         Doc.Views.Redraw()
         rc
-
+    
 
     [<Extension>]
-    ///<summary>Calculate the area of a surface or polysurface object. The results are
-    ///    based on the current drawing units</summary>
+    ///<summary>Calculate the area of a surface Geometry. 
+    /// The results are based on the current drawing units</summary>
+    ///<param name="srf">(Geometry.Surface) The surface geometry</param>
+    ///<returns>(float) of area</returns>
+    static member SurfaceArea(srf:Surface) : float  =        
+        let amp = AreaMassProperties.Compute(srf, true, false, false, false)
+        if isNull amp then  failwithf "SurfaceArea failed on Surface: %A" srf
+        amp.Area
+
+    [<Extension>]
+    ///<summary>Calculate the area of a Brep / Polysurface  Geometry. 
+    /// The results are based on the current drawing units</summary>
+    ///<param name="brep">(Geometry.Brep) The Polysurface geometry</param>
+    ///<returns>(float) of area</returns>
+    static member SurfaceArea(brep:Brep) : float  =        
+        let amp = AreaMassProperties.Compute(brep, true, false, false, false)
+        if isNull amp then  failwithf "SurfaceArea failed on Brep: %A" brep
+        amp.Area
+
+    [<Extension>]
+    ///<summary>Calculate the area of a surface or polysurface object. 
+    /// The results are based on the current drawing units</summary>
     ///<param name="objectId">(Guid) The surface's identifier</param>
     ///<returns>(float) of area</returns>
-    static member SurfaceArea(objectId:Guid) : float  =
-        objectId
-        |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.map AreaMassProperties.Compute
-        |> Option.orElseWith (fun () ->
-            objectId
-            |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.map AreaMassProperties.Compute
-            )
-        |> Option.defaultWith (fun () -> failwithf "SurfaceArea failed on %A" objectId)
-        |> fun amp -> amp.Area
+    static member SurfaceArea(objectId:Guid) : float  =        
+        match RhinoScriptSyntax.CoerceGeometry objectId with
+        | :? Surface as s -> RhinoScriptSyntax.SurfaceArea s        
+        | :? Brep    as b -> RhinoScriptSyntax.SurfaceArea b
+        | x -> failwithf "SurfaceArea doesnt work on on %A" (rhType  objectId)
+   
 
 
 
