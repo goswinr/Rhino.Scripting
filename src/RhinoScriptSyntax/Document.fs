@@ -106,15 +106,26 @@ module ExtensionsDocument =
 
 
     [<Extension>]
-    ///<summary>Enables or disables screen redrawing
+    ///<summary>Enables or disables screen redrawing.
     ///  All UI interaccing functions (such as rs.GetObject) of Rhino.Scripting 
     ///  will automatically enable redraw if needed 
-    ///  and afterwards disable it again if it was disabled before.</summary>
+    ///  and afterwards disable it again if it was disabled before.
+    ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
         Doc.Views.RedrawEnabled <- enable
+
+    [<Extension>]
+    ///<summary>Disables screen redrawing.
+    ///  All UI interaccing functions (such as rs.GetObject) of Rhino.Scripting 
+    ///  will automatically enable redraw if needed 
+    ///  and afterwards disable it again if it was disabled before.
+    ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>    
+    ///<returns>(unit) void, nothing</returns>
+    static member DisableRedraw() : unit =
+        Doc.Views.RedrawEnabled <- false
 
 
     [<Extension>]
