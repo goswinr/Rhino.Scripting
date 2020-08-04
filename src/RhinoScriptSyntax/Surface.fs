@@ -37,9 +37,7 @@ module ExtensionsSurface =
     ///<summary>Adds a cone shaped polysurface to the document</summary>
     ///<param name="basis">(Plane) 3D origin point of the cone or a plane with an apex at the origin
     ///    and normal along the plane's z-axis</param>
-    ///<param name="height">(float) 3D height point of the cone if basis is a 3D point. The height
-    ///    point defines the height and direction of the cone. If basis is a
-    ///    plane, height is a numeric value</param>
+    ///<param name="height">(float)  height of cone </param>
     ///<param name="radius">(float) The radius at the basis of the cone</param>
     ///<param name="cap">(bool) Optional, Default Value: <c>true</c>
     ///    Cap basis of the cone</param>
@@ -49,10 +47,11 @@ module ExtensionsSurface =
                            radius:float,
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
-        let brep = Brep.CreateFromCone(cone, cap)
+        let brep = Brep.CreateFromCone(cone, cap)// TODO cone is upside down??
         let rc = Doc.Objects.AddBrep(brep)
         Doc.Views.Redraw()
         rc
+        //TODO add version with two points
 
 
     [<Extension>]
