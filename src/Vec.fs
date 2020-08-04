@@ -16,14 +16,23 @@ module Vec =
     /// Converts Angels from Radians to Degrees
     let inline internal toDegrees radians = 57.2957795130823 * radians // 57.2957795130823 = 180. / Math.PI
 
+    /// Gets the X value of  Vector3d
+    let inline getX (v:Vector3d)  =  v.X
+
+    /// Gets the Y value of  Vector3d
+    let inline getY (v:Vector3d) =  v.Y
+
+    /// Gets the Z value of  Vector3d
+    let inline getZ (v:Vector3d) =  v.Z
+
     /// Sets the X value and retuns new Vector3d
-    let inline setX (v:Vector3d) x =  Vector3d(x, v.Y, v.Z)
+    let inline setX x (v:Vector3d) =  Vector3d(x, v.Y, v.Z)
 
     /// Sets the Y value and retuns new Vector3d
-    let inline setY (v:Vector3d) y =  Vector3d(v.X, y, v.Z)
+    let inline setY y (v:Vector3d) =  Vector3d(v.X, y, v.Z)
 
     /// Sets the Z value and retuns new Vector3d
-    let inline setZ (v:Vector3d) z =  Vector3d(v.X, v.Y, z)
+    let inline setZ z (v:Vector3d) =  Vector3d(v.X, v.Y, z)
 
     /// Scales the vector
     let inline scale (sc:float) (v:Vector3d) = v * sc  

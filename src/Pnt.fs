@@ -46,13 +46,13 @@ module Pnt =
     
 
     /// Sets the X value and retuns new Point3d
-    let inline setX (v:Point3d) x =  Point3d(x, v.Y, v.Z)
+    let inline setX x (v:Point3d) =  Point3d(x, v.Y, v.Z)
 
     /// Sets the Y value and retuns new Point3d
-    let inline setY (v:Point3d) y =  Point3d(v.X, y, v.Z)
+    let inline setY y (v:Point3d) =  Point3d(v.X, y, v.Z)
 
     /// Sets the Z value and retuns new Point3d
-    let inline setZ (v:Point3d) z =  Point3d(v.X, v.Y, z)
+    let inline setZ z (v:Point3d) =  Point3d(v.X, v.Y, z)
 
     /// Gets the X value of  Point3d
     let inline getX (v:Point3d)  =  v.X
