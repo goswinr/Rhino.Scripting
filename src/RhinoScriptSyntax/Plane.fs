@@ -206,7 +206,7 @@ module ExtensionsPlane =
         //origin = RhinoScriptSyntax.Coerce3dpoint(origin)
         //normal = RhinoScriptSyntax.Coerce3dvector(normal)
         let mutable rc = Plane(origin, normal)
-        if xaxis.IsValid then
+        if not xaxis.IsZero then
             //xaxis = RhinoScriptSyntax.Coerce3dvector(xaxis)
             let xaxis = Vector3d(xaxis)//prevent original xaxis parameter from being unitized too
             xaxis.Unitize() |> ignore
