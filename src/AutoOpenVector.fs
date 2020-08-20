@@ -39,14 +39,19 @@ module AutoOpenVector =
         [<Extension>]
         /// Draws a line with a Curve Arrows
         static member DrawVector(   vector:Vector3d, 
-                                    [<OPT;DEF(Point3d())>]fromPoint:Point3d, 
-                                    [<OPT;DEF("")>]layer:string ) : unit  = 
-            let l = RhinoScriptSyntax.AddLine(fromPoint, fromPoint + vector)
+                                    fromPoint:Point3d, 
+                                    [<OPT;DEF("")>]layer:string ) : unit  =             
+            let l =RhinoScriptSyntax.AddLine(fromPoint, fromPoint + vector )
             RhinoScriptSyntax.CurveArrows(l, 2)
-            if layer<>"" then  
-                RhinoScriptSyntax.AddLayer(layer)|> ignoreObj
-                RhinoScriptSyntax.ObjectLayer(l, layer)
-         
+            if layer<>"" then
+                RhinoScriptSyntax.ObjectLayer(l, layer, true)
+        
+        [<Extension>]
+        /// Draws a line with a Curve Arrows
+        static member DrawVector( vector:Vector3d) : unit  =             
+            let l = RhinoScriptSyntax.AddLine(Point3d.Origin, Point3d.Origin + vector )
+            RhinoScriptSyntax.CurveArrows(l, 2)
+            
     
         [<Extension>]
         /// Draws the axes of a plane and adds TextDots to lable them.
