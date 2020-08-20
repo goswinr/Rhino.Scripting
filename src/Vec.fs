@@ -68,6 +68,13 @@ module Vec =
         else  
             let f = 1.0 / sqrt(l)
             Vector3d(v.X*f , v.Y*f , v.Z*f)
+    
+    /// Applies a transformation matrix
+    let transform (xForm:Transform) (v:Vector3d ) =
+        let t = Vector3d(v)
+        v.Transform(xForm)
+        v
+
 
     /// Returns positive angle between 2 Vectors in Radians , takes vector orientation into account, 
     /// Range 0.0 to PI( = 0 to 180 degree)

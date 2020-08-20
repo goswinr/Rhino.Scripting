@@ -63,7 +63,11 @@ module Pnt =
     /// Gets the Z value of  Point3d
     let inline getZ (v:Point3d) =  v.Z
 
-
+    /// Applies a transformation matrix
+    let transform (xForm:Transform) (v:Point3d ) =
+        let t = Point3d(v)
+        v.Transform(xForm)
+        v
     
     /// Snap to point if within Doc.ModelAbsoluteTolerance
     let snapIfClose (snapTo:Point3d) (pt:Point3d) =
