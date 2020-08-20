@@ -41,8 +41,24 @@ module AutoOpenCurried =
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
     ///<param name="objectId">(Guid) The identifier of the object</param>    
     ///<returns>(unit) void, nothing</returns>
-    static member setLayer( layer:string) (objectId:Guid) : unit = 
+    static member setLayer( layer:string) (objectId:Guid) : unit =
         RhinoScriptSyntax.ObjectLayer(objectId,layer,true)
+    
+    [<Extension>]
+    ///<summary>Returns the full layername of an object. 
+    /// parent layers are separated by <c>::</c></summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<returns>(string) The object's current layer</returns>
+    static member getLayer (objectId:Guid) : string = 
+        RhinoScriptSyntax.ObjectLayer(objectId)
+
+    [<Extension>]
+    ///<summary>Returns the short layer of an object.
+    ///    Without Parent Layers</summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<returns>(string) The object's current layer</returns>
+    static member getLayerShort (objectId:Guid) : string = 
+        RhinoScriptSyntax.ObjectLayerShort(objectId)
         
     [<Extension>]
     ///<summary>Sets the name of an object</summary>
@@ -51,7 +67,14 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing</returns>
     static member setName( name:string) (objectId:Guid) : unit = 
         RhinoScriptSyntax.ObjectName(objectId, name)    
-        
+    
+    [<Extension>]
+    ///<summary>Returns the name of an object or "" if none given</summary>
+    ///<param name="objectId">(Guid)Id of object</param>
+    ///<returns>(string) The current object name, empty string if no name given </returns>
+    static member getName (objectId:Guid) : string = 
+        RhinoScriptSyntax.ObjectName(objectId)    
+
     [<Extension>]
     ///<summary>Sets a user text stored on an object</summary>
     ///<param name="key">(string) The key name to set</param>
@@ -153,4 +176,15 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing</returns>
     static member draw (layer:string) (geo:'AnyRhinoGeometry) : unit =  
         RhinoScriptSyntax.Add(geo) |> RhinoScriptSyntax.setLayer layer
+
+
         
+    [<Extension>]
+    ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
+    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
+    ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
+    ///<param name="objectId">(Guid) The identifier of the object</param> 
+    ///<returns>(unit) void, nothing</returns>
+    static member transform (matrix:Transform) (objectId:Guid) : Guid =  
+        RhinoScriptSyntax.TransformObject(objectId,matrix,false)       
+        // TODO test to ensure GUID is the same ?
