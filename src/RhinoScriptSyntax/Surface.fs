@@ -69,7 +69,7 @@ module ExtensionsSurface =
     static member AddCutPlane( objectIds:Guid seq,
                                startPoint:Point3d,
                                endPoint:Point3d,
-                               [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
+                               [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let bbox = BoundingBox.Unset
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -407,7 +407,7 @@ module ExtensionsSurface =
     ///    Close the loft back to the first curve</param>
     ///<returns>(Guid ResizeArray) Array containing the identifiers of the new surface objects</returns>
     static member AddLoftSrf( objectIds:Guid seq,
-                              [<OPT;DEF(Point3d())>]start:Point3d,
+                              [<OPT;DEF(Point3d())>]start:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                               [<OPT;DEF(Point3d())>]ende:Point3d,
                               [<OPT;DEF(0)>]loftType:int,
                               [<OPT;DEF(0)>]rebuild:int,
@@ -674,7 +674,7 @@ module ExtensionsSurface =
     static member AddTorus( basis:Plane,
                             majorRadius:float,
                             minorRadius:float,
-                            [<OPT;DEF(Point3d())>]direction:Point3d) : Guid =
+                            [<OPT;DEF(Point3d())>]direction:Point3d) : Guid = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
         let rc = Doc.Objects.AddSurface(revsurf)

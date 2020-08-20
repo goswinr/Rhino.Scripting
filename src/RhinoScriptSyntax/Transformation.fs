@@ -259,6 +259,7 @@ module ExtensionsTransformation =
     ///<param name="point">(Point3d) Optional, Center of scale. If omitted, world origin is used</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformScale(scale:float*float*float, [<OPT;DEF(Point3d())>]point:Point3d) : Transform =
+        //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let plane = Plane(point, Vector3d.ZAxis);
         let xf = Transform.Scale(plane, scale|> t1, scale|> t2, t3 scale)
         xf

@@ -170,7 +170,8 @@ module ExtensionsCurve =
     ///<param name="basePointB">(Point3d) Optional, Base point of the second curve. If omitted,
     ///    starting point of the curve is used</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
-    static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
+    static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid = 
+        //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB
         let  curve0 = RhinoScriptSyntax.CoerceCurve (curveA)
@@ -259,7 +260,7 @@ module ExtensionsCurve =
     static member AddInterpCurve(   points:Point3d seq, 
                                     [<OPT;DEF(3)>]degree:int, 
                                     [<OPT;DEF(0)>]knotstyle:int, 
-                                    [<OPT;DEF(Vector3d())>]startTangent:Vector3d, 
+                                    [<OPT;DEF(Vector3d())>]startTangent:Vector3d,  //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                     [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
         let endTangent   = if endTangent.IsZero then Vector3d.Unset else endTangent
         let startTangent = if startTangent.IsZero then Vector3d.Unset else startTangent
@@ -570,7 +571,7 @@ module ExtensionsCurve =
     ///<returns>(int) 1 if the curve's orientation is clockwise
     ///    -1 if the curve's orientation is counter-clockwise
     ///     0 if unable to compute the curve's orientation</returns>
-    static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int =
+    static member ClosedCurveOrientation(curveId:Guid, [<OPT;DEF(Vector3d())>]direction:Vector3d) : int = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let direction0 =if direction.IsZero then Vector3d.Unset else direction
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <| curve.IsClosed then  0
@@ -1189,7 +1190,7 @@ module ExtensionsCurve =
                                     curveB:Guid,
                                     radius:float,
                                     [<OPT;DEF(Point3d())>]basePointA:Point3d,
-                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane =
+                                    [<OPT;DEF(Point3d())>]basePointB:Point3d) : Point3d * Point3d * Plane = //TODO make overload instead, this may leak  see draw vector and transform point!
         //  [<OPT;DEF(true)>]returnPoints:bool)
         //<param name="returnPoints">(bool) Optional, Default Value: <c>true</c>
         //If True (Default), then fillet points are
@@ -2225,7 +2226,7 @@ module ExtensionsCurve =
     ///    3 = Smooth
     ///    4 = Chamfer</param>
     ///<returns>(Guid ResizeArray) list of ids for the new curves</returns>
-    static member OffsetCurve(curveId:Guid, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Guid ResizeArray =
+    static member OffsetCurve(curveId:Guid, direction:Point3d, distance:float, [<OPT;DEF(Vector3d())>]normal:Vector3d, [<OPT;DEF(1)>]style:int) : Guid ResizeArray = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let normal0 = if normal.IsZero then Vector3d.ZAxis else normal
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let tolerance = Doc.ModelAbsoluteTolerance

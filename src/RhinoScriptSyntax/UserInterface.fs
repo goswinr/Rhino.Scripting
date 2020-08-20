@@ -116,7 +116,7 @@ module ExtensionsUserinterface =
     ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
     ///<param name="message">(string) Optional, A prompt to display</param>
     ///<returns>(float option) Option of angle in degree</returns>
-    static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d,
+    static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float,
                             [<OPT;DEF(null:string)>]message:string) : float option=
@@ -185,7 +185,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
     ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
-                            [<OPT;DEF(Point3d())>]basePoint:Point3d,
+                            [<OPT;DEF(Point3d())>]basePoint:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(null:string)>]prompt1:string,
                             [<OPT;DEF(null:string)>]prompt2:string,
                             [<OPT;DEF(null:string)>]prompt3:string) : (Point3d []) option=
@@ -252,7 +252,7 @@ module ExtensionsUserinterface =
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///    Prompt for the second distance point</param>
     ///<returns>(float option) an Option of The distance between the two points</returns>
-    static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d,
+    static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
                                 [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float option =
