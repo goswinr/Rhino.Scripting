@@ -431,7 +431,7 @@ type RhinoScriptSyntax private () =
             if red  <0 || red  >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
             if green<0 || green>255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
             if blue <0 || blue >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
-            Drawing.Color.FromArgb(255  , red, green, blue)
+            Drawing.Color.FromArgb( red, green, blue)
             
         | :? (int*int*int*int) as argb  -> 
             let alpha, red , green, blue   = argb 

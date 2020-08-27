@@ -424,20 +424,13 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts input into a native color object if possible.
-    ///    The returned data is accessible by indexing, and that is the suggested method to interact with the type.
-    ///    Red index is [0], Green index is [1], Blue index is [2] and Alpha index is [3].
-    ///    If the provided object is already a color, its value is copied.
-    ///    Alternatively, you can also pass three coordinates singularly for an RGB color, or four
-    ///    for an RGBA color point</summary>
+    ///<summary>Creats a  RGB color,  red, green and  blue  values</summary>
     ///<param name="red">(int) Red Value</param>
     ///<param name="green">(int) Green value</param>
     ///<param name="blue">(int) Blue value</param>
-    ///<param name="alpha">(int) Optional, Default Value: <c>0</c>
-    ///    Alpha value</param>
-    ///<returns>(Drawing.Color) a Color</returns>
-    static member CreateColor(red:int, green:int, blue:int, [<OPT;DEF(0)>]alpha:int) : Drawing.Color =
-        RhinoScriptSyntax.CoerceColor((red, green, blue, alpha))
+    ///<returns>(System.Drawing.Color) a Color</returns>
+    static member CreateColor(red:int, green:int, blue:int) : Drawing.Color =
+        Drawing.Color.FromArgb( red, green, blue)
 
 
     [<Extension>]
