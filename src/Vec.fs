@@ -46,6 +46,20 @@ module Vec =
     /// Dot product
     let inline dot (a:Vector3d) (b:Vector3d) = a * b 
 
+    /// Checks if a vector is vertical by doing:
+    /// abs(v.X) + abs(v.Y) < RhinoMath.SqrtEpsilon
+    /// fails on tiny (shorter than RhinoMath.SqrtEpsilon) vectors
+    let inline isVertical (v:Vector3d) =
+        if v.IsTiny(RhinoMath.SqrtEpsilon) then failwithf "Cannot not check very tiny vector for verticality %A" v
+        abs(v.X) + abs(v.Y) < RhinoMath.SqrtEpsilon
+
+    /// Checks if a vector is horizontal  by doing:
+    /// abs(v.Z) < RhinoMath.SqrtEpsilon
+    /// fails on tiny (shorter than RhinoMath.SqrtEpsilon) vectors
+    let inline isHorizontal (v:Vector3d) =
+        if v.IsTiny(RhinoMath.SqrtEpsilon) then failwithf "Cannot not check very tiny vector for horizontality %A" v
+        abs(v.Z) < RhinoMath.SqrtEpsilon
+
     /// Cross product 
     /// A x B = |A|*|B|*sin(angle), direction follow right-hand rule
     let inline cross (a:Vector3d) (b:Vector3d) =
