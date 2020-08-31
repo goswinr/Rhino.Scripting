@@ -46,29 +46,45 @@ module Pnt =
     
 
     /// Sets the X value and retuns new Point3d
-    let inline setX x (v:Point3d) =  Point3d(x, v.Y, v.Z)
+    let inline setX x (pt:Point3d) =  Point3d(x, pt.Y, pt.Z)
 
     /// Sets the Y value and retuns new Point3d
-    let inline setY y (v:Point3d) =  Point3d(v.X, y, v.Z)
+    let inline setY y (pt:Point3d) =  Point3d(pt.X, y, pt.Z)
 
     /// Sets the Z value and retuns new Point3d
-    let inline setZ z (v:Point3d) =  Point3d(v.X, v.Y, z)
+    let inline setZ z (pt:Point3d) =  Point3d(pt.X, pt.Y, z)
 
     /// Gets the X value of  Point3d
-    let inline getX (v:Point3d)  =  v.X
+    let inline getX (pt:Point3d)  =  pt.X
 
     /// Gets the Y value of  Point3d
-    let inline getY (v:Point3d) =  v.Y
+    let inline getY (pt:Point3d) =  pt.Y
 
     /// Gets the Z value of  Point3d
-    let inline getZ (v:Point3d) =  v.Z
+    let inline getZ (pt:Point3d) =  pt.Z
 
     /// Applies a transformation matrix
-    let transform (xForm:Transform) (v:Point3d ) =
-        let t = Point3d(v)
-        v.Transform(xForm)
-        v
+    let transform (xForm:Transform) (pt:Point3d ) =        
+        pt.Transform(xForm)
+        pt
+
+    /// Applies a translation vector
+    let inline translate (shift:Vector3d) (pt:Point3d ) =
+        pt + shift
     
+    /// Add to X coordinat of point
+    let inline translateX (xShift:float) (pt:Point3d ) =
+        Point3d(pt.X+xShift, pt.Y, pt.Z)
+
+    /// Add to Y coordinat of point
+    let inline translateY (yShift:float) (pt:Point3d ) =
+        Point3d(pt.X, pt.Y+yShift, pt.Z)
+
+    /// Add to Z coordinat of point
+    let inline translateZ (zShift:float) (pt:Point3d ) =
+        Point3d(pt.X, pt.Y, pt.Z+zShift)
+   
+
     /// Snap to point if within Doc.ModelAbsoluteTolerance
     let snapIfClose (snapTo:Point3d) (pt:Point3d) =
         if (snapTo-pt).Length < Doc.ModelAbsoluteTolerance then snapTo else pt
