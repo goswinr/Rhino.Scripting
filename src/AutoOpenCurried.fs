@@ -165,7 +165,7 @@ module AutoOpenCurried =
 
     
     [<Extension>]
-    ///<summary>Matches all properties from a scource object to a target object by duplicating attributes. 
+    ///<summary>Matches all properties( layer, name, user text, ....) from a scource object to a target object by duplicating attributes. 
     /// and copying user strings on geometry. </summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
