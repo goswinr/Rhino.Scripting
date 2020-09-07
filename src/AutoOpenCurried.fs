@@ -141,16 +141,28 @@ module AutoOpenCurried =
         
     [<Extension>]
     ///<summary>Copies the object name from a scource object to a target object</summary>
-    ///<param name="sourceId">(Guid) The object to take all keys from </param>
-    ///<param name="targetId">(Guid) The object to write  all keys to </param>
+    ///<param name="sourceId">(Guid) The object to take the name from </param>
+    ///<param name="targetId">(Guid) The object to write the name to </param>
     ///<returns>(unit) void, nothing</returns>
     static member matchName (sourceId:Guid) (targetId:Guid) : unit = 
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
         let n = sc.Attributes.Name 
-        if isNull n then failwithf "matchUserText: scource object '%A' has no name. Targets name: '%A'"  sourceId de.Attributes.Name
+        if isNull n then failwithf "matchName: scource object '%A' has no name. Targets name: '%A'"  sourceId de.Attributes.Name
         de.Attributes.Name <- n
-        if not <| de.CommitChanges() then failwithf "matchUserText failed for '%A' and '%A'"  sourceId targetId
+        if not <| de.CommitChanges() then failwithf "matchName failed for '%A' and '%A'"  sourceId targetId
+
+    [<Extension>]
+    ///<summary>Puts target object on the same Layer as a scource object </summary>
+    ///<param name="sourceId">(Guid) The object to take the layer from </param>
+    ///<param name="targetId">(Guid) The object to change the layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member matchLayer (sourceId:Guid) (targetId:Guid) : unit = 
+        let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
+        let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
+        de.Attributes.LayerIndex <- sc.Attributes.LayerIndex 
+        if not <| de.CommitChanges() then failwithf "matchLayer failed for '%A' and '%A'"  sourceId targetId
+
     
     [<Extension>]
     ///<summary>Matches all properties from a scource object to a target object by duplicating attributes. 
