@@ -357,7 +357,7 @@ module ExtensionsCurve =
     [<Extension>]
     ///<summary>Adds a closed polyline curve , 
     ///    if the endpoint is already closer than Doc.ModelAbsoluteTolerance to the start it wil be set to start point
-    // else an additional point will be added with the same position as start</summary>
+    ///    else an additional point will be added with the same position as start</summary>
     ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddPolylineClosed(points:Point3d seq) : Guid =
