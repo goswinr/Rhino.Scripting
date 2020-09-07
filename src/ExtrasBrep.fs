@@ -136,8 +136,8 @@ module ExtrasBrep =
     ///<param name="trimmer">(Brep)the volume to cut out</param>
     ///<param name="keep">(Brep) the volume to keep</param>
     ///<param name="subtractionLocations">(int) Optional, The amount of locations where the brep is expected to be cut
-    /// This is an optional safety check that makes it twice as slow. 
-    //  It ensures that the count of breps from  Brep.CreateBooleanIntersection is equal to subtractionLocations </param>
+    ///  This is an optional safety check that makes it twice as slow. 
+    ///  It ensures that the count of breps from  Brep.CreateBooleanIntersection is equal to subtractionLocations </param>
     ///<returns>(Brep) Brep Geometry</returns>
     static member SubstractBrep (keep:Brep,trimmer:Brep,[<OPT;DEF(0)>]subtractionLocations:int)  :Brep =
         if not trimmer.IsSolid then
