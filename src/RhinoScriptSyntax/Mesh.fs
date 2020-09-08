@@ -42,10 +42,13 @@ module ExtensionsMesh =
             mesh.Vertices.Add(pt) |> ignore
 
         for face in faceVertices do
-            if Seq.length(face)<4 then
+            let l = Seq.length(face)
+            if l = 3 then
                 mesh.Faces.AddFace(face.[0], face.[1], face.[2]) |> ignore
-            else
+            elif l = 4 then 
                 mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore
+            else 
+                failwithf "AddMesh: Expected 3 or 4 indices for a face but got %d" l
 
         if notNull vertexNormals then
             let count = Seq.length(vertexNormals)
@@ -73,6 +76,62 @@ module ExtensionsMesh =
         Doc.Views.Redraw()
         rc
     
+    [<Extension>]
+    ///<summary>Add a mesh object to the document</summary>
+    ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
+    ///<param name="faceVertices">(int*int*int*int seq) Tuple  of  4 integers that define the
+    ///    vertex indices for each face of the mesh. If the third a fourth vertex
+    ///      indices of a face are identical, a triangular face will be created</param>
+    ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
+    ///    the mesh. Note, for every vertex, there must be a corresponding vertex
+    ///    normal</param>
+    ///<param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
+    ///    vertex, there must be a corresponding texture coordinate</param>
+    ///<param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
+    ///    there must be a corresponding vertex color</param>
+    ///<returns>(Guid) Identifier of the new object</returns>
+    static member AddMesh( vertices:Point3d seq, //TODO how to construct Ngon Mesh ???
+                           faceVertices:seq<int*int*int*int>, 
+                           [<OPT;DEF(null:Vector3f seq)>]vertexNormals:Vector3f seq,
+                           [<OPT;DEF(null:Point2f seq)>]textureCoordinates:Point2f seq,
+                           [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
+        let mesh = new Mesh()
+        for pt in vertices do
+            mesh.Vertices.Add(pt) |> ignore
+
+        for face in faceVertices do
+            let a,b,c,d = face 
+            if c = d then
+                mesh.Faces.AddFace(a,b,c) |> ignore
+            else
+                mesh.Faces.AddFace(a,b,c,d) |> ignore
+
+        if notNull vertexNormals then
+            let count = Seq.length(vertexNormals)
+            let normals = Array.zeroCreate count
+            for i, normal in Seq.indexed(vertexNormals) do
+                normals.[i] <- normal
+            mesh.Normals.SetNormals(normals)    |> ignore
+
+        if notNull textureCoordinates then
+            let count = Seq.length(textureCoordinates)
+            let tcs = Array.zeroCreate count
+            for i, tc in Seq.indexed(textureCoordinates) do
+                tcs.[i] <-  tc
+            mesh.TextureCoordinates.SetTextureCoordinates(tcs)  |> ignore
+
+        if notNull vertexColors then
+            let count = Seq.length(vertexColors)
+            let colors = Array.zeroCreate count
+            for i, color in Seq.indexed(vertexColors) do
+                //colors.[i] = RhinoScriptSyntax.Coercecolor(color)
+            mesh.VertexColors.SetColors(colors)   |>   ignore
+
+        let rc = Doc.Objects.AddMesh(mesh)
+        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        Doc.Views.Redraw()
+        rc
+
 
 
     [<Extension>]
