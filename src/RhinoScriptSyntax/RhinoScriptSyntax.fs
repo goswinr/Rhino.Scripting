@@ -46,7 +46,9 @@ type ObjectFilterEnum internal () =
 [<AbstractClass; Sealed>]
 type RhinoScriptSyntax private () =
     
+   
     /// A Dictionary to store state between scripting session.
+    /// use Sticky.Clear() to reset it.
     static member val Sticky = new Dictionary<string, obj>() with get
     
     /// An Integer Enum of Object types.
