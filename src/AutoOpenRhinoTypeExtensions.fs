@@ -124,6 +124,31 @@ module AutoOpenRhinoTypeExtensions =
             Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
 
 
+    type Transform with 
+        
+        [<Extension>] 
+        /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
+        member m.ToNiceString =  
+            let vs = 
+                m.ToFloatArray(true)
+                |> Array.map (sprintf "%g")
+            let cols = 
+                [| for i=0 to 3 do
+                    [| vs.[0+i];vs.[4+i];vs.[8+i];vs.[12+i] |]
+                    |> Array.map String.length
+                    |> Array.max
+                |]
+                
+            stringBuffer{
+                yield! "Rhino.Geometry.Transform:"
+                for i,s in Seq.indexed vs do
+                    let coli = i%4
+                    let len = cols.[coli]                
+                    yield "| "
+                    yield String.prefixToLength len ' ' s
+                    if coli = 3 then yield! ""
+                //yield! sprintf "Scale x: %g ; y: %g z: %g" m.M00 m.M11 m.M22
+                }
     (*
     type Mesh with 
         [<Extension>]
