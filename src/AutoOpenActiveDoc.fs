@@ -15,7 +15,7 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 [<AutoOpen>]
 /// This Module contains 'Doc' the active document, and 'Ot' the current Object Table
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
-module AutoOpenActiceDocument =
+module AutoOpenActiveDocument =
     
     /// Apply function, like |> , but ignore result. 
     /// Return original input
@@ -23,10 +23,10 @@ module AutoOpenActiceDocument =
 
     /// The current active Rhino document (= the file currently open)
     let mutable Doc = 
-        if HostUtils.RunningInRhino then 
+        if HostUtils.RunningInRhino then
             Rhino.RhinoDoc.ActiveDoc 
         else 
-            failwith "failed to find the active Rhino document, is this dll running outside of  Rhino? " 
+            failwith "failed to find the active Rhino document, is this dll running hosted inside the Rhino process? " 
     
     /// Object Table of the current active Rhino documents
     let Ot = Doc.Objects
@@ -37,7 +37,7 @@ module AutoOpenActiceDocument =
     
 
     /// To store last created object form executing a rs.Command(...)
-    let mutable internal commandSerialNumbers : option<uint32*uint32> = None // to store last created object form executing a rs.Command(...)
+    let mutable internal commandSerialNumbers : option<uint32*uint32> = None 
        
     /// Gets a localised descritipn on rhino object type (curve , point, surface ....)
     let internal rhType (g:Guid)=
@@ -60,7 +60,7 @@ module AutoOpenActiceDocument =
     
     do
         if HostUtils.RunningInRhino then
-            Synchronisation.Initialize() //delared in Synchronisation static 
+            Synchronisation.Initialize() //declared in Synchronisation static class
             
             let setup() = 
                 // keep the reference to the active Document (3d file ) updated.
@@ -68,9 +68,8 @@ module AutoOpenActiceDocument =
                 
                 // listen to Esc Key press.
                 // doing this "Add" in sync is only required if no handler has been added in sync before. Adding the first handler to this from async thread cause a Access violation exeption that can only be seen with the window event log.
-                // This his handler does not work on Sync evaluationmode , TODO: test!
-                //RhinoApp.EscapeKeyPressed.Add ( fun _ -> failwithf "Esc pressed") 
-                RhinoApp.EscapeKeyPressed.Add     ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
+                // This his handler does not work on Sync evaluationmode , TODO: test!               
+                RhinoApp.EscapeKeyPressed.Add    ( fun _    -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true) 
                 
             
             if RhinoApp.InvokeRequired then 

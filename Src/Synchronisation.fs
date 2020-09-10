@@ -32,21 +32,25 @@ type Synchronisation private () =
                 with _ ->
                     "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Async UI interactions like selecting objects might crash Rhino!"
                     |>> RhinoApp.WriteLine 
-                    |> printfn "%s"
+                    |> eprintfn "%s"
     
                 try   
                     seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
                 with _ ->
                     "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
                     |>> RhinoApp.WriteLine 
-                    |> printfn "%s" 
+                    |> eprintfn "%s" 
         
                 if notNull syncContext && notNull seffWindow then 
                     "Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
                     |>> RhinoApp.WriteLine 
-                    |> printfn "%s"
+                    |> eprintfn "%s"
     
-    //do init() // never called sinec sttic class only
+    //do init() // never called since this is a static class only
+
+    // ---------------------------------
+    // PUBLIC MEMBERS:
+    // ---------------------------------
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin      
