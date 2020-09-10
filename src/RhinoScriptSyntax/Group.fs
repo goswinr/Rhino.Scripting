@@ -46,6 +46,17 @@ module ExtensionsGroup =
 
 
     [<Extension>]
+    ///<summary>Adds one or more objects to new group</summary>
+    ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member GroupObjects(objectIds:Guid seq) : unit = 
+        let index = Doc.Groups.Add()
+        if Seq.length objectIds < 2 then failwithf "GroupObjects needes to have more than one objects"
+        if not <|  Doc.Groups.AddToGroup(index, objectIds) then failwithf "GroupObjects failed on %A"  objectIds
+        //Doc.Groups.GroupName(index)
+
+
+    [<Extension>]
     ///<summary>Adds a single object to an existing group</summary>
     ///<param name="objectId">(Guid) String or Guid representing the object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
