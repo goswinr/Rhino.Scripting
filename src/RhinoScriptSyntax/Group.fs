@@ -46,7 +46,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Adds one or more objects to new group</summary>
+    ///<summary>Adds two or more objects to new group</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<returns>(unit) void, nothing</returns>
     static member GroupObjects(objectIds:Guid seq) : unit = 
