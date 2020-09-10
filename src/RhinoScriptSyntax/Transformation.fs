@@ -255,15 +255,31 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Creates a scale transformation</summary>
-    ///<param name="scale">(float*float*float) list of 3 numbers for x , y andf z direction</param>
-    ///<param name="point">(Point3d) Optional, Center of scale. If omitted, world origin is used</param>
+    ///<param name="scaleX">(float) Scale in X direction</param>
+    ///<param name="scaleY">(float) Scale in Y direction</param>
+    ///<param name="scaleZ">(float) Scale in Z direction</param>
+    ///<param name="point">(Point3d) Center of scale</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
-    static member XformScale(scale:float*float*float, [<OPT;DEF(Point3d())>]point:Point3d) : Transform =
-        //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
-        let plane = Plane(point, Vector3d.ZAxis);
-        let xf = Transform.Scale(plane, scale|> t1, scale|> t2, t3 scale)
-        xf
+    static member XformScale(scaleX, scaleY, scaleZ, point:Point3d) : Transform =
+        let plane = Plane(point, Vector3d.ZAxis)
+        Transform.Scale(plane, scaleX, scaleY, scaleZ)        
 
+    [<Extension>]
+    ///<summary>Creates a scale transformation</summary>
+    ///<param name="scale">(float) Scale in X , Y and Z direction</param>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
+    static member XformScale(scale) : Transform =
+        Transform.Scale(Plane.WorldXY, scale, scale, scale)        
+
+    [<Extension>]
+    ///<summary>Creates a scale transformation</summary>
+    ///<param name="scale">(float) Scale in X , Y and Z direction</param>
+    ///<param name="point">(Point3d) Center of scale</param>
+    ///<returns>(Transform) The 4x4 transformation matrix</returns>
+    static member XformScale(scale, point:Point3d) : Transform =
+        let plane = Plane(point, Vector3d.ZAxis)
+        Transform.Scale(plane, scale, scale, scale)
+        
 
     [<Extension>]
     ///<summary>Transforms a point from either client-area coordinates of the specified view
