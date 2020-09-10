@@ -29,7 +29,8 @@ The recommended scripting use case is via the [Seff.Rhino](https://github.com/go
 However you can use this library just as well in compiled F#, C# or VB.net projects.
 Or even in Grasshopper C# VB.net scripting components.
 
-First reference the assemblies. In an F# scripting editor do
+First reference the assemblies. 
+In an F# scripting editor do
 ```fsharp
 #r @"C:\Program Files\Rhino 6\System\RhinoCommon.dll"  // adapt path if needed
 #r @"D:\Git\Rhino.Scripting\src\bin\Debug\net472\Rhino.Scripting.dll"
@@ -51,7 +52,7 @@ Screenshot from [Seff](https://github.com/goswinr/Seff.Rhino) Editor hosted in R
 
 
 ## How about the dynamic types and optional parameters from VBScript and Python?
-Many RhinoScript function take variable types of input parameters. This implemented with  method overloads.
+Many RhinoScript function take variable types of input parameters. This is implemented with method overloads.
 Many RhinoScript function have optional parameters. These are also implemented as optional method parameters.
 ### Example
 for example `rs.ObjectLayer` can be called in several ways:
