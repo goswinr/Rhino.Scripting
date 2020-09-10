@@ -265,7 +265,7 @@ module ExtensionsTransformation =
         Transform.Scale(plane, scaleX, scaleY, scaleZ)        
 
     [<Extension>]
-    ///<summary>Creates a scale transformation</summary>
+    ///<summary>Creates a scale transformation based on World Origin point</summary>
     ///<param name="scale">(float) Scale in X , Y and Z direction</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformScale(scale) : Transform =
