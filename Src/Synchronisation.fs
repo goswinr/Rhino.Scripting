@@ -30,24 +30,23 @@ type Synchronisation private () =
                     seffRhinoSyncModule <- seffAssembly.GetType("Seff.Rhino.Sync") 
                     syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
                 with _ ->
-                    "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Async UI interactions like selecting objects might crash Rhino!"
+                    "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!"
                     |>> RhinoApp.WriteLine 
                     |> eprintfn "%s"
     
                 try   
                     seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
                 with _ ->
-                    "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, editor window will not hide on UI interactions"
+                    "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions"
                     |>> RhinoApp.WriteLine 
                     |> eprintfn "%s" 
         
-                if notNull syncContext && notNull seffWindow then 
-                    "Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
-                    |>> RhinoApp.WriteLine 
-                    |> eprintfn "%s"
+                if notNull syncContext && notNull seffWindow then ()
+                    //"Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
+                    //|>> RhinoApp.WriteLine 
+                    //|> printfn "%s"
     
-    //do init() // never called since this is a static class only
-
+  
     // ---------------------------------
     // PUBLIC MEMBERS:
     // ---------------------------------
