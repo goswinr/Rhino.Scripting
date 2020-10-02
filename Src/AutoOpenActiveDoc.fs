@@ -43,9 +43,16 @@ module AutoOpenActiveDocument =
     let internal rhType (g:Guid)=
         if g = Guid.Empty then "-Guid.Empty-"
         else
-            let o = Doc.Objects.FindId(g) 
-            if isNull o then sprintf "(Guid not a Rhino Object): %A" g
-            else sprintf "%s: %A" (o.ShortDescription(false)) g
+           let o = Doc.Objects.FindId(g) 
+           if isNull o then sprintf "Guid, but not an Object in this Rhino File : %A" g
+           else sprintf "%s on Layer %s : %A" (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath) g
+
+    /// Gets a localised descritipn on rhino layer and  object type (e.g. curve , point, surface ....)
+    let internal typeDescr (x:'a)=
+       match box x with 
+       | :? Guid as g -> rhType g
+       | _ -> sprintf "%A" x
+    
 
     /// So that python range expressions dont need top be translated to F#
     let internal range(l) = seq{0..(l-1)} 
