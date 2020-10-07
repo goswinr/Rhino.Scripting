@@ -45,7 +45,7 @@ module AutoOpenActiveDocument =
         else
            let o = Doc.Objects.FindId(g) 
            if isNull o then sprintf "Guid, but not an Object in this Rhino File : %A" g
-           else sprintf "%s on Layer %s : %A" (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath) g
+           else sprintf "'%s' on Layer '%s' : %A" (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath) g
 
     /// Gets a localised descritipn on rhino layer and  object type (e.g. curve , point, surface ....)
     let internal typeDescr (x:'a)=
