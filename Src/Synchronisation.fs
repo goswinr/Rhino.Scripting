@@ -6,6 +6,9 @@ open Rhino
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
+type Error (s:string) =
+    inherit System.Exception(s)
+    static member inline Raise s = raise (new Error(s))
 
 /// A static classs to help access the UI thread from other threads
 type Synchronisation private () =

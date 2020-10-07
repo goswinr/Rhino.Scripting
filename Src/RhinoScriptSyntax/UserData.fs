@@ -108,11 +108,15 @@ module ExtensionsUserdata =
                 obj.Attributes.GetUserString(key)
         
         if isNull s then 
-            printfn "**Available keys on Object are:"
-            RhinoScriptSyntax.GetUserTextKeys(objectId,false) |> Seq.iter (printfn "'%s'") 
-            printfn "on Geometry:"
-            RhinoScriptSyntax.GetUserTextKeys(objectId,true) |> Seq.iter (printfn "'%s'") 
-            failwithf " GetUserText key: '%s' does not exist on %A: %A" key obj objectId
+            let err = 
+                stringBuffer{
+                yield! sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (rhType objectId)
+                yield!  "Available keys on Object are:"
+                for k in RhinoScriptSyntax.GetUserTextKeys(objectId,false) do yield! k
+                yield! "Available keys on Geometry:"
+                for k in RhinoScriptSyntax.GetUserTextKeys(objectId,true) do yield! k
+            }
+            raise (new Error(err))
         s
     
     [<Extension>]
