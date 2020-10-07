@@ -108,9 +108,9 @@ module ExtensionsGrips =
     static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then Error "rhobj.GetGrips() is null"
+        if isNull grips then Result.Error "rhobj.GetGrips() is null"
         else
-            if grips.Length <= index then Error "rhobj.GetGrips() failed:  grips.Length <= index "
+            if grips.Length <= index then Result.Error "rhobj.GetGrips() failed:  grips.Length <= index "
             else
                 let grip = grips.[index]
                 let ng =
@@ -139,7 +139,7 @@ module ExtensionsGrips =
                                   [<OPT;DEF(true)>]enable:bool) : int =
         match RhinoScriptSyntax.Neighborgrip(1, objectId, index, direction, enable) with
         |Ok r -> r.Index
-        |Error s -> failwithf "NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+        |Error s -> Error.Raise <| sprintf "RhinoScriptSyntax.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
     [<Extension>]
     ///<summary>Returns number of grips owned by an object</summary>
@@ -148,7 +148,7 @@ module ExtensionsGrips =
     static member ObjectGripCount(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then failwithf "Rhino.Scripting: ObjectGripCount failed.  objectId:'%A'" objectId
+        if isNull grips then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripCount failed.  objectId:'%A'" objectId
         grips.Length
 
 
@@ -159,10 +159,10 @@ module ExtensionsGrips =
     ///<returns>(Point3d) The current location of the grip referenced by index</returns>
     static member ObjectGripLocation(objectId:Guid, index:int) : Point3d = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then failwithf "Rhino.Scripting: ObjectGripLocation failed.  objectId:'%A' index:'%A'" objectId index
+        if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%A' index:'%A'" objectId index
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            failwithf "Rhino.Scripting: ObjectGripLocation failed.  objectId:'%A' index:'%A' " objectId index
+            Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%A' index:'%A' " objectId index
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         rc
@@ -175,10 +175,10 @@ module ExtensionsGrips =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectGripLocation(objectId:Guid, index:int, point:Point3d) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then failwithf "Rhino.Scripting: ObjectGripLocation failed.  objectId:'%A' index:'%A' point:'%A'" objectId index point
+        if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%A' index:'%A' point:'%A'" objectId index point
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            failwithf "Rhino.Scripting: ObjectGripLocation failed.  objectId:'%A' index:'%A' point:'%A'" objectId index point
+            Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%A' index:'%A' point:'%A'" objectId index point
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         grip.CurrentLocation <-  point
@@ -197,9 +197,9 @@ module ExtensionsGrips =
     ///<returns>(Point3d ResizeArray) The current location of all grips</returns>
     static member ObjectGripLocations(objectId:Guid) : Point3d ResizeArray = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then failwithf "Rhino.Scripting: ObjectGripLocations failed.  objectId:'%A' " objectId
+        if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%A' " objectId
         let grips = rhobj.GetGrips()
-        if isNull grips then failwithf "Rhino.Scripting: ObjectGripLocations failed.  objectId:'%A' " objectId
+        if isNull grips then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%A' " objectId
         resizeArray { for grip in grips do yield grip.CurrentLocation }
 
 
@@ -215,9 +215,9 @@ module ExtensionsGrips =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectGripLocations(objectId:Guid, points:Point3d seq) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then failwithf "Rhino.Scripting: ObjectGripLocations failed.  objectId:'%A' points:'%A'" objectId points
+        if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%A' points:'%A'" objectId points
         let grips = rhobj.GetGrips()
-        if grips |> isNull then failwithf "Rhino.Scripting: ObjectGripLocations failed.  objectId:'%A' points:'%A'" objectId points
+        if grips |> isNull then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%A' points:'%A'" objectId points
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
@@ -267,7 +267,7 @@ module ExtensionsGrips =
                                   [<OPT;DEF(true)>]enable:bool) : int =
         match RhinoScriptSyntax.Neighborgrip(-1, objectId, index, direction, enable) with
         |Ok r -> r.Index
-        |Error s -> failwithf "PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+        |Error s -> Error.Raise <| sprintf "RhinoScriptSyntax.PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
 
     [<Extension>]
@@ -317,9 +317,9 @@ module ExtensionsGrips =
     ///<returns>(int) Number of grips selected</returns>
     static member SelectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
+        if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%A'" objectId
         let grips = rhobj.GetGrips()
-        if isNull grips then failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
+        if isNull grips then Error.Raise <| sprintf "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%A'" objectId
         let mutable count = 0
         for grip in grips do
             if grip.Select(true, true)>0 then count<- count +  1
@@ -327,7 +327,7 @@ module ExtensionsGrips =
             Doc.Views.Redraw()
             count
         else
-            failwithf "Rhino.Scripting: SelectObjectGrips failed.  objectId:'%A'" objectId
+            Error.Raise <| sprintf "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%A'" objectId
 
 
     [<Extension>]
@@ -359,9 +359,9 @@ module ExtensionsGrips =
     ///<returns>(int) Number of grips unselected</returns>
     static member UnselectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId
+        if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%A'" objectId
         let grips = rhobj.GetGrips()
-        if isNull grips then failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId
+        if isNull grips then Error.Raise <| sprintf "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%A'" objectId
         let mutable count = 0
         for grip in grips do
             if grip.Select(false) = 0 then count <- count +   1
@@ -369,6 +369,6 @@ module ExtensionsGrips =
             Doc.Views.Redraw()
             count
         else
-            failwithf "Rhino.Scripting: UnselectObjectGrips failed.  objectId:'%A'" objectId
+            Error.Raise <| sprintf "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%A'" objectId
 
 

@@ -33,8 +33,8 @@ module ExtensionsLayer =
     static member CurrentLayer(layer:string) : unit = //SET
         let rc = Doc.Layers.CurrentLayer.FullPath
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then failwithf "CoerceLayer: could not Coerce Layer from name'%A'" layer
-        if not<|  Doc.Layers.SetCurrentLayerIndex(i, true) then failwithf "Set CurrentLayer to %A failed" layer
+        if i = RhinoMath.UnsetIntIndex then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from name'%A'" layer
+        if not<|  Doc.Layers.SetCurrentLayerIndex(i, true) then Error.Raise <| sprintf "RhinoScriptSyntax.Set CurrentLayer to %A failed" layer
 
 
 
@@ -48,7 +48,7 @@ module ExtensionsLayer =
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteLayer(layer:string) : bool =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then failwithf "CoerceLayer: could not Coerce Layer from name'%A'" layer
+        if i = RhinoMath.UnsetIntIndex then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from name'%A'" layer
         Doc.Layers.Delete(i, true)
 
 
@@ -59,7 +59,7 @@ module ExtensionsLayer =
     ///<returns>(unit) void, nothing</returns>
     static member ExpandLayer(layer:string, expand:bool) : unit =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then failwithf "CoerceLayer: could not Coerce Layer from name'%A'" layer
+        if i = RhinoMath.UnsetIntIndex then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from name'%A'" layer
         let layer = Doc.Layers.[i]
         if layer.IsExpanded <> expand then
             layer.IsExpanded <- expand
@@ -261,7 +261,7 @@ module ExtensionsLayer =
             index <- -1
         else
             let lt = Doc.Linetypes.FindName(linetyp)
-            if lt|> isNull  then failwithf "Rhino.Scripting: LayerLinetype not found.  layer:'%A' linetyp:'%A'" layer linetyp
+            if lt|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.LayerLinetype not found.  layer:'%A' linetyp:'%A'" layer linetyp
             index <- lt.LinetypeIndex
         layer.LinetypeIndex <- index
         Doc.Views.Redraw()
@@ -320,7 +320,7 @@ module ExtensionsLayer =
     ///<returns>(Guid) The layer's identifier</returns>
     static member LayerId(layer:string) : Guid =
         let idx = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if idx = RhinoMath.UnsetIntIndex then failwithf "LayerId not found for name %s" layer
+        if idx = RhinoMath.UnsetIntIndex then Error.Raise <| sprintf "RhinoScriptSyntax.LayerId not found for name %s" layer
         Doc.Layers.[idx].Id
 
 

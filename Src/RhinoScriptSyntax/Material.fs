@@ -99,7 +99,7 @@ module ExtensionsMaterial =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
         let mat = Doc.Materials.[source]
-        if isNull mat then failwithf "Rhino.Scripting: MatchMaterial failed.  source:'%A' destination:'%A'" source destination
+        if isNull mat then Error.Raise <| sprintf "RhinoScriptSyntax.MatchMaterial failed.  source:'%A' destination:'%A'" source destination
 
         for objectId in destination do
             let rhobj = Doc.Objects.FindId(objectId)
@@ -117,7 +117,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current bump bitmap filename</returns>
     static member MaterialBump(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' " materialIndex
         let texture = mat.GetBumpTexture()
         if notNull texture then Some texture.FileName else None
 
@@ -129,14 +129,14 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let texture = mat.GetBumpTexture()
         if IO.File.Exists filename then
-            if not <| mat.SetBumpTexture(filename) then failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetBumpTexture(filename) then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             mat.CommitChanges()|> ignore
             Doc.Views.Redraw()
         else
-            failwithf "Rhino.Scripting: MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            Error.Raise <| sprintf "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
     [<Extension>]
@@ -145,7 +145,7 @@ module ExtensionsMaterial =
     ///<returns>(Drawing.Color) The current material color</returns>
     static member MaterialColor(materialIndex:int) : Drawing.Color = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialColor failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.DiffuseColor
         rc
 
@@ -156,7 +156,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialColor(materialIndex:int, color:Drawing.Color) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
         mat.CommitChanges()|> ignore
         Doc.Views.Redraw()
@@ -168,7 +168,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current environment bitmap filename</returns>
     static member MaterialEnvironmentMap(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetEnvironmentTexture()
         if notNull texture then Some texture.FileName  else None
 
@@ -179,13 +179,13 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            if not <| mat.SetEnvironmentTexture(filename) then failwithf "Rhino.Scripting: MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetEnvironmentTexture(filename) then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             mat.CommitChanges() |> ignore
             Doc.Views.Redraw()
         else
-            failwithf "Rhino.Scripting: MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            Error.Raise <| sprintf "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
 
@@ -195,7 +195,7 @@ module ExtensionsMaterial =
     ///<returns>(string) The current material name</returns>
     static member MaterialName(materialIndex:int) : string = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialName failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' " materialIndex
         let rc = mat.Name
         rc
 
@@ -206,7 +206,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialName(materialIndex:int, name:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
         mat.CommitChanges()|> ignore
 
@@ -218,7 +218,7 @@ module ExtensionsMaterial =
     ///<returns>(Drawing.Color) The current material reflective color</returns>
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialReflectiveColor failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' " materialIndex
         let rc = mat.ReflectionColor
         rc
 
@@ -229,7 +229,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialReflectiveColor(materialIndex:int, color:Drawing.Color) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.ReflectionColor <- color
         mat.CommitChanges() |> ignore
         Doc.Views.Redraw()
@@ -243,7 +243,7 @@ module ExtensionsMaterial =
     ///    0.0 being matte and 255.0 being glossy</returns>
     static member MaterialShine(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialShine failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' " materialIndex
         let rc = mat.Shine
         rc
 
@@ -255,7 +255,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
 
         mat.Shine <- shine
         mat.CommitChanges() |> ignore
@@ -269,7 +269,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current texture bitmap filename</returns>
     static member MaterialTexture(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTexture failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' " materialIndex
         let texture = mat.GetBitmapTexture()
         if notNull texture then  Some texture.FileName else None
 
@@ -280,13 +280,13 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            if  not <| mat.SetBitmapTexture(filename) then failwithf "Rhino.Scripting: MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if  not <| mat.SetBitmapTexture(filename) then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             mat.CommitChanges() |> ignore
             Doc.Views.Redraw()
         else
-            failwithf "Rhino.Scripting: MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
     [<Extension>]
@@ -296,7 +296,7 @@ module ExtensionsMaterial =
     ///    0.0 being opaque and 1.0 being transparent</returns>
     static member MaterialTransparency(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTransparency failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' " materialIndex
         let rc = mat.Transparency
         rc
 
@@ -308,7 +308,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTransparency(materialIndex:int, transparency:float) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         mat.Transparency <- transparency
         mat.CommitChanges() |> ignore
         Doc.Views.Redraw()
@@ -321,7 +321,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current transparency bitmap filename</returns>
     static member MaterialTransparencyMap(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTransparencyMap failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' " materialIndex
         let texture = mat.GetTransparencyTexture()
         if notNull texture then  Some texture.FileName else None
 
@@ -333,14 +333,14 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing</returns>
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then failwithf "Rhino.Scripting: MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         let texture = mat.GetTransparencyTexture()
         if IO.File.Exists filename then
-            if  not <| mat.SetTransparencyTexture(filename) then failwithf "Rhino.Scripting: MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if  not <| mat.SetTransparencyTexture(filename) then Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             mat.CommitChanges() |> ignore
             Doc.Views.Redraw()
         else
-            failwithf "Rhino.Scripting: MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            Error.Raise <| sprintf "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
 

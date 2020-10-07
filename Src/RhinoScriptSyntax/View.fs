@@ -38,12 +38,12 @@ module ExtensionsView =
                              corner2:Point2d,
                              [<OPT;DEF(null:string)>]title:string,
                              [<OPT;DEF(1)>]projection:int) : Guid =
-        if projection<1 || projection>7 then failwithf "Rhino.Scripting: Projection must be a value between 1-7.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if projection<1 || projection>7 then Error.Raise <| sprintf "RhinoScriptSyntax.Projection must be a value between 1-7.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let layout = RhinoScriptSyntax.CoercePageView(layoutName)//TODO test this
-        if isNull layout then failwithf "Rhino.Scripting: No layout found for given layoutId.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull layout then Error.Raise <| sprintf "RhinoScriptSyntax.No layout found for given layoutId.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let projection : Display.DefinedViewportProjection = LanguagePrimitives.EnumOfValue  projection
         let detail = layout.AddDetailView(title, corner1, corner2, projection)
-        if isNull detail then failwithf "Rhino.Scripting: AddDetail failed.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull detail then Error.Raise <| sprintf "RhinoScriptSyntax.AddDetail failed.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         Doc.Views.Redraw()
         detail.Id
 
@@ -61,7 +61,7 @@ module ExtensionsView =
             if width=0.0 || height=0.0  then Doc.Views.AddPageView(title)
             else                             Doc.Views.AddPageView(title, width, height)
         if notNull page then page.MainViewport.Id, page.PageName
-        else failwithf "AddLayout failed for %A %A" title (width, height)
+        else Error.Raise <| sprintf "RhinoScriptSyntax.AddLayout failed for %A %A" title (width, height)
 
 
     [<Extension>]
@@ -70,9 +70,9 @@ module ExtensionsView =
     ///<param name="plane">(Plane) The construction plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddNamedCPlane(cplaneName:string, plane:Plane) : unit =
-        if isNull cplaneName then failwithf "Rhino.Scripting: CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
+        if isNull cplaneName then Error.Raise <| sprintf "RhinoScriptSyntax.CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
         let index = Doc.NamedConstructionPlanes.Add(cplaneName, plane)
-        if index<0 then failwithf "Rhino.Scripting: AddNamedCPlane failed.  cplaneName:'%A' plane:'%A'" cplaneName plane
+        if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.AddNamedCPlane failed.  cplaneName:'%A' plane:'%A'" cplaneName plane
         ()
 
 
@@ -84,10 +84,10 @@ module ExtensionsView =
     ///<returns>(unit) void, nothing</returns>
     static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
-        if isNull name then failwithf "Rhino.Scripting: Name = empty.  name:'%A' view:'%A'" name view
+        if isNull name then Error.Raise <| sprintf "RhinoScriptSyntax.Name = empty.  name:'%A' view:'%A'" name view
         let viewportId = view.MainViewport.Id
         let index = Doc.NamedViews.Add(name, viewportId)
-        if index<0 then failwithf "Rhino.Scripting: AddNamedView failed.  name:'%A' view:'%A'" name view
+        if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.AddNamedView failed.  name:'%A' view:'%A'" name view
 
 
 
@@ -109,7 +109,7 @@ module ExtensionsView =
         let page = RhinoScriptSyntax.CoercePageView(layout)
         if layout = detail then page.SetPageAsActive()
         else
-            if not <| page.SetActiveDetail(detail, false) then failwithf "set CurrentDetail failed for %s to %s" layout detail
+            if not <| page.SetActiveDetail(detail, false) then Error.Raise <| sprintf "RhinoScriptSyntax.CurrentDetail set failed for %s to %s" layout detail
         Doc.Views.Redraw()
 
 
@@ -161,7 +161,7 @@ module ExtensionsView =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
             try Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  failwithf "Rhino.Scripting: Set DetailLock failed. detailId is a %s  lock:'%A'" (rhType detailId)  lock
+            with _ ->  Error.Raise <| sprintf "RhinoScriptSyntax.Set DetailLock failed. detailId is a %s  lock:'%A'" (rhType detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore
@@ -190,7 +190,7 @@ module ExtensionsView =
             detail.CommitChanges()|> ignore
             Doc.Views.Redraw()
         else
-            failwithf "Rhino.Scripting: DetailScale failed.  detailId:'%A' modelLength:'%A' pageLength:'%A'" detailId modelLength pageLength
+            Error.Raise <| sprintf "RhinoScriptSyntax.DetailScale failed.  detailId:'%A' modelLength:'%A' pageLength:'%A'" detailId modelLength pageLength
 
 
 
@@ -214,7 +214,7 @@ module ExtensionsView =
         //layoutid = RhinoScriptSyntax.Coerceguid(layout)
         if   Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then true
         elif Doc.Views.GetViewList(true, false) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then false
-        else failwithf "Rhino.Scripting: IsLayout View does not exist at all.  layout:'%A'" layout // or false
+        else Error.Raise <| sprintf "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
 
 
     [<Extension>]
@@ -290,7 +290,7 @@ module ExtensionsView =
     ///<returns>(Plane) a plane</returns>
     static member NamedCPlane(name:string) : Plane =
         let index = Doc.NamedConstructionPlanes.Find(name)
-        if index<0 then failwithf "Rhino.Scripting: NamedCPlane failed.  name:'%A'" name
+        if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.NamedCPlane failed.  name:'%A'" name
         Doc.NamedConstructionPlanes.[index].Plane
 
 
@@ -317,7 +317,7 @@ module ExtensionsView =
     ///<param name="newTitle">(string) The new title of the view</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenameView(oldTitle:string, newTitle:string) : unit =
-        if isNull oldTitle || isNull newTitle then failwithf "Rhino.Scripting: RenameView failed.  oldTitle:'%A' newTitle:'%A'" oldTitle newTitle
+        if isNull oldTitle || isNull newTitle then Error.Raise <| sprintf "RhinoScriptSyntax.RenameView failed.  oldTitle:'%A' newTitle:'%A'" oldTitle newTitle
         let foundview = RhinoScriptSyntax.CoerceView(oldTitle)
         foundview.MainViewport.Name <- newTitle
 
@@ -332,7 +332,7 @@ module ExtensionsView =
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = Doc.NamedConstructionPlanes.Find(cplaneName)
-        if index<0 then failwithf "Rhino.Scripting: RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
+        if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
         let cplane = Doc.NamedConstructionPlanes.[index]
         view.MainViewport.PushConstructionPlane(cplane)
         view.Redraw()
@@ -352,13 +352,13 @@ module ExtensionsView =
                                     [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = Doc.NamedViews.FindByName(namedView)
-        if index<0 then failwithf "Rhino.Scripting: RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
+        if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
         let viewinfo = Doc.NamedViews.[index]
         if view.MainViewport.PushViewInfo(viewinfo, restoreBitmap) then
             view.Redraw()
             //view.MainViewport.Name
         else
-            failwithf "Rhino.Scripting: RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
+            Error.Raise <| sprintf "RhinoScriptSyntax.RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
 
 
     [<Extension>]
@@ -591,7 +591,7 @@ module ExtensionsView =
     static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
-        if not rc then failwithf "Rhino.Scripting: ViewCameraPlane failed.  view:'%A'" view
+        if not rc then Error.Raise <| sprintf "RhinoScriptSyntax.ViewCameraPlane failed.  view:'%A'" view
         frame
 
 
@@ -676,7 +676,7 @@ module ExtensionsView =
             view.ActiveViewport.DisplayMode <- desc
             Doc.Views.Redraw()
         else
-            failwithf "set ViewDisplayMode mode %s not found." mode
+            Error.Raise <| sprintf "RhinoScriptSyntax.ViewDisplayMode set mode %s not found." mode
 
 
 
@@ -688,7 +688,7 @@ module ExtensionsView =
         let desc = Display.DisplayModeDescription.FindByName(name)
         if notNull desc then desc.Id
         else
-            failwithf "set ViewDisplayModeId mode %s not found." name
+            Error.Raise <| sprintf "RhinoScriptSyntax.ViewDisplayModeId set mode %s not found." name
 
 
     [<Extension>]
@@ -700,7 +700,7 @@ module ExtensionsView =
         let desc = Display.DisplayModeDescription.GetDisplayMode(modeId)
         if notNull desc then desc.EnglishName
         else
-            failwithf "set ViewDisplayModeName Id %A not found." modeId
+            Error.Raise <| sprintf "RhinoScriptSyntax.ViewDisplayModeName set Id %A not found." modeId
 
 
     [<Extension>]
@@ -721,7 +721,7 @@ module ExtensionsView =
     ///<returns>(string ResizeArray) of the view names</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
-        if views|> isNull  then failwithf "Rhino.Scripting: ViewNames failed. viewType:'%A'" viewType
+        if views|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
         resizeArray { for view in views do view.MainViewport.Name}
 
 
@@ -778,7 +778,7 @@ module ExtensionsView =
     static member ViewRadius(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if not viewport.IsParallelProjection then failwithf "Rhino.Scripting: ViewRadius view is not ParallelProjection.  view:'%A' " view
+        if not viewport.IsParallelProjection then Error.Raise <| sprintf "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A' " view
         let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let frusright = b
         let frustop = d
@@ -798,7 +798,7 @@ module ExtensionsView =
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if not viewport.IsParallelProjection then failwithf "Rhino.Scripting: ViewRadius view is not ParallelProjection.  view:'%A' " view
+        if not viewport.IsParallelProjection then Error.Raise <| sprintf "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A' " view
         let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let frusright = b
         let frustop = d
@@ -896,7 +896,7 @@ module ExtensionsView =
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let rc = viewo.ActiveViewport.WallpaperFilename
-        if not <| viewo.ActiveViewport.SetWallpaper(filename, false) then failwithf "Wallpaper faild to set walleper to %s in view %s" filename view
+        if not <| viewo.ActiveViewport.SetWallpaper(filename, false) then Error.Raise <| sprintf "RhinoScriptSyntax.Wallpaper faild to set walleper to %s in view %s" filename view
         viewo.Redraw()
 
 
@@ -919,7 +919,7 @@ module ExtensionsView =
     static member WallpaperGrayScale(view:string, grayscale:bool) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
-        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then failwithf "WallpaperGrayScale faild to set walleper to %s in view %s" filename view
+        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then Error.Raise <| sprintf "RhinoScriptSyntax.WallpaperGrayScale faild to set walleper to %s in view %s" filename view
         viewo.Redraw()
 
 

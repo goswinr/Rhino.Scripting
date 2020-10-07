@@ -155,9 +155,9 @@ module ExtensionsSelection =
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
             let e = Doc.Objects.GetObjectList(it).GetEnumerator()
-            if not <| e.MoveNext() then failwithf "FirstObject not found"
+            if not <| e.MoveNext() then Error.Raise <| sprintf "RhinoScriptSyntax.FirstObject not found"
             let object = e.Current
-            if isNull object then failwithf "FirstObject not found(null)"
+            if isNull object then Error.Raise <| sprintf "RhinoScriptSyntax.FirstObject not found(null)"
             if select then object.Select(true) |> ignore //TODO make sync ?
             object.Id
 
@@ -747,9 +747,9 @@ module ExtensionsSelection =
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
         let rhobjs = Doc.Objects.GetObjectList(settings)
-        if isNull rhobjs || Seq.isEmpty rhobjs then failwithf "Rhino.Scripting: LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+        if isNull rhobjs || Seq.isEmpty rhobjs then Error.Raise <| sprintf "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         let firstobj = Seq.last rhobjs
-        if isNull firstobj then failwithf "Rhino.Scripting: LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+        if isNull firstobj then Error.Raise <| sprintf "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
             firstobj.Select(true) |> ignore //TODO make sync ?
             Doc.Views.Redraw()
@@ -779,7 +779,7 @@ module ExtensionsSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None ->failwithf "NextObject not found for %A" objectId
+            |None ->Error.Raise <| sprintf "RhinoScriptSyntax.NextObject not found for %A" objectId
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id
@@ -828,7 +828,7 @@ module ExtensionsSelection =
     ///<returns>(Guid ResizeArray) identifiers for objects in the group</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let groupinstance = Doc.Groups.FindName(groupName)
-        if isNull groupinstance  then failwithf "%s does not exist in GroupTable" groupName
+        if isNull groupinstance  then Error.Raise <| sprintf "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
         let rhinoobjects = Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             ResizeArray()

@@ -128,7 +128,7 @@ type RhinoScriptSyntax private () =
     ///<param name="value">(float): the value to clamp</param>
     ///<returns>(float):clamped value</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float =
-        if minVal > maxVal then  failwithf "Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
+        if minVal > maxVal then  Error.Raise <| sprintf "RhinoScriptSyntax.Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
         max minVal (min maxVal value) 
 
 
@@ -140,18 +140,18 @@ type RhinoScriptSyntax private () =
     ///<param name="step">(float): step size between two values</param>
     ///<returns>(float seq) a lazy seq of loats</returns>
     static member  FxrangePython (start:float, stop:float, step:float) : float seq =
-        if isNanOrInf start then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        if isNanOrInf step  then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        if isNanOrInf stop  then failwithf "Frange: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf start then Error.Raise <| sprintf "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf step  then Error.Raise <| sprintf "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf stop  then Error.Raise <| sprintf "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         let range = stop - start 
                     |> BitConverter.DoubleToInt64Bits 
                     |> (+) 5L // to make sure stop value is included in Range, will explicitly be removed below to match python semantics
                     |> BitConverter.Int64BitsToDouble
         let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semanticsis diffrent from F# semantics on range expressions)
-        if isNanOrInf steps then failwithf "range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
+        if isNanOrInf steps then Error.Raise <| sprintf "RhinoScriptSyntax.FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
     
         if steps < 0.0 then 
-            failwithf "Frange: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
+            Error.Raise <| sprintf "RhinoScriptSyntax.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
         else 
             // the actual algorithm: 
             let rec floatrange (start, i, steps) =
@@ -189,7 +189,7 @@ type RhinoScriptSyntax private () =
         | :? Sphere     as b ->   Doc.Objects.AddSphere(b)
         | :? Cylinder    as cl -> Doc.Objects.AddSurface (cl.ToNurbsSurface())
         | :? Cone       as c ->   Doc.Objects.AddSurface (c.ToNurbsSurface())
-        | _ -> failwithf "RhinoScriptSyntax.Add: object of type %A not implemented yet" (geo.GetType())
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Add: object of type %A not implemented yet" (geo.GetType())
     
 
     //---------------------------------------------------------------
@@ -400,12 +400,12 @@ type RhinoScriptSyntax private () =
     ///<returns>Guid) Fails on bad input</returns>
     static member CoerceGuid(objectId:'T) : Guid =
         match box objectId with
-        | :? Guid  as g -> if Guid.Empty = g then failwithf ": CoerceGuid: Guid is Emty: %A" objectId else g
-        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then failwithf ": CoerceGuid: Guid is Emty or None: %A" objectId else go.Value //from UI functions
-        | :? string  as s -> try Guid.Parse s with _ -> failwithf ": could not CoerceGuid: string '%s' can not be converted to a Guid" s
+        | :? Guid  as g -> if Guid.Empty = g then Error.Raise <| sprintf "RhinoScriptSyntax.: CoerceGuid: Guid is Emty: %A" objectId else g
+        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then Error.Raise <| sprintf "RhinoScriptSyntax.: CoerceGuid: Guid is Emty or None: %A" objectId else go.Value //from UI functions
+        | :? string  as s -> try Guid.Parse s with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.: could not CoerceGuid: string '%s' can not be converted to a Guid" s
         | :? DocObjects.RhinoObject as o -> o.Id
         | :? DocObjects.ObjRef      as o -> o.ObjectId
-        | _ -> failwithf "CoerceGuid: could not CoerceGuid:%A can not be converted to a Guid" objectId
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceGuid: could not CoerceGuid:%A can not be converted to a Guid" objectId
 
     //<summary>Attempt to get a Sequence of Guids from input</summary>
     //<param name="Ids">list of Guids</param>
@@ -417,8 +417,8 @@ type RhinoScriptSyntax private () =
     //                        try    
     //                            gs |> Seq.map RhinoScriptSyntax.CoerceGuid
     //                        with _ -> 
-    //                            failwithf ": could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" Ids
-    //    | _ -> failwithf "CoerceGuidList: could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" Ids
+    //                            Error.Raise <| sprintf "RhinoScriptSyntax.: could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" Ids
+    //    | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceGuidList: could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" Ids
     
    
     ///<summary>Attempt to get a System.Drawing.Color also works on natrural language color strings see Drawing.ColorTranslator.FromHtml</summary>
@@ -430,17 +430,17 @@ type RhinoScriptSyntax private () =
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
         | :? (int*int*int) as rgb       -> 
             let red , green, blue   = rgb 
-            if red  <0 || red  >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
-            if green<0 || green>255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
-            if blue <0 || blue >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
+            if red  <0 || red  >255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
+            if green<0 || green>255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
+            if blue <0 || blue >255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green %d" red green blue
             Drawing.Color.FromArgb( red, green, blue)
             
         | :? (int*int*int*int) as argb  -> 
             let alpha, red , green, blue   = argb 
-            if red  <0 || red  >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
-            if green<0 || green>255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
-            if blue <0 || blue >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
-            if alpha <0 || alpha >255 then failwithf "CoerceColor: cannot create color form red %d, blue %d and green %d aplpha %d" red green blue alpha
+            if red  <0 || red  >255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
+            if green<0 || green>255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
+            if blue <0 || blue >255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
+            if alpha <0 || alpha >255 then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green %d aplpha %d" red green blue alpha
             Drawing.Color.FromArgb(alpha, red, green, blue)        
         | :? string  as s -> 
             try 
@@ -450,10 +450,10 @@ type RhinoScriptSyntax private () =
                 try 
                     let c = Drawing.ColorTranslator.FromHtml(s)
                     Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
-                with _ -> failwithf "CoerceColor:: could not Coerce %A to a Color" color
+                with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor:: could not Coerce %A to a Color" color
                //     try Windows.Media.ColorConverter.ConvertFromString(s)        
-               //     with _ -> failwithf ": could not Coerce %A to a Color" c
-        | _ -> failwithf "CoerceColor:: could not Coerce %A to a Color" color
+               //     with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.: could not Coerce %A to a Color" c
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceColor:: could not Coerce %A to a Color" color
 
 
 
@@ -468,22 +468,22 @@ type RhinoScriptSyntax private () =
         //    if Guid.Empty = g then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
         //    else 
         //        let o = Doc.Objects.FindId(g) 
-        //        if isNull o then failwithf "CoerceRhinoObject: Guid %A not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" g
+        //        if isNull o then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceRhinoObject: Guid %A not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" g
         //        else o        
         //| :? DocObjects.RhinoObject as o -> o
         //| :? DocObjects.ObjRef as r -> r.Object()        
         //| :? string as s -> 
         //        let g = RhinoScriptSyntax.CoerceGuid(s)
-        //        if Guid.Empty = g then failwithf "CoerceRhinoObject: could not coerce %s to a RhinoObject" s
+        //        if Guid.Empty = g then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceRhinoObject: could not coerce %s to a RhinoObject" s
         //        else 
         //            let o = Doc.Objects.FindId(g) 
-        //            if isNull o then failwithf "CoerceRhinoObject: Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
+        //            if isNull o then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceRhinoObject: Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
         //            else o
-        //| _ -> failwithf "CoerceRhinoObject: could not coerce %A to a RhinoObject" objectId
+        //| _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceRhinoObject: could not coerce %A to a RhinoObject" objectId
         if Guid.Empty = objectId then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
         else 
             let o = Doc.Objects.FindId(objectId) 
-            if isNull o then failwithf "CoerceRhinoObject: Guid %A not found in Object table." objectId
+            if isNull o then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceRhinoObject: Guid %A not found in Object table." objectId
             else o  
 
 
@@ -497,20 +497,20 @@ type RhinoScriptSyntax private () =
                     if i = RhinoMath.UnsetIntIndex then 
                         let lay = Doc.Layers.FindName s
                         if isNull lay then 
-                            failwithf "CoerceLayer: could find name '%s'" s
+                            Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could find name '%s'" s
                         else
                             lay
                     else
                         Doc.Layers.[i]
             | :? Guid as g   -> 
                     let l = Doc.Layers.FindId(g)            
-                    if isNull l then failwithf "CoerceLayer: could not Coerce Layer from Id '%A'" nameOrId  
+                    if isNull l then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from Id '%A'" nameOrId  
                     l
             //| :? int as ix  -> // better not allow ints here ??
-            //        if ix<0 || ix >= Doc.Layers.Count then failwithf "CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
+            //        if ix<0 || ix >= Doc.Layers.Count then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
             //        Doc.Layers.[ix]
 
-            | _ -> failwithf "CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
+            | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
     
     
         
@@ -520,7 +520,7 @@ type RhinoScriptSyntax private () =
     static member CoerceBlockInstanceObject(objectId:Guid) : DocObjects.InstanceObject =
         match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  
         | :? DocObjects.InstanceObject as b -> b
-        | o -> failwithf "CoerceBlockInstanceObject: unable to find Block InstanceObject from %A '%A'" o.ObjectType objectId
+        | o -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceBlockInstanceObject: unable to find Block InstanceObject from %A '%A'" o.ObjectType objectId
 
 
     
@@ -533,18 +533,18 @@ type RhinoScriptSyntax private () =
         match box nameOrId with
         | :? Guid as g ->
             let viewo = Doc.Views.Find(g)
-            if isNull viewo then failwithf "CoerceView: could not CoerceView  from '%A'" g
+            if isNull viewo then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceView: could not CoerceView  from '%A'" g
             else viewo
         
         | :? string as view ->       
-            if isNull view then failwithf "CoerceView: failed on null for view name input" // or Doc.Views.ActiveView
+            if isNull view then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or Doc.Views.ActiveView
             elif view = "" then Doc.Views.ActiveView
             else 
                 let allviews = Doc.Views.GetViewList(true, true) |> Array.filter (fun v-> v.MainViewport.Name = view)
                 if allviews.Length = 1 then allviews.[0]
-                else  failwithf "CoerceView: could not CoerceView '%s'" view
+                else  Error.Raise <| sprintf "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
         
-        | _ -> failwithf "Cannot get view from %A" nameOrId
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Cannot get view from %A" nameOrId
 
     
     ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout</summary>
@@ -554,21 +554,21 @@ type RhinoScriptSyntax private () =
         match box nameOrId with
         | :? Guid as g ->
             let viewo = Doc.Views.Find(g)
-            if isNull viewo then failwithf "CoerceView: could not CoerceView  from '%A'" g
+            if isNull viewo then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceView: could not CoerceView  from '%A'" g
             else 
                 try viewo :?> Display.RhinoPageView
-                with _  -> failwithf "CoerceView: the view found '%A' is not a page view" viewo.MainViewport.Name
+                with _  -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceView: the view found '%A' is not a page view" viewo.MainViewport.Name
         
         | :? string as view ->       
-            if isNull view then failwithf "CoercePageView: failed on null for view name input" // or Doc.Views.ActiveView
+            if isNull view then Error.Raise <| sprintf "RhinoScriptSyntax.CoercePageView: failed on null for view name input" // or Doc.Views.ActiveView
             else 
                 let allviews = Doc.Views.GetPageViews()|> Array.filter (fun v-> v.PageName = view)
                 let l = allviews.Length
                 if allviews.Length = 1 then allviews.[0]
-                elif allviews.Length > 1 then failwithf "CoercePageView: more than one page called '%s'" view
-                else  failwithf "CoercePageView: Layout called '%s' not found" view
+                elif allviews.Length > 1 then Error.Raise <| sprintf "RhinoScriptSyntax.CoercePageView: more than one page called '%s'" view
+                else  Error.Raise <| sprintf "RhinoScriptSyntax.CoercePageView: Layout called '%s' not found" view
         
-        | _ -> failwithf "Cannot get view from %A" nameOrId
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Cannot get view from %A" nameOrId
     
     ///<summary>Attempt to get Detail view rectangle Geometry</summary>
     ///<param name="objectId">(Guid): objectId of Detail object</param> 
@@ -576,7 +576,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailView (objectId:'T) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  DetailView as a -> a
-        | g -> failwithf "CoerceDetailView failed on %A : %A " g.ObjectType objectId            
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceDetailView failed on %A : %A " g.ObjectType objectId            
     
     ///<summary>Attempt to get Detail view rectangle Object</summary>
     ///<param name="objectId">(Guid): objectId of Detail object</param> 
@@ -584,7 +584,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
-        | g -> failwithf "CoerceDetailViewObject failed on %A : %A " g.ObjectType objectId
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceDetailViewObject failed on %A : %A " g.ObjectType objectId
    
         
     //-------Annotation ----
@@ -596,7 +596,7 @@ type RhinoScriptSyntax private () =
     static member CoerceTextDot (objectId:'T) : TextDot =
        match RhinoScriptSyntax.CoerceGeometry objectId with
        | :?  TextDot as a -> a
-       | g -> failwithf "CoerceTextDot failed on: %s " (typeDescr objectId)
+       | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceTextDot failed on: %s " (typeDescr objectId)
 
     ///<summary>Attempt to get TextEntity Geometry</summary>
     ///<param name="objectId">(Guid): objectId of TextEntity object</param> 
@@ -604,7 +604,7 @@ type RhinoScriptSyntax private () =
     static member CoerceTextEntity (objectId:'T) : TextEntity =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
-        | g -> failwithf "CoerceTextEntity failed on: %s " (typeDescr objectId)
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceTextEntity failed on: %s " (typeDescr objectId)
 
     ///<summary>Attempt to get Hatch Geometry</summary>
     ///<param name="objectId">(Guid): objectId of Hatch object</param> 
@@ -612,7 +612,7 @@ type RhinoScriptSyntax private () =
     static member CoerceHatch (objectId:'T) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
-        | g -> failwithf "CoerceHatch failed on: %s " (typeDescr objectId)
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceHatch failed on: %s " (typeDescr objectId)
 
 
     ///<summary>Attempt to get Rhino Hatch Object</summary>
@@ -621,7 +621,7 @@ type RhinoScriptSyntax private () =
     static member CoerceHatchObject (objectId:Guid): DocObjects.HatchObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
-        | o -> failwithf "CoerceHatchObject failed on: %s " (typeDescr objectId)
+        | o -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceHatchObject failed on: %s " (typeDescr objectId)
 
     ///<summary>Attempt to get Rhino Annotation Object</summary>
     ///<param name="objectId">(Guid): objectId of annotation object</param> 
@@ -629,7 +629,7 @@ type RhinoScriptSyntax private () =
     static member CoerceAnnotation (objectId:Guid): DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        | o -> failwithf "CoerceAnnotation failed on: %s " (typeDescr objectId)
+        | o -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (typeDescr objectId)
 
     
     
@@ -646,17 +646,17 @@ type RhinoScriptSyntax private () =
                 if Guid.Empty = g then failwith "CoerceGeometry failed on Empty Guid" 
                 else 
                     let o = Doc.Objects.FindId(g) 
-                    if isNull o then failwithf "CoerceGeometry failed: Guid %A not found in Object table." g else o.Geometry        
+                    if isNull o then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceGeometry failed: Guid %A not found in Object table." g else o.Geometry        
         | :? option<Guid>  as go -> 
                 if go.IsSome then 
                     if Guid.Empty = go.Value then failwith "CoerceGeometry failed on Empty Guid"
                     else 
                         let o = Doc.Objects.FindId(go.Value) 
-                        if isNull o then failwithf "CoerceGeometry: Guid %A not found in Object table." go.Value else o.Geometry 
-                else  failwithf "CoerceGeometry: Could not coerce Option<Guid> None to a RhinoObject. This might be from cancelled UI interaction" 
+                        if isNull o then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceGeometry: Guid %A not found in Object table." go.Value else o.Geometry 
+                else  Error.Raise <| sprintf "RhinoScriptSyntax.CoerceGeometry: Could not coerce Option<Guid> None to a RhinoObject. This might be from cancelled UI interaction" 
         | :? DocObjects.ObjRef as r -> r.Geometry()
         | :? DocObjects.RhinoObject as o -> o.Geometry        
-        | _ -> failwithf "CoerceGeometry: Could not Coerce %A to a Rhino.Geometry.GeometryBase base class. Is it a struct like Point3d or Plane? " objectId
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceGeometry: Could not Coerce %A to a Rhino.Geometry.GeometryBase base class. Is it a struct like Point3d or Plane? " objectId
     
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible</summary>
     ///<param name="pt">Input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
@@ -664,7 +664,7 @@ type RhinoScriptSyntax private () =
     static member Coerce3dPoint(pt:'T) : Point3d =               
         let inline  point3dOf3(x:^x, y:^y, z:^z) = 
             try Point3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
-            with _ -> failwithf "Coerce3dPoint: Could not Coerce the 3 values %A, %A and %A to a Point3d" x y z
+            with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dPoint: Could not Coerce the 3 values %A, %A and %A to a Point3d" x y z
         
         let b = box pt
         match b with
@@ -693,9 +693,9 @@ type RhinoScriptSyntax private () =
                     else
                         let ys = s.Split(',') 
                         Point3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))   
-                |_ -> failwithf "Coerce3dPoint failed on: %s " (typeDescr pt)
+                |_ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (typeDescr pt)
             with _ ->
-                failwithf "Coerce3dPoint failed on: %s " (typeDescr pt)
+                Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (typeDescr pt)
     
     ///<summary>Attempt to get Rhino Point Object</summary>
     ///<param name="objectId">(Guid): objectId of Point object</param> 
@@ -703,7 +703,7 @@ type RhinoScriptSyntax private () =
     static member CoercePointObject (objectId:Guid) : DocObjects.PointObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.PointObject as a -> a
-        | g -> failwithf "CoercePointObject failed on: %s " (rhType objectId)
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoercePointObject failed on: %s " (rhType objectId)
 
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
@@ -713,7 +713,7 @@ type RhinoScriptSyntax private () =
         | :? Point2d    as point -> point
         | :? Point3d    as point -> Point2d(point.X, point.Y)
         | :? (float*float) as xy  -> let x, y = xy in Point2d(x, y)
-        | _ -> failwithf "Coerce2dPoint: could not Coerce: Could not convert %A to a Point2d"  point
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce2dPoint: could not Coerce: Could not convert %A to a Point2d"  point
     
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible</summary>
     ///<param name="vector">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>    
@@ -721,7 +721,7 @@ type RhinoScriptSyntax private () =
     static member Coerce3dVector(vec:'T) : Vector3d =
         let inline vecOf3(x:^x, y:^y, z:^z) = 
             try Vector3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
-            with _ -> failwithf "Coerce3dVector: Could not Coerce %A, %A and %A to Vector3d" x y z
+            with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dVector: Could not Coerce %A, %A and %A to Vector3d" x y z
         
         let b = box vec
         match b with
@@ -747,9 +747,9 @@ type RhinoScriptSyntax private () =
                     else
                         let ys = s.Split(',') 
                         Vector3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))   
-                |_ -> failwithf "Coerce3dVector failed on: %s " (typeDescr vec)
+                |_ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dVector failed on: %s " (typeDescr vec)
             with _ ->
-                failwithf "Coerce3dVector failed on: %s " (typeDescr vec)
+                Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dVector failed on: %s " (typeDescr vec)
         
             
     //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
@@ -757,14 +757,14 @@ type RhinoScriptSyntax private () =
     //<returns>(Rhino.Geometry.Point3d seq) Fails on bad input</returns>
     //static member Coerce3dPointList(points:'T) : Point3d seq=
     //    try Seq.map RhinoScriptSyntax.Coerce3dPoint points //|> Seq.cache
-    //    with _ -> failwithf "Coerce3dPointList: could not Coerce: Could not convert %A to a list of 3d points"  points
+    //    with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce3dPointList: could not Coerce: Could not convert %A to a list of 3d points"  points
         
     //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
     //<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     //<returns>(Rhino.Geometry.Point2d seq) Fails on bad input</returns>
     //static member Coerce2dPointList(points:'T) : Point2d seq=
     //    try Seq.map RhinoScriptSyntax.Coerce2dPoint points //|> Seq.cache
-    //    with _ -> failwithf "Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
+    //    with _ -> Error.Raise <| sprintf "RhinoScriptSyntax.Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
 
 
     ///<summary>Convert input into a Rhino.Geometry.Plane if possible</summary>
@@ -780,7 +780,7 @@ type RhinoScriptSyntax private () =
                 pl.Origin <- pt
                 pl
             with e -> 
-                failwithf "CoercePlane failed on: %s " (typeDescr plane) 
+                Error.Raise <| sprintf "RhinoScriptSyntax.CoercePlane failed on: %s " (typeDescr plane) 
  
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible</summary>
     ///<param name="xform">object to convert</param>
@@ -795,16 +795,16 @@ type RhinoScriptSyntax private () =
                     for r, x in Seq.indexed xs do
                         t.[c, r] <- x
             with
-                | _ -> failwithf "CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
+                | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
             t        
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
             let mutable t= Transform()           
             try
                 xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
             with
-                | _ -> failwithf "CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
+                | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
             t
-        | _ -> failwithf "CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
 
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="line">Line, two points or Guid</param>
@@ -812,7 +812,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLine(line:'T) : Line=
         match RhinoScriptSyntax.TryCoerceLine(line) with
         | Some a -> a
-        | None -> failwithf "CoerceLine failed on: %s " (typeDescr line)
+        | None -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLine failed on: %s " (typeDescr line)
         
     ///<summary>Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance.
     /// does not return circles as arcs.</summary>
@@ -821,7 +821,7 @@ type RhinoScriptSyntax private () =
     static member CoerceArc(arc:'T) : Arc=
         match RhinoScriptSyntax.TryCoerceArc(arc) with
         | Some a -> a
-        | None -> failwithf "CoerceArc failed on: %s " (typeDescr arc)
+        | None -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceArc failed on: %s " (typeDescr arc)
 
     ///<summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="circ">Guid, RhinoObject or Curve </param>
@@ -829,7 +829,7 @@ type RhinoScriptSyntax private () =
     static member CoerceCircle(circ:'T) : Circle=
         match RhinoScriptSyntax.TryCoerceCircle(circ) with
         | Some a -> a
-        | None -> failwithf "CoerceCircle failed on: %s " (typeDescr circ)
+        | None -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceCircle failed on: %s " (typeDescr circ)
 
     ///<summary>Attempt to get Rhino Ellips Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="ellip">Guid, RhinoObject or Curve </param>
@@ -837,7 +837,7 @@ type RhinoScriptSyntax private () =
     static member CoerceEllips(ellip:'T) : Ellipse=
         match RhinoScriptSyntax.TryCoerceEllipse(ellip) with
         | Some a -> a
-        | None -> failwithf "CoerceEllipse failed on: %s " (typeDescr ellip)      
+        | None -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceEllipse failed on: %s " (typeDescr ellip)      
     
     ///<summary>Attempt to get polysurface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
@@ -847,7 +847,7 @@ type RhinoScriptSyntax private () =
         | :? Brep as b -> b
         | :? Extrusion as b -> b.ToBrep(true)
         | :? Surface as s -> s.ToBrep()
-        | g -> failwithf "CoerceBrep failed on: %s " (typeDescr objectId)
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceBrep failed on: %s " (typeDescr objectId)
 
 
     
@@ -859,15 +859,15 @@ type RhinoScriptSyntax private () =
         if segmentIndex < 0 then 
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? Curve as c -> c
-            | _ -> failwithf "CoerceCurve failed on: %s " (typeDescr objectId)
+            | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceCurve failed on: %s " (typeDescr objectId)
         else
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? PolyCurve as c -> 
                 let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then failwithf "CoerceCurve failed on segment index %d for %s" segmentIndex   (typeDescr crv)
+                if isNull crv then Error.Raise <| sprintf "RhinoScriptSyntax.CoerceCurve failed on segment index %d for %s" segmentIndex   (typeDescr crv)
                 crv
             | :? Curve as c -> c
-            | _ -> failwithf "CoerceCurve failed for %s"  (typeDescr objectId)
+            | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceCurve failed for %s"  (typeDescr objectId)
 
   
 
@@ -879,8 +879,8 @@ type RhinoScriptSyntax private () =
         | :? Surface as c -> c
         | :? Brep as b -> 
             if b.Faces.Count = 1 then b.Faces.[0] :> Surface
-            else failwithf "CoerceSurface failed on %A from Brep with %d Faces" srf b.Faces.Count
-        | _ -> failwithf "CoerceSurface failed on: %s " (typeDescr srf)
+            else Error.Raise <| sprintf "RhinoScriptSyntax.CoerceSurface failed on %A from Brep with %d Faces" srf b.Faces.Count
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceSurface failed on: %s " (typeDescr srf)
 
     ///<summary>Attempt to get surface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId = the object's Identifier</param>
@@ -891,8 +891,8 @@ type RhinoScriptSyntax private () =
         | :? Surface as c -> c.ToNurbsSurface()
         | :? Brep as b -> 
             if b.Faces.Count = 1 then (b.Faces.[0] :> Surface).ToNurbsSurface()
-            else failwithf "CoerceNurbsSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
-        | _ -> failwithf "CoerceNurbsSurface failed on: %s " (typeDescr objectId)
+            else Error.Raise <| sprintf "RhinoScriptSyntax.CoerceNurbsSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceNurbsSurface failed on: %s " (typeDescr objectId)
 
 
     ///<summary>Attempt to get mesh geometry from the document with a given objectId</summary>
@@ -901,7 +901,7 @@ type RhinoScriptSyntax private () =
     static member CoerceMesh(objectId:'T) : Mesh =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Mesh as m -> m        
-        | _ -> failwithf "CoerceMesh failed on: %s " (typeDescr objectId)
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceMesh failed on: %s " (typeDescr objectId)
 
 
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId</summary>
@@ -910,7 +910,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLight (objectId:'T) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
-        | g -> failwithf "CoerceLight failed on: %s " (typeDescr objectId)
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoerceLight failed on: %s " (typeDescr objectId)
 
 
     ///<summary>Attempt to get Rhino PointCloud Geometry</summary>
@@ -919,7 +919,7 @@ type RhinoScriptSyntax private () =
     static member CoercePointCloud (objectId:'T) : PointCloud =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
-        | g -> failwithf "CoercePointCloud failed on: %s " (typeDescr objectId)
+        | g -> Error.Raise <| sprintf "RhinoScriptSyntax.CoercePointCloud failed on: %s " (typeDescr objectId)
                 
 
     // -------------------- Layer related functions moved here so that they can be used ealier. -------------------
@@ -934,12 +934,12 @@ type RhinoScriptSyntax private () =
             | "" -> Doc.Layers.CurrentLayerIndex
             | _ -> 
                 match names.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
-                | [| |] -> failwithf "Cannot get or create layer for: '%s'" names
+                | [| |] -> Error.Raise <| sprintf "RhinoScriptSyntax.Cannot get or create layer for: '%s'" names
                 | ns -> 
                     let checkedNs =
                         ns
                         |> Array.map (fun n -> n.Trim())
-                        |> Array.map (fun n -> if n <> "" then n else failwithf "Cannot get or create layer from: '%s'" names)
+                        |> Array.map (fun n -> if n <> "" then n else Error.Raise <| sprintf "RhinoScriptSyntax.Cannot get or create layer from: '%s'" names)
                         |> List.ofArray
 
                     let rec createLayer(nameList, prevId, prevIdx, root) : int = 
@@ -1010,7 +1010,7 @@ type RhinoScriptSyntax private () =
             if createLayerIfMissing then  RhinoScriptSyntax.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for layer '%s' on: %s " layer (typeDescr objectId)
+        if not <| obj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (typeDescr objectId)
         Doc.Views.Redraw()
        
 
@@ -1028,5 +1028,5 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for layer '%s' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+            if not <| obj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
         Doc.Views.Redraw()

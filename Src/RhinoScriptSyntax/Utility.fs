@@ -72,7 +72,7 @@ module ExtensionsUtility =
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
-        if not <| vec0.Unitize() || not <| vec1.Unitize() then  failwithf "angle two failed on %A and %A" line1 line2
+        if not <| vec0.Unitize() || not <| vec1.Unitize() then  Error.Raise <| sprintf "RhinoScriptSyntax.Angle2 two failed on %A and %A" line1 line2
         let mutable dot = vec0 * vec1
         dot <- max -1.0 (min 1.0 dot) // clamp for math errors
         let mutable angle = Math.Acos(dot)
@@ -247,7 +247,7 @@ module ExtensionsUtility =
                 data.Global.[entry]
             else
                 data.[section].[entry]        
-        if isNull s then failwithf "GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
+        if isNull s then Error.Raise <| sprintf "RhinoScriptSyntax.GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
         else s
     
     ///<summary>Saves a specified section and entry in an ini file</summary>
@@ -353,7 +353,7 @@ module ExtensionsUtility =
             |3 -> fun (p:Point3d) -> p.Y, p.Z, p.X
             |4 -> fun (p:Point3d) -> p.Z, p.X, p.Y
             |5 -> fun (p:Point3d) -> p.Z, p.Y, p.X
-            |_ -> failwithf "sortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
+            |_ -> Error.Raise <| sprintf "RhinoScriptSyntax.SortPoints is missing implementation for order input %d, only 0 to 5 are valid inputs" order
         if ascending then points |>  Seq.sortBy           f
         else              points |>  Seq.sortByDescending f
 

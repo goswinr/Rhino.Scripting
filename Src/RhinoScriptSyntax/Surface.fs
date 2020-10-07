@@ -27,9 +27,9 @@ module ExtensionsSurface =
     static member AddBox(corners:Point3d seq) : Guid =
         //box = RhinoScriptSyntax.Coerce3dpointlist(corners)
         let brep = Brep.CreateFromBox(corners)
-        if isNull brep then failwithf "Rhino.Scripting: Unable to create brep from box.  %d corners:'%A'" (Seq.length corners) corners
+        if isNull brep then Error.Raise <| sprintf "RhinoScriptSyntax.AddBox: Unable to create brep from box.  %d corners:'%A'" (Seq.length corners) corners
         let rc = Doc.Objects.AddBrep(brep)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add brep to document. corners:'%A'" corners
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddBox: Unable to add brep to document. corners:'%A'" corners
         Doc.Views.Redraw()
         rc
 
@@ -78,13 +78,13 @@ module ExtensionsSurface =
         //startPoint = RhinoScriptSyntax.Coerce3dpoint(startPoint)
         //endPoint = RhinoScriptSyntax.Coerce3dpoint(endPoint)
         if not bbox.IsValid then
-            failwithf "Rhino.Scripting: AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" objectIds startPoint endPoint normal
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" objectIds startPoint endPoint normal
         let line = Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal
         let surface = PlaneSurface.CreateThroughBox(line, normal, bbox)
-        if surface|> isNull  then failwithf "Rhino.Scripting: AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" objectIds startPoint endPoint normal
+        if surface|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" objectIds startPoint endPoint normal
         let objectId = Doc.Objects.AddSurface(surface)
-        if objectId = Guid.Empty then failwithf "Rhino.Scripting: AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" objectIds startPoint endPoint normal
+        if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" objectIds startPoint endPoint normal
         Doc.Views.Redraw()
         objectId
 
@@ -108,7 +108,7 @@ module ExtensionsSurface =
         let cylinder = Cylinder(circle, height)
         let brep = cylinder.ToBrep(cap, cap)
         let objectId = Doc.Objects.AddBrep(brep)
-        if objectId = Guid.Empty then failwithf "Rhino.Scripting: AddCylinder failed.  basis:'%A' height:'%A' radius:'%A' cap:'%A'" basis height radius cap
+        if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddCylinder failed.  basis:'%A' height:'%A' radius:'%A' cap:'%A'" basis height radius cap
         Doc.Views.Redraw()
         objectId
 
@@ -120,9 +120,9 @@ module ExtensionsSurface =
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
         let curves =  resizeArray { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let brep = Brep.CreateEdgeSurface(curves)
-        if brep|> isNull  then failwithf "Rhino.Scripting: AddEdgeSrf failed.  curveIds:'%A'" curveIds
+        if brep|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%A'" curveIds
         let objectId = Doc.Objects.AddBrep(brep)
-        if objectId = Guid.Empty then failwithf "Rhino.Scripting: AddEdgeSrf failed.  curveIds:'%A'" curveIds
+        if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%A'" curveIds
         Doc.Views.Redraw()
         objectId
 
@@ -152,7 +152,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "AddNetworkSrf failed on %A" curves
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddNetworkSrf failed on %A" curves
 
     [<Extension>]
     ///<summary>Adds a NURBS surface object to the document</summary>
@@ -176,7 +176,7 @@ module ExtensionsSurface =
         let pu, pv = pointCount
         let du, dv = degree
         if points.Count < (pu*pv) then
-            failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
         let ns = NurbsSurface.Create(3, notNull weights , du + 1, dv + 1, pu, pv)
         //add the points && weights
         let controlpoints = ns.Points
@@ -185,7 +185,7 @@ module ExtensionsSurface =
 
         if notNull weights then
             if weights.Count < (pu*pv) then
-                failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+                Error.Raise <| sprintf "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
             for i in range(pu) do
                 for j in range(pv) do
                     let cp = ControlPoint(points.[index], weights.[index])
@@ -213,9 +213,9 @@ module ExtensionsSurface =
             ns.KnotsU.[i] <-  knotsU.[i]
         for i in range(ns.KnotsV.Count) do
             ns.KnotsV.[i] <-  knotsV.[i]
-        if not ns.IsValid then failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+        if not ns.IsValid then Error.Raise <| sprintf "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
         let objectId = Doc.Objects.AddSurface(ns)
-        if objectId = Guid.Empty then failwithf "Rhino.Scripting: AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
+        if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
         Doc.Views.Redraw()
         objectId
 
@@ -265,7 +265,7 @@ module ExtensionsSurface =
                         Doc.Views.Redraw()
                         rc
                     else
-                        failwithf "AddPatch faild for %A and %A " objectIds startSurfaceId
+                        Error.Raise <| sprintf "RhinoScriptSyntax.AddPatch faild for %A and %A " objectIds startSurfaceId
 
     [<Extension>]
     ///<summary>Fits a surface through curve, point, point cloud, and mesh objects</summary>
@@ -313,7 +313,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "AddPatch faild for %A and %A " objectIds uvSpans
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddPatch faild for %A and %A " objectIds uvSpans
 
 
     [<Extension>]
@@ -357,7 +357,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "AddPlanarSrf faild on %A" objectIds
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddPlanarSrf faild on %A" objectIds
 
 
     [<Extension>]
@@ -373,9 +373,9 @@ module ExtensionsSurface =
         let uinterval = Interval(0.0, uDir)
         let vinterval = Interval(0.0, vDir)
         let planesurface = new PlaneSurface(plane, uinterval, vinterval)
-        if planesurface|> isNull  then failwithf "Rhino.Scripting: AddPlaneSurface failed.  plane:'%A' uDir:'%A' vDir:'%A'" plane uDir vDir
+        if planesurface|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.AddPlaneSurface failed.  plane:'%A' uDir:'%A' vDir:'%A'" plane uDir vDir
         let rc = Doc.Objects.AddSurface(planesurface)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: AddPlaneSurface failed.  plane:'%A' uDir:'%A' vDir:'%A'" plane uDir vDir
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddPlaneSurface failed.  plane:'%A' uDir:'%A' vDir:'%A'" plane uDir vDir
         Doc.Views.Redraw()
         rc
 
@@ -413,10 +413,10 @@ module ExtensionsSurface =
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
-        if loftType<0 || loftType>4 then failwithf "Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
-        if rebuild<>0 && refit<>0.0 then failwithf "Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
+        if loftType<0 || loftType>4 then Error.Raise <| sprintf "RhinoScriptSyntax.Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
+        if rebuild<>0 && refit<>0.0 then Error.Raise <| sprintf "RhinoScriptSyntax.Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
         let curves =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
-        if Seq.length(curves)<2 then failwithf "Rhino.Scripting: AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
+        if Seq.length(curves)<2 then Error.Raise <| sprintf "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
         let ende  = if ende  = Point3d.Origin  then Point3d.Unset else ende
         let mutable lt = LoftType.Normal
@@ -431,7 +431,7 @@ module ExtensionsSurface =
             breps <- Brep.CreateFromLoftRebuild(curves, start, ende, lt, closed, rebuild)
         elif refit > 0.0 then
             breps <- Brep.CreateFromLoftRefit(curves, start, ende, lt, closed, refit)
-        if isNull breps then failwithf "Rhino.Scripting: AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
+        if isNull breps then Error.Raise <| sprintf "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" objectIds start ende loftType rebuild refit closed
         let idlist = ResizeArray()
         for brep in breps do
             let objectId = Doc.Objects.AddBrep(brep)
@@ -458,9 +458,9 @@ module ExtensionsSurface =
         let startAngle = toRadians(startAngle)
         let endAngle = toRadians(endAngle)
         let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then failwithf "Rhino.Scripting: AddRevSrf failed.  curveId:'%A' axis:'%A' startAngle:'%A' endAngle:'%A'" curveId axis startAngle endAngle
+        if isNull srf then Error.Raise <| sprintf "RhinoScriptSyntax.AddRevSrf failed.  curveId:'%A' axis:'%A' startAngle:'%A' endAngle:'%A'" curveId axis startAngle endAngle
         let ns = srf.ToNurbsSurface()
-        if isNull ns then failwithf "Rhino.Scripting: AddRevSrf failed.  curveId:'%A' axis:'%A' startAngle:'%A' endAngle:'%A'" curveId axis startAngle endAngle
+        if isNull ns then Error.Raise <| sprintf "RhinoScriptSyntax.AddRevSrf failed.  curveId:'%A' axis:'%A' startAngle:'%A' endAngle:'%A'" curveId axis startAngle endAngle
         let rc = Doc.Objects.AddSurface(ns)
         Doc.Views.Redraw()
         rc
@@ -474,7 +474,7 @@ module ExtensionsSurface =
     static member AddSphere(center:Point3d, radius:float) : Guid =
         let sphere = Sphere(center, radius)
         let rc = Doc.Objects.AddSphere(sphere)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: AddSphere failed.  centerOrPlane:'%A' radius:'%A'" center radius
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddSphere failed.  centerOrPlane:'%A' radius:'%A'" center radius
         Doc.Views.Redraw()
         rc
 
@@ -536,13 +536,13 @@ module ExtensionsSurface =
                                        [<OPT;DEF(3)>]degreeV:int           ) : Guid =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let surf = NurbsSurface.CreateFromPoints(points, fst count, snd count,  degreeU,  degreeV)
-        if isNull surf then failwithf "Rhino.Scripting: AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
+        if isNull surf then Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
         let objectId = Doc.Objects.AddSurface(surf)
         if objectId <> Guid.Empty then
             Doc.Views.Redraw()
             objectId
         else
-            failwithf "Rhino.Scripting: AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
 
     [<Extension>]
     ///<summary>Creates a new surface from four corner points</summary>
@@ -553,9 +553,9 @@ module ExtensionsSurface =
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC , pointD)
-        if surface|> isNull  then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
+        if surface|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
         let rc = Doc.Objects.AddSurface(surface)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
         Doc.Views.Redraw()
         rc
 
@@ -567,9 +567,9 @@ module ExtensionsSurface =
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC)
-        if surface|> isNull  then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
+        if surface|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
         let rc = Doc.Objects.AddSurface(surface)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
         Doc.Views.Redraw()
         rc
 
@@ -591,13 +591,13 @@ module ExtensionsSurface =
                                 [<OPT;DEF(false)>]closedV:bool) : Guid =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let surf = NurbsSurface.CreateThroughPoints(points, fst count, snd count, degreeU, degreeV, closedU, closedV)
-        if isNull surf then failwithf "Rhino.Scripting: AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
+        if isNull surf then Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
         let objectId = Doc.Objects.AddSurface(surf)
         if objectId <> Guid.Empty then
             Doc.Views.Redraw()
             objectId
         else
-            failwithf "Rhino.Scripting: AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
+            Error.Raise <| sprintf "RhinoScriptSyntax.AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
 
 
     [<Extension>]
@@ -615,7 +615,7 @@ module ExtensionsSurface =
         let shapes =  resizeArray { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
         let tolerance = Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
-        if isNull breps then failwithf "Rhino.Scripting: AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
+        if isNull breps then Error.Raise <| sprintf "RhinoScriptSyntax.AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
         let rc =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep) }
         Doc.Views.Redraw()
         rc
@@ -637,7 +637,7 @@ module ExtensionsSurface =
         let shapes =  resizeArray { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
         let tolerance = Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
-        if isNull breps then failwithf "Rhino.Scripting: AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
+        if isNull breps then Error.Raise <| sprintf "RhinoScriptSyntax.AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
         let rc =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep) }
         Doc.Views.Redraw()
         rc
@@ -659,7 +659,7 @@ module ExtensionsSurface =
         let profileinst = RhinoScriptSyntax.CoerceCurve(profile)
         let railinst = RhinoScriptSyntax.CoerceCurve(rail)
         let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
-        if isNull surface then failwithf "Rhino.Scripting: AddRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
+        if isNull surface then Error.Raise <| sprintf "RhinoScriptSyntax.AddRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
         let rc = Doc.Objects.AddSurface(surface)
         Doc.Views.Redraw()
         rc
@@ -699,7 +699,7 @@ module ExtensionsSurface =
         let breps1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
-        if newbreps|> isNull  then failwithf "Rhino.Scripting: BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if newbreps|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let rc =  resizeArray { for brep in newbreps do yield Doc.Objects.AddBrep(brep) }
         if deleteInput then
             for objectId in input0 do Doc.Objects.Delete(objectId, true)|> ignore
@@ -724,7 +724,7 @@ module ExtensionsSurface =
         let breps1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
-        if newbreps|> isNull  then failwithf "Rhino.Scripting: BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if newbreps|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let rc =  resizeArray { for brep in newbreps do yield Doc.Objects.AddBrep(brep) }
         if deleteInput then
             for objectId in input0 do Doc.Objects.Delete(objectId, true)|> ignore
@@ -742,11 +742,11 @@ module ExtensionsSurface =
     ///    Delete all input objects</param>
     ///<returns>(Guid ResizeArray) of identifiers of newly created objects </returns>
     static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        if Seq.length(input)<2 then failwithf "Rhino.Scripting: BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
+        if Seq.length(input)<2 then Error.Raise <| sprintf "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let breps =  resizeArray { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
-        if newbreps|> isNull  then failwithf "Rhino.Scripting: BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
+        if newbreps|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let rc =  resizeArray { for brep in newbreps do yield Doc.Objects.AddBrep(brep) }
         if  deleteInput then
             for objectId in input do Doc.Objects.Delete(objectId, true)|> ignore
@@ -788,7 +788,7 @@ module ExtensionsSurface =
             let idx = (!ci).Index
             !clpt,!s,!t, typ, idx, !n
         else
-            failwithf "BrepClosestPoint faile for %A and %A" objectId point
+            Error.Raise <| sprintf "RhinoScriptSyntax.BrepClosestPoint faile for %A and %A" objectId point
 
 
     [<Extension>]
@@ -828,7 +828,7 @@ module ExtensionsSurface =
             if curve.IsValid then
                 let rc = Doc.Objects.AddCurve(curve)
                 curve.Dispose()
-                if rc = Guid.Empty then failwithf "DuplicateEdgeCurves faile on one of the edge curves"
+                if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.DuplicateEdgeCurves faile on one of the edge curves"
                 curves.Add(rc)
                 if select then
                     let rhobject = RhinoScriptSyntax.CoerceRhinoObject(rc)
@@ -851,10 +851,10 @@ module ExtensionsSurface =
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
         let mutable curves = brep.DuplicateNakedEdgeCurves(outer, inner)
-        if curves|> isNull  then failwithf "Rhino.Scripting: DuplicateSurfaceBorder failed.  surfaceId:'%A' typ:'%A'" surfaceId typ
+        if curves|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%A' typ:'%A'" surfaceId typ
         let tolerance = Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
-        if curves|> isNull  then failwithf "Rhino.Scripting: DuplicateSurfaceBorder failed.  surfaceId:'%A' typ:'%A'" surfaceId typ
+        if curves|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%A' typ:'%A'" surfaceId typ
         let rc =  resizeArray { for c in curves do yield Doc.Objects.AddCurve(c) }
         Doc.Views.Redraw()
         rc
@@ -872,7 +872,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc = surface.PointAt(u, v)
         if rc.IsValid then rc
-        else failwithf "Rhino.Scripting: EvaluateSurface failed.  surfaceId:'%A' u:'%A' v:'%A'" surfaceId u v
+        else Error.Raise <| sprintf "RhinoScriptSyntax.EvaluateSurface failed.  surfaceId:'%A' u:'%A' v:'%A'" surfaceId u v
 
 
     [<Extension>]
@@ -999,7 +999,7 @@ module ExtensionsSurface =
         let curve2 = RhinoScriptSyntax.CoerceCurve(pathId)
         let srf = SumSurface.Create(curve1, curve2)
         let rc = Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: ExtrudeCurve failed.  curveId:'%A' pathId:'%A'" curveId pathId
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ExtrudeCurve failed.  curveId:'%A' pathId:'%A'" curveId pathId
         Doc.Views.Redraw()
         rc
 
@@ -1014,7 +1014,7 @@ module ExtensionsSurface =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let srf = Surface.CreateExtrusionToPoint(curve, point)
         let rc = Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: ExtrudeCurvePoint failed.  curveId:'%A' point:'%A'" curveId point
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ExtrudeCurvePoint failed.  curveId:'%A' point:'%A'" curveId point
         Doc.Views.Redraw()
         rc
 
@@ -1034,7 +1034,7 @@ module ExtensionsSurface =
         let vec = endPoint - startPoint
         let srf = Surface.CreateExtrusion(curve, vec)
         let rc = Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: ExtrudeCurveStraight failed.  curveId:'%A' startPoint:'%A' endPoint:'%A'" curveId startPoint endPoint
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ExtrudeCurveStraight failed.  curveId:'%A' startPoint:'%A' endPoint:'%A'" curveId startPoint endPoint
         Doc.Views.Redraw()
         rc
 
@@ -1057,7 +1057,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "ExtrudeSurface faild on %A and %A " surface curve
+            Error.Raise <| sprintf "RhinoScriptSyntax.ExtrudeSurface faild on %A and %A " surface curve
 
 
     [<Extension>]
@@ -1083,7 +1083,7 @@ module ExtensionsSurface =
                 Surface.CreateRollingBallFillet(surface0, uvparam0, surface1, uvparam1, radius, tol)
             else
                 Surface.CreateRollingBallFillet(surface0, surface1, radius, tol)
-        if isNull surfaces then failwithf "Rhino.Scripting: FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
+        if isNull surfaces then Error.Raise <| sprintf "RhinoScriptSyntax.FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
         let rc = ResizeArray()
         for surf in surfaces do
             rc.Add( Doc.Objects.AddSurface(surf) )
@@ -1098,7 +1098,7 @@ module ExtensionsSurface =
     ///<returns>(bool) The current normal orientation</returns>
     static member FlipSurface(surfaceId:Guid) : bool = //GET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then failwithf "Rhino.Scripting: FlipSurface Get failed.  surfaceId:'%A' " surfaceId
+        if brep.Faces.Count>1 then Error.Raise <| sprintf "RhinoScriptSyntax.FlipSurface Get failed.  surfaceId:'%A' " surfaceId
         let face = brep.Faces.[0]
         let oldreverse = face.OrientationIsReversed
         oldreverse
@@ -1111,7 +1111,7 @@ module ExtensionsSurface =
     ///<returns>(unit) void, nothing</returns>
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then failwithf "Rhino.Scripting: FlipSurface failed.  surfaceId:'%A' flip:'%A'" surfaceId flip
+        if brep.Faces.Count>1 then Error.Raise <| sprintf "RhinoScriptSyntax.FlipSurface failed.  surfaceId:'%A' flip:'%A'" surfaceId flip
         let face = brep.Faces.[0]
         let oldreverse = face.OrientationIsReversed
         if brep.IsSolid = false && oldreverse <> flip then
@@ -1127,7 +1127,7 @@ module ExtensionsSurface =
     static member FlipSurface(surfaceIds:Guid seq, flip:bool) : unit = //MULTISET
         for surfaceId in surfaceIds do 
             let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-            if brep.Faces.Count>1 then failwithf "Rhino.Scripting: FlipSurface failed.  surfaceId:'%A' flip:'%A'" surfaceId flip
+            if brep.Faces.Count>1 then Error.Raise <| sprintf "RhinoScriptSyntax.FlipSurface failed.  surfaceId:'%A' flip:'%A'" surfaceId flip
             let face = brep.Faces.[0]
             let oldreverse = face.OrientationIsReversed
             if brep.IsSolid = false && oldreverse <> flip then
@@ -1162,18 +1162,18 @@ module ExtensionsSurface =
                     if curve.IsValid then
                         let rc = Doc.Objects.AddCurve(curve)
                         curve.Dispose()
-                        if rc = Guid.Empty then failwithf "Rhino.Scripting: IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
+                        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
                         ids.Add(rc)
             else
                 for curve in outcurves do
                     if curve.IsValid then
                         let rc = Doc.Objects.AddCurve(curve)
                         curve.Dispose()
-                        if rc = Guid.Empty then failwithf "Rhino.Scripting: IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
+                        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
                         ids.Add(rc)
             for point in outpoints do
                 let rc = Doc.Objects.AddPoint(point)
-                if rc = Guid.Empty then failwithf "Rhino.Scripting: IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
+                if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
                 ids.Add(rc)
             Doc.Views.Redraw()
             ids
@@ -1204,7 +1204,7 @@ module ExtensionsSurface =
         elif rc = Intersect.SphereSphereIntersection.Overlap then
             2, circle, sphere0.Radius
         else
-            failwithf "Rhino.Scripting: IntersectSpheres failed.  spherePlane0:'%A' sphereRadius0:'%A' spherePlane1:'%A' sphereRadius1:'%A'" spherePlane0 sphereRadius0 spherePlane1 sphereRadius1
+            Error.Raise <| sprintf "RhinoScriptSyntax.IntersectSpheres failed.  spherePlane0:'%A' sphereRadius0:'%A' spherePlane1:'%A' sphereRadius1:'%A'" spherePlane0 sphereRadius0 spherePlane1 sphereRadius1
 
 
     [<Extension>]
@@ -1267,23 +1267,23 @@ module ExtensionsSurface =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
-        //if objectId|> isNull  || point|> isNull  then failwithf "Rhino.Scripting: IsPointInSurface failed.  objectId:'%A' point:'%A' strictlyIn:'%A' tolerance:'%A'" objectId point strictlyIn tolerance
+        //if objectId|> isNull  || point|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.IsPointInSurface failed.  objectId:'%A' point:'%A' strictlyIn:'%A' tolerance:'%A'" objectId point strictlyIn tolerance
         let obj = Doc.Objects.FindId(objectId)
         let  tolerance= ifZero1 tolerance RhinoMath.SqrtEpsilon
         match obj with
         | :? DocObjects.ExtrusionObject as es->
             let brep= es.ExtrusionGeometry.ToBrep(false)
-            if not brep.IsSolid then failwithf "IsPointInSurface failed on not closed Extrusion %A"  objectId
+            if not brep.IsSolid then Error.Raise <| sprintf "RhinoScriptSyntax.IsPointInSurface failed on not closed Extrusion %A"  objectId
             brep.IsPointInside(point, tolerance, strictlyIn)
         | :? DocObjects.BrepObject as bo->
             let br= bo.BrepGeometry
-            if not br.IsSolid then failwithf "IsPointInSurface failed on not closed Brep %A"  objectId
+            if not br.IsSolid then Error.Raise <| sprintf "RhinoScriptSyntax.IsPointInSurface failed on not closed Brep %A"  objectId
             br.IsPointInside(point, tolerance, strictlyIn)
         | :? DocObjects.MeshObject as mo ->
             let me = mo.MeshGeometry
-            if not me.IsClosed then failwithf "IsPointInSurface failed on not closed Mesh %A"  objectId
+            if not me.IsClosed then Error.Raise <| sprintf "RhinoScriptSyntax.IsPointInSurface failed on not closed Mesh %A"  objectId
             me.IsPointInside(point, tolerance, strictlyIn)
-        | _ -> failwithf "IsPointInSurface does not work  on %s %A" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.IsPointInSurface does not work  on %s %A" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
     [<Extension>]
     ///<summary>Verifies that a point lies on a surface</summary>
@@ -1304,7 +1304,7 @@ module ExtensionsSurface =
                     rc <- b.Faces.[0].IsPointOnFace(u, v) <> PointFaceRelation.Exterior
                 | _ -> ()
         else
-            failwithf "IsPointOnSurface failed for surf.ClosestPoint on %A %A" objectId point
+            Error.Raise <| sprintf "RhinoScriptSyntax.IsPointOnSurface failed for surf.ClosestPoint on %A %A" objectId point
         rc
 
 
@@ -1453,7 +1453,7 @@ module ExtensionsSurface =
         let sphere = ref Sphere.Unset
         let issphere = surface.TryGetSphere(sphere, tol)
         if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
-        else failwithf "SurfaceSphere input is not a sphere %A"surfaceId
+        else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceSphere input is not a sphere %A"surfaceId
 
 
     [<Extension>]
@@ -1465,15 +1465,15 @@ module ExtensionsSurface =
     ///<returns>(Guid) identifier of newly created object</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let breps =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        if breps.Count<2 then failwithf "Rhino.Scripting: JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
+        if breps.Count<2 then Error.Raise <| sprintf "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
         let tol = Doc.ModelAbsoluteTolerance * 2.1
         let joinedbreps = Brep.JoinBreps(breps, tol)
         if joinedbreps|> isNull  then
-            failwithf "Rhino.Scripting: JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
+            Error.Raise <| sprintf "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
         if joinedbreps.Length <> 1 then
-            failwithf "Rhino.Scripting: JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
+            Error.Raise <| sprintf "RhinoScriptSyntax.JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
         let rc = Doc.Objects.AddBrep(joinedbreps.[0])
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" objectIds deleteInput
         if  deleteInput then
             for objectId in objectIds do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
@@ -1494,7 +1494,7 @@ module ExtensionsSurface =
                                        [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let newsurf = Surface.CreatePeriodicSurface(surface, direction)
-        if newsurf|> isNull  then failwithf "Rhino.Scripting: MakeSurfacePeriodic failed.  surfaceId:'%A' direction:'%A' deleteInput:'%A'" surfaceId direction deleteInput
+        if newsurf|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MakeSurfacePeriodic failed.  surfaceId:'%A' direction:'%A' deleteInput:'%A'" surfaceId direction deleteInput
         //id = RhinoScriptSyntax.Coerceguid(surfaceId)
         if deleteInput then
             Doc.Objects.Replace(surfaceId, newsurf)|> ignore
@@ -1527,12 +1527,12 @@ module ExtensionsSurface =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let mutable face = null
         if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
-        if face|> isNull  then failwithf "Rhino.Scripting: OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
+        if face|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
         let tolerance= ifZero1 tolerance Doc.ModelAbsoluteTolerance
         let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
-        if newbrep|> isNull  then failwithf "Rhino.Scripting: OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
+        if newbrep|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
         let rc = Doc.Objects.AddBrep(newbrep)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%A' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" surfaceId distance tolerance bothSides createSolid
         Doc.Views.Redraw()
         rc
 
@@ -1623,7 +1623,7 @@ module ExtensionsSurface =
     ///<returns>(unit) void, nothing</returns>
     static member ReverseSurface(surfaceId:Guid, direction:int) : unit =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count <> 1 then failwithf "Rhino.Scripting: ReverseSurface failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
+        if brep.Faces.Count <> 1 then Error.Raise <| sprintf "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
         let face = brep.Faces.[0]
         if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignoreObj
         if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignoreObj
@@ -1651,7 +1651,7 @@ module ExtensionsSurface =
         //if notNull objectId then surfaceIds <- .[id]
         let ray = Ray3d(startPoint, direction)
         let breps = resizeArray{for objectId in surfaceIds do RhinoScriptSyntax.CoerceBrep(objectId)}
-        if breps.Count = 0 then failwithf "Rhino.Scripting: ShootRay failed.  surfaceIds:'%A' startPoint:'%A' direction:'%A' reflections:'%A'" surfaceIds startPoint direction reflections
+        if breps.Count = 0 then Error.Raise <| sprintf "RhinoScriptSyntax.ShootRay failed.  surfaceIds:'%A' startPoint:'%A' direction:'%A' reflections:'%A'" surfaceIds startPoint direction reflections
         Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
 
 
@@ -1671,14 +1671,14 @@ module ExtensionsSurface =
         //end = RhinoScriptSyntax.Coerce3dpoint(endPoint)
         let rcstart, ustart, vstart = surface.ClosestPoint(startPoint)
         let rcend, uend, vend = surface.ClosestPoint(endPoint)
-        if not rcstart || not rcend then failwithf "Rhino.Scripting: ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
+        if not rcstart || not rcend then Error.Raise <| sprintf "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
         let start = Point2d(ustart, vstart)
         let ende = Point2d(uend, vend)
         let tolerance = Doc.ModelAbsoluteTolerance
         let curve = surface.ShortPath(start, ende, tolerance)
-        if curve|> isNull  then failwithf "Rhino.Scripting: ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
+        if curve|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
         let objectId = Doc.Objects.AddCurve(curve)
-        if objectId = Guid.Empty then failwithf "Rhino.Scripting: ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
+        if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%A' startPoint:'%A' endPoint:'%A'" surfaceId startPoint endPoint
         Doc.Views.Redraw()
         objectId
 
@@ -1692,7 +1692,7 @@ module ExtensionsSurface =
     ///<returns>(Guid) If createCopy is true the new Guid, else the input Guid</returns>
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        if brep.Faces.ShrinkFaces() then failwithf "Rhino.Scripting: ShrinkTrimmedSurface failed.  objectId:'%A' createCopy:'%A'" objectId createCopy
+        if brep.Faces.ShrinkFaces() then Error.Raise <| sprintf "RhinoScriptSyntax.ShrinkTrimmedSurface failed.  objectId:'%A' createCopy:'%A'" objectId createCopy
         if  createCopy then
             let oldobj = Doc.Objects.FindId(objectId)
             let attr = oldobj.Attributes
@@ -1721,7 +1721,7 @@ module ExtensionsSurface =
         let cutter = RhinoScriptSyntax.CoerceBrep(cutterId)
         let tol = Doc.ModelAbsoluteTolerance
         let pieces = brep.Split(cutter, tol)
-        if isNull pieces then failwithf "Rhino.Scripting: SplitBrep failed.  brepId:'%A' cutterId:'%A' deleteInput:'%A'" brepId cutterId deleteInput
+        if isNull pieces then Error.Raise <| sprintf "RhinoScriptSyntax.SplitBrep failed.  brepId:'%A' cutterId:'%A' deleteInput:'%A'" brepId cutterId deleteInput
         if  deleteInput then
             //brepId = RhinoScriptSyntax.Coerceguid(brepId)
             Doc.Objects.Delete(brepId, true) |> ignore
@@ -1737,7 +1737,7 @@ module ExtensionsSurface =
     ///<returns>(float) of area</returns>
     static member SurfaceArea(srf:Surface) : float  =        
         let amp = AreaMassProperties.Compute(srf, true, false, false, false)
-        if isNull amp then  failwithf "SurfaceArea failed on Surface: %A" srf
+        if isNull amp then  Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceArea failed on Surface: %A" srf
         amp.Area
 
     [<Extension>]
@@ -1747,7 +1747,7 @@ module ExtensionsSurface =
     ///<returns>(float) of area</returns>
     static member SurfaceArea(brep:Brep) : float  =        
         let amp = AreaMassProperties.Compute(brep, true, false, false, false)
-        if isNull amp then  failwithf "SurfaceArea failed on Brep: %A" brep
+        if isNull amp then  Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceArea failed on Brep: %A" brep
         amp.Area
 
     [<Extension>]
@@ -1759,7 +1759,7 @@ module ExtensionsSurface =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Surface as s -> RhinoScriptSyntax.SurfaceArea s        
         | :? Brep    as b -> RhinoScriptSyntax.SurfaceArea b
-        | x -> failwithf "SurfaceArea doesnt work on on %A" (rhType  objectId)
+        | x -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceArea doesnt work on on %A" (rhType  objectId)
    
 
 
@@ -1778,7 +1778,7 @@ module ExtensionsSurface =
             |> RhinoScriptSyntax.TryCoerceSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> failwithf "Rhino.Scripting: SurfaceAreaCentroid failed.  objectId:'%A'" objectId )
+        |> Option.defaultWith (fun () -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceAreaCentroid failed.  objectId:'%A'" objectId )
         |> fun amp -> amp.Centroid
 
 
@@ -1811,7 +1811,7 @@ module ExtensionsSurface =
             |> RhinoScriptSyntax.TryCoerceSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> failwithf "SurfaceArea failed on %A" surfaceId)
+        |> Option.defaultWith (fun () -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceArea failed on %A" surfaceId)
         |> fun mp ->
             resizeArray{
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -1840,7 +1840,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
         let rc, u, v = surface.ClosestPoint(testPoint)
-        if not rc then failwithf "SurfaceClosestPoint failed on %A and %A " surfaceId testPoint
+        if not rc then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceClosestPoint failed on %A and %A " surfaceId testPoint
         surface.PointAt(u, v)
 
     [<Extension>]
@@ -1852,7 +1852,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
         let rc, u, v = surface.ClosestPoint(testPoint)
-        if not rc then failwithf "SurfaceClosestParameter failed on %A and %A " surfaceId testPoint
+        if not rc then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceClosestParameter failed on %A and %A " surfaceId testPoint
         u, v
 
 
@@ -1867,7 +1867,7 @@ module ExtensionsSurface =
     static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, cone = surface.TryGetCone()
-        if not rc then failwithf "Rhino.Scripting: SurfaceCone failed.  surfaceId:'%A'" surfaceId
+        if not rc then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceCone failed.  surfaceId:'%A'" surfaceId
         cone.Plane, cone.Height, cone.Radius
 
 
@@ -1887,9 +1887,9 @@ module ExtensionsSurface =
     ///    [7]   mean curvature</returns>
     static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float=
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        //if Seq.length(parameter)<2 then failwithf "Rhino.Scripting: SurfaceCurvature failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+        //if Seq.length(parameter)<2 then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
         let c = surface.CurvatureAt(parameter|> fst, parameter|> snd)
-        if c|> isNull  then failwithf "Rhino.Scripting: SurfaceCurvature failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+        if c|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
         c.Point, c.Normal, c.Kappa(0), c.Direction(0), c.Kappa(1), c.Direction(1), c.Gaussian, c.Mean
 
 
@@ -1906,7 +1906,7 @@ module ExtensionsSurface =
             let cylinder = !cy
             cylinder.BasePlane, cylinder.TotalHeight, cylinder.Radius
         else
-            failwithf "SurfaceCylinder failed on %A" surfaceId
+            Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceCylinder failed on %A" surfaceId
 
 
     [<Extension>]
@@ -1924,7 +1924,7 @@ module ExtensionsSurface =
     ///<param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
     ///<returns>(float * float) containing the domain interval in the specified direction</returns>
     static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
-        if direction <> 0 && direction <> 1 then failwithf "Rhino.Scripting: SurfaceDomain failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
+        if direction <> 0 && direction <> 1 then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceDomain failed.  surfaceId:'%A' direction:'%A'" surfaceId direction
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let domain = surface.Domain(direction)
         domain.T0, domain.T1
@@ -1942,7 +1942,7 @@ module ExtensionsSurface =
     static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then failwithf "Rhino.Scripting: SurfaceEditPoints failed.  surfaceId:'%A'  returnAll:'%A'" surfaceId returnAll
+        if isNull nurb then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceEditPoints failed.  surfaceId:'%A'  returnAll:'%A'" surfaceId returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -1977,7 +1977,7 @@ module ExtensionsSurface =
     static member SurfaceEditPointPrameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then failwithf "Rhino.Scripting: SurfaceEditPointParameterss failed.  surfaceId:'%A'  returnAll:'%A'" surfaceId returnAll
+        if isNull nurb then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceEditPointParameterss failed.  surfaceId:'%A'  returnAll:'%A'" surfaceId returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -2024,7 +2024,7 @@ module ExtensionsSurface =
                                    derivative:int) : Point3d * Vector3d ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
-        if not success then failwithf "Rhino.Scripting: SurfaceEvaluate failed.  surfaceId:'%A' parameter:'%A' derivative:'%A'" surfaceId parameter derivative
+        if not success then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceEvaluate failed.  surfaceId:'%A' parameter:'%A' derivative:'%A'" surfaceId parameter derivative
         let rc = resizeArray{()}
         if der.Length > 0 then
           for d in der do rc.Add(d)
@@ -2041,7 +2041,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, frame = surface.FrameAt(uvParameter|> fst, uvParameter|> snd)
         if rc  then frame
-        else failwithf "SurfaceFrame failed on %A at %A" surfaceId uvParameter
+        else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceFrame failed on %A at %A" surfaceId uvParameter
 
 
     [<Extension>]
@@ -2063,7 +2063,7 @@ module ExtensionsSurface =
                 rhinoobject.Attributes.WireDensity
         | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 rhinoobject.Attributes.WireDensity
-        | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' " surfaceId
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%A' " surfaceId
 
 
     [<Extension>]
@@ -2095,7 +2095,7 @@ module ExtensionsSurface =
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges()|> ignore
                 Doc.Views.Redraw()
-        | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' density:'%A'" surfaceId density
+        | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%A' density:'%A'" surfaceId density
 
 
     [<Extension>]
@@ -2125,7 +2125,7 @@ module ExtensionsSurface =
                     let dens = if density<0 then -1 else density
                     rhinoobject.Attributes.WireDensity <- dens
                     rhinoobject.CommitChanges()|> ignore
-            | _ -> failwithf "Rhino.Scripting: Get SurfaceIsocurveDensity failed.  surfaceId:'%A' density:'%A'" surfaceId density
+            | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%A' density:'%A'" surfaceId density
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -2150,11 +2150,11 @@ module ExtensionsSurface =
     static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList=
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurbsurf = surface.ToNurbsSurface()
-        if nurbsurf|> isNull  then failwithf "Rhino.Scripting: SurfaceKnots failed.  surfaceId:'%A'" surfaceId
+        if nurbsurf|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%A'" surfaceId
         nurbsurf.KnotsU , nurbsurf.KnotsV
         //let sknots =  resizeArray { for knot in nurbsurf.KnotsU do yield knot }
         //let tknots =  resizeArray { for knot in nurbsurf.KnotsV do yield knot }
-        //if isNull sknots || not tknots then failwithf "Rhino.Scripting: SurfaceKnots failed.  surfaceId:'%A'" surfaceId
+        //if isNull sknots || not tknots then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%A'" surfaceId
         //sknots, tknots
 
 
@@ -2189,9 +2189,9 @@ module ExtensionsSurface =
         let udomain = surface.Domain(0)
         let vdomain = surface.Domain(1)
         if parameter|> fst<udomain.Min || parameter|> fst>udomain.Max then
-            failwithf "Rhino.Scripting: SurfaceNormalizedParameter failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+            Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceNormalizedParameter failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
         if parameter|> snd<vdomain.Min || parameter|> snd>vdomain.Max then
-            failwithf "Rhino.Scripting: SurfaceNormalizedParameter failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
+            Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceNormalizedParameter failed.  surfaceId:'%A' parameter:'%A'" surfaceId parameter
         let u = udomain.NormalizedParameterAt(parameter|> fst)
         let v = vdomain.NormalizedParameterAt(parameter|> snd)
         u, v
@@ -2232,7 +2232,7 @@ module ExtensionsSurface =
     static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then failwithf "Rhino.Scripting: SurfacePoints failed.  surfaceId:'%A' returnAll:'%A'" surfaceId returnAll
+        if ns|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.SurfacePoints failed.  surfaceId:'%A' returnAll:'%A'" surfaceId returnAll
         let rc = ResizeArray()
         for u in range(ns.Points.CountU) do
             for v in range(ns.Points.CountV) do
@@ -2252,7 +2252,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, torus = surface.TryGetTorus()
         if rc then torus.Plane, torus.MajorRadius, torus.MinorRadius
-        else failwithf "SurfaceTorus failed for %A" surfaceId
+        else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceTorus failed for %A" surfaceId
 
 
     [<Extension>]
@@ -2268,7 +2268,7 @@ module ExtensionsSurface =
             |> RhinoScriptSyntax.TryCoerceSurface
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> failwithf "SurfaceVolume failed on %A" objectId)
+        |> Option.defaultWith (fun () -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolume failed on %A" objectId)
         |> fun amp -> amp.Volume
 
 
@@ -2279,15 +2279,15 @@ module ExtensionsSurface =
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else failwithf "SurfaceVolumeCentroid failed on  open Brep %A" objectId)
+        |> Option.bind (fun b -> if b.IsSolid then Some b else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Brep %A" objectId)
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
             objectId
             |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else failwithf "SurfaceVolumeCentroid failed on  open Surface %A" objectId)
+            |> Option.bind (fun s -> if s.IsSolid then Some s else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Surface %A" objectId)
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> failwithf "SurfaceVolumeCentroid failed on %A" objectId)
+        |> Option.defaultWith (fun () -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolumeCentroid failed on %A" objectId)
         |> fun amp -> amp.Centroid
 
 
@@ -2314,15 +2314,15 @@ module ExtensionsSurface =
     static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) ResizeArray =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else failwithf "SurfaceVolumeMoments failed on  open Brep %A" objectId)
+        |> Option.bind (fun b -> if b.IsSolid then Some b else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Brep %A" objectId)
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
             objectId
             |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else failwithf "SurfaceVolumeMoments failed on  open Surface %A" objectId)
+            |> Option.bind (fun s -> if s.IsSolid then Some s else Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Surface %A" objectId)
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> failwithf "SurfaceVolumeMoments failed on %A" objectId)
+        |> Option.defaultWith (fun () -> Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceVolumeMoments failed on %A" objectId)
         |> fun mp ->
             resizeArray{
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -2352,7 +2352,7 @@ module ExtensionsSurface =
     static member SurfaceWeights(objectId:Guid) : float ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then failwithf "Rhino.Scripting: SurfaceWeights failed.  objectId:'%A'" objectId
+        if ns|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.SurfaceWeights failed.  objectId:'%A'" objectId
         let rc = ResizeArray()
         for u in range(ns.Points.CountU) do
             for v in range(ns.Points.CountV) do
@@ -2443,7 +2443,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "TrimSurfaceU faild on %A with domain %A" surfaceId interval
+            Error.Raise <| sprintf "RhinoScriptSyntax.TrimSurfaceU faild on %A with domain %A" surfaceId interval
 
     [<Extension>]
     ///<summary>Remove portions of the surface outside of the specified interval in V direction</summary>
@@ -2467,7 +2467,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "TrimSurfaceV faild on %A with domain %A" surfaceId interval
+            Error.Raise <| sprintf "RhinoScriptSyntax.TrimSurfaceV faild on %A with domain %A" surfaceId interval
 
 
     [<Extension>]
@@ -2496,7 +2496,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            failwithf "TrimSurfaceUV faild on %A with domain %A and %A" surfaceId intervalU intervalV
+            Error.Raise <| sprintf "RhinoScriptSyntax.TrimSurfaceUV faild on %A with domain %A and %A" surfaceId intervalU intervalV
 
 
 
@@ -2531,10 +2531,10 @@ module ExtensionsSurface =
                 | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
                 | :? Point as g -> unroll.AddFollowingGeometry(g)
                 | :? TextDot as g -> unroll.AddFollowingGeometry(g)
-                | _ -> failwithf "UnrollSurface: cannot add (a %s) as following Geometry" (rhType objectId)
+                | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.UnrollSurface: cannot add (a %s) as following Geometry" (rhType objectId)
 
         let breps, curves, points, dots = unroll.PerformUnroll()
-        if isNull breps then failwithf "UnrollSurface: failed on  %A " surfaceId
+        if isNull breps then Error.Raise <| sprintf "RhinoScriptSyntax.UnrollSurface: failed on  %A " surfaceId
         let rc =  resizeArray { for brep in breps do yield Doc.Objects.AddBrep(brep) }
         let newfollowing = ResizeArray()
         for curve in curves do
@@ -2559,7 +2559,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceNurbsSurface(objectId)
         let u, v = degree
         let maxnurbsdegree = 11
-        if u < 1 || u > maxnurbsdegree || v < 1 || v > maxnurbsdegree ||  (surface.Degree(0) = u && surface.Degree(1) = v) then failwithf "ChangeSurfaceDegree failed on %A" objectId
+        if u < 1 || u > maxnurbsdegree || v < 1 || v > maxnurbsdegree ||  (surface.Degree(0) = u && surface.Degree(1) = v) then Error.Raise <| sprintf "RhinoScriptSyntax.ChangeSurfaceDegree failed on %A" objectId
         let mutable r = false
         if surface.IncreaseDegreeU(u) then
             if surface.IncreaseDegreeV(v) then

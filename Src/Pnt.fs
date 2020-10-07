@@ -35,10 +35,10 @@ module Pnt =
     /// going from a point in the direction of another point. 
     let atZlevel (fromPt:Point3d)( toPt:Point3d) (z:float) =
         let v = toPt - fromPt
-        if fromPt.Z < toPt.Z && z < fromPt.Z  then failwithf "Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
-        if fromPt.Z > toPt.Z && z > fromPt.Z  then failwithf "Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
+        if fromPt.Z < toPt.Z && z < fromPt.Z  then Error.Raise <| sprintf "Rhino.Scripting.Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
+        if fromPt.Z > toPt.Z && z > fromPt.Z  then Error.Raise <| sprintf "Rhino.Scripting.Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
         let dot = abs ( v * Vector3d.ZAxis)
-        if dot < 0.0001 then  failwithf "Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A  almost at same Z level. taget Z %f" fromPt toPt z
+        if dot < 0.0001 then  Error.Raise <| sprintf "Rhino.Scripting.Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A  almost at same Z level. taget Z %f" fromPt toPt z
         let diffZ = abs (fromPt.Z - z)
         let fac = diffZ / dot 
         fromPt + v * fac
@@ -151,6 +151,6 @@ module Pnt =
             let lp = Line(thisPt + sp , vp)  //|>> (Doc.Objects.AddLine>>ignore)
             let ln = Line(thisPt + sn , vn)  //|>> (Doc.Objects.AddLine>> ignore)               
             let ok, tp , tn = Intersect.Intersection.LineLine(lp, ln) //could also be solved with trigonometry functions            
-            if not ok then failwithf "findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
+            if not ok then Error.Raise <| sprintf "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
             sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
 

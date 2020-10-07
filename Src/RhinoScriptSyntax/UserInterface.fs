@@ -72,7 +72,7 @@ module ExtensionsUserinterface =
         if notNull newcheckstates then
             Some (Seq.zip itemstrs newcheckstates |>  ResizeArray.ofSeq)
         else
-            //failwithf "Rhino.Scripting: CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
+            //Error.Raise <| sprintf "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             None
 
 
@@ -147,7 +147,7 @@ module ExtensionsUserinterface =
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
-            if count < 1 || count <> Seq.length(defaultVals) then failwithf "Rhino.Scripting: GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
+            if count < 1 || count <> Seq.length(defaultVals) then Error.Raise <| sprintf "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
             let toggles = ResizeArray()
             for i in range(count) do
                 let initial = defaultVals.[i]
@@ -198,7 +198,7 @@ module ExtensionsUserinterface =
                 |2 -> Input.GetBoxMode.ThreePoint
                 |3 -> Input.GetBoxMode.Vertical
                 |4 -> Input.GetBoxMode.Center
-                |_ -> failwithf "GetBox:Bad mode %A" mode
+                |_ -> Error.Raise <| sprintf "RhinoScriptSyntax.GetBox:Bad mode %A" mode
 
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
@@ -311,7 +311,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(0)>]maxCount:int,
                                     [<OPT;DEF(false)>]select:bool) : option<ResizeArray<Guid*Guid*Point3d>> =
         let get () = 
-            if maxCount > 0 && minCount > maxCount then failwithf "GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
+            if maxCount > 0 && minCount > maxCount then Error.Raise <| sprintf "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.Curve
@@ -633,7 +633,7 @@ module ExtensionsUserinterface =
                 gp.Constrain(brep, -1, -1, false) |> ignore
 
             | _ ->
-                failwithf "Rhino.Scripting: GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%A' message:'%A'" surfaceId message
+                Error.Raise <| sprintf "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%A' message:'%A'" surfaceId message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then

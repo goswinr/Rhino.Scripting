@@ -22,7 +22,7 @@ module ExtrasBrep =
     ///<param name="height">(float) height of sloted hole volume</param> 
     ///<returns>(Brep) Brep Geometry</returns>
     static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =
-        if length<width then failwithf "SlotedHole: length= %g must be more than width= %g" length width
+        if length<width then Error.Raise <| sprintf "RhinoScriptSyntax.SlotedHole: length= %g must be more than width= %g" length width
         let root05  = sqrt 0.5
         let y05 = 0.5 * width
         let x1 =  0.5 * length 
@@ -69,7 +69,7 @@ module ExtrasBrep =
         Transform.PlaneToPlane (Plane.WorldXY, plane) |> c2.Transform |> ignore    
         let rb = Brep.CreateFromLoft( [|c1;c2|], Point3d.Unset, Point3d.Unset, LoftType.Straight, false )
         if isNull rb || rb.Length <> 1  then 
-            failwithf "*** Failed to Create loft part of  SlotedHole , at tolerance %f" Doc.ModelAbsoluteTolerance
+            Error.Raise <| sprintf "RhinoScriptSyntax.*** Failed to Create loft part of  SlotedHole , at tolerance %f" Doc.ModelAbsoluteTolerance
         rb.[0].CapPlanarHoles(Doc.ModelAbsoluteTolerance)
         
 
@@ -103,7 +103,7 @@ module ExtrasBrep =
         plane.Rotate(Math.PI * 0.5, plane.ZAxis)|> failIfFalse "rotate plane" // so that seam of cone an cylinder align
         let cySrf = RhinoScriptSyntax.CreateCylinder(plane, innerDiameter, length)
         let bs = Brep.CreateBooleanUnion( [coneSrf; cySrf], Doc.ModelAbsoluteTolerance)
-        if bs.Length <> 1 then failwithf "%d items as result from creating countersunc screw" bs.Length
+        if bs.Length <> 1 then Error.Raise <| sprintf "RhinoScriptSyntax.%d items as result from creating countersunc screw" bs.Length
         let brep = bs.[0]
         if brep.SolidOrientation = BrepSolidOrientation.Inward then brep.Flip()
         brep
@@ -143,11 +143,11 @@ module ExtrasBrep =
         if not trimmer.IsSolid then
             RhinoScriptSyntax.draw "debug trimmer" trimmer
             RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-            failwithf "substractBrep:CreateBooleanDifference trimmer is NOT a closed polysurface" 
+            Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanDifference trimmer is NOT a closed polysurface" 
         if not keep.IsSolid then
             RhinoScriptSyntax.draw "debug keep" keep
             RhinoScriptSyntax.ZoomBoundingBox(keep.GetBoundingBox(false))
-            failwithf "substractBrep:CreateBooleanDifference keep Volume is NOT a closed polysurface" 
+            Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanDifference keep Volume is NOT a closed polysurface" 
             
         if subtractionLocations <> 0 then 
             let xs = Brep.CreateBooleanIntersection (keep,trimmer,Doc.ModelAbsoluteTolerance) // TODO expensive extra check
@@ -155,12 +155,12 @@ module ExtrasBrep =
                 RhinoScriptSyntax.draw "debug trimmer no Intersection" trimmer
                 RhinoScriptSyntax.draw "debug keep no Intersection" keep
                 RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-                failwithf "substractBrep:CreateBooleanIntersection check isnull, no intersection found, tolerance = %g" Doc.ModelAbsoluteTolerance
+                Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanIntersection check isnull, no intersection found, tolerance = %g" Doc.ModelAbsoluteTolerance
             if xs.Length <> subtractionLocations then
                 RhinoScriptSyntax.draw "debug trimer empty Intersection" trimmer
                 RhinoScriptSyntax.draw "debug keep empty Intersection" keep
                 RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-                failwithf "substractBrep:CreateBooleanIntersection check returned %d breps instead of one , tolerance = %g" xs.Length Doc.ModelAbsoluteTolerance
+                Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanIntersection check returned %d breps instead of one , tolerance = %g" xs.Length Doc.ModelAbsoluteTolerance
             for x in xs do x.Dispose()
 
         let bs =  Brep.CreateBooleanDifference(keep,trimmer,Doc.ModelAbsoluteTolerance)
@@ -168,23 +168,23 @@ module ExtrasBrep =
             RhinoScriptSyntax.draw "debug trimmer" trimmer
             RhinoScriptSyntax.draw "debug keep" keep
             RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-            failwithf "substractBrep:CreateBooleanDifference is null, tolerance = %g" Doc.ModelAbsoluteTolerance
+            Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanDifference is null, tolerance = %g" Doc.ModelAbsoluteTolerance
         if bs.Length = 0 then
             RhinoScriptSyntax.draw "debug trimer for empty result" trimmer
             RhinoScriptSyntax.draw "debug keep for empty result" keep
             RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-            failwithf "substractBrep:CreateBooleanDifference returned 0 breps instead of one , tolerance = %g" Doc.ModelAbsoluteTolerance
+            Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanDifference returned 0 breps instead of one , tolerance = %g" Doc.ModelAbsoluteTolerance
         if bs.Length <> 1 then 
             bs |> Seq.iter (RhinoScriptSyntax.draw "debug more than one")
             RhinoScriptSyntax.draw "debug trimer for more than one" trimmer
             RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-            failwithf "substractBrep:CreateBooleanDifference returned %d breps instead of one , tolerance = %g" bs.Length Doc.ModelAbsoluteTolerance            
+            Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanDifference returned %d breps instead of one , tolerance = %g" bs.Length Doc.ModelAbsoluteTolerance            
         let brep = bs.[0]
         if subtractionLocations = 0 && brep.Vertices.Count = keep.Vertices.Count then // extra test if 
             RhinoScriptSyntax.draw "debug trimmer same vertex count on  result" trimmer
             RhinoScriptSyntax.draw "debug keep same vertex count on  result" keep
             RhinoScriptSyntax.ZoomBoundingBox(trimmer.GetBoundingBox(false))
-            failwithf "substractBrep:CreateBooleanDifference returned same vertex count on input and output brep is this desired ?, tolerance = %g" Doc.ModelAbsoluteTolerance
+            Error.Raise <| sprintf "RhinoScriptSyntax.SubstractBrep:CreateBooleanDifference returned same vertex count on input and output brep is this desired ?, tolerance = %g" Doc.ModelAbsoluteTolerance
         if brep.SolidOrientation = BrepSolidOrientation.Inward then  brep.Flip()
         brep
         
@@ -210,9 +210,9 @@ module ExtrasBrep =
                 m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 1000.0 + meshing.MinimumEdgeLength * 100.0) |> ignore             
         if  not m.IsValid then
             Doc.Objects.AddBrep brep|> RhinoScriptSyntax.setLayer "RhinoScriptSyntax.ExtractRenderMesh mesh from Brep invalid"                    
-            failwithf "RhinoScriptSyntax.ExtractRenderMesh: failed to create valid mesh from brep"
+            Error.Raise <| sprintf "RhinoScriptSyntax.ExtractRenderMesh: failed to create valid mesh from brep"
         elif brep.IsSolid && not m.IsClosed then 
-            Error m
+            Result.Error m
             //Doc.Objects.AddMesh m |> RhinoScriptSyntax.setLayer "RhinoScriptSyntax.ExtractRenderMesh not closed"
             //printf "Mesh from closed Brep is not closed, see debug layer"
             //if  m0.IsValid && m0.IsClosed && ( g := Doc.Objects.AddMesh m0 ; !g <> Guid.Empty) then 
@@ -224,11 +224,11 @@ module ExtrasBrep =
             //    RhinoScriptSyntax.SelectObject(mb)
             //    RhinoScriptSyntax.Command("ExtractRenderMesh ") |> failIfFalse "mesh render"
             //    let ms = RhinoScriptSyntax.LastCreatedObjects()
-            //    if ms.Count <> 1 then failwithf "getRenderMesh: %d in LastCreatedObjects" ms.Count 
+            //    if ms.Count <> 1 then Error.Raise <| sprintf "getRenderMesh: %d in LastCreatedObjects" ms.Count 
             //    RhinoScriptSyntax.EnableRedraw(false)
             //    let k = RhinoScriptSyntax.UnselectAllObjects()
-            //    if k <> 1 then failwithf "getRenderMesh: %d Unselected" k
+            //    if k <> 1 then Error.Raise <| sprintf "getRenderMesh: %d Unselected" k
             //    Error (ms.[0],mb) 
         else
-            Ok m
+            Result.Ok m
            

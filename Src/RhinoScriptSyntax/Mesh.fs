@@ -48,7 +48,7 @@ module ExtensionsMesh =
             elif l = 4 then 
                 mesh.Faces.AddFace(face.[0], face.[1], face.[2], face.[3]) |> ignore
             else 
-                failwithf "AddMesh: Expected 3 or 4 indices for a face but got %d" l
+                Error.Raise <| sprintf "RhinoScriptSyntax.AddMesh: Expected 3 or 4 indices for a face but got %d" l
 
         if notNull vertexNormals then
             let count = Seq.length(vertexNormals)
@@ -72,7 +72,7 @@ module ExtensionsMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         Doc.Views.Redraw()
         rc
     
@@ -128,7 +128,7 @@ module ExtensionsMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         Doc.Views.Redraw()
         rc
 
@@ -149,7 +149,7 @@ module ExtensionsMesh =
           mesh.Vertices.Add(pointD) |> ignore
           mesh.Faces.AddFace(0,1,2,3) |> ignore
           let rc = Doc.Objects.AddMesh(mesh)
-          if rc = Guid.Empty then  failwithf "Rhino.Scripting: AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
+          if rc = Guid.Empty then  Error.Raise <| sprintf "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
           Doc.Views.Redraw()
           rc
 
@@ -166,7 +166,7 @@ module ExtensionsMesh =
           mesh.Vertices.Add(pointC) |> ignore
           mesh.Faces.AddFace(0,1,2) |> ignore
           let rc = Doc.Objects.AddMesh(mesh)
-          if rc = Guid.Empty then  failwithf "Rhino.Scripting: AddMeshQuad failed.  points:'%A, %A and %A" pointA pointB pointC 
+          if rc = Guid.Empty then  Error.Raise <| sprintf "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A and %A" pointA pointB pointC 
           Doc.Views.Redraw()
           rc
 
@@ -180,12 +180,12 @@ module ExtensionsMesh =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
         let tolerance = Doc.ModelAbsoluteTolerance
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then failwithf "Rhino.Scripting: AddPlanarMesh failed.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+        if isNull mesh then Error.Raise <| sprintf "RhinoScriptSyntax.AddPlanarMesh failed.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         if deleteInput then
             let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| Doc.Objects.Delete(ob, true) then failwithf "Rhino.Scripting: AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+            if not<| Doc.Objects.Delete(ob, true) then Error.Raise <| sprintf "RhinoScriptSyntax.AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         let rc = Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Unable to add mesh to document.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
         Doc.Views.Redraw()
         rc
 
@@ -204,7 +204,7 @@ module ExtensionsMesh =
         let tolerance = Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then failwithf "Rhino.Scripting: CurveMeshIntersection failed.  curveId:'%A' meshId:'%A' " curveId meshId
+        if isNull pts then Error.Raise <| sprintf "RhinoScriptSyntax.CurveMeshIntersection failed.  curveId:'%A' meshId:'%A' " curveId meshId
         pts, faceids
 
 
@@ -330,7 +330,7 @@ module ExtensionsMesh =
         let joinedmesh = new Mesh()
         joinedmesh.Append(meshes)
         let rc = Doc.Objects.AddMesh(joinedmesh)
-        if rc = Guid.Empty then failwithf "Failed to join Meshes %A" objectIds
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Failed to join Meshes %A" objectIds
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.Coerceguid(objectId)
@@ -349,7 +349,7 @@ module ExtensionsMesh =
         if notNull mp then
             mp.Area
         else
-            failwithf "Rhino.Scripting: MeshArea failed.  objectId:'%A'" objectId
+            Error.Raise <| sprintf "RhinoScriptSyntax.MeshArea failed.  objectId:'%A'" objectId
 
 
 
@@ -360,7 +360,7 @@ module ExtensionsMesh =
     static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then failwithf "Rhino.Scripting: MeshAreaCentroid failed.  objectId:'%A'" objectId
+        if mp|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%A'" objectId
         mp.Centroid
 
 
@@ -376,7 +376,7 @@ module ExtensionsMesh =
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then failwithf "Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then Error.Raise <| sprintf "RhinoScriptSyntax.Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -402,7 +402,7 @@ module ExtensionsMesh =
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then failwithf "Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then Error.Raise <| sprintf "RhinoScriptSyntax.Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -429,7 +429,7 @@ module ExtensionsMesh =
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         let meshes0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then failwithf "Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then Error.Raise <| sprintf "RhinoScriptSyntax.Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = ResizeArray()
         for mesh in newmeshes do
@@ -451,7 +451,7 @@ module ExtensionsMesh =
     ///    Delete the input meshes</param>
     ///<returns>(Guid ResizeArray) identifiers of new meshes</returns>
     static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
-        if Seq.length(meshIds)<2 then failwithf "Rhino.Scripting: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
+        if Seq.length(meshIds)<2 then Error.Raise <| sprintf "RhinoScriptSyntax.MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
         let meshes =  resizeArray { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let newmeshes = Mesh.CreateBooleanUnion(meshes)
         let rc = ResizeArray()
@@ -484,7 +484,7 @@ module ExtensionsMesh =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then failwithf "Rhino.Scripting: MeshClosestPoint failed.  objectId:'%A' point:'%A' maximumDistance:'%A'" objectId point maximumDistance
+        if face<0 then Error.Raise <| sprintf "RhinoScriptSyntax.MeshClosestPoint failed.  objectId:'%A' point:'%A' maximumDistance:'%A'" objectId point maximumDistance
         !pt, face
 
 
@@ -682,9 +682,9 @@ module ExtensionsMesh =
     static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then failwithf "Rhino.Scripting: MeshOffset failed.  meshId:'%A' distance:'%A'" meshId distance
+        if offsetmesh|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.MeshOffset failed.  meshId:'%A' distance:'%A'" meshId distance
         let rc = Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add mesh to document.  meshId:'%A' distance:'%A'" meshId distance
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Unable to add mesh to document.  meshId:'%A' distance:'%A'" meshId distance
         Doc.Views.Redraw()
         rc
 
@@ -700,7 +700,7 @@ module ExtensionsMesh =
         let rc = ResizeArray()
         if notNull view then
             let viewport = Doc.Views.Find(view, false).MainViewport
-            if isNull viewport then failwithf "Rhino.Scripting.MeshOutline: did not find view named '%A'" view
+            if isNull viewport then Error.Raise <| sprintf "RhinoScriptSyntax.Rhino.Scripting.MeshOutline: did not find view named '%A'" view
             else
                 for mesh in meshes do
                     let polylines = mesh.GetOutlines(viewport)
@@ -800,7 +800,7 @@ module ExtensionsMesh =
         else
             let colorcount = Seq.length(colors)
             if colorcount <> mesh.Vertices.Count then
-                failwithf "Rhino.Scripting: Length of colors must match vertex count.  meshId:'%A' colors:'%A'" meshId colors
+                Error.Raise <| sprintf "RhinoScriptSyntax.Length of colors must match vertex count.  meshId:'%A' colors:'%A'" meshId colors
             mesh.VertexColors.Clear()
             for c in colors do mesh.VertexColors.Add(c) |> ignore
         Doc.Objects.Replace(meshId, mesh) |> ignore
@@ -864,7 +864,7 @@ module ExtensionsMesh =
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume
             else
-                failwithf "Rhino.Scripting: MeshVolume failed on objectId:'%A'" objectId
+                Error.Raise <| sprintf "RhinoScriptSyntax.MeshVolume failed on objectId:'%A'" objectId
         totalvolume
 
 
@@ -876,7 +876,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else failwithf "Rhino.Scripting: MeshVolumeCentroid failed.  objectId:'%A'" objectId
+        else Error.Raise <| sprintf "RhinoScriptSyntax.MeshVolumeCentroid failed.  objectId:'%A'" objectId
 
 
     [<Extension>]
@@ -891,9 +891,9 @@ module ExtensionsMesh =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = Doc.ModelAbsoluteTolerance
         let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then failwithf "Rhino.Scripting: PullCurveToMesh failed.  meshId:'%A' curveId:'%A'" meshId curveId
+        if isNull polyline then Error.Raise <| sprintf "RhinoScriptSyntax.PullCurveToMesh failed.  meshId:'%A' curveId:'%A'" meshId curveId
         let rc = Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then failwithf "Rhino.Scripting: Unable to add polyline to document.  meshId:'%A' curveId:'%A'" meshId curveId
+        if rc = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Unable to add polyline to document.  meshId:'%A' curveId:'%A'" meshId curveId
         Doc.Views.Redraw()
         rc
 
