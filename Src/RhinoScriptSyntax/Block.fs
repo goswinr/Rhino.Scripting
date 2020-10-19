@@ -30,7 +30,7 @@ module ExtensionsBlock =
     static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
         let name = if name="" then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = Doc.InstanceDefinitions.Find(name)
-        let objects = ResizeArray()
+        let objects = Rarr()
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)  //Coerce should not be needed
             if obj.IsReference then  Error.Raise <| sprintf "RhinoScriptSyntax.AddBlock: cannt add Refrence Object %A to %s" objectId name
@@ -67,12 +67,12 @@ module ExtensionsBlock =
     ///<summary>Returns names of the block definitions that contain a specified block
     ///    definition</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<returns>(string ResizeArray) A list of block definition names</returns>
-    static member BlockContainers(blockName:string) : string ResizeArray =
+    ///<returns>(string Rarr) A list of block definition names</returns>
+    static member BlockContainers(blockName:string) : string Rarr =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  Error.Raise <| sprintf "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         let containers = idef.GetContainers()
-        let rc = ResizeArray()
+        let rc = Rarr()
         for item in containers do
             if not <| item.IsDeleted then  rc.Add(item.Name)
         rc
@@ -159,12 +159,12 @@ module ExtensionsBlock =
     ///    0 = get top level references in active document.
     ///    1 = get top level and nested references in active document.
     ///    2 = check for references from other instance definitions</param>
-    ///<returns>(Guid ResizeArray) Ids identifying the instances of a block in the model</returns>
-    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : ResizeArray<Guid> =
+    ///<returns>(Guid Rarr) Ids identifying the instances of a block in the model</returns>
+    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  Error.Raise <| sprintf "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         let instances = idef.GetReferences(0)
-        resizeArray { for item in instances do yield item.Id }
+        rarr { for item in instances do yield item.Id }
 
 
     [<Extension>]
@@ -181,10 +181,10 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns the names of all block definitions in the document</summary>
-    ///<returns>(string ResizeArray) the names of all block definitions in the document</returns>
-    static member BlockNames() : string ResizeArray =
+    ///<returns>(string Rarr) the names of all block definitions in the document</returns>
+    static member BlockNames() : string Rarr =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
-        resizeArray { for item in ideflist do yield item.Name}
+        rarr { for item in ideflist do yield item.Name}
 
 
 
@@ -201,12 +201,12 @@ module ExtensionsBlock =
     [<Extension>]
     ///<summary>Returns identifiers of the objects that make up a block definition</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<returns>(Guid ResizeArray) list of identifiers</returns>
-    static member BlockObjects(blockName:string) : ResizeArray<Guid> =
+    ///<returns>(Guid Rarr) list of identifiers</returns>
+    static member BlockObjects(blockName:string) : Rarr<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  Error.Raise <| sprintf "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         let  rhobjs = idef.GetObjects()
-        resizeArray { for obj in rhobjs -> obj.Id}
+        rarr { for obj in rhobjs -> obj.Id}
 
 
     [<Extension>]

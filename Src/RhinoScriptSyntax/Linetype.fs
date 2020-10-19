@@ -43,10 +43,10 @@ module ExtensionsLinetype =
 
     [<Extension>]
     ///<summary>Returns names of all linetypes in the document</summary>
-    ///<returns>(string ResizeArray) list of linetype names</returns>
-    static member LinetypeNames() : string ResizeArray =
+    ///<returns>(string Rarr) list of linetype names</returns>
+    static member LinetypeNames() : string Rarr =
         let count = Doc.Linetypes.Count
-        let rc = ResizeArray()
+        let rc = Rarr()
         for i = 0 to count - 1 do
             let linetype = Doc.Linetypes.[i]
             if not linetype.IsDeleted then  rc.Add(linetype.Name)

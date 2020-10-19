@@ -88,7 +88,7 @@ module ExtrasMesh =
 
         [<Extension>]
         /// Makes a closed loop of welded Quads, last Line is ignored, it is considered the same as the first one, (e.g. coming from closed Polyline)
-        static member MeshAddLoophWelded (m:Mesh, lns:ResizeArray<Line>) = 
+        static member MeshAddLoophWelded (m:Mesh, lns:Rarr<Line>) = 
             // add first face
             let ln0 = lns.[0] 
             let s0 = ln0.From
@@ -117,7 +117,7 @@ module ExtrasMesh =
         
         [<Extension>]
         /// Makes a closed loop of NOT welded Quads, last Line is ignored, it is considered the same as the first one, (e.g. coming from closed Polyline)
-        static member MeshAddLoopUnWelded (m:Mesh, lns:ResizeArray<Line>) = 
+        static member MeshAddLoopUnWelded (m:Mesh, lns:Rarr<Line>) = 
             for lnP,ln in Seq.thisNext lns do
                 let  sP = lnP.From
                 let  eP = lnP.To

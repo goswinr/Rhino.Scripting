@@ -398,10 +398,10 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Returns list of identifiers of light objects in the document</summary>
-    ///<returns>(Guid ResizeArray) the list of identifiers of light objects in the document</returns>
-    static member LightObjects() : Guid ResizeArray =
+    ///<returns>(Guid Rarr) the list of identifiers of light objects in the document</returns>
+    static member LightObjects() : Guid Rarr =
         let count = Doc.Lights.Count
-        let rc = ResizeArray()
+        let rc = Rarr()
         for i in range(count) do
             let rhlight = Doc.Lights.[i]
             if not rhlight.IsDeleted then rc.Add(rhlight.Id)

@@ -296,19 +296,19 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Returns the names of all named construction planes in the document</summary>
-    ///<returns>(string ResizeArray) the names of all named construction planes in the document</returns>
-    static member NamedCPlanes() : string ResizeArray =
+    ///<returns>(string Rarr) the names of all named construction planes in the document</returns>
+    static member NamedCPlanes() : string Rarr =
         let count = Doc.NamedConstructionPlanes.Count
-        resizeArray {for i in range(count) do Doc.NamedConstructionPlanes.[i].Name }
+        rarr {for i in range(count) do Doc.NamedConstructionPlanes.[i].Name }
 
 
 
     [<Extension>]
     ///<summary>Returns the names of all named views in the document</summary>
-    ///<returns>(string ResizeArray) the names of all named views in the document</returns>
-    static member NamedViews() : string ResizeArray =
+    ///<returns>(string Rarr) the names of all named views in the document</returns>
+    static member NamedViews() : string Rarr =
         let count = Doc.NamedViews.Count
-        resizeArray {for i in range(count) do Doc.NamedViews.[i].Name }
+        rarr {for i in range(count) do Doc.NamedViews.[i].Name }
 
 
     [<Extension>]
@@ -705,10 +705,10 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Return list of display modes</summary>
-    ///<returns>(string ResizeArray) strings identifying the display mode names</returns>
-    static member ViewDisplayModes() : string ResizeArray =
+    ///<returns>(string Rarr) strings identifying the display mode names</returns>
+    static member ViewDisplayModes() : string Rarr =
         let modes = Display.DisplayModeDescription.GetDisplayModes()
-        resizeArray {for mode in modes do mode.EnglishName }
+        rarr {for mode in modes do mode.EnglishName }
 
 
     [<Extension>]
@@ -718,11 +718,11 @@ module ExtensionsView =
     ///    0 = standard model views
     ///    1 = page layout views
     ///    2 = both standard and page layout views</param>
-    ///<returns>(string ResizeArray) of the view names</returns>
-    static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
+    ///<returns>(string Rarr) of the view names</returns>
+    static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
-        resizeArray { for view in views do view.MainViewport.Name}
+        rarr { for view in views do view.MainViewport.Name}
 
 
 

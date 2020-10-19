@@ -70,14 +70,16 @@ module ExtensionsDimension =
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
     ///    If points will be projected to this plane</param>
     ///<returns>(Guid) identifier of the new leader</returns>
-    static member AddLeader(points:Point3d seq, text:string, [<OPT;DEF(Plane())>]plane:Plane) : Guid =
-        let points2d = ResizeArray()
+    static member AddLeader(    points:Point3d seq, 
+                                text:string, 
+                                [<OPT;DEF(Plane())>]plane:Plane) : Guid =
+        let points2d = Rarr()
         let plane0 =
             if plane.IsValid then plane
             else
-                let ps= ResizeArray(points)
-                let o = ps.GetItem(-2)
-                let mutable x = ps.GetItem(-1)-o
+                let ps= Rarr(points)
+                let o = ps.GetNeg(-2)
+                let mutable x = ps.GetNeg(-1) - o
                 let mutable y = ps.[0]-ps.[1]
                 if y.Z < 0.0 then y <- -y
                 if y.Y < 0.0 then y <- -y
@@ -453,9 +455,9 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Returns the names of all dimension styles in the document</summary>
-    ///<returns>(string ResizeArray) the names of all dimension styles in the document</returns>
-    static member DimStyleNames() : string ResizeArray =
-        resizeArray {for  ds in Doc.DimStyles -> ds.Name }
+    ///<returns>(string Rarr) the names of all dimension styles in the document</returns>
+    static member DimStyleNames() : string Rarr =
+        rarr {for  ds in Doc.DimStyles -> ds.Name }
 
 
     [<Extension>]

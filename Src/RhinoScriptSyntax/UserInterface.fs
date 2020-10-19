@@ -58,19 +58,19 @@ module ExtensionsUserinterface =
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>((string*bool) ResizeArray option) Option of tuples containing the input string in items along with their new boolean check value</returns>
+    ///<returns>((string*bool) Rarr option) Option of tuples containing the input string in items along with their new boolean check value</returns>
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
-                                [<OPT;DEF(null:string)>]title:string) : option<ResizeArray<string*bool>> =
-        let checkstates = resizeArray { for  item in items -> snd item }
-        let itemstrs =    resizeArray { for item in items -> fst item}
+                                [<OPT;DEF(null:string)>]title:string) : option<Rarr<string*bool>> =
+        let checkstates = rarr { for  item in items -> snd item }
+        let itemstrs =    rarr { for item in items -> fst item}
 
         let newcheckstates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
             Synchronisation.DoSync false false getKeepEditor
 
         if notNull newcheckstates then
-            Some (Seq.zip itemstrs newcheckstates |>  ResizeArray.ofSeq)
+            Some (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
         else
             //Error.Raise <| sprintf "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             None
@@ -140,15 +140,15 @@ module ExtensionsUserinterface =
     ///    [n][2]    string identifying the false value
     ///    [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
-    ///<returns>(bool ResizeArray) Option of a list of values that represent the boolean values</returns>
-    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<ResizeArray<bool>> =
+    ///<returns>(bool Rarr) Option of a list of values that represent the boolean values</returns>
+    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<Rarr<bool>> =
         let get () = 
             use go = new Input.Custom.GetOption()
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
             if count < 1 || count <> Seq.length(defaultVals) then Error.Raise <| sprintf "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
-            let toggles = ResizeArray()
+            let toggles = Rarr()
             for i in range(count) do
                 let initial = defaultVals.[i]
                 let item = items.[i]
@@ -164,7 +164,7 @@ module ExtensionsUserinterface =
                 if getrc <> Input.GetResult.Nothing then
                     None
                 else
-                    Some (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
+                    Some (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
             if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
             res
         Synchronisation.DoSync true true get
@@ -305,11 +305,11 @@ module ExtensionsUserinterface =
     ///    Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge curves</param>
-    ///<returns>((Guid*Guid*Point3d) ResizeArray) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
+    ///<returns>((Guid*Guid*Point3d) Rarr) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
-                                    [<OPT;DEF(false)>]select:bool) : option<ResizeArray<Guid*Guid*Point3d>> =
+                                    [<OPT;DEF(false)>]select:bool) : option<Rarr<Guid*Guid*Point3d>> =
         let get () = 
             if maxCount > 0 && minCount > maxCount then Error.Raise <| sprintf "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
@@ -320,7 +320,7 @@ module ExtensionsUserinterface =
             let rc = go.GetMultiple(minCount, maxCount)            
             if rc <> Input.GetResult.Object then None
             else
-                let r = ResizeArray()
+                let r = Rarr()
                 for i in range(go.ObjectCount) do
                     let edge = go.Object(i).Edge()
                     if notNull edge then
@@ -401,12 +401,12 @@ module ExtensionsUserinterface =
     ///    Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
     ///    Optional button to show on the dialog</param>
-    ///<returns>(string ResizeArray) an Option of The names of selected layers</returns>
-    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string ResizeArray> =
+    ///<returns>(string Rarr) an Option of The names of selected layers</returns>
+    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string Rarr> =
         let getKeepEditor () = 
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
             if rc then
-                Some (resizeArray { for index in layerindices do yield  Doc.Layers.[index].FullPath })
+                Some (rarr { for index in layerindices do yield  Doc.Layers.[index].FullPath })
             else
                 None
         Synchronisation.DoSync false false getKeepEditor
@@ -489,11 +489,11 @@ module ExtensionsUserinterface =
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int ResizeArray) an Option of of mesh face indices</returns>
+    ///<returns>(int Rarr) an Option of of mesh face indices</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
-                                [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
+                                [<OPT;DEF(0)>]maxCount:int) : option<Rarr<int>> =
         let get () = 
             Doc.Objects.UnselectAll() |> ignore
             Doc.Views.Redraw()
@@ -506,7 +506,7 @@ module ExtensionsUserinterface =
                 None
             else
                 let objrefs = go.Objects()
-                let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
+                let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
             |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
@@ -523,11 +523,11 @@ module ExtensionsUserinterface =
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int ResizeArray) an Option of of mesh vertex indices</returns>
+    ///<returns>(int Rarr) an Option of of mesh vertex indices</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
-                                    [<OPT;DEF(0)>]maxCount:int) : option<ResizeArray<int>> =
+                                    [<OPT;DEF(0)>]maxCount:int) : option<Rarr<int>> =
         let get () = 
             Doc.Objects.UnselectAll() |> ignore
             Doc.Views.Redraw()
@@ -540,7 +540,7 @@ module ExtensionsUserinterface =
                 None
             else
                 let objrefs = go.Objects()
-                let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
+                let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
             |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
@@ -660,7 +660,7 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
                                 [<OPT;DEF(null:string)>]message2:string,
-                                [<OPT;DEF(0)>]maxPoints:int) : option<Point3d ResizeArray> =
+                                [<OPT;DEF(0)>]maxPoints:int) : option<Point3d Rarr> =
                                 //[<OPT;DEF(Point3d())>]basePoint:Point3d) // Ignored here because ignored in python too
 
         let get () = 
@@ -675,7 +675,7 @@ module ExtensionsUserinterface =
             if gp.CommandResult() <> Commands.Result.Success then None
             else
                 let mutable prevPoint = gp.Point()
-                let rc = ResizeArray([prevPoint])
+                let rc = Rarr([prevPoint])
                 if maxPoints = 0 || maxPoints > 1 then
                     let mutable currentpoint = 1
                     if notNull message2 then gp.SetCommandPrompt(message2)
@@ -807,7 +807,7 @@ module ExtensionsUserinterface =
             let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
 
             let basePoint = if basePoint = Point3d.Origin then Point3d.Unset else basePoint
-            let prompts = ResizeArray([""; ""; ""])
+            let prompts = Rarr([""; ""; ""])
             if notNull prompt1 then prompts.[0] <- prompt1
             if notNull prompt2 then prompts.[1] <- prompt2
             if notNull prompt3 then prompts.[2] <- prompt3
@@ -953,7 +953,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string) : string array option =
         let getKeepEditor () = 
-            let values = resizeArray { for  v in values do yield v.ToString() }
+            let values = rarr { for  v in values do yield v.ToString() }
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null ->  None
             | s -> Some s

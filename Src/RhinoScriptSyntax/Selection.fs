@@ -74,11 +74,11 @@ module ExtensionsSelection =
     ///    Include grips objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) Identifiers for all the objects in the document</returns>
+    ///<returns>(Guid Rarr) Identifiers for all the objects in the document</returns>
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
                                [<OPT;DEF(false)>]includeGrips:bool,
-                               [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =            
+                               [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =            
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -87,7 +87,7 @@ module ExtensionsSelection =
             it.HiddenObjects <- true
             it.ReferenceObjects <- includeReferences
             let es = Doc.Objects.GetObjectList(it)
-            let objectids = ResizeArray()            
+            let objectids = Rarr()            
             for ob in es do
                 objectids.Add ob.Id
                 if select then ob.Select(true) |> ignore   //TODO make sync ?             
@@ -109,13 +109,13 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips objects</param>  
-    ///<returns>(Guid ResizeArray) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
+    ///<returns>(Guid Rarr) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
     static member ShownObjects(     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
                                     [<OPT;DEF(true)>]includeLockedObjects:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
-                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
             let Vis = new Collections.Generic.HashSet<int>()
             for layer in Doc.Layers do
                 if not layer.IsDeleted && layer.IsVisible then 
@@ -129,7 +129,7 @@ module ExtensionsSelection =
             it.ReferenceObjects <- includeReferences            
             it.ObjectTypeFilter <- RhinoScriptSyntax.FilterHelper(filter)
             let e = Doc.Objects.GetObjectList(it)
-            let objectIds = ResizeArray()            
+            let objectIds = Rarr()            
             for object in e do  
                 if Vis.Contains(object.Attributes.LayerIndex) then 
                     objectIds.Add(object.Id)                    
@@ -348,7 +348,7 @@ module ExtensionsSelection =
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
+    ///<returns>(Guid Rarr) Option of List of identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -358,7 +358,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(1)>]minimumCount:int,
                                     [<OPT;DEF(0)>]maximumCount:int,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
+                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid Rarr> =
         let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -380,7 +380,7 @@ module ExtensionsSelection =
                 if not <| select && not <| go.ObjectsWerePreselected then
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
-                let rc = ResizeArray()
+                let rc = Rarr()
                 let count = go.ObjectCount
                 for i in range(count) do
                     let objref = go.Object(i)
@@ -416,7 +416,7 @@ module ExtensionsSelection =
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid ResizeArray) Option of List of identifiers of the picked objects</returns>
+    ///<returns>(Guid Rarr) Option of List of identifiers of the picked objects</returns>
     static member GetObjectsAndRemember(message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
@@ -426,9 +426,9 @@ module ExtensionsSelection =
                                         [<OPT;DEF(1)>]minimumCount:int,
                                         [<OPT;DEF(0)>]maximumCount:int,
                                         [<OPT;DEF(true)>]printCount:bool,
-                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid ResizeArray> =
+                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid Rarr> =
         try 
-            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> ResizeArray<Guid>
+            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
             if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             Some objectIds
         with | _ -> 
@@ -459,13 +459,13 @@ module ExtensionsSelection =
                                         [<OPT;DEF(false)>]select:bool,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid> =
         try 
-            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> ResizeArray<Guid>
+            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
             //if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             Some objectIds.[0]
         with | _ -> 
             match RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter,false) with
             |Some id ->
-                RhinoScriptSyntax.Sticky.[message] <- resizeArray {id}
+                RhinoScriptSyntax.Sticky.[message] <- rarr {id}
                 Some id
             | None -> None
 
@@ -489,7 +489,7 @@ module ExtensionsSelection =
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
-    ///<returns>((Guid*bool*int*Point3d*string) ResizeArray) Option of List containing the following information
+    ///<returns>((Guid*bool*int*Point3d*string) Rarr) Option of List containing the following information
     ///    [n][0]  identifier of the object
     ///    [n][1]  True if the object was preselected, otherwise False
     ///    [n][2]  selection method (DocObjects.SelectionMethod)
@@ -501,7 +501,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) ResizeArray> =
+                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr> =
         let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -521,7 +521,7 @@ module ExtensionsSelection =
                 if not <| select && not <| go.ObjectsWerePreselected then
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
-                let rc = ResizeArray()
+                let rc = Rarr()
                 let count = go.ObjectCount
                 for i in range(count) do
                     let objref = go.Object(i)
@@ -535,7 +535,7 @@ module ExtensionsSelection =
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then 
                     rc 
-                    |> ResizeArray.map ( fun (id, _, _, _, _) -> id )
+                    |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> RhinoScriptSyntax.ObjectDescription
                     |> (+) "GetObjectsEx got " 
                     |> RhinoScriptSyntax.Print
@@ -551,13 +551,13 @@ module ExtensionsSelection =
     ///    A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
-    ///<returns>(Point3d ResizeArray) Option of List of 3d points</returns>
+    ///<returns>(Point3d Rarr) Option of List of 3d points</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
-                                        [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d ResizeArray> =
+                                        [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d Rarr> =
         match RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect) with 
         |None -> None
         |Some ids -> 
-            let rc = ResizeArray<Point3d>()
+            let rc = Rarr<Point3d>()
             for objectId in ids do
                 let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
                 rc.Add(pt)
@@ -630,10 +630,10 @@ module ExtensionsSelection =
     ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers the locked objects</returns>
+    ///<returns>(Guid Rarr) identifiers the locked objects</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) :Guid ResizeArray =
+                                    [<OPT;DEF(false)>]includeReferences:bool) :Guid Rarr =
             let settings = DocObjects.ObjectEnumeratorSettings()
             settings.ActiveObjects <- true
             settings.NormalObjects <- true
@@ -642,7 +642,7 @@ module ExtensionsSelection =
             settings.IncludeLights <- includeLights
             settings.IncludeGrips <- includeGrips
             settings.ReferenceObjects <- includeReferences
-            resizeArray{
+            rarr{
                 for i in Doc.Objects.GetObjectList(settings) do
                     if i.IsLocked || (Doc.Layers.[i.Attributes.LayerIndex]).IsLocked then
                         yield i.Id }
@@ -658,10 +658,10 @@ module ExtensionsSelection =
     ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the hidden objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the hidden objects</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.ActiveObjects <- true
         settings.NormalObjects <- true
@@ -670,7 +670,7 @@ module ExtensionsSelection =
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.ReferenceObjects <- includeReferences
-        resizeArray {for i in Doc.Objects.GetObjectList(settings) do
+        rarr {for i in Doc.Objects.GetObjectList(settings) do
                         if i.IsHidden || not <| (Doc.Layers.[i.Attributes.LayerIndex]).IsVisible then
                             i.Id }
 
@@ -684,17 +684,17 @@ module ExtensionsSelection =
     ///    Include grips objects.  If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the newly selected objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the newly selected objects</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
-                                        [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
+                                        [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.IncludePhantoms <- true
         settings.ReferenceObjects <- includeReferences
         let rhobjs = Doc.Objects.GetObjectList(settings)
-        let rc = ResizeArray()
+        let rc = Rarr()
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
                 rc.Add(obj.Id)
@@ -712,13 +712,13 @@ module ExtensionsSelection =
     ///    most recently created or changed object identifiers will be returned</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the object.  If omitted, the object is not selected</param>
-    ///<returns>(Guid ResizeArray) identifiers of the most recently created or changed objects</returns>
-    static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
+    ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects</returns>
+    static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr =
         match commandSerialNumbers with
-        |None -> ResizeArray()
+        |None -> Rarr()
         |Some (serialnum, ende) ->
             let mutable serialnumber = serialnum
-            let rc = ResizeArray()
+            let rc = Rarr()
             while serialnumber < ende do
                 let obj = Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
@@ -792,14 +792,14 @@ module ExtensionsSelection =
     ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips objects.  If omitted, grips objects are not returned</param>
-    ///<returns>(Guid ResizeArray) identifier of normal objects</returns>
-    static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+    ///<returns>(Guid Rarr) identifier of normal objects</returns>
+    static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true
         iter.LockedObjects <- false
         iter.IncludeLights <- includeLights
         iter.IncludeGrips <- includeGrips
-        resizeArray {for obj in Doc.Objects.GetObjectList(iter) do yield obj.Id }
+        rarr {for obj in Doc.Objects.GetObjectList(iter) do yield obj.Id }
 
 
     [<Extension>]
@@ -809,15 +809,15 @@ module ExtensionsSelection =
     ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include lights in the set</param>
-    ///<returns>(Guid ResizeArray) identifiers of objects of the selected color</returns>
+    ///<returns>(Guid Rarr) identifiers of objects of the selected color</returns>
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
-                                  [<OPT;DEF(false)>]includeLights:bool) : Guid ResizeArray =
+                                  [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr =
         let rhinoobjects = Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore //TODO make sync ?
             Doc.Views.Redraw()
-        resizeArray {for obj in rhinoobjects do yield obj.Id }
+        rarr {for obj in rhinoobjects do yield obj.Id }
 
 
     [<Extension>]
@@ -825,18 +825,18 @@ module ExtensionsSelection =
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects in the group</returns>
-    static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
+    ///<returns>(Guid Rarr) identifiers for objects in the group</returns>
+    static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let groupinstance = Doc.Groups.FindName(groupName)
         if isNull groupinstance  then Error.Raise <| sprintf "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
         let rhinoobjects = Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
-            ResizeArray()
+            Rarr()
         else
             if select then
                 for obj in rhinoobjects do obj.Select(true) |> ignore //TODO make sync ?
                 Doc.Views.Redraw()
-            resizeArray { for obj in rhinoobjects do yield obj.Id }
+            rarr { for obj in rhinoobjects do yield obj.Id }
 
 
     [<Extension>]
@@ -844,16 +844,16 @@ module ExtensionsSelection =
     ///<param name="layerName">(string) Name of the layer</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects in the specified layer</returns>
-    static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
+    ///<returns>(Guid Rarr) identifiers for objects in the specified layer</returns>
+    static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         let rhinoobjects = Doc.Objects.FindByLayer(layer)
-        if isNull rhinoobjects then ResizeArray()
+        if isNull rhinoobjects then Rarr()
         else
             if select then
                 for rhobj in rhinoobjects do rhobj.Select(true) |> ignore //TODO make sync ?
                 Doc.Views.Redraw()
-            resizeArray {for obj in rhinoobjects do yield obj.Id }
+            rarr {for obj in rhinoobjects do yield obj.Id }
 
 
 
@@ -866,11 +866,11 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid ResizeArray) identifiers for objects with the specified name</returns>
+    ///<returns>(Guid Rarr) identifiers for objects with the specified name</returns>
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(false)>]includeLights:bool,
-                                 [<OPT;DEF(false)>]includeReferences:bool) : Guid ResizeArray =
+                                 [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.HiddenObjects <- true
         settings.DeletedObjects <- false
@@ -880,7 +880,7 @@ module ExtensionsSelection =
         settings.NameFilter <- name
         settings.ReferenceObjects <- includeReferences
         let objects = Doc.Objects.GetObjectList(settings)
-        let ids = resizeArray{ for rhobj in objects do yield rhobj.Id }
+        let ids = rarr{ for rhobj in objects do yield rhobj.Id }
         if ids.Count>0 && select then
             for rhobj in objects do rhobj.Select(true) |> ignore //TODO make sync ?
             Doc.Views.Redraw()
@@ -921,10 +921,10 @@ module ExtensionsSelection =
     ///      1         Normal objects
     ///      2         Locked objects
     ///      4         Hidden objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of object that fit the specified type(s)</returns>
+    ///<returns>(Guid Rarr) identifiers of object that fit the specified type(s)</returns>
     static member ObjectsByType( geometryType:int,
                                  [<OPT;DEF(false)>]select:bool,
-                                 [<OPT;DEF(0)>]state:int) : Guid ResizeArray =
+                                 [<OPT;DEF(0)>]state:int) : Guid Rarr =
         let mutable state = state
         if state = 0 then state <- 7
         let mutable bSurface = false
@@ -952,7 +952,7 @@ module ExtensionsSelection =
         if (state &&& 1) <> 0 then it.NormalObjects <- true
         if (state &&& 2) <> 0 then it.LockedObjects <- true
         if (state &&& 4) <> 0 then it.HiddenObjects <- true
-        let objectids = ResizeArray()
+        let objectids = Rarr()
         let e = Doc.Objects.GetObjectList(it)
         for object in e do
             let  mutable bFound = false
@@ -987,10 +987,10 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of selected objects</returns>
-    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+    ///<returns>(Guid Rarr) identifiers of selected objects</returns>
+    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let selobjects = Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
-        resizeArray {for obj in selobjects do obj.Id }
+        rarr {for obj in selobjects do obj.Id }
 
 
     [<Extension>]
@@ -1013,11 +1013,11 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the visible objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the visible objects</returns>
     static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
                                           [<OPT;DEF(false)>]select:bool,
                                           [<OPT;DEF(false)>]includeLights:bool,
-                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid ResizeArray =
+                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let it = DocObjects.ObjectEnumeratorSettings()
         it.DeletedObjects <- false
         it.ActiveObjects <- true
@@ -1027,7 +1027,7 @@ module ExtensionsSelection =
         it.VisibleFilter <- true
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
         it.ViewportFilter <- viewport
-        let objectids = ResizeArray()
+        let objectids = Rarr()
         let e = Doc.Objects.GetObjectList(it)
         for object in e do
             let bbox = object.Geometry.GetBoundingBox(true)
@@ -1047,12 +1047,12 @@ module ExtensionsSelection =
     ///    Select picked objects</param>
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
     ///    If False, then a crossing window selection is performed</param>
-    ///<returns>(Guid ResizeArray) identifiers of selected objects</returns>
+    ///<returns>(Guid Rarr) identifiers of selected objects</returns>
     static member WindowPick( corner1:Point3d,
                               corner2:Point3d,
                               [<OPT;DEF(null:string)>]view:string,
                               [<OPT;DEF(false)>]select:bool,
-                              [<OPT;DEF(true)>]inWindow:bool) : Guid ResizeArray =
+                              [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr =
         
         let pick () = 
             let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else Doc.Views.ActiveView
@@ -1085,9 +1085,9 @@ module ExtensionsSelection =
         
                 Doc.Objects.PickObjects(pc)
 
-            let rc = ResizeArray()
+            let rc = Rarr()
             if notNull objects then
-                let rc = ResizeArray()
+                let rc = Rarr()
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)

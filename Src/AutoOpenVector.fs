@@ -159,7 +159,7 @@ module AutoOpenVector =
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistances: float seq, 
                                         [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
-                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  =       
+                                        [<OPT;DEF(false)>]loop:bool) :Point3d  Rarr  =       
                                         
             let offDists0  = Array.ofSeq offsetDistances           
             let normDists0 = Array.ofSeq (normalDistances |? Seq.empty<float> )
@@ -179,7 +179,7 @@ module AutoOpenVector =
                     elif lenDistNorm = 1 then normDists0.[0]
                     else Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm points.ToNiceString         
                 let a, b = Pnt.offsetTwoPt(points.[0], points.[1] , offDist, normDist)
-                resizeArray { a; b}                                        
+                rarr { a; b}                                        
             else // regular case more than 2 points
                 let lastIsFirst = (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance //auto detect closed polyline points:                                            
                 let distsNeeded = 
@@ -201,13 +201,13 @@ module AutoOpenVector =
                     elif lenDistNorm = distsNeededNorm then   normDists0
                     else Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop  
                 let refNormal = RhinoScriptSyntax.NormalOfPoints(points) //to have good starting direction, first kink might be in bad direction   
-                let Pts = ResizeArray<Point3d>(pointk) 
-                let Ns = ResizeArray<Vector3d>(pointk)         
+                let Pts = Rarr<Point3d>(pointk) 
+                let Ns = Rarr<Vector3d>(pointk)         
                 for i, p, t, n in Seq.iPrevThisNext(points) do                                                 
                     // first one:
                     if i=0 then 
                         if lastIsFirst then 
-                            let prev = points.GetItem(-2) // because -1 is same as 0                    
+                            let prev = points.GetNeg(-2) // because -1 is same as 0                    
                             let _, _, pt, N = Pnt.findOffsetCorner(prev, t, n, offDists.Last, offDists.[0], refNormal)
                             Pts.Add pt
                             Ns.Add N
@@ -240,13 +240,13 @@ module AutoOpenVector =
                         if n <> Vector3d.Zero then 
                             Pts.[i] <- Pts.[i] + n * normDists.[i]
                 
-                let rec searchBack i (ns:ResizeArray<Vector3d>) = 
+                let rec searchBack i (ns:Rarr<Vector3d>) = 
                     let ii = saveIdx (i) ns.Count
                     let v = ns.[ii]
                     if v <> Vector3d.Zero || i < -ns.Count then ii
                     else searchBack (i-1) ns
                     
-                let rec  searchForward i (ns:ResizeArray<Vector3d>) = 
+                let rec  searchForward i (ns:Rarr<Vector3d>) = 
                     let ii = saveIdx (i) ns.Count
                     let v = ns.[ii]
                     if v <> Vector3d.Zero || i > (2 * ns.Count) then ii
@@ -285,7 +285,7 @@ module AutoOpenVector =
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistance: float, 
                                         [<OPT;DEF(0.0)>]normalDistance: float ,
-                                        [<OPT;DEF(false)>]loop:bool) :Point3d  ResizeArray  = 
+                                        [<OPT;DEF(false)>]loop:bool) :Point3d  Rarr  = 
 
             if normalDistance = 0.0 then RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[]              , loop)
             else                         RhinoScriptSyntax.OffsetPoints(points,[offsetDistance],[normalDistance], loop)

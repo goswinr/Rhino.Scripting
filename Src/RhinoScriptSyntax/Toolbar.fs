@@ -161,9 +161,9 @@ module ExtensionsToolbar =
 
     [<Extension>]
     ///<summary>Returns names of all currently open toolbar collections</summary>
-    ///<returns>(string ResizeArray) the names of all currently open toolbar collections</returns>
-    static member ToolbarCollectionNames() : string ResizeArray =
-        resizeArray { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
+    ///<returns>(string Rarr) the names of all currently open toolbar collections</returns>
+    static member ToolbarCollectionNames() : string Rarr =
+        rarr { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
 
 
     [<Extension>]
@@ -197,10 +197,10 @@ module ExtensionsToolbar =
     ///<param name="name">(string) Name of currently open toolbar collection</param>
     ///<param name="groups">(bool) Optional, Default Value: <c>false</c>
     ///    If true, return the names of toolbar groups in the file</param>
-    ///<returns>(string ResizeArray) names of all toolbars (or toolbar groups)</returns>
-    static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string ResizeArray =
+    ///<returns>(string Rarr) names of all toolbars (or toolbar groups)</returns>
+    static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string Rarr =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        let rc = ResizeArray()
+        let rc = Rarr()
         if notNull tbfile then
             if groups then
                 for i = 0 to tbfile.GroupCount-1 do rc.Add(tbfile.GetGroup(i).Name)

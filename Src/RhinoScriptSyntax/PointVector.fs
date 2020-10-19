@@ -100,11 +100,11 @@ module ExtensionsPointvector =
     ///<summary>Transforms a list of 3D points</summary>
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<param name="xform">(Transform) Transformation to apply</param>
-    ///<returns>(Point3d ResizeArray) transformed points</returns>
-    static member PointArrayTransform(points:Point3d seq, xform:Transform) : Point3d ResizeArray =
+    ///<returns>(Point3d Rarr) transformed points</returns>
+    static member PointArrayTransform(points:Point3d seq, xform:Transform) : Point3d Rarr =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         //xform = RhinoScriptSyntax.Coercexform(xform)
-        resizeArray {for point in points do xform*point}
+        rarr {for point in points do xform*point}
 
     [<Extension>]
     ///<summary>Finds the object that is closest to a test point</summary>
@@ -255,7 +255,7 @@ module ExtensionsPointvector =
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
-        let meshes =  resizeArray { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
+        let meshes =  rarr { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let tolerance = Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
 
@@ -270,7 +270,7 @@ module ExtensionsPointvector =
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
-        let breps =  resizeArray { for objectId in surfaceIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps =  rarr { for objectId in surfaceIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 

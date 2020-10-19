@@ -196,12 +196,12 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(string ResizeArray) List of children layer names</returns>
-    static member LayerChildren(layer:string) : string ResizeArray =
+    ///<returns>(string Rarr) List of children layer names</returns>
+    static member LayerChildren(layer:string) : string Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
-        if notNull children then resizeArray {for child in children do child.FullPath }
-        else resizeArray { () } //empty list
+        if notNull children then rarr {for child in children do child.FullPath }
+        else rarr { () } //empty list
 
 
     [<Extension>]
@@ -232,9 +232,9 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Return identifiers of all layers in the document</summary>
-    ///<returns>(Guid ResizeArray) the identifiers of all layers in the document</returns>
-    static member LayerIds() : Guid ResizeArray =
-        resizeArray {for layer in Doc.Layers do
+    ///<returns>(Guid Rarr) the identifiers of all layers in the document</returns>
+    static member LayerIds() : Guid Rarr =
+        rarr {for layer in Doc.Layers do
                         if not layer.IsDeleted then
                             layer.Id }
 
@@ -339,9 +339,9 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the names of all layers in the document</summary>
-    ///<returns>(string ResizeArray) list of layer names</returns>
-    static member LayerNames() : string ResizeArray =
-        let rc = ResizeArray()
+    ///<returns>(string Rarr) list of layer names</returns>
+    static member LayerNames() : string Rarr =
+        let rc = Rarr()
         for layer in Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
         rc

@@ -161,16 +161,16 @@ module ExtensionsUtility =
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
-    ///<returns>(float ResizeArray) numbers with duplicates removed</returns>
-    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
-        if Seq.length numbers < 2 then ResizeArray(numbers )
+    ///<returns>(float Rarr) numbers with duplicates removed</returns>
+    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
+        if Seq.length numbers < 2 then Rarr(numbers )
         else
             let tol = ifZero1 tolerance  RhinoMath.ZeroTolerance // or Doc.ModelAbsoluteTolerance
             let nums = numbers|> Seq.sort
             let first = Seq.head nums
             let second = (Seq.item 1 nums)
             let mutable lastOK = first
-            resizeArray{
+            rarr{
                 if abs(first-second) > tol then
                     yield first
                     lastOK <- second
@@ -221,7 +221,7 @@ module ExtensionsUtility =
     ///<returns>(string array)
     ///    If section is NOT specified, a list containing all section names
     ///    If section is specified, a list containing all entry names for the given section</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string ResizeArray =  
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =  
         //https://github.com/rickyah/ini-parser
         
         //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
@@ -229,9 +229,9 @@ module ExtensionsUtility =
         let data = parser.ReadFile(filename)
         data.Configuration.ThrowExceptionsOnError <-true
         if isNull section then 
-            resizeArray { for s in data.Sections do s.SectionName }
+            rarr { for s in data.Sections do s.SectionName }
         else            
-            resizeArray { for k in data.[section] do k.KeyName}
+            rarr { for k in data.[section] do k.KeyName}
 
     ///<summary>Returns string from a specified section and entry in an ini file</summary>
     ///<param name="filename">(string) Name  and path of the ini file</param>
@@ -300,9 +300,9 @@ module ExtensionsUtility =
     [<Extension>]
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
-    ///<returns>(float ResizeArray) A one-dimensional list containing real numbers</returns>
-    static member SimplifyArray(points:Point3d seq) : float ResizeArray =
-        resizeArray { for  p in points do
+    ///<returns>(float Rarr) A one-dimensional list containing real numbers</returns>
+    static member SimplifyArray(points:Point3d seq) : float Rarr =
+        rarr { for  p in points do
                             yield p.X
                             yield p.Y
                             yield p.Z }

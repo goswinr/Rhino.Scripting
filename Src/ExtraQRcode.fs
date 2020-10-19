@@ -87,7 +87,7 @@ module QRcode =
 
     /// creats Hatch of size 1 at 0,0
     let private asRhinoHatch (ar:bool[,]):Hatch [] =        
-        let crvs = ResizeArray<Curve>()
+        let crvs = Rarr<Curve>()
         let sizeX = Array2D.length1 ar 
         let sizeY = Array2D.length2 ar 
         let stepX = 1./ float sizeX 

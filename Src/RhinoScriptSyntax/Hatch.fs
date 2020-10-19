@@ -61,12 +61,12 @@ module ExtensionsHatch =
     ///    Hatch pattern rotation angle in degrees</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    Tolerance for hatch fills</param>
-    ///<returns>(Guid ResizeArray) identifiers of the newly created hatch</returns>
+    ///<returns>(Guid Rarr) identifiers of the newly created hatch</returns>
     static member AddHatches( curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
+                              [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
         //id = RhinoScriptSyntax.Coerceguid(curveIds)
         let mutable index = Doc.HatchPatterns.CurrentHatchPatternIndex
@@ -74,13 +74,13 @@ module ExtensionsHatch =
             let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patterninstance|> isNull then RhinoMath.UnsetIntIndex else patterninstance.Index
             if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
-        let curves =  resizeArray { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
         if isNull hatches then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
-        let ids = ResizeArray()
+        let ids = Rarr()
         for hatch in hatches do
             let objectId = Doc.Objects.AddHatch(hatch)
             if objectId <> Guid.Empty then
@@ -118,11 +118,11 @@ module ExtensionsHatch =
     ///    If hatch pattern names already in the document match hatch
     ///    pattern names in the pattern definition file, then the existing hatch
     ///    patterns will be redefined</param>
-    ///<returns>(string ResizeArray) Names of the newly added hatch patterns</returns>
-    static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string ResizeArray =
+    ///<returns>(string Rarr) Names of the newly added hatch patterns</returns>
+    static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
         if isNull patterns then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
-        let rc = ResizeArray()
+        let rc = Rarr()
         for pattern in patterns do
              let index = Doc.HatchPatterns.Add(pattern)
              if index>=0 then
@@ -162,14 +162,14 @@ module ExtensionsHatch =
     ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the hatch object</param>
-    ///<returns>(Guid ResizeArray) list of identifiers for the newly created objects</returns>
-    static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid ResizeArray =
+    ///<returns>(Guid Rarr) list of identifiers for the newly created objects</returns>
+    static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid Rarr =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
         let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
         let pieces = geo.Explode()
         if isNull pieces then Error.Raise <| sprintf "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%A' delete:'%A'" hatchId delete
         let attr = rhobj.Attributes
-        let rc = ResizeArray()
+        let rc = Rarr()
         for piece in pieces do
             match piece with
             | :? Curve as c->
@@ -262,10 +262,10 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Returns the names of all of the hatch patterns in the document</summary>
-    ///<returns>(string ResizeArray) the names of all of the hatch patterns in the document</returns>
-    static member HatchPatternNames() : string ResizeArray =
+    ///<returns>(string Rarr) the names of all of the hatch patterns in the document</returns>
+    static member HatchPatternNames() : string Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
-        let rc = ResizeArray()
+        let rc = Rarr()
         for i in range(Doc.HatchPatterns.Count) do
             let hatchpattern = Doc.HatchPatterns.[i]
             if not hatchpattern.IsDeleted then

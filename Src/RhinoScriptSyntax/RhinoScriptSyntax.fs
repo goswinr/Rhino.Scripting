@@ -166,9 +166,9 @@ type RhinoScriptSyntax private () =
     ///<param name="start">(float): first value of range</param> 
     ///<param name="stop">(float): end of range( The last value will not be included in range, Python semantics.)</param>    
     ///<param name="step">(float): step size between two values</param>
-    ///<returns>(float ResizeArray)</returns>
-    static member FrangePython (start:float, stop:float, step:float) : float ResizeArray =
-        RhinoScriptSyntax.FxrangePython (start, stop, step) |> ResizeArray.ofSeq
+    ///<returns>(float Rarr)</returns>
+    static member FrangePython (start:float, stop:float, step:float) : float Rarr =
+        RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
         
     
     ///<summary>Adds any geometry object (stuct or class) to the Rhino document.</summary>

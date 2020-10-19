@@ -74,13 +74,13 @@ module ExtensionsGrips =
     ///    Allow for selection of pre-selected object grips</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked object grips</param>
-    ///<returns>((Guid * int * Point3d) ResizeArray) containing one or more grip records. Each grip record is a tuple
+    ///<returns>((Guid * int * Point3d) Rarr) containing one or more grip records. Each grip record is a tuple
     ///    [n][0] = identifier of the object that owns the grip
     ///    [n][1] = index value of the grip
     ///    [n][2] = location of the grip</returns>
     static member GetObjectGrips( [<OPT;DEF(null:string)>]message:string,
                                   [<OPT;DEF(false)>]preselect:bool,
-                                  [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid * int * Point3d> =
+                                  [<OPT;DEF(false)>]select:bool) : Rarr<Guid * int * Point3d> =
         let get () = 
             if not preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -88,7 +88,7 @@ module ExtensionsGrips =
             let grips = ref null
             let re = Input.RhinoGet.GetGrips(grips, message)
             let grips = !grips
-            let rc = ResizeArray()
+            let rc = Rarr()
             if re = Commands.Result.Success && notNull grips then
                 for grip in grips do
                     let objectId = grip.OwnerId
@@ -194,13 +194,13 @@ module ExtensionsGrips =
     /// the grips, you must provide a list of points that contain the same number
     /// of points at grips</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(Point3d ResizeArray) The current location of all grips</returns>
-    static member ObjectGripLocations(objectId:Guid) : Point3d ResizeArray = //GET
+    ///<returns>(Point3d Rarr) The current location of all grips</returns>
+    static member ObjectGripLocations(objectId:Guid) : Point3d Rarr = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%A' " objectId
         let grips = rhobj.GetGrips()
         if isNull grips then Error.Raise <| sprintf "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%A' " objectId
-        resizeArray { for grip in grips do yield grip.CurrentLocation }
+        rarr { for grip in grips do yield grip.CurrentLocation }
 
 
 
@@ -273,10 +273,10 @@ module ExtensionsGrips =
     [<Extension>]
     ///<summary>Returns a list of grip indices indentifying an object's selected grips</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(int ResizeArray) list of indices</returns>
-    static member SelectedObjectGrips(objectId:Guid) : int ResizeArray =
+    ///<returns>(int Rarr) list of indices</returns>
+    static member SelectedObjectGrips(objectId:Guid) : int Rarr =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let rc = ResizeArray()
+        let rc = Rarr()
         if not rhobj.GripsOn then rc
         else
             let grips = rhobj.GetGrips()

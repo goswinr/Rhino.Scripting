@@ -27,12 +27,12 @@ module ExtensionsObject =
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) ids identifying the newly transformed objects</returns>
+    ///<returns>(Guid Rarr) ids identifying the newly transformed objects</returns>
     static member TransformObject( objectIds:Guid seq,
                                     matrix:Transform,
-                                    [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =   //PLURAL    
+                                    [<OPT;DEF(false)>]copy:bool) : Guid Rarr =   //PLURAL    
         // this is also called by Copy, Scale, Mirror, Move, and Rotate functions defined below
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let objectId = Doc.Objects.Transform(objectid, matrix, not copy)
             if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Cannot apply transform to object '%A' from objectId:'%A' matrix:'%A' copy:'%A'" objectid objectId matrix copy
@@ -77,14 +77,14 @@ module ExtensionsObject =
     ///<summary>Copies one or more objects from one location to another, or in-place</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
-    ///<returns>(Guid ResizeArray) identifiers for the copies</returns>
-    static member CopyObject(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray = //PLURAL
+    ///<returns>(Guid Rarr) identifiers for the copies</returns>
+    static member CopyObject(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
         let translation =
             if not translation.IsZero then
                 Transform.Translation(translation)
             else
                 Transform.Identity
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let res = Doc.Objects.Transform(objectid, translation, false)
             if res = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.CopyObjectc failed.  objectId:'%A' translation:'%A'" objectid translation
@@ -123,7 +123,7 @@ module ExtensionsObject =
     ///    If False, flash between visible and invisible</param>
     ///<returns>(unit)</returns>
     static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
-        let rhobjs = resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
+        let rhobjs = rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.Count>0 then
             Doc.Views.FlashObjects(rhobjs, style)
 
@@ -381,18 +381,18 @@ module ExtensionsObject =
     ///<param name="endPoint">(Point3d) End of the mirror plane</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) List of identifiers of the mirrored objects</returns>
+    ///<returns>(Guid Rarr) List of identifiers of the mirrored objects</returns>
     static member MirrorObject(  objectIds:Guid seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d,
-                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
+                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
         let vec = endPoint-startPoint
         if vec.IsTiny() then Error.Raise <| sprintf "RhinoScriptSyntax.Start and  end points are too close to each other.  objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectIds startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let objectId = Doc.Objects.Transform(objectid, xf, not copy)
             if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Cannot apply MirrorObjects to objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
@@ -416,10 +416,10 @@ module ExtensionsObject =
     ///<summary>Moves one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
-    ///<returns>(Guid ResizeArray) Identifiers of the moved objects(same as the input!?)</returns>
-    static member MoveObject(objectIds:Guid seq, translation:Vector3d) : Guid ResizeArray =  //PLURAL        
+    ///<returns>(Guid Rarr) Identifiers of the moved objects(same as the input!?)</returns>
+    static member MoveObject(objectIds:Guid seq, translation:Vector3d) : Guid Rarr =  //PLURAL        
         let xf = Transform.Translation(translation)
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let objectId = Doc.Objects.Transform(objectid, xf, true)
             if objectId = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.Cannot apply MoveObjects Transform to objectId:'%A'  translation:'%A'" objectId translation
@@ -554,13 +554,13 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Returns all of the group names that an object is assigned to</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
-    ///<returns>(string ResizeArray) list of group names</returns>
-    static member ObjectGroups(objectId:Guid) : string ResizeArray =
+    ///<returns>(string Rarr) list of group names</returns>
+    static member ObjectGroups(objectId:Guid) : string Rarr =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if rhinoobject.GroupCount<1 then resizeArray { () }
+        if rhinoobject.GroupCount<1 then rarr { () }
         else
             let groupindices = rhinoobject.GetGroupList()
-            resizeArray { for index in groupindices do yield Doc.Groups.GroupName(index) }
+            rarr { for index in groupindices do yield Doc.Groups.GroupName(index) }
 
     [<Extension>]
     ///<summary>Returns the short layer of an object.
@@ -1122,12 +1122,12 @@ module ExtensionsObject =
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the object</param>
-    ///<returns>(Guid ResizeArray) identifiers of the rotated objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the rotated objects</returns>
     static member RotateObject( objectIds:Guid seq,
                                  centerPoint:Point3d,
                                  rotationAngle:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
-                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
+                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
         let axis =
             if not axis.IsZero then
                 Vector3d.ZAxis
@@ -1135,7 +1135,7 @@ module ExtensionsObject =
                 axis
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let res = Doc.Objects.Transform(objectid, xf, not copy)
             if res = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.RotateObjects failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectid centerPoint rotationAngle axis copy
@@ -1192,16 +1192,16 @@ module ExtensionsObject =
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the scaled objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the scaled objects</returns>
     static member ScaleObject( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float*float*float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =  //PLURAL
+                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURAL
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let x, y, z = scale
         let xf = Transform.Scale(plane, x, y, z)
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let res = Doc.Objects.Transform(objectid, xf, not copy)
             if res = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectid origin scale  copy
@@ -1215,15 +1215,15 @@ module ExtensionsObject =
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the scaled objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the scaled objects</returns>
     static member ScaleObject( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =  //PLURALALT
+                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURALALT
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let xf = Transform.Scale(plane, scale, scale, scale)
-        let rc = ResizeArray()
+        let rc = Rarr()
         for objectid in objectIds do
             let res = Doc.Objects.Transform(objectid, xf, not copy)
             if res = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectid origin scale  copy
@@ -1322,12 +1322,12 @@ module ExtensionsObject =
     ///<param name="angleDegrees">(float) The shear angle in degrees</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid ResizeArray) identifiers of the sheared objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the sheared objects</returns>
     static member ShearObject( objectIds:Guid seq,
                                 origin:Point3d,
                                 referencePoint:Point3d,
                                 angleDegrees:float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
+                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
         if (origin-referencePoint).IsTiny() then Error.Raise <| sprintf "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A " origin referencePoint
         let plane = Doc.Views.ActiveView.MainViewport.ConstructionPlane()
         let mutable frame = Plane(plane)
@@ -1345,7 +1345,7 @@ module ExtensionsObject =
         shear2d.[0, 1] <- tan(toRadians(angleDegrees))
         let cobinv = Transform.ChangeBasis(frame, worldplane)
         let xf = cobinv * shear2d * cob
-        resizeArray{
+        rarr{
             for ob in objectIds do
                 let res = Doc.Objects.Transform(ob, xf, not copy)
                 if res = Guid.Empty then Error.Raise <| sprintf "RhinoScriptSyntax.ShearObject failed for %A, origin %A, ref point  %A andangle  %A " ob origin referencePoint angleDegrees
