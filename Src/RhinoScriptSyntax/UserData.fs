@@ -116,7 +116,7 @@ module ExtensionsUserdata =
                 yield! "Available keys on Geometry:"
                 for k in RhinoScriptSyntax.GetUserTextKeys(objectId,true) do yield! k
             }
-            raise (new Error(err))
+            RhinoScriptingException.Raise "%s" err
         s
     
     [<Extension>]
