@@ -12,9 +12,9 @@
     <NeutralLanguage>en</NeutralLanguage>
     
     <!--assembly info -->
-    <Version>0.2.0.0</Version>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
+    <Version>0.3.0.0</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
 
     <Authors>Goswin Rothenthal</Authors>
     <Product>Rhino.Scripting</Product>
@@ -26,22 +26,23 @@
 
   
   <ItemGroup>
+    <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries--> 
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="ZXing.Net" Version="0.16.5" />
-    <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries-->
- 
     
-    <Reference Include="RhinoCommon">
-      <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
-      <Private>False</Private>
-    </Reference>  
-
-    <ProjectReference Include="..\FsEx\FsEx.fsproj" />      <!-- take from https://github.com/goswinr/FsEx -->   
-
     <Reference Include="WindowsBase" />  
     <Reference Include="PresentationCore" />  
     <Reference Include="PresentationFramework" />    <!--WPF dlls because a refernce to seff editor window is held if available-->
     <Reference Include="System.Windows.Forms" /> <!--to get screen resolution-->   
+
+    <Reference Include="RhinoCommon">
+      <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>      
+
+    <Reference Include="FsEx">
+      <HintPath>..\FsEx\bin\Release\netstandard2.0\FsEx.dll</HintPath> <!-- take from https://github.com/goswinr/FsEx -->   
+    </Reference>  
 
   </ItemGroup>
 
@@ -78,6 +79,7 @@
     <Compile Include="Src\RhinoScriptSyntax\UserInterface.fs" />
     <Compile Include="Src\RhinoScriptSyntax\Utility.fs" />
     <Compile Include="Src\RhinoScriptSyntax\View.fs" />
+
     <Compile Include="Src\AutoOpenCurried.fs" />
     <Compile Include="Src\Vec.fs" />
     <Compile Include="Src\Pnt.fs" />
