@@ -37,11 +37,11 @@ module Line =
     /// Returns point on lnB
     let intersectInOnePoint (lnA:Line) (lnB:Line):Point3d = 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
-        if not ok then Error.Raise <| sprintf "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
+        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
         let a = lnA.PointAt(ta)
         let b = lnB.PointAt(tb)
         if (a-b).SquareLength > RhinoMath.ZeroTolerance then // = Length > 1e-6
-            Error.Raise <| sprintf "Rhino.Scripting.Line.intersect failed, they are skew. distance: %g  on %s and %s" (a-b).Length lnA.ToNiceString lnB.ToNiceString
+            RhinoScriptingException.Raise "Rhino.Scripting.Line.intersect failed, they are skew. distance: %g  on %s and %s" (a-b).Length lnA.ToNiceString lnB.ToNiceString
         b
     
     /// Finds intersection of two infinite lines.
@@ -51,7 +51,7 @@ module Line =
     /// Considers Lines infinte
     let intersectSkew (lnA:Line) (lnB:Line) :Point3d*Point3d= 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
-        if not ok then Error.Raise <| sprintf "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
+        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
         let a = lnA.PointAt(ta)
         let b = lnB.PointAt(tb)        
         a,b
@@ -61,7 +61,7 @@ module Line =
     /// Fails if lines are paralell.
     let distanceToLine (lnA:Line) (lnB:Line) :float= 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
-        if not ok then Error.Raise <| sprintf "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
+        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
         let a = lnA.PointAt(ta)
         let b = lnB.PointAt(tb)
         (a-b).Length

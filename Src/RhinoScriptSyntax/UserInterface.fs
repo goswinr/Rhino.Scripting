@@ -72,7 +72,7 @@ module ExtensionsUserinterface =
         if notNull newcheckstates then
             Some (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
         else
-            //Error.Raise <| sprintf "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
+            //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             None
 
 
@@ -127,7 +127,7 @@ module ExtensionsUserinterface =
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then Some(toDegrees(angle))
             else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -147,7 +147,7 @@ module ExtensionsUserinterface =
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
-            if count < 1 || count <> Seq.length(defaultVals) then Error.Raise <| sprintf "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
+            if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
             let toggles = Rarr()
             for i in range(count) do
                 let initial = defaultVals.[i]
@@ -198,13 +198,13 @@ module ExtensionsUserinterface =
                 |2 -> Input.GetBoxMode.ThreePoint
                 |3 -> Input.GetBoxMode.Vertical
                 |4 -> Input.GetBoxMode.Center
-                |_ -> Error.Raise <| sprintf "RhinoScriptSyntax.GetBox:Bad mode %A" mode
+                |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.GetBox:Bad mode %A" mode
 
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then Some ((!box).GetCorners())
             else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -218,7 +218,7 @@ module ExtensionsUserinterface =
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
             if rc then Some (!col) else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -291,7 +291,7 @@ module ExtensionsUserinterface =
                     gp2.Dispose()
                     None
             | _ -> None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -311,7 +311,7 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(0)>]maxCount:int,
                                     [<OPT;DEF(false)>]select:bool) : option<Rarr<Guid*Guid*Point3d>> =
         let get () = 
-            if maxCount > 0 && minCount > maxCount then Error.Raise <| sprintf "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
+            if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.Curve
@@ -335,7 +335,7 @@ module ExtensionsUserinterface =
                         rhobj.Select(true)|> ignore //TODO make sync ?
                     Doc.Views.Redraw()
                 Some r
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -363,7 +363,7 @@ module ExtensionsUserinterface =
                 let rc = gi.Number()
                 gi.Dispose()
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -452,7 +452,7 @@ module ExtensionsUserinterface =
                 Some line
             else
                 None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -508,7 +508,7 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -542,7 +542,7 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -572,7 +572,7 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -595,7 +595,7 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -610,7 +610,7 @@ module ExtensionsUserinterface =
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             if cmdrc = Commands.Result.Success then Some point
             else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -633,7 +633,7 @@ module ExtensionsUserinterface =
                 gp.Constrain(brep, -1, -1, false) |> ignore
 
             | _ ->
-                Error.Raise <| sprintf "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%A' message:'%A'" surfaceId message
+                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%A' message:'%A'" surfaceId message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then
@@ -641,7 +641,7 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -708,7 +708,7 @@ module ExtensionsUserinterface =
                     Some rc
                 else
                     None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
 
         Synchronisation.DoSync true true get
 
@@ -752,7 +752,7 @@ module ExtensionsUserinterface =
             Doc.Views.Redraw()
             if rc = Commands.Result.Success then Some polyline
             else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -779,7 +779,7 @@ module ExtensionsUserinterface =
                 let rc = gn.Number()
                 gn.Dispose()
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -814,7 +814,7 @@ module ExtensionsUserinterface =
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
             else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -844,7 +844,7 @@ module ExtensionsUserinterface =
                 Some <| gs.Option().EnglishName
             else
                 Some <| gs.StringResult()
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -1088,7 +1088,7 @@ module ExtensionsUserinterface =
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)            
             if  rc then Some (!defaultValNumber)
             else None
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 

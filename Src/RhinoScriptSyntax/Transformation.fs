@@ -55,7 +55,7 @@ module ExtensionsTransformation =
         //initialPlane = RhinoScriptSyntax.Coerceplane(initialPlane)
         //finalPlane = RhinoScriptSyntax.Coerceplane(finalPlane)
         let xform = Transform.ChangeBasis(initialPlane, finalPlane)
-        if not xform.IsValid then Error.Raise <| sprintf "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        if not xform.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xform
 
 
@@ -81,7 +81,7 @@ module ExtensionsTransformation =
         //y1 = RhinoScriptSyntax.Coerce3dvector(y1)
         //z1 = RhinoScriptSyntax.Coerce3dvector(z1)
         let xform = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
-        if not xform.IsValid   then Error.Raise <| sprintf "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xform
 
 
@@ -143,7 +143,7 @@ module ExtensionsTransformation =
     static member XformInverse(xform:Transform) : Transform =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         let rc, inverse = xform.TryGetInverse()
-        if not rc then Error.Raise <| sprintf "RhinoScriptSyntax.XformInverse failed.  xform:'%A'" xform
+        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.XformInverse failed.  xform:'%A'" xform
         inverse
 
 
@@ -188,7 +188,7 @@ module ExtensionsTransformation =
         //initialPlane = RhinoScriptSyntax.Coerceplane(initialPlane)
         //finalPlane = RhinoScriptSyntax.Coerceplane(finalPlane)
         let xform = Transform.PlaneToPlane(initialPlane, finalPlane)
-        if not xform.IsValid   then Error.Raise <| sprintf "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xform
 
 
@@ -205,7 +205,7 @@ module ExtensionsTransformation =
         //center = RhinoScriptSyntax.Coerce3dpoint(centerPoint)
         let anglerad = toRadians(angleDegrees)
         let xform = Transform.Rotation(anglerad, rotationAxis, centerPoint)
-        if not xform.IsValid   then Error.Raise <| sprintf "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
+        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
         xform
 
 
@@ -223,7 +223,7 @@ module ExtensionsTransformation =
         //end = RhinoScriptSyntax.Coerce3dvector(endDirection)
         //center = RhinoScriptSyntax.Coerce3dpoint(centerPoint)
         let xform = Transform.Rotation(startDirection, endDirection, centerPoint)
-        if not xform.IsValid   then Error.Raise <| sprintf "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
+        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
         xform
 
 
@@ -249,7 +249,7 @@ module ExtensionsTransformation =
         //y1 = RhinoScriptSyntax.Coerce3dvector(y1)
         //z1 = RhinoScriptSyntax.Coerce3dvector(z1)
         let xform = Transform.Rotation(x0, y0, z0, x1, y1, z1)
-        if not xform.IsValid   then Error.Raise <| sprintf "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xform
 
 

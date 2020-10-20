@@ -68,7 +68,7 @@ module AutoOpenRhinoTypeExtensions =
         member v.Unitized = 
             let len = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) // see Vec.unitze too
             if len > 1e-9 then v * (1./len) 
-            else Error.Raise <| sprintf "Vector3d.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString
+            else RhinoScriptingException.Raise "Vector3d.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString
         
         //[<Extension>] 
         //Unitizes the vector , fails if input is of zero length

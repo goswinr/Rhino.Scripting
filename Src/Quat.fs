@@ -27,7 +27,7 @@ type [<Struct>] Quat =
 
     /// makes sure input is unitized
     private new (x, y, z, w) = // assume  unitized ??   // make private ?? 
-        if abs(x*x+y*y+z*z+w*w-1.0) > 1e-9 then Error.Raise <| sprintf "Rhino.Scripting.Quat constructors are not unitized: %g %g %g %g" x y z w // skip check ??
+        if abs(x*x+y*y+z*z+w*w-1.0) > 1e-9 then RhinoScriptingException.Raise "Rhino.Scripting.Quat constructors are not unitized: %g %g %g %g" x y z w // skip check ??
         {X = x; Y = y; Z = z; W = w} // assume  unitized ??    
     
     member q.MagnitudeSq = q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W
@@ -36,7 +36,7 @@ type [<Struct>] Quat =
 
     member q.ScaleBy(k)  =  Quat(k * q.X, k * q.Y, k * q.Z, k * q.W)
 
-    member q.Norm = let l = q.Magnitude in if l > 1e-8 then q.ScaleBy (1./l) else Error.Raise <| sprintf "Quad failed to normalize %A" q
+    member q.Norm = let l = q.Magnitude in if l > 1e-8 then q.ScaleBy (1./l) else RhinoScriptingException.Raise "Quad failed to normalize %A" q
     
     /// returns Angle in Degree
     member q.AngleDeg  = 
@@ -46,7 +46,7 @@ type [<Struct>] Quat =
 
     static member scaleBy  k (q:Quat)  =  q.ScaleBy k
 
-    static member divideBy k (q:Quat)  =  if abs k > 1e-8 then q.ScaleBy (1./k) else Error.Raise <| sprintf "Rhino.Scripting.Quat: Cannot devide Quat %A by %f" q k    
+    static member divideBy k (q:Quat)  =  if abs k > 1e-8 then q.ScaleBy (1./k) else RhinoScriptingException.Raise "Rhino.Scripting.Quat: Cannot devide Quat %A by %f" q k    
 
     static member magnitudeSq (q:Quat) = q.MagnitudeSq
 
@@ -61,11 +61,11 @@ type [<Struct>] Quat =
 
     static member isNormalized (q:Quat) = abs (1. - q.MagnitudeSq) < 1e-8 
 
-    //static member failIfNotNorm (q:Quat) = if q |> Quat.isNormalized |> not then Error.Raise <| sprintf "RhinoScriptSyntax.%A is not Unitized" q else q
+    //static member failIfNotNorm (q:Quat) = if q |> Quat.isNormalized |> not then RhinoScriptingException.Raise "RhinoScriptSyntax.%A is not Unitized" q else q
          
     static member fromXYZW (x, y, z, w) = 
         let l = sqrt ( x*x + y*y + z*z + w*w )
-        if l < 1e-9 then Error.Raise <| sprintf "Rhino.Scripting.Quat.fromXYZW failed on : x:%g y:%g z:%g w:%g" x y z w
+        if l < 1e-9 then RhinoScriptingException.Raise "Rhino.Scripting.Quat.fromXYZW failed on : x:%g y:%g z:%g w:%g" x y z w
         let lq = 1. / l
         Quat(x*lq, y*lq, z*lq, w*lq)
         
@@ -79,7 +79,7 @@ type [<Struct>] Quat =
          Quat.fromXYZW (v.X, v.Y, v.Z, 0.0)  
     
     //static member inline ( * ) (q:Quat,k:float) =  Quat(k * q.X, k * q.Y, k * q.Z, k * q.W)
-    //static member inline ( / ) (q:Quat,f:float) = if abs f < 1e-9 then Error.Raise <| sprintf "RhinoScriptSyntax.Cannot devide Quat %A by %f" q f  else q * (1./f)
+    //static member inline ( / ) (q:Quat,f:float) = if abs f < 1e-9 then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot devide Quat %A by %f" q f  else q * (1./f)
     //static member inline ( + ) (l:Quat,r:Quat)  = Quat( l.X + r.X, l.Y + r.Y, l.Z + r.Z, l.W + r.W )
     //static member inline ( - ) (l:Quat,r:Quat)  = Quat( l.X - r.X, l.Y - r.Y, l.Z - r.Z, l.W - r.W )
     //static member identity = Quat(0.,0.,0.,1.)
@@ -94,7 +94,7 @@ type [<Struct>] Quat =
     /// Given a Rotation Axis(Vec) and an Angle in Radian returns a Quaternion
     static member fromVecRad (axis:Vector3d, angleRadian) =
         let mutable li = axis.Length
-        if li < 1e-8 then Error.Raise <| sprintf "Rhino.Scripting.Quat.fromVecRad: Cannot create Quat to rotate %g radians around zero length vector %A" angleRadian axis //or return identity ?
+        if li < 1e-8 then RhinoScriptingException.Raise "Rhino.Scripting.Quat.fromVecRad: Cannot create Quat to rotate %g radians around zero length vector %A" angleRadian axis //or return identity ?
         let sa = sin (angleRadian * 0.5)
         li <- 1. / li // inverse
         //printfn "Build with ang %g " (Math.radToDeg angleRadian)
@@ -113,8 +113,8 @@ type [<Struct>] Quat =
         // http://stackoverflow.com/questions/1171849/finding-quaternion-representing-the-rotation-from-one-vector-to-another/1171995#1171995
         let n = Vec.cross u  v
         if n.SquareLength < 1e-12 then // vectors are paralell
-            if u.IsTiny 1e-8  then Error.Raise <| sprintf "Rhino.Scripting.Quat.fromVecToVec u: %A (+ %A) to short in Quat.fromVecToVec" u v
-            if v.IsTiny 1e-8  then Error.Raise <| sprintf "Rhino.Scripting.Quat.fromVecToVec v: %A (+ %A) to short in Quat.fromVecToVec" v u
+            if u.IsTiny 1e-8  then RhinoScriptingException.Raise "Rhino.Scripting.Quat.fromVecToVec u: %A (+ %A) to short in Quat.fromVecToVec" u v
+            if v.IsTiny 1e-8  then RhinoScriptingException.Raise "Rhino.Scripting.Quat.fromVecToVec v: %A (+ %A) to short in Quat.fromVecToVec" v u
             if u*v > 0. then
                 Quat(0., 0., 0., 1.)   // Quat.fromVecAndW nn (cos ((Math.degToRad 0.) * 0.5))   
             else

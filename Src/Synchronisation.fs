@@ -6,9 +6,12 @@ open Rhino
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
-type Error (s:string) =
+type RhinoScriptingException (s:string) =
     inherit System.Exception(s)
-    static member inline Raise s = raise (new Error(s))
+    static member inline Raise msg = Printf.kprintf (fun s -> raise (new RhinoScriptingException(s))) msg 
+    static member inline FailIfFalse s b = if not b then raise (new RhinoScriptingException(s))
+
+
 
 /// A static classs to help access the UI thread from other threads
 type Synchronisation private () =
@@ -34,19 +37,19 @@ type Synchronisation private () =
                     syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
                 with _ ->
                     "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!"
-                    |>> RhinoApp.WriteLine 
+                    |>! RhinoApp.WriteLine 
                     |> eprintfn "%s"
     
                 try   
                     seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
                 with _ ->
                     "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions"
-                    |>> RhinoApp.WriteLine 
+                    |>! RhinoApp.WriteLine 
                     |> eprintfn "%s" 
         
                 if notNull syncContext && notNull seffWindow then ()
                     //"Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
-                    //|>> RhinoApp.WriteLine 
+                    //|>! RhinoApp.WriteLine 
                     //|> printfn "%s"
     
   

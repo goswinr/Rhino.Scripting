@@ -73,19 +73,19 @@ module ExtensionsHatch =
         if notNull hatchPattern then
             let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patterninstance|> isNull then RhinoMath.UnsetIntIndex else patterninstance.Index
-            if index<0 then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+            if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
         let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
-        if isNull hatches then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+        if isNull hatches then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
         let ids = Rarr()
         for hatch in hatches do
             let objectId = Doc.Objects.AddHatch(hatch)
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
-        if ids.Count = 0 then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+        if ids.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
         Doc.Views.Redraw()
         ids
 
@@ -106,7 +106,7 @@ module ExtensionsHatch =
                             [<OPT;DEF(0.0)>]rotation:float) : Guid =
         let rc = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation) //TODO Test ok with null
         if rc.Count = 1 then rc.[0]
-        else Error.Raise <| sprintf "RhinoScriptSyntax.AddHatch failed.  curveId:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A'" curveId hatchPattern scale rotation
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed.  curveId:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A'" curveId hatchPattern scale rotation
 
 
 
@@ -121,14 +121,14 @@ module ExtensionsHatch =
     ///<returns>(string Rarr) Names of the newly added hatch patterns</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
-        if isNull patterns then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         let rc = Rarr()
         for pattern in patterns do
              let index = Doc.HatchPatterns.Add(pattern)
              if index>=0 then
                  let pattern = Doc.HatchPatterns.[index]
                  rc.Add(pattern.Name)
-        if  rc.Count = 0 then Error.Raise <| sprintf "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if  rc.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         rc
 
 
@@ -150,7 +150,7 @@ module ExtensionsHatch =
         let rc = Doc.HatchPatterns.CurrentHatchPatternIndex
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
-        if patterninstance|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.Set CurrentHatchPattern failed. hatchPattern:'%A'" hatchPattern
+        if patterninstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.Set CurrentHatchPattern failed. hatchPattern:'%A'" hatchPattern
         Doc.HatchPatterns.CurrentHatchPatternIndex <- patterninstance.Index
 
 
@@ -167,7 +167,7 @@ module ExtensionsHatch =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
         let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
         let pieces = geo.Explode()
-        if isNull pieces then Error.Raise <| sprintf "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%A' delete:'%A'" hatchId delete
+        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%A' delete:'%A'" hatchId delete
         let attr = rhobj.Attributes
         let rc = Rarr()
         for piece in pieces do
@@ -178,7 +178,7 @@ module ExtensionsHatch =
             | :? Brep as c->
                 let g = Doc.Objects.AddBrep(c, attr)
                 if g<>Guid.Empty then rc.Add(g)
-            | _ -> Error.Raise <| sprintf "RhinoScriptSyntax.ExplodeHatch: darwing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch: darwing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
         if delete then Doc.Objects.Delete(rhobj)|> ignore
         rc
 
@@ -203,9 +203,9 @@ module ExtensionsHatch =
         let oldindex = hatchobj.HatchGeometry.PatternIndex
         RhinoScriptSyntax.InitHatchPatterns()
         let newpatt = Doc.HatchPatterns.FindName(hatchPattern)
-        if newpatt|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+        if newpatt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
         hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
-        if not<| hatchobj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+        if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -220,9 +220,9 @@ module ExtensionsHatch =
             let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let oldindex = hatchobj.HatchGeometry.PatternIndex            
             let newpatt = Doc.HatchPatterns.FindName(hatchPattern)
-            if newpatt|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+            if newpatt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
             hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
-            if not<| hatchobj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+            if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
         Doc.Views.Redraw()
 
 
@@ -242,7 +242,7 @@ module ExtensionsHatch =
     static member HatchPatternDescription(hatchPattern:string) : string =
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
-        if patterninstance|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.HatchPatternDescription failed.  hatchPattern:'%A'" hatchPattern
+        if patterninstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPatternDescription failed.  hatchPattern:'%A'" hatchPattern
         patterninstance.Description
 
 
@@ -256,7 +256,7 @@ module ExtensionsHatch =
     static member HatchPatternFillType(hatchPattern:string) : int =
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
-        if patterninstance|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.HatchPatternFillType failed.  hatchPattern:'%A'" hatchPattern
+        if patterninstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPatternFillType failed.  hatchPattern:'%A'" hatchPattern
         int(patterninstance.FillType)
 
 
@@ -297,7 +297,7 @@ module ExtensionsHatch =
         if rotation <> rc then
             let rotation = RhinoMath.ToRadians(rotation)
             hatchobj.HatchGeometry.PatternRotation <- rotation
-            if not <| hatchobj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.HatchRotation failed on rotation %f on %A" rotation hatchId
+            if not <| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchRotation failed on rotation %f on %A" rotation hatchId
             Doc.Views.Redraw()
 
     [<Extension>]
@@ -314,7 +314,7 @@ module ExtensionsHatch =
             if rotation <> rc then
                 let rotation = RhinoMath.ToRadians(rotation)
                 hatchobj.HatchGeometry.PatternRotation <- rotation
-                if not <| hatchobj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.HatchRotation failed on rotation %f on %A" rotation hatchId
+                if not <| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchRotation failed on rotation %f on %A" rotation hatchId
         Doc.Views.Redraw()
 
 
@@ -339,7 +339,7 @@ module ExtensionsHatch =
         let rc = hatchobj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchobj.HatchGeometry.PatternScale <- scale
-            if not <| hatchobj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.HatchScale failed on scale %f on %A" scale hatchId
+            if not <| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchScale failed on scale %f on %A" scale hatchId
             Doc.Views.Redraw()
 
     [<Extension>]
@@ -354,7 +354,7 @@ module ExtensionsHatch =
             let rc = hatchobj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchobj.HatchGeometry.PatternScale <- scale
-                if not <| hatchobj.CommitChanges() then Error.Raise <| sprintf "RhinoScriptSyntax.HatchScale failed on scale %f on %A" scale hatchId
+                if not <| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchScale failed on scale %f on %A" scale hatchId
         Doc.Views.Redraw()
 
 
@@ -383,7 +383,7 @@ module ExtensionsHatch =
     static member IsHatchPatternCurrent(hatchPattern:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
-        if patterninstance|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.IsHatchPatternCurrent failed.  hatchPattern:'%A'" hatchPattern
+        if patterninstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsHatchPatternCurrent failed.  hatchPattern:'%A'" hatchPattern
         patterninstance.Index = Doc.HatchPatterns.CurrentHatchPatternIndex
 
 
@@ -394,7 +394,7 @@ module ExtensionsHatch =
     static member IsHatchPatternReference(hatchPattern:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
-        if patterninstance|> isNull  then Error.Raise <| sprintf "RhinoScriptSyntax.IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
+        if patterninstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
         patterninstance.IsReference
 
 

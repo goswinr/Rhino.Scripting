@@ -53,7 +53,7 @@ module ExtensionsPlane =
         //plane3 = RhinoScriptSyntax.Coerceplane(plane3)
         let rc, point = Intersect.Intersection.PlanePlanePlane(plane1, plane2, plane3)
         if rc then point
-        else Error.Raise <| sprintf "RhinoScriptSyntax.IntersectPlanes failed, are they paralell? %A; %A; %A" plane1 plane2 plane3
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectPlanes failed, are they paralell? %A; %A; %A" plane1 plane2 plane3
 
 
     [<Extension>]
@@ -95,7 +95,7 @@ module ExtensionsPlane =
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
-        else Error.Raise <| sprintf "RhinoScriptSyntax.PlaneClosestParameter faild for %A; %A" plane point
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter faild for %A; %A" plane point
 
 
     [<Extension>]
@@ -151,7 +151,7 @@ module ExtensionsPlane =
                 rc.Add( (a, b, c, d, e, f, g, h, i, j, k) )
             rc
         else
-            Error.Raise <| sprintf "RhinoScriptSyntax.PlaneCurveIntersection faild on %A; %A tolerance %A" plane curve tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneCurveIntersection faild on %A; %A tolerance %A" plane curve tolerance
 
 
     [<Extension>]
@@ -173,7 +173,7 @@ module ExtensionsPlane =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
         if rc = PlaneFitResult.Success then plane
-        else Error.Raise <| sprintf "RhinoScriptSyntax.PlaneFitFromPoints faild for %A" points
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFitFromPoints faild for %A" points
 
 
     [<Extension>]
@@ -229,7 +229,7 @@ module ExtensionsPlane =
         //y = RhinoScriptSyntax.Coerce3dpoint(y)
         let plane = Plane(origin, x, y)
         if plane.IsValid then plane
-        else Error.Raise <| sprintf "RhinoScriptSyntax.PlaneFromPoints failed for %A; %A; %A" origin x y
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFromPoints failed for %A; %A; %A" origin x y
 
 
     [<Extension>]
@@ -242,7 +242,7 @@ module ExtensionsPlane =
         //plane2 = RhinoScriptSyntax.Coerceplane(plane2)
         let rc, line = Intersect.Intersection.PlanePlane(plane1, plane2)
         if rc then line
-        else Error.Raise <| sprintf "RhinoScriptSyntax.PlanePlaneIntersection failed for %A; %A " plane1 plane2
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlanePlaneIntersection failed for %A; %A " plane1 plane2
 
 
     [<Extension>]
@@ -269,7 +269,7 @@ module ExtensionsPlane =
         elif rc = Intersect.PlaneSphereIntersection.Circle then
             1, circle.Plane, circle.Radius
         else
-            Error.Raise <| sprintf "RhinoScriptSyntax.PlaneSphereIntersection failed for %A; %A, %A " plane spherePlane sphereRadius
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneSphereIntersection failed for %A; %A, %A " plane spherePlane sphereRadius
 
 
     [<Extension>]
@@ -282,7 +282,7 @@ module ExtensionsPlane =
         //xform = RhinoScriptSyntax.Coercexform(xform)
         let rc = Plane(plane)
         if rc.Transform(xform) then rc
-        else Error.Raise <| sprintf "RhinoScriptSyntax.PlaneTransform faild for %A; %A" plane xform
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform faild for %A; %A" plane xform
 
 
     [<Extension>]
@@ -299,7 +299,7 @@ module ExtensionsPlane =
         let angleradians = toRadians(angleDegrees)
         let rc = Plane(plane)
         if rc.Rotate(angleradians, axis) then rc
-        else Error.Raise <| sprintf "RhinoScriptSyntax.RotatePlane failed for %A; %A; %A" plane angleDegrees axis
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.RotatePlane failed for %A; %A; %A" plane angleDegrees axis
 
 
     [<Extension>]

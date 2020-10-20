@@ -197,8 +197,8 @@ module ExtensionsUserdata =
     ///<param name="value">(string) The string value to set. Cannot be empty string. Use rs.DeleteDocumentUserText to delete keys</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetDocumentUserText(key:string, value:string) : unit =
-        if isNull key || isNull value then Error.Raise <| sprintf "RhinoScriptSyntax.SetDocumentUserText failed on for null key and/or null value" 
-        if value = "" then Error.Raise <| sprintf "RhinoScriptSyntax.SetDocumentUserText failed on for key '%s' and value \"\" (empty string)"  key 
+        if isNull key || isNull value then RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText failed on for null key and/or null value" 
+        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText failed on for key '%s' and value \"\" (empty string)"  key 
         Doc.Strings.SetString(key, value) |> ignoreObj
         
 
@@ -207,9 +207,9 @@ module ExtensionsUserdata =
     ///<param name="key">(string) Key name to delete</param>
     ///<returns>(unit) void, nothing</returns>
     static member DeleteDocumentUserText(key:string) : unit =
-        if isNull key  then Error.Raise <| sprintf "RhinoScriptSyntax.DeleteDocumentUserText failed on for null key" 
+        if isNull key  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed on for null key" 
         let p = Doc.Strings.SetString(key, null) 
-        if isNull p then Error.Raise <| sprintf "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key    
+        if isNull p then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key    
 
     [<Extension>]
     ///<summary>Sets a user text stored on an object</summary>
@@ -221,11 +221,11 @@ module ExtensionsUserdata =
     ///<returns>(unit) void, nothing</returns>
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if value = "" then Error.Raise <| sprintf "RhinoScriptSyntax.SetUserText failed on %A for key '%s' and value \"\" (empty string)" objectId key 
+        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %A for key '%s' and value \"\" (empty string)" objectId key 
         if attachToGeometry then
-            if not <| obj.Geometry.SetUserString(key, value) then Error.Raise <| sprintf "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
+            if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
         else
-            if not <| obj.Attributes.SetUserString(key, value) then Error.Raise <| sprintf "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
+            if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
 
     [<Extension>]
     ///<summary>Sets or removes user text stored on multiple objects</summary>
@@ -236,13 +236,13 @@ module ExtensionsUserdata =
     ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing</returns>
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
-        if value = "" then Error.Raise <| sprintf "RhinoScriptSyntax.SetUserText failed on %A for key '%s' and value \"\" (empty string)" objectIds key 
+        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %A for key '%s' and value \"\" (empty string)" objectIds key 
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
-                if not <| obj.Geometry.SetUserString(key, value) then Error.Raise <| sprintf "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
+                if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
             else
-                if not <| obj.Attributes.SetUserString(key, value) then Error.Raise <| sprintf "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
+                if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %A for key '%s' value '%s'" objectId key value
 
 
     [<Extension>]
@@ -257,9 +257,9 @@ module ExtensionsUserdata =
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
-            if not <| obj.Geometry.SetUserString(key, null) then Error.Raise <| sprintf "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
+            if not <| obj.Geometry.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
         else
-            if not <| obj.Attributes.SetUserString(key, null) then Error.Raise <| sprintf "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
+            if not <| obj.Attributes.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
 
     [<Extension>]
     ///<summary>Sets or removes user text stored on multiple objects</summary>
@@ -274,6 +274,6 @@ module ExtensionsUserdata =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
-                if not <| obj.Geometry.SetUserString(key, null) then Error.Raise <| sprintf "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
+                if not <| obj.Geometry.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
             else
-                if not <| obj.Attributes.SetUserString(key, null) then Error.Raise <| sprintf "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 
+                if not <| obj.Attributes.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %A for key '%s'" objectId key 

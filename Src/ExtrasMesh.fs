@@ -57,7 +57,7 @@ module ExtrasMesh =
         /// Appends a welded Quad to last 2 vertices, Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ??
         static member MeshAddQuadFaceToLastTwo (m:Mesh, a:Point3d, b:Point3d) = 
             let c = m.Vertices.Count
-            if c<2 then Error.Raise <| sprintf "RhinoScriptSyntax.Cannot append Quad to mesh %A" m     
+            if c<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot append Quad to mesh %A" m     
             else m.Faces.AddFace(c-1, c-2,  m.Vertices.Add (b.X,b.Y,b.Z), m.Vertices.Add (a.X,a.Y,a.Z)) |>ignore 
         [<Extension>]
         /// Appends a welded Quad to last 2 vertices,  Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ??

@@ -140,7 +140,7 @@ module ExtensionsDocument =
         let bmp =
             if notNull modelName  then
                 if notNull Doc.Path then RhinoDoc.ExtractPreviewImage(Doc.Path) // TODO test this works ok
-                else Error.Raise <| sprintf "RhinoScriptSyntax.ExtractPreviewImage failed on unsaved file"
+                else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractPreviewImage failed on unsaved file"
             else
                 RhinoDoc.ExtractPreviewImage(modelName)
         bmp.Save(fileName)
@@ -212,7 +212,7 @@ module ExtensionsDocument =
     ///<param name="item">(int) 0= ambient light color, 1= background color</param>
     ///<returns>(Drawing.Color) The current item color</returns>
     static member RenderColor(item:int) : Drawing.Color = //GET
-        if item<>0 && item<>1 then  Error.Raise <| sprintf "RhinoScriptSyntax.Item must be 0 or 1.  item:'%A'" item
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.Item must be 0 or 1.  item:'%A'" item
         if item = 0 then  Doc.RenderSettings.AmbientLight
         else Doc.RenderSettings.BackgroundColorTop
 
@@ -222,7 +222,7 @@ module ExtensionsDocument =
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
-        if item<>0 && item<>1 then  Error.Raise <| sprintf "RhinoScriptSyntax.Item must be 0 || 1.  item:'%A' color:'%A'" item color
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.Item must be 0 || 1.  item:'%A' color:'%A'" item color
         let settings = Doc.RenderSettings
         if item = 0 then  settings.AmbientLight <- color
         else            settings.BackgroundColorTop <- color
@@ -528,7 +528,7 @@ module ExtensionsDocument =
         if tolerance > 0.0 then
             Doc.ModelAbsoluteTolerance <- tolerance
         else
-            Error.Raise <| sprintf "RhinoScriptSyntax.UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
 
 
 
@@ -550,7 +550,7 @@ module ExtensionsDocument =
             if angleToleranceDegrees > 0. then
                 Doc.ModelAngleToleranceDegrees <- angleToleranceDegrees
             else
-                Error.Raise <| sprintf "RhinoScriptSyntax.UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
+                RhinoScriptingException.Raise "RhinoScriptSyntax.UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
 
 
     [<Extension>]
@@ -587,7 +587,7 @@ module ExtensionsDocument =
             if relativeTolerance > 0.0 then
                 Doc.ModelRelativeTolerance <- relativeTolerance
             else
-              Error.Raise <| sprintf "RhinoScriptSyntax.UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
+              RhinoScriptingException.Raise "RhinoScriptSyntax.UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
 
 
     [<Extension>]
@@ -695,7 +695,7 @@ module ExtensionsDocument =
     ///<returns>(unit) void, nothing</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
         if unitSystem < 1 || unitSystem > 25 then
-            Error.Raise <| sprintf "RhinoScriptSyntax.UnitSystem value of %d is not  valid" unitSystem
+            RhinoScriptingException.Raise "RhinoScriptSyntax.UnitSystem value of %d is not  valid" unitSystem
             let unitSystem : UnitSystem  = LanguagePrimitives.EnumOfValue (byte unitSystem)
             Doc.AdjustPageUnitSystem(unitSystem, scale)
 

@@ -85,8 +85,8 @@ module ExtensionsToolbar =
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
             if notNull group then  group.IsDocked
-            else Error.Raise <| sprintf "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
-        else Error.Raise <| sprintf "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
 
 
     [<Extension>]
@@ -99,8 +99,8 @@ module ExtensionsToolbar =
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
             if notNull group then  group.Visible
-            else Error.Raise <| sprintf "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
-        else Error.Raise <| sprintf "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
 
 
     [<Extension>]
@@ -110,7 +110,7 @@ module ExtensionsToolbar =
     static member OpenToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.Open(file)
         if notNull tbfile then  tbfile.Name
-        else Error.Raise <| sprintf "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
 
 
     [<Extension>]

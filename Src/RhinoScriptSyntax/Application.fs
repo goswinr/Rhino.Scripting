@@ -116,7 +116,7 @@ module ExtensionsApplication =
         elif item = 11 then AppearanceSettings.CommandPromptTextColor
         elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor
         elif item = 13 then AppearanceSettings.CommandPromptHypertextColor
-        else Error.Raise <| sprintf "RhinoScriptSyntax.AppearanceColor: get item %d is out of range" item
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor: get item %d is out of range" item
 
     [<Extension>]
     ///<summary>Modifies an application interface item's color</summary>
@@ -152,7 +152,7 @@ module ExtensionsApplication =
         elif item = 11 then AppearanceSettings.CommandPromptTextColor <- color
         elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor <- color
         elif item = 13 then AppearanceSettings.CommandPromptHypertextColor <- color
-        else Error.Raise <| sprintf "RhinoScriptSyntax.AppearanceColor: setting item %d is out of range" item
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor: setting item %d is out of range" item
         Doc.Views.Redraw()
 
 
@@ -328,7 +328,7 @@ module ExtensionsApplication =
         if mode = 1 || mode = 2 then
             ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
         else
-            Error.Raise <| sprintf "RhinoScriptSyntax.EdgeAnalysisMode bad edge analysisMode %d" mode
+            RhinoScriptingException.Raise "RhinoScriptSyntax.EdgeAnalysisMode bad edge analysisMode %d" mode
 
 
     [<Extension>]
@@ -348,7 +348,7 @@ module ExtensionsApplication =
         let objectId = PlugIns.PlugIn.IdFromName(plugin)
         let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)
         if rc then loadSilent
-        else Error.Raise <| sprintf "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
 
     [<Extension>]
     ///<summary>Enables or disables a Rhino plug-in</summary>
@@ -359,7 +359,7 @@ module ExtensionsApplication =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
         if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
-        else Error.Raise <| sprintf "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
 
 
 
@@ -629,7 +629,7 @@ module ExtensionsApplication =
     static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
-        else Error.Raise <| sprintf "RhinoScriptSyntax.Plugin %s not found" plugin
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.Plugin %s not found" plugin
 
 
     [<Extension>]

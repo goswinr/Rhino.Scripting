@@ -155,9 +155,9 @@ module ExtensionsSelection =
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
             let e = Doc.Objects.GetObjectList(it).GetEnumerator()
-            if not <| e.MoveNext() then Error.Raise <| sprintf "RhinoScriptSyntax.FirstObject not found"
+            if not <| e.MoveNext() then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found"
             let object = e.Current
-            if isNull object then Error.Raise <| sprintf "RhinoScriptSyntax.FirstObject not found(null)"
+            if isNull object then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found(null)"
             if select then object.Select(true) |> ignore //TODO make sync ?
             object.Id
 
@@ -208,7 +208,7 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
                 Some (objectId, presel, selmethod, point, curveparameter, viewname)
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -321,7 +321,7 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select) |> ignore
                 Some (objectId, presel, selmethod, point, viewname)
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -389,7 +389,7 @@ module ExtensionsSelection =
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -541,7 +541,7 @@ module ExtensionsSelection =
                     |> RhinoScriptSyntax.Print
 
                 Some rc
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -617,7 +617,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
                 Some ( objectId, prepicked, selmethod, point, uv, name)
-            |>> fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
 
@@ -747,9 +747,9 @@ module ExtensionsSelection =
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
         let rhobjs = Doc.Objects.GetObjectList(settings)
-        if isNull rhobjs || Seq.isEmpty rhobjs then Error.Raise <| sprintf "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+        if isNull rhobjs || Seq.isEmpty rhobjs then RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         let firstobj = Seq.last rhobjs
-        if isNull firstobj then Error.Raise <| sprintf "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+        if isNull firstobj then RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
             firstobj.Select(true) |> ignore //TODO make sync ?
             Doc.Views.Redraw()
@@ -779,7 +779,7 @@ module ExtensionsSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None ->Error.Raise <| sprintf "RhinoScriptSyntax.NextObject not found for %A" objectId
+            |None ->RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" objectId
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id
@@ -828,7 +828,7 @@ module ExtensionsSelection =
     ///<returns>(Guid Rarr) identifiers for objects in the group</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let groupinstance = Doc.Groups.FindName(groupName)
-        if isNull groupinstance  then Error.Raise <| sprintf "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
+        if isNull groupinstance  then RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
         let rhinoobjects = Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             Rarr()

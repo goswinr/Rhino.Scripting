@@ -19,7 +19,7 @@ module AutoOpenActiveDocument =
     
     /// Apply function, like |> , but ignore result. 
     /// Return original input
-    let inline (|>>) x f =  f x |> ignore ; x 
+    let inline (|>!) x f =  f x |> ignore ; x 
 
     /// The current active Rhino document (= the file currently open)
     let mutable Doc = 
@@ -91,7 +91,7 @@ module AutoOpenActiveDocument =
                     "Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"+
                     "RhinoApp.EscapeKeyPressed.Add     ( fun _    ->  \r\n"+
                     "          if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)" 
-                    |>> RhinoApp.WriteLine 
+                    |>! RhinoApp.WriteLine 
                     |> printfn "%s"  
                 else
                     async{ 

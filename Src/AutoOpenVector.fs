@@ -104,12 +104,12 @@ module AutoOpenVector =
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
             let k = Seq.length pts
             if k < 2 then 
-                Error.Raise <| sprintf "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString
+                RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString
             elif k = 3   then  
                 let a = pts.[0] - pts.[1]
                 let b = pts.[2] - pts.[1]
                 let v= Vector3d.CrossProduct(b, a)
-                if v.IsTiny() then Error.Raise <| sprintf "RhinoScriptSyntax.NormalOfPoints: three points are in a line  %s" pts.ToNiceString
+                if v.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints: three points are in a line  %s" pts.ToNiceString
                 else
                     v.Unitized
             else
@@ -120,7 +120,7 @@ module AutoOpenVector =
                     let b = n-cen
                     let x = Vector3d.CrossProduct(a, b)  |> Vec.matchOrientation v // TODO do this matching?
                     v <- v + x              
-                if v.IsTiny() then Error.Raise <| sprintf "RhinoScriptSyntax.NormalOfPoints: points are in a line  %s"  pts.ToNiceString
+                if v.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints: points are in a line  %s"  pts.ToNiceString
                 else
                     v.Unitized
 
@@ -168,16 +168,16 @@ module AutoOpenVector =
             let lenDist = offDists0.Length
             let lenDistNorm = normDists0.Length                                        
             if pointk < 2 then 
-                Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints needs at least two points but %s given" points.ToNiceString                                        
+                RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints needs at least two points but %s given" points.ToNiceString                                        
             elif pointk = 2 then
                 let offDist = 
                     if   lenDist = 0 then 0.0
                     elif lenDist = 1 then offDists0.[0]
-                    else Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints: offsetDistances has %d items but should have 1 or 0 for 2 given points %s" lenDist points.ToNiceString 
+                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: offsetDistances has %d items but should have 1 or 0 for 2 given points %s" lenDist points.ToNiceString 
                 let normDist = 
                     if   lenDistNorm = 0 then 0.0
                     elif lenDistNorm = 1 then normDists0.[0]
-                    else Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm points.ToNiceString         
+                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm points.ToNiceString         
                 let a, b = Pnt.offsetTwoPt(points.[0], points.[1] , offDist, normDist)
                 rarr { a; b}                                        
             else // regular case more than 2 points
@@ -199,7 +199,7 @@ module AutoOpenVector =
                     if   lenDistNorm = 0 then                 Array.create distsNeededNorm 0.0
                     elif lenDistNorm = 1 then                 Array.create distsNeededNorm normDists0.[0]
                     elif lenDistNorm = distsNeededNorm then   normDists0
-                    else Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop  
+                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeededNorm lastIsFirst loop  
                 let refNormal = RhinoScriptSyntax.NormalOfPoints(points) //to have good starting direction, first kink might be in bad direction   
                 let Pts = Rarr<Point3d>(pointk) 
                 let Ns = Rarr<Vector3d>(pointk)         
@@ -270,7 +270,7 @@ module AutoOpenVector =
                         print (i,"is colinear")
                         print (ni,"next i")
                         if offDists.[pi] <> offDists.[saveIdx (ni-1) distsNeeded] then 
-                            Error.Raise <| sprintf "RhinoScriptSyntax.OffsetPoints: cant fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk]                                                     
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: cant fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk]                                                     
                         Pts.[i] <- points.[i] + (nv + pv)*0.5                                            
                 if lastIsFirst then Pts.[lastIndex] <- Pts.[0]
                 Pts

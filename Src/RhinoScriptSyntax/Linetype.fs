@@ -30,7 +30,7 @@ module ExtensionsLinetype =
     ///<returns>(bool) True or False</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = Doc.Linetypes.FindName(name)
-        if isNull lt then Error.Raise <| sprintf "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a linetypes" name
+        if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a linetypes" name
         lt.IsReference
 
 

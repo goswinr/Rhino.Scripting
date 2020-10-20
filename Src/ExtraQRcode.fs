@@ -45,7 +45,7 @@ module QRcode =
         let minX,minY,dX,dY = 
             match bm.getEnclosingRectangle() with 
             |[|minX;minY;dX;dY|] -> minX,minY,dX,dY
-            |_ -> Error.Raise <| sprintf "Rhino.Scripting.Extra.QRcode.as2dArray: Err in QR code getEnclosingRectangle()"
+            |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Extra.QRcode.as2dArray: Err in QR code getEnclosingRectangle()"
 
         let arr2d = Array2D.zeroCreate (dX+1) (dY+1)
         let mutable xx = 0
@@ -110,9 +110,9 @@ module QRcode =
                     pl |> crvs.Add                    
             iyy <- iyy + 1        
         let pat = Doc.HatchPatterns.FindName("SOLID")
-        if isNull pat then Error.Raise <| sprintf "RhinoScriptSyntax.Hatchpattern for QR code not found: SOLID"
+        if isNull pat then RhinoScriptingException.Raise "RhinoScriptSyntax.Hatchpattern for QR code not found: SOLID"
         let hs = Hatch.Create (crvs, pat.Index , 0.0 , 100.0, 0.01)
-        if isNull hs then Error.Raise <| sprintf "RhinoScriptSyntax.Hatchpattern for QR code is null"
+        if isNull hs then RhinoScriptingException.Raise "RhinoScriptSyntax.Hatchpattern for QR code is null"
         hs
         
 
