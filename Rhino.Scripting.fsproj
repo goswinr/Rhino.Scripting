@@ -39,9 +39,10 @@
       <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>      
-
+    
+    <!-- take from https://github.com/goswinr/FsEx -->   
     <Reference Include="FsEx">
-      <HintPath>..\FsEx\bin\Release\netstandard2.0\FsEx.dll</HintPath> <!-- take from https://github.com/goswinr/FsEx -->   
+      <HintPath>..\FsEx\bin\Release\netstandard2.0\FsEx.dll</HintPath> 
     </Reference>  
 
   </ItemGroup>
