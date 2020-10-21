@@ -75,6 +75,23 @@ module AutoOpenCurried =
     static member getName (objectId:Guid) : string = 
         RhinoScriptSyntax.ObjectName(objectId)    
 
+
+    [<Extension>]
+    ///<summary>Sets the Color of an object</summary>
+    ///<param name="color">(Drawing.Color) The new object color.</param>
+    ///<param name="objectId">(Guid)Id of object</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member setColor( color:Drawing.Color) (objectId:Guid) : unit = 
+        RhinoScriptSyntax.ObjectColor(objectId, color)    
+    
+    [<Extension>]
+    ///<summary>Returns the color of an object </summary>
+    ///<param name="objectId">(Guid)Id of object</param>
+    ///<returns>(string) The current object color</returns>
+    static member getColor (objectId:Guid) : Drawing.Color = 
+        RhinoScriptSyntax.ObjectColor(objectId) 
+
+
     [<Extension>]
     ///<summary>Sets a user text stored on an object</summary>
     ///<param name="key">(string) The key name to set</param>
