@@ -15,7 +15,6 @@ open IniParser.Model
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsUtility =
-
    
   type RhinoScriptSyntax with
 
@@ -425,9 +424,9 @@ module ExtensionsUtility =
 
     [<Extension>]
     ///<summary>Creats a  RGB color,  red, green and  blue  values</summary>
-    ///<param name="red">(int) Red Value</param>
-    ///<param name="green">(int) Green value</param>
-    ///<param name="blue">(int) Blue value</param>
+    ///<param name="red">(int) Red Value between 0 and 255 </param>
+    ///<param name="green">(int) Green value between 0 and 255 </param>
+    ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<returns>(System.Drawing.Color) a Color</returns>
     static member CreateColor(red:int, green:int, blue:int) : Drawing.Color =
         Drawing.Color.FromArgb( red, green, blue)

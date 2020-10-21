@@ -66,9 +66,9 @@ type RhinoScriptSyntax private () =
         
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
-    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
-    ///<returns>(stirng) the string</returns>
+    ///<returns>(string) the string</returns>
     static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
         let formatRhinoObject (o:obj)  = 
             match o with
@@ -82,26 +82,74 @@ type RhinoScriptSyntax private () =
         if trim then NiceString.toNiceStringWithFormater    (x, formatRhinoObject)
         else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
 
-    ///<summary>Prints an object or value to Rhino Command line. 
+    ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
     ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq
     ///    You could also use the curried print, print2 or print3 functions</summary>
     ///<param name="x">('T): the value or object to print</param>
-    ///<param name="state">(bool) Optional, Default Value: <c>true</c>
-    ///    If true and the value x is a Seq the string will be no longer than 4 lines per nested Seq by</param>
-    ///<returns>(unit) voId, nothing</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member Print (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, true)
         |>! RhinoApp.WriteLine 
         |> printfn "%s"  
         RhinoApp.Wait() // no swith to UI Thread needed !
 
+    
+    ///<summary>Prints an object or value in Red color to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq
+    ///    You could also use the curried print, print2 or print3 functions</summary>
+    ///<param name="x">('T): the value or object to print</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member PrintRed (x:'T) : unit =
+        RhinoScriptSyntax.ToNiceString(x, true)
+        |>! RhinoApp.WriteLine 
+        |> Synchronisation.ColorLogger 220 0 0  
+        RhinoApp.Wait() // no swith to UI Thread needed !
+
+    
+    ///<summary>Prints an object or value in Green color to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq
+    ///    You could also use the curried print, print2 or print3 functions</summary>
+    ///<param name="x">('T): the value or object to print</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member PrintGreen (x:'T) : unit =
+        RhinoScriptSyntax.ToNiceString(x, true)
+        |>! RhinoApp.WriteLine 
+        |> Synchronisation.ColorLogger 0 220 0  
+        RhinoApp.Wait() // no swith to UI Thread needed !
+
+  ///<summary>Prints an object or value in Blue color to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq
+    ///    You could also use the curried print, print2 or print3 functions</summary>
+    ///<param name="x">('T): the value or object to print</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member PrintBlue (x:'T) : unit =
+        RhinoScriptSyntax.ToNiceString(x, true)
+        |>! RhinoApp.WriteLine 
+        |> Synchronisation.ColorLogger 0 0 255  
+        RhinoApp.Wait() // no swith to UI Thread needed !
+
+  ///<summary>Prints an object or value in RGB color to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq
+    ///    You could also use the curried print, print2 or print3 functions</summary>
+    ///<param name="red">(int) Red Value between 0 and 255 </param>
+    ///<param name="green">(int) Green value between 0 and 255 </param>
+    ///<param name="blue">(int) Blue value between 0 and 255 </param>
+    ///<param name="x">('T): the value or object to print</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member PrintColor (red:int) (green:int) (blue:int) (x:'T) : unit =
+        RhinoScriptSyntax.ToNiceString(x, true)
+        |>! RhinoApp.WriteLine 
+        |> Synchronisation.ColorLogger red green blue  
+        RhinoApp.Wait() // no swith to UI Thread needed !
+
+
 
     //static member Print2 (x:'T,y'T) : unit = // use curried print 2 instead, rs.Print can also take a tuple or triple, so rs.Print2 is not useful here
 
-    ///<summary>Prints an object or value to Rhino Command line. 
+    ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line.
     ///    If the value is a Seq the string will contain a line for each item and per nested item.</summary>
     ///<param name="x">('T): the value or object to print</param>   
-    ///<returns>(unit) voId, nothing</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member PrintFull (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, false)
         |>! RhinoApp.WriteLine 
@@ -112,7 +160,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value</summary>
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
-    ///<returns>(unit) voId, nothing</returns>
+    ///<returns>(unit) void, nothing</returns>
     static member PrintSeq (xs:'T seq, [<OPT;DEF(" ")>]separator:string) : unit =
         xs
         |> Seq.map RhinoScriptSyntax.ToNiceString
