@@ -26,16 +26,17 @@ module ExtensionsDimension =
     ///<param name="style">(string) Optional, Default Value: <c>""</c>
     ///    Name of dimension style</param>
     ///<returns>(Guid) identifier of new dimension</returns>
-    static member AddAlignedDimension(startPoint:Point3d, endPoint:Point3d, pointOnDimensionLine:Point3d, [<OPT;DEF("")>]style:string) : Guid =
-        let mutable start = startPoint
-        let mutable ende = endPoint
-        let mutable onpoint = pointOnDimensionLine
-        let mutable plane = Geometry.Plane(start, ende, onpoint)
-        let mutable success, s, t = plane.ClosestParameter(start)
+    static member AddAlignedDimension(  startPoint:Point3d, 
+                                        endPoint:Point3d, 
+                                        pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
+                                        [<OPT;DEF("")>]style:string) : Guid =        
+        let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
+        if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' " startPoint endPoint pointOnDimensionLine
+        let success, s, t = plane.ClosestParameter(startPoint)
         let start2 = Point2d(s, t)
-        let success, s, t = plane.ClosestParameter(ende)
+        let success, s, t = plane.ClosestParameter(endPoint)
         let ende2 = Point2d(s, t)
-        let success, s, t = plane.ClosestParameter(onpoint)
+        let success, s, t = plane.ClosestParameter(pointOnDimensionLine)
         let onpoint2 = Point2d(s, t)
         let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
         if isNull ldim then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
@@ -105,9 +106,9 @@ module ExtensionsDimension =
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,
-                                        pointOnDimensionLine:Point3d,
+                                        pointOnDimensionLine:Point3d, // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF(Plane())>] plane:Plane ) : Guid =
-        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' " startPoint endPoint pointOnDimensionLine
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
