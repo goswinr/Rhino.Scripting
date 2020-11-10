@@ -46,6 +46,13 @@ module Vec =
     /// Dot product
     let inline dot (a:Vector3d) (b:Vector3d) = a * b 
 
+    /// Vector length
+    let inline length (v:Vector3d) = v.Length
+
+    /// Vector length projected into X Y Plane 
+    /// sqrt( v.X * v.X  + v.Y * v.Y)
+    let inline lengthInXY(v:Vector3d) = sqrt(v.X * v.X  + v.Y * v.Y)
+
     /// Checks if a vector is vertical by doing:
     /// abs(v.X) + abs(v.Y) < RhinoMath.SqrtEpsilon
     /// fails on tiny (shorter than RhinoMath.SqrtEpsilon) vectors
@@ -74,7 +81,7 @@ module Vec =
         if len > 1e-9 then v * (1./len) 
         else RhinoScriptingException.Raise "Rhino.Scripting.Vec Vec.unitize: %s is too small for unitizing, tol: 1e-9" v.ToNiceString
     
-    /// Unitize vector, if input vector is shorter than 1e-6 alternative vector is returned UN-unitized.
+    /// Unitize vector, if input vector is shorter than 1e-6 alternative vector is returned (without beeing unitized).
     let inline unitizeWithAlternative (unitVectorAlt:Vector3d) (v:Vector3d) =
         let l = v.SquareLength
         if l < RhinoMath.ZeroTolerance  then  //sqrt RhinoMath.ZeroTolerance = 1e-06

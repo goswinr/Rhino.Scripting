@@ -41,16 +41,16 @@ type Synchronisation private () =
                     seffAssembly <- seffRh.Assembly
                     seffRhinoSyncModule <- seffAssembly.GetType("Seff.Rhino.Sync") 
                     syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
-                with _ ->
-                    "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!"                     
-                    |> eprintfn "%s"
+                with ex ->
+                    eprintfn "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread! \r\nMessage: %A" ex                      
+                    
                 
                 try   
                     let printModule = seffAssembly.GetType("Seff.Rhino.Print") 
                     colorLogger <- printModule.GetProperty("colorLogger").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
-                with _ ->
-                    "Failed to get Seff.Rhino.Print.colorLogger  via Reflection, If you are not using the Seff Editor Plugin this is normal."                    
-                    |> eprintfn "%s" 
+                with ex ->
+                    eprintfn "Failed to get Seff.Rhino.Print.colorLogger via Reflection, If you are not using the Seff Editor Plugin this is normal. \r\nMessage: %A" ex                    
+                    
 
 
                 try   

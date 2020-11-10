@@ -27,6 +27,7 @@
   
   <ItemGroup>
     <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries--> 
+    
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="ZXing.Net" Version="0.16.5" />
     
