@@ -204,7 +204,7 @@ module Vec =
     /// in relation to XY Plane    
     /// 100% = 45 degrees
     let slopePercent (v:Vector3d) =
-        if abs(v.Z) < RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Rhino.Scripting.Vec Can't get Slope from vertical vector %A" v
+        if abs(v.Z) < RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Rhino.Scripting.Vec.slopePercent: Can't get Slope from vertical vector %A" v
         let f = Vector3d(v.X, v.Y, 0.0)
         100.0 * (v.Z/f.Length)
 
@@ -213,7 +213,7 @@ module Vec =
     /// Fails on tiny vectors (v.SquareLength < RhinoMath.SqrtEpsilon)
     let inline setLength (len:float) (v:Vector3d) =
         let l  = v.SquareLength
-        if l < RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Rhino.Scripting.Vec Cant set length of tiny vector %A" v
+        if l < RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Rhino.Scripting.Vec.setLength: Cant set length of tiny vector %A" v
         let f = len / sqrt(l) in Vector3d(v.X*f, v.Y*f, v.Z*f) 
     
     /// Reverse vector if Z part is smaller than 0.0     
@@ -233,43 +233,52 @@ module Vec =
     /// Rotated counter clockwise in top view.
     /// If input vector is vertical, result is a zero length vector.
     /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
-    let perpendicularVecInXY (v:Vector3d) =         
+    let inline perpendicularVecInXY (v:Vector3d) =         
         let r = Vector3d(v.Y, -v.X, 0.0) // this si the same as: Vec.cross v Vector3d.ZAxis
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec Cannot find perpendicularVecInXY for vertical vector %A" v
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.perpendicularVecInXY: Cannot find perpendicularVecInXY for vertical vector %A" v
         r
 
     /// Returns a vector that is perpendicular to the given vector an in the same vertical plane .
     /// Projected into the XY plane input and output vectors are parallell and of same orientation.
     /// Not of same length, not unitized
     /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
-    let perpendicularVecInVerticalPlane (v:Vector3d) =         
+    let inline perpendicularVecInVerticalPlane (v:Vector3d) =         
         let hor = Vector3d(v.Y, -v.X, 0.0)
         let r = cross v hor
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec Cannot find perpendicularVecInVerticalPlane for vertical vector %A" v 
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.perpendicularVecInVerticalPlane: Cannot find perpendicularVecInVerticalPlane for vertical vector %A" v 
         if v.Z < 0.0 then -r else r
+
+        
+    /// Project vector to World XY plane
+    /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
+    /// Returns Vector3d(v.X, v.Y, 0.0)
+    let inline projectToXYPlane (v:Vector3d) =
+        let r = Vector3d(v.X, v.Y, 0.0)
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToXYPlane: Cannot projectToXYPlane for vertical vector %A " v 
+        r
 
     /// Project vector to plane
     /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
-    let projectToPlane (pl:Plane) (v:Vector3d) =
+    let inline projectToPlane (pl:Plane) (v:Vector3d) =
         let pt = pl.Origin + v
         let clpt = pl.ClosestPoint(pt)
         let r = clpt-pl.Origin
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec Cannot projectToPlane for perpendicular vector %A to given plane %A" v pl
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToPlane: Cannot projectToPlane for perpendicular vector %A to given plane %A" v pl
         r
 
-    /// Project point onto line in directin of v
-    /// Fails if line is missed , tolerance 1E-6
+    /// Project point onto a finite line in directin of v
+    /// Fails if line is missed by tolerance 1e-6 and draws debug objects on layer 'Error-projectToLine'
     let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
         let h = Line(pt,v)
         let ok,tln,th = Intersect.Intersection.LineLine(ln,h)
-        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Vec projectToLine: project in direction faild. (paralell?)"
+        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: project in direction faild. (are they paralell?)"
         let a = ln.PointAt(tln)
         let b = h.PointAt(th)
         if (a-b).SquareLength > RhinoMath.ZeroTolerance then 
-            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "projectToLine"
-            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "projectToLineDirection"
-            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "projectToLineFrom"            
-            RhinoScriptingException.Raise "Rhino.Scripting.Vec projectToLine: missed Line by: %g " (a-b).Length
+            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "Error-projectToLine"
+            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "Error-projectToLineDirection"
+            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "Error-projectToLineFrom"            
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: missed Line by: %g " (a-b).Length
         a
     
     /// Checks if Angle between two vectors is Below one Degree
