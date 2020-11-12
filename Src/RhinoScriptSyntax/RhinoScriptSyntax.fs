@@ -21,24 +21,43 @@ open System.Runtime.CompilerServices
 /// Don't create an instance, use the instance in RhinoScriptSyntax.Filter
 [<Sealed>] //AbstractClass;
 type ObjectFilterEnum internal () =  
+    /// retuns 0
     member _.AllObjects = 0
+    /// retuns 1
     member _.Point = 1
+    /// retuns 2
     member _.PointCloud = 2
+    /// retuns 4
     member _.Curve = 4
+    /// retuns 8
     member _.Surface = 8
+    /// retuns 16
     member _.PolySurface = 16
+    /// retuns 32
     member _.Mesh = 32
+    /// retuns 256
     member _.Light = 256
+    /// retuns 512
     member _.Annotation = 512
+    /// retuns 4096
     member _.Instance = 4096
+    /// retuns 8192
     member _.Textdot = 8192
+    /// retuns 16384
     member _.Grip = 16384
+    /// retuns 32768
     member _.Detail = 32768
+    /// retuns 65536
     member _.Hatch = 65536
+    /// retuns 131072
     member _.Morph = 131072
+    /// retuns 134217728
     member _.Cage = 134217728
+    /// retuns 268435456
     member _.Phantom = 268435456
+    /// retuns 536870912
     member _.ClippingPlane = 536870912
+    /// retuns 1073741824
     member _.Extrusion = 1073741824
 
 
