@@ -230,8 +230,8 @@ module Vec =
     
     /// Returns a horizontal vector that is perpendicular to the given vector.
     /// just: Vector3d(v.Y, -v.X, 0.0)
-    /// Rotated counter clockwise in top view.
-    /// If input vector is vertical, result is a zero length vector.
+    /// Not of same length, not unitized
+    /// Rotated counter clockwise in top view.    
     /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
     let inline perpendicularVecInXY (v:Vector3d) =         
         let r = Vector3d(v.Y, -v.X, 0.0) // this si the same as: Vec.cross v Vector3d.ZAxis
