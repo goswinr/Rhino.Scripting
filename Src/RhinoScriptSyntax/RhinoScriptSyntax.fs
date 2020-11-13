@@ -97,7 +97,7 @@ type RhinoScriptSyntax private () =
             | :? Line       as x -> Some x.ToNiceString        
             | :? Point3f    as x -> Some x.ToNiceString
             | :? Vector3f   as x -> Some x.ToNiceString
-            | _ -> None        
+            | _                  -> None        
         if trim then NiceString.toNiceStringWithFormater    (x, formatRhinoObject)
         else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
 
