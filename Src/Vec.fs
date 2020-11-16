@@ -5,6 +5,7 @@ open Rhino.Geometry
 //open FsEx.UtilMath
 open FsEx.SaveIgnore 
 open System
+open System.Numerics
 
 /// This module provides curried functions to manipulate Rhino Vector3d
 /// It is NOT automatically opened.
@@ -95,12 +96,46 @@ module Vec =
         let t = Vector3d(v)
         v.Transform(xForm)
         v
+    
 
+    /// Project vector to World XY plane
+    /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
+    /// Returns Vector3d(v.X, v.Y, 0.0)
+    let inline projectToXYPlane (v:Vector3d) =
+        let r = Vector3d(v.X, v.Y, 0.0)
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToXYPlane: Cannot projectToXYPlane for vertical vector %A " v 
+        r
 
-    /// Returns positive angle between 2 Vectors in Radians , takes vector orientation into account, 
-    /// Range 0.0 to PI( = 0 to 180 degree)
-    /// Unitizes the input vectors
-    let inline angle180Rad (a:Vector3d) (b:Vector3d) = 
+    /// Project vector to plane
+    /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
+    let inline projectToPlane (pl:Geometry.Plane) (v:Vector3d) =
+        let pt = pl.Origin + v
+        let clpt = pl.ClosestPoint(pt)
+        let r = clpt-pl.Origin
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToPlane: Cannot projectToPlane for perpendicular vector %A to given plane %A" v pl
+        r
+
+    /// Project point onto a finite line in directin of v
+    /// Fails if line is missed by tolerance 1e-6 and draws debug objects on layer 'Error-projectToLine'
+    let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
+        let h = Line(pt,v)
+        let ok,tln,th = Intersect.Intersection.LineLine(ln,h)
+        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: project in direction faild. (are they paralell?)"
+        let a = ln.PointAt(tln)
+        let b = h.PointAt(th)
+        if (a-b).SquareLength > RhinoMath.ZeroTolerance then 
+            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "Error-projectToLine"
+            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "Error-projectToLineDirection"
+            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "Error-projectToLineFrom"            
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: missed Line by: %g " (a-b).Length
+        a
+    
+
+    /// Input vectors MUST BE UNITIZED
+    /// Returns positive angle between two vectors in Radians , takes vector orientation into account, 
+    /// Range 0.0 to PI( = 0 to 180 degree)    
+    // INPUT MUST BE UNITIZES
+    let inline angle180fast (a:Vector3d) (b:Vector3d) = 
         // The "straight forward" method of acos(u.v) has large precision
         // issues when the dot product is near +/-1.  This is due to the
         // steep slope of the acos function as we approach +/- 1.  Slight
@@ -114,78 +149,142 @@ module Vec =
         // The largest possible value of |u-v| occurs with perpendicular
         // vectors and is sqrt(2)/2 which is well away from extreme slope
         // at +/-1. (See Windows OS Bug #1706299 for details) (form WPF refrence scource code)
-        let a0 = unitize a
-        let b0 = unitize b
-        let dot = a0 * b0
+        //INPUT MUST BE UNITIZED
+        let dot = a * b
         if -0.98 < dot && dot < 0.98 then acos dot // TODO test and compare this to real Acossafe function !!! also to find thershold for switching !!  0.98 ??               
         else
-            if dot < 0. then System.Math.PI - 2.0 * asin((-a0 - b0).Length * 0.5)
-            else                              2.0 * asin(( a0 - b0).Length * 0.5)    
-            
-    /// Returns positive angle between 2 Vectors in Degrees , takes vector orientation into account, 
+            if dot < 0. then System.Math.PI - 2.0 * asin((-a - b).Length * 0.5)
+            else                              2.0 * asin(( a - b).Length * 0.5)    
+    
+    /// Returns positive angle between two vectors in Radians , takes vector orientation into account, 
+    /// Range 0.0 to PI( = 0 to 180 degree)
+    /// Unitizes the input vectors
+    let inline angle180Rad (a:Vector3d) (b:Vector3d) =        
+        angle180fast (unitize a) (unitize b)      
+
+
+    /// Returns positive angle between two vectors in Degrees , takes vector orientation into account, 
     /// Range 0 to 180 degrees
     /// Unitizes the input vectors
     let inline angle180Deg (a:Vector3d) (b:Vector3d) = 
-        angle180Rad a b |>  toDegrees
+        angle180fast (unitize a) (unitize b) |>  toDegrees
 
 
-    /// Returns positive angle between 2 Vectors in Radians, 
+    /// Returns positive angle between two vectors in Radians, 
     /// Ignores vector orientation, 
     /// Range: 0.0 to PI/2 ( = 0 to 90 degrees)
     /// Unitizes the input vectors
     let inline angle90Rad (a:Vector3d) (b:Vector3d) =   
-        let a0 = unitize a
-        let b0 = unitize b
-        let dot =  a0 * b0
-        let dotAbs = abs dot
-        if dotAbs < 0.98 then acos dotAbs 
-        else
-            if dot < 0. then 2.0 * asin((-a0 - b0).Length * 0.5)
-            else             2.0 * asin(( a0 - b0).Length * 0.5)
+        let ang = angle180fast (unitize a) (unitize b) 
+        if ang > System.Math.PI*0.5 then System.Math.PI - ang else ang        
     
-    /// Returns positive angle between 2 Vectors in Degrees, 
+    /// Returns positive angle between two vectors in Degrees, 
     /// Ignores vector orientation, 
     /// Range: 0 to 90 degrees
     /// Unitizes the input vectors
     let inline angle90Deg (a:Vector3d) (b:Vector3d) =   
         angle90Rad a b |>  toDegrees
     
-    /// Returns positive angle between 2 Vectors in Radians
+    //--------------------angels 360:---------------------------
+
+    /// Returns positive angle between two Vectors in Radians projected to a Plane
+    /// Considering positve rotation round a planes ZAxis 
+    /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
+    /// Unitizes the input vectors   
+    let inline angle360RadProjected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
+        let x = projectToPlane pl a
+        let y = projectToPlane pl b
+        let ang = angle180Rad x y
+        if dot (cross x y) pl.ZAxis > 0.0 then  ang
+        else                                    Math.PI * 2. - ang
+
+    /// Returns positive angle between two Vectors in Degrees projected to a Plane
+    /// Considering positve rotation round a planes ZAxis 
+    /// Range:  0 to 360 degrees
+    /// Unitizes the input vectors   
+    let inline angle360DegProjected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  =  angle360RadProjected pl a b|> toDegrees
+
+    /// Returns positive angle of two Vector projected in XY plane in Radians
+    /// Considering positve rotation round the World ZAxis 
+    /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
+    let inline angle360RadProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = 
+        if abs(a.X)<RhinoMath.SqrtEpsilon && abs(a.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angle360RadProjectedInXYPlane: input vector a is vertical or zero length:%A" a
+        if abs(b.X)<RhinoMath.SqrtEpsilon && abs(b.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angle360RadProjectedInXYPlane: input vector b is vertical or zero length:%A" b
+        let va = Vector3d(a.X, a.Y, 0.0)  // project to xy plane
+        let vb = Vector3d(b.X, b.Y, 0.0)  // project to xy plane
+        let ang = angle180Rad va vb //TODO could be optimized with 2D math
+        if (cross va vb).Z > 0.0 then  ang
+        else                           Math.PI * 2. - ang
+
+    /// Returns positive angle of two Vector projected in XY plane in Degrees
+    /// Considering positve rotation round the World ZAxis 
+    /// Range:  0 to 360 degrees
+    let inline angle360DegProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = angle360RadProjectedInXYPlane a b |> toDegrees
+
+
+    /// Returns positive angle of Vector to XAxis  projected in XY plane in Radians
+    /// Considering positve rotation round the World ZAxis 
+    /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
+    let inline angle360RadProjectedToXAxis(vec:Vector3d)   = 
+        if abs(vec.X)<RhinoMath.SqrtEpsilon && abs(vec.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angle360RadProjectedToXAxis: input vector is vertical or zero length:%A" vec 
+        let v = Vector3d(vec.X, vec.Y, 0.0) |> unitize // project to xy plane
+        let ang = angle180fast Vector3d.XAxis v //TODO could be optimized with 2D math
+        if (cross Vector3d.XAxis v).Z > 0.0 then  ang
+        else                                      Math.PI * 2. - ang
+
+    /// Returns positive angle of Vector to XAxis projected in XY plane in Degrees
+    /// Considering positve rotation round the World ZAxis 
+    /// Range: 0 to 360 degrees
+    let inline angle360DegProjectedToXAxis(v:Vector3d)   =  angle360RadProjectedToXAxis v |> toDegrees
+
+
+    /// Returns positive angle between two vectors in Radians
+    /// Not projected to Plane.
     /// Considering positve rotation round a planes ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors
-    let inline angle360Rad (pl:Plane) (a:Vector3d) (b:Vector3d)  = 
+    [<Obsolete>]
+    let inline angle360Rad (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
         let r = angle180Rad a b
         if dot (cross a b) pl.ZAxis > 0.0 then  r
         else                                    Math.PI * 2. - r
     
-    /// Returns positive angle between 2 Vectors in Degrees
+    /// Returns positive angle between two vectors in Degrees
+    /// Not projected to Plane.
     /// Considering positve rotation round a planes ZAxis 
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors
-    let inline angle360Deg (pl:Plane) (a:Vector3d) (b:Vector3d)  = 
+    [<Obsolete>]
+    let inline angle360Deg (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
         let r = angle180Deg a b
         if dot (cross a b) pl.ZAxis > 0.0 then  r
         else                                    360. - r
 
-    /// Returns positive angle between 2 Vectors in Radians
+    /// Returns positive angle between two vectors in Radians
+    /// Not projected to Plane.
     /// Considering positve rotation round the World ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors
+    [<Obsolete>]
     let inline angle360RadXY (a:Vector3d) (b:Vector3d)  = 
         let r = angle180Rad a b
         if (cross a b).Z > 0.0 then  r
         else                         Math.PI * 2. - r
     
-    /// Returns positive angle between 2 Vectors in Degrees
+    /// Returns positive angle between two vectors in Degrees
+    /// Not projected to Plane.
     /// Considering positve rotation round the World ZAxis 
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors
+    [<Obsolete>]
     let inline angle360DegXY  (a:Vector3d) (b:Vector3d)  = 
         let r = angle180Deg a b
         if (cross a b).Z  > 0.0 then  r
         else                          360. - r        
-    
+   
+
+     //--------------------end angels 360:---------------------------
+
     /// Returns positive or negative  slope of a vector in Radians
     /// in relation to XY Plane    
     let slopeRad (v:Vector3d) =
@@ -249,38 +348,7 @@ module Vec =
         if v.Z < 0.0 then -r else r
 
         
-    /// Project vector to World XY plane
-    /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
-    /// Returns Vector3d(v.X, v.Y, 0.0)
-    let inline projectToXYPlane (v:Vector3d) =
-        let r = Vector3d(v.X, v.Y, 0.0)
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToXYPlane: Cannot projectToXYPlane for vertical vector %A " v 
-        r
 
-    /// Project vector to plane
-    /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
-    let inline projectToPlane (pl:Plane) (v:Vector3d) =
-        let pt = pl.Origin + v
-        let clpt = pl.ClosestPoint(pt)
-        let r = clpt-pl.Origin
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToPlane: Cannot projectToPlane for perpendicular vector %A to given plane %A" v pl
-        r
-
-    /// Project point onto a finite line in directin of v
-    /// Fails if line is missed by tolerance 1e-6 and draws debug objects on layer 'Error-projectToLine'
-    let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
-        let h = Line(pt,v)
-        let ok,tln,th = Intersect.Intersection.LineLine(ln,h)
-        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: project in direction faild. (are they paralell?)"
-        let a = ln.PointAt(tln)
-        let b = h.PointAt(th)
-        if (a-b).SquareLength > RhinoMath.ZeroTolerance then 
-            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "Error-projectToLine"
-            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "Error-projectToLineDirection"
-            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "Error-projectToLineFrom"            
-            RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: missed Line by: %g " (a-b).Length
-        a
-    
     /// Checks if Angle between two vectors is Below one Degree
     /// Ignores vector orientation 
     /// Fails on zero length vectors, tolerance 0.00012
