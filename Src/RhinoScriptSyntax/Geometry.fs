@@ -76,7 +76,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Adds point object to the document</summary>
-    ///<param name="X">(float) X location of point to add</param>
+    ///<param name="x">(float) X location of point to add</param>
     ///<param name="y">(float) Y location of point to add</param>
     ///<param name="z">(float) Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc</returns>
@@ -205,7 +205,7 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Adds a text string to the document</summary>
     ///<param name="text">(string) The text to display</param>
-    ///<param name="point">(Point3d) a ponit where to add text. It will be paralell to XY plane.</param>
+    ///<param name="pt">(Point3d) a ponit where to add text. It will be paralell to XY plane.</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
     ///    The text height</param>
     ///<param name="font">(string) Optional, The text font</param>
@@ -556,9 +556,10 @@ module ExtensionsGeometry =
         textdot.FontFace <-  fontface
         if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %A to %A " objectId fontface
         Doc.Views.Redraw()
+
     [<Extension>]
     ///<summary>Modifies the font of multiple text dots</summary>
-    ///<param name="objectsIds">(Guid seq) Identifiers of multiple text dot objects</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
     ///<param name="fontface">(string) New font face name</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotFont(objectIds:Guid seq, fontface:string) : unit = //MULTISET
@@ -589,7 +590,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Modifies the font height of multiple text dots</summary>
-    ///<param name="objectsIds">(Guid seq) Identifiers of multiple text dot objects</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
     ///<param name="height">(int) New font height</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotHeight(objectIds:Guid seq, height:int) : unit = //MULTISET
@@ -644,7 +645,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Modifies the text on multiple text dot objects</summary>
-    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text dot objects</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text dot objects</param>
     ///<param name="text">(string) A new string for the dot</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextDotText(objectIds:Guid seq, text:string) : unit = //MULTISET
@@ -686,7 +687,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Modifies the font used by multiple text objects</summary>
-    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="font">(string) The new Font Name</param> 
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
@@ -727,7 +728,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Modifies the height of multiple text objects</summary>
-    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="height">(float) The new text height</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectHeight(objectIds:Guid seq, height:float) : unit = //MULTISET
@@ -822,7 +823,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Modifies the font style of multiple text objects</summary>
-    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
     ///    0 = Normal
     ///    1 = Bold
@@ -870,7 +871,7 @@ module ExtensionsGeometry =
     
     [<Extension>]
     ///<summary>Modifies the text string of multiple text objects</summary>
-    ///<param name="objectsIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET

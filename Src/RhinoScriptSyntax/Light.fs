@@ -164,7 +164,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Enables or disables multiple light objects</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="enable">(bool) The light's enabled status</param>
     ///<returns>(unit) void, nothing</returns>
     static member EnableLight(objectIds:Guid seq, enable:bool) : unit = //MULTISET
@@ -273,7 +273,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Changes the color of multiple light</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="color">(Drawing.Color) The light's new color</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
@@ -315,7 +315,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Changes the direction of multiple light objects</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="direction">(Vector3d) The light's new direction</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightDirection(objectIds:Guid seq, direction:Vector3d) : unit = //MULTISET
@@ -350,7 +350,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Changes the location of multiple light objects</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="location">(Point3d) The light's new location</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightLocation(objectIds:Guid seq, location:Point3d) : unit = //MULTISET
@@ -384,7 +384,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
     [<Extension>]
     ///<summary>Changes the name of multiple light objects</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="name">(string) The light's new name</param>
     ///<returns>(unit) void, nothing</returns>
     static member LightName(objectIds:Guid seq, name:string) : unit = //MULTISET
@@ -454,7 +454,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Changes the hardness of multiple spot light. Spotlight hardness
     /// controls the fully illuminated region</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="hardness">(float) The light's new hardness</param>
     ///<returns>(unit) void, nothing</returns>
     static member SpotLightHardness(objectIds:Guid seq, hardness:float) : unit = //MULTISET
@@ -497,7 +497,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Changes the radius of multiple spot light</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="radius">(float) The light's new radius</param>
     ///<returns>(unit) void, nothing</returns>
     static member SpotLightRadius(objectIds:Guid seq, radius:float) : unit = //MULTISET
@@ -538,7 +538,7 @@ module ExtensionsLight =
         Doc.Views.Redraw()
     [<Extension>]
     ///<summary>Changes the shadow intensity of multiple spot light</summary>
-    ///<param name="objectsIds">(Guid seq) The light objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="intensity">(float) The light's new intensity</param>
     ///<returns>(unit) void, nothing</returns>
     static member SpotLightShadowIntensity(objectIds:Guid seq, intensity:float) : unit = //MULTISET

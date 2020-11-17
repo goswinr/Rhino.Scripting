@@ -253,6 +253,7 @@ module ExtensionsUtility =
     ///<param name="filename">(string) Name and path of the ini file</param>
     ///<param name="section">(string) Section containing the entry. if empty string key without section will be added</param>
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
+    ///<param name="value">(string) The Value of this entry</param>
     ///<returns>(string) a value for entry</returns>
     static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit =
         if IO.File.Exists filename then

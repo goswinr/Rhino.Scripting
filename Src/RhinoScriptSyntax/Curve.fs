@@ -857,26 +857,26 @@ module ExtensionsCurve =
     ///    each other. Note, this function provides similar functionality to that of
     ///    Rhino's ClosestPt command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object to test</param>
-    ///<param name="objectsIds">(Guid seq) List of identifiers of point cloud, curve, surface, or
+    ///<param name="objectIds">(Guid seq) List of identifiers of point cloud, curve, surface, or
     ///    polysurface to test against</param>
     ///<returns>(Guid * Point3d * Point3d) containing the results of the closest point calculation.
     ///    The elements are as follows:
     ///      [0]    The identifier of the closest object.
     ///      [1]    The 3-D point that is closest to the closest object.
     ///      [2]    The 3-D point that is closest to the test curve</returns>
-    static member CurveClosestObject(curveId:Guid, objectsIds:Guid seq) : Guid * Point3d * Point3d =
+    static member CurveClosestObject(curveId:Guid, objectIds:Guid seq) : Guid * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let geometry = Rarr()
-        for curveId in objectsIds do
+        for curveId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
             geometry.Add( rhobj.Geometry )
-        if Seq.isEmpty geometry then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject: objectsIds must contain at least one item.  curveId:'%A' curveIds:'%A'" curveId objectsIds
+        if Seq.isEmpty geometry then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject: objectIds must contain at least one item.  curveId:'%A' curveIds:'%A'" curveId objectIds
         let curvePoint = ref Point3d.Unset
         let geomPoint  = ref Point3d.Unset
         let whichGeom = ref 0
         let success = curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom)
-        if success then  objectsIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject failed  curveId:'%A' objectsIds:'%A'" curveId objectsIds
+        if success then  objectIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject failed  curveId:'%A' objectIds:'%A'" curveId objectIds
 
     [<Extension>]
     ///<summary>Returns the 3D point locations on the curve and finite line where they are closest to
@@ -1452,7 +1452,6 @@ module ExtensionsCurve =
     ///<summary>Returns the start point of a curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segmentIndex">(int) Optional, The curve segment index if `curveId` identifies a polycurve</param>
-    ///<param name="point">(Point3d) Optional, New start point</param>
     ///<returns>(Point3d) The 3D starting point of the curve</returns>
     static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)

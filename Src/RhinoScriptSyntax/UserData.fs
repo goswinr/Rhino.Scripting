@@ -18,8 +18,7 @@ module ExtensionsUserdata =
 
     [<Extension>]
     ///<summary>Removes user data strings from the current document</summary>
-    ///<param name="section">(string) Optional, Section name. If omitted, all sections and their corresponding
-    ///    entries are removed</param>
+    ///<param name="section">(string) Optional, Section name. If omitted, all sections and their corresponding entries are removed</param>
     ///<param name="entry">(string) Optional, Entry name. If omitted, all entries for section are removed</param>
     ///<returns>(unit) void, nothing</returns>
     static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit =
@@ -258,9 +257,7 @@ module ExtensionsUserdata =
     [<Extension>]
     ///<summary>Sets or removes user text stored on an object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<param name="key">(string) The key name to set</param>
-    ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair
-    ///    specified by key will be deleted</param>
+    ///<param name="key">(string) The key name to set</param>    
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing</returns>
@@ -274,9 +271,7 @@ module ExtensionsUserdata =
     [<Extension>]
     ///<summary>Sets or removes user text stored on multiple objects</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
-    ///<param name="key">(string) The key name to set</param>
-    ///<param name="value">(string) Optional, The string value to set. If omitted, the key/value pair
-    ///    specified by key will be deleted</param>
+    ///<param name="key">(string) The key name to set</param>    
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
     ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing</returns>

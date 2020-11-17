@@ -389,7 +389,7 @@ module ExtensionsSurface =
     ///      of closed curves</summary>
     ///<param name="objectIds">(Guid seq) Ordered list of the curves to loft through</param>
     ///<param name="start">(Point3d) Optional, Starting point of the loft</param>
-    ///<param name="end">(Point3d) Optional, Ending point of the loft</param>
+    ///<param name="ende">(Point3d) Optional, Ending point of the loft</param>
     ///<param name="loftType">(int) Optional, Default Value: <c>0</c>
     ///    Type of loft. Possible options are:
     ///    0 = Normal. Uses chord-length parameterization in the loft direction
@@ -401,7 +401,7 @@ module ExtensionsSurface =
     ///    3 = Tight. The surface sticks closely to the original curves. Uses square
     ///      root of chord-length parameterization in the loft direction</param>
     ///<param name="rebuild">(int) Optional, Default Value: <c>0</c>
-    /// If not 0 then Rebuilds the shape curves before lofting with this control poin count</param>
+    ///    If not 0 then Rebuilds the shape curves before lofting with this control poin count</param>
     ///<param name="refit">(float) Optional, if given the loft is refitted, the value is the tolerance used to rebuild</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
     ///    Close the loft back to the first curve</param>
@@ -484,8 +484,7 @@ module ExtensionsSurface =
     ///    defined cutting planes through a surface or polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
-    ///<param name="Plane">(Plane) The plane that defines the cutting plane</param>
-    ///<param name="interval">(float) Distance between contour curves</param>
+    ///<param name="plane">(Plane) The plane that defines the cutting plane</param>    
     ///<returns>(Guid Rarr) ids of new contour curves </returns>
     static member AddSrfContourCrvs( objectId:Guid,
                                      plane:Plane) : Guid Rarr =
@@ -670,12 +669,11 @@ module ExtensionsSurface =
     ///<param name="basis">(Plane)  the basis plane of the torus</param>
     ///<param name="majorRadius">(float) Major radius of  the torus</param>
     ///<param name="minorRadius">(float) Minor radius of  torus</param>
-       ///    <returns>(Guid) The identifier of the new object</returns>
+    ///<returns>(Guid) The identifier of the new object</returns>
     static member AddTorus( basis:Plane,
                             majorRadius:float,
-                            minorRadius:float,
-                            [<OPT;DEF(Point3d())>]direction:Point3d) : Guid = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
-        let torus = Torus(basis, majorRadius, minorRadius)
+                            minorRadius:float) : Guid = 
+        let torus = Torus(basis, majorRadius, minorRadius) 
         let revsurf = torus.ToRevSurface()
         let rc = Doc.Objects.AddSurface(revsurf)
         Doc.Views.Redraw()
@@ -2481,7 +2479,7 @@ module ExtensionsSurface =
     ///<summary>Remove portions of the surface outside of the specified interval ain U and V direction</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
     ///<param name="intervalU">(float*float) Sub section of the surface to keep in U direction</param>
-    ///<param name="intervalU">(float*float) Sub section of the surface to keep in V direction</param>
+    ///<param name="intervalV">(float*float) Sub section of the surface to keep in V direction</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Should the input surface be deleted</param>
     ///<returns>(Guid) new surface identifier</returns>

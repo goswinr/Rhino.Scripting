@@ -18,7 +18,7 @@ module ExtrasBrep =
     ///<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
     ///<param name="plane">(Plane)Origin = center of hole</param>
     ///<param name="length">(float) total length of sloted hole</param>
-    ///<param name="breite">(float) width = radius of sloted hole</param>
+    ///<param name="width">(float) width = radius of sloted hole</param>
     ///<param name="height">(float) height of sloted hole volume</param> 
     ///<returns>(Brep) Brep Geometry</returns>
     static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =

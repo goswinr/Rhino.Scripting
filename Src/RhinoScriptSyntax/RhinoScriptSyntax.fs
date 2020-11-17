@@ -783,7 +783,7 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce2dPoint: could not Coerce: Could not convert %A to a Point2d"  point
     
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible</summary>
-    ///<param name="vector">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>    
+    ///<param name="vec">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>    
     ///<returns> aRhino.Geometry.Vector3d, Fails on bad input</returns>
     static member Coerce3dVector(vec:'T) : Vector3d =
         let inline vecOf3(x:^x, y:^y, z:^z) = 
@@ -941,13 +941,13 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get surface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId = the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface) Fails on bad input</returns>
-    static member CoerceSurface(srf:'T): Surface =
-        match RhinoScriptSyntax.CoerceGeometry(srf) with 
+    static member CoerceSurface(objectId:'T): Surface =
+        match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Surface as c -> c
         | :? Brep as b -> 
             if b.Faces.Count = 1 then b.Faces.[0] :> Surface
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on %A from Brep with %d Faces" srf b.Faces.Count
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on: %s " (typeDescr srf)
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on: %s " (typeDescr objectId)
 
     ///<summary>Attempt to get surface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId = the object's Identifier</param>

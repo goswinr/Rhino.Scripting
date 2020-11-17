@@ -626,7 +626,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Changes the layout or model space of an objects</summary>
-    ///<param name="objectsIds">(Guid seq) Identifier of the objects</param>
+    ///<param name="objectIds">(Guid seq) Identifier of the objects</param>
     ///<param name="layout">(string option) To change, or move, an objects from model space to page
     ///    layout space, or from one page layout to another, then specify the
     ///    title of an existing page layout view. To move an objects
@@ -831,7 +831,7 @@ module ExtensionsObject =
     
     [<Extension>]
     ///<summary>Modifies the rendering material source of multiple objects</summary>
-    ///<param name="objectsIds">(Guid seq) One or more objects identifierss</param>
+    ///<param name="objectIds">(Guid seq) One or more objects identifierss</param>
     ///<param name="source">(int) The new rendering material source.
     ///    0 = Material from layer
     ///    1 = Material from objects
@@ -872,7 +872,7 @@ module ExtensionsObject =
     
     [<Extension>]
     ///<summary>Modifies the name of multiple objects</summary>
-    ///<param name="objectsIds">(Guid seq)Id of objects</param>
+    ///<param name="objectIds">(Guid seq)Id of objects</param>
     ///<param name="name">(string) The new objects name.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectName(objectIds:Guid seq, name:string) : unit = //MULTISET
@@ -907,7 +907,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Modifies the print color of multiple objects</summary>
-    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="color">(Drawing.Color) New print color.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectPrintColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
@@ -948,7 +948,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Modifies the print color source of multiple objects</summary>
-    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="source">(int) New print color source
     ///    0 = print color by layer
     ///    1 = print color by objects
@@ -989,7 +989,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Modifies the print width of multiple objects</summary>
-    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
     ///    the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
     ///    but does not show on print)</param>
@@ -1032,7 +1032,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Modifies the print width source of multiple objects</summary>
-    ///<param name="objectsIds">(Guid seq) Identifier of objects</param>
+    ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="source">(int) New print width source
     ///    0 = print width by layer
     ///    1 = print width by objects

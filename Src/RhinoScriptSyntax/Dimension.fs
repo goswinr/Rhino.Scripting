@@ -188,7 +188,7 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Modifies the dimension style of multiple dimension objects</summary>
-    ///<param name="objectsIds">(Guid seq) Identifier of the objects</param>
+    ///<param name="objectIds">(Guid seq) Identifier of the objects</param>
     ///<param name="dimStyleName">(string) The name of multiple existing dimension style</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
@@ -236,7 +236,7 @@ module ExtensionsDimension =
     [<Extension>]
     ///<summary>Modifies the user text string of multiple dimension objects. The user
     /// text is the string that gets printed when the dimension is defined</summary>
-    ///<param name="objectsIds">(Guid seq) Identifiers of the objects</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of the objects</param>
     ///<param name="usertext">(string) The new user text string value</param>
     ///<returns>(unit) void, nothing</returns>
     static member DimensionUserText(objectIds:Guid seq, usertext:string) : unit = //MULTISET
@@ -820,7 +820,7 @@ module ExtensionsDimension =
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (rhType objectId)
     [<Extension>]
     ///<summary>Modifies the text string of multiple dimension leader objects</summary>
-    ///<param name="objectsIds">(Guid seq) The objects's identifiers</param>
+    ///<param name="objectIds">(Guid seq) The objects's identifiers</param>
     ///<param name="text">(string) The new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectIds:Guid seq, text:string) : unit = //MULTISET

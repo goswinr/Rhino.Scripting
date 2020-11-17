@@ -313,6 +313,8 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Joins two or or more mesh objects together</summary>
     ///<param name="meshes">(Mesh seq) Mesh objects</param>
+    ///<param name="deleteInput">(bool) Optional, Defalut Value <c>false</c>
+    ///   Delete input objects?</param>
     ///<returns>(Mesh) newly created Mesh</returns>
     static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
         let joinedmesh = new Mesh()
