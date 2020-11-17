@@ -95,4 +95,12 @@
     <Compile Include="Src\ExtraQRcode.fs" />
   </ItemGroup>
 
+ 
+  <Target Name="CopyFilesOverAfterBuild" BeforeTargets="AfterBuild">
+    <!-- <Message Text="Copied FSharp.Core.xml file from $(PkgFSharp_Core) to output dir ." Importance="high"/> -->
+    <!-- FSharp.Core.xml is missing otherwise ? to have it as intellisense provider if someone uses this package in IronPython-->
+    <Copy SourceFiles="..\FsEx\bin\Release\netstandard2.0\FSharp.Core.xml" DestinationFiles="$(TargetDir)FSharp.Core.xml" ContinueOnError="false" />  
+  </Target>
+
+
 </Project>
