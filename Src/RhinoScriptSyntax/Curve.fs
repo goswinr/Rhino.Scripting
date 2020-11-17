@@ -1689,20 +1689,18 @@ module ExtensionsCurve =
         rc
 
 
-
-
-
-
     [<Extension>]
     ///<summary>Extends a non-closed curve object by a line, arc, or smooth extension
     ///    until it intersects a collection of objects</summary>
     ///<param name="curveId">(Guid) Identifier of curve to extend</param>
-    ///<param name="extensionType">(int) 0 = line
+    ///<param name="extensionType">(int) 
+    ///    0 = line
     ///    1 = arc
     ///    2 = smooth</param>
-    ///<param name="side">(int) 0= extend from the start of the curve
-    ///    1= extend from the end of the curve
-    ///    2= extend from both the start and the end of the curve</param>
+    ///<param name="side">(int) 
+    ///    0 = extend from the start of the curve
+    ///    1 = extend from the end of the curve
+    ///    2 = extend from both the start and the end of the curve</param>
     ///<param name="boundarycurveIds">(Guid seq) Curve, surface, and polysurface objects to extend to</param>
     ///<param name="replaceInput">(bool) Optional, Default Value <c>false</c> Replace input or add new?</param>
     ///<returns>(Guid) The identifier of the new object or orignal curve ( depending on 'replaceInput')</returns>
@@ -1716,13 +1714,14 @@ module ExtensionsCurve =
         if extensionType = 0 then  extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, || 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
 
-        let mutable sidet = CurveEnd.Start
-        if side = 0 then  sidet <- CurveEnd.Start
-        elif side = 1 then  sidet <- CurveEnd.End
-        elif side = 2 then sidet <- CurveEnd.Both
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve Side must be 0, 1, || 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+        let sidet = 
+            match side with 
+            |0  -> CurveEnd.Start
+            |1  -> CurveEnd.End
+            |2  -> CurveEnd.Both
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve Side must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
 
         let rhobjs = rarr { for objectId in boundarycurveIds -> RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.IsEmpty then  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve BoundarycurveIds failed. they must contain at least one item.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
@@ -1744,30 +1743,35 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Extends a non-closed curve by a line, arc, or smooth extension for a
-    ///    specified distance</summary>
+    ///<summary>Extends a non-closed curve by a line, arc, or smooth extension for a specified distance</summary>
     ///<param name="curveId">(Guid) Curve to extend</param>
-    ///<param name="extensionType">(int) 0 = line
+    ///<param name="extensionType">(int) 
+    ///    0 = line
     ///    1 = arc
     ///    2 = smooth</param>
-    ///<param name="side">(int) 0= extend from start of the curve
-    ///    1= extend from end of the curve
-    ///    2= Extend from both ends</param>
+    ///<param name="side">(int) 
+    ///    0 = extend from start of the curve
+    ///    1 = extend from end of the curve
+    ///    2 = Extend from both ends</param>
     ///<param name="length">(float) Distance to extend</param>
     ///<returns>(Guid) The identifier of the new object</returns>
-    static member ExtendCurveLength(curveId:Guid, extensionType:int, side:int, length:float) : Guid =
+    static member ExtendCurveLength(    curveId:Guid, 
+                                        extensionType:int, 
+                                        side:int, 
+                                        length:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mutable extensionTypet = CurveExtensionStyle.Line
-        if extensionType = 0 then  extensionTypet <- CurveExtensionStyle.Line
+        if extensionType   = 0 then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength ExtensionType must be 0, 1, || 2.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength ExtensionType must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
 
-        let mutable sidet = CurveEnd.Start
-        if side = 0 then  sidet <- CurveEnd.Start
-        elif side = 1 then  sidet <- CurveEnd.End
-        elif side = 2 then sidet <- CurveEnd.Both
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength Side must be 0, 1, || 2.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
+        let sidet = 
+            match side with 
+            |0  -> CurveEnd.Start
+            |1  -> CurveEnd.End
+            |2  -> CurveEnd.Both
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength Side must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
 
         let newcurve =
             if length<0. then curve.Trim(sidet, -length)
@@ -1784,21 +1788,37 @@ module ExtensionsCurve =
     [<Extension>]
     ///<summary>Extends a non-closed curve by smooth extension to a point</summary>
     ///<param name="curveId">(Guid) Curve to extend</param>
-    ///<param name="side">(int) 0= extend from start of the curve
-    ///    1= extend from end of the curve</param>
+    ///<param name="side">(int) 
+    ///    0 = extend from start of the curve
+    ///    1 = extend from end of the curve
+    ///    2 = extend from both the start and the end of the curve</param>
     ///<param name="point">(Point3d) Point to extend to</param>
+    ///<param name="extensionType">(int) Optional, Default Value: <c>2</c> ( CurveExtensionStyle.Smooth)) 
+    ///    0 = line
+    ///    1 = arc
+    ///    2 = smooth</param>
     ///<returns>(Guid) The identifier of the new object</returns>
-    static member ExtendCurvePoint(curveId:Guid, side:int, point:Point3d) : Guid =
+    static member ExtendCurvePoint( curveId:Guid, 
+                                    side:int, 
+                                    point:Point3d,
+                                    [<OPT;DEF(-1)>]extensionType:int) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
+        let extensionTypet = 
+            match extensionType with 
+            | -1 ->  CurveExtensionStyle.Smooth
+            |  0 ->  CurveExtensionStyle.Line
+            |  1 ->  CurveExtensionStyle.Arc
+            |  2 ->  CurveExtensionStyle.Smooth
+            |  x ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2.  curveId:'%A' side:'%A' point:'%A' extensionType:'%A'" curveId side point extensionType
 
-        let mutable sidet = CurveEnd.Start
-        if side = 0 then  sidet <- CurveEnd.Start
-        elif side = 1 then  sidet <- CurveEnd.End
-        elif side = 2 then sidet <- CurveEnd.Both
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.Side must be 0, 1, || 2.  curveId:'%A' side:'%A' point:'%A'" curveId side point
-
-        let extensionType = CurveExtensionStyle.Smooth
-        let newcurve = curve.Extend(sidet, extensionType, point)
+        let sidet = 
+            match side with 
+            |0  -> CurveEnd.Start
+            |1  -> CurveEnd.End
+            |2  -> CurveEnd.Both
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2.  curveId:'%A' side:'%A' point:'%A' extensionType:'%A'" curveId side point extensionType
+        
+        let newcurve = curve.Extend(sidet, extensionTypet, point)
         if notNull newcurve && newcurve.IsValid then
             if Doc.Objects.Replace( curveId, newcurve ) then
                 Doc.Views.Redraw()
@@ -2581,7 +2601,7 @@ module ExtensionsCurve =
             outCurves <- Curve.CreateTweenCurvesWithMatching(curve0, curve1, numberOfCurves, tolerance)
         elif method = 2 then
             outCurves <- Curve.CreateTweenCurvesWithSampling(curve0, curve1, numberOfCurves, sampleNumber, tolerance)
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddTweenCurves Method must be 0, 1, || 2.  fromCurveId:'%A' toCurveId:'%A' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" fromCurveId toCurveId numberOfCurves method sampleNumber
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddTweenCurves Method must be 0, 1, or 2.  fromCurveId:'%A' toCurveId:'%A' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" fromCurveId toCurveId numberOfCurves method sampleNumber
         let curves = Rarr()
         if notNull outCurves then
             for curve in outCurves do
