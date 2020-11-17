@@ -352,7 +352,7 @@ module ExtensionsLayer =
     ///    layer dialog box. A display order index of -1 indicates that the current
     ///    layer dialog filter does not allow the layer to appear in the layer list</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(int) 0 based index of layer</returns>
+    ///<returns>(int) zero based index of layer</returns>
     static member LayerOrder(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.SortIndex

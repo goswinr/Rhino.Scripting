@@ -262,7 +262,8 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Verifies that an object is currently selected</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(int) 0, the object is not selected
+    ///<returns>(int) 
+    ///    0, the object is not selected
     ///    1, the object is selected
     ///    2, the object is entirely persistently selected
     ///    3, one or more proper sub-objects are selected</returns>

@@ -129,7 +129,7 @@ module ExtensionsGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the next grip index</param>
     ///<param name="direction">(int ) Optional, Default Value: <c>0</c>
-    ///    Direction to get the next grip index (0= U, 1= V)</param>
+    ///    Direction to get the next grip index (0 = U, 1 = V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    If True, the next grip index found will be selected</param>
     ///<returns>(int) index of the next grip</returns>
@@ -257,7 +257,7 @@ module ExtensionsGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
-    ///    Direction to get the next grip index (0= U, 1= V)</param>
+    ///    Direction to get the next grip index (0 = U, 1 = V)</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    If True, the next grip index found will be selected</param>
     ///<returns>(int) index of the next grip</returns>

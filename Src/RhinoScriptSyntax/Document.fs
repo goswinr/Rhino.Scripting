@@ -192,13 +192,13 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns render antialiasing style</summary>
-    ///<returns>(int) The current antialiasing style (0= none, 1= normal, 2= best)</returns>
+    ///<returns>(int) The current antialiasing style (0 = none, 1 = normal, 2 = best)</returns>
     static member RenderAntialias() : int = //GET
         int(Doc.RenderSettings.AntialiasLevel) // TODO check
 
     [<Extension>]
     ///<summary>Sets render antialiasing style</summary>
-    ///<param name="style">(int) Level of antialiasing (0= none, 1= normal, 2= best)</param>
+    ///<param name="style">(int) Level of antialiasing (0 = none, 1 = normal, 2 = best)</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderAntialias(style:int) : unit = //SET
         if style = 0 || style = 1 || style = 2 then
@@ -209,7 +209,9 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render ambient light or background color</summary>
-    ///<param name="item">(int) 0= ambient light color, 1= background color</param>
+    ///<param name="item">(int) 
+    ///   0 = ambient light color, 
+    ///   1 = background color</param>
     ///<returns>(Drawing.Color) The current item color</returns>
     static member RenderColor(item:int) : Drawing.Color = //GET
         if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.Item must be 0 or 1.  item:'%A'" item
@@ -218,7 +220,9 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render ambient light or background color</summary>
-    ///<param name="item">(int) 0= ambient light color, 1= background color</param>
+    ///<param name="item">(int) 
+    ///    0 = ambient light color, 
+    ///    1 = background color</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
@@ -478,11 +482,11 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Returns render settings</summary>
     ///<returns>(int) if settings are not specified, the current render settings in bit-coded flags
-    ///    0= none,
-    ///    1= create shadows,
-    ///    2= use lights on layers that are off,
-    ///    4= render curves and isocurves,
-    ///    8= render dimensions and text</returns>
+    ///    0 = none,
+    ///    1 = create shadows,
+    ///    2 = use lights on layers that are off,
+    ///    4 = render curves and isocurves,
+    ///    8 = render dimensions and text</returns>
     static member RenderSettings() : int = //GET
         let mutable rc = 0
         let rendersettings = Doc.RenderSettings
@@ -495,11 +499,11 @@ module ExtensionsDocument =
     [<Extension>]
     ///<summary>Sets render settings</summary>
     ///<param name="settings">(int) Bit-coded flags of render settings to modify.
-    ///    0= none,
-    ///    1= create shadows,
-    ///    2= use lights on layers that are off,
-    ///    4= render curves and isocurves,
-    ///    8= render dimensions and text</param>
+    ///    0 = none,
+    ///    1 = create shadows,
+    ///    2 = use lights on layers that are off,
+    ///    4 = render curves and isocurves,
+    ///    8 = render dimensions and text</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET
         let rendersettings = Doc.RenderSettings

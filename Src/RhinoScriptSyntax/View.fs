@@ -366,10 +366,10 @@ module ExtensionsView =
     ///    command in the Rhino help file for more details</summary>
     ///<param name="direction">(int)
     ///    The direction to rotate the camera where
-    ///    0= right
-    ///    1= left
-    ///    2= down
-    ///    3= up</param>
+    ///    0 = right
+    ///    1 = left
+    ///    2 = down
+    ///    3 = up</param>
     ///<param name="angle">(float) The angle to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<returns>(unit) void, nothing</returns>
@@ -404,10 +404,10 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Rotates a view. See RotateView command in Rhino help for more information</summary>
     ///<param name="direction">(int) Optional, The direction to rotate the view where
-    ///    0= right
-    ///    1= left
-    ///    2= down
-    ///    3= up</param>
+    ///    0 = right
+    ///    1 = left
+    ///    2 = down
+    ///    3 = up</param>
     ///<param name="angle">(float) Angle to rotate. If omitted, the angle of rotation is specified
     ///    by the "Increment in divisions of a circle" parameter specified in
     ///    Options command's View tab</param>
@@ -523,8 +523,8 @@ module ExtensionsView =
     ///<summary>Tilts a view by rotating the camera up vector. See the TiltView command in
     ///    the Rhino help file for more details</summary>
     ///<param name="direction">(int) The direction to rotate the view where
-    ///    0= right
-    ///    1= left</param>
+    ///    0 = right
+    ///    1 = left</param>
     ///<param name="angle">(float) The angle in degrees to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(unit) void, nothing</returns>

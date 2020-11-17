@@ -257,7 +257,7 @@ module ExtensionsSurface =
                     let uspan, vspan = 10, 10
                     let geometry =   rarr{for objectid in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectid).Geometry }
                     let surface = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
-                    let tolerance = if 0.0= tolerance then Doc.ModelAbsoluteTolerance else tolerance
+                    let tolerance = if 0.0 = tolerance then Doc.ModelAbsoluteTolerance else tolerance
                     let b =  Array.create 4 fixEdges
                     let brep = Brep.CreatePatch(geometry, surface, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance)
                     if notNull brep then
@@ -305,7 +305,7 @@ module ExtensionsSurface =
 
         let uspan, vspan = uvSpans
         let geometry =   rarr{for objectid in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectid).Geometry }
-        let tolerance = if 0.0= tolerance then Doc.ModelAbsoluteTolerance else tolerance
+        let tolerance = if 0.0 = tolerance then Doc.ModelAbsoluteTolerance else tolerance
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
         if notNull brep then
@@ -842,9 +842,9 @@ module ExtensionsSurface =
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="typ">(int) Optional, Default Value: <c>0</c>
     ///    The border curves to return
-    ///    0= both exterior and interior,
-    ///    1= exterior
-    ///    2= interior</param>
+    ///    0 = both exterior and interior,
+    ///    1 = exterior
+    ///    2 = interior</param>
     ///<returns>(Guid Rarr) list of curve ids </returns>
     static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
@@ -1187,7 +1187,7 @@ module ExtensionsSurface =
     ///<param name="spherePlane1">(Plane) Plane for second sphere</param>
     ///<param name="sphereRadius1">(float) Radius for second sphere</param>
     ///<returns>(int * Circle * float ) of intersection results
-    ///    [0] = type of intersection (0= point, 1= circle, 2= spheres are identical)
+    ///    [0] = type of intersection (0 = point, 1 = circle, 2 = spheres are identical)
     ///    [1] = Circle of  intersection , if type is Point take Circle center
     ///    [2] = radius of circle if circle intersection</returns>
     static member IntersectSpheres( spherePlane0:Plane,
@@ -1355,7 +1355,9 @@ module ExtensionsSurface =
     ///<summary>Verifies a surface object is closed in the specified direction.  If the
     ///    surface fully encloses a volume, it is considered a solid</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="direction">(int) 0= U direction check, 1= V direction check</param>
+    ///<param name="direction">(int) 
+    ///    0 = U direction check, 
+    ///    1 = V direction check</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfaceClosed(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
@@ -1367,7 +1369,9 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Verifies a surface object is periodic in the specified direction</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="direction">(int) 0= U direction check, 1= V direction check</param>
+    ///<param name="direction">(int) 
+    ///    0 = U direction check, 
+    ///    1 = V direction check</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfacePeriodic(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
@@ -1409,10 +1413,11 @@ module ExtensionsSurface =
     ///<summary>Verifies a surface object is singular in the specified direction.
     ///    Surfaces are considered singular if a side collapses to a point</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="direction">(int) 0= south
-    ///    1= east
-    ///    2= north
-    ///    3= west</param>
+    ///<param name="direction">(int) 
+    ///    0 = south
+    ///    1 = east
+    ///    2 = north
+    ///    3 = west</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfaceSingular(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with    //TODO better fail if input is not a surface ?? here and above functions
@@ -1485,7 +1490,9 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Makes an existing surface a periodic NURBS surface</summary>
     ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="direction">(int) The direction to make periodic, either 0= U or 1= V</param>
+    ///<param name="direction">(int) The direction to make periodic, either 
+    ///    0 = U  
+    ///    1 = V</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the input surface</param>
     ///<returns>(Guid) if deleteInput is False, identifier of the new surface</returns>

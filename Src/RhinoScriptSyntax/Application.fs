@@ -636,17 +636,17 @@ module ExtensionsApplication =
     ///<summary>Returns a array of registered Rhino plug-ins</summary>
     ///<param name="types">(int) Optional, Default Value: <c>0</c>
     ///    The type of plug-ins to return.
-    ///    0= all
-    ///    1= render
-    ///    2= file export
-    ///    4= file import
-    ///    8= digitizer
-    ///    16= utility.
+    ///    0 = all
+    ///    1 = render
+    ///    2 = file export
+    ///    4 = file import
+    ///    8 = digitizer
+    ///    16 = utility.
     ///    If omitted, all are returned</param>
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
-    /// 0= both loaded and unloaded, 
-    /// 1= loaded, 
-    /// 2= unloaded.  If omitted both status is returned</param>
+    /// 0 = both loaded and unloaded, 
+    /// 1 = loaded, 
+    /// 2 = unloaded.  If omitted both status is returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
