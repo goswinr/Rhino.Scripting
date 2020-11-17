@@ -323,9 +323,15 @@ module Vec =
     let inline orientDown (v:Vector3d) =
         if v.Z < 0.0 then v else -v
     
+
+
     /// Ensure vector has a positive dot product with given orientation vector
-    let inline matchOrientation (orientToMatch:Vector3d) (v:Vector3d) =
-        if orientToMatch * v < 0.0 then -v else v
+    let inline matchOrientation (orientationToMatch:Vector3d) (v:Vector3d) =
+        if orientationToMatch * v < 0.0 then -v else v
+
+    /// Check if vector has a positive dot product with given orientation vector
+    let inline isSameOrientation (orientationToCkeck:Vector3d) (v:Vector3d) =
+        orientationToCkeck * v > 0.0 
     
     /// Returns a horizontal vector that is perpendicular to the given vector.
     /// just: Vector3d(v.Y, -v.X, 0.0)
