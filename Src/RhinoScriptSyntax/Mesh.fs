@@ -180,12 +180,12 @@ module ExtensionsMesh =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
         let tolerance = Doc.ModelAbsoluteTolerance
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+        if isNull mesh then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (rhType objectId) deleteInput
         if deleteInput then
             let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed to delete input.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+            if not<| Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (rhType objectId) deleteInput
         let rc = Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  objectId:'%A' deleteInput:'%A'" objectId deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (rhType objectId) deleteInput
         Doc.Views.Redraw()
         rc
 
@@ -204,7 +204,7 @@ module ExtensionsMesh =
         let tolerance = Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed.  curveId:'%A' meshId:'%A' " curveId meshId
+        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%A'" (rhType curveId) meshId
         pts, faceids
 
 
@@ -332,7 +332,7 @@ module ExtensionsMesh =
         let joinedmesh = new Mesh()
         joinedmesh.Append(meshes)
         let rc = Doc.Objects.AddMesh(joinedmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Failed to join Meshes %A" objectIds
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Failed to join Meshes %A" (RhinoScriptSyntax.ToNiceString objectIds) 
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.Coerceguid(objectId)
@@ -351,7 +351,7 @@ module ExtensionsMesh =
         if notNull mp then
             mp.Area
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.MeshArea failed.  objectId:'%A'" objectId
+            RhinoScriptingException.Raise "RhinoScriptSyntax.MeshArea failed.  objectId:'%s'" (rhType objectId)
 
 
 
@@ -362,7 +362,7 @@ module ExtensionsMesh =
     static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%A'" objectId
+        if mp|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%s'" (rhType objectId)
         mp.Centroid
 
 
@@ -378,7 +378,7 @@ module ExtensionsMesh =
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let meshes0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
@@ -404,7 +404,7 @@ module ExtensionsMesh =
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let meshes0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
@@ -431,7 +431,7 @@ module ExtensionsMesh =
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let meshes0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A' " input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
@@ -486,7 +486,7 @@ module ExtensionsMesh =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshClosestPoint failed.  objectId:'%A' point:'%A' maximumDistance:'%A'" objectId point maximumDistance
+        if face<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (rhType objectId) point maximumDistance
         !pt, face
 
 
@@ -866,7 +866,7 @@ module ExtensionsMesh =
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolume failed on objectId:'%A'" objectId
+                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolume failed on objectId:'%s'" (rhType objectId)
         totalvolume
 
 
@@ -878,7 +878,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolumeCentroid failed.  objectId:'%A'" objectId
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolumeCentroid failed.  objectId:'%s'" (rhType objectId)
 
 
     [<Extension>]
@@ -893,9 +893,9 @@ module ExtensionsMesh =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = Doc.ModelAbsoluteTolerance
         let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then RhinoScriptingException.Raise "RhinoScriptSyntax.PullCurveToMesh failed.  meshId:'%A' curveId:'%A'" meshId curveId
+        if isNull polyline then RhinoScriptingException.Raise "RhinoScriptSyntax.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (rhType meshId)  (rhType curveId)
         let rc = Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add polyline to document.  meshId:'%A' curveId:'%A'" meshId curveId
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (rhType meshId) (rhType curveId)
         Doc.Views.Redraw()
         rc
 

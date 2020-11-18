@@ -181,7 +181,7 @@ module ExtensionsLine =
     static member LineTransform(lineId:Guid, xform:Transform) : unit =
         let line = RhinoScriptSyntax.CoerceLine lineId
         let success = line.Transform(xform)
-        if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A " line xform
+        if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xform
 
 
 

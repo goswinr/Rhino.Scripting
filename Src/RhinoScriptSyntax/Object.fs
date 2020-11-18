@@ -33,9 +33,9 @@ module ExtensionsObject =
                                     [<OPT;DEF(false)>]copy:bool) : Guid Rarr =   //PLURAL    
         // this is also called by Copy, Scale, Mirror, Move, and Rotate functions defined below
         let rc = Rarr()
-        for objectid in objectIds do
-            let objectId = Doc.Objects.Transform(objectid, matrix, not copy)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply transform to object '%A' from objectId:'%A' matrix:'%A' copy:'%A'" objectid objectId matrix copy
+        for objId in objectIds do
+            let objectId = Doc.Objects.Transform(objId, matrix, not copy)
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (rhType objId) (rhType objectId) matrix copy
             rc.Add objectId
         Doc.Views.Redraw()
         rc
@@ -52,7 +52,7 @@ module ExtensionsObject =
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid =
         let res = Doc.Objects.Transform(objectId, matrix, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply transform to object '%A' from objectId:'%A' matrix:'%A' copy:'%A'" objectId objectId matrix copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (rhType objectId) matrix copy
         res
 
 
@@ -68,7 +68,7 @@ module ExtensionsObject =
             else
                 Transform.Identity
         let res = Doc.Objects.Transform(objectId, translation, false)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CopyObject failed.  objectId:'%A' translation:'%A'" objectId translation
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CopyObject failed.  objectId:'%s' translation:'%A'" (rhType objectId) translation
         res
 
 
@@ -85,9 +85,9 @@ module ExtensionsObject =
             else
                 Transform.Identity
         let rc = Rarr()
-        for objectid in objectIds do
-            let res = Doc.Objects.Transform(objectid, translation, false)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CopyObjectc failed.  objectId:'%A' translation:'%A'" objectid translation
+        for objectId in objectIds do
+            let res = Doc.Objects.Transform(objectId, translation, false)
+            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CopyObjectc failed.  objectId:'%s' translation:'%A'" (rhType objectId) translation
             rc.Add res
         rc
 
@@ -98,7 +98,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member DeleteObject(objectId:Guid) : unit =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
-        if not <| Doc.Objects.Delete(objectId, true)  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObject failed on %A" objectId
+        if not <| Doc.Objects.Delete(objectId, true)  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObject failed on %s" (rhType objectId)
         Doc.Views.Redraw()
 
 
@@ -110,7 +110,7 @@ module ExtensionsObject =
     static member DeleteObject(objectIds:Guid seq) : unit = //PLURAL
         let k = Doc.Objects.Delete(objectIds, true)
         let l = Seq.length objectIds
-        if k <> l then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObjects failed on %d out of %A" (l-k) objectIds
+        if k <> l then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObjects failed on %d out of %s" (l-k) (RhinoScriptSyntax.ToNiceString objectIds)
         Doc.Views.Redraw()
         
 
@@ -365,13 +365,13 @@ module ExtensionsObject =
                                 endPoint:Point3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid =
         let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.Start and  end points are too close to each other.  objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
+        if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (rhType objectId) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MirrorObject transform to objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (rhType objectId) startPoint endPoint copy
         res
 
 
@@ -388,15 +388,15 @@ module ExtensionsObject =
                                  endPoint:Point3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
         let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.Start and  end points are too close to each other.  objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectIds startPoint endPoint copy
+        if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
         let rc = Rarr()
-        for objectid in objectIds do
-            let objectId = Doc.Objects.Transform(objectid, xf, not copy)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MirrorObjects to objectId:'%A' startPoint:'%A' endPoint:'%A' copy:'%A'" objectId startPoint endPoint copy
+        for objectId in objectIds do
+            let objectId = Doc.Objects.Transform(objectId, xf, not copy)
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MirrorObjects to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (rhType objectId) startPoint endPoint copy
             rc.Add objectId
         rc
 
@@ -410,7 +410,7 @@ module ExtensionsObject =
     static member MoveObject(objectId:Guid, translation:Vector3d) : Guid = //TODO or return unit ??
         let xf = Transform.Translation(translation)
         let res = Doc.Objects.Transform(objectId, xf, true)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%A' translation:'%A'" objectId translation
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translation
         res
 
     [<Extension>]
@@ -421,9 +421,9 @@ module ExtensionsObject =
     static member MoveObject(objectIds:Guid seq, translation:Vector3d) : Guid Rarr =  //PLURAL        
         let xf = Transform.Translation(translation)
         let rc = Rarr()
-        for objectid in objectIds do
-            let objectId = Doc.Objects.Transform(objectid, xf, true)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MoveObjects Transform to objectId:'%A'  translation:'%A'" objectId translation
+        for objectId in objectIds do
+            let objectId = Doc.Objects.Transform(objectId, xf, true)
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (rhType objectId) translation
             rc.Add objectId
         rc
 
@@ -451,7 +451,7 @@ module ExtensionsObject =
         let attr = rhobj.Attributes
         attr.ObjectColor <- color
         attr.ColorSource <- DocObjects.ObjectColorSource.ColorFromObject
-        if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectColor setting failed for %A; %A" objectId color
+        if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectColor setting failed for %A; %A" (rhType objectId) color
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -467,7 +467,7 @@ module ExtensionsObject =
             let attr = rhobj.Attributes
             attr.ObjectColor <- color
             attr.ColorSource <- DocObjects.ObjectColorSource.ColorFromObject
-            if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectColor setting failed for %A; %A" objectId color
+            if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectColor setting failed for %A; %A" (rhType objectId) color
         Doc.Views.Redraw()
         
 
@@ -498,7 +498,7 @@ module ExtensionsObject =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectColorSource failed for '%A' and '%A'" objectId source
+        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
     
     [<Extension>]
@@ -515,7 +515,7 @@ module ExtensionsObject =
         for objectId in objectIds do 
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectColorSource failed for '%A' and '%A'" objectId source
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
         
 
@@ -943,7 +943,7 @@ module ExtensionsObject =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
+        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -960,7 +960,7 @@ module ExtensionsObject =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'" objectId source
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -1109,7 +1109,7 @@ module ExtensionsObject =
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.RotateObject failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectId centerPoint rotationAngle axis copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (rhType objectId) centerPoint rotationAngle axis copy
         res
 
 
@@ -1137,9 +1137,9 @@ module ExtensionsObject =
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let rc = Rarr()
-        for objectid in objectIds do
-            let res = Doc.Objects.Transform(objectid, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.RotateObjects failed.  objectId:'%A' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" objectid centerPoint rotationAngle axis copy
+        for objectId in objectIds do
+            let res = Doc.Objects.Transform(objectId, xf, not copy)
+            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (rhType objectId) centerPoint rotationAngle axis copy
             rc.Add res
         rc
 
@@ -1163,7 +1163,7 @@ module ExtensionsObject =
         let x, y, z = scale
         let xf = Transform.Scale(plane, x, y, z)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (rhType objectId) origin scale  copy
         res
 
     [<Extension>]
@@ -1182,7 +1182,7 @@ module ExtensionsObject =
         plane.Origin <- origin
         let xf = Transform.Scale(plane, scale, scale, scale)
         let res = Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectId origin scale  copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (rhType objectId) origin scale  copy
         res
 
     [<Extension>]
@@ -1203,9 +1203,9 @@ module ExtensionsObject =
         let x, y, z = scale
         let xf = Transform.Scale(plane, x, y, z)
         let rc = Rarr()
-        for objectid in objectIds do
-            let res = Doc.Objects.Transform(objectid, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectid origin scale  copy
+        for objectId in objectIds do
+            let res = Doc.Objects.Transform(objectId, xf, not copy)
+            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (rhType objectId) origin scale  copy
             rc.Add res
         rc
 
@@ -1225,9 +1225,9 @@ module ExtensionsObject =
         plane.Origin <- origin
         let xf = Transform.Scale(plane, scale, scale, scale)
         let rc = Rarr()
-        for objectid in objectIds do
-            let res = Doc.Objects.Transform(objectid, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%A' origin:'%A' scale:'%A' copy:'%A'" objectid origin scale  copy
+        for objectId in objectIds do
+            let res = Doc.Objects.Transform(objectId, xf, not copy)
+            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (rhType objectId) origin scale  copy
             rc.Add res
         rc
 
@@ -1243,15 +1243,15 @@ module ExtensionsObject =
             if 0 = rhobj.Select(true) then 
                 let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
                 if rhobj.IsHidden then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %A " objectId 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %A" (rhType objectId) 
                 elif rhobj.IsLocked then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %A " objectId 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %A" (rhType objectId) 
                 elif not lay.IsVisible then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %A " lay.FullPath objectId 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %A" lay.FullPath objectId 
                 elif not lay.IsLocked then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %A " lay.FullPath objectId 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %A" lay.FullPath objectId 
                 else
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %A " objectId 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %A" (rhType objectId) 
             Doc.Views.Redraw()
             )
 
@@ -1266,15 +1266,15 @@ module ExtensionsObject =
                 if 0 = rhobj.Select(true) then 
                     let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
                     if rhobj.IsHidden then 
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %A out of %d objects" objectId (Seq.length objectIds)
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %A out of %d objects" (rhType objectId) (Seq.length objectIds)
                     elif rhobj.IsLocked then 
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %A out of %d objects" objectId (Seq.length objectIds)
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %A out of %d objects" (rhType objectId) (Seq.length objectIds)
                     elif not lay.IsVisible then 
                         RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %A out of %d objects" lay.FullPath objectId (Seq.length objectIds)
                     elif not lay.IsLocked then 
                         RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %A out of %d objects" lay.FullPath objectId (Seq.length objectIds)
                     else
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %A out of %d objects" objectId (Seq.length objectIds)
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %A out of %d objects" (rhType objectId) (Seq.length objectIds)
             Doc.Views.Redraw()
             )
         
@@ -1293,7 +1293,7 @@ module ExtensionsObject =
                                referencePoint:Point3d,
                                angleDegrees:float,
                                [<OPT;DEF(false)>]copy:bool) : Guid =
-       if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A " origin referencePoint
+       if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A" origin referencePoint
        let plane = Doc.Views.ActiveView.MainViewport.ConstructionPlane()
        let mutable frame = Plane(plane)
        frame.Origin <- origin
@@ -1311,7 +1311,7 @@ module ExtensionsObject =
        let cobinv = Transform.ChangeBasis(frame, worldplane)
        let xf = cobinv * shear2d * cob
        let res = Doc.Objects.Transform(objectId, xf, not copy)
-       if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed for %A, origin %A, ref point  %A andangle  %A " objectId origin referencePoint angleDegrees
+       if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed for %A, origin %A, ref point  %A andangle  %A" (rhType objectId) origin referencePoint angleDegrees
        res
 
 
@@ -1329,7 +1329,7 @@ module ExtensionsObject =
                                 referencePoint:Point3d,
                                 angleDegrees:float,
                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
-        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A " origin referencePoint
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny(): %A and %A" origin referencePoint
         let plane = Doc.Views.ActiveView.MainViewport.ConstructionPlane()
         let mutable frame = Plane(plane)
         frame.Origin <- origin
@@ -1349,7 +1349,7 @@ module ExtensionsObject =
         rarr{
             for ob in objectIds do
                 let res = Doc.Objects.Transform(ob, xf, not copy)
-                if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed for %A, origin %A, ref point  %A andangle  %A " ob origin referencePoint angleDegrees
+                if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed for %A, origin %A, ref point  %A andangle  %A" ob origin referencePoint angleDegrees
                 res  }
 
 
@@ -1359,7 +1359,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) Representing id of object to show</param>
     ///<returns>(unit) void, nothing</returns>
     static member ShowObject(objectId:Guid) : unit =
-        if not <| Doc.Objects.Show(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %A" objectId
+        if not <| Doc.Objects.Show(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %A" (rhType objectId)
         Doc.Views.Redraw()
 
 
@@ -1371,7 +1371,7 @@ module ExtensionsObject =
     static member ShowObject(objectIds:Guid seq) : unit =
         let mutable rc = 0
         for objectId in objectIds do
-            if not <| Doc.Objects.Show(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %A" objectId
+            if not <| Doc.Objects.Show(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %A" (rhType objectId)
         Doc.Views.Redraw()
 
 
@@ -1381,7 +1381,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(unit) void, nothing</returns>
     static member UnlockObject(objectId:Guid) : unit =
-        if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %A" objectId
+        if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %A" (rhType objectId)
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -1392,7 +1392,7 @@ module ExtensionsObject =
     static member UnlockObject(objectIds:Guid seq) : unit =  //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
-            if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %A" objectId
+            if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %A" (rhType objectId)
         Doc.Views.Redraw()
         
 
@@ -1402,7 +1402,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing</returns>
     static member UnSelectObject(objectId:Guid) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnSelectObject failed on %A" objectId
+        if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnSelectObject failed on %A" (rhType objectId)
         Doc.Views.Redraw()
 
 
@@ -1413,6 +1413,6 @@ module ExtensionsObject =
     static member UnSelectObject(objectIds:Guid seq) : unit = //PLURAL
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnSelectObject failed on %A" objectId            
+            if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnSelectObject failed on %A" (rhType objectId)            
         Doc.Views.Redraw()
 

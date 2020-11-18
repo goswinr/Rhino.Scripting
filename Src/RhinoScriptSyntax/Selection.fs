@@ -87,12 +87,12 @@ module ExtensionsSelection =
             it.HiddenObjects <- true
             it.ReferenceObjects <- includeReferences
             let es = Doc.Objects.GetObjectList(it)
-            let objectids = Rarr()            
+            let objectIds = Rarr()            
             for ob in es do
-                objectids.Add ob.Id
+                objectIds.Add ob.Id
                 if select then ob.Select(true) |> ignore   //TODO make sync ?             
-            if objectids.Count > 0 && select then Doc.Views.Redraw()           
-            objectids
+            if objectIds.Count > 0 && select then Doc.Views.Redraw()           
+            objectIds
 
     [<Extension>]
     ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
@@ -779,7 +779,7 @@ module ExtensionsSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None ->RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" objectId
+            |None ->RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (rhType objectId)
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id
@@ -952,7 +952,7 @@ module ExtensionsSelection =
         if (state &&& 1) <> 0 then it.NormalObjects <- true
         if (state &&& 2) <> 0 then it.LockedObjects <- true
         if (state &&& 4) <> 0 then it.HiddenObjects <- true
-        let objectids = Rarr()
+        let objectIds = Rarr()
         let e = Doc.Objects.GetObjectList(it)
         for object in e do
             let  mutable bFound = false
@@ -976,9 +976,9 @@ module ExtensionsSelection =
                 bFound <- true
             if bFound then
                 if select then object.Select(true) |> ignore //TODO make sync ?
-                objectids.Add(object.Id)
-        if objectids.Count > 0 && select then Doc.Views.Redraw()
-        objectids
+                objectIds.Add(object.Id)
+        if objectIds.Count > 0 && select then Doc.Views.Redraw()
+        objectIds
 
 
     [<Extension>]
@@ -1027,15 +1027,15 @@ module ExtensionsSelection =
         it.VisibleFilter <- true
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
         it.ViewportFilter <- viewport
-        let objectids = Rarr()
+        let objectIds = Rarr()
         let e = Doc.Objects.GetObjectList(it)
         for object in e do
             let bbox = object.Geometry.GetBoundingBox(true)
             if viewport.IsVisible(bbox) then
                 if select then object.Select(true) |> ignore //TODO make sync ? TEST !!!
-                objectids.Add(object.Id)
-        if objectids.Count>0 && select then Doc.Views.Redraw()
-        objectids
+                objectIds.Add(object.Id)
+        if objectIds.Count>0 && select then Doc.Views.Redraw()
+        objectIds
 
 
     [<Extension>]

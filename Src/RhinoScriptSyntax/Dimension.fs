@@ -31,7 +31,7 @@ module ExtensionsDimension =
                                         pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF("")>]style:string) : Guid =        
         let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
-        if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' " startPoint endPoint pointOnDimensionLine
+        if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" startPoint endPoint pointOnDimensionLine
         let success, s, t = plane.ClosestParameter(startPoint)
         let start2 = Point2d(s, t)
         let success, s, t = plane.ClosestParameter(endPoint)
@@ -108,7 +108,7 @@ module ExtensionsDimension =
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d, // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF(Plane())>] plane:Plane ) : Guid =
-        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' " startPoint endPoint pointOnDimensionLine
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" startPoint endPoint pointOnDimensionLine
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
@@ -180,7 +180,7 @@ module ExtensionsDimension =
     static member DimensionStyle(objectId:Guid, dimStyleName:string) : unit = //SET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let ds =  Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%A' dimStyleName:'%A'" objectId dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%A'" (rhType objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
@@ -193,7 +193,7 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing</returns>
     static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
         let ds =  Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%A' dimStyleName:'%A'" objectIds dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) dimStyleName
         for objectId in objectIds do         
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
@@ -793,13 +793,13 @@ module ExtensionsDimension =
     ///<returns>(string) The current text string</returns>
     static member LeaderText(objectId:Guid) : string = //GET
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText failed.  objectId:'%A'" objectId
+        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText failed.  objectId:'%s'" (rhType objectId)
         | Some g ->
             match g with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%A'" objectId
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (rhType objectId)
 
     [<Extension>]
     ///<summary>Modifies the text string of a dimension leader object</summary>
@@ -808,13 +808,13 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectId:Guid, text:string) : unit = //SET
         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed. objectId:'%A'" objectId
+        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed. objectId:'%s'" (rhType objectId)
         | Some g ->
             match g with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
-                if not <| Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%A'" objectId                
+                if not <| Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (rhType objectId)                
                 annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
                 Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (rhType objectId)

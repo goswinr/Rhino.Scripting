@@ -117,7 +117,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current bump bitmap filename</returns>
     static member MaterialBump(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetBumpTexture()
         if notNull texture then Some texture.FileName else None
 
@@ -195,7 +195,7 @@ module ExtensionsMaterial =
     ///<returns>(string) The current material name</returns>
     static member MaterialName(materialIndex:int) : string = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Name
         rc
 
@@ -218,7 +218,7 @@ module ExtensionsMaterial =
     ///<returns>(Drawing.Color) The current material reflective color</returns>
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.ReflectionColor
         rc
 
@@ -243,7 +243,7 @@ module ExtensionsMaterial =
     ///    0.0 being matte and 255.0 being glossy</returns>
     static member MaterialShine(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Shine
         rc
 
@@ -269,7 +269,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current texture bitmap filename</returns>
     static member MaterialTexture(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetBitmapTexture()
         if notNull texture then  Some texture.FileName else None
 
@@ -296,7 +296,7 @@ module ExtensionsMaterial =
     ///    0.0 being opaque and 1.0 being transparent</returns>
     static member MaterialTransparency(materialIndex:int) : float = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Transparency
         rc
 
@@ -321,7 +321,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current transparency bitmap filename</returns>
     static member MaterialTransparencyMap(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' " materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
         let texture = mat.GetTransparencyTexture()
         if notNull texture then  Some texture.FileName else None
 

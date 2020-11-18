@@ -73,19 +73,19 @@ module ExtensionsHatch =
         if notNull hatchPattern then
             let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patterninstance|> isNull then RhinoMath.UnsetIntIndex else patterninstance.Index
-            if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+            if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) hatchPattern scale rotation tolerance
         let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
-        if isNull hatches then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+        if isNull hatches then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) hatchPattern scale rotation tolerance
         let ids = Rarr()
         for hatch in hatches do
             let objectId = Doc.Objects.AddHatch(hatch)
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
-        if ids.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" curveIds hatchPattern scale rotation tolerance
+        if ids.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed.  curveIds:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) hatchPattern scale rotation tolerance
         Doc.Views.Redraw()
         ids
 
@@ -106,7 +106,7 @@ module ExtensionsHatch =
                             [<OPT;DEF(0.0)>]rotation:float) : Guid =
         let rc = RhinoScriptSyntax.AddHatches([curveId], hatchPattern, scale, rotation) //TODO Test ok with null
         if rc.Count = 1 then rc.[0]
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed.  curveId:'%A' hatchPattern:'%A' scale:'%A' rotation:'%A'" curveId hatchPattern scale rotation
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed. curveId:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A'" (rhType curveId) hatchPattern scale rotation
 
 
 

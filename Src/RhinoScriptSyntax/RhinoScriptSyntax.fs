@@ -467,12 +467,12 @@ type RhinoScriptSyntax private () =
     ///<returns>Guid) Fails on bad input</returns>
     static member CoerceGuid(objectId:'T) : Guid =
         match box objectId with
-        | :? Guid  as g -> if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.: CoerceGuid: Guid is Emty: %A" objectId else g
-        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then RhinoScriptingException.Raise "RhinoScriptSyntax.: CoerceGuid: Guid is Emty or None: %A" objectId else go.Value //from UI functions
+        | :? Guid  as g -> if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.: CoerceGuid: Guid is Emty: %A" (rhType objectId) else g
+        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then RhinoScriptingException.Raise "RhinoScriptSyntax.: CoerceGuid: Guid is Emty or None: %A" (rhType objectId) else go.Value //from UI functions
         | :? string  as s -> try Guid.Parse s with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.: could not CoerceGuid: string '%s' can not be converted to a Guid" s
         | :? DocObjects.RhinoObject as o -> o.Id
         | :? DocObjects.ObjRef      as o -> o.ObjectId
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: could not CoerceGuid:%A can not be converted to a Guid" objectId
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: could not CoerceGuid:%A can not be converted to a Guid" (rhType objectId)
 
     //<summary>Attempt to get a Sequence of Guids from input</summary>
     //<param name="Ids">list of Guids</param>
@@ -546,11 +546,11 @@ type RhinoScriptSyntax private () =
         //            let o = Doc.Objects.FindId(g) 
         //            if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
         //            else o
-        //| _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: could not coerce %A to a RhinoObject" objectId
+        //| _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: could not coerce %A to a RhinoObject" (rhType objectId)
         if Guid.Empty = objectId then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
         else 
             let o = Doc.Objects.FindId(objectId) 
-            if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: Guid %A not found in Object table." objectId
+            if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: Guid %A not found in Object table." (rhType objectId)
             else o  
 
 
@@ -643,7 +643,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailView (objectId:'T) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  DetailView as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %A : %A " g.ObjectType objectId            
+        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %A : %A" g.ObjectType objectId            
     
     ///<summary>Attempt to get Detail view rectangle Object</summary>
     ///<param name="objectId">(Guid): objectId of Detail object</param> 
@@ -651,7 +651,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailViewObject failed on %A : %A " g.ObjectType objectId
+        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailViewObject failed on %A : %A" g.ObjectType objectId
    
         
     //-------Annotation ----
@@ -723,7 +723,7 @@ type RhinoScriptSyntax private () =
                 else  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry: Could not coerce Option<Guid> None to a RhinoObject. This might be from cancelled UI interaction" 
         | :? DocObjects.ObjRef as r -> r.Geometry()
         | :? DocObjects.RhinoObject as o -> o.Geometry        
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry: Could not Coerce %A to a Rhino.Geometry.GeometryBase base class. Is it a struct like Point3d or Plane? " objectId
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry: Could not Coerce %A to a Rhino.Geometry.GeometryBase base class. Is it a struct like Point3d or Plane? " (rhType objectId)
     
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible</summary>
     ///<param name="pt">Input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
@@ -946,7 +946,7 @@ type RhinoScriptSyntax private () =
         | :? Surface as c -> c
         | :? Brep as b -> 
             if b.Faces.Count = 1 then b.Faces.[0] :> Surface
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on %A from Brep with %d Faces" (rhType objectId) b.Faces.Count
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on: %s " (typeDescr objectId)
 
     ///<summary>Attempt to get surface geometry from the document with a given objectId</summary>
@@ -958,7 +958,7 @@ type RhinoScriptSyntax private () =
         | :? Surface as c -> c.ToNurbsSurface()
         | :? Brep as b -> 
             if b.Faces.Count = 1 then (b.Faces.[0] :> Surface).ToNurbsSurface()
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on %A from Brep with %d Faces" (rhType objectId) b.Faces.Count
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on: %s " (typeDescr objectId)
 
 

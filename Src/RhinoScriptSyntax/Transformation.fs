@@ -45,7 +45,6 @@ module ExtensionsTransformation =
         xform.IsZero4x4
 
 
-
     [<Extension>]
     ///<summary>Returns a change of basis transformation matrix or None on error</summary>
     ///<param name="initialPlane">(Plane) The initial plane</param>

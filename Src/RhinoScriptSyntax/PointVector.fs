@@ -169,7 +169,7 @@ module ExtensionsPointvector =
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject: non supported object type %A %A ose Point, Pointcloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
         if t1 closest <> Guid.Empty then closest
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject failed on %A and %A " point objectIds
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject failed on %A and %A" point objectIds
 
 
     [<Extension>]

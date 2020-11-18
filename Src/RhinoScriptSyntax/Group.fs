@@ -158,11 +158,11 @@ module ExtensionsGroup =
     static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%A' groupName:'%A'" objectId groupName
+        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (rhType objectId) groupName
         let attrs = rhinoobject.Attributes
         attrs.RemoveFromGroup(index)
         if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%A' groupName:'%A'" objectId groupName
+            RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (rhType objectId) groupName
 
 
     [<Extension>]
@@ -172,13 +172,13 @@ module ExtensionsGroup =
     ///<returns>(unit) void, nothing</returns>
     static member RemoveObjectFromGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" objectIds groupName        
+        if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) groupName        
         for objectId in objectIds do
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rhinoobject.Attributes
             attrs.RemoveFromGroup(index)
             if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%A' groupName:'%A'" objectId groupName
+                RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (rhType objectId) groupName
         
 
 

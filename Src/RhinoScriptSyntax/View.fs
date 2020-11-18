@@ -778,7 +778,7 @@ module ExtensionsView =
     static member ViewRadius(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A' " view
+        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
         let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let frusright = b
         let frustop = d
@@ -798,7 +798,7 @@ module ExtensionsView =
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
-        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A' " view
+        if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
         let ok, a, b, c, d, e, f = viewport.GetFrustum()
         let frusright = b
         let frustop = d

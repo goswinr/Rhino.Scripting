@@ -350,7 +350,7 @@ module ExtensionsCurve =
             for i,pt in Seq.indexed(points) do
                 let d = Doc.Objects.AddTextDot(string i, pt) 
                 RhinoScriptSyntax.ObjectLayer(d,"AddPolyline failed",true)
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document.  points:'%A' " points
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document.  points:'%A'" points
         Doc.Views.Redraw()
         rc
     
@@ -362,7 +362,7 @@ module ExtensionsCurve =
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddPolylineClosed(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A' " points.ToNiceString        
+        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A'" points.ToNiceString        
         if (pl.First-pl.Last).Length <= Doc.ModelAbsoluteTolerance then 
             pl.[pl.Count-1] <- pl.First
         else
@@ -373,7 +373,7 @@ module ExtensionsCurve =
             for i,pt in Seq.indexed(points) do
                 let d = Doc.Objects.AddTextDot(string i, pt) 
                 RhinoScriptSyntax.ObjectLayer(d,"AddPolylineClosed failed",true)            
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A' " points
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A'" points
         Doc.Views.Redraw()
         rc
 
@@ -427,9 +427,9 @@ module ExtensionsCurve =
     static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId)
         let trimcurve = curve.Trim(param0, param1)
-        if isNull trimcurve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSubCrv: Unable to trim curve.  curveId:'%A' param0:'%A' param1:'%A'" curveId param0 param1
+        if isNull trimcurve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSubCrv: Unable to trim curve. curveId:'%s' param0:'%A' param1:'%A'" (rhType curveId) param0 param1
         let rc = Doc.Objects.AddCurve(trimcurve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSubCrv: Unable to add curve to document.  curveId:'%A' param0:'%A' param1:'%A'" curveId param0 param1
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSubCrv: Unable to add curve to document. curveId:'%s' param0:'%A' param1:'%A'" (rhType curveId) param0 param1
         Doc.Views.Redraw()
         rc
 
@@ -444,7 +444,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         (!arc).AngleDegrees
 
 
@@ -457,7 +457,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex 
         (!arc).Center
 
 
@@ -470,7 +470,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex 
         (!arc).MidPoint
 
 
@@ -483,7 +483,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc.  curveId:'%A' segmentIndex:'%A' curveId:'%A'" curveId segmentIndex curveId
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex 
         (!arc).Radius
 
 
@@ -497,7 +497,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         (!circle).Center
 
 
@@ -510,7 +510,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         (!circle).Plane
 
 
@@ -526,7 +526,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle.  curveId:'%A' segmentIndex:'%A' " curveId segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         (!circle).Circumference
 
 
@@ -539,7 +539,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle.  curveId:'%A' segmentIndex:'%A' " curveId segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         (!circle).Radius
 
 
@@ -554,9 +554,9 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.IsClosed then  curveId
         else
-            if not <| curve.MakeClosed(ifZero1 tolerance Doc.ModelAbsoluteTolerance) then  RhinoScriptingException.Raise "RhinoScriptSyntax.CloseCurve: Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
+            if not <| curve.MakeClosed(ifZero1 tolerance Doc.ModelAbsoluteTolerance) then  RhinoScriptingException.Raise "RhinoScriptSyntax.CloseCurve: Unable to add curve to document. curveId:'%s' tolerance:'%A'" (rhType curveId) tolerance
             let rc = Doc.Objects.AddCurve(curve)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CloseCurve: Unable to add curve to document.  curveId:'%A' tolerance:'%A'" curveId tolerance
+            if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CloseCurve: Unable to add curve to document. curveId:'%s' tolerance:'%A'" (rhType curveId) tolerance
             Doc.Views.Redraw()
             rc
 
@@ -760,12 +760,12 @@ module ExtensionsCurve =
                 if notNull curve && curve.IsValid then
                     let rc = Doc.Objects.AddCurve(curve)
                     curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A' " curveA curveB
+                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
                     curves.Add(rc)
             Doc.Views.Redraw()
             curves
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A' " curveA curveB
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanDifference: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
 
 
     [<Extension>]
@@ -787,12 +787,12 @@ module ExtensionsCurve =
                 if notNull curve && curve.IsValid then
                     let rc = Doc.Objects.AddCurve(curve)
                     curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A' " curveA curveB
+                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
                     curves.Add(rc)
             Doc.Views.Redraw()
             curves
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A' " curveA curveB
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanIntersection: Unable to add curve to document.  curveA:'%A' curveB:'%A'" curveA curveB
 
 
     [<Extension>]
@@ -813,7 +813,7 @@ module ExtensionsCurve =
                 if notNull curve && curve.IsValid then
                     let rc = Doc.Objects.AddCurve(curve)
                     curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanUnion: Unable to add curve to document.  curveIds:'%A' " curveIds
+                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanUnion: Unable to add curve to document.  curveIds:'%s'" (RhinoScriptSyntax.ToNiceString curveIds)
                     curves.Add(rc)
             Doc.Views.Redraw()
         curves 
@@ -832,7 +832,7 @@ module ExtensionsCurve =
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let rc, outCurves, outPoints = Intersect.Intersection.CurveBrep(curve, brep, tolerance0)
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Intersection failed.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
+        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Intersection failed. curveId:'%s' brepId:'%A' tolerance:'%A'" (rhType curveId) brepId tolerance
 
         let curves = Rarr(0)
         let points = Rarr(0)
@@ -841,7 +841,7 @@ module ExtensionsCurve =
                 curves.Add(curve)
                 //let rc = Doc.Objects.AddCurve(curve)
                 //curve.Dispose()
-                //if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Unable to add curve to document.  curveId:'%A' brepId:'%A' tolerance:'%A'" curveId brepId tolerance
+                //if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Unable to add curve to document. curveId:'%s' brepId:'%A' tolerance:'%A'" (rhType curveId) brepId tolerance
                 //curves.Add(rc)
         for point in outPoints do
             if point.IsValid then
@@ -870,13 +870,13 @@ module ExtensionsCurve =
         for curveId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
             geometry.Add( rhobj.Geometry )
-        if Seq.isEmpty geometry then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject: objectIds must contain at least one item.  curveId:'%A' curveIds:'%A'" curveId objectIds
+        if Seq.isEmpty geometry then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject: objectIds must contain at least one item. curveId:'%s' objectIds:'%s'" (rhType curveId) (RhinoScriptSyntax.ToNiceString objectIds)
         let curvePoint = ref Point3d.Unset
         let geomPoint  = ref Point3d.Unset
         let whichGeom = ref 0
         let success = curve.ClosestPoints(geometry, curvePoint, geomPoint, whichGeom)
         if success then  objectIds|> Seq.item !whichGeom, !geomPoint, !curvePoint
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject failed  curveId:'%A' objectIds:'%A'" curveId objectIds
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject failed  curveId:'%s' objectIds:'%A'" (rhType curveId) objectIds
 
     [<Extension>]
     ///<summary>Returns the 3D point locations on the curve and finite line where they are closest to
@@ -891,7 +891,7 @@ module ExtensionsCurve =
         let linePoint  = ref Point3d.Unset
         let success = curve.ClosestPoints(line.ToNurbsCurve(), curvePoint, linePoint)
         if success then  !linePoint, !curvePoint
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveLineClosestPoint failed  curveId:'%A' Line:'%A'" curveId line
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveLineClosestPoint failed  curveId:'%s' Line:'%A'" (rhType curveId) line
 
 
 
@@ -906,7 +906,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let t = ref 0.
         let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestParameter failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestParameter failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         !t
 
     [<Extension>]
@@ -919,7 +919,7 @@ module ExtensionsCurve =
     static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let rc, t = curve.ClosestPoint(point)
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestPoint failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestPoint failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         curve.PointAt(t)
 
 
@@ -935,7 +935,7 @@ module ExtensionsCurve =
     static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if startPoint.DistanceTo(endPoint)<RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.Start && ende point are too close to define a line.  curveId:'%A' startPoint:'%A' endPoint:'%A'" curveId startPoint endPoint
+            RhinoScriptingException.Raise "RhinoScriptSyntax.Start && ende point are too close to define a line. curveId:'%s' startPoint:'%A' endPoint:'%A'" (rhType curveId) startPoint endPoint
         curve.DivideAsContour( startPoint, endPoint, interval)
 
 
@@ -1246,10 +1246,10 @@ module ExtensionsCurve =
             elif parameter<domain.Min && (domain.Min-para)<=tol then
                 para <- domain.Min
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.CurveFrame failed.  curveId:'%A' parameter:'%A' segmentIndex:'%A'" curveId parameter segmentIndex
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CurveFrame failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (rhType curveId) parameter segmentIndex
         let  rc, frame = curve.FrameAt(para)
         if rc && frame.IsValid then  frame
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveFrame failed.  curveId:'%A' parameter:'%A' segmentIndex:'%A'" curveId parameter segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveFrame failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (rhType curveId) parameter segmentIndex
 
 
     [<Extension>]
@@ -1260,7 +1260,7 @@ module ExtensionsCurve =
     static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if notNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnotCount failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if notNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnotCount failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         nc.Knots.Count
 
 
@@ -1272,7 +1272,7 @@ module ExtensionsCurve =
     static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Rarr<float> =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if notNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnots failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if notNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnots failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         rarr{ for i = 0 to nc.Knots.Count - 1 do yield nc.Knots.[i] }
 
 
@@ -1302,11 +1302,11 @@ module ExtensionsCurve =
     static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
-            if curve.IsClosed || curve.IsClosable(Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveDirection failed on closed or closable curve.  curveId:'%A' allowNonLinear '%A' segmentIndex:'%A'" curveId allowNonLinear segmentIndex
+            if curve.IsClosed || curve.IsClosable(Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveDirection failed on closed or closable curve. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (rhType curveId) allowNonLinear segmentIndex
             let v = curve.PointAtEnd - curve.PointAtStart
             v.Unitized
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveDirection failed.  curveId:'%A' allowNonLinear '%A' segmentIndex:'%A'" curveId allowNonLinear segmentIndex
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveDirection failed. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (rhType curveId) allowNonLinear segmentIndex
 
 
     [<Extension>]
@@ -1318,7 +1318,7 @@ module ExtensionsCurve =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  rc, t = curve.NormalizedLengthParameter(0.5)
         if rc then  curve.PointAt(t)
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMidPoint failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMidPoint failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
 
 
     [<Extension>]
@@ -1332,7 +1332,7 @@ module ExtensionsCurve =
         let plane = ref Plane.WorldXY
         let rc = curve.TryGetPlane(plane, tol)
         if rc then  (!plane).Normal
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveNormal failed. curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveNormal failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
 
 
     [<Extension>]
@@ -1366,7 +1366,7 @@ module ExtensionsCurve =
     static member CurvePerpFrame(curveId:Guid, parameter:float) : Plane =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let  rc, plane = curve.PerpendicularFrameAt(parameter)
-        if rc then  plane else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePerpFrame failed. curveId:'%A' parameter:'%f'" curveId parameter
+        if rc then  plane else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePerpFrame failed. curveId:'%s' parameter:'%f'"  (rhType curveId) parameter
 
 
     [<Extension>]
@@ -1381,7 +1381,7 @@ module ExtensionsCurve =
         let plane = ref Plane.WorldXY
         let rc = curve.TryGetPlane(plane, tol)
         if rc then  !plane
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePlane failed. curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePlane failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
 
 
     [<Extension>]
@@ -1393,7 +1393,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable nc = curve.ToNurbsCurve()
         if notNull nc then  nc.Points.Count
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePointCount failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePointCount failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
 
 
     [<Extension>]
@@ -1406,7 +1406,7 @@ module ExtensionsCurve =
     static member CurvePoints(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d Rarr =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePoints failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePoints failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         rarr { for i = 0 to nc.Points.Count-1 do yield nc.Points.[i].Location }
 
 
@@ -1419,11 +1419,11 @@ module ExtensionsCurve =
     static member CurveRadius(curveId:Guid, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable rc, t = curve.ClosestPoint(testPoint)//, 0.0)
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveRadius failed.  curveId:'%A' testPoint:'%A' segmentIndex:'%A'" curveId testPoint segmentIndex
+        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (rhType curveId) testPoint segmentIndex
         let mutable v = curve.CurvatureAt( t )
         let mutable k = v.Length
         if k>RhinoMath.ZeroTolerance then  1.0/k
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveRadius failed.  curveId:'%A' testPoint:'%A' segmentIndex:'%A'" curveId testPoint segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (rhType curveId) testPoint segmentIndex
 
 
     [<Extension>]
@@ -1548,7 +1548,7 @@ module ExtensionsCurve =
         if curve.Domain.IncludesParameter(parameter) then
             curve.TangentAt(parameter)
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveTangent failed.  curveId:'%A' parameter:'%A' segmentIndex:'%A'" curveId parameter segmentIndex
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveTangent failed. curveId:'%s' parameter:'%A' segmentIndex:'%A'" (rhType curveId) parameter segmentIndex
 
 
     [<Extension>]
@@ -1561,7 +1561,7 @@ module ExtensionsCurve =
             match RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex) with
             | :? NurbsCurve as nc -> nc
             | c -> c.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveWeights failed.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveWeights failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         rarr { for pt in nc.Points -> pt.Weight }
 
 
@@ -1575,7 +1575,7 @@ module ExtensionsCurve =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let pts = ref (Array.zeroCreate (segments + 1))
         let rc = curve.DivideByCount(segments, true, pts)
-        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed.  curveId:'%A' segments:'%A'" curveId segments
+        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed. curveId:'%s' segments:'%A'" (rhType curveId) segments
         !pts
 
 
@@ -1587,7 +1587,7 @@ module ExtensionsCurve =
     static member DivideCurve(curveId:Guid, segments:int) :  float array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let rc = curve.DivideByCount(segments, true)
-        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed.  curveId:'%A' segments:'%A'" curveId segments
+        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed. curveId:'%s' segments:'%A'" (rhType curveId) segments
         rc
 
 
@@ -1599,7 +1599,11 @@ module ExtensionsCurve =
     static member DivideCurveEquidistant(curveId:Guid, distance:float) : array<Point3d> =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let  points = curve.DivideEquidistant(distance)
-        if isNull points then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed.  curveId:'%A' distance:'%A'" curveId distance
+        if isNull points then  
+            let len = curve.GetLength()
+            if len < distance then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
         points
         //let  tvals = Rarr()
         //for point in points do
@@ -1616,8 +1620,12 @@ module ExtensionsCurve =
     static member DivideCurveLengthIntoPoints(curveId:Guid, length:float) : Point3d Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, true)
-        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed.  curveId:'%A' length:'%A'" curveId length
-        Rarr.init rc.Length (fun i-> curve.PointAt(rc.[i]))
+        if isNull rc then  
+            let len = curve.GetLength()
+            if len < length then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
+        rarr{ for r in rc do curve.PointAt(r)}
 
     [<Extension>]
     ///<summary>Divides a curve object into segments of a specified length</summary>
@@ -1627,7 +1635,11 @@ module ExtensionsCurve =
     static member DivideCurveLength(curveId:Guid, length:float) :  float [] =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, true)
-        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed.  curveId:'%A' length:'%A'" curveId length
+        if isNull rc then  
+            let len = curve.GetLength()
+            if len < length then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
         rc
 
 
@@ -1638,7 +1650,7 @@ module ExtensionsCurve =
     static member EllipseCenterPoint(curveId:Guid) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc, ellipse = curve.TryGetEllipse()
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.EllipseCenterPoint: Curve is not an ellipse.  curveId:'%A'" curveId
+        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.EllipseCenterPoint: Curve is not an ellipse. curveId:'%s'" (rhType curveId)
         ellipse.Plane.Origin
 
 
@@ -1649,7 +1661,7 @@ module ExtensionsCurve =
     static member EllipseQuadPoints(curveId:Guid) : Point3d * Point3d * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc, ellipse = curve.TryGetEllipse()
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.EllipseQuadPoints: Curve is not an ellipse.  curveId:'%A'" curveId
+        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.EllipseQuadPoints: Curve is not an ellipse. curveId:'%s'" (rhType curveId)
         let origin = ellipse.Plane.Origin;
         let xaxis = ellipse.Radius1 * ellipse.Plane.XAxis;
         let yaxis = ellipse.Radius2 * ellipse.Plane.YAxis;
@@ -1713,17 +1725,17 @@ module ExtensionsCurve =
         if extensionType = 0 then  extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (rhType curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
 
         let sidet = 
             match side with 
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve Side must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (rhType curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
 
         let rhobjs = rarr { for objectId in boundarycurveIds -> RhinoScriptSyntax.CoerceRhinoObject(objectId) }
-        if rhobjs.IsEmpty then  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve BoundarycurveIds failed. they must contain at least one item.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+        if rhobjs.IsEmpty then  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve BoundarycurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (rhType curveId) extensionType side (RhinoScriptSyntax.ToNiceString boundarycurveIds)
         let geometry = rarr { for obj in rhobjs -> obj.Geometry }
         let newcurve = curve.Extend(sidet, extensionTypet, geometry)
         if notNull newcurve && newcurve.IsValid then
@@ -1732,13 +1744,13 @@ module ExtensionsCurve =
                  Doc.Views.Redraw()
                  curveId
               else
-                 RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+                 RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (rhType curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
             else
               let g= Doc.Objects.AddCurve(newcurve)
               Doc.Views.Redraw()
               g
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed.  curveId:'%A' extensionType:'%A' side:'%A' boundarycurveIds:'%A'" curveId extensionType side boundarycurveIds
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (rhType curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
 
 
     [<Extension>]
@@ -1763,14 +1775,14 @@ module ExtensionsCurve =
         if extensionType   = 0 then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength ExtensionType must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (rhType curveId) extensionType side length
 
         let sidet = 
             match side with 
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength Side must be 0, 1, or 2.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (rhType curveId) extensionType side length
 
         let newcurve =
             if length<0. then curve.Trim(sidet, -length)
@@ -1780,8 +1792,8 @@ module ExtensionsCurve =
             if Doc.Objects.Replace(curveId, newcurve) then
                 Doc.Views.Redraw()
                 curveId
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength failed.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength failed.  curveId:'%A' extensionType:'%A' side:'%A' length:'%A'" curveId extensionType side length
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength failed. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (rhType curveId) extensionType side length
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength failed. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (rhType curveId) extensionType side length
 
 
     [<Extension>]
@@ -1808,22 +1820,22 @@ module ExtensionsCurve =
             |  0 ->  CurveExtensionStyle.Line
             |  1 ->  CurveExtensionStyle.Arc
             |  2 ->  CurveExtensionStyle.Smooth
-            |  x ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2.  curveId:'%A' side:'%A' point:'%A' extensionType:'%A'" curveId side point extensionType
+            |  x ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (rhType curveId) side point extensionType
 
         let sidet = 
             match side with 
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2.  curveId:'%A' side:'%A' point:'%A' extensionType:'%A'" curveId side point extensionType
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (rhType curveId) side point extensionType
         
         let newcurve = curve.Extend(sidet, extensionTypet, point)
         if notNull newcurve && newcurve.IsValid then
             if Doc.Objects.Replace( curveId, newcurve ) then
                 Doc.Views.Redraw()
                 curveId
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint failed.  curveId:'%A' side:'%A' point:'%A'" curveId side point
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint failed.  curveId:'%A' side:'%A' point:'%A'" curveId side point
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint failed. curveId:'%s' side:'%A' point:'%A'" (rhType curveId) side point
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint failed. curveId:'%s' side:'%A' point:'%A'" (rhType curveId) side point
 
 
     [<Extension>]
@@ -1883,11 +1895,11 @@ module ExtensionsCurve =
                 rc <- Doc.Objects.AddCurve(nc, rhobj.Attributes)
             else
                 rc <- Doc.Objects.AddCurve(nc)
-            if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.FitCurve: Unable to add curve to document.  curveId:'%A' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" curveId degree distanceTolerance angleTolerance
+            if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.FitCurve: Unable to add curve to document. curveId:'%s' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" (rhType curveId) degree distanceTolerance angleTolerance
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.FitCurve failed.  curveId:'%A' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" curveId degree distanceTolerance angleTolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.FitCurve failed. curveId:'%s' degree:'%A' distanceTolerance:'%A' angleTolerance:'%A'" (rhType curveId) degree distanceTolerance angleTolerance
 
 
     [<Extension>]
@@ -2144,13 +2156,13 @@ module ExtensionsCurve =
     ///<returns>(Guid Rarr) Object objectId representing the new curves</returns>
     static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         if Seq.length(curveIds)<2 then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveIds must contain at least 2 items.  curveIds:'%A' deleteInput:'%A' tolerance:'%A'" curveIds deleteInput tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveIds must contain at least 2 items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) deleteInput tolerance
 
         let curves = rarr { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         let tolerance0 = ifZero1 tolerance (2.1 * Doc.ModelAbsoluteTolerance)
         let newcurves = Curve.JoinCurves(curves, tolerance0)
         if isNull newcurves then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveIds must contain at least 2 items.  curveIds:'%A' deleteInput:'%A' tolerance:'%A'" curveIds deleteInput tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.CurveIds must contain at least 2 items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) deleteInput tolerance
 
         let rc = rarr { for crv in newcurves -> Doc.Objects.AddCurve(crv) }
         if deleteInput then
@@ -2180,19 +2192,19 @@ module ExtensionsCurve =
     ///<returns>(Guid) objectId of the new or modified curve</returns>
     static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        if not <| curve.IsPeriodic then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.1  curveId:'%A' deleteInput:'%A'" curveId deleteInput
+        if not <| curve.IsPeriodic then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.1  curveId:'%s' deleteInput:'%A'" (rhType curveId) deleteInput
         let nc = curve.ToNurbsCurve()
-        if isNull nc  then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.2  curveId:'%A' deleteInput:'%A'" curveId deleteInput
-        if not <| nc.Knots.ClampEnd( CurveEnd.Both ) then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.  curveId:'%A' deleteInput:'%A'" curveId deleteInput
+        if isNull nc  then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.2  curveId:'%s' deleteInput:'%A'" (rhType curveId) deleteInput
+        if not <| nc.Knots.ClampEnd( CurveEnd.Both ) then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed. curveId:'%s' deleteInput:'%A'" (rhType curveId) deleteInput
         if deleteInput then
             let rc = Doc.Objects.Replace(curveId, nc)
-            if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.3  curveId:'%A' deleteInput:'%A'" curveId deleteInput
+            if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.3  curveId:'%s' deleteInput:'%A'" (rhType curveId) deleteInput
             Doc.Views.Redraw()
             curveId
         else
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
             let rc = Doc.Objects.AddCurve(nc, rhobj.Attributes)
-            if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.4  curveId:'%A' deleteInput:'%A'" curveId deleteInput
+            if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.4  curveId:'%s' deleteInput:'%A'" (rhType curveId) deleteInput
             Doc.Views.Redraw()
             rc
 
@@ -2255,7 +2267,7 @@ module ExtensionsCurve =
         let tolerance = Doc.ModelAbsoluteTolerance
         let style:CurveOffsetCornerStyle = EnumOfValue style
         let curves = curve.Offset(direction, normal0, distance, tolerance, style)
-        if isNull curves then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurve failed.  curveId:'%A' direction:'%A' distance:'%A' normal:'%A' style:'%A'" curveId direction distance normal style
+        if isNull curves then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:'%A'" (rhType curveId) direction distance normal style
         let rc = rarr { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
         rc
@@ -2273,7 +2285,7 @@ module ExtensionsCurve =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed.  curveId:'%A' surfaceId:'%A' parameter:'%A'" curveId surfaceId parameter
+        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%A' parameter:'%A'" (rhType curveId) surfaceId parameter
         let rc = rarr { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
         rc
@@ -2291,7 +2303,7 @@ module ExtensionsCurve =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, distance, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed.  curveId:'%A' surfaceId:'%A' distance:'%A'" curveId surfaceId distance
+        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%A' distance:'%A'" (rhType curveId) surfaceId distance
         let curves = rarr{for curve in curves do curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) } //https://github.com/mcneel/rhinoscriptsyntax/pull/186        
         let rc = rarr { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
@@ -2370,7 +2382,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         match curve with
         | :? PolyCurve as curve ->  curve.SegmentCount
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CurveId does not reference a polycurve.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CurveId does not reference a polycurve. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
 
 
     [<Extension>]
@@ -2383,7 +2395,7 @@ module ExtensionsCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let rc, polyline = curve.TryGetPolyline()
         if rc then  rarr { for pt in polyline -> pt }
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveId does not <| reference a polyline.  curveId:'%A' segmentIndex:'%A'" curveId segmentIndex
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.CurveId does not <| reference a polyline. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
 
 
     [<Extension>]
@@ -2427,7 +2439,7 @@ module ExtensionsCurve =
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RebuildCurve(curveId:Guid, degree:int, pointCount:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        if degree<1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RebuildCurve: Degree must be greater than 0.  curveId:'%A' degree:'%A' pointCount:'%A'" curveId degree pointCount
+        if degree<1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RebuildCurve: Degree must be greater than 0. curveId:'%s' degree:'%A' pointCount:'%A'" (rhType curveId) degree pointCount
         let newcurve = curve.Rebuild(pointCount, degree, false)
         if isNull newcurve then  false
         else
@@ -2527,7 +2539,7 @@ module ExtensionsCurve =
     static member SplitCurve(curveId:Guid, parameter:float seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurves = curve.Split(parameter)
-        if isNull newcurves then  RhinoScriptingException.Raise "RhinoScriptSyntax.SplitCurve failed.  curveId:'%A' parameter:'%A' deleteInput:'%A'" curveId parameter deleteInput
+        if isNull newcurves then  RhinoScriptingException.Raise "RhinoScriptSyntax.SplitCurve failed. curveId:'%s' parameter:'%A' deleteInput:'%A'" (rhType curveId) parameter deleteInput
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = rarr { for crv in newcurves -> Doc.Objects.AddCurve(crv, rhobj.Attributes) }
         if deleteInput then
@@ -2550,7 +2562,7 @@ module ExtensionsCurve =
     static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurve = curve.Trim(fst interval, snd interval)
-        if isNull newcurve then  RhinoScriptingException.Raise "RhinoScriptSyntax.TrimCurve failed.  curveId:'%A' interval:'%A' deleteInput:'%A'" curveId interval deleteInput
+        if isNull newcurve then  RhinoScriptingException.Raise "RhinoScriptSyntax.TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (rhType curveId) interval deleteInput
         let att = None
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = Doc.Objects.AddCurve(newcurve, rhobj.Attributes)
@@ -2600,14 +2612,14 @@ module ExtensionsCurve =
             outCurves <- Curve.CreateTweenCurvesWithMatching(curve0, curve1, numberOfCurves, tolerance)
         elif method = 2 then
             outCurves <- Curve.CreateTweenCurvesWithSampling(curve0, curve1, numberOfCurves, sampleNumber, tolerance)
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddTweenCurves Method must be 0, 1, or 2.  fromCurveId:'%A' toCurveId:'%A' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" fromCurveId toCurveId numberOfCurves method sampleNumber
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AddTweenCurves Method must be 0, 1, or 2.  fromcurveId:'%s' tocurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (rhType fromCurveId) (rhType toCurveId) numberOfCurves method sampleNumber
         let curves = Rarr()
         if notNull outCurves then
             for curve in outCurves do
                 if notNull curve && curve.IsValid then
                     let rc = Doc.Objects.AddCurve(curve)
                     //curve.Dispose()
-                    if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddTweenCurves: Unable to add curve to document.  fromCurveId:'%A' toCurveId:'%A' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" fromCurveId toCurveId numberOfCurves method sampleNumber
+                    if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddTweenCurves: Unable to add curve to document.  fromcurveId:'%s' tocurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" (rhType fromCurveId) (rhType toCurveId) numberOfCurves method sampleNumber
                     curves.Add(rc)
             Doc.Views.Redraw()
         curves

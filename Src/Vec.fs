@@ -103,7 +103,7 @@ module Vec =
     /// Returns Vector3d(v.X, v.Y, 0.0)
     let inline projectToXYPlane (v:Vector3d) =
         let r = Vector3d(v.X, v.Y, 0.0)
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToXYPlane: Cannot projectToXYPlane for vertical vector %A " v 
+        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToXYPlane: Cannot projectToXYPlane for vertical vector %A" v 
         r
 
     /// Project vector to plane
