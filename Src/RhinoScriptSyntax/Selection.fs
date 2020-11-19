@@ -172,7 +172,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked objects. If False, objects that
     ///    are picked are not selected</param>
-    ///<returns>(Guid * bool * int * Point3d * float * string) Option of Tuple containing the following information
+    ///<returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
     ///    [0]  guid     identifier of the curve object
     ///    [1]  bool     True if the curve was preselected, otherwise False
     ///    [2]  Enum     DocObjects.SelectionMethod
@@ -181,7 +181,7 @@ module ExtensionsSelection =
     ///    [5]  str      name of the view selection was made</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
-                                    [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * float * string> =
+                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
         let get () =  // TODO Add check if already hidden, then dont even hide and show
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -191,8 +191,9 @@ module ExtensionsSelection =
             go.GeometryFilter <- DocObjects.ObjectType.Curve
             go.SubObjectSelect <- false
             go.GroupSelect <- false
-            go.AcceptNothing(true)            
-            if go.Get() <> Input.GetResult.Object then None
+            go.AcceptNothing(true)
+            let res = go.Get()
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetCurveObject(message=%A): %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -207,7 +208,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll()|> ignore
                     Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
-                Some (objectId, presel, selmethod, point, curveparameter, viewname)
+                (objectId, presel, selmethod, point, curveparameter, viewname)
             |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
@@ -227,13 +228,13 @@ module ExtensionsSelection =
     ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
     ///    If True, subobjects can be selected. When this is the
     ///    case, for tracking  of the subobject go via the Object Ref</param>
-    ///<returns>(Guid option) Identifier of the picked object</returns>
+    ///<returns>(Guid) Identifier of the picked object</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
-                                    [<OPT;DEF(false)>]subObjects:bool) : Guid option =
+                                    [<OPT;DEF(false)>]subObjects:bool) : Guid =
         let get () = 
             if not  preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -245,8 +246,9 @@ module ExtensionsSelection =
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- subObjects
             go.GroupSelect <- false
-            go.AcceptNothing(true)            
-            if go.Get() <> Input.GetResult.Object then None
+            go.AcceptNothing(true)
+            let res = go.Get()
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObject(message=%A): %A" message res
             else
                 let objref = go.Object(0)
                 let obj = objref.Object()
@@ -258,7 +260,7 @@ module ExtensionsSelection =
                 else
                     Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
-                Some obj.Id
+                obj.Id
         Synchronisation.DoSync true true get
                 
 
@@ -276,7 +278,7 @@ module ExtensionsSelection =
     ///    picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
-    ///<returns>(Guid * bool * float * Point3d * string) Option of Tuple containing the following information
+    ///<returns>(Guid * bool * float * Point3d * string) Tuple containing the following information
     ///    [0] identifier of the object
     ///    [1] True if the object was preselected, otherwise False
     ///    [2] selection method Enum DocObjects.SelectionMethod
@@ -290,7 +292,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * string> =
+                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string = 
         let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -306,7 +308,8 @@ module ExtensionsSelection =
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)            
-            if go.Get() <> Input.GetResult.Object then None
+            let res = go.Get()
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObjectEx(message=%A): %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -320,7 +323,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
                 obj.Select(select) |> ignore
-                Some (objectId, presel, selmethod, point, viewname)
+                (objectId, presel, selmethod, point, viewname)
             |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
@@ -348,7 +351,7 @@ module ExtensionsSelection =
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) Option of List of identifiers of the picked objects</returns>
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -358,7 +361,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(1)>]minimumCount:int,
                                     [<OPT;DEF(0)>]maximumCount:int,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid Rarr> =
+                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Rarr<Guid> =
         let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -375,7 +378,8 @@ module ExtensionsSelection =
             go.SubObjectSelect <- false
             go.GroupSelect <- group
             go.AcceptNothing(true)
-            if go.GetMultiple(minimumCount, maximumCount) <> Input.GetResult.Object then None
+            let res = go.GetMultiple(minimumCount, maximumCount)
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObjects(message=%A): %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     Doc.Objects.UnselectAll() |> ignore
@@ -388,7 +392,7 @@ module ExtensionsSelection =
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
-                Some rc
+                rc
             |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
@@ -416,7 +420,7 @@ module ExtensionsSelection =
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) Option of List of identifiers of the picked objects</returns>
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects</returns>
     static member GetObjectsAndRemember(message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
@@ -426,17 +430,16 @@ module ExtensionsSelection =
                                         [<OPT;DEF(1)>]minimumCount:int,
                                         [<OPT;DEF(0)>]maximumCount:int,
                                         [<OPT;DEF(true)>]printCount:bool,
-                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid Rarr> =
+                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid Rarr =
         try 
             let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
             if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
-            Some objectIds
+            objectIds
         with | _ -> 
-            match RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) with
-            |Some ids ->
-                RhinoScriptSyntax.Sticky.[message] <- ids
-                Some ids
-            | None -> None
+            let ids = RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) 
+            RhinoScriptSyntax.Sticky.[message] <- ids
+            ids
+            
 
     
     [<Extension>]
@@ -452,22 +455,20 @@ module ExtensionsSelection =
     ///    Select the picked objects.  If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
-    ///<returns>(Guid) Option of a identifier of the picked object</returns>
+    ///<returns>(Guid) a identifier of the picked object</returns>
     static member GetObjectAndRemember( message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]preselect:bool,
                                         [<OPT;DEF(false)>]select:bool,
-                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : option<Guid> =
+                                        [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid =
         try 
             let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
             //if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
-            Some objectIds.[0]
+            objectIds.[0]
         with | _ -> 
-            match RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter,false) with
-            |Some id ->
-                RhinoScriptSyntax.Sticky.[message] <- rarr {id}
-                Some id
-            | None -> None
+            let id = RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter,false) 
+            RhinoScriptSyntax.Sticky.[message] <- rarr {id}
+            id
 
     [<Extension>]
     ///<summary>Prompts user to pick, or select one or more objects</summary>
@@ -489,7 +490,7 @@ module ExtensionsSelection =
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
-    ///<returns>((Guid*bool*int*Point3d*string) Rarr) Option of List containing the following information
+    ///<returns>((Guid*bool*int*Point3d*string) Rarr) List containing the following information
     ///    [n][0]  identifier of the object
     ///    [n][1]  True if the object was preselected, otherwise False
     ///    [n][2]  selection method (DocObjects.SelectionMethod)
@@ -501,7 +502,7 @@ module ExtensionsSelection =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : option<(Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr> =
+                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr =
         let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -515,8 +516,9 @@ module ExtensionsSelection =
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
-            go.AcceptNothing(true)            
-            if go.GetMultiple(1, 0) <> Input.GetResult.Object then None
+            go.AcceptNothing(true)
+            let res = go.GetMultiple(1, 0)
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObjectsEx(message=%A): %A" message res            
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     Doc.Objects.UnselectAll() |> ignore
@@ -540,7 +542,7 @@ module ExtensionsSelection =
                     |> (+) "GetObjectsEx got " 
                     |> RhinoScriptSyntax.Print
 
-                Some rc
+                rc
             |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
@@ -551,17 +553,15 @@ module ExtensionsSelection =
     ///    A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
-    ///<returns>(Point3d Rarr) Option of List of 3d points</returns>
+    ///<returns>(Point3d Rarr) List of 3d points</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
-                                        [<OPT;DEF(false)>]                  preselect:bool) : option<Point3d Rarr> =
-        match RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect) with 
-        |None -> None
-        |Some ids -> 
-            let rc = Rarr<Point3d>()
-            for objectId in ids do
-                let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
-                rc.Add(pt)
-            Some rc
+                                        [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr =
+        let ids =  RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect) 
+        let rc = Rarr<Point3d>()
+        for objectId in ids do
+            let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
+            rc.Add(pt)
+        rc
             
 
 
@@ -574,7 +574,7 @@ module ExtensionsSelection =
     ///    Allow for preselected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked object</param>
-    ///<returns>(option of (Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string)):
+    ///<returns>((Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string)):
     ///    [0]  identifier of the surface
     ///    [1]  True if the surface was preselected, otherwise False
     ///    [2]  selection method ( DocObjects.SelectionMethod )
@@ -583,7 +583,7 @@ module ExtensionsSelection =
     ///    [5]  name of the view in which the selection was made</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
-                                    [<OPT;DEF(false)>]select:bool) : option<Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string> =
+                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
         let get () = 
             if not <| preselect then
                 Doc.Objects.UnselectAll() |> ignore
@@ -594,8 +594,8 @@ module ExtensionsSelection =
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)
-            if go.Get() <> Input.GetResult.Object then
-                None
+            let res = go.Get()
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetSurfaceObject(message=%A): %A" message res
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
@@ -616,7 +616,7 @@ module ExtensionsSelection =
                 if not <| select && not <| prepicked then
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
-                Some ( objectId, prepicked, selmethod, point, uv, name)
+                (objectId, prepicked, selmethod, point, uv, name)
             |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
         Synchronisation.DoSync true true get
 
