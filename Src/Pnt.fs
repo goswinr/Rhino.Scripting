@@ -171,6 +171,21 @@ module Pnt =
         xi,yj    
     
     /// returns the smallest Distance between Point Sets
-    let minDistBetweenPointsets (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
+    let minDistBetweenPointSets (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
         let (i,j) = closestPointsIdx xs ys
         distance xs.[i]  ys.[j]
+
+    /// Culls points if they are to close to previous or next item
+    let cullDuplicatePointsInSeq (tolerance) (pts:Rarr<Point3d>)  = 
+        if pts.Count < 2 then pts
+        else
+            let tsq = tolerance*tolerance
+            let res  =  Rarr(pts.Count)
+            let mutable last  = pts.[0]
+            res.Add last
+            for i = 1  to pts.LastIndex do                
+                let pt = pts.[i]
+                if distanceSq last pt > tsq then 
+                    last <- pt
+                    res.Add last
+            res
