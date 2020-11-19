@@ -135,7 +135,7 @@ module Vec =
     /// Returns positive angle between two vectors in Radians , takes vector orientation into account, 
     /// Range 0.0 to PI( = 0 to 180 degree)    
     // INPUT MUST BE UNITIZES
-    let inline angle180fast (a:Vector3d) (b:Vector3d) = 
+    let inline anglePifast (a:Vector3d) (b:Vector3d) = 
         // The "straight forward" method of acos(u.v) has large precision
         // issues when the dot product is near +/-1.  This is due to the
         // steep slope of the acos function as we approach +/- 1.  Slight
@@ -159,31 +159,31 @@ module Vec =
     /// Returns positive angle between two vectors in Radians , takes vector orientation into account, 
     /// Range 0.0 to PI( = 0 to 180 degree)
     /// Unitizes the input vectors
-    let inline angle180Rad (a:Vector3d) (b:Vector3d) =        
-        angle180fast (unitize a) (unitize b)      
+    let inline anglePi (a:Vector3d) (b:Vector3d) =        
+        anglePifast (unitize a) (unitize b)      
 
 
     /// Returns positive angle between two vectors in Degrees , takes vector orientation into account, 
     /// Range 0 to 180 degrees
     /// Unitizes the input vectors
-    let inline angle180Deg (a:Vector3d) (b:Vector3d) = 
-        angle180fast (unitize a) (unitize b) |>  toDegrees
+    let inline angle180 (a:Vector3d) (b:Vector3d) = 
+        anglePifast (unitize a) (unitize b) |>  toDegrees
 
 
     /// Returns positive angle between two vectors in Radians, 
     /// Ignores vector orientation, 
     /// Range: 0.0 to PI/2 ( = 0 to 90 degrees)
     /// Unitizes the input vectors
-    let inline angle90Rad (a:Vector3d) (b:Vector3d) =   
-        let ang = angle180fast (unitize a) (unitize b) 
+    let inline angleHalfPi (a:Vector3d) (b:Vector3d) =   
+        let ang = anglePifast (unitize a) (unitize b) 
         if ang > System.Math.PI*0.5 then System.Math.PI - ang else ang        
     
     /// Returns positive angle between two vectors in Degrees, 
     /// Ignores vector orientation, 
     /// Range: 0 to 90 degrees
     /// Unitizes the input vectors
-    let inline angle90Deg (a:Vector3d) (b:Vector3d) =   
-        angle90Rad a b |>  toDegrees
+    let inline angle90 (a:Vector3d) (b:Vector3d) =   
+        angleHalfPi a b |>  toDegrees
     
     //--------------------angels 360:---------------------------
 
@@ -191,51 +191,55 @@ module Vec =
     /// Considering positve rotation round a planes ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors   
-    let inline angle360RadProjected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
+    let inline angleTwoPiProjected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
         let x = projectToPlane pl a
         let y = projectToPlane pl b
-        let ang = angle180Rad x y
-        if dot (cross x y) pl.ZAxis > 0.0 then  ang
+        let ang = anglePi x y
+        if dot (cross x y) pl.ZAxis >= 0.0 then ang
         else                                    Math.PI * 2. - ang
 
     /// Returns positive angle between two Vectors in Degrees projected to a Plane
     /// Considering positve rotation round a planes ZAxis 
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors   
-    let inline angle360DegProjected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  =  angle360RadProjected pl a b|> toDegrees
+    let inline angle360Projected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  =  angleTwoPiProjected pl a b|> toDegrees
 
     /// Returns positive angle of two Vector projected in XY plane in Radians
     /// Considering positve rotation round the World ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
-    let inline angle360RadProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = 
-        if abs(a.X)<RhinoMath.SqrtEpsilon && abs(a.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angle360RadProjectedInXYPlane: input vector a is vertical or zero length:%A" a
-        if abs(b.X)<RhinoMath.SqrtEpsilon && abs(b.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angle360RadProjectedInXYPlane: input vector b is vertical or zero length:%A" b
+    /// input vector does not need to be unitized
+    let inline angleTwoPiProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = 
+        if abs(a.X)<RhinoMath.SqrtEpsilon && abs(a.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angleTwoPiProjectedInXYPlane: input vector a is vertical or zero length:%A" a
+        if abs(b.X)<RhinoMath.SqrtEpsilon && abs(b.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angleTwoPiProjectedInXYPlane: input vector b is vertical or zero length:%A" b
         let va = Vector3d(a.X, a.Y, 0.0)  // project to xy plane
         let vb = Vector3d(b.X, b.Y, 0.0)  // project to xy plane
-        let ang = angle180Rad va vb //TODO could be optimized with 2D math
-        if (cross va vb).Z > 0.0 then  ang
+        let ang = anglePi va vb //TODO could be optimized with 2D math
+        if (cross va vb).Z >= 0.0 then ang
         else                           Math.PI * 2. - ang
 
     /// Returns positive angle of two Vector projected in XY plane in Degrees
     /// Considering positve rotation round the World ZAxis 
     /// Range:  0 to 360 degrees
-    let inline angle360DegProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = angle360RadProjectedInXYPlane a b |> toDegrees
+    /// input vector does not need to be unitized
+    let inline angle360ProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = angleTwoPiProjectedInXYPlane a b |> toDegrees
 
 
     /// Returns positive angle of Vector to XAxis  projected in XY plane in Radians
     /// Considering positve rotation round the World ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
-    let inline angle360RadProjectedToXAxis(vec:Vector3d)   = 
-        if abs(vec.X)<RhinoMath.SqrtEpsilon && abs(vec.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angle360RadProjectedToXAxis: input vector is vertical or zero length:%A" vec 
+    /// input vector does not need to be unitized
+    let inline angleTwoPiProjectedToXAxis(vec:Vector3d)   = 
+        if abs(vec.X)<RhinoMath.SqrtEpsilon && abs(vec.Y)<RhinoMath.SqrtEpsilon then RhinoScriptingException.Raise "Vec.angleTwoPiProjectedToXAxis: input vector is vertical or zero length:%A" vec 
         let v = Vector3d(vec.X, vec.Y, 0.0) |> unitize // project to xy plane
-        let ang = angle180fast Vector3d.XAxis v //TODO could be optimized with 2D math
-        if (cross Vector3d.XAxis v).Z > 0.0 then  ang
-        else                                      Math.PI * 2. - ang
+        let ang = anglePifast Vector3d.XAxis v //TODO could be optimized with 2D math
+        if (cross Vector3d.XAxis v).Z >= 0.0 then  ang
+        else                                       Math.PI * 2. - ang
 
     /// Returns positive angle of Vector to XAxis projected in XY plane in Degrees
     /// Considering positve rotation round the World ZAxis 
-    /// Range: 0 to 360 degrees
-    let inline angle360DegProjectedToXAxis(v:Vector3d)   =  angle360RadProjectedToXAxis v |> toDegrees
+    /// Range: 0 to 360 degrees    
+    /// input vector does not need to be unitized
+    let inline angle360ProjectedToXAxis(v:Vector3d)   =  angleTwoPiProjectedToXAxis v |> toDegrees
 
 
     /// Returns positive angle between two vectors in Radians
@@ -244,10 +248,10 @@ module Vec =
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors
     [<Obsolete>]
-    let inline angle360Rad (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
-        let r = angle180Rad a b
-        if dot (cross a b) pl.ZAxis > 0.0 then  r
-        else                                    Math.PI * 2. - r
+    let inline angleTwoPi (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
+        let r = anglePi a b
+        if dot (cross a b) pl.ZAxis >= 0.0 then  r
+        else                                     Math.PI * 2. - r
     
     /// Returns positive angle between two vectors in Degrees
     /// Not projected to Plane.
@@ -255,10 +259,10 @@ module Vec =
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors
     [<Obsolete>]
-    let inline angle360Deg (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
-        let r = angle180Deg a b
-        if dot (cross a b) pl.ZAxis > 0.0 then  r
-        else                                    360. - r
+    let inline angle360 (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
+        let r = angle180 a b
+        if dot (cross a b) pl.ZAxis >= 0.0 then  r
+        else                                     360. - r
 
     /// Returns positive angle between two vectors in Radians
     /// Not projected to Plane.
@@ -266,9 +270,9 @@ module Vec =
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors
     [<Obsolete>]
-    let inline angle360RadXY (a:Vector3d) (b:Vector3d)  = 
-        let r = angle180Rad a b
-        if (cross a b).Z > 0.0 then  r
+    let inline angleTwoPiXY (a:Vector3d) (b:Vector3d)  = 
+        let r = anglePi a b
+        if (cross a b).Z >= 0.0 then r
         else                         Math.PI * 2. - r
     
     /// Returns positive angle between two vectors in Degrees
@@ -277,9 +281,9 @@ module Vec =
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors
     [<Obsolete>]
-    let inline angle360DegXY  (a:Vector3d) (b:Vector3d)  = 
-        let r = angle180Deg a b
-        if (cross a b).Z  > 0.0 then  r
+    let inline angle360XY  (a:Vector3d) (b:Vector3d)  = 
+        let r = angle180 a b
+        if (cross a b).Z  >= 0.0 then r
         else                          360. - r        
    
 
@@ -289,15 +293,15 @@ module Vec =
     /// in relation to XY Plane    
     let slopeRad (v:Vector3d) =
         let f = Vector3d(v.X, v.Y, 0.0)
-        if v.Z > 0.0 then   angle90Rad v f
-        else              -(angle90Rad v f)
+        if v.Z >= 0.0 then  angleHalfPi v f
+        else              -(angleHalfPi v f)
 
     /// Returns positive or negative slope of a vector in Degrees
     /// in relation to XY Plane    
     let slopeDeg (v:Vector3d) =
         let f = Vector3d(v.X, v.Y, 0.0)
-        if v.Z > 0.0 then   angle90Deg v f
-        else              -(angle90Deg v f)
+        if v.Z >= 0.0 then  angle90 v f
+        else              -(angle90 v f)
 
     /// Returns positive or negative slope of a vector in Percent
     /// in relation to XY Plane    
