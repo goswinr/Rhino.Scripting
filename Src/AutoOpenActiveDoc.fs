@@ -4,6 +4,7 @@ namespace Rhino.Scripting
 open System
 open Rhino
 open Rhino.Runtime
+open FsEx
 
 
 
@@ -16,11 +17,7 @@ type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 /// This Module contains 'Doc' the active document, and 'Ot' the current Object Table
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 module AutoOpenActiveDocument =
-    
-    /// Apply function, like |> , but ignore result. 
-    /// Return original input
-    let inline (|>!) x f =  f x |> ignore ; x 
-
+  
     /// The current active Rhino document (= the file currently open)
     let mutable Doc = 
         if HostUtils.RunningInRhino then
