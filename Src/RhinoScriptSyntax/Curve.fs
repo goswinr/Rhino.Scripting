@@ -1394,7 +1394,20 @@ module ExtensionsCurve =
         let mutable nc = curve.ToNurbsCurve()
         if notNull nc then  nc.Points.Count
         else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePointCount failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
-
+    
+    [<Extension>]
+    ///<summary>Returns the control points, or control vertices, of a curve object.
+    ///    If the curve is a rational NURBS curve, the euclidean control vertices
+    ///    are returned</summary>
+    ///<param name="curve">(Curve) The Curve Geometry</param>
+    ///<returns>(Point3d Rarr) the control points, or control vertices, of a curve object</returns>
+    static member CurvePoints(curve:Curve) : Point3d Rarr =        
+        let  nc = 
+            match curve with
+            | :? NurbsCurve as nc -> nc
+            | _ -> curve.ToNurbsCurve()
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePoints failed. curve:'%A'" curve
+        rarr { for i = 0 to nc.Points.Count-1 do yield nc.Points.[i].Location }
 
     [<Extension>]
     ///<summary>Returns the control points, or control vertices, of a curve object.
@@ -1407,7 +1420,7 @@ module ExtensionsCurve =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
         if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePoints failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
-        rarr { for i = 0 to nc.Points.Count-1 do yield nc.Points.[i].Location }
+        RhinoScriptSyntax.CurvePoints(nc)
 
 
     [<Extension>]
