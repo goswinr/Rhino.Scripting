@@ -1,8 +1,10 @@
 ﻿namespace Rhino.Scripting
 
+open System
 open Rhino
 open Rhino.Geometry
 open FsEx.SaveIgnore 
+open FsEx
 
 
 /// This module provides curried functions to manipulate Rhino Point3d
@@ -154,3 +156,21 @@ module Pnt =
             if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
             sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
 
+    /// returns the inedices of the points that are closest to each other 
+    let closestPointsIdx (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
+        let mutable xi = -1
+        let mutable yj = -1
+        let mutable mid = Double.MaxValue
+        for i=0 to xs.LastIndex do
+            for j=0 to ys.LastIndex do
+                let d = distanceSq xs.[i]  ys.[j]
+                if d < mid then 
+                    mid <- d
+                    xi <- i
+                    yj <- j
+        xi,yj    
+    
+    /// returns the smallest Distance between Point Sets
+    let minDistBetweenPointsets (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
+        let (i,j) = closestPointsIdx xs ys
+        distance xs.[i]  ys.[j]
