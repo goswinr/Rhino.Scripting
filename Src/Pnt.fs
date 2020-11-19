@@ -5,6 +5,8 @@ open Rhino
 open Rhino.Geometry
 open FsEx.SaveIgnore 
 open FsEx
+open Rhino.Geometry
+open Rhino.Geometry
 
 
 /// This module provides curried functions to manipulate Rhino Point3d
@@ -156,19 +158,49 @@ module Pnt =
             if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
             sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
 
-    /// returns the inedices of the points that are closest to each other 
+    /// returns the closest point 
+    let closestPoint (pt:Point3d) (pts:Rarr<Point3d>) : Point3d=
+        let mutable mip = Point3d.Unset
+        let mutable mid = Double.MaxValue
+        for i=0 to pts.LastIndex do
+            let p = pts.[i]
+            let d = distanceSq p pt
+            if d < mid then 
+                mid <- d
+                mip <- p
+        mip 
+
+    /// returns the indices of the points that are closest to each other 
     let closestPointsIdx (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
         let mutable xi = -1
         let mutable yj = -1
         let mutable mid = Double.MaxValue
         for i=0 to xs.LastIndex do
+            let pt = xs.[i] 
             for j=0 to ys.LastIndex do
-                let d = distanceSq xs.[i]  ys.[j]
+                let d = distanceSq pt ys.[j]
                 if d < mid then 
                     mid <- d
                     xi <- i
                     yj <- j
         xi,yj    
+
+    /// find the point that has the biggest distance to any point from another set
+    let mostDistantPoint (findPointFrom:Rarr<Point3d>) (checkagainst:Rarr<Point3d>) =        
+        let mutable maxd = Double.MinValue
+        let mutable res = Point3d.Unset
+        for i=0 to findPointFrom.LastIndex do
+            let pt = findPointFrom.[i] 
+            let mutable mind = Double.MaxValue
+            for j=0 to checkagainst.LastIndex do
+                let d = distanceSq pt checkagainst.[j]
+                if d < mind then 
+                    mind <- d
+            if mind > maxd then 
+                maxd <- mind
+                res <- pt
+        res
+       
     
     /// returns the smallest Distance between Point Sets
     let minDistBetweenPointSets (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
