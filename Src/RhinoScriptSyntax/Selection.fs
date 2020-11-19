@@ -193,7 +193,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetCurveObject(message=%A): %A" message res
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -248,7 +248,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObject(message=%A): %A" message res
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let obj = objref.Object()
@@ -309,7 +309,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)            
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObjectEx(message=%A): %A" message res
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -379,7 +379,7 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             let res = go.GetMultiple(minimumCount, maximumCount)
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObjects(message=%A): %A" message res
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     Doc.Objects.UnselectAll() |> ignore
@@ -518,7 +518,7 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             let res = go.GetMultiple(1, 0)
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetObjectsEx(message=%A): %A" message res            
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjectsEx(message=%A), Interaction result: %A" message res            
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     Doc.Objects.UnselectAll() |> ignore
@@ -595,7 +595,7 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selcted in rs.GetSurfaceObject(message=%A): %A" message res
+            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetSurfaceObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
