@@ -665,13 +665,22 @@ type RhinoScriptSyntax private () =
        | :?  TextDot as a -> a
        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextDot failed on: %s " (typeDescr objectId)
 
-    ///<summary>Attempt to get TextEntity Geometry</summary>
+    ///<summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) </summary>
     ///<param name="objectId">(Guid): objectId of TextEntity object</param> 
     ///<returns>a Geometry.TextEntity) Fails on bad input</returns>
     static member CoerceTextEntity (objectId:'T) : TextEntity =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
         | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextEntity failed on: %s " (typeDescr objectId)
+
+
+    ///<summary>Attempt to get Rhino TextObject Annotation Object</summary>
+    ///<param name="objectId">(Guid): objectId of TextObject</param> 
+    ///<returns>(DocObjects.TextObject) Fails on bad input</returns>
+    static member CoerceTextObject (objectId:Guid): DocObjects.TextObject =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
+        | :?  DocObjects.TextObject as a -> a
+        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextObject failed on: %s " (typeDescr objectId)
 
     ///<summary>Attempt to get Hatch Geometry</summary>
     ///<param name="objectId">(Guid): objectId of Hatch object</param> 
@@ -690,7 +699,7 @@ type RhinoScriptSyntax private () =
         | :?  DocObjects.HatchObject as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatchObject failed on: %s " (typeDescr objectId)
 
-    ///<summary>Attempt to get Rhino Annotation Object</summary>
+    ///<summary>Attempt to get Rhino Annotation Base Object</summary>
     ///<param name="objectId">(Guid): objectId of annotation object</param> 
     ///<returns>(DocObjects.AnnotationObjectBase) Fails on bad input</returns>
     static member CoerceAnnotation (objectId:Guid): DocObjects.AnnotationObjectBase =
@@ -698,7 +707,22 @@ type RhinoScriptSyntax private () =
         | :?  DocObjects.AnnotationObjectBase as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (typeDescr objectId)
 
-    
+
+    ///<summary>Attempt to get Rhino Leader Annotation Object</summary>
+    ///<param name="objectId">(Guid): objectId of Leader object</param> 
+    ///<returns>(DocObjects.LeaderObject) Fails on bad input</returns>
+    static member CoerceLeader (objectId:Guid): DocObjects.LeaderObject =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
+        | :?  DocObjects.LeaderObject as a -> a
+        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (typeDescr objectId)
+
+    ///<summary>Attempt to get Rhino LinearDimension Annotation Object</summary>
+    ///<param name="objectId">(Guid): objectId of LinearDimension object</param> 
+    ///<returns>(DocObjects.LinearDimensionObject) Fails on bad input</returns>
+    static member CoerceLinearDimension (objectId:Guid): DocObjects.LinearDimensionObject =
+        match RhinoScriptSyntax.CoerceRhinoObject objectId with
+        | :?  DocObjects.LinearDimensionObject as a -> a
+        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (typeDescr objectId)
     
     //---------Geometry (Base)------------
 
