@@ -105,3 +105,12 @@ module Line =
     let distanceToPoint (pt:Point3d) (ln:Line) :float= 
         let cl = ln.ClosestPoint(pt,false)
         (cl-pt).Length
+
+    /// returns a new transformed line
+    let transform(xForm:Transform) (line:Line) =
+        let ln = Line(line.From,line.To)
+        if ln.Transform(xForm) then 
+            ln
+        else  
+            RhinoScriptingException.Raise "Line.transform failed on line %A with  %A" line xForm
+        

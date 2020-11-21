@@ -19,30 +19,30 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Verifies a matrix is the identity matrix</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member IsXformIdentity(xform:Transform) : bool =
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        xform = Transform.Identity
+    static member IsXformIdentity(xForm:Transform) : bool =
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        xForm = Transform.Identity
 
 
     [<Extension>]
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
     ///    transformation can be broken into a sequence of dialations, translations,
     ///    rotations, and reflections</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False</returns>
-    static member IsXformSimilarity(xform:Transform) : bool =
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        xform.SimilarityType <> TransformSimilarityType.NotSimilarity
+    static member IsXformSimilarity(xForm:Transform) : bool =
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        xForm.SimilarityType <> TransformSimilarityType.NotSimilarity
 
 
     [<Extension>]
     ///<summary>verifies that a matrix is a zero transformation matrix</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
-    static member IsXformZero(xform:Transform) : bool =
-        xform.IsZero4x4
+    static member IsXformZero(xForm:Transform) : bool =
+        xForm.IsZero4x4
 
 
     [<Extension>]
@@ -53,9 +53,9 @@ module ExtensionsTransformation =
     static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform =
         //initialPlane = RhinoScriptSyntax.Coerceplane(initialPlane)
         //finalPlane = RhinoScriptSyntax.Coerceplane(finalPlane)
-        let xform = Transform.ChangeBasis(initialPlane, finalPlane)
-        if not xform.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
-        xform
+        let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
+        if not xForm.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        xForm
 
 
     [<Extension>]
@@ -79,22 +79,22 @@ module ExtensionsTransformation =
         //x1 = RhinoScriptSyntax.Coerce3dvector(x1)
         //y1 = RhinoScriptSyntax.Coerce3dvector(y1)
         //z1 = RhinoScriptSyntax.Coerce3dvector(z1)
-        let xform = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
-        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
-        xform
+        let xForm = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        xForm
 
 
     [<Extension>]
     ///<summary>Compares two transformation matrices</summary>
-    ///<param name="xform1">(Transform) First matrix to compare</param>
-    ///<param name="xform2">(Transform) Second matrix to compare</param>
-    ///<returns>(int) -1 if xform1 is smaller than xform2
-    ///    1 if xform1 bigger than xform2
-    ///    0 if xform1 = xform2</returns>
-    static member XformCompare(xform1:Transform, xform2:Transform) : int =
-        //xform1 = RhinoScriptSyntax.Coercexform(xform1)
-        //xform2 = RhinoScriptSyntax.Coercexform(xform2)
-        xform1.CompareTo(xform2)
+    ///<param name="xForm1">(Transform) First matrix to compare</param>
+    ///<param name="xForm2">(Transform) Second matrix to compare</param>
+    ///<returns>(int) -1 if xForm1 is smaller than xForm2
+    ///    1 if xForm1 bigger than xForm2
+    ///    0 if xForm1 = xForm2</returns>
+    static member XformCompare(xForm1:Transform, xForm2:Transform) : int =
+        //xForm1 = RhinoScriptSyntax.CoercexForm(xForm1)
+        //xForm2 = RhinoScriptSyntax.CoercexForm(xForm2)
+        xForm1.CompareTo(xForm2)
 
 
     [<Extension>]
@@ -112,11 +112,11 @@ module ExtensionsTransformation =
     ///<summary>Returns the determinant of a transformation matrix. If the determinant
     ///    of a transformation matrix is 0, the matrix is said to be singular. Singular
     ///    matrices do not have inverses</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant</returns>
-    static member XformDeterminant(xform:Transform) : float =
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        xform.Determinant
+    static member XformDeterminant(xForm:Transform) : float =
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        xForm.Determinant
 
 
     [<Extension>]
@@ -137,12 +137,12 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Returns the inverse of a non-singular transformation matrix</summary>
-    ///<param name="xform">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix</returns>
-    static member XformInverse(xform:Transform) : Transform =
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        let rc, inverse = xform.TryGetInverse()
-        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.XformInverse failed.  xform:'%A'" xform
+    static member XformInverse(xForm:Transform) : Transform =
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        let rc, inverse = xForm.TryGetInverse()
+        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.XformInverse failed.  xForm:'%A'" xForm
         inverse
 
 
@@ -158,14 +158,14 @@ module ExtensionsTransformation =
 
 
     [<Extension>]
-    ///<summary>Multiplies two transformation matrices, where result = xform1 * xform2</summary>
-    ///<param name="xform1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply</param>
-    ///<param name="xform2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply</param>
+    ///<summary>Multiplies two transformation matrices, where result = xForm1 * xForm2</summary>
+    ///<param name="xForm1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply</param>
+    ///<param name="xForm2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation</returns>
-    static member XformMultiply(xform1:Transform, xform2:Transform) : Transform =
-        //xform1 = RhinoScriptSyntax.Coercexform(xform1)
-        //xform2 = RhinoScriptSyntax.Coercexform(xform2)
-        xform1*xform2
+    static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform =
+        //xForm1 = RhinoScriptSyntax.CoercexForm(xForm1)
+        //xForm2 = RhinoScriptSyntax.CoercexForm(xForm2)
+        xForm1*xForm2
 
 
     [<Extension>]
@@ -186,9 +186,9 @@ module ExtensionsTransformation =
     static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform =
         //initialPlane = RhinoScriptSyntax.Coerceplane(initialPlane)
         //finalPlane = RhinoScriptSyntax.Coerceplane(finalPlane)
-        let xform = Transform.PlaneToPlane(initialPlane, finalPlane)
-        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
-        xform
+        let xForm = Transform.PlaneToPlane(initialPlane, finalPlane)
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        xForm
 
 
     [<Extension>]
@@ -203,9 +203,9 @@ module ExtensionsTransformation =
         //axis = RhinoScriptSyntax.Coerce3dvector(rotationAxis)
         //center = RhinoScriptSyntax.Coerce3dpoint(centerPoint)
         let anglerad = toRadians(angleDegrees)
-        let xform = Transform.Rotation(anglerad, rotationAxis, centerPoint)
-        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
-        xform
+        let xForm = Transform.Rotation(anglerad, rotationAxis, centerPoint)
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
+        xForm
 
 
     [<Extension>]
@@ -221,9 +221,9 @@ module ExtensionsTransformation =
         //start = RhinoScriptSyntax.Coerce3dvector(startDirection)
         //end = RhinoScriptSyntax.Coerce3dvector(endDirection)
         //center = RhinoScriptSyntax.Coerce3dpoint(centerPoint)
-        let xform = Transform.Rotation(startDirection, endDirection, centerPoint)
-        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
-        xform
+        let xForm = Transform.Rotation(startDirection, endDirection, centerPoint)
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
+        xForm
 
 
     [<Extension>]
@@ -247,9 +247,9 @@ module ExtensionsTransformation =
         //x1 = RhinoScriptSyntax.Coerce3dvector(x1)
         //y1 = RhinoScriptSyntax.Coerce3dvector(y1)
         //z1 = RhinoScriptSyntax.Coerce3dvector(z1)
-        let xform = Transform.Rotation(x0, y0, z0, x1, y1, z1)
-        if not xform.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
-        xform
+        let xForm = Transform.Rotation(x0, y0, z0, x1, y1, z1)
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        xForm
 
 
     [<Extension>]
@@ -296,13 +296,13 @@ module ExtensionsTransformation =
         //point = RhinoScriptSyntax.Coerce2dpoint(point)
         let view = RhinoScriptSyntax.CoerceView(view |? "") // ""to get active view
         let viewport = view.MainViewport
-        let xform = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
+        let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
         let mutable point3d = Point3d(point.X, point.Y, 0.0)
         if  screenCoordinates then
             let screen = view.ScreenRectangle
             point3d.X <- point.X - (float screen.Left) //TODO check if correct?
             point3d.Y <- point.Y - (float screen.Top)
-        point3d <- xform * point3d
+        point3d <- xForm * point3d
         point3d
 
 
@@ -356,8 +356,8 @@ module ExtensionsTransformation =
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d =
         let view = RhinoScriptSyntax.CoerceView(view |? "")// to get active view
         let viewport = view.MainViewport
-        let xform = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
-        let mutable point3 = xform * point
+        let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
+        let mutable point3 = xForm * point
         let mutable point = Point2d(point3.X, point3.Y)
         if  screenCoordinates then
             let screen = view.ScreenRectangle

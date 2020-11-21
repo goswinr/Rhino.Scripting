@@ -92,8 +92,8 @@ module Vec =
             Vector3d(v.X*f , v.Y*f , v.Z*f)
     
     /// Applies a transformation matrix
-    let transform (xForm:Transform) (v:Vector3d ) =
-        let t = Vector3d(v)
+    let transform (xForm:Transform) (vec:Vector3d ) =
+        let v = Vector3d(vec)
         v.Transform(xForm)
         v
     

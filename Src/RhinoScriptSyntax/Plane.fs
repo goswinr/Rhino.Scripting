@@ -275,14 +275,14 @@ module ExtensionsPlane =
     [<Extension>]
     ///<summary>Transforms a plane</summary>
     ///<param name="plane">(Plane) Plane to transform</param>
-    ///<param name="xform">(Transform) Transformation to apply</param>
+    ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Plane) the resulting plane</returns>
-    static member PlaneTransform(plane:Plane, xform:Transform) : Plane =
+    static member PlaneTransform(plane:Plane, xForm:Transform) : Plane =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
-        //xform = RhinoScriptSyntax.Coercexform(xform)
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
         let rc = Plane(plane)
-        if rc.Transform(xform) then rc
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform faild for %A; %A" plane xform
+        if rc.Transform(xForm) then rc
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform faild for %A; %A" plane xForm
 
 
     [<Extension>]

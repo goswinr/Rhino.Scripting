@@ -176,12 +176,23 @@ module ExtensionsLine =
     [<Extension>]
     ///<summary>Transforms a line</summary>
     ///<param name="lineId">(Guid) The line to transform</param>
-    ///<param name="xform">(Transform) The transformation to apply</param>
+    ///<param name="xForm">(Transform) The transformation to apply</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the Line object</param>
     ///<returns>(unit) void, nothing</returns>
-    static member LineTransform(lineId:Guid, xform:Transform) : unit =
+    static member LineTransform(    lineId:Guid, 
+                                    xForm:Transform,
+                                    [<OPT;DEF(false)>]copy:bool)  : Guid =        
+        
         let line = RhinoScriptSyntax.CoerceLine lineId
-        let success = line.Transform(xform)
-        if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xform
+        let ln = Line(line.From,line.To)
+        let success = ln.Transform(xForm)
+        if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
+        if copy then
+            Ot.AddLine(ln)
+        else            
+            let lo = RhinoScriptSyntax.CoerceRhinoObject(lineId)
+            if not <| Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to replace geometry: line %A with  %A" line xForm
+            lineId
 
 
 

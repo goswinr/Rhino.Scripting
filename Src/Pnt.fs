@@ -67,10 +67,11 @@ module Pnt =
     /// Gets the Z value of  Point3d
     let inline getZ (pt:Point3d) =  pt.Z
 
-    /// Applies a transformation matrix
+    /// Applies a transformation matrix, retun new point
     let transform (xForm:Transform) (pt:Point3d ) =        
-        pt.Transform(xForm)
-        pt
+        let p = Point3d(pt) //copy first !
+        p.Transform(xForm)
+        p
 
     /// Applies a translation vector
     let inline translate (shift:Vector3d) (pt:Point3d ) =

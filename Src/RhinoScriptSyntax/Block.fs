@@ -137,7 +137,7 @@ module ExtensionsBlock =
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  xf = instance.InstanceXform
-        let  pt = Geometry.Point3d.Origin
+        let  pt = Point3d(0. , 0. , 0.)
         pt.Transform(xf)
         pt
 
@@ -269,12 +269,12 @@ module ExtensionsBlock =
     [<Extension>]
     ///<summary>Inserts a block whose definition already exists in the document</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<param name="xform">(Transform) 4x4 transformation matrix to apply</param>
+    ///<param name="xForm">(Transform) 4x4 transformation matrix to apply</param>
     ///<returns>(Guid) objectId for the block that was added to the doc</returns>
-    static member InsertBlock2(blockName:string, xform:Transform) : Guid =
+    static member InsertBlock2(blockName:string, xForm:Transform) : Guid =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
-        let objectId = Doc.Objects.AddInstanceObject(idef.Index, xform )
+        let objectId = Doc.Objects.AddInstanceObject(idef.Index, xForm )
         if objectId<>System.Guid.Empty then
             Doc.Views.Redraw()
         objectId
@@ -298,8 +298,8 @@ module ExtensionsBlock =
         let move = Transform.Translation(insertionPoint.X, insertionPoint.Y, insertionPoint.Z)
         let scale = Transform.Scale(Geometry.Plane.WorldXY, sc.X, sc.Y, sc.Z)
         let rotate = Transform.Rotation(angleRadians, rotationNormal0, Geometry.Point3d.Origin)
-        let xform = move * scale * rotate
-        RhinoScriptSyntax.InsertBlock2 (blockName, xform)
+        let xForm = move * scale * rotate
+        RhinoScriptSyntax.InsertBlock2 (blockName, xForm)
 
 
     [<Extension>]

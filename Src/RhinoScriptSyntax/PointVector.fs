@@ -99,12 +99,15 @@ module ExtensionsPointvector =
     [<Extension>]
     ///<summary>Transforms a list of 3D points</summary>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<param name="xform">(Transform) Transformation to apply</param>
+    ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Point3d Rarr) transformed points</returns>
-    static member PointArrayTransform(points:Point3d seq, xform:Transform) : Point3d Rarr =
+    static member PointArrayTransform(points:Point3d seq, xForm:Transform) : Point3d Rarr =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        rarr {for point in points do xform*point}
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        rarr {for point in points do 
+                let p = Point3d(point) //copy first !
+                p.Transform(xForm)
+                p}
 
     [<Extension>]
     ///<summary>Finds the object that is closest to a test point</summary>
@@ -238,12 +241,15 @@ module ExtensionsPointvector =
     [<Extension>]
     ///<summary>Transforms a 3D point</summary>
     ///<param name="point">(Point3d) The point to transform</param>
-    ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     ///<returns>(Point3d) transformed Point</returns>
-    static member PointTransform(point:Point3d, xform:Transform) : Point3d =
+    static member PointTransform(point:Point3d, xForm:Transform) : Point3d =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        xform*point
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        let p = Point3d(point) //copy first !
+        p.Transform(xForm)
+        p
+        
 
 
     [<Extension>]
@@ -456,12 +462,15 @@ module ExtensionsPointvector =
     [<Extension>]
     ///<summary>Transforms a 3D vector</summary>
     ///<param name="vector">(Vector3d) The vector to transform</param>
-    ///<param name="xform">(Transform) A valid 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     ///<returns>(Vector3d) transformed vector</returns>
-    static member VectorTransform(vector:Vector3d, xform:Transform) : Vector3d =
+    static member VectorTransform(vector:Vector3d, xForm:Transform) : Vector3d =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)
-        //xform = RhinoScriptSyntax.Coercexform(xform)
-        xform*vector
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
+        //xForm*vector
+        let v = Vector3d(vector)
+        v.Transform(xForm)
+        v
 
 
     [<Extension>]

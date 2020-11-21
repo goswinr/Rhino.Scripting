@@ -874,11 +874,11 @@ type RhinoScriptSyntax private () =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePlane failed on: %s " (typeDescr plane) 
  
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible</summary>
-    ///<param name="xform">object to convert</param>
+    ///<param name="xForm">object to convert</param>
     ///<returns>(Rhino.Geometry.Transform) Fails on bad input</returns>   
-    static member CoerceXform(xform:'T) : Transform =
-        match box xform with
-        | :? Transform  as xform -> xform 
+    static member CoerceXform(xForm:'T) : Transform =
+        match box xForm with
+        | :? Transform  as xForm -> xForm 
         | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
             let mutable t= Transform()
             try
@@ -886,16 +886,16 @@ type RhinoScriptSyntax private () =
                     for r, x in Seq.indexed xs do
                         t.[c, r] <- x
             with
-                | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
+                | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xForm)
             t        
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
             let mutable t= Transform()           
             try
                 xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
             with
-                | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
+                | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xForm)
             t
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xform)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xForm)
 
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="line">Line, two points or Guid</param>

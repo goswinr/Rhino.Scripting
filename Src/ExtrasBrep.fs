@@ -118,9 +118,9 @@ module ExtrasBrep =
         let mutable pl = Plane(plane)
         if extraHeightPerSide <> 0.0 then 
             pl.Origin <- pl.Origin - pl.ZAxis*extraHeightPerSide
-        let xform = RhinoScriptSyntax.XformRotation1(Plane.WorldXY,pl)
+        let xForm = RhinoScriptSyntax.XformRotation1(Plane.WorldXY,pl)
         let c = curveToExtrudeInWorldXY.DuplicateCurve()
-        c.Transform(xform) |> RhinoScriptingException.FailIfFalse "xform in CreateExrusionAtPlane"
+        c.Transform(xForm) |> RhinoScriptingException.FailIfFalse "xForm in CreateExrusionAtPlane"
         let h = extraHeightPerSide + height
         let brep = Surface.CreateExtrusion(c, pl.ZAxis * h )
                         .ToBrep()

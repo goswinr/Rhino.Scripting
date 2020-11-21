@@ -22,7 +22,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
+    ///    matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
@@ -42,7 +42,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xform) member</summary>
+    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
@@ -1093,8 +1093,7 @@ module ExtensionsObject =
     ///<param name="rotationAngle">(float) In degrees</param>
     ///<param name="axis">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
-    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
-    ///    Copy the object</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid) Identifier of the rotated object</returns>
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
@@ -1121,8 +1120,7 @@ module ExtensionsObject =
     ///<param name="rotationAngle">(float) In degrees</param>
     ///<param name="axis">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
-    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
-    ///    Copy the object</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid Rarr) identifiers of the rotated objects</returns>
     static member RotateObject( objectIds:Guid seq,
                                  centerPoint:Point3d,
@@ -1151,8 +1149,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
-    ///    Copy the object</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>.Copy the object</param>
     ///<returns>(Guid) Identifier of the scaled object</returns>
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
@@ -1171,8 +1168,7 @@ module ExtensionsObject =
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
-    ///    Copy the object</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid) Identifier of the scaled object</returns>
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
@@ -1191,8 +1187,7 @@ module ExtensionsObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
-    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
-    ///    Copy the objects</param>
+    ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the scaled objects</returns>
     static member ScaleObject( objectIds:Guid seq,
                                 origin:Point3d,
