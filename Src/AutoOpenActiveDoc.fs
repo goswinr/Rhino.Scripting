@@ -5,6 +5,8 @@ open System
 open Rhino
 open Rhino.Runtime
 open FsEx
+open Rhino
+open Rhino
 
 
 
@@ -62,19 +64,24 @@ module AutoOpenActiveDocument =
     /// if second value is 0.0 return first else second
     let internal ifZero2 a b = if b = 0.0 then a else b    
 
-        
     do
         if HostUtils.RunningInRhino then
             Synchronisation.Initialize() //declared in Synchronisation static class
             
+            // keep the reference to the active Document (3d file ) updated.  
+            let updateDoc (doc:RhinoDoc) = 
+                Doc <- doc //Rhino.RhinoDoc.ActiveDoc 
+                Ot  <- doc.Objects //Rhino.RhinoDoc.ActiveDoc.Objects 
+                commandSerialNumbers <- None
+                escapePressed <- false
+
             let setup() = 
-                // keep the reference to the active Document (3d file ) updated.
-                Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> 
-                    Doc <- args.Document
-                    Ot  <- args.Document.Objects
-                    commandSerialNumbers <- None
-                    escapePressed <- false
-                    )
+                
+                // keep the reference to the active Document (3d file ) updated.  
+                RhinoDoc.EndOpenDocument.Add (fun args -> updateDoc args.Document)
+                //RhinoDoc.BeginOpenDocument.Add //Dont use since it is called on temp pasting files too
+                //RhinoDoc.ActiveDocumentChanged.Add (fun args -> updateDoc args.Document) // seems to not work ??             
+                                    
                 
                 // listen to Esc Key press.
                 // doing this "Add" in sync is only required if no handler has been added in sync before. Adding the first handler to this from async thread cause a Access violation exeption that can only be seen with the window event log.
