@@ -339,13 +339,32 @@ module Vec =
     
     /// Returns a horizontal vector that is perpendicular to the given vector.
     /// just: Vector3d(v.Y, -v.X, 0.0)
-    /// Not of same length, not unitized
+    /// Not of same length, NOT unitized
     /// Rotated counter clockwise in top view.    
     /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
     let inline perpendicularVecInXY (v:Vector3d) =         
-        let r = Vector3d(v.Y, -v.X, 0.0) // this si the same as: Vec.cross v Vector3d.ZAxis
-        if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.perpendicularVecInXY: Cannot find perpendicularVecInXY for vertical vector %A" v
-        r
+        // test:
+        //let rnd  =  Random() 
+        //let next()   =  -1.0  +  2.0 * rnd.NextDouble()        
+        //for i = 0 to 20 do
+        //    let v  =  Vector3d(next()   , next()  , next()  ) |> Vec.unitize
+        //    let o  =  Point3d.Origin
+        //    let e  =  o + v
+        //    rs.AddLine(o, e)  |> ignore 
+        //    let p  =  Vec.perpendicularVecInXY(e-o) |> Vec.scale 0.1
+        //    let b  =  Pnt.normalOfTwoPointsInXY(o, e) |> Vec.scale 0.2
+        //    let g  =  Vec.cross (e-o) Vector3d.ZAxis|> Vec.scale 0.2
+        //    //rs.AddLine(e, e + p)  |> ignore 
+        //    //rs.AddLine(e, e + b)  |> ignore 
+        //    rs.AddLine(e, e + g)  |> ignore 
+        let x = v.Y
+        let y = -v.X  // this is the same as: Vec.cross v Vector3d.ZAxis
+        let len = sqrt(x*x + y*y)
+        if len < RhinoMath.SqrtEpsilon then 
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec.perpendicularVecInXY: Cannot find perpendicularVecInXY for vertical vector %A" v
+        else 
+            Vector3d(x, y, 0.0)
+        
 
     /// Returns a vector that is perpendicular to the given vector an in the same vertical plane .
     /// Projected into the XY plane input and output vectors are parallell and of same orientation.
