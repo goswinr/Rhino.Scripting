@@ -19,16 +19,16 @@ module AutoOpenCurried =
   let print x = RhinoScriptSyntax.Print x 
   
   /// shadowing the default printf to also print to Rhino Command line
-  let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// shadowing the default printfn to also print to Rhino Command line
-  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> printfn "%s"  ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> printfn "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// shadowing the default eprintf to also print to Rhino Command line
-  let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// shadowing the default eprintfn to also print to Rhino Command line
-  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eprintfn "%s" ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eprintfn "%s" ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
 
   /// prints two values separated by a space using FsEx.NiceString.toNiceString
   ///(shadows print2 from FsEx)
