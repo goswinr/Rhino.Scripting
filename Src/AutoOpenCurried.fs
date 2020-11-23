@@ -17,6 +17,18 @@ module AutoOpenCurried =
 
   ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
   let print x = RhinoScriptSyntax.Print x 
+  
+  /// shadowing the default printf to also print to Rhino Command line
+  let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  
+  /// shadowing the default printfn to also print to Rhino Command line
+  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> printfn "%s"  ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  
+  /// shadowing the default eprintf to also print to Rhino Command line
+  let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) // no swith to UI Thread needed !
+  
+  /// shadowing the default eprintfn to also print to Rhino Command line
+  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eprintfn "%s" ; RhinoApp.Wait()) // no swith to UI Thread needed !
 
   /// prints two values separated by a space using FsEx.NiceString.toNiceString
   ///(shadows print2 from FsEx)
@@ -127,7 +139,7 @@ module AutoOpenCurried =
 
     [<Extension>]
     ///<summary>Copies all user text keys and values from  one object to another
-    ///from both fGeometry and from Attributes. Existing values are overwitten.</summary>
+    ///from both Geometry and Object.Attributes. Existing values are overwitten.</summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
     ///<returns>(unit) void, nothing</returns>
