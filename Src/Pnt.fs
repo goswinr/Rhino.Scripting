@@ -7,6 +7,7 @@ open FsEx.SaveIgnore
 open FsEx
 open Rhino.Geometry
 open Rhino.Geometry
+open System.Resources
 
 
 /// This module provides curried functions to manipulate Rhino Point3d
@@ -37,16 +38,15 @@ module Pnt =
     
     /// retuns a point that is at a given Z level, 
     /// going from a point in the direction of another point. 
-    let atZlevel (fromPt:Point3d)( toPt:Point3d) (z:float) =
+    let extendToZLevel (fromPt:Point3d)( toPt:Point3d) (z:float) =
         let v = toPt - fromPt
-        if fromPt.Z < toPt.Z && z < fromPt.Z  then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
-        if fromPt.Z > toPt.Z && z > fromPt.Z  then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
+        if fromPt.Z < toPt.Z && z < fromPt.Z  then RhinoScriptingException.Raise "Pnt.extendToZLevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
+        if fromPt.Z > toPt.Z && z > fromPt.Z  then RhinoScriptingException.Raise "Pnt.extendToZLevel  cannot be reached for fromPt:%A toPt:%A z:%f" fromPt toPt z
         let dot = abs ( v * Vector3d.ZAxis)
-        if dot < 0.0001 then  RhinoScriptingException.Raise "Rhino.Scripting.Pnt.atZlevel  cannot be reached for fromPt:%A toPt:%A  almost at same Z level. taget Z %f" fromPt toPt z
+        if dot < 0.0001 then  RhinoScriptingException.Raise "Pnt.extendToZLevel  cannot be reached for fromPt:%A toPt:%A  almost at same Z level. taget Z %f" fromPt toPt z
         let diffZ = abs (fromPt.Z - z)
         let fac = diffZ / dot 
         fromPt + v * fac
-
     
 
     /// Sets the X value and retuns new Point3d
@@ -89,18 +89,21 @@ module Pnt =
     let inline translateZ (zShift:float) (pt:Point3d ) =
         Point3d(pt.X, pt.Y, pt.Z+zShift)
    
-
     /// Snap to point if within Doc.ModelAbsoluteTolerance
     let snapIfClose (snapTo:Point3d) (pt:Point3d) =
         if (snapTo-pt).Length < Doc.ModelAbsoluteTolerance then snapTo else pt
     
     /// Every line has a normal vector in XY Plane.
-    /// If line is vertical then XAxis
+    /// If line is vertical then XAxis is returned
+    /// Rotated counter clockwise in top view.  
     /// result is unitized
-    let normalOfTwoPointsInXY(fromPt:Point3d, toPt:Point3d) =
-        let v = toPt - fromPt
-        Vector3d.CrossProduct(v, Vector3d.ZAxis)
-        |> Vec.unitizeWithAlternative Vector3d.XAxis
+    /// see also : Vec.perpendicularVecInXY
+    let normalOfTwoPointsInXY(fromPt:Point3d, toPt:Point3d) =        
+        let x = toPt.Y - fromPt.Y
+        let y = fromPt.X - toPt.X  // this is the same as: Vec.cross v Vector3d.ZAxis
+        let len = sqrt(x*x + y*y)
+        if len < RhinoMath.SqrtEpsilon then Vector3d.XAxis
+        else Vector3d(x/len, y/len, 0.0)
     
     /// Offsets two points by two given distances.
     /// The fist distance (distHor) is applied in in XY Plane 
@@ -159,8 +162,9 @@ module Pnt =
             if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
             sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
 
-    /// returns the closest point 
+    /// returns the closest point form a Point list 
     let closestPoint (pt:Point3d) (pts:Rarr<Point3d>) : Point3d=
+        if pts.Count = 0 then RhinoScriptingException.Raise "Pnt.closestPoint empty List of Points: pts"
         let mutable mip = Point3d.Unset
         let mutable mid = Double.MaxValue
         for i=0 to pts.LastIndex do
@@ -173,6 +177,8 @@ module Pnt =
 
     /// returns the indices of the points that are closest to each other 
     let closestPointsIdx (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
+        if xs.Count = 0 then RhinoScriptingException.Raise "Pnt.closestPointsIdx empty List of Points: xs"
+        if ys.Count = 0 then RhinoScriptingException.Raise "Pnt.closestPointsIdx empty List of Points: ys"
         let mutable xi = -1
         let mutable yj = -1
         let mutable mid = Double.MaxValue
@@ -185,16 +191,26 @@ module Pnt =
                     xi <- i
                     yj <- j
         xi,yj    
+    
+    /// returns the smallest Distance between Point Sets
+    let minDistBetweenPointSets (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
+        if xs.Count = 0 then RhinoScriptingException.Raise "Pnt.minDistBetweenPointSets empty List of Points: xs"
+        if ys.Count = 0 then RhinoScriptingException.Raise "Pnt.minDistBetweenPointSets empty List of Points: ys"        
+        let (i,j) = closestPointsIdx xs ys
+        distance xs.[i]  ys.[j]
+
 
     /// find the point that has the biggest distance to any point from another set
-    let mostDistantPoint (findPointFrom:Rarr<Point3d>) (checkagainst:Rarr<Point3d>) =        
+    let mostDistantPoint (findPointFrom:Rarr<Point3d>) (checkAgainst:Rarr<Point3d>) =        
+        if findPointFrom.Count = 0 then RhinoScriptingException.Raise "Pnt.mostDistantPoint empty List of Points: findPointFrom"
+        if checkAgainst.Count = 0 then RhinoScriptingException.Raise "Pnt.mostDistantPoint empty List of Points: checkAgainst"
         let mutable maxd = Double.MinValue
         let mutable res = Point3d.Unset
         for i=0 to findPointFrom.LastIndex do
             let pt = findPointFrom.[i] 
             let mutable mind = Double.MaxValue
-            for j=0 to checkagainst.LastIndex do
-                let d = distanceSq pt checkagainst.[j]
+            for j=0 to checkAgainst.LastIndex do
+                let d = distanceSq pt checkAgainst.[j]
                 if d < mind then 
                     mind <- d
             if mind > maxd then 
@@ -202,15 +218,13 @@ module Pnt =
                 res <- pt
         res
        
-    
-    /// returns the smallest Distance between Point Sets
-    let minDistBetweenPointSets (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
-        let (i,j) = closestPointsIdx xs ys
-        distance xs.[i]  ys.[j]
+
 
     /// Culls points if they are to close to previous or next item
     let cullDuplicatePointsInSeq (tolerance) (pts:Rarr<Point3d>)  = 
-        if pts.Count < 2 then pts
+        if pts.Count = 0 then RhinoScriptingException.Raise "Pnt.cullDuplicatePointsInSeq empty List of Points: pts"
+        if pts.Count = 1 then 
+            pts
         else
             let tsq = tolerance*tolerance
             let res  =  Rarr(pts.Count)
