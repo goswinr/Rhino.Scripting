@@ -198,14 +198,16 @@ module Pnt =
         if ys.Count = 0 then RhinoScriptingException.Raise "Pnt.minDistBetweenPointSets empty List of Points: ys"        
         let (i,j) = closestPointsIdx xs ys
         distance xs.[i]  ys.[j]
-
-
-    /// find the point that has the biggest distance to any point from another set
-    let mostDistantPoint (findPointFrom:Rarr<Point3d>) (checkAgainst:Rarr<Point3d>) =        
+    
+    /// find the indix of the point that has the biggest distance to any point from another set
+    /// returns findPointFromIdx * checkAgainstIdx
+    let mostDistantPointIdx (findPointFrom:Rarr<Point3d>) (checkAgainst:Rarr<Point3d>) : int*int=        
         if findPointFrom.Count = 0 then RhinoScriptingException.Raise "Pnt.mostDistantPoint empty List of Points: findPointFrom"
         if checkAgainst.Count = 0 then RhinoScriptingException.Raise "Pnt.mostDistantPoint empty List of Points: checkAgainst"
         let mutable maxd = Double.MinValue
-        let mutable res = Point3d.Unset
+        let mutable findPointFromIdx = -1
+        let mutable checkAgainstTempIdx = -1
+        let mutable checkAgainstIdx = -1
         for i=0 to findPointFrom.LastIndex do
             let pt = findPointFrom.[i] 
             let mutable mind = Double.MaxValue
@@ -213,10 +215,17 @@ module Pnt =
                 let d = distanceSq pt checkAgainst.[j]
                 if d < mind then 
                     mind <- d
-            if mind > maxd then 
+                    checkAgainstTempIdx <-j
+            if mind > maxd then
                 maxd <- mind
-                res <- pt
-        res
+                findPointFromIdx <-i
+                checkAgainstIdx <-checkAgainstTempIdx
+        findPointFromIdx, checkAgainstIdx
+
+    /// find the point that has the biggest distance to any point from another set
+    let mostDistantPoint (findPointFrom:Rarr<Point3d>) (checkAgainst:Rarr<Point3d>) =        
+        let i,_ = mostDistantPointIdx findPointFrom checkAgainst
+        findPointFrom.[i]
        
 
 
@@ -236,3 +245,33 @@ module Pnt =
                     last <- pt
                     res.Add last
             res
+
+    /// similar to Join Polylines this tries to find continous sequences of points
+    /// tolGap is the maximun allowable gap between the start and the endpoint of to segments
+    /// search starts from the segment with the most points
+    /// both start and ened point of each point list is checked for adjacency
+    let findContinousPoints (tolGap:float)  (ptss: Rarr<Rarr<Point3d>>)  = 
+        let i =  ptss |> Rarr.maxIndBy Rarr.length        
+        let res = ptss.Pop(i)
+        let mutable loop = true
+        while loop && ptss.Count > 0 do
+            //first try to append to end
+            let ende = res.Last
+            let si = ptss |> Rarr.minIndBy ( fun ps -> distanceSq ende ps.First) 
+            let ei = ptss |> Rarr.minIndBy ( fun ps -> distanceSq ende ps.Last) 
+            let sd = distance ende ptss.[si].First
+            let ed = distance ende ptss.[ei].Last
+            if   sd < tolGap && sd < ed then  res.AddRange(         ptss.Pop(si)) 
+            elif ed < tolGap && ed < sd then  res.AddRange(Rarr.rev(ptss.Pop(ei)))
+            else
+                //search from start
+                let start = res.First
+                let si = ptss |> Rarr.minIndBy ( fun ps -> distanceSq start ps.First) 
+                let ei = ptss |> Rarr.minIndBy ( fun ps -> distanceSq start ps.Last) 
+                let sd = distance start ptss.[si].First
+                let ed = distance start ptss.[ei].Last
+                if   sd < tolGap && sd < ed then res.InsertRange(0, Rarr.rev(ptss.Pop(si))) 
+                elif ed < tolGap && ed < sd then res.InsertRange(0,          ptss.Pop(ei))
+                else
+                    loop <- false
+        res
