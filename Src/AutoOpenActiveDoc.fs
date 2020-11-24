@@ -37,16 +37,20 @@ module AutoOpenActiveDocument =
 
     /// To store last created object form executing a rs.Command(...)
     let mutable internal commandSerialNumbers : option<uint32*uint32> = None // will be reset in EndOpenDocument Event
-       
-
-
-    /// Gets a localised descritipn on rhino object type (curve , point, surface ....)
+   
+    /// Gets a descritipn on rhino object type (curve , point, surface ....)
+    /// including Layer and object name
     let internal rhType (g:Guid)=
         if g = Guid.Empty then "-Guid.Empty-"
         else
-           let o = Doc.Objects.FindId(g) 
-           if isNull o then sprintf "Guid %A (but not in Doc.Objects table of this Rhino file)" g
-           else sprintf "Guid %A ( a %s on Layer '%s' )" g (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath) 
+            let o = Doc.Objects.FindId(g) 
+            if isNull o then sprintf "Guid %A (but not in Doc.Objects table of this Rhino file)" g
+            else
+                let name = o.Attributes.Name
+                if name <> "" then 
+                    sprintf "Guid %A (a %s on Layer '%s' named '%s')" g (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
+                else 
+                    sprintf "Guid %A (an unnamed %s on Layer '%s')" g (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath)
 
     /// Gets a localised descritipn on rhino layer and  object type (e.g. curve , point, surface ....)
     let internal typeDescr (x:'a)=
