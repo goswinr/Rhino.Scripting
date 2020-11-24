@@ -161,19 +161,23 @@ module Pnt =
             let ok, tp , tn = Intersect.Intersection.LineLine(lp, ln) //could also be solved with trigonometry functions            
             if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
             sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
-
-    /// returns the closest point form a Point list 
-    let closestPoint (pt:Point3d) (pts:Rarr<Point3d>) : Point3d=
+    
+    /// returns the closest point index form a Point list  to a given Point
+    let closestPointIdx (pt:Point3d) (pts:Rarr<Point3d>) : int =
         if pts.Count = 0 then RhinoScriptingException.Raise "Pnt.closestPoint empty List of Points: pts"
-        let mutable mip = Point3d.Unset
+        let mutable mi = -1
         let mutable mid = Double.MaxValue
         for i=0 to pts.LastIndex do
             let p = pts.[i]
             let d = distanceSq p pt
             if d < mid then 
                 mid <- d
-                mip <- p
-        mip 
+                mi <- i
+        mi 
+
+    /// returns the closest point form a Point list to a given Point
+    let closestPoint (pt:Point3d) (pts:Rarr<Point3d>) : Point3d=
+        pts.[closestPointIdx pt pts]
 
     /// returns the indices of the points that are closest to each other 
     let closestPointsIdx (xs:Rarr<Point3d>) (ys:Rarr<Point3d>) =
@@ -199,7 +203,8 @@ module Pnt =
         let (i,j) = closestPointsIdx xs ys
         distance xs.[i]  ys.[j]
     
-    /// find the indix of the point that has the biggest distance to any point from another set
+    /// find the index of the point that has the biggest distance to any point from the other set
+    /// basicaly the mos lonely point in 'findPointFrom' list with respect to 'checkAgainst' list
     /// returns findPointFromIdx * checkAgainstIdx
     let mostDistantPointIdx (findPointFrom:Rarr<Point3d>) (checkAgainst:Rarr<Point3d>) : int*int=        
         if findPointFrom.Count = 0 then RhinoScriptingException.Raise "Pnt.mostDistantPoint empty List of Points: findPointFrom"
