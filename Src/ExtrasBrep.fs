@@ -215,7 +215,7 @@ module ExtrasBrep =
             if not m.IsClosed then 
                 m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 1000.0 + meshing.MinimumEdgeLength * 100.0) |> ignore             
         if  not m.IsValid then
-            Doc.Objects.AddBrep brep|> RhinoScriptSyntax.setLayer "RhinoScriptSyntax.ExtractRenderMesh mesh from Brep invalid"                    
+            //Doc.Objects.AddBrep brep|> RhinoScriptSyntax.setLayer "rs.ExtractRenderMesh mesh from Brep invalid"                    
             RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractRenderMesh: failed to create valid mesh from brep"
         elif brep.IsSolid && not m.IsClosed then 
             Result.Error m
