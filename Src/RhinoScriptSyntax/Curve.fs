@@ -349,8 +349,9 @@ module ExtensionsCurve =
         if rc = Guid.Empty then 
             for i,pt in Seq.indexed(points) do
                 let d = Doc.Objects.AddTextDot(string i, pt) 
-                RhinoScriptSyntax.ObjectLayer(d,"AddPolyline failed",true)
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document.  points:'%A'" points
+                RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolyline",true)
+            eprintf "See %d TextDots on layer 'ERROR-AddPolyline'"  (Seq.length points)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document form points:\r\n'%A'" (RhinoScriptSyntax.ToNiceString points)
         Doc.Views.Redraw()
         rc
     
@@ -362,7 +363,7 @@ module ExtensionsCurve =
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddPolylineClosed(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A'" points.ToNiceString        
+        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:\r\n'%A'" (RhinoScriptSyntax.ToNiceString points)       
         if (pl.First-pl.Last).Length <= Doc.ModelAbsoluteTolerance then 
             pl.[pl.Count-1] <- pl.First
         else
@@ -372,7 +373,8 @@ module ExtensionsCurve =
         if rc = Guid.Empty then 
             for i,pt in Seq.indexed(points) do
                 let d = Doc.Objects.AddTextDot(string i, pt) 
-                RhinoScriptSyntax.ObjectLayer(d,"AddPolylineClosed failed",true)            
+                RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolylineClosed",true)
+            eprintf "See %d TextDots on layer 'ERROR-AddPolylineClosed'"  (Seq.length points)
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A'" points
         Doc.Views.Redraw()
         rc
@@ -1588,7 +1590,7 @@ module ExtensionsCurve =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let pts = ref (Array.zeroCreate (segments + 1))
         let rc = curve.DivideByCount(segments, true, pts)
-        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed. curveId:'%s' segments:'%A'" (rhType curveId) segments
+        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveIntoPoints failed. curveId:'%s' segments:'%A'" (rhType curveId) segments
         !pts
 
 
@@ -1615,8 +1617,8 @@ module ExtensionsCurve =
         if isNull points then  
             let len = curve.GetLength()
             if len < distance then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed on too short curve. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
         points
         //let  tvals = Rarr()
         //for point in points do
@@ -1626,7 +1628,8 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Divides a curve object into segments of a specified length</summary>
+    ///<summary>Divides a curve object into segments of a specified length.
+    /// If length is more than curve length it fails</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="length">(float) The length of each segment</param>
     ///<returns>(Point3d Rarr) a list containing division points</returns>
@@ -1641,7 +1644,8 @@ module ExtensionsCurve =
         rarr{ for r in rc do curve.PointAt(r)}
 
     [<Extension>]
-    ///<summary>Divides a curve object into segments of a specified length</summary>
+    ///<summary>Divides a curve object into segments of a specified length.
+    /// If length is more than curve length it fails</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="length">(float) The length of each segment</param>
     ///<returns>( float array) a list containing division parameters</returns>
