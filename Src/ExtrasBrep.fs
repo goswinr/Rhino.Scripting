@@ -192,18 +192,24 @@ module ExtrasBrep =
     ///<summary> Calls Mesh.CreateFromBrep, and mesh.HealNakedEdges() to try to ensure mesh is closed if input is closed</summary>
     ///<param name="brep">(Brep)the Polysurface to extract mesh from</param>
     ///<param name="meshingParameters">(MeshingParameters) Optional, The meshing parameters , if omitted the current meshing parameters are used </param>
-    ///<returns>((Mesh,Mesh) Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output mesh not</returns>
+    ///<returns>((Mesh Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output mesh not
+    /// fails if no meshes can be extracted </returns>
     static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Result<Mesh,Mesh> =            
         let meshing =                
-            if notNull meshingParameters then meshingParameters
+            if notNull meshingParameters then 
+                meshingParameters
             else
                 Doc.GetCurrentMeshingParameters()
         meshing.ClosedObjectPostProcess <- true // not needed use heal instead
         let ms = Mesh.CreateFromBrep(brep,meshing)
         let m = new Mesh()
         for p in ms do 
-            m.Append p 
-        let g = ref Guid.Empty
+            if notNull p then 
+                m.Append p 
+        if m.Vertices.Count < 3 then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractRenderMesh: failed to extract a mesh from brep: %A of %d Faces" brep brep.Faces.Count
+        
+        //let g = ref Guid.Empty
         if brep.IsSolid && not m.IsClosed then // https://discourse.mcneel.com/t/failed-to-create-closed-mesh-with-mesh-createfrombrep-brep-meshing-params-while-sucessfull-with-rhino-command--mesh/35481/8
             m.HealNakedEdges(Doc.ModelAbsoluteTolerance * 100.0) |> ignore // see https://discourse.mcneel.com/t/mesh-createfrombrep-fails/93926
             if not m.IsClosed then 
