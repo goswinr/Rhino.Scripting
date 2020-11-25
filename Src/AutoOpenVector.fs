@@ -21,6 +21,8 @@ module AutoOpenVector =
     type RhinoScriptSyntax with
         
         [<Extension>] 
+        [<Obsolete>]
+        /// Use Vec.angle .. instead
         ///projects to plane an retuns angle in degrees in plane between -180 and + 180               
         static member AngleInPlane180( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
@@ -28,7 +30,9 @@ module AutoOpenVector =
             let ang = acos dot  |> toDegrees
             if v*plane.YAxis < 0.0 then -ang else ang
         
-        [<Extension>] 
+        [<Extension>]
+        [<Obsolete>]
+        /// Use Vec.angle .. instead
         ///projects to plane an retuns angle in degrees in plane between 0 and 360               
         static member AngleInPlane360( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
@@ -208,30 +212,30 @@ module AutoOpenVector =
                     if i=0 then 
                         if lastIsFirst then 
                             let prev = points.GetNeg(-2) // because -1 is same as 0                    
-                            let _, _, pt, N = Pnt.findOffsetCorner(prev, t, n, offDists.Last, offDists.[0], refNormal)
+                            let struct( _, _, pt, N) = Pnt.findOffsetCorner(prev, t, n, offDists.Last, offDists.[0], refNormal)
                             Pts.Add pt
                             Ns.Add N
                         else
-                            let _, sn, pt, N = Pnt.findOffsetCorner(p, t, n, offDists.Last, offDists.[0], refNormal)
+                            let struct( _, sn, pt, N) = Pnt.findOffsetCorner(p, t, n, offDists.Last, offDists.[0], refNormal)
                             Ns.Add N 
                             if loop then Pts.Add pt
                             else         Pts.Add (t + sn)                                                 
                     // last one:
                     elif i = lastIndex  then 
                         if lastIsFirst then
-                            let _, _, pt, N = Pnt.findOffsetCorner(p, t, points.[1], offDists.[i-1], offDists.[0], refNormal)
+                            let struct(_, _, pt, N) = Pnt.findOffsetCorner(p, t, points.[1], offDists.[i-1], offDists.[0], refNormal)
                             Pts.Add pt
                             Ns.Add N
                         elif loop then 
-                            let _, _, pt, N = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
+                            let struct( _, _, pt, N) = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
                             Pts.Add pt
                             Ns.Add N
                         else 
-                            let sp, _, _, N = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i-1], refNormal) // or any next off dist since only sp is used    
+                            let struct( sp, _, _, N) = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i-1], refNormal) // or any next off dist since only sp is used    
                             Pts.Add (t + sp)
                             Ns.Add N 
                     else
-                        let _, _, pt, N = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
+                        let struct( _, _, pt, N ) = Pnt.findOffsetCorner(p, t, n, offDists.[i-1], offDists.[i], refNormal)
                         Pts.Add pt
                         Ns.Add N                                            
                 if lenDistNorm > 0 then 
