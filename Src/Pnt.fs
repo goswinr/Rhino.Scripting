@@ -143,11 +143,11 @@ module Pnt =
                             nextPt:Point3d, 
                             prevDist:float, 
                             nextDist:float,
-                            orientation:Vector3d) : Vector3d* Vector3d * Point3d * Vector3d=
+                            orientation:Vector3d) : struct(Vector3d* Vector3d * Point3d * Vector3d) =
         let vp = prevPt - thisPt
         let vn = nextPt - thisPt    
         if Vec.isAngleBelowQuaterDegree(vp, vn) then // TODO refine erroe criteria
-            Vector3d.Zero, Vector3d.Zero, Point3d.Origin, Vector3d.Zero
+            struct(Vector3d.Zero, Vector3d.Zero, Point3d.Origin, Vector3d.Zero)
         else 
             let n = 
                 Vector3d.CrossProduct(vp, vn)
@@ -160,7 +160,14 @@ module Pnt =
             let ln = Line(thisPt + sn , vn)  //|>! (Doc.Objects.AddLine>> ignore)               
             let ok, tp , tn = Intersect.Intersection.LineLine(lp, ln) //could also be solved with trigonometry functions            
             if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
-            sp, sn, lp.PointAt(tp), n  //or ln.PointAt(tn), should be same
+            struct(sp, sn, lp.PointAt(tp), n)  //or ln.PointAt(tn), should be same
+    
+    /// returns angle in degree at midd point
+    let angelInCorner(prevPt:Point3d, thisPt:Point3d, nextPt:Point3d) =
+        let a = prevPt-thisPt
+        let b = nextPt-thisPt
+        Vec.angle180 a b
+    
     
     /// returns the closest point index form a Point list  to a given Point
     let closestPointIdx (pt:Point3d) (pts:Rarr<Point3d>) : int =
@@ -235,20 +242,25 @@ module Pnt =
 
 
     /// Culls points if they are to close to previous or next item
+    /// Last and first points stay the same
     let cullDuplicatePointsInSeq (tolerance) (pts:Rarr<Point3d>)  = 
         if pts.Count = 0 then RhinoScriptingException.Raise "Pnt.cullDuplicatePointsInSeq empty List of Points: pts"
         if pts.Count = 1 then 
             pts
         else
-            let tsq = tolerance*tolerance
+            let tolSq = tolerance*tolerance
             let res  =  Rarr(pts.Count)
             let mutable last  = pts.[0]
             res.Add last
-            for i = 1  to pts.LastIndex do                
+            let iLast = pts.LastIndex 
+            for i = 1  to iLast do                
                 let pt = pts.[i]
-                if distanceSq last pt > tsq then 
+                if distanceSq last pt > tolSq then                     
                     last <- pt
                     res.Add last
+                elif i=iLast then // to ensure last point stays the same
+                    res.Pop() |> ignore 
+                    res.Add pt
             res
 
     /// similar to Join Polylines this tries to find continous sequences of points
@@ -280,3 +292,4 @@ module Pnt =
                 else
                     loop <- false
         res
+
