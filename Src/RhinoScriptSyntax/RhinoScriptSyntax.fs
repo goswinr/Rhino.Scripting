@@ -37,15 +37,15 @@ type ObjectFilterEnum internal () =
     member _.Mesh = 32
     /// retuns 256
     member _.Light = 256
-    /// retuns 512
+    /// retuns 512, for Text, leaders, and dimension lines
     member _.Annotation = 512
-    /// retuns 4096
+    /// retuns 4096, for block instances
     member _.Instance = 4096
     /// retuns 8192
     member _.Textdot = 8192
     /// retuns 16384
     member _.Grip = 16384
-    /// retuns 32768
+    /// retuns 32768, for detail view objects
     member _.Detail = 32768
     /// retuns 65536
     member _.Hatch = 65536
