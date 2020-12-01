@@ -21,7 +21,7 @@
     <Description>Rhino Script Syntax for F# (and C#)</Description>
     <Copyright>Copyright: Goswin Rothenthal 2020 </Copyright>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>
-      <!--to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
+      <!-- $(OtherFlags)  warnon:3390 to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
   </PropertyGroup>
   
 
