@@ -58,7 +58,7 @@ type ObjectFilterEnum internal () =
     /// retuns 536870912
     member _.ClippingPlane = 536870912
     /// retuns 1073741824
-    member _.Extrusion = 1073741824
+    member _.Extrusion = 1073741824 
 
 
 /// A static class with static members providing functions Identical to RhinoScript in Pyhton or VBscript 

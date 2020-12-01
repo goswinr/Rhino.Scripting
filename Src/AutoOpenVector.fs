@@ -160,7 +160,7 @@ module AutoOpenVector =
         /// Distances Sequence  must have exact count , be a singelton ( for repeating) or empty seq ( for ignoring)
         /// Auto detects points from closed polylines and loops them
         [<Extension>] 
-        static member OffsetPoints(     points:Point3d IList, 
+        static member OffsetPoints(     points: IList<Point3d>,  // IList so it can take a Point3dList class too
                                         offsetDistances: float seq, 
                                         [<OPT;DEF(null:seq<float>)>] normalDistances: float seq,
                                         [<OPT;DEF(false)>]loop:bool) :Point3d  Rarr  =       
