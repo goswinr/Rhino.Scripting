@@ -2,7 +2,7 @@ namespace Rhino.Scripting
 
 open System
 open Rhino
-
+open FsEx
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
 
@@ -215,4 +215,32 @@ module ExtensionsGroup =
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockGroup failed.  groupName:'%A'" groupName
         Doc.Groups.Unlock(index)
 
+    [<Extension>]
+    ///<summary>Returns the top most group name that an object is assigned.  
+    ///   This function primarily applies to objects that are members of nested groups</summary>
+    ///<param name="objId">(Guid) id of the object to query </param>
+    ///<returns>(int) The top group's name. Fails if object is not in a group</returns>
+    static member ObjectTopGroup(objId:Guid) : string =
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
+        let groupIndexes = obj.GetGroupList()
+        if isNull groupIndexes then  RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectTopGroup objId not part of a group:'%s'" (rhType objId)
+        else
+            let topGroupIndex = Array.max(groupIndexes) // this is a bad assumption. See RH-49189
+            Doc.Groups.FindIndex(topGroupIndex).Name
 
+    [<Extension>]
+    ///<summary>Returns the names of all groups that an object is part of .  
+    ///   This function primarily applies to objects that are members of nested groups</summary>
+    ///<param name="objId">(Guid) id of the object to query </param>
+    ///<returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group</returns>
+    static member ObjectGroups(objId:Guid) : Rarr<string> =
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
+        let groupIndexes = obj.GetGroupList()
+        if isNull groupIndexes then  (new Rarr<string>(0))
+        else
+            groupIndexes
+            |>  Rarr.ofArray
+            |>! Rarr.sortInPlace
+            |>  Rarr.map (fun i -> Doc.Groups.FindIndex(i).Name)
+            
+         
