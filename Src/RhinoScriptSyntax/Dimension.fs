@@ -550,6 +550,27 @@ module ExtensionsDimension =
         Doc.Views.Redraw()
 
 
+    [<Extension>]
+    ///<summary>Returns the scale of a dimension style </summary>
+    ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
+    ///<returns>(string) The current suffix</returns>
+    static member DimStyleScale(dimStyle:string) : float = //GET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale get failed.  dimStyle:'%A'" dimStyle
+        ds.DimensionScale
+
+    [<Extension>]
+    ///<summary>Changes the scale of a dimension style </summary>
+    ///<param name="dimStyle">(string) The name of an existing dimStyle</param>
+    ///<param name="scale">(float) The new scale</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member DimStyleScale(dimStyle:string, scale:float) : unit = //SET
+        let ds = Doc.DimStyles.FindName(dimStyle)
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale set failed.  dimStyle:'%A' scale:'%A'" dimStyle scale
+        ds.DimensionScale <- scale
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale set failed.  dimStyle:'%A' scale:'%A'" dimStyle scale
+        Doc.Views.Redraw()
+
 
     [<Extension>]
     ///<summary>Returns the suffix of a dimension style - the text to
