@@ -1579,13 +1579,22 @@ module ExtensionsCurve =
         if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveWeights failed. curveId:'%s' segmentIndex:'%A'" (rhType curveId) segmentIndex
         rarr { for pt in nc.Points -> pt.Weight }
 
-
+    [<Extension>]
+    ///<summary>Divides a curve Geometry into a specified number of segments, inluding start and end point</summary>
+    ///<param name="curve">(Geometry.Curve) curve geometry</param>
+    ///<param name="segments">(int) The number of segments</param>
+    ///<returns>(Point3d array) Array containing points at divisions</returns>
+    static member DivideCurveIntoPoints(curve:Curve, segments:int) : Point3d array =        
+        let pts = ref (Array.zeroCreate (segments + 1))
+        let rc = curve.DivideByCount(segments, true, pts)
+        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveIntoPoints failed. curve:'%A' segments:'%A'" curve segments
+        !pts
 
     [<Extension>]
-    ///<summary>Divides a curve object into a specified number of segments</summary>
+    ///<summary>Divides a curve object into a specified number of segments, inluding start and end point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segments">(int) The number of segments</param>
-    ///<returns>(Point3d array) Array containing division curve parameters</returns>
+    ///<returns>(Point3d array) Array containing points at divisions</returns>
     static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let pts = ref (Array.zeroCreate (segments + 1))
@@ -1593,12 +1602,21 @@ module ExtensionsCurve =
         if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveIntoPoints failed. curveId:'%s' segments:'%A'" (rhType curveId) segments
         !pts
 
+    [<Extension>]
+    ///<summary>Divides a curve Geometry into a specified number of segments</summary>
+    ///<param name="curve">(Geometry.Curve) curve geometry</param>
+    ///<param name="segments">(int) The number of segments</param>
+    ///<returns>( float array ) array containing 3D division parameters</returns>
+    static member DivideCurve(curve:Curve, segments:int) :  float array =
+        let rc = curve.DivideByCount(segments, true)
+        if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed. curve:'%A' segments:'%A'" curve segments
+        rc
 
     [<Extension>]
     ///<summary>Divides a curve object into a specified number of segments</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object</param>
     ///<param name="segments">(int) The number of segments</param>
-    ///<returns>( float array ) array containing 3D division points</returns>
+    ///<returns>( float array ) array containing 3D division parameters</returns>
     static member DivideCurve(curveId:Guid, segments:int) :  float array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let rc = curve.DivideByCount(segments, true)
@@ -1607,7 +1625,23 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Divides a curve such that the linear distance between the points is equal</summary>
+    ///<summary>Divides a curve Geometry such that the linear distance between the points is equal</summary>
+    ///<param name="curve">(Geometry.Curve) curve geometry</param>
+    ///<param name="distance">(float) Linear distance between division points</param>
+    ///<returns>(Point3d array) array containing 3D division points</returns>
+    static member DivideCurveEquidistant(curve:Curve, distance:float) : array<Point3d> =
+        let  points = curve.DivideEquidistant(distance)
+        if isNull points then  
+            let len = curve.GetLength()
+            if len < distance then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed on too short curve. curve:'%A' distance:%f, curveLength=%f" curve distance len
+            else 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed. curve:'%A' distance:%f, curveLength=%f" curve distance len
+        points
+       
+
+    [<Extension>]
+    ///<summary>Divides a curve object such that the linear distance between the points is equal</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="distance">(float) Linear distance between division points</param>
     ///<returns>(Point3d array) array containing 3D division points</returns>
@@ -1618,14 +1652,30 @@ module ExtensionsCurve =
             let len = curve.GetLength()
             if len < distance then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed on too short curve. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
+            else 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (rhType curveId) distance len
         points
         //let  tvals = Rarr()
         //for point in points do
         //    let mutable rc, t = curve.ClosestPoint(point)
         //    tvals.Add(t)
         //tvals
-
+    
+    [<Extension>]
+    ///<summary>Divides a curve Geometry into segments of a specified length.
+    /// If length is more than curve length it fails</summary>
+    ///<param name="curve">(Geometry.Curve) curve geometry</param>
+    ///<param name="length">(float) The length of each segment</param>
+    ///<returns>(Point3d Rarr) a list containing division points</returns>
+    static member DivideCurveLengthIntoPoints(curve:Curve, length:float) : Point3d Rarr =        
+        let rc = curve.DivideByLength(length, true)
+        if isNull rc then  
+            let len = curve.GetLength()
+            if len < length then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed on too short curve. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+            else 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+        rarr{ for r in rc do curve.PointAt(r)}
 
     [<Extension>]
     ///<summary>Divides a curve object into segments of a specified length.
@@ -1640,8 +1690,25 @@ module ExtensionsCurve =
             let len = curve.GetLength()
             if len < length then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
+            else 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLengthIntoPoints failed. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
         rarr{ for r in rc do curve.PointAt(r)}
+    
+    [<Extension>]
+    ///<summary>Divides a curve Geometry into segments of a specified length.
+    /// If length is more than curve length it fails</summary>
+    ///<param name="curve">(Geometry.Curve) curve geometry</param>
+    ///<param name="length">(float) The length of each segment</param>
+    ///<returns>( float array) a list containing division parameters</returns>
+    static member DivideCurveLength(curve:Curve, length:float) :  float [] =        
+        let rc = curve.DivideByLength(length, true)
+        if isNull rc then  
+            let len = curve.GetLength()
+            if len < length then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed on too short curve. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+            else 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+        rc
 
     [<Extension>]
     ///<summary>Divides a curve object into segments of a specified length.
@@ -1656,7 +1723,8 @@ module ExtensionsCurve =
             let len = curve.GetLength()
             if len < length then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
+            else 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveLength failed. curveId:'%s' divedlength:%f, curveLength=%f" (rhType curveId) length len
         rc
 
 
