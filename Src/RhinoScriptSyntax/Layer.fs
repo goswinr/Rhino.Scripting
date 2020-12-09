@@ -17,6 +17,29 @@ module ExtensionsLayer =
   type RhinoScriptSyntax with
 
 
+    [<Extension>]
+    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already</summary>
+    ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
+    ///<param name="newLayerName">(string) The new name</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ChangeLayerName(currentLayerName:string, newLayerName:string) : unit = 
+        let i = Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
+        else 
+            RhinoScriptSyntax.ensureValidShortLayerName newLayerName            
+            let lay = Doc.Layers.[i]
+            let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
+            ps.Last <- newLayerName
+            let np = String.concat "::" ps
+            let ni = Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
+            if i >= 0 then 
+                RhinoScriptingException.Raise "rs.ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
+            else
+                lay.Name <- newLayerName
+                
+
+
+
     //static member AddLayer() // moved to file RhinoScriptSyntax.fs
 
     [<Extension>]
@@ -28,13 +51,13 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Changes the current layer</summary>
-    ///<param name="layer">(string) The name or Guid of an existing layer to make current</param>
+    ///<param name="layer">(string) The name of an existing layer to make current</param>
     ///<returns>(unit) void, nothing</returns>
     static member CurrentLayer(layer:string) : unit = //SET
         let rc = Doc.Layers.CurrentLayer.FullPath
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from name'%A'" layer
-        if not<|  Doc.Layers.SetCurrentLayerIndex(i, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.Set CurrentLayer to %A failed" layer
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
+        if not<|  Doc.Layers.SetCurrentLayerIndex(i, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer Set CurrentLayer to %s failed" layer
 
 
 
@@ -48,7 +71,7 @@ module ExtensionsLayer =
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteLayer(layer:string) : bool =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from name'%A'" layer
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
         Doc.Layers.Delete(i, true)
 
 
@@ -59,7 +82,7 @@ module ExtensionsLayer =
     ///<returns>(unit) void, nothing</returns>
     static member ExpandLayer(layer:string, expand:bool) : unit =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from name'%A'" layer
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
         let layer = Doc.Layers.[i]
         if layer.IsExpanded <> expand then
             layer.IsExpanded <- expand
