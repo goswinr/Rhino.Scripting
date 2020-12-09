@@ -6,7 +6,7 @@ open Rhino
 open Rhino.Geometry
 open FsEx.Util
 open FsEx.UtilMath
-
+open System.Globalization
 open System.Collections.Generic
 open FsEx
 open FsEx.SaveIgnore
@@ -1016,22 +1016,69 @@ type RhinoScriptSyntax private () =
     // -------------------- Layer related functions moved here so that they can be used ealier. -------------------
     //----------------------They is used in many functions to draw error fedback objects--------------------------------
     
-    /// Creates all parent layers too if they are missing, uses same locked state and colors for all nerw layers.
+    /// Raise exceptions if short layername is not valid
+    /// it may not contain :: or control characters
+    static member internal ensureValidShortLayerName(name:string) : unit= 
+        if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax found an null string as layer name" 
+        if name.Length = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax found an empty string as layer name" 
+        
+        let tr = name.Trim()
+        if tr.Length <> name.Length then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid layer name: '%s'. It has trailing oe leading white space" name
+        
+        if name.Contains "::" then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing two colons(::)  '%s'. " name        
+        
+        match Char.GetUnicodeCategory(name.First) with
+        | UnicodeCategory.OpenPunctuation | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] )
+            RhinoScriptingException.Raise  "RhinoScriptSyntax found an invalid layer name: '%s'. The name may not start with a '%c' " name name.First
+        | _ -> ()
+
+        for c in name do
+            let cat = Char.GetUnicodeCategory(c)
+            match cat with
+            |UnicodeCategory.Control  ->                     
+                RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing UnicodeCategory.Control characters: '%s'. " name            
+            |UnicodeCategory.SpaceSeparator when c <> ' ' -> 
+                RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing UnicodeCategory.SpaceSeparator other than regular space in '%s'. If you really want this character add the layer directly via Rhinocommon"  name
+            |UnicodeCategory.ModifierSymbol  
+            |UnicodeCategory.ModifierLetter
+            |UnicodeCategory.Format                 // https://www.compart.com/en/unicode/category
+            |UnicodeCategory.EnclosingMark
+            |UnicodeCategory.LetterNumber
+            |UnicodeCategory.OtherNumber
+            |UnicodeCategory.LineSeparator
+            |UnicodeCategory.SpacingCombiningMark
+            |UnicodeCategory.NonSpacingMark
+            |UnicodeCategory.ParagraphSeparator
+            |UnicodeCategory.TitlecaseLetter -> 
+                RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" cat  name
+            |UnicodeCategory.ConnectorPunctuation when c <> '_' -> 
+                RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" cat  name
+            |UnicodeCategory.DashPunctuation when c <> '-'  ->       // only minus is allowed
+                RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" cat  name
+            | _ -> ()
+
+    
+    
+    /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
     /// returns index
-    static member private getOrCreateLayer(names, color, visible, locked) : int = 
-        match Doc.Layers.FindByFullPath(names, -99) with
+    /// empty string returns current layer
+    static member private getOrCreateLayer(name, color, visible, locked) : int = 
+        match Doc.Layers.FindByFullPath(name, -99) with
         | -99 -> 
-            match names with 
+            match name with 
             | "" -> Doc.Layers.CurrentLayerIndex
             | _ -> 
-                match names.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
-                | [| |] -> RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot get or create layer for: '%s'" names
+                match name.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
+                | [| |] -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer for name: '%s'" name
                 | ns -> 
-                    let checkedNs =
-                        ns
-                        |> Array.map (fun n -> n.Trim())
-                        |> Array.map (fun n -> if n <> "" then n else RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot get or create layer from: '%s'" names)
-                        |> List.ofArray
+                    
+                    //let checkedNs = // done in RhinoScriptSyntax.ensureValidShortLayerNmae
+                    //    ns
+                    //    |> Array.map (fun n -> n.Trim())
+                    //    |> Array.map (fun n -> if n <> "" then n else RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot get or create layer from: '%s'" name)
+                    //    |> List.ofArray
 
                     let rec createLayer(nameList, prevId, prevIdx, root) : int = 
                         match nameList with 
@@ -1040,10 +1087,11 @@ type RhinoScriptSyntax private () =
                             let fullpath = if root="" then branch else root + "::" + branch 
                             match Doc.Layers.FindByFullPath(fullpath,-99) with
                             | -99 -> // actually create layer:
+                                RhinoScriptSyntax.ensureValidShortLayerName branch   // only check non existing layers                             
                                 let layer = DocObjects.Layer.GetDefaultLayerProperties()
                                 if prevId<>Guid.Empty then layer.ParentLayerId <- prevId
                                 layer.Name <- branch
-                                layer.Color <- color()// delay creation of color till actaully neded ( so random colors are not created, in most cases layer exists)
+                                layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
                                 layer.IsVisible <- visible
                                 layer.IsLocked <- locked
                                 let i = Doc.Layers.Add(layer)
@@ -1053,7 +1101,7 @@ type RhinoScriptSyntax private () =
                             | i -> 
                                 createLayer(rest , Doc.Layers.[i].Id , i ,fullpath)
                     
-                    createLayer(checkedNs, Guid.Empty, 0, "")
+                    createLayer( ns |> List.ofArray, Guid.Empty, 0, "")
         | i -> i
 
 
@@ -1071,7 +1119,8 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(true)>]visible:bool,
                             [<OPT;DEF(false)>]locked:bool,
                             [<OPT;DEF(null:string)>]parent:string) : string = // this member was orignally in Layer.fs
-        let names = if isNull parent then name else parent+ "::" + name
+        let nameC =  if isNull name then DocObjects.Layer.GetDefaultLayerProperties().Name else name                     
+        let names = if isNull parent then nameC else parent+ "::" + nameC
         let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
         let i     = RhinoScriptSyntax.getOrCreateLayer(names, col, visible, locked)
         Doc.Layers.[i].FullPath
