@@ -1068,6 +1068,7 @@ type RhinoScriptSyntax private () =
         match Doc.Layers.FindByFullPath(name, -99) with
         | -99 -> 
             match name with 
+            | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer from null string" 
             | "" -> Doc.Layers.CurrentLayerIndex
             | _ -> 
                 match name.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
@@ -1104,8 +1105,16 @@ type RhinoScriptSyntax private () =
                     createLayer( ns |> List.ofArray, Guid.Empty, 0, "")
         | i -> i
 
+    static member internal createDefaultLayer(color, visible, locked) = 
+        let layer = DocObjects.Layer.GetDefaultLayerProperties() 
+        layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
+        layer.IsVisible <- visible
+        layer.IsLocked <- locked
+        Doc.Layers.Add(layer)        
 
-    [<Extension>]
+
+
+
     ///<summary>Add a new layer to the document. If it does not exist yet.
     /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
@@ -1119,14 +1128,20 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(true)>]visible:bool,
                             [<OPT;DEF(false)>]locked:bool,
                             [<OPT;DEF(null:string)>]parent:string) : string = // this member was orignally in Layer.fs
-        let nameC =  if isNull name then DocObjects.Layer.GetDefaultLayerProperties().Name else name                     
-        let names = if isNull parent then nameC else parent+ "::" + nameC
-        let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
-        let i     = RhinoScriptSyntax.getOrCreateLayer(names, col, visible, locked)
-        Doc.Layers.[i].FullPath
-
     
-    [<Extension>]
+        let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
+        if notNull parent && isNull name then  
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer if parent name is given (%s) the child name must be given too." parent
+    
+        if isNull name then 
+            Doc.Layers.[RhinoScriptSyntax.createDefaultLayer(col, visible, locked)].FullPath
+        else
+            let names = if isNull parent then name else parent+ "::" + name            
+            let i     = RhinoScriptSyntax.getOrCreateLayer(names, col, visible, locked)
+            Doc.Layers.[i].FullPath
+  
+    
+   
     ///<summary>Returns the full layername of an object. 
     /// parent layers are separated by <c>::</c></summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
@@ -1137,7 +1152,6 @@ type RhinoScriptSyntax private () =
         Doc.Layers.[index].FullPath
 
 
-    [<Extension>]
     ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -1154,7 +1168,6 @@ type RhinoScriptSyntax private () =
         Doc.Views.Redraw()
        
 
-    [<Extension>]
     ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
