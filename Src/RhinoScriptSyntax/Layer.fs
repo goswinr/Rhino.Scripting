@@ -3,22 +3,231 @@ namespace Rhino.Scripting
 open FsEx
 open System
 open Rhino
-
+open System.Globalization
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
 
+
+// -------------------- Layer related functions moved in fist position sinsce they are used in other modules. -------------------
+
  
-[<AutoOpen>]
+
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsLayer =
+  
+  /// Raise exceptions if short layername is not valid
+  /// it may not contain :: or control characters
+  /// set allowSpecialChars to false to only have ASCII
+  let internal ensureValidShortLayerName(name:string, allowSpecialChars) : unit= 
+    if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax found an null string as layer name" 
+    if name.Length = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax found an empty string as layer name" 
+   
+    let tr = name.Trim()
+    if tr.Length <> name.Length then 
+        RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid layer name: '%s'. It has trailing or leading white space" name
+   
+    if name.Contains "::" then 
+        RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing two colons(::)  '%s'. " name        
+   
+    match Char.GetUnicodeCategory(name.First) with
+    | UnicodeCategory.OpenPunctuation | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) dont work at start of layer name
+        RhinoScriptingException.Raise  "RhinoScriptSyntax found an invalid layer name: '%s'. The name may not start with a '%c' " name name.First
+    | _ -> ()      
+   
+    for c in name do
+        let cat = Char.GetUnicodeCategory(c)
+        match cat with
+        |UnicodeCategory.Control  ->                     
+            RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing UnicodeCategory.Control characters: '%s'. " name       
+        
+        |UnicodeCategory.SpaceSeparator when c <> ' ' -> 
+            RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing UnicodeCategory.SpaceSeparator other than regular space in '%s'. If you really want this character add the layer directly via Rhinocommon"  name
+        
+        |UnicodeCategory.ConnectorPunctuation when c <> '_' -> 
+            RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater '%c' in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" c cat  name
+        
+        |UnicodeCategory.DashPunctuation when c <> '-'  ->       // only minus is allowed
+            RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater '%c' in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" c cat  name
+        
+        |UnicodeCategory.TitlecaseLetter            
+        |UnicodeCategory.ModifierLetter             
+        |UnicodeCategory.NonSpacingMark             
+        |UnicodeCategory.SpacingCombiningMark       
+        |UnicodeCategory.EnclosingMark              
+        |UnicodeCategory.LetterNumber               
+        |UnicodeCategory.OtherNumber                
+        |UnicodeCategory.LineSeparator              
+        |UnicodeCategory.ParagraphSeparator         
+        |UnicodeCategory.Format 
+        |UnicodeCategory.OtherNotAssigned 
+        |UnicodeCategory.ModifierSymbol ->
+            RhinoScriptingException.Raise "RhinoScriptSyntax found a probably not supported charcater in short layer name containing %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" cat  name
+                   
+        | _ -> ()
+   
+        if not allowSpecialChars then
+             match cat with
+             |UnicodeCategory.OtherPunctuation when c > '\\' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.CurrencySymbol when c > '¥' ->
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+
+             |UnicodeCategory.OpenPunctuation when c > '{' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+
+             |UnicodeCategory.ClosePunctuation when c > '}' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.MathSymbol when c > '÷' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.DecimalDigitNumber when c > '9' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.UppercaseLetter when c > 'Z' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.LowercaseLetter when c > 'z' ->
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.OtherSymbol 
+             |UnicodeCategory.InitialQuotePunctuation 
+             |UnicodeCategory.FinalQuotePunctuation 
+             |UnicodeCategory.OtherLetter ->
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             | _ -> ()
+
+          
+  /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
+  /// returns index
+  /// empty string returns current layer
+  let internal getOrCreateLayer(name, color, visible, locked) : int = 
+      match Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
+      | RhinoMath.UnsetIntIndex -> 
+          match name with 
+          | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer from null string" 
+          | "" -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer from empty string"        
+          | _ -> 
+              match name.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
+              | [| |] -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer for name: '%s'" name
+              | ns -> 
+              
+                  let rec createLayer(nameList, prevId, prevIdx, root) : int = 
+                      match nameList with 
+                      | [] -> prevIdx // exit recursion
+                      | branch :: rest -> 
+                          let fullpath = if root="" then branch else root + "::" + branch 
+                          match Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
+                          | RhinoMath.UnsetIntIndex -> // actually create layer:
+                          
+                              ensureValidShortLayerName (branch,false)   // only check non existing layer names                          
+                              let layer = DocObjects.Layer.GetDefaultLayerProperties()
+                              if prevId <> Guid.Empty then layer.ParentLayerId <- prevId
+                              layer.Name <- branch
+                              layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
+                              layer.IsVisible <- visible
+                              layer.IsLocked <- locked
+                              let i = Doc.Layers.Add(layer)
+                              let id = Doc.Layers.[i].Id //just using layer.Id would be empty guid                                
+                              createLayer(rest , id , i,  fullpath)
+                          
+                          | i -> 
+                              createLayer(rest , Doc.Layers.[i].Id , i ,fullpath)
+              
+                  createLayer( ns |> List.ofArray, Guid.Empty, 0, "")
+      | i -> i
+  
+  
+  /// creates layer with default name
+  let internal createDefaultLayer(color, visible, locked) = 
+      let layer = DocObjects.Layer.GetDefaultLayerProperties() 
+      layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
+      layer.IsVisible <- visible
+      layer.IsLocked <- locked
+      Doc.Layers.Add(layer)        
+
 
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
+    
+    [<Extension>]
+    ///<summary>Add a new layer to the document. If it does not exist yet. Currently anly ASCII characters are allowed.
+    /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
+    ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
+    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.  If omitted a random (non yellow)  color wil be choosen.</param>
+    ///<param name="visible">(bool) Optional, Default Value: <c>true</c>  Layer's visibility.</param>
+    ///<param name="locked">(bool) Optional, Default Value: <c>false</c>  Layer's locked state.</param>
+    ///<param name="parent">(string) Optional, Name of existing parent layer. </param>
+    ///<returns>(string) The full name of the new layer</returns>
+    static member AddLayer( [<OPT;DEF(null:string)>]name:string,
+                            [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
+                            [<OPT;DEF(true)>]visible:bool,
+                            [<OPT;DEF(false)>]locked:bool,
+                            [<OPT;DEF(null:string)>]parent:string) : string = // this member was orignally in Layer.fs
+
+        let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
+        if notNull parent && isNull name then  
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer if parent name is given (%s) the child name must be given too." parent
+
+        if isNull name then 
+            Doc.Layers.[createDefaultLayer(col, visible, locked)].FullPath
+        else
+            let names = if isNull parent then name else parent+ "::" + name            
+            let i     = getOrCreateLayer(names, col, visible, locked)
+            Doc.Layers.[i].FullPath
+  
+
+    [<Extension>]
+    ///<summary>Returns the full layername of an object. 
+    /// parent layers are separated by <c>::</c></summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<returns>(string) The object's current layer</returns>
+    static member ObjectLayer(objectId:Guid) : string = //GET
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let index = obj.Attributes.LayerIndex
+        Doc.Layers.[index].FullPath
+
+    [<Extension>]
+    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+    ///     Set true to create Layer if it does not exist yet.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
+        let layerIndex =
+            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
+        obj.Attributes.LayerIndex <- layerIndex
+        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (typeDescr objectId)
+        Doc.Views.Redraw()
+   
+    [<Extension>]
+    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
+    ///<param name="layer">(string) Name of an existing layer</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
+    ///     Set true to create Layer if it does not exist yet.</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
+        let layerIndex =
+            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            else                          RhinoScriptSyntax.CoerceLayer(layer).Index   
+        for objectId in objectIds do
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            obj.Attributes.LayerIndex <- layerIndex
+            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+        Doc.Views.Redraw()
+
 
 
     [<Extension>]
-    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already</summary>
+    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed</summary>
     ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
     ///<param name="newLayerName">(string) The new name</param>
     ///<returns>(unit) void, nothing</returns>
@@ -26,7 +235,7 @@ module ExtensionsLayer =
         let i = Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
         else 
-            RhinoScriptSyntax.ensureValidShortLayerName newLayerName            
+            ensureValidShortLayerName (newLayerName, false)
             let lay = Doc.Layers.[i]
             let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
             ps.Last <- newLayerName
@@ -36,11 +245,7 @@ module ExtensionsLayer =
                 RhinoScriptingException.Raise "rs.ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
             else
                 lay.Name <- newLayerName
-                
-
-
-
-    //static member AddLayer() // moved to file RhinoScriptSyntax.fs
+       
 
     [<Extension>]
     ///<summary>Returns the current layer</summary>

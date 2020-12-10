@@ -26,7 +26,13 @@ type Synchronisation private () = // no public constructor
     
     static let mutable seffWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
 
+    
     static let mutable colorLogger : int-> int -> int -> string -> unit = //set via reflection below from Seff.Rhino
+        fun r g b s -> 
+             RhinoApp.Write s
+             printf "%s" s    
+    
+    static let mutable colorLoggerNl : int-> int -> int -> string -> unit = //set via reflection below from Seff.Rhino
         fun r g b s -> 
              RhinoApp.WriteLine s
              printfn "%s" s
@@ -51,9 +57,10 @@ type Synchronisation private () = // no public constructor
                                    
                 try   
                     let printModule = seffAssembly.GetType("Seff.Rhino.Print") 
-                    colorLogger <- printModule.GetProperty("colorLogger").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
+                    colorLogger   <- printModule.GetProperty("colorLogger").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
+                    colorLoggerNl <- printModule.GetProperty("colorLoggerNl").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
                 with ex ->
-                    eprintfn "Failed to get Seff.Rhino.Print.colorLogger via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\nMessage: %A" ex                    
+                    eprintfn "Failed to get Seff.Rhino.Print.colorLogger or colorLoggerNl via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\nMessage: %A" ex                    
                 
                     
             if isNull seffWindow then 
@@ -83,9 +90,13 @@ type Synchronisation private () = // no public constructor
         // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails
         RhinoApp.InvokeRequired
 
-    /// print with rgb colors
+    /// print with rgb colors. does not add a new line
     /// red -> green -> blue -> string -> unit
     static member ColorLogger = colorLogger
+
+    /// print with rgb colors. adds a new line
+    /// red -> green -> blue -> string -> unit
+    static member ColorLoggerNl = colorLoggerNl
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin      
