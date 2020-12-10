@@ -17,7 +17,7 @@ open System.Runtime.CompilerServices
 /// it only contaions static extension member on RhinoScriptSyntax
 [<AutoOpen>]
 module ExtensionsPrint =
-
+  
   type RhinoScriptSyntax with
     
     [<Extension>]
@@ -169,3 +169,34 @@ module ExtensionsPrint =
             RhinoApp.WriteLine s
             Synchronisation.ColorLoggerNl red green blue  s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+    
+
+  ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
+  let print x = RhinoScriptSyntax.Print x 
+  
+  /// shadowing the default printf to also print to Rhino Command line
+  let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  
+  /// shadowing the default printfn to also print to Rhino Command line
+  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> printfn "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  
+  /// shadowing the default eprintf to also print to Rhino Command line
+  let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  
+  /// shadowing the default eprintfn to also print to Rhino Command line
+  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eprintfn "%s" ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  
+  /// prints two values separated by a space using FsEx.NiceString.toNiceString
+  ///(shadows print2 from FsEx)
+  let print2 x y = RhinoScriptSyntax.Print (sprintf "%s %s" (NiceString.toNiceString x) (NiceString.toNiceString y))
+    
+  /// prints three values separated by a space using FsEx.NiceString.toNiceString
+  ///(shadows print3 from FsEx)
+  let print3 x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s" (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
+  
+  /// prints four values separated by a space using FsEx.NiceString.toNiceString
+  ///(shadows print4 from FsEx)
+  let print4 w x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s %s" (NiceString.toNiceString w) (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
+  
+  ///RhinoScriptSyntax.PrintFull (shadows printFull from FsEx)
+  let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull

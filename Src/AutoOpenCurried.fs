@@ -15,36 +15,6 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 module AutoOpenCurried =
 
-  ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
-  let print x = RhinoScriptSyntax.Print x 
-  
-  /// shadowing the default printf to also print to Rhino Command line
-  let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
-  
-  /// shadowing the default printfn to also print to Rhino Command line
-  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> printfn "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
-  
-  /// shadowing the default eprintf to also print to Rhino Command line
-  let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
-  
-  /// shadowing the default eprintfn to also print to Rhino Command line
-  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eprintfn "%s" ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
-
-  /// prints two values separated by a space using FsEx.NiceString.toNiceString
-  ///(shadows print2 from FsEx)
-  let print2 x y = RhinoScriptSyntax.Print (sprintf "%s %s" (NiceString.toNiceString x) (NiceString.toNiceString y))
-    
-  /// prints three values separated by a space using FsEx.NiceString.toNiceString
-  ///(shadows print3 from FsEx)
-  let print3 x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s" (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
-
-  /// prints four values separated by a space using FsEx.NiceString.toNiceString
-  ///(shadows print4 from FsEx)
-  let print4 w x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s %s" (NiceString.toNiceString w) (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
-  
-  ///RhinoScriptSyntax.PrintFull (shadows printFull from FsEx)
-  let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull
-
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
 
@@ -120,6 +90,16 @@ module AutoOpenCurried =
     ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
     static member getUserText( key:string) (objectId:Guid) : string = 
         RhinoScriptSyntax.GetUserText(objectId, key)
+
+    [<Extension>]
+    ///<summary>Checks if the user text stored on an object matches a given string, fails if non existing</summary>
+    ///<param name="key">(string) The key name</param>
+    ///<param name="valueToMatch">(string) The value to check for equality with</param>
+    ///<param name="objectId">(Guid) The object's identifies</param>
+    ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
+    static member isUserTextValue( key:string) (valueToMatch:string) (objectId:Guid) : bool = 
+        valueToMatch = RhinoScriptSyntax.GetUserText(objectId, key)
+
         
     [<Extension>]
     ///<summary>Checks if a User Text key is stored on an object</summary>
