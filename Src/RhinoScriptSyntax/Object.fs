@@ -160,7 +160,7 @@ module ExtensionsObject =
 
 
     [<Extension>]
-    ///<summary>Verifies the existence of an object</summary>
+    ///<summary>Verifies the existence of an objectin the Doc.Objects table. Fails on empty Guid.</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist</returns>
     static member IsObject(objectId:Guid) : bool =

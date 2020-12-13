@@ -198,7 +198,7 @@ module AutoOpenVector =
                     if   lenDist = 0 then             Array.create distsNeeded 0.0
                     elif lenDist = 1 then             Array.create distsNeeded offDists0.[0]
                     elif lenDist = distsNeeded then   offDists0
-                    else failwithf"OffsetPoints: offsetDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeeded lastIsFirst loop                                                
+                    else RhinoScriptingException.Raise "OffsetPoints: offsetDistances has %d items but should have %d (lastIsFirst=%b) (loop=%b)" lenDist distsNeeded lastIsFirst loop                                                
                 let normDists = 
                     if   lenDistNorm = 0 then                 Array.create distsNeededNorm 0.0
                     elif lenDistNorm = 1 then                 Array.create distsNeededNorm normDists0.[0]

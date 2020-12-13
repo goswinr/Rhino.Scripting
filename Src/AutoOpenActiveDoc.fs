@@ -25,7 +25,7 @@ module AutoOpenActiveDocument =
         if HostUtils.RunningInRhino then
             Rhino.RhinoDoc.ActiveDoc  // will be reset in EndOpenDocument Event
         else 
-            failwith "failed to find the active Rhino document, is this dll running hosted inside the Rhino process? " 
+            raise <|  RhinoScriptingException "failed to find the active Rhino document, is this dll running hosted inside the Rhino process? " 
     
     /// Object Table of the current active Rhino documents
     let mutable Ot = Doc.Objects  // will be reset in EndOpenDocument Event
@@ -44,7 +44,7 @@ module AutoOpenActiveDocument =
         if g = Guid.Empty then "-Guid.Empty-"
         else
             let o = Doc.Objects.FindId(g) 
-            if isNull o then sprintf "Guid %A (but not in Doc.Objects table of this Rhino file)" g
+            if isNull o then sprintf "Guid %A is not in Doc.Objects table of this Rhino file." g
             else
                 let name = o.Attributes.Name
                 if name <> "" then 

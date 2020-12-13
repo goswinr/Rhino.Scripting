@@ -170,21 +170,21 @@ type RhinoScriptSyntax private () =
         | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
         | _ -> None
 
-    ///<summary>Attempt to get RhinoObject from the document with a given objectId</summary>
+    ///<summary>Attempt to get RhinoObject from the document with a given objectId. Fails on empty Guid.</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>a RhinoObject Option</returns>
     static member TryCoerceRhinoObject (objectId:Guid): DocObjects.RhinoObject option =     
-        if Guid.Empty = objectId then None 
+        if Guid.Empty = objectId then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceRhinoObject failed on empty Guid"
         else 
             let o = Doc.Objects.FindId(objectId) 
             if isNull o then None
             else Some o     
     
-    ///<summary>Attempt to get GeometryBase class from given Guid</summary>
+    ///<summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">geometry Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.GeometryBase Option</returns>
     static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
-        if objectId = Guid.Empty then None
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceGeometry failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
             | null -> None
@@ -203,11 +203,11 @@ type RhinoScriptSyntax private () =
 
 
 
-    ///<summary>Attempt to get Mesh class from given Guid</summary>
+    ///<summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Mesh Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option</returns>
     static member TryCoerceMesh (objectId:Guid) :Mesh option =
-        if objectId = Guid.Empty then None
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceMesh failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
             | null -> None
@@ -216,11 +216,11 @@ type RhinoScriptSyntax private () =
                 | :? Mesh as m -> Some m
                 | _ -> None
 
-    ///<summary>Attempt to get Surface class from given Guid</summary>
+    ///<summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Surface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option</returns>
     static member TryCoerceSurface (objectId:Guid) :Surface option =
-        if objectId = Guid.Empty then None
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceSurface failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
             | null -> None
@@ -232,11 +232,11 @@ type RhinoScriptSyntax private () =
                     else None
                 | _ -> None
 
-    ///<summary>Attempt to get a Polysurface or Brep class from given Guid</summary>
+    ///<summary>Attempt to get a Polysurface or Brep class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Polysurface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Mesh Option</returns>
     static member TryCoerceBrep (objectId:Guid) :Brep option =
-        if objectId = Guid.Empty then None
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceBrep failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
             | null -> None
@@ -362,12 +362,12 @@ type RhinoScriptSyntax private () =
     ///<returns>Guid) Fails on bad input</returns>
     static member CoerceGuid(objectId:'T) : Guid =
         match box objectId with
-        | :? Guid  as g -> if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.: CoerceGuid: Guid is Empty"  else g
-        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then RhinoScriptingException.Raise "RhinoScriptSyntax.: CoerceGuid: Guid is Empty or None: %A" objectId else go.Value //from UI functions
-        | :? string  as s -> try Guid.Parse s with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.: could not CoerceGuid: string '%s' can not be converted to a Guid" s
+        | :? Guid  as g -> if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: Guid is Empty"  else g
+        | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: Guid is Empty or None: %A" objectId else go.Value //from UI functions
+        | :? string  as s -> try Guid.Parse s with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: string '%s' can not be converted to a Guid" s
         | :? DocObjects.RhinoObject as o -> o.Id
         | :? DocObjects.ObjRef      as o -> o.ObjectId
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: could not CoerceGuid:%A can not be converted to a Guid" objectId
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: %A can not be converted to a Guid" objectId
 
     //<summary>Attempt to get a Sequence of Guids from input</summary>
     //<param name="Ids">list of Guids</param>
@@ -427,7 +427,7 @@ type RhinoScriptSyntax private () =
     static member CoerceRhinoObject(objectId:Guid): DocObjects.RhinoObject =  
         //match box objectId with
         //| :? Guid  as g -> 
-        //    if Guid.Empty = g then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
+        //    if Guid.Empty = g then raise <|  RhinoScriptingException "RhinoScriptSyntax.CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
         //    else 
         //        let o = Doc.Objects.FindId(g) 
         //        if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: Guid %A not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" g
@@ -442,10 +442,10 @@ type RhinoScriptSyntax private () =
         //            if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: Guid %s not found in Object table (in RhinoScriptSyntax.CoerceRhinoObject)" s
         //            else o
         //| _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: could not coerce %A to a RhinoObject" (rhType objectId)
-        if Guid.Empty = objectId then failwith "CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
+        if Guid.Empty = objectId then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject failed on empty Guid"
         else 
             let o = Doc.Objects.FindId(objectId) 
-            if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: Guid %A not found in Object table." (rhType objectId)
+            if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: The Guid %A was not found in the current Object table." objectId
             else o  
 
 
@@ -629,13 +629,13 @@ type RhinoScriptSyntax private () =
         match box object with
         | :? GeometryBase as g -> g
         | :? Guid  as g -> 
-                if Guid.Empty = g then failwith "CoerceGeometry failed on Empty Guid" 
+                if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry failed on empty Guid"
                 else 
                     let o = Doc.Objects.FindId(g) 
                     if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry failed: Guid %A not found in Object table." g else o.Geometry        
         | :? option<Guid>  as go -> 
                 if go.IsSome then 
-                    if Guid.Empty = go.Value then failwith "CoerceGeometry failed on Empty Guid"
+                    if Guid.Empty = go.Value then raise <|  RhinoScriptingException "RhinoScriptSyntax.CoerceGeometry failed on empty Guid"
                     else 
                         let o = Doc.Objects.FindId(go.Value) 
                         if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry: Guid %A not found in Object table." go.Value else o.Geometry 

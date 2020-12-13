@@ -108,7 +108,13 @@ module ExtensionsPrint =
             Synchronisation.ColorLogger 0 0 220   s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
 
-
+    [<Extension>]
+    /// Like printf but in Grey. Does not add a new line at end.
+    static member PrintfGrey msg =  
+        Printf.kprintf (fun s -> 
+            RhinoApp.Write s
+            Synchronisation.ColorLogger 150 150 150   s
+            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     //printfn:
 
     [<Extension>]
@@ -142,7 +148,14 @@ module ExtensionsPrint =
             RhinoApp.WriteLine s
             Synchronisation.ColorLoggerNl 0 0 220   s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
-
+    
+    [<Extension>]
+    /// Like printf but in Grey. Adds a new line at end.
+    static member PrintfnGrey msg =  
+        Printf.kprintf (fun s -> 
+            RhinoApp.WriteLine s
+            Synchronisation.ColorLoggerNl 150 150 150   s
+            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     
     [<Extension>]
     ///<summary>Like printf but in costom color. Does not add a new line at end.</summary>
