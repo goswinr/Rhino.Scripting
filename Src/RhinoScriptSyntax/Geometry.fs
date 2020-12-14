@@ -263,59 +263,94 @@ module ExtensionsGeometry =
         mp.Area
     
     
-
     [<Extension>]
-    ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
-    ///    bounding box of several objects</summary>
+    ///<summary>Returns a world axis-aligned bounding box of several objects.
+    ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. 
+    ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///    plane to which the bounding box should be aligned
-    ///    If omitted, a world axis-aligned bounding box
-    ///    will be calculated</param>
-    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///    Return the bounding box as world coordinates or
-    ///    construction plane coordinates. Note, this option does not apply to
-    ///    world axis-aligned bounding boxes</param>
-    ///<returns>(Geometry.Box) The Box (oriented to the plane). 
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
-    static member BoundingBox(objects:Guid seq, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+    static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox =
+        let mutable bbox = BoundingBox.Empty       
+        for o in objects do 
+            let g =  RhinoScriptSyntax.CoerceGeometry o
+            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        bbox
+
+    [<Extension>]
+    ///<summary>Returns a world axis-aligned bounding box of one object.
+    ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. 
+    ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
+    ///<param name="object">(Guid) The identifier of the object</param>
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBoxEstimate(object:Guid) : BoundingBox =              
+        let g =  RhinoScriptSyntax.CoerceGeometry object
+        g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        
+
+    [<Extension>]
+    ///<summary>Returns a world axis-aligned bounding box of several objects</summary>
+    ///<param name="objects">(Guid seq) The identifiers of the objects</param>
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBox(objects:Guid seq) : BoundingBox =
+        let mutable bbox = BoundingBox.Empty       
+        for o in objects do 
+            let g =  RhinoScriptSyntax.CoerceGeometry o
+            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true)) 
+        bbox
+
+    [<Extension>]
+    ///<summary>Returns a world axis-aligned bounding box of one object</summary>
+    ///<param name="object">(Guid) The identifier of the object</param>
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBox(object:Guid) : BoundingBox =
+        let g =  RhinoScriptSyntax.CoerceGeometry object
+        g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+
+    [<Extension>]
+    ///<summary>Returns a custom plane axis-aligned bounding box of several objects</summary>
+    ///<param name="objects">(Guid seq) The identifiers of the objects</param>
+    ///<param name="plane">(Plane) plane to which the bounding box should be aligned</param>
+    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
+    ///    Returns the box as world coordinates or custum plane coordinates.</param>
+    ///<returns>(Geometry.Box) The Box ,oriented to the plane or in plane coordinates. 
+    ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
+        if not plane.IsValid then RhinoScriptingException.Raise "Invalid plane in rs.Boundingbox of %A" objects        
+        let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
+        objects
+        |> Seq.map RhinoScriptSyntax.CoerceGeometry
+        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)) )
 
-        if plane.IsValid then
-            let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
-            objects
-            |> Seq.map RhinoScriptSyntax.CoerceGeometry
-            |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)) )
-        else            
-            objects
-            |> Seq.map RhinoScriptSyntax.CoerceGeometry
-            |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true)) )
-
-        if plane.IsValid && inWorldCoords then
+        if  inWorldCoords then
             let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)
             let box = Box(bbox)
             box.Transform(planetoworld) |> RhinoScriptingException.FailIfFalse "plane Transform in rs.BoundingBox()"
             box
         else
-            Box(bbox)
+            Box(bbox) // return in Plane coordinates not worldxy
 
     [<Extension>]
-    ///<summary>Returns either world axis-aligned or a construction plane axis-aligned
-    ///    bounding box of an object</summary>
-    ///<param name="object">(Guid) The identifier of the object</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///    plane to which the bounding box should be aligned
-    ///    If omitted, a world axis-aligned bounding box
-    ///    will be calculated</param>
-    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///    Return the bounding box as world coordinates or
-    ///    construction plane coordinates. Note, this option does not apply to
-    ///    world axis-aligned bounding boxes</param>
-    ///<returns>(Geometry.Box) The Box (oriented to the plane). 
-    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
-    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
-    static member BoundingBox(object:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
+   ///<summary>Returns a custom plane axis-aligned bounding box of one object</summary>
+   ///<param name="object">(Guid) The identifier of the object</param>
+   ///<param name="plane">(Plane) plane to which the bounding box should be aligned</param>
+   ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
+   ///    Returns the box as world coordinates or custum plane coordinates.</param>
+   ///<returns>(Geometry.Box) The Box ,oriented to the plane or in plane coordinates. 
+   ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+   ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+   ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
 
@@ -351,8 +386,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping plane</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
-        let pc = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        if pc.IsNone then false else pc.Value :? ClippingPlaneSurface
+        RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
 
 
     [<Extension>]
@@ -360,8 +394,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point</returns>
     static member IsPoint(objectId:Guid) : bool =
-        let p = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        if p.IsNone then false else p.Value :? Point
+        RhinoScriptSyntax.CoerceGeometry objectId :? Point
 
 
     [<Extension>]
@@ -369,8 +402,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud</returns>
     static member IsPointCloud(objectId:Guid) : bool =
-        let pc = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        if pc.IsNone then false else pc.Value :? PointCloud
+        RhinoScriptSyntax.CoerceGeometry objectId :? PointCloud
 
 
     [<Extension>]
@@ -378,8 +410,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object</returns>
     static member IsText(objectId:Guid) : bool =
-        let p = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        if p.IsNone then false else p.Value :? TextEntity
+        RhinoScriptSyntax.CoerceGeometry objectId :? TextEntity
 
 
     [<Extension>]
@@ -387,8 +418,7 @@ module ExtensionsGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object</returns>
     static member IsTextDot(objectId:Guid) : bool =
-        let p = RhinoScriptSyntax.TryCoerceGeometry(objectId)
-        if p.IsNone then false else p.Value :? TextDot
+        RhinoScriptSyntax.CoerceGeometry objectId :? TextDot
 
 
     [<Extension>]
@@ -483,9 +513,6 @@ module ExtensionsGeometry =
         pc.GetPoints()
 
 
-
-
-
     [<Extension>]
     ///<summary>Returns amount indices of points in a point cloud that are near needlePoints</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack".
@@ -502,10 +529,6 @@ module ExtensionsGeometry =
             Collections.RhinoList.Point3dKNeighbors(ptCloud, needlePoints, amount)
 
 
-
-
-
-
     [<Extension>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
     ///    closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius</summary>
@@ -515,8 +538,6 @@ module ExtensionsGeometry =
     ///<returns>(int array seq) a seq of arrays with the indices of the found points</returns>
     static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
         RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
-
-
 
 
     [<Extension>]
