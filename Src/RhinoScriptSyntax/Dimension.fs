@@ -689,26 +689,20 @@ module ExtensionsDimension =
     ///<summary>Verifies an object is an aligned dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
-    static member IsAlignedDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> false
-        | Some g ->
-            match g with
-            | :? LinearDimension as g -> g.Aligned
-            | _ -> false
+    static member IsAlignedDimension(objectId:Guid) : bool =        
+        match RhinoScriptSyntax.CoerceGeometry objectId with
+        | :? LinearDimension as g -> g.Aligned
+        | _ -> false
 
 
     [<Extension>]
     ///<summary>Verifies an object is an angular dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
-    static member IsAngularDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> false
-        | Some g ->
-            match g with
-            | :? AngularDimension -> true
-            | _ -> false
+    static member IsAngularDimension(objectId:Guid) : bool =        
+        match RhinoScriptSyntax.CoerceGeometry objectId with
+        | :? AngularDimension -> true
+        | _ -> false
 
 
     [<Extension>]
@@ -716,25 +710,19 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsDiameterDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> false
-        | Some g ->
-            match g with
-            | :? RadialDimension as g -> g.IsDiameterDimension
-            | _ -> false
+        match RhinoScriptSyntax.CoerceGeometry objectId with
+        | :? RadialDimension as g -> g.IsDiameterDimension
+        | _ -> false
 
 
     [<Extension>]
     ///<summary>Verifies an object is a dimension object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
-    static member IsDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> false
-        | Some g ->
-            match g with
-            | :? AnnotationBase  -> true
-            | _ -> false
+    static member IsDimension(objectId:Guid) : bool =        
+        match RhinoScriptSyntax.CoerceGeometry objectId with
+        | :? AnnotationBase  -> true
+        | _ -> false
 
 
     [<Extension>]
@@ -761,10 +749,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsLeader(objectId:Guid) : bool =
-         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-         | None -> false
-         | Some g ->
-            match g with
+            match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? Leader  -> true
             | _ -> false
 
@@ -774,10 +759,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsLinearDimension(objectId:Guid) : bool =
-         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-         | None -> false
-         | Some g ->
-            match g with
+            match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? LinearDimension  -> true
             | _ -> false
 
@@ -787,10 +769,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool =
-         match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-         | None -> false
-         | Some g ->
-            match g with
+            match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? OrdinateDimension  -> true
             | _ -> false
 
@@ -800,10 +779,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsRadialDimension(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> false
-        | Some g ->
-           match g with
+           match RhinoScriptSyntax.CoerceGeometry objectId with
            | :? RadialDimension  -> true
            | _ -> false
 
@@ -813,10 +789,7 @@ module ExtensionsDimension =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(string) The current text string</returns>
     static member LeaderText(objectId:Guid) : string = //GET
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText failed.  objectId:'%s'" (rhType objectId)
-        | Some g ->
-            match g with
+            match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
@@ -828,10 +801,7 @@ module ExtensionsDimension =
     ///<param name="text">(string) The new text string</param>
     ///<returns>(unit) void, nothing</returns>
     static member LeaderText(objectId:Guid, text:string) : unit = //SET
-        match RhinoScriptSyntax.TryCoerceGeometry(objectId) with
-        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed. objectId:'%s'" (rhType objectId)
-        | Some g ->
-            match g with
+            match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
@@ -839,6 +809,7 @@ module ExtensionsDimension =
                 annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
                 Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (rhType objectId)
+
     [<Extension>]
     ///<summary>Modifies the text string of multiple dimension leader objects</summary>
     ///<param name="objectIds">(Guid seq) The objects's identifiers</param>
