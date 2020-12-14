@@ -1307,27 +1307,33 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a polysurface. Polysurfaces consist of two or more
-    ///    surfaces joined together. If the polysurface fully encloses a volume, it is
-    ///    considered a solid</summary>
+    ///<summary>Verifies an object is a polysurface or extrusion. Polysurfaces consist of two or more
+    ///    surfaces joined together. </summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True is successful, otherwise False</returns>
+    ///<returns>(bool) True if successful, otherwise False</returns>
     static member IsPolysurface(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceBrep(objectId) with
-        | Some b ->  b.Faces.Count > 1
-        | _ -> false
+        match Doc.Objects.FindId(objectId) with 
+        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurface: %A is not an object in Doc.Objects table" objectId
+        | o ->  match o.Geometry with          
+                | :? Brep as b -> b.Faces.Count > 1 
+                | :? Extrusion as b -> true   
+                | _ -> false
 
+      
 
     [<Extension>]
-    ///<summary>Verifies a Guid refers to a closed polysurface. If the polysurface fully encloses
+    ///<summary>Verifies a Guid refers to a closed polysurface or closed extrtrusion. If the polysurface fully encloses
     ///    a volume, it is considered a solid</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True is successful, otherwise False</returns>
+    ///<returns>(bool) True if successful, otherwise False</returns>
     static member IsPolysurfaceClosed(objectId:Guid) : bool =
-        match RhinoScriptSyntax.TryCoerceBrep(objectId) with
-        | Some b ->  b.IsSolid
-        | _ -> false
-
+        match Doc.Objects.FindId(objectId) with 
+        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurfaceClosed: %A is not an object in Doc.Objects table" objectId
+        | o ->  match o.Geometry with          
+                | :? Brep as b -> b.IsSolid
+                | :? Extrusion as e -> e.IsSolid   
+                | _ -> false        
+       
 
     [<Extension>]
     ///<summary>Determines if a surface is a portion of a sphere</summary>
@@ -1361,7 +1367,6 @@ module ExtensionsSurface =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
         | Some surface ->  surface.IsClosed(direction)
         | _ -> false
-
 
 
     [<Extension>]

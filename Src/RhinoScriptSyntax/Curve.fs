@@ -2575,7 +2575,7 @@ module ExtensionsCurve =
     ///      - All the polycurve segments are lines, polylines, arcs, or NURBS curves.
     ///      - The NURBS curves segments do not have fully multiple interior knots.
     ///      - Rational NURBS curves do not have constant weights.
-    ///      - Any segment for which IsCurveLinear or IsArc is True is a line, polyline segment, or an arc.
+    ///      - Any segment for which IsCurveLinear or IsArc is True:  a line, polyline segment, or an arc.
     ///      - Adjacent co-linear or co-circular segments are combined.
     ///      - Segments that meet with G1-continuity have there ends tuned up so that they meet with G1-continuity to within machine precision.
     ///      - If the polycurve is a polyline, a polyline will be created</summary>
