@@ -153,7 +153,7 @@ module ExtensionsLayer =
 
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
-    
+       
     [<Extension>]
     ///<summary>Add a new layer to the document. If it does not exist yet. Currently anly ASCII characters are allowed.
     /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
@@ -649,7 +649,9 @@ module ExtensionsLayer =
     ///<summary>Changes the visible property of a layer</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="visible">(bool) New visible state</param>
-    ///<param name="forcevisibleOrDonotpersist">(bool) If visible is True then turn parent layers on if True.  If visible is False then do not persist if True</param>
+    ///<param name="forcevisibleOrDonotpersist">(bool) 
+    ///    If visible is True then turn parent layers on if True.  
+    ///    If visible is False then do not persist if True</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
@@ -661,8 +663,21 @@ module ExtensionsLayer =
                 layer.SetPersistentVisibility(visible)
             // layer.CommitChanges() |> ignore //obsolete !!
         Doc.Views.Redraw()
+    
 
-
+    [<Extension>]
+    ///<summary>Turn a layer off. (via LayerVisible(layer, false, true) )</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerOff(layer:string) : unit = //SET
+        RhinoScriptSyntax.LayerVisible(layer, false, true)
+    
+    [<Extension>]
+    ///<summary>Turn a layer on. (via LayerVisible(layer, true, true) )</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerOn(layer:string) : unit = //SET
+        RhinoScriptSyntax.LayerVisible(layer, true, true)
 
     [<Extension>]
     ///<summary>Return the parent layer of a layer or mepty string if no parent present</summary>
