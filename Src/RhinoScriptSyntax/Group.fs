@@ -24,7 +24,7 @@ module ExtensionsGroup =
     ///<returns>(string) name of the new group</returns>
     static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string =
         let mutable index = -1
-        if groupName|> isNull  then
+        if isNull groupName then
             index <- Doc.Groups.Add()
         else
             index <- Doc.Groups.Add( groupName )
@@ -51,10 +51,21 @@ module ExtensionsGroup =
     ///<returns>(unit) void, nothing</returns>
     static member GroupObjects(objectIds:Guid seq) : unit = 
         let index = Doc.Groups.Add()
-        if Seq.length objectIds < 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects needes to have more than one objects"
+        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects needes to have more than one objects but has %d" (Seq.length objectIds)
         if not <|  Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed on %A"  objectIds
         //Doc.Groups.GroupName(index)
-
+    
+    [<Extension>]
+    ///<summary>Adds two or more objects to new group, sets group name</summary>
+    ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
+    ///<param name="groupName">(string) The name of group to create</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member GroupObjects(objectIds:Guid seq, groupName:string) : unit = 
+        let index = Doc.Groups.Add( groupName )
+        if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed to creat group with name '%s' for %d objects" groupName (Seq.length objectIds)
+        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects to '%s' needes to have more than one objects but has %d" groupName (Seq.length objectIds) 
+        if not <|  Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed on %A"  objectIds
+        //Doc.Groups.GroupName(index)
 
     [<Extension>]
     ///<summary>Adds a single object to an existing group</summary>
