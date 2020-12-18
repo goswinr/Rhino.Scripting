@@ -2240,7 +2240,7 @@ module ExtensionsCurve =
     ///    tolerance is used</param>
     ///<returns>(Guid Rarr) Object objectId representing the new curves</returns>
     static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
-        if Seq.length(curveIds)<2 then
+        if Seq.hasMaximumItems 1 curveIds then
             RhinoScriptingException.Raise "RhinoScriptSyntax.CurveIds must contain at least 2 items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) deleteInput tolerance
 
         let curves = rarr { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }

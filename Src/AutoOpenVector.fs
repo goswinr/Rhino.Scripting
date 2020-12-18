@@ -105,11 +105,10 @@ module AutoOpenVector =
         /// It finds the center point and then takes corossproducts iterating all points in pairs of two.
         /// The first two points define the orientation of the normal.
         /// Considers current order of points too, counterclockwise in xy plane is z        
-        static member NormalOfPoints(pts:Point3d IList) : Vector3d  =
-            let k = Seq.length pts
-            if k < 2 then 
+        static member NormalOfPoints(pts:Point3d IList) : Vector3d  =            
+            if Seq.hasMaximumItems 2 pts then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString
-            elif k = 3   then  
+            elif Seq.hasItems 3 pts   then  
                 let a = pts.[0] - pts.[1]
                 let b = pts.[2] - pts.[1]
                 let v= Vector3d.CrossProduct(b, a)
