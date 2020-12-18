@@ -339,19 +339,49 @@ module ExtensionsGeometry =
             box
         else
             Box(bbox) // return in Plane coordinates not worldxy
-
+ 
     [<Extension>]
-   ///<summary>Returns a custom plane axis-aligned bounding box of one object</summary>
-   ///<param name="object">(Guid) The identifier of the object</param>
-   ///<param name="plane">(Plane) plane to which the bounding box should be aligned</param>
-   ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-   ///    Returns the box as world coordinates or custum plane coordinates.</param>
-   ///<returns>(Geometry.Box) The Box ,oriented to the plane or in plane coordinates. 
-   ///    It cannot be a Geometry.BoundingBox since it is not in World XY
-   ///    To get the eight 3D points that define the bounding box call box.GetCorners()
-   ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    ///<summary>Returns a custom plane axis-aligned bounding box of one object</summary>
+    ///<param name="object">(Guid) The identifier of the object</param>
+    ///<param name="plane">(Plane) plane to which the bounding box should be aligned</param>
+    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
+    ///    Returns the box as world coordinates or custum plane coordinates.</param>
+    ///<returns>(Geometry.Box) The Box ,oriented to the plane or in plane coordinates. 
+    ///    It cannot be a Geometry.BoundingBox since it is not in World XY
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
-        RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
+         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
+    
+    [<Extension>]
+    ///<summary>Returns a new inflated the box with equal amounts in all directions. 
+    ///   Inflating with negative amounts may result in decreasing and invalid boxes.
+    ///   This function raises an Exception if the resulting box is decreasing.
+    ///   Invalid boxes can not be inflated.</summary>
+    ///<param name="bbox">(BoundingBox) Geometry.BoundingBox</param>
+    ///<param name="amount">(float) amount in model units to expand</param>
+    ///<returns>(Geometry.BoundingBox) The new Box.</returns>
+    static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
+         let b = BoundingBox(bbox.Min,bbox.Max)
+         b.Inflate(amount)
+         if amount < 0.0 && not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by %f on %A" amount bbox   
+         b
+ 
+    [<Extension>]
+    ///<summary>Returns a new inflated box with custom x, y and z amounts in their directions. 
+    ///   Inflating with negative amounts may result in decreasing and invalid boxes.
+    ///   This function raises an Exception if the resulting box is decreasing.
+    ///   InValid boxes can not be inflated.</summary>
+    ///<param name="bbox">(BoundingBox) Geometry.BoundingBox</param>
+    ///<param name="amountX">(float) amount on X Axis in model units to expand</param>
+    ///<param name="amountY">(float) amount on X Axis in model units to expand</param>
+    ///<param name="amountZ">(float) amount on X Axis in model units to expand</param>
+    ///<returns>(Geometry.BoundingBox) The new Box.</returns>
+    static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
+         let b = BoundingBox(bbox.Min,bbox.Max)
+         b.Inflate(amountX, amountY, amountZ)
+         if (amountX < 0.0 || amountY < 0.0 || amountZ < 0.0 ) && not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %A" amountX amountY amountZ bbox  
+         b
 
 
     [<Extension>]
