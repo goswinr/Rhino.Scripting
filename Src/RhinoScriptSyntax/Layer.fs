@@ -6,6 +6,7 @@ open Rhino
 open System.Globalization
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
+open Rhino.DocObjects
 
 
 // -------------------- Layer related functions moved in fist position sinsce they are used in other modules. -------------------
@@ -101,11 +102,50 @@ module ExtensionsLayer =
              
              | _ -> ()
 
+  let internal getParents(lay:Layer) = 
+      let rec find (l:Layer) ps = 
+          if l.ParentLayerId = Guid.Empty then ps
+          else
+            let pl = Doc.Layers.FindId(l.ParentLayerId)
+            if isNull pl then RhinoScriptingException.Raise "RhinoScriptSyntax let internal getParents: ParentLayerId not found in layers"   
+            find pl (pl::ps)
+      find lay []
+  
+  let internal visibleSetTrue(lay:Layer, forceVisible:bool) : unit = 
+    if not lay.IsVisible then
+        if forceVisible then
+            if not (Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "rs.LayerVisibleSetTrue Failed to turn on sublayers of layer  %s"  lay.FullPath        
+        else
+            lay.SetPersistentVisibility(true)
+        
+  let internal visibleSetFalse(lay:Layer, persist:bool) : unit =
+    if lay.IsVisible then 
+        lay.IsVisible <- false        
+    if persist then
+        if lay.ParentLayerId <> Guid.Empty then
+            lay.SetPersistentVisibility(false)
+  
+  let internal lockedSetTrue(lay:Layer,forceLocked:bool) : unit = 
+      if not lay.IsLocked then 
+          lay.IsLocked <- true
+      if forceLocked then
+          lay.SetPersistentLocking(true)            
+          
+  
+  let internal lockedSetFalse(lay:Layer,  parentsToo:bool) : unit =
+      if lay.IsLocked then 
+          //lay.IsLocked <- false // fails with msg box if parents are locked
+          if parentsToo then 
+            for l in getParents(lay) do
+              l.SetPersistentLocking(false)  
+          lay.SetPersistentLocking(false) // does noy unlock parents 
+
+  type internal LayerState = Off | On | ByParent
           
   /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
   /// returns index
   /// empty string returns current layer
-  let internal getOrCreateLayer(name, color, visible, locked) : int = 
+  let internal getOrCreateLayer(name, color, visible:LayerState, locked:LayerState) : int = 
       match Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
       | RhinoMath.UnsetIntIndex -> 
           match name with 
@@ -122,15 +162,23 @@ module ExtensionsLayer =
                       | branch :: rest -> 
                           let fullpath = if root="" then branch else root + "::" + branch 
                           match Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
-                          | RhinoMath.UnsetIntIndex -> // actually create layer:
-                          
+                          | RhinoMath.UnsetIntIndex -> // actually create layer:                          
                               ensureValidShortLayerName (branch,false)   // only check non existing layer names                          
                               let layer = DocObjects.Layer.GetDefaultLayerProperties()
                               if prevId <> Guid.Empty then layer.ParentLayerId <- prevId
+
+                              match visible with 
+                              |ByParent -> ()
+                              |On  -> visibleSetTrue(layer,true)
+                              |Off -> visibleSetFalse(layer,true)
+
+                              match locked with 
+                              |ByParent -> ()
+                              |On  -> lockedSetTrue(layer,true)
+                              |Off -> lockedSetFalse(layer,true)
+                              
                               layer.Name <- branch
-                              layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
-                              layer.IsVisible <- visible
-                              layer.IsLocked <- locked
+                              layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)                              
                               let i = Doc.Layers.Add(layer)
                               let id = Doc.Layers.[i].Id //just using layer.Id would be empty guid                                
                               createLayer(rest , id , i,  fullpath)
@@ -146,38 +194,59 @@ module ExtensionsLayer =
   let internal createDefaultLayer(color, visible, locked) = 
       let layer = DocObjects.Layer.GetDefaultLayerProperties() 
       layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
-      layer.IsVisible <- visible
-      layer.IsLocked <- locked
+      if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "how can a new default layer have a parent ? %A" layer      
+      layer.IsVisible <- visible 
+      layer.IsLocked <- locked 
       Doc.Layers.Add(layer)        
 
 
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
-       
+     
+    
     [<Extension>]
     ///<summary>Add a new layer to the document. If it does not exist yet. Currently anly ASCII characters are allowed.
     /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
     ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.  If omitted a random (non yellow)  color wil be choosen.</param>
-    ///<param name="visible">(bool) Optional, Default Value: <c>true</c>  Layer's visibility.</param>
-    ///<param name="locked">(bool) Optional, Default Value: <c>false</c>  Layer's locked state.</param>
-    ///<param name="parent">(string) Optional, Name of existing parent layer. </param>
+    ///<param name="visible">(int) Optional, Default Value: <c>2</c>  
+    ///   Layer visibility:
+    ///   0 = explicitly Off (even if parent is already Off)
+    ///   1 = On and turn parents on too
+    ///   2 = inherited from parent, or On by default</param>
+    ///<param name="locked">(int) Optional, Default Value: <c>2</c>  
+    ///   Layer locking state:
+    ///   0 = Unlocked this and parents 
+    ///   1 = explicitly Locked (even if parent is already Locked)
+    ///   2 = inherited from parent, or Unlocked default</param>
+    ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
     ///<returns>(string) The full name of the new layer</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,
                             [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
-                            [<OPT;DEF(true)>]visible:bool,
-                            [<OPT;DEF(false)>]locked:bool,
-                            [<OPT;DEF(null:string)>]parent:string) : string = // this member was orignally in Layer.fs
+                            [<OPT;DEF(2)>]visible:int,
+                            [<OPT;DEF(2)>]locked:int,
+                            [<OPT;DEF(null:string)>]parent:string) : string = 
 
         let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
         if notNull parent && isNull name then  
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer if parent name is given (%s) the child name must be given too." parent
+        
+        let vis =    match visible with 
+                     | 0 ->  Off
+                     | 1 ->  On
+                     | 2 ->  ByParent
+                     | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer Bad value vor Visibility: %d, it may be 0, 1 or 2" visible
+        let loc =    match locked with 
+                     | 0 ->  Off
+                     | 1 ->  On
+                     | 2 ->  ByParent
+                     | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer Bad value vor Locked: %d, it may be 0, 1 or 2" locked
 
         if isNull name then 
-            Doc.Layers.[createDefaultLayer(col, visible, locked)].FullPath
+            Doc.Layers.[createDefaultLayer(col, true, false)].FullPath
         else
             let names = if isNull parent then name else parent+ "::" + name            
-            let i     = getOrCreateLayer(names, col, visible, locked)
+            let i     = getOrCreateLayer(names, col, vis, loc)
             Doc.Layers.[i].FullPath
   
 
@@ -201,7 +270,7 @@ module ExtensionsLayer =
     static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
         let layerIndex =
-            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, ByParent, ByParent)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (typeDescr objectId)
@@ -216,7 +285,7 @@ module ExtensionsLayer =
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
         let layerIndex =
-            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, ByParent, ByParent)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index   
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -355,7 +424,9 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is locked</summary>
+    ///<summary>Verifies that a layer is locked 
+    /// persistent or non persitent locking return true
+    /// via layer.IsLocked</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False</returns>
     static member IsLayerLocked(layer:string) : bool =
@@ -402,7 +473,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is visible (normal, locked, and reference)</summary>
+    ///<summary>Verifies that a layer is visible.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False</returns>
     static member IsLayerVisible(layer:string) : bool =
@@ -495,26 +566,141 @@ module ExtensionsLayer =
         Doc.Views.Redraw()
 
 
-
     [<Extension>]
-    ///<summary>Returns the locked mode of a layer</summary>
-    ///<param name="layer">(string) Name of an existing layer</param>
-    ///<returns>(bool) The current layer locked mode</returns>
-    static member LayerLocked(layer:string) : bool = //GET
+    ///<summary>Returns the visible property of a layer, 
+    ///  if layer is on but invisble because of a parent that is off this returns false</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(bool) The current layer visibility</returns>
+    static member LayerVisible(layer:string) : bool = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        layer.IsLocked
+        let rc = layer.IsVisible
+        rc
+    
+
+    [<Extension>]
+    ///<summary>Makes a layer visible</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<param name="forceVisible">(bool) Optional, Default Value: <c>true</c>
+    ///     Turn on parent layers too if needed. True by default</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit = 
+        let lay = RhinoScriptSyntax.CoerceLayer(layer)
+        visibleSetTrue(lay,forceVisible)
+        Doc.Views.Redraw()
+    
+    [<Extension>]
+    ///<summary>Makes a layer invisible</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<param name="persist">(bool) Optional, Default Value: <c>false</c>
+    ///     Turn layer persitently off? even if it is already invisible because of a parent layer that is turned off.
+    ///     By default alreaday invisibe layers are not changed</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
+        let lay = RhinoScriptSyntax.CoerceLayer(layer)
+        visibleSetFalse(lay,persist)
+        Doc.Views.Redraw()
+
+    (*
+    [<Extension>]
+    ///<summary>Changes the visible property of a layer</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<param name="visible">(bool) New visible state</param>
+    ///<param name="forcevisibleOrDonotpersist">(bool) 
+    ///    If visible is True then turn parent layers on if True.  
+    ///    If visible is False then do not persist if True</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit = //SET
+        let layer = RhinoScriptSyntax.CoerceLayer(layer)
+        layer.IsVisible <- visible
+        if visible && forcevisibleOrDonotpersist then
+            Doc.Layers.ForceLayerVisible(layer.Id) |> ignore
+        if not visible && not forcevisibleOrDonotpersist then
+            if layer.ParentLayerId <> Guid.Empty then
+                layer.SetPersistentVisibility(visible)
+            // layer.CommitChanges() |> ignore //obsolete !!
+        Doc.Views.Redraw()
+    *)
+    
+
+    [<Extension>]
+    ///<summary>Turn a layer off if visible, does nothing if parent layer is already invisible. </summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerOff(layer:string) : unit = 
+        RhinoScriptSyntax.LayerVisibleSetFalse(layer,false)
+    
+    [<Extension>]
+    ///<summary>Turn a layer on if not  visible , enforces visibility  of parents</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerOn(layer:string) : unit = //SET
+        RhinoScriptSyntax.LayerVisibleSetTrue(layer, true)
+    
+    [<Extension>]
+    ///<summary>Returns the locked property of a layer, 
+    ///  if layer is unlocked but parent layer is locked this still returns true</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(bool) The current layer visibility</returns>
+    static member LayerLocked(layer:string) : bool =       
+        let layer = RhinoScriptSyntax.CoerceLayer(layer)
+        let rc = layer.IsLocked //not same as // https://github.com/mcneel/rhinoscriptsyntax/pull/193 // TODO ??
+        rc    
+
+    [<Extension>]
+    ///<summary>Makes a layer locked</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<param name="forceLocked">(bool) Optional, Default Value: <c>false</c>
+    ///     Lock layer even if it is already locked via a parent layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit = 
+        let lay = RhinoScriptSyntax.CoerceLayer(layer)
+        lockedSetTrue(lay,forceLocked)       
+        Doc.Views.Redraw()
+    
+    [<Extension>]
+    ///<summary>Makes a layer unlocked</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<param name="parentsToo">(bool) Optional, Default Value: <c>true</c>
+    ///     Unlock parent layers to if needed</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit = 
+        let lay = RhinoScriptSyntax.CoerceLayer(layer)
+        lockedSetFalse(lay,parentsToo)                      
+        Doc.Views.Redraw()
 
 
     [<Extension>]
-    ///<summary>Changes the locked mode of a layer</summary>
+    ///<summary>Unlocks a layer and all parents if needed </summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerUnlock(layer:string) : unit = 
+        RhinoScriptSyntax.LayerLockedSetFalse(layer,true)
+    
+    [<Extension>]
+    ///<summary>Locks a layer if it is not already locked via a parent</summary>
+    ///<param name="layer">(string) Name of existing layer</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member LayerLock(layer:string) : unit = //SET
+        RhinoScriptSyntax.LayerLockedSetTrue(layer, false)
+
+    (*
+    [<Extension>]
+    ///<summary>Changes the locked mode of a layer, enforces presistent locking.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="locked">(bool) New layer locked mode</param>
     ///<returns>(unit) void, nothing</returns>
     static member LayerLocked(layer:string, locked:bool) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        if locked <> layer.IsLocked then
-            layer.IsLocked <- locked
-            Doc.Views.Redraw()
+        if layer.ParentLayerId <> Guid.Empty then 
+            let l = layer.GetPersistentLocking()
+            if l <> locked then 
+                layer.SetPersistentLocking(locked)
+                Doc.Views.Redraw()
+        else
+            if locked <> layer.IsLocked then
+                layer.IsLocked <- locked 
+                Doc.Views.Redraw()
+    *)
 
 
     [<Extension>]
@@ -635,49 +821,6 @@ module ExtensionsLayer =
             Doc.Views.Redraw()
 
 
-
-    [<Extension>]
-    ///<summary>Returns the visible property of a layer</summary>
-    ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(bool) The current layer visibility</returns>
-    static member LayerVisible(layer:string) : bool = //GET
-        let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let rc = layer.IsVisible
-        rc
-
-    [<Extension>]
-    ///<summary>Changes the visible property of a layer</summary>
-    ///<param name="layer">(string) Name of existing layer</param>
-    ///<param name="visible">(bool) New visible state</param>
-    ///<param name="forcevisibleOrDonotpersist">(bool) 
-    ///    If visible is True then turn parent layers on if True.  
-    ///    If visible is False then do not persist if True</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit = //SET
-        let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        layer.IsVisible <- visible
-        if visible && forcevisibleOrDonotpersist then
-            Doc.Layers.ForceLayerVisible(layer.Id) |> ignore
-        if not visible && not forcevisibleOrDonotpersist then
-            if layer.ParentLayerId <> Guid.Empty then
-                layer.SetPersistentVisibility(visible)
-            // layer.CommitChanges() |> ignore //obsolete !!
-        Doc.Views.Redraw()
-    
-
-    [<Extension>]
-    ///<summary>Turn a layer off. (via LayerVisible(layer, false, true) )</summary>
-    ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member LayerOff(layer:string) : unit = //SET
-        RhinoScriptSyntax.LayerVisible(layer, false, true)
-    
-    [<Extension>]
-    ///<summary>Turn a layer on. (via LayerVisible(layer, true, true) )</summary>
-    ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(unit) void, nothing</returns>
-    static member LayerOn(layer:string) : unit = //SET
-        RhinoScriptSyntax.LayerVisible(layer, true, true)
 
     [<Extension>]
     ///<summary>Return the parent layer of a layer or mepty string if no parent present</summary>
