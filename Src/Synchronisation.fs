@@ -26,7 +26,7 @@ type Synchronisation private () = // no public constructor
     
     static let mutable seffWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
 
-    
+    (* in fsEx now
     static let mutable colorLogger : int-> int -> int -> string -> unit = //set via reflection below from Seff.Rhino
         fun r g b s -> 
              RhinoApp.Write s
@@ -36,6 +36,7 @@ type Synchronisation private () = // no public constructor
         fun r g b s -> 
              RhinoApp.WriteLine s
              printfn "%s" s
+    *)
    
     static let init()=
         if HostUtils.RunningInRhino  && HostUtils.RunningOnWindows then 
@@ -54,13 +55,15 @@ type Synchronisation private () = // no public constructor
                     eprintfn "Seff.Rhino.Sync.syncContext is still -null-, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!" 
                 if isNull seffAssembly then  
                     eprintfn "Seff.Rhino.Print.colorLogger is still -null-. If you are not using the Seff Editor Plugin this is normal." 
-                                   
+                
+                (*
                 try   
                     let printModule = seffAssembly.GetType("Seff.Rhino.Print") 
                     colorLogger   <- printModule.GetProperty("colorLogger").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
                     colorLoggerNl <- printModule.GetProperty("colorLoggerNl").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
                 with ex ->
                     eprintfn "Failed to get Seff.Rhino.Print.colorLogger or colorLoggerNl via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\nMessage: %A" ex                    
+                *)
                 
                     
             if isNull seffWindow then 
@@ -89,7 +92,7 @@ type Synchronisation private () = // no public constructor
     static member isCurrrenThreadUI()=
         // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails
         RhinoApp.InvokeRequired
-
+    (*
     /// print with rgb colors. does not add a new line
     /// red -> green -> blue -> string -> unit
     static member ColorLogger = colorLogger
@@ -97,6 +100,7 @@ type Synchronisation private () = // no public constructor
     /// print with rgb colors. adds a new line
     /// red -> green -> blue -> string -> unit
     static member ColorLoggerNl = colorLoggerNl
+    *)
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin      

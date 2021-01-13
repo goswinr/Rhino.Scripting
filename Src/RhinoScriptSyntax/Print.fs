@@ -75,20 +75,20 @@ module ExtensionsPrint =
         RhinoApp.Wait()
 
     //printf:
-
+    
     [<Extension>]
     /// Like printf but in Red. Does not add a new line at end.
     static member PrintfRed msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            Synchronisation.ColorLogger 220 0 0  s
+            printfColor 220 0 0 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     [<Extension>]
     /// Like printf but in Red. Adds a new line at end.
     static member PrintfnRed msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            Synchronisation.ColorLoggerNl 220 0 0  s
+            printfnColor 220 0 0 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
 
     [<Extension>]
@@ -96,14 +96,14 @@ module ExtensionsPrint =
     static member PrintfGreen msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            Synchronisation.ColorLogger 0 180 0  s
+            printfColor 0 180 0 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     [<Extension>]
     /// Like printf but in Green.Adds a new line at end.
     static member PrintfnGreen msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            Synchronisation.ColorLoggerNl 0 180 0  s
+            printfnColor 0 180 0 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
 
     [<Extension>]
@@ -111,14 +111,14 @@ module ExtensionsPrint =
     static member PrintfLightBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            Synchronisation.ColorLogger 173 216 230    s
+            printfColor 173 216 230  "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     [<Extension>]
     /// Like printf but in Light Blue. Adds a new line at end.
     static member PrintfnLightBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            Synchronisation.ColorLoggerNl 173 216 230    s
+            printfnColor 173 216 230  "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
 
     [<Extension>]
@@ -126,14 +126,14 @@ module ExtensionsPrint =
     static member PrintfBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            Synchronisation.ColorLogger 0 0 220   s
+            printfColor 0 0 220 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     [<Extension>]
     /// Like printf but in Blue. Adds a new line at end.
     static member PrintfnBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            Synchronisation.ColorLoggerNl 0 0 220   s
+            printfnColor 0 0 220 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
 
     [<Extension>]
@@ -141,14 +141,14 @@ module ExtensionsPrint =
     static member PrintfGrey msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            Synchronisation.ColorLogger 150 150 150   s
+            printfColor 150 150 150 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     [<Extension>]
     /// Like printf but in Grey. Adds a new line at end.
     static member PrintfnGrey msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            Synchronisation.ColorLoggerNl 150 150 150   s
+            printfnColor 150 150 150 "%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     
     [<Extension>]
@@ -161,7 +161,7 @@ module ExtensionsPrint =
     static member PrintfColor (red:int) (green:int) (blue:int) msg  =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            Synchronisation.ColorLogger red green blue  s
+            printfColor red green blue"%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     
     [<Extension>]
@@ -174,9 +174,14 @@ module ExtensionsPrint =
     static member PrintfnColor (red:int) (green:int) (blue:int) msg  =
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            Synchronisation.ColorLoggerNl red green blue  s
+            printfnColor red green blue"%s" s
             RhinoApp.Wait() )  msg // no swith to UI Thread needed !
     
+
+  //TODO do this via reflection checking on Rhinocommon loaded in FSEX instead ? OR only print in rhino if rs.print is called ??
+
+  (*
+
 
   ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
   let print x = RhinoScriptSyntax.Print x 
@@ -207,3 +212,5 @@ module ExtensionsPrint =
   
   ///RhinoScriptSyntax.PrintFull (shadows printFull from FsEx)
   let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull
+    
+  *)
