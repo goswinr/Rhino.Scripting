@@ -1067,6 +1067,7 @@ module ExtensionsObject =
     ///      32768       Detail
     ///      65536       Hatch
     ///      131072      Morph control
+    ///      262144      SubD
     ///      134217728   Cage
     ///      268435456   Phantom
     ///      536870912   Clipping plane

@@ -14,55 +14,38 @@ open FsEx.SaveIgnore
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsSelection =
+  
+ 
+  ///A helper function to get a DocObjects.ObjectType Enum form an integer
+  let private getFilterEnum(i:int) : DocObjects.ObjectType =
+      let mutable e = DocObjects.ObjectType.None
+      if 0 <> (i &&& 1 ) then          e  <- e ||| DocObjects.ObjectType.Point
+      if 0 <> (i &&& 16384 ) then      e  <- e ||| DocObjects.ObjectType.Grip
+      if 0 <> (i &&& 2 ) then          e  <- e ||| DocObjects.ObjectType.PointSet
+      if 0 <> (i &&& 4 ) then          e  <- e ||| DocObjects.ObjectType.Curve
+      if 0 <> (i &&& 8 ) then          e  <- e ||| DocObjects.ObjectType.Surface
+      if 0 <> (i &&& 16 ) then         e  <- e ||| DocObjects.ObjectType.Brep
+      if 0 <> (i &&& 32 ) then         e  <- e ||| DocObjects.ObjectType.Mesh
+      if 0 <> (i &&& 512 ) then        e  <- e ||| DocObjects.ObjectType.Annotation
+      if 0 <> (i &&& 256 ) then        e  <- e ||| DocObjects.ObjectType.Light
+      if 0 <> (i &&& 4096 ) then       e  <- e ||| DocObjects.ObjectType.InstanceReference
+      if 0 <> (i &&& 134217728 ) then  e  <- e ||| DocObjects.ObjectType.Cage
+      if 0 <> (i &&& 65536 ) then      e  <- e ||| DocObjects.ObjectType.Hatch
+      if 0 <> (i &&& 131072 ) then     e  <- e ||| DocObjects.ObjectType.MorphControl
+      if 0 <> (i &&& 262144 ) then     e  <- e ||| DocObjects.ObjectType.SubD
+      if 0 <> (i &&& 2097152 ) then    e  <- e ||| DocObjects.ObjectType.PolysrfFilter
+      if 0 <> (i &&& 268435456 ) then  e  <- e ||| DocObjects.ObjectType.Phantom
+      if 0 <> (i &&& 8192 ) then       e  <- e ||| DocObjects.ObjectType.TextDot
+      if 0 <> (i &&& 32768 ) then      e  <- e ||| DocObjects.ObjectType.Detail
+      if 0 <> (i &&& 536870912 ) then  e  <- e ||| DocObjects.ObjectType.ClipPlane
+      if 0 <> (i &&& 1073741824 ) then e  <- e ||| DocObjects.ObjectType.Extrusion
+      e
 
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
     
-    [<Extension>]
-    ///<summary>A helper function for DocObjects.ObjectType Enum</summary>
-    ///<param name="filter">(int) Int representing one or several Enums as used in Rhinopython for object types</param>
-    ///<returns>(DocObjects.ObjectType) translated DocObjects.ObjectType Enum</returns>
-    static member private FilterHelper(filter:int) : DocObjects.ObjectType =
-        let mutable geometryfilter = DocObjects.ObjectType.None
-        if 0 <> (filter &&& 1 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Point
-        if 0 <> (filter &&& 16384 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Grip
-        if 0 <> (filter &&& 2 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.PointSet
-        if 0 <> (filter &&& 4 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Curve
-        if 0 <> (filter &&& 8 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Surface
-        if 0 <> (filter &&& 16 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Brep
-        if 0 <> (filter &&& 32 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Mesh
-        if 0 <> (filter &&& 512 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Annotation
-        if 0 <> (filter &&& 256 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Light
-        if 0 <> (filter &&& 4096 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.InstanceReference
-        if 0 <> (filter &&& 134217728 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Cage
-        if 0 <> (filter &&& 65536 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Hatch
-        if 0 <> (filter &&& 131072 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.MorphControl
-        if 0 <> (filter &&& 2097152 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.PolysrfFilter
-        if 0 <> (filter &&& 268435456 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Phantom
-        if 0 <> (filter &&& 8192 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.TextDot
-        if 0 <> (filter &&& 32768 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Detail
-        if 0 <> (filter &&& 536870912 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.ClipPlane
-        if 0 <> (filter &&& 1073741824 ) then
-            geometryfilter  <- geometryfilter ||| DocObjects.ObjectType.Extrusion
-        geometryfilter
+    
+    
 
     [<Extension>]
     ///<summary>Returns identifiers of all objects in the document</summary>
@@ -127,7 +110,7 @@ module ExtensionsSelection =
             it.LockedObjects <- includeLockedObjects
             it.HiddenObjects <- false
             it.ReferenceObjects <- includeReferences            
-            it.ObjectTypeFilter <- RhinoScriptSyntax.FilterHelper(filter)
+            it.ObjectTypeFilter <- getFilterEnum(filter)
             let e = Doc.Objects.GetObjectList(it)
             let objectIds = Rarr()            
             for object in e do  
@@ -241,9 +224,8 @@ module ExtensionsSelection =
                 Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull customFilter then go.SetCustomGeometryFilter(customFilter)
-            if notNull message then go.SetCommandPrompt(message)
-            let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
-            if filter>0 then go.GeometryFilter <- geometryfilter
+            if notNull message then go.SetCommandPrompt(message)            
+            if filter>0 then go.GeometryFilter <- getFilterEnum(filter)
             go.SubObjectSelect <- subObjects
             go.GroupSelect <- false
             go.AcceptNothing(true)
@@ -304,7 +286,7 @@ module ExtensionsSelection =
             if notNull message then
                 go.SetCommandPrompt(message)
             if filter>0 then
-                go.GeometryFilter <- RhinoScriptSyntax.FilterHelper(filter)
+                go.GeometryFilter <- getFilterEnum(filter)
             go.SubObjectSelect <- false
             go.GroupSelect <- false
             go.AcceptNothing(true)            
@@ -373,7 +355,7 @@ module ExtensionsSelection =
             elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
             go.SetCommandPrompt(message )
-            let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
+            let geometryfilter = getFilterEnum(filter)
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
@@ -512,7 +494,7 @@ module ExtensionsSelection =
                 let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
                 go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
             go.SetCommandPrompt(message)
-            let geometryfilter = RhinoScriptSyntax.FilterHelper(filter)
+            let geometryfilter = getFilterEnum(filter)
             if filter>0 then go.GeometryFilter <- geometryfilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
@@ -907,6 +889,7 @@ module ExtensionsSelection =
     ///        32768       Detail
     ///        65536       Hatch
     ///        131072      Morph control
+    ///        262144      SubD
     ///        134217728   Cage
     ///        268435456   Phantom
     ///        536870912   Clipping plane
@@ -932,7 +915,7 @@ module ExtensionsSelection =
         let mutable bLights = false
         let mutable bGrips = false
         let mutable bPhantoms = false
-        let mutable geometryfilter = RhinoScriptSyntax.FilterHelper(geometryType)
+        let mutable geometryfilter = getFilterEnum(geometryType)
         if geometryType = 0 then geometryfilter <- DocObjects.ObjectType.AnyObject
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Surface) then bSurface <- true // TODO verify this works OK !
         if DocObjects.ObjectType.None <>(geometryfilter &&& DocObjects.ObjectType.Brep ) then bPolySurface <- true

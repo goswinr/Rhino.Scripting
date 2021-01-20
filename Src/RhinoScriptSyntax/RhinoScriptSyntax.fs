@@ -50,6 +50,8 @@ type ObjectFilterEnum internal () =
     member _.Hatch = 65536
     /// retuns 131072
     member _.Morph = 131072
+    /// retuns 262144
+    member _.SubD = 262144
     /// retuns 134217728
     member _.Cage = 134217728
     /// retuns 268435456
