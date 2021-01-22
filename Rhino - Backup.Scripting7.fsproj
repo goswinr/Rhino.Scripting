@@ -17,7 +17,7 @@
     <FileVersion>0.3.0.0</FileVersion>
 
     <Authors>Goswin Rothenthal</Authors>
-    <Product>Rhino.Scripting< for Rhino 6</Product>
+    <Product>Rhino.Scripting for Rhino 7</Product>
     <Description>Rhino Script Syntax for F# (and C#)</Description>
     <Copyright>Copyright: Goswin Rothenthal 2020 </Copyright>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>
@@ -28,11 +28,11 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>binRh6/Debug/</OutputPath>
+    <OutputPath>binRh7/Debug/</OutputPath>
   </PropertyGroup> 
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>binRh6/Release/</OutputPath>
+    <OutputPath>binRh7/Release/</OutputPath>
   </PropertyGroup>
 
 
@@ -41,7 +41,7 @@
     <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries--> 
     
     <PackageReference Include="ini-parser" Version="2.5.2" />
-    <PackageReference Include="ZXing.Net" Version="0.16.5" />
+    <PackageReference Include="ZXing.Net" Version="0.16.6" />
     
     <Reference Include="WindowsBase" />  
     <Reference Include="PresentationCore" />  
@@ -49,7 +49,7 @@
     <Reference Include="System.Windows.Forms" /> <!--to get screen resolution-->   
 
     <Reference Include="RhinoCommon">
-      <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
+      <HintPath>C:\Program Files\Rhino 7\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>      
     

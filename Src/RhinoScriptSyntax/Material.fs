@@ -118,7 +118,11 @@ module ExtensionsMaterial =
     static member MaterialBump(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A'" materialIndex
-        let texture = mat.GetBumpTexture()
+        #if RHINO6
+        let texture = mat.GetBumpTexture() 
+        #else
+        let texture = mat.GetTexture(DocObjects.TextureType.Bump)
+        #endif
         if notNull texture then Some texture.FileName else None
 
 
@@ -130,9 +134,15 @@ module ExtensionsMaterial =
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-        let texture = mat.GetBumpTexture()
         if IO.File.Exists filename then
-            if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            #if RHINO6            
+            if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename        
+            #else
+            let texture = new DocObjects.Texture()
+            texture.FileName <- filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename  
+            #endif
+        
             mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
             Doc.Views.Redraw()
         else
@@ -169,7 +179,11 @@ module ExtensionsMaterial =
     static member MaterialEnvironmentMap(materialIndex:int) : string option= //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
+        #if RHINO6
         let texture = mat.GetEnvironmentTexture()
+        #else
+        let texture = mat.GetTexture(DocObjects.TextureType.Emap)
+        #endif
         if notNull texture then Some texture.FileName  else None
 
     [<Extension>]
@@ -181,7 +195,13 @@ module ExtensionsMaterial =
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            if not <| mat.SetEnvironmentTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            #if RHINO6
+            if not <| mat.SetEnvironmentTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename            
+            #else
+            let texture = new DocObjects.Texture()
+            texture.FileName <- filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename     
+            #endif
             mat.CommitChanges() |> ignore
             Doc.Views.Redraw()
         else
@@ -256,7 +276,6 @@ module ExtensionsMaterial =
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
-
         mat.Shine <- shine
         mat.CommitChanges() |> ignore
         Doc.Views.Redraw()
@@ -270,7 +289,11 @@ module ExtensionsMaterial =
     static member MaterialTexture(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A'" materialIndex
+        #if RHINO6
         let texture = mat.GetBitmapTexture()
+        #else
+        let texture = mat.GetTexture(DocObjects.TextureType.Bitmap)
+        #endif
         if notNull texture then  Some texture.FileName else None
 
     [<Extension>]
@@ -282,7 +305,14 @@ module ExtensionsMaterial =
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
+            #if RHINO6
             if  not <| mat.SetBitmapTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            #else
+            let texture = new DocObjects.Texture()
+            texture.FileName <- filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            #endif
+            
             mat.CommitChanges() |> ignore
             Doc.Views.Redraw()
         else
@@ -322,7 +352,11 @@ module ExtensionsMaterial =
     static member MaterialTransparencyMap(materialIndex:int) : string option = //GET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
+        #if RHINO6
         let texture = mat.GetTransparencyTexture()
+        #else
+        let texture = mat.GetTexture(DocObjects.TextureType.Transparency)
+        #endif
         if notNull texture then  Some texture.FileName else None
 
 
@@ -334,9 +368,14 @@ module ExtensionsMaterial =
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
         let mat = Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-        let texture = mat.GetTransparencyTexture()
         if IO.File.Exists filename then
+            #if RHINO6
             if  not <| mat.SetTransparencyTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            #else
+            let texture = new DocObjects.Texture()
+            texture.FileName <- filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename            
+            #endif            
             mat.CommitChanges() |> ignore
             Doc.Views.Redraw()
         else

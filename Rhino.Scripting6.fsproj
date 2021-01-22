@@ -17,46 +17,41 @@
     <FileVersion>0.3.0.0</FileVersion>
 
     <Authors>Goswin Rothenthal</Authors>
-    <Product>Rhino.Scripting< for Rhino 7</Product>
+    <Product>Rhino.Scripting for Rhino 6</Product>
     <Description>Rhino Script Syntax for F# (and C#)</Description>
     <Copyright>Copyright: Goswin Rothenthal 2020 </Copyright>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>
       <!-- $(OtherFlags)  warnon:3390 to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
   
-    <Configurations>Debug;Release</Configurations>  
-  
+    <Configurations>Debug;Release</Configurations>
+    <DefineConstants>RHINO6</DefineConstants>
+    
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>binRh7/Debug/</OutputPath>
+    <OutputPath>binRh6/Debug/</OutputPath>
   </PropertyGroup> 
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>binRh7/Release/</OutputPath>
+    <OutputPath>binRh6/Release/</OutputPath>
   </PropertyGroup>
 
 
   
   <ItemGroup>
-    <!--<PackageReference Update="FSharp.Core" Version="4.7.2" /> dont include in libaries--> 
-    
+    <!--<PackageReference Update="FSharp.Core" Version="5.0.0" /> dont include in libaries-->     
     <PackageReference Include="ini-parser" Version="2.5.2" />
-    <PackageReference Include="ZXing.Net" Version="0.16.5" />
+    <PackageReference Include="ZXing.Net" Version="0.16.6" />
     
     <Reference Include="WindowsBase" />  
     <Reference Include="PresentationCore" />  
     <Reference Include="PresentationFramework" />    <!--WPF dlls because a refernce to seff editor window is held if available-->
     <Reference Include="System.Windows.Forms" /> <!--to get screen resolution-->   
 
-    <Reference Include="RhinoCommon">
-      <HintPath>C:\Program Files\Rhino 7\System\RhinoCommon.dll</HintPath>
-      <Private>False</Private>
-    </Reference>      
+    <Reference Include="RhinoCommon">      <HintPath>C:\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>      <Private>False</Private>    </Reference>      
     
     <!-- take from https://github.com/goswinr/FsEx -->   
-    <Reference Include="FsEx">
-      <HintPath>..\FsEx\bin\Release\netstandard2.0\FsEx.dll</HintPath> 
-    </Reference>  
+    <Reference Include="FsEx">      <HintPath>..\FsEx\bin\Release\netstandard2.0\FsEx.dll</HintPath>     </Reference>  
 
   </ItemGroup>
 
