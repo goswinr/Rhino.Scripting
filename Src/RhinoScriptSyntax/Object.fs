@@ -1230,47 +1230,77 @@ module ExtensionsObject =
 
 
     [<Extension>]
-    ///<summary>Selects a single object</summary>
+    ///<summary>Selects a single object. 
+    /// Throws an exception if object can't be selectyed for some reason
+    ///  e.g. when locked , hidden, or on invisible layer </summary>
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
+    ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hiddden or layers that are off visible and unlocked </param>
+    ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing</returns>
-    static member SelectObject(objectId:Guid) : unit =
+    static member SelectObject( objectId:Guid,
+                                [<OPT;DEF(false)>]forceVisible:bool,
+                                [<OPT;DEF(false)>]ignoreErrors:bool) : unit =
         Synchronisation.DoSync false false (fun () -> 
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if 0 = rhobj.Select(true) then 
-                let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
-                if rhobj.IsHidden then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %A" (rhType objectId) 
-                elif rhobj.IsLocked then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %A" (rhType objectId) 
-                elif not lay.IsVisible then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %A" lay.FullPath objectId 
-                elif not lay.IsLocked then 
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %A" lay.FullPath objectId 
-                else
-                    RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %A" (rhType objectId) 
+                if not ignoreErrors then 
+                    let mutable redo = false
+                    let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
+                    if rhobj.IsHidden then 
+                        if forceVisible then redo <- true ; Doc.Objects.Show(rhobj, true) |> ignore 
+                        else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %s" (rhType objectId) 
+                    elif rhobj.IsLocked then 
+                        if forceVisible then redo <- true ; Doc.Objects.Unlock(rhobj, true) |> ignore 
+                        else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %s" (rhType objectId) 
+                    elif not lay.IsVisible then 
+                        if forceVisible then redo <- true ; visibleSetTrue(lay,true)
+                        else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %s" lay.FullPath (rhType objectId) 
+                    elif not lay.IsLocked then 
+                        if forceVisible then redo <- true ; lockedSetFalse(lay,true)
+                        else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %s" lay.FullPath (rhType objectId) 
+                    else
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %s" (rhType objectId) 
+                    if redo then 
+                        if 0 = rhobj.Select(true) then 
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed dispite forceVisible beeing set to true on object %s" (rhType objectId)     
             Doc.Views.Redraw()
             )
 
     [<Extension>]
-    ///<summary>Selects one or more objects</summary>
+    ///<summary>Selects one or more objects
+    /// Throws an exception if object can't be selectyed for some reason
+    ///  e.g. when locked , hidden, or on invisible layer </summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
+    ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hiddden or layers that are off visible and unlocked </param>
+    ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing</returns>
-    static member SelectObject(objectIds:Guid seq) : unit =  //PLURAL
+    static member SelectObject( objectIds:Guid seq,
+                                [<OPT;DEF(false)>]forceVisible:bool,
+                                [<OPT;DEF(false)>]ignoreErrors:bool) : unit =  //PLURAL
         Synchronisation.DoSync false false (fun () ->             
             for objectId in objectIds do
                 let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 if 0 = rhobj.Select(true) then 
-                    let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
-                    if rhobj.IsHidden then 
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %A out of %d objects" (rhType objectId) (Seq.length objectIds)
-                    elif rhobj.IsLocked then 
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %A out of %d objects" (rhType objectId) (Seq.length objectIds)
-                    elif not lay.IsVisible then 
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %A out of %d objects" lay.FullPath objectId (Seq.length objectIds)
-                    elif not lay.IsLocked then 
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %A out of %d objects" lay.FullPath objectId (Seq.length objectIds)
-                    else
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %A out of %d objects" (rhType objectId) (Seq.length objectIds)
+                    if not ignoreErrors then 
+                        let mutable redo = false
+                        let lay = Doc.Layers.[rhobj.Attributes.LayerIndex]
+                        if rhobj.IsHidden then 
+                            if forceVisible then redo <- true ; Doc.Objects.Show(rhobj, true) |> ignore 
+                            else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on hidden object %s out of %d objects" (rhType objectId) (Seq.length objectIds)
+                        elif rhobj.IsLocked then 
+                            if forceVisible then redo <- true ; Doc.Objects.Unlock(rhobj, true) |> ignore 
+                            else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked object %s out of %d objects" (rhType objectId) (Seq.length objectIds)
+                        elif not lay.IsVisible then 
+                            if forceVisible then redo <- true ; visibleSetTrue(lay,true)
+                            else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on invisible layer %s for object %s out of %d objects" lay.FullPath (rhType objectId) (Seq.length objectIds)
+                        elif not lay.IsLocked then 
+                            if forceVisible then redo <- true ; lockedSetFalse(lay,true)
+                            else RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on locked layer %s for object %s out of %d objects" lay.FullPath (rhType objectId) (Seq.length objectIds)
+                        else
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed on object %s out of %d objects" (rhType objectId) (Seq.length objectIds)
+                        if redo then 
+                            if 0 = rhobj.Select(true) then 
+                                RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObject failed dispite forceVisible beeing set to true on object %s out of %d objects" (rhType objectId) (Seq.length objectIds) 
             Doc.Views.Redraw()
             )
         
@@ -1307,7 +1337,7 @@ module ExtensionsObject =
        let cobinv = Transform.ChangeBasis(frame, worldplane)
        let xf = cobinv * shear2d * cob
        let res = Doc.Objects.Transform(objectId, xf, not copy)
-       if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed for %A, origin %A, ref point  %A andangle  %A" (rhType objectId) origin referencePoint angleDegrees
+       if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed for %s, origin %A, ref point  %A andangle  %A" (rhType objectId) origin referencePoint angleDegrees
        res
 
 
