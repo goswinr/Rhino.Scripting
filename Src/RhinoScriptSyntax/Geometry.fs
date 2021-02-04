@@ -262,6 +262,19 @@ module ExtensionsGeometry =
         if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties.  objectId:'%s'" (rhType objectId)
         mp.Area
     
+    [<Extension>]
+    ///<summary>Returns a world axis-aligned bounding box of several objects.
+    ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. 
+    ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
+    ///<param name="geometries">(GeometryBase seq) The Geometries of the objects</param>
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
+    static member BoundingBoxEstimate(geometries: seq<#GeometryBase>) : BoundingBox =
+        let mutable bbox = BoundingBox.Empty       
+        for g in geometries do
+            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
+        bbox
     
     [<Extension>]
     ///<summary>Returns a world axis-aligned bounding box of several objects.
