@@ -204,7 +204,7 @@ module ExtensionsMesh =
         let tolerance = Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (rhType curveId) <| rhType meshId
+        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (rhType curveId) (rhType meshId)
         pts, faceids
 
 
