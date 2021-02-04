@@ -633,7 +633,7 @@ module ExtensionsUserinterface =
                 gp.Constrain(brep, -1, -1, false) |> ignore
 
             | _ ->
-                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%A' message:'%A'" surfaceId message
+                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (rhType surfaceId) message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then

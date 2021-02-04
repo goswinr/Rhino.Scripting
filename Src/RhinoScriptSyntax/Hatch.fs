@@ -167,7 +167,7 @@ module ExtensionsHatch =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
         let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
         let pieces = geo.Explode()
-        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%A' delete:'%A'" hatchId delete
+        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (rhType hatchId) delete
         let attr = rhobj.Attributes
         let rc = Rarr()
         for piece in pieces do
@@ -203,9 +203,9 @@ module ExtensionsHatch =
         let oldindex = hatchobj.HatchGeometry.PatternIndex
         RhinoScriptSyntax.InitHatchPatterns()
         let newpatt = Doc.HatchPatterns.FindName(hatchPattern)
-        if newpatt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+        if newpatt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (rhType hatchId) hatchPattern
         hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
-        if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+        if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (rhType hatchId) hatchPattern
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -220,9 +220,9 @@ module ExtensionsHatch =
             let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let oldindex = hatchobj.HatchGeometry.PatternIndex            
             let newpatt = Doc.HatchPatterns.FindName(hatchPattern)
-            if newpatt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+            if newpatt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (rhType hatchId) hatchPattern
             hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
-            if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%A' hatchPattern:'%A'" hatchId hatchPattern
+            if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (rhType hatchId) hatchPattern
         Doc.Views.Redraw()
 
 

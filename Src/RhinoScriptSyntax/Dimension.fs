@@ -39,14 +39,14 @@ module ExtensionsDimension =
         let success, s, t = plane.ClosestParameter(pointOnDimensionLine)
         let onpoint2 = Point2d(s, t)
         let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
-        if isNull ldim then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
+        if isNull ldim then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
         ldim.Aligned <- true
         if style <> "" then
             let ds = Doc.DimStyles.FindName(style)
             if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension, style not found, failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
             ldim.DimensionStyleId <- ds.Id
         let rc = Doc.Objects.AddLinearDimension(ldim)
-        if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension: Unable to add dimension to document.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%A'" startPoint endPoint pointOnDimensionLine style
+        if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension: Unable to add dimension to document.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
         Doc.Views.Redraw()
         rc
 
@@ -826,8 +826,8 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing</returns>
     static member RenameDimStyle(oldstyle:string, newstyle:string) : unit =
         let mutable ds = Doc.DimStyles.FindName(oldstyle)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%A' newstyle:'%A'" oldstyle newstyle
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
         ds.Name <- newstyle
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%A' newstyle:'%A'" oldstyle newstyle
+        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
 
 

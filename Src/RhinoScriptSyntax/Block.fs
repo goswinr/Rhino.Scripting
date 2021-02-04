@@ -33,15 +33,15 @@ module ExtensionsBlock =
         let objects = Rarr()
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)  //Coerce should not be needed
-            if obj.IsReference then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannt add Refrence Object %A to %s" (rhType objectId) name
+            if obj.IsReference then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannt add Refrence object %s to %s" (rhType objectId) name
             let ot = obj.ObjectType
-            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Light Object %A to %s" (rhType objectId) name
-            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Grip Object %A to %s" (rhType objectId) name
-            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Phantom Object %A to %s" (rhType objectId) name
+            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Light object %s to %s" (rhType objectId) name
+            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Grip object %s to %s" (rhType objectId) name
+            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Phantom object %s to %s" (rhType objectId) name
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
-                if uses then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannt add Instance Ref Object %A to %s" (rhType objectId) name
+                if uses then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannt add Instance Ref object %s to %s" (rhType objectId) name
 
             objects.Add(obj)
         if objects.Count>0 then

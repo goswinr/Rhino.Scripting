@@ -204,7 +204,7 @@ module ExtensionsMesh =
         let tolerance = Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%A'" (rhType curveId) meshId
+        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (rhType curveId) <| rhType meshId
         pts, faceids
 
 
@@ -684,9 +684,9 @@ module ExtensionsMesh =
     static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset failed.  meshId:'%A' distance:'%A'" meshId distance
+        if offsetmesh|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset failed.  meshId:'%s' distance:'%A'" (rhType meshId) distance
         let rc = Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  meshId:'%A' distance:'%A'" meshId distance
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  meshId:'%s' distance:'%A'" (rhType meshId) distance
         Doc.Views.Redraw()
         rc
 
@@ -802,7 +802,7 @@ module ExtensionsMesh =
         else
             let colorcount = Seq.length(colors)
             if colorcount <> mesh.Vertices.Count then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.Length of colors must match vertex count.  meshId:'%A' colors:'%A'" meshId colors
+                RhinoScriptingException.Raise "RhinoScriptSyntax.Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (rhType meshId) colors
             mesh.VertexColors.Clear()
             for c in colors do mesh.VertexColors.Add(c) |> ignore
         Doc.Objects.Replace(meshId, mesh) |> ignore

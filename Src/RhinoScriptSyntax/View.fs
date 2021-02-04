@@ -38,12 +38,12 @@ module ExtensionsView =
                              corner2:Point2d,
                              [<OPT;DEF(null:string)>]title:string,
                              [<OPT;DEF(1)>]projection:int) : Guid =
-        if projection<1 || projection>7 then RhinoScriptingException.Raise "RhinoScriptSyntax.Projection must be a value between 1-7.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if projection<1 || projection>7 then RhinoScriptingException.Raise "RhinoScriptSyntax.Projection must be a value between 1-7.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let layout = RhinoScriptSyntax.CoercePageView(layoutName)//TODO test this
-        if isNull layout then RhinoScriptingException.Raise "RhinoScriptSyntax.No layout found for given layoutId.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull layout then RhinoScriptingException.Raise "RhinoScriptSyntax.No layout found for given layoutId.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let projection : Display.DefinedViewportProjection = LanguagePrimitives.EnumOfValue  projection
         let detail = layout.AddDetailView(title, corner1, corner2, projection)
-        if isNull detail then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail failed.  layoutId:'%A' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull detail then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail failed.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         Doc.Views.Redraw()
         detail.Id
 
@@ -190,7 +190,7 @@ module ExtensionsView =
             detail.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
             Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%A' modelLength:'%A' pageLength:'%A'" detailId modelLength pageLength
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (rhType detailId) modelLength pageLength
 
 
 

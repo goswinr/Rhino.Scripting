@@ -598,7 +598,7 @@ module ExtensionsGeometry =
     ///<returns>(unit) void, nothing</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
-        if not <| Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %A to %A" (rhType objectId) point
+        if not <| Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %s to %A" (rhType objectId) point
         Doc.Views.Redraw()
 
 
@@ -618,7 +618,7 @@ module ExtensionsGeometry =
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontFace <-  fontface
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %A to %A" (rhType objectId) fontface
+        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (rhType objectId) fontface
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -630,7 +630,7 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontFace <-  fontface
-            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %A to %A" (rhType objectId) fontface
+            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (rhType objectId) fontface
         Doc.Views.Redraw()
 
 
@@ -649,7 +649,7 @@ module ExtensionsGeometry =
     static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontHeight <- height
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %A to %A" (rhType objectId) height
+        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (rhType objectId) height
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -661,7 +661,7 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontHeight <- height
-            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %A to %A" (rhType objectId) height
+            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (rhType objectId) height
         Doc.Views.Redraw()
 
 
@@ -681,7 +681,7 @@ module ExtensionsGeometry =
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Point <-  point
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %A to %A" (rhType objectId) point
+        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %s to %A" (rhType objectId) point
         Doc.Views.Redraw()
 
 
@@ -704,7 +704,7 @@ module ExtensionsGeometry =
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Text <-  text
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %A to %A" (rhType objectId) text
+        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (rhType objectId) text
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -716,7 +716,7 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.Text <-  text
-            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %A to %A" (rhType objectId) text
+            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (rhType objectId) text
         Doc.Views.Redraw()
 
 
@@ -744,9 +744,9 @@ module ExtensionsGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, true, false)
             |? DocObjects.Font.FromQuartetProperties(font, false, true)
             |? DocObjects.Font.FromQuartetProperties(font, true, true)
-            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:'%A'" (rhType objectId) font)
+            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font)
         annotation.Font <- f
-        if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:'%A'" (rhType objectId) font
+        if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -766,9 +766,9 @@ module ExtensionsGeometry =
                 |? DocObjects.Font.FromQuartetProperties(font, true, false)
                 |? DocObjects.Font.FromQuartetProperties(font, false, true)
                 |? DocObjects.Font.FromQuartetProperties(font, true, true)
-                |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:'%A'" (rhType objectId) font)
+                |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font)
             annotation.Font <- f
-            if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:'%A'" (rhType objectId) font
+            if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font
         Doc.Views.Redraw()
 
 
@@ -878,11 +878,11 @@ module ExtensionsGeometry =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
-            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:'%A'" (rhType objectId) style)
-            |?    (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:'%A' not availabe for %s" (rhType objectId) style fontdata.QuartetName)
+            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style)
+            |?    (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (rhType objectId) style fontdata.QuartetName)
  
         if not <| Doc.Objects.Replace(objectId, annotation) then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:'%A'" (rhType objectId) style
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style
         Doc.Views.Redraw()
 
     [<Extension>]
@@ -904,11 +904,11 @@ module ExtensionsGeometry =
                 |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
                 |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
                 |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
-                |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:'%A'" (rhType objectId) style)
-                |?   (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:'%A' not availabe for %s" (rhType objectId) style fontdata.QuartetName)
+                |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style)
+                |?   (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (rhType objectId) style fontdata.QuartetName)
      
             if not <| Doc.Objects.Replace(objectId, annotation) then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:'%A'" (rhType objectId) style
+                RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style
         Doc.Views.Redraw()
 
 

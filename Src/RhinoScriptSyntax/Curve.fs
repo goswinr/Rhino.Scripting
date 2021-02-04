@@ -209,9 +209,9 @@ module ExtensionsCurve =
         let  surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let  tolerance = Doc.ModelAbsoluteTolerance
         let  curve = surface.InterpolatedCurveOnSurface(points, tolerance)
-        if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrf: Unable to create InterpolatedCurveOnSurface.  surfaceId:'%A' points:'%A'" surfaceId points
+        if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrf: Unable to create InterpolatedCurveOnSurface.  surfaceId:'%s' points:'%A'" (rhType surfaceId) points
         let mutable rc = Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrf: Unable to add curve to document.  surfaceId:'%A' points:'%A'" surfaceId points
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrf: Unable to add curve to document.  surfaceId:'%s' points:'%A'" (rhType surfaceId) points
         Doc.Views.Redraw()
         rc
 
@@ -228,9 +228,9 @@ module ExtensionsCurve =
         let mutable surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable tolerance = Doc.ModelAbsoluteTolerance
         let mutable curve = surface.InterpolatedCurveOnSurfaceUV(points, tolerance)
-        if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrfUV: Unable to create InterpolatedCurveOnSurfaceUV.  surfaceId:'%A' points:'%A'" surfaceId points
+        if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrfUV: Unable to create InterpolatedCurveOnSurfaceUV.  surfaceId:'%s' points:'%A'" (rhType surfaceId) points
         let mutable rc = Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrfUV: Unable to add curve to document.  surfaceId:'%A' points:'%A'" surfaceId points
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCrvOnSrfUV: Unable to add curve to document.  surfaceId:'%s' points:'%A'" (rhType surfaceId) points
         Doc.Views.Redraw()
         rc
 
@@ -245,7 +245,7 @@ module ExtensionsCurve =
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>    
     ///    Periodic curves must have a degree bigger than 1. For knotstyle = 1 or 2,
     ///    the degree must be 3. For knotstyle = 4 or 5, the degree must be odd</param>
-    ///<param name="knotstyle">(int) Optional, Default Value: <c>0</c>
+    ///<param name="knotStyle">(int) Optional, Default Value: <c>0</c>
     ///    0 Uniform knots.  Parameter spacing between consecutive knots is 1.0.
     ///    1 Chord length spacing.  Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    2 Sqrt (chord length).  Requires degree = 3 with arrCV1 and arrCVn1 specified.
@@ -259,16 +259,16 @@ module ExtensionsCurve =
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCurve(   points:Point3d seq, 
                                     [<OPT;DEF(3)>]degree:int, 
-                                    [<OPT;DEF(0)>]knotstyle:int, 
+                                    [<OPT;DEF(0)>]knotStyle:int, 
                                     [<OPT;DEF(Vector3d())>]startTangent:Vector3d,  //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                     [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
         let endTangent   = if endTangent.IsZero then Vector3d.Unset else endTangent
         let startTangent = if startTangent.IsZero then Vector3d.Unset else startTangent
-        let knotstyle : CurveKnotStyle = EnumOfValue knotstyle
+        let knotstyle : CurveKnotStyle = EnumOfValue knotStyle
         let  curve = Curve.CreateInterpolatedCurve(points, degree, knotstyle, startTangent, endTangent)
-        if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCurve: Unable to CreateInterpolatedCurve.  points:'%A' degree:'%A' knotstyle:'%A' startTangent:'%A' endTangent:'%A'" points degree knotstyle startTangent endTangent
+        if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCurve: Unable to CreateInterpolatedCurve.  points:'%A' degree:'%A' knotStyle:%d startTangent:'%A' endTangent:'%A'" points degree knotStyle startTangent endTangent
         let  rc = Doc.Objects.AddCurve(curve)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCurve: Unable to add curve to document.  points:'%A' degree:'%A' knotstyle:'%A' startTangent:'%A' endeTangent:'%A'" points degree knotstyle startTangent endTangent
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddInterpCurve: Unable to add curve to document.  points:'%A' degree:'%A' knotStyle:%d startTangent:'%A' endeTangent:'%A'" points degree knotStyle startTangent endTangent
         Doc.Views.Redraw()
         rc
 
@@ -834,7 +834,7 @@ module ExtensionsCurve =
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let tolerance0 = ifZero2 Doc.ModelAbsoluteTolerance tolerance
         let rc, outCurves, outPoints = Intersect.Intersection.CurveBrep(curve, brep, tolerance0)
-        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Intersection failed. curveId:'%s' brepId:'%A' tolerance:'%A'" (rhType curveId) brepId tolerance
+        if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Intersection failed. curveId:'%s' brepId:'%s' tolerance:'%A'" (rhType curveId) (rhType brepId) tolerance
 
         let curves = Rarr(0)
         let points = Rarr(0)
@@ -843,7 +843,7 @@ module ExtensionsCurve =
                 curves.Add(curve)
                 //let rc = Doc.Objects.AddCurve(curve)
                 //curve.Dispose()
-                //if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Unable to add curve to document. curveId:'%s' brepId:'%A' tolerance:'%A'" (rhType curveId) brepId tolerance
+                //if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBrepIntersect: Unable to add curve to document. curveId:'%s' brepId:'%s' tolerance:'%A'" (rhType curveId) brepId tolerance
                 //curves.Add(rc)
         for point in outPoints do
             if point.IsValid then
@@ -2322,9 +2322,9 @@ module ExtensionsCurve =
     static member MeshPolyline(polylineId:Guid) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve polylineId
         let ispolyline, polyline = curve.TryGetPolyline()
-        if not <| ispolyline then  RhinoScriptingException.Raise "RhinoScriptSyntax.MeshPolyline failed.  polylineId:'%A'" polylineId
+        if not <| ispolyline then  RhinoScriptingException.Raise "RhinoScriptSyntax.MeshPolyline failed.  polylineId:'%s'" (rhType polylineId)
         let mesh = Mesh.CreateFromClosedPolyline(polyline)
-        if isNull mesh then  RhinoScriptingException.Raise "RhinoScriptSyntax.MeshPolyline failed.  polylineId:'%A'" polylineId
+        if isNull mesh then  RhinoScriptingException.Raise "RhinoScriptSyntax.MeshPolyline failed.  polylineId:'%s'" (rhType polylineId)
         let rc = Doc.Objects.AddMesh(mesh)
         Doc.Views.Redraw()
         rc
@@ -2350,9 +2350,9 @@ module ExtensionsCurve =
         let normal0 = if normal.IsZero then Vector3d.ZAxis else normal
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let tolerance = Doc.ModelAbsoluteTolerance
-        let style:CurveOffsetCornerStyle = EnumOfValue style
-        let curves = curve.Offset(direction, normal0, distance, tolerance, style)
-        if isNull curves then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:'%A'" (rhType curveId) direction distance normal style
+        let stylee:CurveOffsetCornerStyle = EnumOfValue style
+        let curves = curve.Offset(direction, normal0, distance, tolerance, stylee)
+        if isNull curves then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurve failed. curveId:'%s' direction:'%A' distance:'%A' normal:'%A' style:%d" (rhType curveId) direction distance normal style
         let rc = rarr { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
         rc
@@ -2370,7 +2370,7 @@ module ExtensionsCurve =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%A' parameter:'%A'" (rhType curveId) surfaceId parameter
+        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (rhType curveId) (rhType surfaceId) parameter
         let rc = rarr { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
         rc
@@ -2388,7 +2388,7 @@ module ExtensionsCurve =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, distance, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%A' distance:'%A'" (rhType curveId) surfaceId distance
+        if isNull curves  then  RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' distance:'%A'" (rhType curveId) (rhType surfaceId) distance
         let curves = rarr{for curve in curves do curve.ExtendOnSurface(Rhino.Geometry.CurveEnd.Both, surface) } //https://github.com/mcneel/rhinoscriptsyntax/pull/186        
         let rc = rarr { for curve in curves -> Doc.Objects.AddCurve(curve) }
         Doc.Views.Redraw()
