@@ -1316,7 +1316,7 @@ module ExtensionsSurface =
         | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurface: %A is not an object in Doc.Objects table" objectId
         | o ->  match o.Geometry with          
                 | :? Brep as b -> b.Faces.Count > 1 
-                | :? Extrusion as b -> true   
+                | :? Extrusion  -> true   
                 | _ -> false
 
       
