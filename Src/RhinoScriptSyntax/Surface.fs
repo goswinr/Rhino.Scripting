@@ -1250,7 +1250,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies that a point is inside a closed mesh , surface or polysurface</summary>
+    ///<summary>Verifies that a point is inside a closed Mesh , Surface or Polysurface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
@@ -1284,7 +1284,7 @@ module ExtensionsSurface =
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPointInSurface does not work  on %s %A" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
     [<Extension>]
-    ///<summary>Verifies that a point lies on a surface</summary>
+    ///<summary>Verifies that a point lies on a Surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<returns>(bool) True , otherwise False</returns>
@@ -1307,7 +1307,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a polysurface or extrusion. Polysurfaces consist of two or more
+    ///<summary>Verifies an object is a Folysurface or Extrusion. Polysurfaces consist of two or more
     ///    surfaces joined together. </summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False</returns>
@@ -1322,7 +1322,7 @@ module ExtensionsSurface =
       
 
     [<Extension>]
-    ///<summary>Verifies a Guid refers to a closed polysurface or closed extrtrusion. If the polysurface fully encloses
+    ///<summary>Verifies a Guid refers to a closed Polysurface or closed Extrtrusion. If the polysurface fully encloses
     ///    a volume, it is considered a solid</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False</returns>
@@ -1336,7 +1336,7 @@ module ExtensionsSurface =
        
 
     [<Extension>]
-    ///<summary>Determines if a surface is a portion of a sphere</summary>
+    ///<summary>Determines if a surface is a portion of a Sphere</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsSphere(objectId:Guid) : bool =
@@ -1356,7 +1356,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a surface object is closed in the specified direction.  If the
+    ///<summary>Verifies a Surface object is closed in the specified direction.  If the
     ///    surface fully encloses a volume, it is considered a solid</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="direction">(int) 
@@ -1370,7 +1370,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a surface object is periodic in the specified direction</summary>
+    ///<summary>Verifies a Surface object is periodic in the specified direction</summary>
     ///<param name="surfaceId">(Guid) Identifier of a surface</param>
     ///<param name="direction">(int) 
     ///    0 = U direction check, 
@@ -1595,7 +1595,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Deletes a knot from a surface object</summary>
+    ///<summary>Deletes a knot from a Surface object</summary>
     ///<param name="surface">(Guid) The reference of the surface object</param>
     ///<param name="uvParameter">(float * float) ): An indexable item containing a U, V parameter on the surface. List, tuples and UVIntervals will work.
     ///    Note, if the parameter is not equal to one of the existing knots, then the knot closest to the specified parameter will be removed</param>
