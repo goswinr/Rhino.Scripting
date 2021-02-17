@@ -23,8 +23,17 @@ module AutoOpenCurried =
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
     ///<param name="objectId">(Guid) The identifier of the object</param>    
     ///<returns>(unit) void, nothing</returns>
-    static member setLayer( layer:string) (objectId:Guid) : unit =
+    static member setLayer (layer:string) (objectId:Guid) : unit =
         RhinoScriptSyntax.ObjectLayer(objectId,layer,true)
+
+    [<Extension>]
+    ///<summary>Modifies the layer of several objects, creates layer if not yet existing</summary>
+    ///<param name="layer">(string) Name of layer or empty string for current layer</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of several objects</param>    
+    ///<returns>(unit) void, nothing</returns>
+    static member setLayers (layer:string) (objectIds:seq<Guid>) : unit =
+        RhinoScriptSyntax.ObjectLayer(objectIds,layer,true)
+
     
     [<Extension>]
     ///<summary>Returns the full layername of an object. 
@@ -47,8 +56,17 @@ module AutoOpenCurried =
     ///<param name="name">(string) The new object name.</param>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(unit) void, nothing</returns>
-    static member setName( name:string) (objectId:Guid) : unit = 
-        RhinoScriptSyntax.ObjectName(objectId, name)    
+    static member setName (name:string) (objectId:Guid) : unit = 
+        RhinoScriptSyntax.ObjectName(objectId, name)  
+        
+    [<Extension>]
+    ///<summary>Sets the name of several objects</summary>
+    ///<param name="name">(string) The new object name.</param>
+    ///<param name="objectIds">(Guid seq)Ids of several objects</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member setNames (name:string) (objectIds:seq<Guid>) : unit = 
+        RhinoScriptSyntax.ObjectName(objectIds, name)  
+
     
     [<Extension>]
     ///<summary>Returns the name of an object or "" if none given</summary>
@@ -63,8 +81,16 @@ module AutoOpenCurried =
     ///<param name="color">(Drawing.Color) The new object color.</param>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(unit) void, nothing</returns>
-    static member setColor( color:Drawing.Color) (objectId:Guid) : unit = 
-        RhinoScriptSyntax.ObjectColor(objectId, color)    
+    static member setColor(color:Drawing.Color) (objectId:Guid) : unit = 
+        RhinoScriptSyntax.ObjectColor(objectId, color)  
+        
+    [<Extension>]
+    ///<summary>Sets the Color of several objects</summary>
+    ///<param name="color">(Drawing.Color) The new object color.</param>
+    ///<param name="objectIds">(Guid seq)Id of several objects</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member setColors(color:Drawing.Color) (objectIds:seq<Guid>) : unit = 
+        RhinoScriptSyntax.ObjectColor(objectIds, color)  
     
     [<Extension>]
     ///<summary>Returns the color of an object </summary>
@@ -72,6 +98,7 @@ module AutoOpenCurried =
     ///<returns>(string) The current object color</returns>
     static member getColor (objectId:Guid) : Drawing.Color = 
         RhinoScriptSyntax.ObjectColor(objectId) 
+
 
 
     [<Extension>]
@@ -82,6 +109,16 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing</returns>
     static member setUserText( key:string) ( value :string) (objectId:Guid) : unit = 
         RhinoScriptSyntax.SetUserText(objectId, key, value)
+
+    [<Extension>]
+    ///<summary>Sets a user text stored on several objects</summary>
+    ///<param name="key">(string) The key name to set</param>
+    ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
+    ///<param name="objectIds">(Guid seq) The identifiers of several objects</param>
+    ///<returns>(unit) void, nothing</returns>
+    static member setUserTexts( key:string) ( value :string) (objectIds:seq<Guid>) : unit = 
+        RhinoScriptSyntax.SetUserText(objectIds, key, value)
+
         
     [<Extension>]
     ///<summary>Returns user text stored on an object, fails if non existing</summary>
