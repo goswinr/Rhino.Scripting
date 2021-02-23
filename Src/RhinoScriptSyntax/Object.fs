@@ -355,8 +355,8 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Mirrors a single object on World XY Plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object to mirror</param>
-    ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
-    ///<param name="endPoint">(Point3d) End of the mirror plane</param>
+    ///<param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    ///<param name="endPoint">(Point3d) End of the mirror Plane</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the object</param>
     ///<returns>(Guid) Identifier of the mirrored object</returns>
@@ -378,8 +378,8 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Mirrors a list of objects on World XY Plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
-    ///<param name="startPoint">(Point3d) Start of the mirror plane</param>
-    ///<param name="endPoint">(Point3d) End of the mirror plane</param>
+    ///<param name="startPoint">(Point3d) Start of the mirror Plane</param>
+    ///<param name="endPoint">(Point3d) End of the mirror Plane</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) List of identifiers of the mirrored objects</returns>
@@ -1070,7 +1070,7 @@ module ExtensionsObject =
     ///      262144      SubD
     ///      134217728   Cage
     ///      268435456   Phantom
-    ///      536870912   Clipping plane
+    ///      536870912   Clipping Plane
     ///      1073741824  Extrusion</returns>
     static member ObjectType(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1146,7 +1146,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
-    ///    scale transformation. Scaling is based on the WorldXY plane</summary>
+    ///    scale transformation. Scaling is based on the WorldXY Plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1165,7 +1165,7 @@ module ExtensionsObject =
         res
 
     [<Extension>]
-    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY plane</summary>
+    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1184,7 +1184,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
-    ///    uniform scale transformation. Scaling is based on the WorldXY plane</summary>
+    ///    uniform scale transformation. Scaling is based on the WorldXY Plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
@@ -1206,7 +1206,7 @@ module ExtensionsObject =
         rc
 
     [<Extension>]
-    ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY plane</summary>
+    ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>

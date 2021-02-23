@@ -275,7 +275,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Returns the rotation applied to the Hatch pattern when
-    /// it is mapped to the Hatch's plane</summary>
+    /// it is mapped to the Hatch's Plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if rotation is not defined, the current rotation angle</returns>
     static member HatchRotation(hatchId:Guid) : float = //GET
@@ -286,7 +286,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the rotation applied to the Hatch pattern when
-    /// it is mapped to the Hatch's plane</summary>
+    /// it is mapped to the Hatch's Plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing</returns>
@@ -302,7 +302,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the rotation applied to the Hatch pattern when
-    /// it is mapped to the Hatch's plane</summary>
+    /// it is mapped to the Hatch's Plane</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing</returns>
@@ -320,7 +320,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Returns the scale applied to the Hatch pattern when it is
-    /// mapped to the Hatch's plane</summary>
+    /// mapped to the Hatch's Plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if scale is not defined, the current scale factor</returns>
     static member HatchScale(hatchId:Guid) : float = //GET
@@ -330,7 +330,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
-    /// mapped to the Hatch's plane</summary>
+    /// mapped to the Hatch's Plane</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing</returns>
@@ -344,7 +344,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
-    /// mapped to the Hatch's plane</summary>
+    /// mapped to the Hatch's Plane</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing</returns>

@@ -20,10 +20,10 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Create a clipping Plane for visibly clipping away geometry in a specific
-    ///    view. Note, clipping planes are infinite</summary>
-    ///<param name="plane">(Plane) The plane</param>
-    ///<param name="uMagnitude">(float) U magnitude of the plane</param>
-    ///<param name="vMagnitude">(float) V magnitude of the plane</param>
+    ///    view. Note, clipping Planes are infinite</summary>
+    ///<param name="plane">(Plane) The Plane</param>
+    ///<param name="uMagnitude">(float) U magnitude of the Plane</param>
+    ///<param name="vMagnitude">(float) V magnitude of the Plane</param>
     ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
     ///    view is used</param>
     ///<returns>(Guid) object identifier</returns>
@@ -47,7 +47,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Creates a picture frame and adds it to the document</summary>
-    ///<param name="plane">(Plane) The Plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction</param>
+    ///<param name="plane">(Plane) The Plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at Plane's origin. The width will be in the Plane's X axis direction, and the height will be in the Plane's Y axis direction</param>
     ///<param name="filename">(string) The path to a bitmap or image file</param>
     ///<param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skiped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="height">(float) Optional, If both dblWidth and dblHeight are  0.0 or skied, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
@@ -205,7 +205,7 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Adds a text string to the document</summary>
     ///<param name="text">(string) The text to display</param>
-    ///<param name="pt">(Point3d) a ponit where to add text. It will be paralell to XY plane.</param>
+    ///<param name="pt">(Point3d) a ponit where to add text. It will be paralell to XY Plane.</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
     ///    The text height</param>
     ///<param name="font">(string) Optional, The text font</param>
@@ -267,7 +267,7 @@ module ExtensionsGeometry =
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. 
     ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
     ///<param name="geometries">(GeometryBase seq) The Geometries of the objects</param>
-    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBoxEstimate(geometries: seq<#GeometryBase>) : BoundingBox =
@@ -281,7 +281,7 @@ module ExtensionsGeometry =
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. 
     ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
-    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox =
@@ -296,7 +296,7 @@ module ExtensionsGeometry =
     ///   Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. 
     ///   Estimated bounding boxes are always similar to or larger than accurate bounding boxes.</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
-    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBoxEstimate(object:Guid) : BoundingBox =              
@@ -307,7 +307,7 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Returns a world axis-aligned bounding box of several objects</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
-    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(objects:Guid seq) : BoundingBox =
@@ -320,7 +320,7 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Returns a world axis-aligned bounding box of one object</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
-    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY plane). 
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
     static member BoundingBox(object:Guid) : BoundingBox =
@@ -427,7 +427,7 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Verifies that an object is a clipping Plane object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True if the object with a given objectId is a clipping plane</returns>
+    ///<returns>(bool) True if the object with a given objectId is a clipping Plane</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
 
@@ -805,14 +805,14 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Returns the Plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<returns>(Plane) The current plane</returns>
+    ///<returns>(Plane) The current Plane</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
 
     [<Extension>]
     ///<summary>Modifies the Plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="plane">(Plane) The new text object plane</param>
+    ///<param name="plane">(Plane) The new text object Plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)

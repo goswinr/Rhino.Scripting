@@ -141,7 +141,7 @@ module ExtensionsLine =
     ///<summary>Returns a Plane that contains the line. The origin of the Plane is at the start of
     ///    the line. If possible, a Plane parallel to the world XY, YZ, or ZX Plane is returned</summary>
     ///<param name="line">(Geometry.Line) a Line</param>
-    ///<returns>(Plane) the plane</returns>
+    ///<returns>(Plane) the Plane</returns>
     static member LinePlane(line:Line) : Plane =
         let rc, plane = line.TryGetPlane()
         if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LinePlane failed.  line:'%A'" line
@@ -149,7 +149,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Calculates the intersection of a line and a plane</summary>
+    ///<summary>Calculates the intersection of a line and a Plane</summary>
     ///<param name="line">(Line) The line to intersect</param>
     ///<param name="plane">(Plane) The Plane to intersect</param>
     ///<returns>(Point3d) The 3D point of intersection is successful</returns>

@@ -31,7 +31,7 @@ module ExtensionsDocument =
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
     ///    Bitmap creation flags. Can be the combination of:
     ///    1 = honor object highlighting
-    ///    2 = draw construction plane
+    ///    2 = draw construction Plane
     ///    4 = use ghosted shading</param>
     ///<param name="wireframe">(bool) Optional, Default Value: <c>false</c>
     ///    If True then a wireframe preview image. If False,
@@ -449,7 +449,7 @@ module ExtensionsDocument =
     ///      0: No settings enabled.
     ///      1: Refine Mesh enabled.
     ///      2: Jagged seams enabled.
-    ///      4: Simple planes enabled.
+    ///      4: Simple Planes enabled.
     ///      8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized</returns>
     static member RenderMeshSettings() : int = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -467,7 +467,7 @@ module ExtensionsDocument =
     ///      0: No settings enabled.
     ///      1: Refine Mesh enabled.
     ///      2: Jagged seams enabled.
-    ///      4: Simple planes enabled.
+    ///      4: Simple Planes enabled.
     ///      8: Texture is packed, scaled and normalized; otherwise unpacked, unscaled and normalized</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshSettings(settings:int) : unit = //SET

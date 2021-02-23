@@ -98,7 +98,7 @@ module Vec =
         v
     
 
-    /// Project vector to World XY plane
+    /// Project vector to World XY Plane
     /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
     /// Returns Vector3d(v.X, v.Y, 0.0)
     let inline projectToXYPlane (v:Vector3d) =
@@ -106,7 +106,7 @@ module Vec =
         if r.IsTiny(RhinoMath.SqrtEpsilon) then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToXYPlane: Cannot projectToXYPlane for vertical vector %A" v 
         r
 
-    /// Project vector to plane
+    /// Project vector to Plane
     /// Fails if resulting vector is of almost zero length (RhinoMath.SqrtEpsilon)
     let inline projectToPlane (pl:Geometry.Plane) (v:Vector3d) =
         let pt = pl.Origin + v
@@ -188,7 +188,7 @@ module Vec =
     //--------------------angels 360:---------------------------
 
     /// Returns positive angle between two Vectors in Radians projected to a Plane
-    /// Considering positve rotation round a planes ZAxis 
+    /// Considering positve rotation round a Planes ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors   
     let inline angleTwoPiProjected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  = 
@@ -199,7 +199,7 @@ module Vec =
         else                                    Math.PI * 2. - ang
 
     /// Returns positive angle between two Vectors in Degrees projected to a Plane
-    /// Considering positve rotation round a planes ZAxis 
+    /// Considering positve rotation round a Planes ZAxis 
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors   
     let inline angle360Projected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  =  angleTwoPiProjected pl a b|> toDegrees
@@ -244,7 +244,7 @@ module Vec =
 
     /// Returns positive angle between two vectors in Radians
     /// Not projected to Plane.
-    /// Considering positve rotation round a planes ZAxis 
+    /// Considering positve rotation round a Planes ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// Unitizes the input vectors
     [<Obsolete>]
@@ -255,7 +255,7 @@ module Vec =
     
     /// Returns positive angle between two vectors in Degrees
     /// Not projected to Plane.
-    /// Considering positve rotation round a planes ZAxis 
+    /// Considering positve rotation round a Planes ZAxis 
     /// Range:  0 to 360 degrees
     /// Unitizes the input vectors
     [<Obsolete>]

@@ -36,7 +36,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Adds a cone shaped Polysurface to the document</summary>
     ///<param name="basis">(Plane) 3D origin point of the cone or a Plane with an apex at the origin
-    ///    and normal along the plane's z-axis</param>
+    ///    and normal along the Plane's z-axis</param>
     ///<param name="height">(float)  height of cone </param>
     ///<param name="radius">(float) The radius at the basis of the cone</param>
     ///<param name="cap">(bool) Optional, Default Value: <c>true</c>
@@ -59,8 +59,8 @@ module ExtensionsSurface =
     ///    information, see the Rhino help file for the CutPlane command</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects that the cutting Plane will
     ///    pass through</param>
-    ///<param name="startPoint">(Point3d) Start point of line that defines the cutting plane</param>
-    ///<param name="endPoint">(Point3d) End point of line that defines the cutting plane</param>
+    ///<param name="startPoint">(Point3d) Start point of line that defines the cutting Plane</param>
+    ///<param name="endPoint">(Point3d) End point of line that defines the cutting Plane</param>
     ///<param name="normal">(Vector3d) Optional, Default Value: <c>world Z axis</c>
     ///    Vector that will be contained in the returned planar
     ///    Surface.
@@ -94,7 +94,7 @@ module ExtensionsSurface =
     ///<param name="basis">(Plane) The 3D basis point of the cylinder or the basis Plane of the cylinder</param>
     ///<param name="height">(float) If basis is a point, then height is a 3D height point of the
     ///    cylinder. The height point defines the height and direction of the
-    ///    cylinder. If basis is a plane, then height is the numeric height value
+    ///    cylinder. If basis is a Plane, then height is the numeric height value
     ///    of the cylinder</param>
     ///<param name="radius">(float) Radius of the cylinder</param>
     ///<param name="cap">(bool) Optional, Default Value: <c>true</c>
@@ -362,7 +362,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Create a Plane Surface and add it to the document</summary>
-    ///<param name="plane">(Plane) The plane</param>
+    ///<param name="plane">(Plane) The Plane</param>
     ///<param name="uDir">(float) The magnitude in the U direction</param>
     ///<param name="vDir">(float) The magnitude in the V direction</param>
     ///<returns>(Guid) The identifier of the new object</returns>
@@ -481,10 +481,10 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
-    ///    defined cutting planes through a Surface or Polysurface. For more
+    ///    defined cutting Planes through a Surface or Polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
-    ///<param name="plane">(Plane) The Plane that defines the cutting plane</param>    
+    ///<param name="plane">(Plane) The Plane that defines the cutting Plane</param>    
     ///<returns>(Guid Rarr) ids of new contour curves </returns>
     static member AddSrfContourCrvs( objectId:Guid,
                                      plane:Plane) : Guid Rarr =
@@ -501,7 +501,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
-    ///    defined cutting planes through a Surface or Polysurface. For more
+    ///    defined cutting Planes through a Surface or Polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
     ///<param name="startPoint">(Point3d)  the startpoint of a center line</param>
@@ -1871,7 +1871,7 @@ module ExtensionsSurface =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the cone
     ///    [0]   the Plane of the cone. The apex of the cone is at the
-    ///      plane's origin and the axis of the cone is the plane's z-axis
+    ///      Plane's origin and the axis of the cone is the Plane's z-axis
     ///    [1]   the height of the cone
     ///    [2]   the radius of the cone</returns>
     static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
@@ -1906,7 +1906,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Returns the definition of a cylinder Surface</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
-    ///<returns>(Plane * float * float) of the cylinder plane, height and radius</returns>
+    ///<returns>(Plane * float * float) of the cylinder Plane, height and radius</returns>
     static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = Doc.ModelAbsoluteTolerance
@@ -2046,7 +2046,7 @@ module ExtensionsSurface =
     ///    U, V parameter</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="uvParameter">(float * float) U, v parameter to evaluate</param>
-    ///<returns>(Plane) plane</returns>
+    ///<returns>(Plane) Plane</returns>
     static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, frame = surface.FrameAt(uvParameter|> fst, uvParameter|> snd)

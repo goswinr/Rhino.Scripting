@@ -892,7 +892,7 @@ module ExtensionsSelection =
     ///        262144      SubD
     ///        134217728   Cage
     ///        268435456   Phantom
-    ///        536870912   Clipping plane
+    ///        536870912   Clipping Plane
     ///        1073741824  Extrusion</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>

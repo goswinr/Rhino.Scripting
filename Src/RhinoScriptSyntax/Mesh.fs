@@ -752,7 +752,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<param name="trimmedTriangles">(bool) Optional, Default Value: <c>true</c>
     ///    If True, triangles in the Mesh will be
-    ///    represented by a trimmed plane</param>
+    ///    represented by a trimmed Plane</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input object</param>
     ///<returns>(Guid Rarr) identifiers for the new breps</returns>

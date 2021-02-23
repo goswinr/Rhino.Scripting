@@ -90,7 +90,7 @@ module ExtensionsCurve =
     [<Extension>]
     ///<summary>Adds a circle Curve to the document</summary>
     ///<param name="plane">(Plane) Plane on which the circle will lie. If a point is
-    ///    passed, this will be the center of the circle on the active construction plane</param>
+    ///    passed, this will be the center of the circle on the active construction Plane</param>
     ///<param name="radius">(float) The radius of the circle</param>
     ///<returns>(Guid) objectId of the new Curve object</returns>
     static member AddCircle(plane:Plane, radius:float) : Guid = //(TODO add overload point)
@@ -382,9 +382,9 @@ module ExtensionsCurve =
     [<Extension>]
     ///<summary>Add a rectangular Curve to the document</summary>
     ///<param name="plane">(Plane) Plane on which the rectangle will lie</param>
-    ///<param name="width">(float) Width of rectangle as measured along the plane's
+    ///<param name="width">(float) Width of rectangle as measured along the Plane's
     ///    x and y axes</param>
-    ///<param name="height">(float) Height of rectangle as measured along the plane's
+    ///<param name="height">(float) Height of rectangle as measured along the Plane's
     ///    x and y axes</param>
     ///<returns>(Guid) objectId of new rectangle</returns>
     static member AddRectangle(plane:Plane, width:float, height:float) : Guid =
@@ -399,7 +399,7 @@ module ExtensionsCurve =
     [<Extension>]
     ///<summary>Adds a spiral or helical Curve to the document</summary>
     ///<param name="point0">(Point3d) Helix axis start point or center of spiral</param>
-    ///<param name="point1">(Point3d) Helix axis end point or point normal on spiral plane</param>
+    ///<param name="point1">(Point3d) Helix axis end point or point normal on spiral Plane</param>
     ///<param name="pitch">(float) Distance between turns. If 0, then a spiral. If > 0 then the
     ///    distance between helix "threads"</param>
     ///<param name="turns">(float) Number of turns</param>
@@ -1187,7 +1187,7 @@ module ExtensionsCurve =
     ///    . The list elements are as follows:
     ///      [0]    A point on the first Curve at which to cut (point).
     ///      [1]    A point on the second Curve at which to cut (point).
-    ///      [2]    The fillet plane</returns>
+    ///      [2]    The fillet Plane</returns>
     static member CurveFilletPoints(curveA:Guid,
                                     curveB:Guid,
                                     radius:float,
@@ -1361,7 +1361,7 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Returns the perpendicular Plane at a parameter of a curve. The result
-    ///    is relatively parallel (zero-twisting) plane</summary>
+    ///    is relatively parallel (zero-twisting) Plane</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<returns>(Plane) Plane</returns>
@@ -2084,7 +2084,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Test a Curve to see if it lies in a specific plane</summary>
+    ///<summary>Test a Curve to see if it lies in a specific Plane</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="plane">(Plane) Plane to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
@@ -2401,7 +2401,7 @@ module ExtensionsCurve =
     ///<param name="curveA">(Guid) identifier of the first  planar, closed curve</param>
     ///<param name="curveB">(Guid) identifier of the second planar, closed curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///    Test plane. If omitted, the Plane.WorldXY Plane is used</param>
+    ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(int) a number identifying the relationship
     ///    0 = the regions bounded by the curves are disjoint
@@ -2422,7 +2422,7 @@ module ExtensionsCurve =
     ///<param name="curveA">(Guid) identifier of the first  planar curve</param>
     ///<param name="curveB">(Guid) identifier of the second planar curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///    Test plane. If omitted, the Plane.WorldXY Plane is used</param>
+    ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(bool) True if the curves intersect; otherwise False</returns>
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =

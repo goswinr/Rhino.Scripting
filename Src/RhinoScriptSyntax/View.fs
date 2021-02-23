@@ -66,8 +66,8 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Adds new named construction Plane to the document</summary>
-    ///<param name="cplaneName">(string) The name of the new named construction plane</param>
-    ///<param name="plane">(Plane) The construction plane</param>
+    ///<param name="cplaneName">(string) The name of the new named construction Plane</param>
+    ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(unit) void, nothing</returns>
     static member AddNamedCPlane(cplaneName:string, plane:Plane) : unit =
         if isNull cplaneName then RhinoScriptingException.Raise "RhinoScriptSyntax.CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
@@ -285,9 +285,9 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Returns the Plane geometry of the specified named construction plane</summary>
-    ///<param name="name">(string) The name of the construction plane</param>
-    ///<returns>(Plane) a plane</returns>
+    ///<summary>Returns the Plane geometry of the specified named construction Plane</summary>
+    ///<param name="name">(string) The name of the construction Plane</param>
+    ///<returns>(Plane) a Plane</returns>
     static member NamedCPlane(name:string) : Plane =
         let index = Doc.NamedConstructionPlanes.Find(name)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.NamedCPlane failed.  name:'%A'" name
@@ -295,8 +295,8 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Returns the names of all named construction planes in the document</summary>
-    ///<returns>(string Rarr) the names of all named construction planes in the document</returns>
+    ///<summary>Returns the names of all named construction Planes in the document</summary>
+    ///<returns>(string Rarr) the names of all named construction Planes in the document</returns>
     static member NamedCPlanes() : string Rarr =
         let count = Doc.NamedConstructionPlanes.Count
         rarr {for i in range(count) do Doc.NamedConstructionPlanes.[i].Name }
@@ -328,7 +328,7 @@ module ExtensionsView =
     ///<param name="cplaneName">(string) Name of the construction Plane to restore</param>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
-    ///<returns>(string) name of the restored named construction plane</returns>
+    ///<returns>(string) name of the restored named construction Plane</returns>
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = Doc.NamedConstructionPlanes.Find(cplaneName)
@@ -587,7 +587,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the orientation of a view's camera</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
-    ///<returns>(Plane) the view's camera plane</returns>
+    ///<returns>(Plane) the view's camera Plane</returns>
     static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
@@ -636,15 +636,15 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Return a view's construction plane</summary>
+    ///<summary>Return a view's construction Plane</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Plane) The current construction plane</returns>
+    ///<returns>(Plane) The current construction Plane</returns>
     static member ViewCPlane(view:string) : Plane = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.ConstructionPlane()
 
     [<Extension>]
-    ///<summary>Set a view's construction plane</summary>
+    ///<summary>Set a view's construction Plane</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="plane">(Plane) The new construction Plane if setting</param>
     ///<returns>(unit) void, nothing</returns>

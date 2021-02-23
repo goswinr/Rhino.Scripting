@@ -422,7 +422,7 @@ module ExtensionsUserinterface =
     ///    1  Two-point - Defines a line from two points.
     ///    2  Normal - Defines a line normal to a location on a Surface.
     ///    3  Angled - Defines a line at a specified angle from a reference line.
-    ///    4  Vertical - Defines a line vertical to the construction plane.
+    ///    4  Vertical - Defines a line vertical to the construction Plane.
     ///    5  Four-point - Defines a line using two points to establish direction and two points to establish length.
     ///    6  Bisector - Defines a line that bisects a specified angle.
     ///    7  Perpendicular - Defines a line perpendicular to or from a curve
@@ -552,7 +552,7 @@ module ExtensionsUserinterface =
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
-    ///    Constrains the point selections to the active construction plane</param>
+    ///    Constrains the point selections to the active construction Plane</param>
     ///<returns>(Point3d option) an Option of point3d</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -650,7 +650,7 @@ module ExtensionsUserinterface =
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
     ///    Draw lines between points</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
-    ///    Constrain point selection to the active construction plane</param>
+    ///    Constrain point selection to the active construction Plane</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
     ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an

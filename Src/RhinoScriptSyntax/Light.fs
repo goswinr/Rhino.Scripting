@@ -411,7 +411,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the Plane of a rectangular light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(Plane*float*float) the plane, X and Y length</returns>
+    ///<returns>(Plane*float*float) the Plane, X and Y length</returns>
     static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldRectangular then
