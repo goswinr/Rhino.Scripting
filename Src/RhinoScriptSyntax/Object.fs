@@ -406,26 +406,26 @@ module ExtensionsObject =
     ///<summary>Moves a single object</summary>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
-    ///<returns>(Guid) Identifier of the moved object, (same as the input!?)</returns>
-    static member MoveObject(objectId:Guid, translation:Vector3d) : Guid = //TODO or return unit ??
+    ///<returns>(unit) void, nothing</returns>
+    static member MoveObject(objectId:Guid, translation:Vector3d) : unit = //TODO or return unit ??
         let xf = Transform.Translation(translation)
         let res = Doc.Objects.Transform(objectId, xf, true)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translation
-        res
+        //if objectId <> res
 
     [<Extension>]
     ///<summary>Moves one or more objects</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
-    ///<returns>(Guid Rarr) Identifiers of the moved objects(same as the input!?)</returns>
-    static member MoveObject(objectIds:Guid seq, translation:Vector3d) : Guid Rarr =  //PLURAL        
+    ///<returns>(unit) void, nothing</returns>
+    static member MoveObject(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL        
         let xf = Transform.Translation(translation)
-        let rc = Rarr()
+        //let rc = Rarr()
         for objectId in objectIds do
-            let objectId = Doc.Objects.Transform(objectId, xf, true)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (rhType objectId) translation
-            rc.Add objectId
-        rc
+            let res = Doc.Objects.Transform(objectId, xf, true)
+            if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (rhType objectId) translation
+            //rc.Add objectId
+        //rc
 
 
 
