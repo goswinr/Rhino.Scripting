@@ -50,18 +50,18 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Creates one or more new hatch objects a list of closed planar curves</summary>
+    ///<summary>Creates one or more new Hatch objects a list of closed planar curves</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar curves that defines the
-    ///    boundary of the hatch objects</param>
-    ///<param name="hatchPattern">(string) Optional, Name of the hatch pattern to be used by the hatch object.
-    ///    If omitted, the current hatch pattern will be used</param>
+    ///    boundary of the Hatch objects</param>
+    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.
+    ///    If omitted, the current Hatch pattern will be used</param>
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
     ///    Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
     ///    Hatch pattern rotation angle in degrees</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
-    ///    Tolerance for hatch fills</param>
-    ///<returns>(Guid Rarr) identifiers of the newly created hatch</returns>
+    ///    Tolerance for Hatch fills</param>
+    ///<returns>(Guid Rarr) identifiers of the newly created Hatch</returns>
     static member AddHatches( curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
@@ -90,16 +90,16 @@ module ExtensionsHatch =
         ids
 
     [<Extension>]
-    ///<summary>Creates a new hatch object from a closed planar curve object</summary>
+    ///<summary>Creates a new Hatch object from a closed planar curve object</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar curve that defines the
-    ///    boundary of the hatch object</param>
-    ///<param name="hatchPattern">(string) Optional, Name of the hatch pattern to be used by the hatch
-    ///    object. If omitted, the current hatch pattern will be used</param>
+    ///    boundary of the Hatch object</param>
+    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch
+    ///    object. If omitted, the current Hatch pattern will be used</param>
     ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
     ///    Hatch pattern scale factor</param>
     ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
     ///    Hatch pattern rotation angle in degrees</param>
-    ///<returns>(Guid) identifier of the newly created hatch</returns>
+    ///<returns>(Guid) identifier of the newly created Hatch</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
@@ -111,14 +111,14 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Adds hatch patterns to the document by importing hatch pattern definitions
+    ///<summary>Adds Hatch patterns to the document by importing Hatch pattern definitions
     ///    from a pattern file</summary>
-    ///<param name="filename">(string) Name of the hatch pattern file</param>
+    ///<param name="filename">(string) Name of the Hatch pattern file</param>
     ///<param name="replace">(bool) Optional, Default Value: <c>false</c>
-    ///    If hatch pattern names already in the document match hatch
-    ///    pattern names in the pattern definition file, then the existing hatch
+    ///    If Hatch pattern names already in the document match Hatch
+    ///    pattern names in the pattern definition file, then the existing Hatch
     ///    patterns will be redefined</param>
-    ///<returns>(string Rarr) Names of the newly added hatch patterns</returns>
+    ///<returns>(string Rarr) Names of the newly added Hatch patterns</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
         if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
@@ -133,8 +133,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the current hatch pattern file</summary>
-    ///<returns>(string) The current hatch pattern</returns>
+    ///<summary>Returns the current Hatch pattern file</summary>
+    ///<returns>(string) The current Hatch pattern</returns>
     static member CurrentHatchPattern() : string = //GET
         let i = Doc.HatchPatterns.CurrentHatchPatternIndex
         let hp = Doc.HatchPatterns.[i]
@@ -143,8 +143,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Sets the current hatch pattern file</summary>
-    ///<param name="hatchPattern">(string) Name of an existing hatch pattern to make current</param>
+    ///<summary>Sets the current Hatch pattern file</summary>
+    ///<param name="hatchPattern">(string) Name of an existing Hatch pattern to make current</param>
     ///<returns>(unit) void, nothing</returns>
     static member CurrentHatchPattern(hatchPattern:string) : unit = //SET
         let rc = Doc.HatchPatterns.CurrentHatchPatternIndex
@@ -155,13 +155,13 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Explodes a hatch object into its component objects. The exploded objects
-    ///    will be added to the document. If the hatch object uses a solid pattern,
+    ///<summary>Explodes a Hatch object into its component objects. The exploded objects
+    ///    will be added to the document. If the Hatch object uses a solid pattern,
     ///    then planar face Brep objects will be created. Otherwise, line curve objects
     ///    will be created</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
-    ///    Delete the hatch object</param>
+    ///    Delete the Hatch object</param>
     ///<returns>(Guid Rarr) list of identifiers for the newly created objects</returns>
     static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid Rarr =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
@@ -184,19 +184,19 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns a hatch object's hatch pattern</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
-    ///<returns>(string) The current hatch pattern</returns>
+    ///<summary>Returns a Hatch object's Hatch pattern</summary>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
+    ///<returns>(string) The current Hatch pattern</returns>
     static member HatchPattern(hatchId:Guid) : string = //GET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let oldindex = hatchobj.HatchGeometry.PatternIndex
         Doc.HatchPatterns.[oldindex].Name
 
     [<Extension>]
-    ///<summary>Changes a hatch object's hatch pattern</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
-    ///<param name="hatchPattern">(string) Name of an existing hatch pattern to replace the
-    ///    current hatch pattern</param>
+    ///<summary>Changes a Hatch object's Hatch pattern</summary>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
+    ///<param name="hatchPattern">(string) Name of an existing Hatch pattern to replace the
+    ///    current Hatch pattern</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchPattern(hatchId:Guid, hatchPattern:string) : unit = //SET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
@@ -209,10 +209,10 @@ module ExtensionsHatch =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Changes multiple hatch objects's hatch pattern</summary>
-    ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
-    ///<param name="hatchPattern">(string) Name of multiple existing hatch pattern to replace the
-    ///    current hatch pattern</param>
+    ///<summary>Changes multiple Hatch objects's Hatch pattern</summary>
+    ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
+    ///<param name="hatchPattern">(string) Name of multiple existing Hatch pattern to replace the
+    ///    current Hatch pattern</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchPattern(hatchIds:Guid seq, hatchPattern:string) : unit = //MULTISET
         RhinoScriptSyntax.InitHatchPatterns()
@@ -227,18 +227,18 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the number of hatch patterns in the document</summary>
-    ///<returns>(int) the number of hatch patterns in the document</returns>
+    ///<summary>Returns the number of Hatch patterns in the document</summary>
+    ///<returns>(int) the number of Hatch patterns in the document</returns>
     static member HatchPatternCount() : int =
         RhinoScriptSyntax.InitHatchPatterns()
         Doc.HatchPatterns.Count
 
 
     [<Extension>]
-    ///<summary>Returns the description of a hatch pattern. Note, not all hatch patterns
+    ///<summary>Returns the description of a Hatch pattern. Note, not all Hatch patterns
     ///    have descriptions</summary>
-    ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
-    ///<returns>(string) description of the hatch pattern</returns>
+    ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
+    ///<returns>(string) description of the Hatch pattern</returns>
     static member HatchPatternDescription(hatchPattern:string) : string =
         RhinoScriptSyntax.InitHatchPatterns()
         let patterninstance = Doc.HatchPatterns.FindName(hatchPattern)
@@ -247,9 +247,9 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the fill type of a hatch pattern</summary>
-    ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
-    ///<returns>(int) hatch pattern's fill type
+    ///<summary>Returns the fill type of a Hatch pattern</summary>
+    ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
+    ///<returns>(int) Hatch pattern's fill type
     ///    0 = solid, uses object color
     ///    1 = lines, uses pattern file definition
     ///    2 = gradient, uses fill color definition</returns>
@@ -261,8 +261,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the names of all of the hatch patterns in the document</summary>
-    ///<returns>(string Rarr) the names of all of the hatch patterns in the document</returns>
+    ///<summary>Returns the names of all of the Hatch patterns in the document</summary>
+    ///<returns>(string Rarr) the names of all of the Hatch patterns in the document</returns>
     static member HatchPatternNames() : string Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
         let rc = Rarr()
@@ -274,9 +274,9 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the rotation applied to the hatch pattern when
-    /// it is mapped to the hatch's plane</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
+    ///<summary>Returns the rotation applied to the Hatch pattern when
+    /// it is mapped to the Hatch's plane</summary>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if rotation is not defined, the current rotation angle</returns>
     static member HatchRotation(hatchId:Guid) : float = //GET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
@@ -285,9 +285,9 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Modifies the rotation applied to the hatch pattern when
-    /// it is mapped to the hatch's plane</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
+    ///<summary>Modifies the rotation applied to the Hatch pattern when
+    /// it is mapped to the Hatch's plane</summary>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
@@ -301,9 +301,9 @@ module ExtensionsHatch =
             Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the rotation applied to the hatch pattern when
-    /// it is mapped to the hatch's plane</summary>
-    ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
+    ///<summary>Modifies the rotation applied to the Hatch pattern when
+    /// it is mapped to the Hatch's plane</summary>
+    ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchRotation(hatchIds:Guid seq, rotation:float) : unit = //MULTISET
@@ -319,9 +319,9 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the scale applied to the hatch pattern when it is
-    /// mapped to the hatch's plane</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
+    ///<summary>Returns the scale applied to the Hatch pattern when it is
+    /// mapped to the Hatch's plane</summary>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if scale is not defined, the current scale factor</returns>
     static member HatchScale(hatchId:Guid) : float = //GET
         let hatchobj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
@@ -329,9 +329,9 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Modifies the scale applied to the hatch pattern when it is
-    /// mapped to the hatch's plane</summary>
-    ///<param name="hatchId">(Guid) Identifier of a hatch object</param>
+    ///<summary>Modifies the scale applied to the Hatch pattern when it is
+    /// mapped to the Hatch's plane</summary>
+    ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchScale(hatchId:Guid, scale:float) : unit = //SET
@@ -343,9 +343,9 @@ module ExtensionsHatch =
             Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the scale applied to the hatch pattern when it is
-    /// mapped to the hatch's plane</summary>
-    ///<param name="hatchIds">(Guid seq) Identifiers of multiple hatch objects</param>
+    ///<summary>Modifies the scale applied to the Hatch pattern when it is
+    /// mapped to the Hatch's plane</summary>
+    ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing</returns>
     static member HatchScale(hatchIds:Guid seq, scale:float) : unit = //MULTISET
@@ -359,7 +359,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies the existence of a hatch object in the document</summary>
+    ///<summary>Verifies the existence of a Hatch object in the document</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(bool) True or False</returns>
     static member IsHatch(objectId:Guid) : bool =
@@ -368,8 +368,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies the existence of a hatch pattern in the document</summary>
-    ///<param name="name">(string) The name of a hatch pattern</param>
+    ///<summary>Verifies the existence of a Hatch pattern in the document</summary>
+    ///<param name="name">(string) The name of a Hatch pattern</param>
     ///<returns>(bool) True or False</returns>
     static member IsHatchPattern(name:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
@@ -377,8 +377,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies that a hatch pattern is the current hatch pattern</summary>
-    ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
+    ///<summary>Verifies that a Hatch pattern is the current Hatch pattern</summary>
+    ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False</returns>
     static member IsHatchPatternCurrent(hatchPattern:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
@@ -388,8 +388,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies that a hatch pattern is from a reference file</summary>
-    ///<param name="hatchPattern">(string) Name of an existing hatch pattern</param>
+    ///<summary>Verifies that a Hatch pattern is from a reference file</summary>
+    ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False</returns>
     static member IsHatchPatternReference(hatchPattern:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()

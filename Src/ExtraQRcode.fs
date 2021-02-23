@@ -24,7 +24,7 @@ open ZXing.QrCode.Internal
 
 
 [<AutoOpen>]
-/// This module provides functions to create or QR codes as hatch or mesh
+/// This module provides functions to create or QR codes as Hatch or mesh
 /// This module is automatically opened when Rhino.Scripting.Extra namspace is opened.
 module QRcode = 
 

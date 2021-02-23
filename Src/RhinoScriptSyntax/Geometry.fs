@@ -253,7 +253,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Compute the area of a closed curve, hatch, Surface, Polysurface, or mesh</summary>
+    ///<summary>Compute the area of a closed curve, Hatch, Surface, Polysurface, or mesh</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area</returns>
     static member Area(objectId:Guid) : float =
