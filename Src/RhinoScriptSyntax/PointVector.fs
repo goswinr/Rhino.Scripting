@@ -268,7 +268,7 @@ module ExtensionsPointvector =
 
 
     [<Extension>]
-    ///<summary>Projects one or more points onto one or more Surfaces or polysurfaces</summary>
+    ///<summary>Projects one or more points onto one or more Surfaces or Polysurfaces</summary>
     ///<param name="points">(Point3d seq) One or more 3D points</param>
     ///<param name="surfaceIds">(Guid seq) Identifiers of one or more Surfaces/polysurfaces</param>
     ///<param name="direction">(Vector3d) Direction vector to project the points</param>

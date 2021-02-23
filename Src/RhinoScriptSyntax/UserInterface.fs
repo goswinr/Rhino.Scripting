@@ -296,7 +296,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompt the user to pick one or more Surface or polysurface edge curves</summary>
+    ///<summary>Prompt the user to pick one or more Surface or Polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
     ///    A prompt or message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
@@ -615,7 +615,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point constrained to a Surface or polysurface
+    ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
     ///    object</summary>
     ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>

@@ -860,7 +860,7 @@ module ExtensionsCurve =
     ///    Rhino's ClosestPt command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object to test</param>
     ///<param name="objectIds">(Guid seq) List of identifiers of point cloud, curve, Surface, or
-    ///    polysurface to test against</param>
+    ///    Polysurface to test against</param>
     ///<returns>(Guid * Point3d * Point3d) containing the results of the closest point calculation.
     ///    The elements are as follows:
     ///      [0]    The identifier of the closest object.
@@ -1797,7 +1797,7 @@ module ExtensionsCurve =
     ///    0 = extend from the start of the curve
     ///    1 = extend from the end of the curve
     ///    2 = extend from both the start and the end of the curve</param>
-    ///<param name="boundarycurveIds">(Guid seq) Curve, Surface, and polysurface objects to extend to</param>
+    ///<param name="boundarycurveIds">(Guid seq) Curve, Surface, and Polysurface objects to extend to</param>
     ///<param name="replaceInput">(bool) Optional, Default Value <c>false</c> Replace input or add new?</param>
     ///<returns>(Guid) The identifier of the new object or orignal curve ( depending on 'replaceInput')</returns>
     static member ExtendCurve(  curveId:Guid, 
@@ -2500,7 +2500,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Projects one or more curves onto one or more Surfaces or polysurfaces</summary>
+    ///<summary>Projects one or more curves onto one or more Surfaces or Polysurfaces</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
     ///<param name="surfaceIds">(Guid seq) Identifiers of Surfaces to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>

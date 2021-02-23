@@ -20,7 +20,7 @@ module ExtensionsSurface =
     type RhinoScriptSyntax with
 
     [<Extension>]
-    ///<summary>Adds a box shaped polysurface to the document</summary>
+    ///<summary>Adds a box shaped Polysurface to the document</summary>
     ///<param name="corners">(Point3d seq) 8 points that define the corners of the box. Points need to
     ///    be in counter-clockwise order starting with the bottom rectangle of the box</param>
     ///<returns>(Guid) identifier of the new object</returns>
@@ -34,7 +34,7 @@ module ExtensionsSurface =
         rc
 
     [<Extension>]
-    ///<summary>Adds a cone shaped polysurface to the document</summary>
+    ///<summary>Adds a cone shaped Polysurface to the document</summary>
     ///<param name="basis">(Plane) 3D origin point of the cone or a plane with an apex at the origin
     ///    and normal along the plane's z-axis</param>
     ///<param name="height">(float)  height of cone </param>
@@ -90,7 +90,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a cylinder-shaped polysurface to the document</summary>
+    ///<summary>Adds a cylinder-shaped Polysurface to the document</summary>
     ///<param name="basis">(Plane) The 3D basis point of the cylinder or the basis plane of the cylinder</param>
     ///<param name="height">(float) If basis is a point, then height is a 3D height point of the
     ///    cylinder. The height point defines the height and direction of the
@@ -481,7 +481,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
-    ///    defined cutting planes through a Surface or polysurface. For more
+    ///    defined cutting planes through a Surface or Polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
     ///<param name="plane">(Plane) The plane that defines the cutting plane</param>    
@@ -501,7 +501,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
-    ///    defined cutting planes through a Surface or polysurface. For more
+    ///    defined cutting planes through a Surface or Polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
     ///<param name="startPoint">(Point3d)  the startpoint of a center line</param>
@@ -682,7 +682,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Performs a boolean difference operation on two sets of input Surfaces
-    ///    and polysurfaces. For more details, see the BooleanDifference command in
+    ///    and Polysurfaces. For more details, see the BooleanDifference command in
     ///    the Rhino help file</summary>
     ///<param name="input0">(Guid seq) List of Surfaces to subtract from</param>
     ///<param name="input1">(Guid seq) List of Surfaces to be subtracted</param>
@@ -708,7 +708,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Performs a boolean intersection operation on two sets of input Surfaces
-    ///    and polysurfaces. For more details, see the BooleanIntersection command in
+    ///    and Polysurfaces. For more details, see the BooleanIntersection command in
     ///    the Rhino help file</summary>
     ///<param name="input0">(Guid seq) List of Surfaces</param>
     ///<param name="input1">(Guid seq) List of Surfaces</param>
@@ -733,7 +733,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Performs a boolean union operation on a set of input Surfaces and
-    ///    polysurfaces. For more details, see the BooleanUnion command in the
+    ///    Polysurfaces. For more details, see the BooleanUnion command in the
     ///    Rhino help file</summary>
     ///<param name="input">(Guid seq) List of Surfaces to union</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
@@ -753,7 +753,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the point on a Surface or polysurface that is closest to a test
+    ///<summary>Returns the point on a Surface or Polysurface that is closest to a test
     ///    point. This function works on both untrimmed and trimmed Surfaces</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
@@ -790,8 +790,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Caps planar holes in a Surface or polysurface</summary>
-    ///<param name="surfaceId">(Guid) The identifier of the Surface or polysurface to cap</param>
+    ///<summary>Caps planar holes in a Surface or Polysurface</summary>
+    ///<param name="surfaceId">(Guid) The identifier of the Surface or Polysurface to cap</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CapPlanarHoles(surfaceId:Guid) : bool =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
@@ -811,10 +811,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Duplicates the edge curves of a Surface or polysurface. For more
+    ///<summary>Duplicates the edge curves of a Surface or Polysurface. For more
     ///    information, see the Rhino help file for information on the DupEdge
     ///    command</summary>
-    ///<param name="objectId">(Guid) The identifier of the Surface or polysurface object</param>
+    ///<param name="objectId">(Guid) The identifier of the Surface or Polysurface object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge curves. The default is not to select (False)</param>
     ///<returns>(Guid Rarr) identifying the newly created curve objects</returns>
@@ -836,7 +836,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create curves that duplicate a Surface or polysurface border</summary>
+    ///<summary>Create curves that duplicate a Surface or Polysurface border</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="typ">(int) Optional, Default Value: <c>0</c>
     ///    The border curves to return
@@ -900,9 +900,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Explodes, or unjoins, one or more polysurface objects. Polysurfaces
+    ///<summary>Explodes, or unjoins, one or more Polysurface objects. Polysurfaces
     ///    will be exploded into separate Surfaces</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of polysurfaces to explode</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of Polysurfaces to explode</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input objects after exploding</param>
     ///<returns>(Guid Rarr) of identifiers of exploded pieces </returns>
@@ -963,7 +963,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Separates or copies a Surface or a copy of a Surface from a polysurface</summary>
+    ///<summary>Separates or copies a Surface or a copy of a Surface from a Polysurface</summary>
     ///<param name="objectId">(Guid) Polysurface identifier</param>
     ///<param name="faceIndices">(int seq) One or more numbers representing faces</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
@@ -1322,7 +1322,7 @@ module ExtensionsSurface =
       
 
     [<Extension>]
-    ///<summary>Verifies a Guid refers to a closed Polysurface or closed Extrtrusion. If the polysurface fully encloses
+    ///<summary>Verifies a Guid refers to a closed Polysurface or closed Extrtrusion. If the Polysurface fully encloses
     ///    a volume, it is considered a solid</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False</returns>
@@ -1465,8 +1465,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Joins two or more Surface or polysurface objects together to form one
-    ///    polysurface object</summary>
+    ///<summary>Joins two or more Surface or Polysurface objects together to form one
+    ///    Polysurface object</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the original Surfaces</param>
@@ -1761,7 +1761,7 @@ module ExtensionsSurface =
         amp.Area
 
     [<Extension>]
-    ///<summary>Calculate the area of a Surface or polysurface object. 
+    ///<summary>Calculate the area of a Surface or Polysurface object. 
     /// The results are based on the current drawing units</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float) of area</returns>
@@ -1776,7 +1776,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates the area centroid of a Surface or polysurface</summary>
+    ///<summary>Calculates the area centroid of a Surface or Polysurface</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(Point3d ) Area centroid</returns>
     static member SurfaceAreaCentroid(objectId:Guid) : Point3d =
@@ -1793,7 +1793,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates area moments of inertia of a Surface or polysurface object.
+    ///<summary>Calculates area moments of inertia of a Surface or Polysurface object.
     ///    See the Rhino help for "Mass Properties calculation details"</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>((float*float*float) Rarr ) of moments and error bounds in tuples(X, Y, Z) - see help topic
@@ -2055,7 +2055,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the isocurve density of a Surface or polysurface object.
+    ///<summary>Returns the isocurve density of a Surface or Polysurface object.
     /// An isoparametric curve is a curve of constant U or V value on a Surface.
     /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
     /// NURBS Surface</summary>
@@ -2077,7 +2077,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Sets the isocurve density of a Surface or polysurface object.
+    ///<summary>Sets the isocurve density of a Surface or Polysurface object.
     /// An isoparametric curve is a curve of constant U or V value on a Surface.
     /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
     /// NURBS Surface</summary>
@@ -2109,7 +2109,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Sets the isocurve density of multiple Surface or polysurface objects.
+    ///<summary>Sets the isocurve density of multiple Surface or Polysurface objects.
     /// An isoparametric curve is a curve of constant U or V value on a Surface.
     /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
     /// NURBS Surface</summary>
@@ -2266,7 +2266,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates volume of a closed Surface or polysurface</summary>
+    ///<summary>Calculates volume of a closed Surface or Polysurface</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float) the volume</returns>
     static member SurfaceVolume(objectId:Guid) : float =
@@ -2283,7 +2283,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates volume centroid of a closed Surface or polysurface</summary>
+    ///<summary>Calculates volume centroid of a closed Surface or Polysurface</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(Point3d) Volume Centriod</returns>
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
@@ -2302,7 +2302,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates volume moments of inertia of a Surface or polysurface object.
+    ///<summary>Calculates volume moments of inertia of a Surface or Polysurface object.
     ///    For more information, see Rhino help for "Mass Properties calculation details"</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>((float*float*float) Rarr) of moments and error bounds in tuple(X, Y, Z) - see help topic
@@ -2371,9 +2371,9 @@ module ExtensionsSurface =
         rc
 
     [<Extension>]
-    ///<summary>Trims a Surface or polysurface using an oriented cutter brep or Surface</summary>
-    ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
-    ///<param name="cutter">(Guid) Surface or polysurface  performing the trim</param>
+    ///<summary>Trims a Surface or Polysurface using an oriented cutter brep or Surface</summary>
+    ///<param name="objectId">(Guid) Surface or Polysurface identifier</param>
+    ///<param name="cutter">(Guid) Surface or Polysurface  performing the trim</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(Guid Rarr) identifiers of retained components</returns>
     static member TrimBrep( objectId:Guid,
@@ -2403,7 +2403,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Trims a Surface using an oriented cutter Plane</summary>
-    ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
+    ///<param name="objectId">(Guid) Surface or Polysurface identifier</param>
     ///<param name="cutter">(Plane) Plane performing the trim</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(Guid Rarr) identifiers of retained components</returns>
@@ -2511,7 +2511,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Flattens a developable Surface or polysurface</summary>
+    ///<summary>Flattens a developable Surface or Polysurface</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the resulting Surfaces ar not joined</param>

@@ -827,7 +827,7 @@ type RhinoScriptSyntax private () =
         | Some a -> a
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceEllipse failed on: %s " (typeDescr ellip)      
     
-    ///<summary>Attempt to get polysurface geometry from the document with a given objectId</summary>
+    ///<summary>Attempt to get Polysurface geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
     ///<returns>(Rhino.Geometry.Brep) Fails on bad input</returns>
     static member CoerceBrep(objectId:Guid) : Brep  =
