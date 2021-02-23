@@ -31,7 +31,7 @@ module ExtensionsPrint =
         | _                  -> None        
     
     [<Extension>]
-    ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
+    ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString().</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
@@ -42,7 +42,7 @@ module ExtensionsPrint =
     
     [<Extension>]
     ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
-    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
+    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq.</summary>
     ///<param name="x">('T): the value or object to print</param>
     ///<returns>(unit) void, nothing.</returns>
     static member Print (x:'T) : unit =
@@ -63,7 +63,7 @@ module ExtensionsPrint =
         RhinoApp.Wait() // no swith to UI Thread needed !
 
     [<Extension>]
-    ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value</summary>
+    ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value.</summary>
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
     ///<returns>(unit) void, nothing.</returns>
@@ -171,7 +171,7 @@ module ExtensionsPrint =
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
     [<Extension>]
-    ///<summary>Like printfn but in costom color. Adds a new line at end. </summary>
+    ///<summary>Like printfn but in costom color. Adds a new line at end. .</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>

@@ -20,7 +20,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Create a clipping Plane for visibly clipping away geometry in a specific
-    ///    view. Note, clipping Planes are infinite</summary>
+    ///    view. Note, clipping Planes are infinite.</summary>
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="uMagnitude">(float) U magnitude of the Plane</param>
     ///<param name="vMagnitude">(float) V magnitude of the Plane</param>
@@ -46,7 +46,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Creates a picture frame and adds it to the document</summary>
+    ///<summary>Creates a picture frame and adds it to the document.</summary>
     ///<param name="plane">(Plane) The Plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at Plane's origin. The width will be in the Plane's X axis direction, and the height will be in the Plane's Y axis direction</param>
     ///<param name="filename">(string) The path to a bitmap or image file</param>
     ///<param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skiped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
@@ -75,7 +75,7 @@ module ExtensionsGeometry =
         rc
 
     [<Extension>]
-    ///<summary>Adds point object to the document</summary>
+    ///<summary>Adds point object to the document.</summary>
     ///<param name="x">(float) X location of point to add</param>
     ///<param name="y">(float) Y location of point to add</param>
     ///<param name="z">(float) Z location of point to add</param>
@@ -87,7 +87,7 @@ module ExtensionsGeometry =
         rc
 
     [<Extension>]
-    ///<summary>Adds point object to the document</summary>
+    ///<summary>Adds point object to the document.</summary>
     ///<param name="point">(Point3d) point to draw</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(point:Point3d) : Guid =
@@ -98,7 +98,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Adds point cloud object to the document</summary>
+    ///<summary>Adds point cloud object to the document.</summary>
     ///<param name="points">(Point3d array) List of values where every multiple of three represents a point</param>
     ///<param name="colors">(Drawing.Color IList) Optional, List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud.</returns>
@@ -120,7 +120,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Adds one or more point objects to the document</summary>
+    ///<summary>Adds one or more point objects to the document.</summary>
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid Rarr) List of identifiers of the new objects.</returns>
     static member AddPoints(points:Point3d seq) : Guid Rarr =
@@ -130,7 +130,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Adds a text string to the document</summary>
+    ///<summary>Adds a text string to the document.</summary>
     ///<param name="text">(string) The text to display</param>
     ///<param name="plane">(Plane) The Plane on which the text will lie.
     ///    The origin of the Plane will be the origin point of the text</param>
@@ -203,7 +203,7 @@ module ExtensionsGeometry =
         objectId
     
     [<Extension>]
-    ///<summary>Adds a text string to the document</summary>
+    ///<summary>Adds a text string to the document.</summary>
     ///<param name="text">(string) The text to display</param>
     ///<param name="pt">(Point3d) a ponit where to add text. It will be paralell to XY Plane.</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
@@ -241,7 +241,7 @@ module ExtensionsGeometry =
         RhinoScriptSyntax.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
 
     [<Extension>]
-    ///<summary>Add a text dot to the document</summary>
+    ///<summary>Add a text dot to the document.</summary>
     ///<param name="text">(string) String in dot</param>
     ///<param name="point">(Point3d) A 3D point identifying the origin point</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
@@ -253,7 +253,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh</summary>
+    ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area.</returns>
     static member Area(objectId:Guid) : float =
@@ -305,7 +305,7 @@ module ExtensionsGeometry =
         
 
     [<Extension>]
-    ///<summary>Returns a world axis-aligned bounding box of several objects</summary>
+    ///<summary>Returns a world axis-aligned bounding box of several objects.</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
@@ -318,7 +318,7 @@ module ExtensionsGeometry =
         bbox
 
     [<Extension>]
-    ///<summary>Returns a world axis-aligned bounding box of one object</summary>
+    ///<summary>Returns a world axis-aligned bounding box of one object.</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane). 
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
@@ -328,7 +328,7 @@ module ExtensionsGeometry =
         g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
     [<Extension>]
-    ///<summary>Returns a custom Plane axis-aligned bounding box of several objects</summary>
+    ///<summary>Returns a custom Plane axis-aligned bounding box of several objects.</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
     ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
@@ -354,7 +354,7 @@ module ExtensionsGeometry =
             Box(bbox) // return in Plane coordinates not worldxy
  
     [<Extension>]
-    ///<summary>Returns a custom Plane axis-aligned bounding box of one object</summary>
+    ///<summary>Returns a custom Plane axis-aligned bounding box of one object.</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
     ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
@@ -398,7 +398,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Compares two objects to determine if they are geometrically identical</summary>
+    ///<summary>Compares two objects to determine if they are geometrically identical.</summary>
     ///<param name="first">(Guid) The identifier of the first object to compare</param>
     ///<param name="second">(Guid) The identifier of the second object to compare</param>
     ///<returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
@@ -409,7 +409,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Creates outline Curves for a given text entity</summary>
+    ///<summary>Creates outline Curves for a given text entity.</summary>
     ///<param name="textId">(Guid) Identifier of Text object to explode</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the text object after the Curves have been created</param>
@@ -425,7 +425,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies that an object is a clipping Plane object</summary>
+    ///<summary>Verifies that an object is a clipping Plane object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
@@ -433,7 +433,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a point object</summary>
+    ///<summary>Verifies an object is a point object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point.</returns>
     static member IsPoint(objectId:Guid) : bool =
@@ -441,7 +441,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a point cloud object</summary>
+    ///<summary>Verifies an object is a point cloud object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud.</returns>
     static member IsPointCloud(objectId:Guid) : bool =
@@ -449,7 +449,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a text object</summary>
+    ///<summary>Verifies an object is a text object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object.</returns>
     static member IsText(objectId:Guid) : bool =
@@ -457,7 +457,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a text dot object</summary>
+    ///<summary>Verifies an object is a text dot object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object.</returns>
     static member IsTextDot(objectId:Guid) : bool =
@@ -465,7 +465,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the point count of a point cloud object</summary>
+    ///<summary>Returns the point count of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(int) number of points.</returns>
     static member PointCloudCount(objectId:Guid) : int =
@@ -474,7 +474,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies that a point cloud has hidden points</summary>
+    ///<summary>Verifies that a point cloud has hidden points.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False.</returns>
     static member PointCloudHasHiddenPoints(objectId:Guid) : bool =
@@ -483,7 +483,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies that a point cloud has point colors</summary>
+    ///<summary>Verifies that a point cloud has point colors.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False.</returns>
     static member PointCloudHasPointColors(objectId:Guid) : bool =
@@ -492,7 +492,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the hidden points of a point cloud object</summary>
+    ///<summary>Returns the hidden points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool Rarr) List of point cloud hidden states.</returns>
     static member PointCloudHidePoints(objectId:Guid) : Rarr<bool> = //GET
@@ -501,7 +501,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Modifies the hidden points of a point cloud object</summary>
+    ///<summary>Modifies the hidden points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<param name="hidden">(bool seq) List of booleans matched to the index of points to be hidden, On empty seq all point wil be shown</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -522,7 +522,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the point colors of a point cloud object</summary>
+    ///<summary>Returns the point colors of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Drawing.Color Rarr) List of point cloud colors.</returns>
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color Rarr = //GET
@@ -530,7 +530,7 @@ module ExtensionsGeometry =
         rarr { for item in pc do yield item.Color }
 
     [<Extension>]
-    ///<summary>Modifies the point colors of a point cloud object</summary>
+    ///<summary>Modifies the point colors of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<param name="colors">(Drawing.Color seq) List of color values if you want to adjust colors, empty Seq to clear colors</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -548,7 +548,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the points of a point cloud object</summary>
+    ///<summary>Returns the points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Point3d array) list of points.</returns>
     static member PointCloudPoints(objectId:Guid) : array<Point3d> =
@@ -557,7 +557,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns amount indices of points in a point cloud that are near needlePoints</summary>
+    ///<summary>Returns amount indices of points in a point cloud that are near needlePoints.</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack".
     /// This can also be a list of points</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud.
@@ -574,7 +574,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
-    ///    closest to needlePoints. Each inner list references all points within or on the Surface of a sphere of distance radius</summary>
+    ///    closest to needlePoints. Each inner list references all points within or on the Surface of a sphere of distance radius.</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>
@@ -584,7 +584,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the X, Y, and Z coordinates of a point object</summary>
+    ///<summary>Returns the X, Y, and Z coordinates of a point object.</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<returns>(Point3d) The current 3-D point location.</returns>
     static member PointCoordinates(objectId:Guid) : Point3d = //GET
@@ -592,7 +592,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Modifies the X, Y, and Z coordinates of a point object</summary>
+    ///<summary>Modifies the X, Y, and Z coordinates of a point object.</summary>
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<param name="point">(Point3d) A new 3D point location</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -604,14 +604,14 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the font of a text dot</summary>
+    ///<summary>Returns the font of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(string) The current text dot font.</returns>
     static member TextDotFont(objectId:Guid) : string = //GET
         (RhinoScriptSyntax.CoerceTextDot(objectId)).FontFace
 
     [<Extension>]
-    ///<summary>Modifies the font of a text dot</summary>
+    ///<summary>Modifies the font of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="fontface">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -622,7 +622,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the font of multiple text dots</summary>
+    ///<summary>Modifies the font of multiple text dots.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
     ///<param name="fontface">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -635,14 +635,14 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the font height of a text dot</summary>
+    ///<summary>Returns the font height of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(int) The current text dot height.</returns>
     static member TextDotHeight(objectId:Guid) : int = //GET
         (RhinoScriptSyntax.CoerceTextDot(objectId)).FontHeight
 
     [<Extension>]
-    ///<summary>Modifies the font height of a text dot</summary>
+    ///<summary>Modifies the font height of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="height">(int) New font height</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -653,7 +653,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the font height of multiple text dots</summary>
+    ///<summary>Modifies the font height of multiple text dots.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
     ///<param name="height">(int) New font height</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -666,7 +666,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the location, or insertion point, on a text dot object</summary>
+    ///<summary>Returns the location, or insertion point, on a text dot object.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(Point3d) The current 3-D text dot location.</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
@@ -674,7 +674,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Modifies the location, or insertion point, on a text dot object</summary>
+    ///<summary>Modifies the location, or insertion point, on a text dot object.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="point">(Point3d) A new 3D point location</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -688,7 +688,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the text on a text dot object</summary>
+    ///<summary>Returns the text on a text dot object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<returns>(string) The current text dot text.</returns>
     static member TextDotText(objectId:Guid) : string = //GET
@@ -697,7 +697,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Modifies the text on a text dot object</summary>
+    ///<summary>Modifies the text on a text dot object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<param name="text">(string) A new string for the dot</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -708,7 +708,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the text on multiple text dot objects</summary>
+    ///<summary>Modifies the text on multiple text dot objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text dot objects</param>
     ///<param name="text">(string) A new string for the dot</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -721,7 +721,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the font used by a text object</summary>
+    ///<summary>Returns the font used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name.</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
@@ -729,7 +729,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Modifies the font used by a text object</summary>
+    ///<summary>Modifies the font used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="font">(string) The new Font Name</param> 
     ///<returns>(unit) void, nothing.</returns>
@@ -750,7 +750,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the font used by multiple text objects</summary>
+    ///<summary>Modifies the font used by multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="font">(string) The new Font Name</param> 
     ///<returns>(unit) void, nothing.</returns>
@@ -773,14 +773,14 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the height of a text object</summary>
+    ///<summary>Returns the height of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(float) The current text height.</returns>
     static member TextObjectHeight(objectId:Guid) : float = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).TextHeight
 
     [<Extension>]
-    ///<summary>Modifies the height of a text object</summary>
+    ///<summary>Modifies the height of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="height">(float) The new text height</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -791,7 +791,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the height of multiple text objects</summary>
+    ///<summary>Modifies the height of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="height">(float) The new text height</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -803,14 +803,14 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Returns the Plane used by a text object</summary>
+    ///<summary>Returns the Plane used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Plane) The current Plane.</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
 
     [<Extension>]
-    ///<summary>Modifies the Plane used by a text object</summary>
+    ///<summary>Modifies the Plane used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="plane">(Plane) The new text object Plane</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -822,14 +822,14 @@ module ExtensionsGeometry =
 
     
     [<Extension>]
-    ///<summary>Returns the location of a text object</summary>
+    ///<summary>Returns the location of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Point3d) The 3D point identifying the current location.</returns>
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane.Origin
 
     [<Extension>]
-    ///<summary>Modifies the location of a text object</summary>
+    ///<summary>Modifies the location of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="point">(Point3d) The new text object location</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -845,7 +845,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the font style of a text object</summary>
+    ///<summary>Returns the font style of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(int) The current font style
     ///    0 = Normal
@@ -861,7 +861,7 @@ module ExtensionsGeometry =
         rc
 
     [<Extension>]
-    ///<summary>Modifies the font style of a text object</summary>
+    ///<summary>Modifies the font style of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
     ///    0 = Normal
@@ -886,7 +886,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Modifies the font style of multiple text objects</summary>
+    ///<summary>Modifies the font style of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
     ///    0 = Normal
@@ -913,7 +913,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Returns the text string of a text object</summary>
+    ///<summary>Returns the text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value.</returns>
     static member TextObjectText(objectId:Guid) : string = //GET
@@ -922,7 +922,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Modifies the text string of a text object</summary>
+    ///<summary>Modifies the text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -934,7 +934,7 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
     
     [<Extension>]
-    ///<summary>Modifies the text string of multiple text objects</summary>
+    ///<summary>Modifies the text string of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing.</returns>

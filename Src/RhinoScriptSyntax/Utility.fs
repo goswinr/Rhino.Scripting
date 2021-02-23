@@ -19,21 +19,21 @@ module ExtensionsUtility =
   type RhinoScriptSyntax with
 
     [<Extension>]
-    ///<summary>Return true if the script is being executed in the context of Rhino(currently always true)</summary>
+    ///<summary>Return true if the script is being executed in the context of Rhino(currently always true).</summary>
     ///<returns>(bool) true if the script is being executed in the context of Rhino(currently always true).</returns>
     static member ContextIsRhino() : bool =
         true //TODO implement correctly
 
 
     [<Extension>]
-    ///<summary>Return true if the script is being executed in a grasshopper component(currently always false)</summary>
+    ///<summary>Return true if the script is being executed in a grasshopper component(currently always false).</summary>
     ///<returns>(bool) true if the script is being executed in a grasshopper component(currently always false).</returns>
     static member ContextIsGrasshopper() : bool =
         false //TODO implement correctly
 
 
     [<Extension>]
-    ///<summary>Measures the angle between two points</summary>
+    ///<summary>Measures the angle between two points.</summary>
     ///<param name="point1">(Point3d) Point1 of input points</param>
     ///<param name="point2">(Point3d) Point2 of input points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldX</c>
@@ -62,7 +62,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Measures the angle between two lines</summary>
+    ///<summary>Measures the angle between two lines.</summary>
     ///<param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     ///<param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     ///<returns>(float * float) containing the following elements .
@@ -82,13 +82,13 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Returns a text string to the Windows clipboard</summary>
+    ///<summary>Returns a text string to the Windows clipboard.</summary>
     ///<returns>(string) The current text in the clipboard.</returns>
     static member ClipboardText() : string = //GET
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 
     [<Extension>]
-    ///<summary>Sets a text string to the Windows clipboard</summary>
+    ///<summary>Sets a text string to the Windows clipboard.</summary>
     ///<param name="text">(string) Text to set</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ClipboardText(text:string) : unit = //SET
@@ -97,7 +97,7 @@ module ExtensionsUtility =
 
     [<Extension>]
     ///<summary>Changes the luminance of a red-green-blue value. Hue and saturation are
-    ///    not affected</summary>
+    ///    not affected.</summary>
     ///<param name="rgb">(Drawing.Color) Initial rgb value</param>
     ///<param name="luma">(float) The luminance in units of 0.1 percent of the total range. A
     ///    value of luma = 50 corresponds to 5 percent of the maximum luminance</param>
@@ -114,7 +114,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Retrieves intensity value for the blue component of an RGB color</summary>
+    ///<summary>Retrieves intensity value for the blue component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The blue component.</returns>
     static member ColorBlueValue(rgb:Drawing.Color) : int =
@@ -122,7 +122,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Retrieves intensity value for the green component of an RGB color</summary>
+    ///<summary>Retrieves intensity value for the green component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The green component.</returns>
     static member ColorGreenValue(rgb:Drawing.Color) : int =
@@ -130,7 +130,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts colors from hue-lumanence-saturation to RGB</summary>
+    ///<summary>Converts colors from hue-lumanence-saturation to RGB.</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value.</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
@@ -139,7 +139,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Retrieves intensity value for the red component of an RGB color</summary>
+    ///<summary>Retrieves intensity value for the red component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The red color value.</returns>
     static member ColorRedValue(rgb:Drawing.Color) : int =
@@ -147,7 +147,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance)</summary>
+    ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance).</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(Display.ColorHSL) The HLS color value.</returns>
     static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
@@ -156,7 +156,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Removes duplicates from an array of numbers</summary>
+    ///<summary>Removes duplicates from an array of numbers.</summary>
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
@@ -181,7 +181,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Removes duplicates from a list of 3D points</summary>
+    ///<summary>Removes duplicates from a list of 3D points.</summary>
     ///<param name="points">(Point3d seq) A list of 3D points</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
@@ -192,7 +192,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Measures Square distance between two 3D points. Does not validate input</summary>
+    ///<summary>Measures Square distance between two 3D points. Does not validate input.</summary>
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The square distance.</returns>
@@ -203,7 +203,7 @@ module ExtensionsUtility =
         x*x + y*y + z*z
 
     [<Extension>]
-    ///<summary>Measures distance between two 3D points</summary>
+    ///<summary>Measures distance between two 3D points.</summary>
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The distance.</returns>
@@ -214,7 +214,7 @@ module ExtensionsUtility =
         sqrt (x*x + y*y + z*z)
 
     [<Extension>]
-    ///<summary>Returns section names or keys in one section of an ini file</summary>
+    ///<summary>Returns section names or keys in one section of an ini file.</summary>
     ///<param name="filename">(string) Name  and path of the inifile</param>
     ///<param name="section">(string) Optional, Section to list keys from</param>
     ///<returns>(string array)
@@ -232,7 +232,7 @@ module ExtensionsUtility =
         else            
             rarr { for k in data.[section] do k.KeyName}
 
-    ///<summary>Returns string from a specified section and entry in an ini file</summary>
+    ///<summary>Returns string from a specified section and entry in an ini file.</summary>
     ///<param name="filename">(string) Name  and path of the ini file</param>
     ///<param name="section">(string) Section containing the entry,for keys without section use empty string</param>
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
@@ -249,7 +249,7 @@ module ExtensionsUtility =
         if isNull s then RhinoScriptingException.Raise "RhinoScriptSyntax.GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
         else s
     
-    ///<summary>Saves a specified section and entry in an ini file</summary>
+    ///<summary>Saves a specified section and entry in an ini file.</summary>
     ///<param name="filename">(string) Name and path of the ini file</param>
     ///<param name="section">(string) Section containing the entry. if empty string key without section will be added</param>
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
@@ -279,7 +279,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Returns 3D point that is a specified angle and distance from a 3D point</summary>
+    ///<summary>Returns 3D point that is a specified angle and distance from a 3D point.</summary>
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="angleDegrees">(float) Angle in degrees</param>
     ///<param name="distance">(float) Distance from point</param>
@@ -298,7 +298,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers</summary>
+    ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float Rarr) A one-dimensional list containing real numbers.</returns>
     static member SimplifyArray(points:Point3d seq) : float Rarr =
@@ -309,7 +309,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI</summary>
+    ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI.</summary>
     ///<param name="milliseconds">(int) Thousands of a second</param>
     ///<returns>(unit).</returns>
     static member Sleep(milliseconds:int) : unit =
@@ -318,7 +318,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Sorts list of points so they will be connected in a "reasonable" Polyline order</summary>
+    ///<summary>Sorts list of points so they will be connected in a "reasonable" Polyline order.</summary>
     ///<param name="points">(Point3d seq) The points to sort</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    Minimum distance between points. Points that fall within this tolerance
@@ -330,7 +330,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Sorts the components of an array of 3D points</summary>
+    ///<summary>Sorts the components of an array of 3D points.</summary>
     ///<param name="points">(Point3d seq) Points to sort</param>
     ///<param name="ascending">(bool) Optional, Default Value: <c>true</c>
     ///    Ascendeing if omitted (True) or True, descending if False</param>
@@ -359,7 +359,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>convert a formatted string value into a 3D point value</summary>
+    ///<summary>convert a formatted string value into a 3D point value.</summary>
     ///<param name="point">(string) A string that contains a delimited point like "1, 2, 3"</param>
     ///<returns>(Point3d) Point structure from the input string.</returns>
     static member Str2Pt(point:string) : Point3d =
@@ -367,14 +367,14 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible</summary>
+    ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="point">('T) any value that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
     static member CreatePoint(point:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
     [<Extension>]
-    ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible</summary>
+    ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
@@ -384,13 +384,13 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible</summary>
+    ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="vector">('T) any value that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
     static member CreateVector(vector:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
     [<Extension>]
-    ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible</summary>
+    ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
@@ -401,7 +401,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts input into a Rhino.Geometry.Plane object if possible</summary>
+    ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.</summary>
     ///<param name="origin">(Point3d) The Plane Center or Origin</param>
     ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d.XAxis</c>
     ///    Direction of X-Axis</param>
@@ -416,7 +416,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts input into a Rhino.Geometry.Transform object if possible</summary>
+    ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
     ///<param name="xForm">(float seq seq) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column.</returns>
     static member CreateXform(xForm:seq<seq<float>>) : Transform =
@@ -424,7 +424,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Creats a  RGB color,  red, green and  blue  values</summary>
+    ///<summary>Creats a  RGB color,  red, green and  blue  values.</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
@@ -434,7 +434,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Converts input into a Rhino.Geometry.Interval</summary>
+    ///<summary>Converts input into a Rhino.Geometry.Interval.</summary>
     ///<param name="start">(float) The lower bound</param>
     ///<param name="ende">(float) Uper bound of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:

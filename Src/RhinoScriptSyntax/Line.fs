@@ -19,7 +19,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Finds the point on an FINITE line that is closest to a test point</summary>
+    ///<summary>Finds the point on an FINITE line that is closest to a test point.</summary>
     ///<param name="line">(Geometry.Line) The finite line</param>
     ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d.  The test point</param>
     ///<returns>(Point3d) The point on the finite line that is closest to the test point.</returns>
@@ -29,7 +29,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Finds the point on an INFINITE line (ray) that is closest to a test point</summary>
+    ///<summary>Finds the point on an INFINITE line (ray) that is closest to a test point.</summary>
     ///<param name="line">(Geometry.Line) The line to be considered infinite</param>
     ///<param name="testPoint">(Point3d) The test point</param>
     ///<returns>(Point3d) The point on the infinite line (ray) that is closest to the test point.</returns>
@@ -39,7 +39,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Calculates the intersection of a line and a cylinder</summary>
+    ///<summary>Calculates the intersection of a line and a cylinder.</summary>
     ///<param name="line">(Geometry.Line) The line to intersect</param>
     ///<param name="cylinderPlane">(Plane) Base Plane of the cylinder</param>
     ///<param name="cylinderHeight">(float) Height of the cylinder</param>
@@ -63,7 +63,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Determines if the shortest distance from a line to a point or another
-    ///    line is greater than a specified distance</summary>
+    ///    line is greater than a specified distance.</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line</param>
     ///<param name="distance">(float) The distance</param>
     ///<param name="point">(Point3d) The test point</param>
@@ -74,7 +74,7 @@ module ExtensionsLine =
         minDist > distance
     [<Extension>]
     ///<summary>Determines if the shortest distance from a line to a point or another
-    ///    line is greater than a specified distance</summary>
+    ///    line is greater than a specified distance.</summary>
     ///<param name="line">(Geometry.Line) a Geometry.Line</param>
     ///<param name="distance">(float) The distance</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
@@ -88,7 +88,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Calculates the intersection of two non-parallel lines. The lines are considered endless.
-    ///    If the two lines do not actually intersect the closest point on each is returned</summary>
+    ///    If the two lines do not actually intersect the closest point on each is returned.</summary>
     ///<param name="lineA">(Geometry.Line) LineA of lines to intersect</param>
     ///<param name="lineB">(Geometry.Line) LineB of lines to intersect</param>
     ///<returns>(Point3d * Point3d) containing a point on the first line and a point on the second line.</returns>
@@ -98,7 +98,7 @@ module ExtensionsLine =
         lineA.PointAt(a), lineB.PointAt(b)
 
     [<Extension>]
-    ///<summary>Finds the longest distance between a line as a finite chord, and a point</summary>
+    ///<summary>Finds the longest distance between a line as a finite chord, and a point.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point or test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -106,7 +106,7 @@ module ExtensionsLine =
     static member LineMaxDistanceTo(line:Line, point:Point3d) : float =
         line.MaximumDistanceTo(point)
     [<Extension>]
-    ///<summary>Finds the longest distance between a line as a finite chord, and a line</summary>
+    ///<summary>Finds the longest distance between a line as a finite chord, and a line.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -117,7 +117,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
-    ///    or another line</summary>
+    ///    or another line.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -127,7 +127,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point
-    ///    or another line</summary>
+    ///    or another line.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -139,7 +139,7 @@ module ExtensionsLine =
 
     [<Extension>]
     ///<summary>Returns a Plane that contains the line. The origin of the Plane is at the start of
-    ///    the line. If possible, a Plane parallel to the world XY, YZ, or ZX Plane is returned</summary>
+    ///    the line. If possible, a Plane parallel to the world XY, YZ, or ZX Plane is returned.</summary>
     ///<param name="line">(Geometry.Line) a Line</param>
     ///<returns>(Plane) The Plane.</returns>
     static member LinePlane(line:Line) : Plane =
@@ -149,7 +149,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Calculates the intersection of a line and a Plane</summary>
+    ///<summary>Calculates the intersection of a line and a Plane.</summary>
     ///<param name="line">(Line) The line to intersect</param>
     ///<param name="plane">(Plane) The Plane to intersect</param>
     ///<returns>(Point3d) The 3D point of intersection is successful.</returns>
@@ -160,7 +160,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Calculates the intersection of a line and a sphere</summary>
+    ///<summary>Calculates the intersection of a line and a sphere.</summary>
     ///<param name="line">(Geometry.Line) The line</param>
     ///<param name="sphereCenter">(Point3d) The center point of the sphere</param>
     ///<param name="sphereRadius">(float) The radius of the sphere</param>
@@ -174,7 +174,7 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Transforms a line</summary>
+    ///<summary>Transforms a line.</summary>
     ///<param name="lineId">(Guid) The line to transform</param>
     ///<param name="xForm">(Transform) The transformation to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the Line object</param>

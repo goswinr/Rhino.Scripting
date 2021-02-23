@@ -23,7 +23,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
+    ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<returns>(string option) selected folder option or None if selection was canceled.</returns>
@@ -54,7 +54,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays a list of items in a checkable-style list dialog box</summary>
+    ///<summary>Displays a list of items in a checkable-style list dialog box.</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -77,7 +77,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays a list of items in a combo-style list box dialog</summary>
+    ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -93,7 +93,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display dialog prompting the user to enter a string. The
-    ///    string value may span multiple lines</summary>
+    ///    string value may span multiple lines.</summary>
     ///<param name="defaultValString">(string) Optional, A default string value</param>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -108,7 +108,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pause for user input of an angle</summary>
+    ///<summary>Pause for user input of an angle.</summary>
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
     ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
@@ -133,7 +133,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
-    ///    displayed as click-able command line option toggles</summary>
+    ///    displayed as click-able command line option toggles.</summary>
     ///<param name="message">(string) A prompt</param>
     ///<param name="items">((string*string*string) array) List of options. Each option is a tuple of three strings
     ///    [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
@@ -171,7 +171,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a box</summary>
+    ///<summary>Pauses for user input of a box.</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///    The box selection mode.
     ///    0 = All modes
@@ -209,7 +209,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
+    ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c></param>
     ///<returns>(Drawing.Color option) an Option of RGB color.</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
@@ -223,7 +223,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Retrieves the cursor's position</summary>
+    ///<summary>Retrieves the cursor's position.</summary>
     ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
     ///    0  Point3d: cursor position in world coordinates
     ///    1  Point2d: cursor position in screen coordinates
@@ -244,7 +244,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a distance</summary>
+    ///<summary>Pauses for user input of a distance.</summary>
     ///<param name="firstPt">(Point3d) Optional, First distance point</param>
     ///<param name="distance">(float) Optional, Default distance</param>
     ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
@@ -296,7 +296,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves</summary>
+    ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
     ///    A prompt or message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
@@ -340,7 +340,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a whole number</summary>
+    ///<summary>Pauses for user input of a whole number.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="number">(int) Optional, A default whole number value</param>
     ///<param name="minimum">(int) Optional, A minimum allowable value</param>
@@ -368,7 +368,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays dialog box prompting the user to select a layer</summary>
+    ///<summary>Displays dialog box prompting the user to select a layer.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
     ///    Dialog box title</param>
     ///<param name="layer">(string) Optional, Name of a layer to preselect. If omitted, the current layer will be preselected</param>
@@ -396,7 +396,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays a dialog box prompting the user to select one or more layers</summary>
+    ///<summary>Displays a dialog box prompting the user to select one or more layers.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
     ///    Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
@@ -415,7 +415,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick points that define a line</summary>
+    ///<summary>Prompts the user to pick points that define a line.</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///    Line definition mode.
     ///    0  Default - Show all modes, start in two-point mode
@@ -457,7 +457,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays a dialog box prompting the user to select one linetype</summary>
+    ///<summary>Displays a dialog box prompting the user to select one linetype.</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the "by Layer" linetype will show. Defaults to False</param>
@@ -479,7 +479,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick one or more Mesh faces</summary>
+    ///<summary>Prompts the user to pick one or more Mesh faces.</summary>
     ///<param name="objectId">(Guid) The Mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Faces"</c>
     ///    A prompt of message</param>
@@ -513,7 +513,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick one or more Mesh vertices</summary>
+    ///<summary>Prompts the user to pick one or more Mesh vertices.</summary>
     ///<param name="objectId">(Guid) The Mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Vertices"</c>
     ///    A prompt of message</param>
@@ -547,7 +547,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point</summary>
+    ///<summary>Pauses for user input of a point.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
@@ -578,7 +578,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point constrainted to a Curve object</summary>
+    ///<summary>Pauses for user input of a point constrainted to a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
@@ -600,7 +600,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point constrained to a Mesh object</summary>
+    ///<summary>Pauses for user input of a point constrained to a Mesh object.</summary>
     ///<param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
@@ -616,7 +616,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
-    ///    object</summary>
+    ///    object.</summary>
     ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
@@ -646,7 +646,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of one or more points</summary>
+    ///<summary>Pauses for user input of one or more points.</summary>
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
     ///    Draw lines between points</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
@@ -716,7 +716,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick points that define a polyline</summary>
+    ///<summary>Prompts the user to pick points that define a polyline.</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
     ///    The options are bit coded flags. Values can be added together to specify more than one option. 
     ///    value description
@@ -757,7 +757,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a number</summary>
+    ///<summary>Pauses for user input of a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
     ///    A prompt or message</param>
     ///<param name="number">(float) Optional, A default number value</param>
@@ -784,7 +784,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a rectangle</summary>
+    ///<summary>Pauses for user input of a rectangle.</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///    The rectangle selection mode. The modes are as follows
     ///    0 = All modes
@@ -819,7 +819,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a string value</summary>
+    ///<summary>Pauses for user input of a string value.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="defaultValString">(string) Optional, A default value</param>
     ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
@@ -849,7 +849,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Display a list of items in a list box dialog</summary>
+    ///<summary>Display a list of items in a list box dialog.</summary>
     ///<param name="items">(string IList) A list of values to select</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -870,7 +870,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Displays a message box. A message box contains a message and
-    ///    title, plus any combination of predefined icons and push buttons</summary>
+    ///    title, plus any combination of predefined icons and push buttons.</summary>
     ///<param name="message">(string) A prompt or message</param>
     ///<param name="buttons">(int) Optional, Default Value: <c>0</c>
     ///    Buttons and icon to display as a bit coded flag. Can be a combination of the
@@ -942,7 +942,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
+    ///<summary>Displays list of items and their values in a property-style list box dialog.</summary>
     ///<param name="items">(string IList) list of string items</param>
     ///<param name="values">(string seq) The corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
@@ -961,7 +961,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Displays a list of items in a multiple-selection list box dialog</summary>
+    ///<summary>Displays a list of items in a multiple-selection list box dialog.</summary>
     ///<param name="items">(string IList) A zero-based list of string items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -979,7 +979,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
-    ///    Note, this function does not open the file</summary>
+    ///    Note, this function does not open the file.</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
@@ -1007,7 +1007,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
-    ///    Note, this function does not open the file</summary>
+    ///    Note, this function does not open the file.</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
@@ -1036,7 +1036,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
-    ///    anywhere, and can be dismissed by clicking the left or right mouse buttons</summary>
+    ///    anywhere, and can be dismissed by clicking the left or right mouse buttons.</summary>
     ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
     ///    will create a separator</param>
     ///<param name="modes">(int seq) Optional, List of numbers identifying the display modes. If omitted, all
@@ -1066,7 +1066,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Display a dialog box prompting the user to enter a number</summary>
+    ///<summary>Display a dialog box prompting the user to enter a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///    A prompt message</param>
     ///<param name="defaultValNumber">(float) Optional, A default number</param>
@@ -1094,7 +1094,7 @@ module ExtensionsUserinterface =
 
     [<Extension>]
     ///<summary>Display a save dialog box allowing the user to enter a file name.
-    ///    Note, this function does not save the file</summary>
+    ///    Note, this function does not save the file.</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="filter">(string) Optional, A filter string. The filter must be in the following form:
     ///    "Description1|Filter1|Description2|Filter2||", where "||" terminates filter string.
@@ -1120,7 +1120,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Display a dialog box prompting the user to enter a string value</summary>
+    ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="defaultValValue">(string) Optional, A default string value</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1135,7 +1135,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Display a text dialog box similar to the one used by the _What command</summary>
+    ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
     ///<param name="message">(string) The message</param>
     ///<param name="title">(string) Optional, The message title</param>
     ///<returns>(unit) void, nothing.</returns>

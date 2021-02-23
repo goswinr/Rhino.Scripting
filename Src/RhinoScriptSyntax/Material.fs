@@ -20,7 +20,7 @@ module ExtensionsMaterial =
     [<Extension>]
     ///<summary>Add material to a layer and returns the new material's index. If the
     ///    layer already has a material, then the layer's current material index is
-    ///    returned</summary>
+    ///    returned.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(int) Material index of the layer.</returns>
     static member AddMaterialToLayer(layer:string) : int =
@@ -34,7 +34,7 @@ module ExtensionsMaterial =
 
     [<Extension>]
     ///<summary>Adds material to an object and returns the new material's index. If the
-    ///    object already has a material, the the object's current material index is returned</summary>
+    ///    object already has a material, the the object's current material index is returned.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) material index of the object.</returns>
     static member AddMaterialToObject(objectId:Guid) : int =
@@ -54,7 +54,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Copies definition of a source material to a destination material</summary>
+    ///<summary>Copies definition of a source material to a destination material.</summary>
     ///<param name="sourceIndex">(int) Source index of materials to copy</param>
     ///<param name="destinationIndex">(int) Destination index materials to copy</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -72,7 +72,7 @@ module ExtensionsMaterial =
     [<Extension>]
     ///<summary>Verifies a material is a copy of Rhino's built-in "default" material.
     ///    The default material is used by objects and layers that have not been
-    ///    assigned a material</summary>
+    ///    assigned a material.</summary>
     ///<param name="materialIndex">(int) The zero-based material index</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsMaterialDefault(materialIndex:int) : bool =
@@ -81,7 +81,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Verifies a material is referenced from another file</summary>
+    ///<summary>Verifies a material is referenced from another file.</summary>
     ///<param name="materialIndex">(int) The zero-based material index</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsMaterialReference(materialIndex:int) : bool =
@@ -90,7 +90,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Copies the material definition from one material to one or more objects</summary>
+    ///<summary>Copies the material definition from one material to one or more objects.</summary>
     ///<param name="source">(Guid) Source material index -or- identifier of the source object.
     ///    The object must have a material assigned</param>
     ///<param name="destination">(Guid seq) Id of the destination object</param>
@@ -112,7 +112,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's bump bitmap filename</summary>
+    ///<summary>Returns a material's bump bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current bump bitmap filename.</returns>
     static member MaterialBump(materialIndex:int) : string option= //GET
@@ -127,7 +127,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Modifies a material's bump bitmap filename</summary>
+    ///<summary>Modifies a material's bump bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The bump bitmap filename</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -150,7 +150,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's diffuse color</summary>
+    ///<summary>Returns a material's diffuse color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material color.</returns>
     static member MaterialColor(materialIndex:int) : Drawing.Color = //GET
@@ -160,7 +160,7 @@ module ExtensionsMaterial =
         rc
 
     [<Extension>]
-    ///<summary>Modifies a material's diffuse color</summary>
+    ///<summary>Modifies a material's diffuse color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -173,7 +173,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's environment bitmap filename</summary>
+    ///<summary>Returns a material's environment bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current environment bitmap filename.</returns>
     static member MaterialEnvironmentMap(materialIndex:int) : string option= //GET
@@ -187,7 +187,7 @@ module ExtensionsMaterial =
         if notNull texture then Some texture.FileName  else None
 
     [<Extension>]
-    ///<summary>Modifies a material's environment bitmap filename</summary>
+    ///<summary>Modifies a material's environment bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The environment bitmap filename</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -210,7 +210,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's user defined name</summary>
+    ///<summary>Returns a material's user defined name.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string) The current material name.</returns>
     static member MaterialName(materialIndex:int) : string = //GET
@@ -220,7 +220,7 @@ module ExtensionsMaterial =
         rc
 
     [<Extension>]
-    ///<summary>Modifies a material's user defined name</summary>
+    ///<summary>Modifies a material's user defined name.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="name">(string) The new name</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -233,7 +233,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's reflective color</summary>
+    ///<summary>Returns a material's reflective color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(Drawing.Color) The current material reflective color.</returns>
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
@@ -243,7 +243,7 @@ module ExtensionsMaterial =
         rc
 
     [<Extension>]
-    ///<summary>Modifies a material's reflective color</summary>
+    ///<summary>Modifies a material's reflective color.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -257,7 +257,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's shine value</summary>
+    ///<summary>Returns a material's shine value.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(float) The current material shine value
     ///    0.0 being matte and 255.0 being glossy.</returns>
@@ -268,7 +268,7 @@ module ExtensionsMaterial =
         rc
 
     [<Extension>]
-    ///<summary>Modifies a material's shine value</summary>
+    ///<summary>Modifies a material's shine value.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="shine">(float) The new shine value. A material's shine value ranges from 0.0 to 255.0, with
     ///    0.0 being matte and 255.0 being glossy</param>
@@ -283,7 +283,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's texture bitmap filename</summary>
+    ///<summary>Returns a material's texture bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current texture bitmap filename.</returns>
     static member MaterialTexture(materialIndex:int) : string option = //GET
@@ -297,7 +297,7 @@ module ExtensionsMaterial =
         if notNull texture then  Some texture.FileName else None
 
     [<Extension>]
-    ///<summary>Modifies a material's texture bitmap filename</summary>
+    ///<summary>Modifies a material's texture bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The texture bitmap filename</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -320,7 +320,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's transparency value</summary>
+    ///<summary>Returns a material's transparency value.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(float) The current material transparency value
     ///    0.0 being opaque and 1.0 being transparent.</returns>
@@ -331,7 +331,7 @@ module ExtensionsMaterial =
         rc
 
     [<Extension>]
-    ///<summary>Modifies a material's transparency value</summary>
+    ///<summary>Modifies a material's transparency value.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="transparency">(float) The new transparency value. A material's transparency value ranges from 0.0 to 1.0, with
     ///    0.0 being opaque and 1.0 being transparent</param>
@@ -346,7 +346,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Returns a material's transparency bitmap filename</summary>
+    ///<summary>Returns a material's transparency bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(string option) The current transparency bitmap filename.</returns>
     static member MaterialTransparencyMap(materialIndex:int) : string option = //GET
@@ -361,7 +361,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Modifies a material's transparency bitmap filename</summary>
+    ///<summary>Modifies a material's transparency bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<param name="filename">(string) The transparency bitmap filename</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -384,7 +384,7 @@ module ExtensionsMaterial =
 
 
     [<Extension>]
-    ///<summary>Resets a material to Rhino's default material</summary>
+    ///<summary>Resets a material to Rhino's default material.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member ResetMaterial(materialIndex:int) : bool =

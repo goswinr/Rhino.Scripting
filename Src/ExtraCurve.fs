@@ -20,7 +20,7 @@ module ExtrasCurve =
   type RhinoScriptSyntax with 
     
     [<Extension>]
-    ///<summary>Returns the fillet arc if it fits within three points describing two connected lines (= a polyline). Fails otherwise</summary>
+    ///<summary>Returns the fillet arc if it fits within three points describing two connected lines (= a polyline). Fails otherwise.</summary>
     ///<param name="prevPt">(Point3d)The first point of polyline</param>
     ///<param name="midPt">(Point3d)The middle point of polyline, that will get the fillet</param>    
     ///<param name="nextPt">(Point3d)The last (or third) point of polyline</param>
@@ -46,7 +46,7 @@ module ExtrasCurve =
         Arc(arcStart, - uA , arcEnd)
     
     [<Extension>]
-    ///<summary>Fillest some corners of polyline</summary>
+    ///<summary>Fillest some corners of polyline.</summary>
     ///<param name="fillets">(int*float Rarr)The index of the cornes to filet and the fillet radius</param>
     ///<param name="polyline">(Point3d Rarr) The Polyline as pointlist </param> 
     ///<returns>a PolyCurve object.</returns>
@@ -88,7 +88,7 @@ module ExtrasCurve =
 
     [<Extension>]
     ///<summary>Returns the needed trimming of two planar Surfaces in order to fit a fillet of given radius.
-    ///    the Lines can be anywhere on Plane ( except paralel to axis)</summary>   
+    ///    the Lines can be anywhere on Plane ( except paralel to axis).</summary>   
     ///<param name="radius">(float) radius of filleting zylinder</param>
     ///<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  Planes to fillet, this might be the cross profuct of the two lines, but the lines might also be skew </param>
     ///<param name="lineA">(Line) First line to fillet, must not be prependicular to direction, the lines might also be skew  </param> 
@@ -119,7 +119,7 @@ module ExtrasCurve =
     [<Extension>]
     ///<summary>Creates a fillet Curve between two lines, 
     ///    the fillet might be an ellipse or free form 
-    ///    but it always lies on the Surface of a cylinder with the given direction and radius </summary>
+    ///    but it always lies on the Surface of a cylinder with the given direction and radius .</summary>
     ///<param name="makeSCurve">(bool)only relevant if Curves are skew: make S-curve if true or kink if false</param>
     ///<param name="radius">(float) radius of filleting zylinder</param>
     ///<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  Planes to fillet, this might be the cross profuct of the two lines, but the lines might also be skew </param>

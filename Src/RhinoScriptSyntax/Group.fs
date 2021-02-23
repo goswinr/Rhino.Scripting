@@ -18,7 +18,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Adds a new empty group to the document</summary>
+    ///<summary>Adds a new empty group to the document.</summary>
     ///<param name="groupName">(string) Optional, Name of the new group. If omitted, Rhino automatically
     ///    generates the group name</param>
     ///<returns>(string) name of the new group.</returns>
@@ -34,7 +34,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Adds one or more objects to an existing group</summary>
+    ///<summary>Adds one or more objects to an existing group.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -46,7 +46,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Adds two or more objects to new group</summary>
+    ///<summary>Adds two or more objects to new group.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq) : unit = 
@@ -56,7 +56,7 @@ module ExtensionsGroup =
         //Doc.Groups.GroupName(index)
     
     [<Extension>]
-    ///<summary>Adds two or more objects to new group, sets group name</summary>
+    ///<summary>Adds two or more objects to new group, sets group name.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of group to create</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -68,7 +68,7 @@ module ExtensionsGroup =
         //Doc.Groups.GroupName(index)
 
     [<Extension>]
-    ///<summary>Adds a single object to an existing group</summary>
+    ///<summary>Adds a single object to an existing group.</summary>
     ///<param name="objectId">(Guid) String or Guid representing the object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -81,7 +81,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Removes an existing group from the document. Reference groups cannot be
-    ///    removed. Deleting a group does not delete the member objects</summary>
+    ///    removed. Deleting a group does not delete the member objects.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteGroup(groupName:string) : unit =
@@ -91,7 +91,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Returns the number of groups in the document</summary>
+    ///<summary>Returns the number of groups in the document.</summary>
     ///<returns>(int) The number of groups in the document.</returns>
     static member GroupCount() : int =
         Doc.Groups.Count
@@ -99,7 +99,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Returns the names of all the groups in the document
-    ///    None if no names exist in the document</summary>
+    ///    None if no names exist in the document.</summary>
     ///<returns>(string array) The names of all the groups in the document.  None if no names exist in the document.</returns>
     static member GroupNames() : string array =
         let names = Doc.Groups.GroupNames(true)
@@ -109,7 +109,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Hides a group of objects. Hidden objects are not visible, cannot be
-    ///    snapped to, and cannot be selected</summary>
+    ///    snapped to, and cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were hidden.</returns>
     static member HideGroup(groupName:string) : int =
@@ -119,7 +119,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Verifies the existance of a group</summary>
+    ///<summary>Verifies the existance of a group.</summary>
     ///<param name="groupName">(string) The name of the group to check for</param>
     ///<returns>(bool) True or False.</returns>
     static member IsGroup(groupName:string) : bool =
@@ -127,7 +127,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Verifies that an existing group is empty, or contains no object members</summary>
+    ///<summary>Verifies that an existing group is empty, or contains no object members.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(bool) True or False if groupName is empty.</returns>
     static member IsGroupEmpty(groupName:string) : bool =
@@ -138,7 +138,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Locks a group of objects. Locked objects are visible and they can be
-    ///    snapped to. But, they cannot be selected</summary>
+    ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) Number of objects that were locked.</returns>
     static member LockGroup(groupName:string) : int =
@@ -149,7 +149,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Removes a single object from any and all groups that it is a member.
-    ///    Neither the object nor the group can be reference objects</summary>
+    ///    Neither the object nor the group can be reference objects.</summary>
     ///<param name="objectId">(Guid) The object identifier</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RemoveObjectFromAllGroups(objectId:Guid) : bool =
@@ -162,7 +162,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Remove a single object from an existing group</summary>
+    ///<summary>Remove a single object from an existing group.</summary>
     ///<param name="objectId">(Guid) The object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -177,7 +177,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Removes multiple objects from an existing group</summary>
+    ///<summary>Removes multiple objects from an existing group.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -194,7 +194,7 @@ module ExtensionsGroup =
 
 
     [<Extension>]
-    ///<summary>Renames an existing group</summary>
+    ///<summary>Renames an existing group.</summary>
     ///<param name="oldName">(string) The name of an existing group</param>
     ///<param name="newName">(string) The new group name</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -207,7 +207,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Shows a group of previously hidden objects. Hidden objects are not
-    ///    visible, cannot be snapped to, and cannot be selected</summary>
+    ///    visible, cannot be snapped to, and cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were shown.</returns>
     static member ShowGroup(groupName:string) : int =
@@ -218,7 +218,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Unlocks a group of previously locked objects. Lockes objects are visible,
-    ///    can be snapped to, but cannot be selected</summary>
+    ///    can be snapped to, but cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were unlocked.</returns>
     static member UnlockGroup(groupName:string) : int =
@@ -228,7 +228,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Returns the top most group name that an object is assigned.  
-    ///   This function primarily applies to objects that are members of nested groups</summary>
+    ///   This function primarily applies to objects that are members of nested groups.</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
     ///<returns>(int) The top group's name. Fails if object is not in a group.</returns>
     static member ObjectTopGroup(objId:Guid) : string =
@@ -241,7 +241,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Returns the names of all groups that an object is part of .  
-    ///   This function primarily applies to objects that are members of nested groups</summary>
+    ///   This function primarily applies to objects that are members of nested groups.</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
     ///<returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group.</returns>
     static member ObjectGroups(objId:Guid) : Rarr<string> =

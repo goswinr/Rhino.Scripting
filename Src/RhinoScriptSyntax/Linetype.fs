@@ -17,7 +17,7 @@ module ExtensionsLinetype =
   type RhinoScriptSyntax with
 
     [<Extension>]
-    ///<summary>Verifies the existance of a linetype in the document</summary>
+    ///<summary>Verifies the existance of a linetype in the document.</summary>
     ///<param name="name">(string) The name of an existing linetype</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLinetype(name:string) : bool =
@@ -25,7 +25,7 @@ module ExtensionsLinetype =
 
 
     [<Extension>]
-    ///<summary>Verifies that an existing linetype is from a reference file</summary>
+    ///<summary>Verifies that an existing linetype is from a reference file.</summary>
     ///<param name="name">(string) The name of an existing linetype</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
@@ -35,14 +35,14 @@ module ExtensionsLinetype =
 
 
     [<Extension>]
-    ///<summary>Returns number of linetypes in the document</summary>
+    ///<summary>Returns number of linetypes in the document.</summary>
     ///<returns>(int) The number of linetypes in the document.</returns>
     static member LinetypeCount() : int =
         Doc.Linetypes.Count
 
 
     [<Extension>]
-    ///<summary>Returns names of all linetypes in the document</summary>
+    ///<summary>Returns names of all linetypes in the document.</summary>
     ///<returns>(string Rarr) list of linetype names.</returns>
     static member LinetypeNames() : string Rarr =
         let count = Doc.Linetypes.Count

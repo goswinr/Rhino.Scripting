@@ -48,7 +48,7 @@ module ExtensionsSelection =
     
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects in the document</summary>
+    ///<summary>Returns identifiers of all objects in the document.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -78,7 +78,7 @@ module ExtensionsSelection =
             objectIds
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
+    ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers.</summary>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
@@ -123,7 +123,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifier of the first object in the document. The first
-    ///    object is the last object created by the user</summary>
+    ///    object is the last object created by the user.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the object.  If omitted, the object is not selected</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -148,7 +148,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Prompts user to pick or select a single Curve object</summary>
+    ///<summary>Prompts user to pick or select a single Curve object.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
@@ -197,7 +197,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Prompts user to pick, or select, a single object</summary>
+    ///<summary>Prompts user to pick, or select, a single object.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
@@ -247,7 +247,7 @@ module ExtensionsSelection =
                 
 
     [<Extension>]
-    ///<summary>Prompts user to pick, or select a single object</summary>
+    ///<summary>Prompts user to pick, or select a single object.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
@@ -311,7 +311,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Prompts user to pick or select one or more objects</summary>
+    ///<summary>Prompts user to pick or select one or more objects.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
@@ -453,7 +453,7 @@ module ExtensionsSelection =
             id
 
     [<Extension>]
-    ///<summary>Prompts user to pick, or select one or more objects</summary>
+    ///<summary>Prompts user to pick, or select one or more objects.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
@@ -530,7 +530,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to select one or more point objects</summary>
+    ///<summary>Prompts the user to select one or more point objects.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
     ///    A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -549,7 +549,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to select a single Surface</summary>
+    ///<summary>Prompts the user to select a single Surface.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Surface"</c>
     ///    Prompt displayed</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -605,7 +605,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
-    ///    cannot be snapped to, and cannot be selected</summary>
+    ///    cannot be snapped to, and cannot be selected.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
@@ -633,7 +633,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
-    ///    are not visible, cannot be snapped to, and cannot be selected</summary>
+    ///    are not visible, cannot be snapped to, and cannot be selected.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
@@ -659,7 +659,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Inverts the current object selection. The identifiers of the newly
-    ///    selected objects are returned</summary>
+    ///    selected objects are returned.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
@@ -691,7 +691,7 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of the objects that were most recently created or changed
     ///    by scripting a Rhino command using the Command function. It is important to
     ///    call this function immediately after calling the Command function as only the
-    ///    most recently created or changed object identifiers will be returned</summary>
+    ///    most recently created or changed object identifiers will be returned.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the object.  If omitted, the object is not selected</param>
     ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
@@ -713,7 +713,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns the identifier of the last object in the document. The last object
-    ///    in the document is the first object created by the user</summary>
+    ///    in the document is the first object created by the user.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the object</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
@@ -739,7 +739,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Returns the identifier of the next object in the document</summary>
+    ///<summary>Returns the identifier of the next object in the document.</summary>
     ///<param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the object</param>
@@ -769,7 +769,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
-    ///    are visible, can be snapped to, and are independent of selection state</summary>
+    ///    are visible, can be snapped to, and are independent of selection state.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
@@ -785,7 +785,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects based on color</summary>
+    ///<summary>Returns identifiers of all objects based on color.</summary>
     ///<param name="color">(Drawing.Color) Color to get objects by</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
@@ -803,7 +803,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects based on the objects' group name</summary>
+    ///<summary>Returns identifiers of all objects based on the objects' group name.</summary>
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
@@ -822,7 +822,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects based on the objects' layer name</summary>
+    ///<summary>Returns identifiers of all objects based on the objects' layer name.</summary>
     ///<param name="layerName">(string) Name of the layer</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
@@ -840,7 +840,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects based on user-assigned name</summary>
+    ///<summary>Returns identifiers of all objects based on user-assigned name.</summary>
     ///<param name="name">(string) Name of the object or objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
@@ -869,7 +869,7 @@ module ExtensionsSelection =
         ids
 
     [<Extension>]
-    ///<summary>Returns identifiers of all objects based on the objects' geometry type</summary>
+    ///<summary>Returns identifiers of all objects based on the objects' geometry type.</summary>
     ///<param name="geometryType">(int) The type(s) of geometry objects (points, Curves, Surfaces,
     ///    Meshes, etc.) that can be selected. Object types can be
     ///    added together as bit-coded flags to filter several different kinds of geometry.
@@ -965,7 +965,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Returns the identifiers of all objects that are currently selected</summary>
+    ///<summary>Returns the identifiers of all objects that are currently selected.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
@@ -977,7 +977,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Unselects all objects in the document</summary>
+    ///<summary>Unselects all objects in the document.</summary>
     ///<returns>(int) The number of objects that were unselected.</returns>
     static member UnselectAllObjects() : int =
         let rc = Doc.Objects.UnselectAll()
@@ -988,7 +988,7 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Return identifiers of all objects that are visible in a specified view.
     /// This function is the same as rs.VisibleObjects in Rhino Python.
-    /// use rs.ShownObjects to get all objects that are not hidden or on turned-off layers. </summary>
+    /// use rs.ShownObjects to get all objects that are not hidden or on turned-off layers. .</summary>
     ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
@@ -1022,7 +1022,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Picks objects using either a window or crossing selection</summary>
+    ///<summary>Picks objects using either a window or crossing selection.</summary>
     ///<param name="corner1">(Point3d) Corner1 of selection window</param>
     ///<param name="corner2">(Point3d) Corner2 of selection window</param>
     ///<param name="view">(string) Optional, View to perform the selection in</param>

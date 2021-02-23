@@ -50,7 +50,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Creates one or more new Hatch objects a list of closed planar Curves</summary>
+    ///<summary>Creates one or more new Hatch objects a list of closed planar Curves.</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the
     ///    boundary of the Hatch objects</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.
@@ -90,7 +90,7 @@ module ExtensionsHatch =
         ids
 
     [<Extension>]
-    ///<summary>Creates a new Hatch object from a closed planar Curve object</summary>
+    ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the
     ///    boundary of the Hatch object</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch
@@ -112,7 +112,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Adds Hatch patterns to the document by importing Hatch pattern definitions
-    ///    from a pattern file</summary>
+    ///    from a pattern file.</summary>
     ///<param name="filename">(string) Name of the Hatch pattern file</param>
     ///<param name="replace">(bool) Optional, Default Value: <c>false</c>
     ///    If Hatch pattern names already in the document match Hatch
@@ -133,7 +133,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the current Hatch pattern file</summary>
+    ///<summary>Returns the current Hatch pattern file.</summary>
     ///<returns>(string) The current Hatch pattern.</returns>
     static member CurrentHatchPattern() : string = //GET
         let i = Doc.HatchPatterns.CurrentHatchPatternIndex
@@ -143,7 +143,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Sets the current Hatch pattern file</summary>
+    ///<summary>Sets the current Hatch pattern file.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern to make current</param>
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentHatchPattern(hatchPattern:string) : unit = //SET
@@ -158,7 +158,7 @@ module ExtensionsHatch =
     ///<summary>Explodes a Hatch object into its component objects. The exploded objects
     ///    will be added to the document. If the Hatch object uses a solid pattern,
     ///    then planar face Brep objects will be created. Otherwise, line Curve objects
-    ///    will be created</summary>
+    ///    will be created.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the Hatch object</param>
@@ -184,7 +184,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns a Hatch object's Hatch pattern</summary>
+    ///<summary>Returns a Hatch object's Hatch pattern.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(string) The current Hatch pattern.</returns>
     static member HatchPattern(hatchId:Guid) : string = //GET
@@ -193,7 +193,7 @@ module ExtensionsHatch =
         Doc.HatchPatterns.[oldindex].Name
 
     [<Extension>]
-    ///<summary>Changes a Hatch object's Hatch pattern</summary>
+    ///<summary>Changes a Hatch object's Hatch pattern.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern to replace the
     ///    current Hatch pattern</param>
@@ -209,7 +209,7 @@ module ExtensionsHatch =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Changes multiple Hatch objects's Hatch pattern</summary>
+    ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="hatchPattern">(string) Name of multiple existing Hatch pattern to replace the
     ///    current Hatch pattern</param>
@@ -227,7 +227,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the number of Hatch patterns in the document</summary>
+    ///<summary>Returns the number of Hatch patterns in the document.</summary>
     ///<returns>(int) The number of Hatch patterns in the document.</returns>
     static member HatchPatternCount() : int =
         RhinoScriptSyntax.InitHatchPatterns()
@@ -236,7 +236,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Returns the description of a Hatch pattern. Note, not all Hatch patterns
-    ///    have descriptions</summary>
+    ///    have descriptions.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(string) description of the Hatch pattern.</returns>
     static member HatchPatternDescription(hatchPattern:string) : string =
@@ -247,7 +247,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the fill type of a Hatch pattern</summary>
+    ///<summary>Returns the fill type of a Hatch pattern.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(int) Hatch pattern's fill type
     ///    0 = solid, uses object color
@@ -261,7 +261,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Returns the names of all of the Hatch patterns in the document</summary>
+    ///<summary>Returns the names of all of the Hatch patterns in the document.</summary>
     ///<returns>(string Rarr) The names of all of the Hatch patterns in the document.</returns>
     static member HatchPatternNames() : string Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
@@ -275,7 +275,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Returns the rotation applied to the Hatch pattern when
-    /// it is mapped to the Hatch's Plane</summary>
+    /// it is mapped to the Hatch's Plane.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if rotation is not defined, the current rotation angle.</returns>
     static member HatchRotation(hatchId:Guid) : float = //GET
@@ -286,7 +286,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the rotation applied to the Hatch pattern when
-    /// it is mapped to the Hatch's Plane</summary>
+    /// it is mapped to the Hatch's Plane.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -302,7 +302,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the rotation applied to the Hatch pattern when
-    /// it is mapped to the Hatch's Plane</summary>
+    /// it is mapped to the Hatch's Plane.</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -320,7 +320,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Returns the scale applied to the Hatch pattern when it is
-    /// mapped to the Hatch's Plane</summary>
+    /// mapped to the Hatch's Plane.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if scale is not defined, the current scale factor.</returns>
     static member HatchScale(hatchId:Guid) : float = //GET
@@ -330,7 +330,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
-    /// mapped to the Hatch's Plane</summary>
+    /// mapped to the Hatch's Plane.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -344,7 +344,7 @@ module ExtensionsHatch =
 
     [<Extension>]
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
-    /// mapped to the Hatch's Plane</summary>
+    /// mapped to the Hatch's Plane.</summary>
     ///<param name="hatchIds">(Guid seq) Identifiers of multiple Hatch objects</param>
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -359,7 +359,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies the existence of a Hatch object in the document</summary>
+    ///<summary>Verifies the existence of a Hatch object in the document.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatch(objectId:Guid) : bool =
@@ -368,7 +368,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies the existence of a Hatch pattern in the document</summary>
+    ///<summary>Verifies the existence of a Hatch pattern in the document.</summary>
     ///<param name="name">(string) The name of a Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPattern(name:string) : bool =
@@ -377,7 +377,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies that a Hatch pattern is the current Hatch pattern</summary>
+    ///<summary>Verifies that a Hatch pattern is the current Hatch pattern.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPatternCurrent(hatchPattern:string) : bool =
@@ -388,7 +388,7 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Verifies that a Hatch pattern is from a reference file</summary>
+    ///<summary>Verifies that a Hatch pattern is from a reference file.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPatternReference(hatchPattern:string) : bool =

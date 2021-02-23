@@ -19,7 +19,7 @@ module ExtensionsGrips =
 
     [<Extension>]
     ///<summary>Enables or disables an object's grips. For Curves and Surfaces, these are
-    ///    also called control points</summary>
+    ///    also called control points.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
     ///    If True, the specified object's grips will be turned on.
@@ -34,7 +34,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick a single object grip</summary>
+    ///<summary>Prompts the user to pick a single object grip.</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///    Allow for selection of pre-selected object grip</param>
@@ -68,7 +68,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Prompts user to pick one or more object grips from one or more objects</summary>
+    ///<summary>Prompts user to pick one or more object grips from one or more objects.</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///    Allow for selection of pre-selected object grips</param>
@@ -125,7 +125,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Returns the next grip index from a specified grip index of an object</summary>
+    ///<summary>Returns the next grip index from a specified grip index of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the next grip index</param>
     ///<param name="direction">(int ) Optional, Default Value: <c>0</c>
@@ -142,7 +142,7 @@ module ExtensionsGrips =
         |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
     [<Extension>]
-    ///<summary>Returns number of grips owned by an object</summary>
+    ///<summary>Returns number of grips owned by an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) number of grips.</returns>
     static member ObjectGripCount(objectId:Guid) : int =
@@ -153,7 +153,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Returns the location of an object's grip</summary>
+    ///<summary>Returns the location of an object's grip.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to either query or modify</param>
     ///<returns>(Point3d) The current location of the grip referenced by index.</returns>
@@ -168,7 +168,7 @@ module ExtensionsGrips =
         rc
 
     [<Extension>]
-    ///<summary>Modifies the location of an object's grip</summary>
+    ///<summary>Modifies the location of an object's grip.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to either query or modify</param>
     ///<param name="point">(Point3d) 3D point defining new location of the grip</param>
@@ -192,7 +192,7 @@ module ExtensionsGrips =
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
     /// the grips, you must provide a list of points that contain the same number
-    /// of points at grips</summary>
+    /// of points at grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(Point3d Rarr) The current location of all grips.</returns>
     static member ObjectGripLocations(objectId:Guid) : Point3d Rarr = //GET
@@ -209,7 +209,7 @@ module ExtensionsGrips =
     /// locations of the grips are returned in a list of Point3d with each position
     /// in the list corresponding to that grip's index. To modify the locations of
     /// the grips, you must provide a list of points that contain the same number
-    /// of points at grips</summary>
+    /// of points at grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="points">(Point3d seq) List of 3D points identifying the new grip locations</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -227,7 +227,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Verifies that an object's grips are turned on</summary>
+    ///<summary>Verifies that an object's grips are turned on.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating Grips state.</returns>
     static member ObjectGripsOn(objectId:Guid) : bool =
@@ -237,7 +237,7 @@ module ExtensionsGrips =
 
     [<Extension>]
     ///<summary>Verifies that an object's grips are turned on and at least one grip
-    ///    is selected</summary>
+    ///    is selected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member ObjectGripsSelected(objectId:Guid) : bool =
@@ -253,7 +253,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Returns the previous grip index from a specified grip index of an object</summary>
+    ///<summary>Returns the previous grip index from a specified grip index of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
     ///<param name="direction">(int) Optional, Default Value: <c>0</c>
@@ -271,7 +271,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Returns a list of grip indices indentifying an object's selected grips</summary>
+    ///<summary>Returns a list of grip indices indentifying an object's selected grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int Rarr) list of indices.</returns>
     static member SelectedObjectGrips(objectId:Guid) : int Rarr =
@@ -289,7 +289,7 @@ module ExtensionsGrips =
 
     [<Extension>]
     ///<summary>Selects a single grip owned by an object. If the object's grips are
-    ///    not turned on, the grips will not be selected</summary>
+    ///    not turned on, the grips will not be selected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to select</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -312,7 +312,7 @@ module ExtensionsGrips =
 
     [<Extension>]
     ///<summary>Selects an object's grips. If the object's grips are not turned on,
-    ///    they will not be selected</summary>
+    ///    they will not be selected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips selected.</returns>
     static member SelectObjectGrips(objectId:Guid) : int =
@@ -332,7 +332,7 @@ module ExtensionsGrips =
 
     [<Extension>]
     ///<summary>Unselects a single grip owned by an object. If the object's grips are
-    ///    not turned on, the grips will not be unselected</summary>
+    ///    not turned on, the grips will not be unselected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to unselect</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -354,7 +354,7 @@ module ExtensionsGrips =
 
 
     [<Extension>]
-    ///<summary>Unselects an object's grips. Note, the grips will not be turned off</summary>
+    ///<summary>Unselects an object's grips. Note, the grips will not be turned off.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips unselected.</returns>
     static member UnselectObjectGrips(objectId:Guid) : int =

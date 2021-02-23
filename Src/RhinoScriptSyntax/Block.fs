@@ -19,7 +19,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Adds a new block definition to the document</summary>
+    ///<summary>Adds a new block definition to the document.</summary>
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
     ///<param name="basePoint">(Point3d) 3D base point for the block definition</param>
     ///<param name="name">(string) Optional, Default Value: <c>InstanceDefinitions.GetUnusedInstanceDefinitionName()</c>
@@ -65,7 +65,7 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns names of the block definitions that contain a specified block
-    ///    definition</summary>
+    ///    definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string Rarr) A list of block definition names.</returns>
     static member BlockContainers(blockName:string) : string Rarr =
@@ -79,7 +79,7 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Returns number of block definitions that contain a specified
-    ///    block definition</summary>
+    ///    block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(int) The number of block definitions that contain a specified block definition.</returns>
     static member BlockContainerCount(blockName:string) : int =
@@ -87,14 +87,14 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns the number of block definitions in the document</summary>
+    ///<summary>Returns the number of block definitions in the document.</summary>
     ///<returns>(int) The number of block definitions in the document.</returns>
     static member BlockCount() : int =
         Doc.InstanceDefinitions.ActiveCount
 
 
     [<Extension>]
-    ///<summary>Returns the description of a block definition</summary>
+    ///<summary>Returns the description of a block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string) The current description.</returns>
     static member BlockDescription(blockName:string) : string = //GET
@@ -103,7 +103,7 @@ module ExtensionsBlock =
         idef.Description
 
     [<Extension>]
-    ///<summary>Sets the description of a block definition</summary>
+    ///<summary>Sets the description of a block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="description">(string) The new description</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -115,7 +115,7 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Counts number of instances of the block in the document.
-    ///    Nested instances are not included in the count. Attention this may include deleted blocks</summary>
+    ///    Nested instances are not included in the count. Attention this may include deleted blocks.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///    0 = get top level references in active document.
@@ -131,7 +131,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns the insertion point of a block instance</summary>
+    ///<summary>Returns the insertion point of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Point3d) The insertion 3D point.</returns>
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
@@ -143,7 +143,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns the block name of a block instance</summary>
+    ///<summary>Returns the block name of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(string) The block name of a block instance.</returns>
     static member BlockInstanceName(objectId:Guid) : string =
@@ -153,7 +153,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns the identifiers of the inserted instances of a block</summary>
+    ///<summary>Returns the identifiers of the inserted instances of a block.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///    0 = get top level references in active document.
@@ -170,7 +170,7 @@ module ExtensionsBlock =
     [<Extension>]
     ///<summary>Returns the location of a block instance relative to the world coordinate
     ///    system origin (0, 0, 0). The position is returned as a 4x4 transformation
-    ///    matrix</summary>
+    ///    matrix.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Transform) The location, as a transform matrix, of a block instance relative to the world coordinate
     ///    system origin.</returns>
@@ -180,7 +180,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns the names of all block definitions in the document</summary>
+    ///<summary>Returns the names of all block definitions in the document.</summary>
     ///<returns>(string Rarr) The names of all block definitions in the document.</returns>
     static member BlockNames() : string Rarr =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
@@ -189,7 +189,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns number of objects that make up a block definition</summary>
+    ///<summary>Returns number of objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(int) The number of objects that make up a block definition.</returns>
     static member BlockObjectCount(blockName:string) : int =
@@ -199,7 +199,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns identifiers of the objects that make up a block definition</summary>
+    ///<summary>Returns identifiers of the objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(Guid Rarr) list of identifiers.</returns>
     static member BlockObjects(blockName:string) : Rarr<Guid> =
@@ -212,7 +212,7 @@ module ExtensionsBlock =
     [<Extension>]
     ///<summary>Returns path to the source of a linked or embedded block definition.
     ///    A linked or embedded block definition is a block definition that was
-    ///    inserted from an external file</summary>
+    ///    inserted from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block.</returns>
     static member BlockPath(blockName:string) : string =
@@ -222,7 +222,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Returns the status of a linked block</summary>
+    ///<summary>Returns the status of a linked block.</summary>
     ///<param name="blockName">(string) Name of an existing block</param>
     ///<returns>(int) The status of a linked block
     ///    Value Description
@@ -240,7 +240,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Deletes a block definition and all of it's inserted instances</summary>
+    ///<summary>Deletes a block definition and all of it's inserted instances.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteBlock(blockName:string) : bool =
@@ -253,7 +253,7 @@ module ExtensionsBlock =
 
     [<Extension>]
     ///<summary>Explodes a block instance into it's geometric components. The
-    ///    exploded objects are added to the document</summary>
+    ///    exploded objects are added to the document.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
     ///    By default nested blocks are not exploded</param>
@@ -267,7 +267,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Inserts a block whose definition already exists in the document</summary>
+    ///<summary>Inserts a block whose definition already exists in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="xForm">(Transform) 4x4 transformation matrix to apply</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
@@ -281,7 +281,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Inserts a block whose definition already exists in the document</summary>
+    ///<summary>Inserts a block whose definition already exists in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
     ///<param name="scale">(Vector3d) Optional, Default Value: <c>Vector3d(1.0 , 1.0 , 1.0)</c>
@@ -303,7 +303,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Verifies the existence of a block definition in the document</summary>
+    ///<summary>Verifies the existence of a block definition in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlock(blockName:string) : bool =
@@ -312,7 +312,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Verifies a block definition is embedded, or linked, from an external file</summary>
+    ///<summary>Verifies a block definition is embedded, or linked, from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockEmbedded(blockName:string) : bool =
@@ -325,7 +325,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a block instance</summary>
+    ///<summary>Verifies an object is a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockInstance(objectId:Guid) : bool =
@@ -335,7 +335,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Verifies that a block definition is being used by an inserted instance</summary>
+    ///<summary>Verifies that a block definition is being used by an inserted instance.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///    One of the following values
@@ -350,7 +350,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Verifies that a block definition is from a reference file</summary>
+    ///<summary>Verifies that a block definition is from a reference file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockReference(blockName:string) : bool =
@@ -360,7 +360,7 @@ module ExtensionsBlock =
 
 
     [<Extension>]
-    ///<summary>Renames an existing block definition</summary>
+    ///<summary>Renames an existing block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="newName">(string) Name to change to</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>

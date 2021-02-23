@@ -252,7 +252,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the full layername of an object. 
-    /// parent layers are separated by <c>::</c></summary>
+    /// parent layers are separated by <c>::</c>.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer.</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET
@@ -261,7 +261,7 @@ module ExtensionsLayer =
         Doc.Layers.[index].FullPath
 
     [<Extension>]
-    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
@@ -277,7 +277,7 @@ module ExtensionsLayer =
         Doc.Views.Redraw()
    
     [<Extension>]
-    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
@@ -296,7 +296,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed</summary>
+    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed.</summary>
     ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
     ///<param name="newLayerName">(string) The new name</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -317,14 +317,14 @@ module ExtensionsLayer =
        
 
     [<Extension>]
-    ///<summary>Returns the current layer</summary>
+    ///<summary>Returns the current layer.</summary>
     ///<returns>(string) The full name of the current layer.</returns>
     static member CurrentLayer() : string = //GET
         Doc.Layers.CurrentLayer.FullPath
 
 
     [<Extension>]
-    ///<summary>Changes the current layer</summary>
+    ///<summary>Changes the current layer.</summary>
     ///<param name="layer">(string) The name of an existing layer to make current</param>
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentLayer(layer:string) : unit = //SET
@@ -340,7 +340,7 @@ module ExtensionsLayer =
     ///    cannot be the current layer. Unlike the PurgeLayer method, the layer must
     ///    be empty, or contain no objects, before it can be removed. Any layers that
     ///    are children of the specified layer will also be removed if they are also
-    ///    empty</summary>
+    ///    empty.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteLayer(layer:string) : bool =
@@ -350,7 +350,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Expands a layer. Expanded layers can be viewed in Rhino's layer dialog</summary>
+    ///<summary>Expands a layer. Expanded layers can be viewed in Rhino's layer dialog.</summary>
     ///<param name="layer">(string) Name of the layer to expand</param>
     ///<param name="expand">(bool) True to expand, False to collapse</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -365,7 +365,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies the existance of a layer in the document</summary>
+    ///<summary>Verifies the existance of a layer in the document.</summary>
     ///<param name="layer">(string) The name of a layer to search for</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayer(layer:string) : bool =
@@ -374,7 +374,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that the objects on a layer can be changed (normal)</summary>
+    ///<summary>Verifies that the objects on a layer can be changed (normal).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerChangeable(layer:string) : bool =
@@ -384,7 +384,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is a child of another layer</summary>
+    ///<summary>Verifies that a layer is a child of another layer.</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
@@ -395,7 +395,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is the current layer</summary>
+    ///<summary>Verifies that a layer is the current layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerCurrent(layer:string) : bool =
@@ -404,7 +404,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that an existing layer is empty, or contains no objects</summary>
+    ///<summary>Verifies that an existing layer is empty, or contains no objects.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerEmpty(layer:string) : bool =
@@ -415,7 +415,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
-    ///    Rhino's layer dialog</summary>
+    ///    Rhino's layer dialog.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerExpanded(layer:string) : bool =
@@ -426,7 +426,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that a layer is locked 
     /// persistent or non persitent locking return true
-    /// via layer.IsLocked</summary>
+    /// via layer.IsLocked.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerLocked(layer:string) : bool =
@@ -435,7 +435,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is on</summary>
+    ///<summary>Verifies that a layer is on.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerOn(layer:string) : bool =
@@ -444,7 +444,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that an existing layer is selectable (normal and reference)</summary>
+    ///<summary>Verifies that an existing layer is selectable (normal and reference).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerSelectable(layer:string) : bool =
@@ -453,7 +453,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is a parent of another layer</summary>
+    ///<summary>Verifies that a layer is a parent of another layer.</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
@@ -464,7 +464,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Verifies that a layer is from a reference file</summary>
+    ///<summary>Verifies that a layer is from a reference file.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerReference(layer:string) : bool =
@@ -482,7 +482,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the number of immediate child layers of a layer</summary>
+    ///<summary>Returns the number of immediate child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(int) The number of immediate child layers.</returns>
     static member LayerChildCount(layer:string) : int =
@@ -493,7 +493,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the immediate child layers of a layer</summary>
+    ///<summary>Returns the immediate child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
     static member LayerChildren(layer:string) : string Rarr =
@@ -504,7 +504,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the color of a layer</summary>
+    ///<summary>Returns the color of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(Drawing.Color) The current color value .</returns>
     static member LayerColor(layer:string) : Drawing.Color = //GET
@@ -512,7 +512,7 @@ module ExtensionsLayer =
         layer.Color
 
     [<Extension>]
-    ///<summary>Changes the color of a layer</summary>
+    ///<summary>Changes the color of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -523,14 +523,14 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the number of layers in the document</summary>
+    ///<summary>Returns the number of layers in the document.</summary>
     ///<returns>(int) The number of layers in the document.</returns>
     static member LayerCount() : int =
         Doc.Layers.ActiveCount
 
 
     [<Extension>]
-    ///<summary>Return identifiers of all layers in the document</summary>
+    ///<summary>Return identifiers of all layers in the document.</summary>
     ///<returns>(Guid Rarr) The identifiers of all layers in the document.</returns>
     static member LayerIds() : Guid Rarr =
         rarr {for layer in Doc.Layers do
@@ -539,7 +539,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the linetype of a layer</summary>
+    ///<summary>Returns the linetype of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) Name of the current linetype.</returns>
     static member LayerLinetype(layer:string) : string = //GET
@@ -549,7 +549,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Changes the linetype of a layer</summary>
+    ///<summary>Changes the linetype of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="linetyp">(string) Name of a linetype</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -568,7 +568,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the visible property of a layer, 
-    ///  if layer is on but invisble because of a parent that is off this returns false</summary>
+    ///  if layer is on but invisble because of a parent that is off this returns false.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility.</returns>
     static member LayerVisible(layer:string) : bool = //GET
@@ -578,7 +578,7 @@ module ExtensionsLayer =
     
 
     [<Extension>]
-    ///<summary>Makes a layer visible</summary>
+    ///<summary>Makes a layer visible.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="forceVisible">(bool) Optional, Default Value: <c>true</c>
     ///     Turn on parent layers too if needed. True by default</param>
@@ -589,7 +589,7 @@ module ExtensionsLayer =
         Doc.Views.Redraw()
     
     [<Extension>]
-    ///<summary>Makes a layer invisible</summary>
+    ///<summary>Makes a layer invisible.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="persist">(bool) Optional, Default Value: <c>false</c>
     ///     Turn layer persitently off? even if it is already invisible because of a parent layer that is turned off.
@@ -602,7 +602,7 @@ module ExtensionsLayer =
 
     (*
     [<Extension>]
-    ///<summary>Changes the visible property of a layer</summary>
+    ///<summary>Changes the visible property of a layer.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="visible">(bool) New visible state</param>
     ///<param name="forcevisibleOrDonotpersist">(bool) 
@@ -623,14 +623,14 @@ module ExtensionsLayer =
     
 
     [<Extension>]
-    ///<summary>Turn a layer off if visible, does nothing if parent layer is already invisible. </summary>
+    ///<summary>Turn a layer off if visible, does nothing if parent layer is already invisible. .</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerOff(layer:string) : unit = 
         RhinoScriptSyntax.LayerVisibleSetFalse(layer,false)
     
     [<Extension>]
-    ///<summary>Turn a layer on if not  visible , enforces visibility  of parents</summary>
+    ///<summary>Turn a layer on if not  visible , enforces visibility  of parents.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerOn(layer:string) : unit = //SET
@@ -638,7 +638,7 @@ module ExtensionsLayer =
     
     [<Extension>]
     ///<summary>Returns the locked property of a layer, 
-    ///  if layer is unlocked but parent layer is locked this still returns true</summary>
+    ///  if layer is unlocked but parent layer is locked this still returns true.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility.</returns>
     static member LayerLocked(layer:string) : bool =       
@@ -647,7 +647,7 @@ module ExtensionsLayer =
         rc    
 
     [<Extension>]
-    ///<summary>Makes a layer locked</summary>
+    ///<summary>Makes a layer locked.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="forceLocked">(bool) Optional, Default Value: <c>false</c>
     ///     Lock layer even if it is already locked via a parent layer</param>
@@ -658,7 +658,7 @@ module ExtensionsLayer =
         Doc.Views.Redraw()
     
     [<Extension>]
-    ///<summary>Makes a layer unlocked</summary>
+    ///<summary>Makes a layer unlocked.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="parentsToo">(bool) Optional, Default Value: <c>true</c>
     ///     Unlock parent layers to if needed</param>
@@ -670,14 +670,14 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Unlocks a layer and all parents if needed </summary>
+    ///<summary>Unlocks a layer and all parents if needed .</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerUnlock(layer:string) : unit = 
         RhinoScriptSyntax.LayerLockedSetFalse(layer,true)
     
     [<Extension>]
-    ///<summary>Locks a layer if it is not already locked via a parent</summary>
+    ///<summary>Locks a layer if it is not already locked via a parent.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerLock(layer:string) : unit = //SET
@@ -706,7 +706,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the material index of a layer. A material index of -1
     /// indicates that no material has been assigned to the layer. Thus, the layer
-    /// will use Rhino's default layer material</summary>
+    /// will use Rhino's default layer material.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(int) a zero-based material index.</returns>
     static member LayerMaterialIndex(layer:string) : int = //GET
@@ -716,7 +716,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Changes the material index of a layer. A material index of -1
     /// indicates that no material has been assigned to the layer. Thus, the layer
-    /// will use Rhino's default layer material</summary>
+    /// will use Rhino's default layer material.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="index">(int) The new material index</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -729,7 +729,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the identifier of a layer given the layer's name</summary>
+    ///<summary>Returns the identifier of a layer given the layer's name.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Guid) The layer's identifier.</returns>
     static member LayerId(layer:string) : Guid =
@@ -740,7 +740,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Return the name of a layer given it's identifier</summary>
+    ///<summary>Return the name of a layer given it's identifier.</summary>
     ///<param name="layerId">(Guid) Layer identifier</param>
     ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
     ///    Return the full path name `True` or short name `False`</param>
@@ -752,7 +752,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Returns the names of all layers in the document</summary>
+    ///<summary>Returns the names of all layers in the document.</summary>
     ///<returns>(string Rarr) list of layer names.</returns>
     static member LayerNames() : string Rarr =
         let rc = Rarr()
@@ -764,7 +764,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the current display order index of a layer as displayed in Rhino's
     ///    layer dialog box. A display order index of -1 indicates that the current
-    ///    layer dialog filter does not allow the layer to appear in the layer list</summary>
+    ///    layer dialog filter does not allow the layer to appear in the layer list.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(int) zero based index of layer.</returns>
     static member LayerOrder(layer:string) : int =
@@ -774,7 +774,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the print color of a layer. Layer print colors are
-    /// represented as RGB colors</summary>
+    /// represented as RGB colors.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Drawing.Color) The current layer print color.</returns>
     static member LayerPrintColor(layer:string) : Drawing.Color = //GET
@@ -784,7 +784,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Changes the print color of a layer. Layer print colors are
-    /// represented as RGB colors</summary>
+    /// represented as RGB colors.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="color">(Drawing.Color) New print color</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -799,7 +799,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the print width of a layer. Print width is specified
-    /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
+    /// in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(float) The current layer print width.</returns>
     static member LayerPrintWidth(layer:string) : float = //GET
@@ -809,7 +809,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Changes the print width of a layer. Print width is specified
-    /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
+    /// in millimeters. A print width of 0.0 denotes the "default" print width.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="width">(float) New print width</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -823,7 +823,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Return the parent layer of a layer or mepty string if no parent present</summary>
+    ///<summary>Return the parent layer of a layer or mepty string if no parent present.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<returns>(string) The name of the current parent layer.</returns>
     static member ParentLayer(layer:string) : string = //GET
@@ -837,7 +837,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Modify the parent layer of a layer</summary>
+    ///<summary>Modify the parent layer of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="parent">(string) Name of new parent layer. To remove the parent layer,
     ///    thus making a root-level layer, specify an empty string</param>
@@ -856,7 +856,7 @@ module ExtensionsLayer =
     ///<summary>Removes an existing layer from the document. The layer will be removed
     ///    even if it contains geometry objects. The layer to be removed cannot be the
     ///    current layer
-    ///    empty</summary>
+    ///    empty.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member PurgeLayer(layer:string) : bool =
@@ -867,7 +867,7 @@ module ExtensionsLayer =
 
 
     [<Extension>]
-    ///<summary>Renames an existing layer</summary>
+    ///<summary>Renames an existing layer.</summary>
     ///<param name="oldname">(string) Original layer name</param>
     ///<param name="newname">(string) New layer name</param>
     ///<returns>(unit) void, nothing.</returns>

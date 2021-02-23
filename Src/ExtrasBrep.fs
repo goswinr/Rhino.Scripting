@@ -15,7 +15,7 @@ module ExtrasBrep =
   type RhinoScriptSyntax with // TODO chnage to Brep type extensions ??!!
    
     [<Extension>]
-    ///<summary>Creates a Brep in the Shape of a Sloted Hole</summary>
+    ///<summary>Creates a Brep in the Shape of a Sloted Hole.</summary>
     ///<param name="plane">(Plane)Origin = center of hole</param>
     ///<param name="length">(float) total length of sloted hole</param>
     ///<param name="width">(float) width = radius of sloted hole</param>
@@ -75,7 +75,7 @@ module ExtrasBrep =
 
 
     [<Extension>]
-    ///<summary>Creates a solid Brep in the Shape of a  cylinder</summary>
+    ///<summary>Creates a solid Brep in the Shape of a  cylinder.</summary>
     ///<param name="plane">(Plane) Origin is center of base of cylinder</param>
     ///<param name="diameter">(float) Diameter of cylinder</param>
     ///<param name="length">(float) total length of the screw brep</param>
@@ -87,7 +87,7 @@ module ExtrasBrep =
 
     [<Extension>]
     ///<summary>Creates a Brep in the Shape of a Countersunk Screw Hole , 45 degrees slope
-    ///    a caped cone and a cylinder</summary>
+    ///    a caped cone and a cylinder.</summary>
     ///<param name="plane">(Plane) Origin is center of conebase or head</param>
     ///<param name="outerDiameter">(float) diameter of cone base</param>
     ///<param name="innerDiameter">(float) Diameter of cylinder</param>
@@ -108,7 +108,7 @@ module ExtrasBrep =
         if brep.SolidOrientation = BrepSolidOrientation.Inward then brep.Flip()
         brep
 
-    ///<summary>if brep.SolidOrientation is inward then flip brep </summary>
+    ///<summary>if brep.SolidOrientation is inward then flip brep .</summary>
     static member OrientBrep (brep:Brep):Brep  =
         if brep.SolidOrientation = BrepSolidOrientation.Inward then  
             brep.Flip()
@@ -132,7 +132,7 @@ module ExtrasBrep =
     [<Extension>]
     ///<summary>Subtracts trimmer from brep (= BooleanDifference), 
     /// so that a single brep is returned, 
-    /// draws objects and zooms on them if an error occures</summary>
+    /// draws objects and zooms on them if an error occures.</summary>
     ///<param name="trimmer">(Brep)the volume to cut out</param>
     ///<param name="keep">(Brep) The volume to keep</param>
     ///<param name="subtractionLocations">(int) Optional, The amount of locations where the brep is expected to be cut
@@ -189,7 +189,7 @@ module ExtrasBrep =
         brep
         
     [<Extension>]
-    ///<summary> Calls Mesh.CreateFromBrep, and Mesh.HealNakedEdges() to try to ensure Mesh is closed if input is closed</summary>
+    ///<summary> Calls Mesh.CreateFromBrep, and Mesh.HealNakedEdges() to try to ensure Mesh is closed if input is closed.</summary>
     ///<param name="brep">(Brep)the Polysurface to extract Mesh from</param>
     ///<param name="meshingParameters">(MeshingParameters) Optional, The Meshing parameters , if omitted the current Meshing parameters are used </param>
     ///<returns>((Mesh Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output Mesh not

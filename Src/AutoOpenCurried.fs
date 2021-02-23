@@ -19,7 +19,7 @@ module AutoOpenCurried =
   type RhinoScriptSyntax with
 
     [<Extension>]
-    ///<summary>Modifies the layer of an object, creates layer if not yet existing</summary>
+    ///<summary>Modifies the layer of an object, creates layer if not yet existing.</summary>
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
     ///<param name="objectId">(Guid) The identifier of the object</param>    
     ///<returns>(unit) void, nothing.</returns>
@@ -27,7 +27,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.ObjectLayer(objectId,layer,true)
 
     [<Extension>]
-    ///<summary>Modifies the layer of several objects, creates layer if not yet existing</summary>
+    ///<summary>Modifies the layer of several objects, creates layer if not yet existing.</summary>
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
     ///<param name="objectIds">(Guid seq) The identifiers of several objects</param>    
     ///<returns>(unit) void, nothing.</returns>
@@ -37,7 +37,7 @@ module AutoOpenCurried =
     
     [<Extension>]
     ///<summary>Returns the full layername of an object. 
-    /// parent layers are separated by <c>::</c></summary>
+    /// parent layers are separated by <c>::</c>.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer.</returns>
     static member getLayer (objectId:Guid) : string = 
@@ -45,14 +45,14 @@ module AutoOpenCurried =
 
     [<Extension>]
     ///<summary>Returns the short layer of an object.
-    ///    Without Parent Layers</summary>
+    ///    Without Parent Layers.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer.</returns>
     static member getLayerShort (objectId:Guid) : string = 
         RhinoScriptSyntax.ObjectLayerShort(objectId)
         
     [<Extension>]
-    ///<summary>Sets the name of an object</summary>
+    ///<summary>Sets the name of an object.</summary>
     ///<param name="name">(string) The new object name.</param>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -60,7 +60,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.ObjectName(objectId, name)  
         
     [<Extension>]
-    ///<summary>Sets the name of several objects</summary>
+    ///<summary>Sets the name of several objects.</summary>
     ///<param name="name">(string) The new object name.</param>
     ///<param name="objectIds">(Guid seq)Ids of several objects</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -69,7 +69,7 @@ module AutoOpenCurried =
 
     
     [<Extension>]
-    ///<summary>Returns the name of an object or "" if none given</summary>
+    ///<summary>Returns the name of an object or "" if none given.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(string) The current object name, empty string if no name given .</returns>
     static member getName (objectId:Guid) : string = 
@@ -77,7 +77,7 @@ module AutoOpenCurried =
 
 
     [<Extension>]
-    ///<summary>Sets the Color of an object</summary>
+    ///<summary>Sets the Color of an object.</summary>
     ///<param name="color">(Drawing.Color) The new object color.</param>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -85,7 +85,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.ObjectColor(objectId, color)  
         
     [<Extension>]
-    ///<summary>Sets the Color of several objects</summary>
+    ///<summary>Sets the Color of several objects.</summary>
     ///<param name="color">(Drawing.Color) The new object color.</param>
     ///<param name="objectIds">(Guid seq)Id of several objects</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -93,7 +93,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.ObjectColor(objectIds, color)  
     
     [<Extension>]
-    ///<summary>Returns the color of an object </summary>
+    ///<summary>Returns the color of an object .</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(string) The current object color.</returns>
     static member getColor (objectId:Guid) : Drawing.Color = 
@@ -102,7 +102,7 @@ module AutoOpenCurried =
 
 
     [<Extension>]
-    ///<summary>Sets a user text stored on an object</summary>
+    ///<summary>Sets a user text stored on an object.</summary>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -111,7 +111,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.SetUserText(objectId, key, value)
 
     [<Extension>]
-    ///<summary>Sets a user text stored on several objects</summary>
+    ///<summary>Sets a user text stored on several objects.</summary>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
     ///<param name="objectIds">(Guid seq) The identifiers of several objects</param>
@@ -121,7 +121,7 @@ module AutoOpenCurried =
 
         
     [<Extension>]
-    ///<summary>Returns user text stored on an object, fails if non existing</summary>
+    ///<summary>Returns user text stored on an object, fails if non existing.</summary>
     ///<param name="key">(string) The key name</param>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<returns>(string) if key is specified, the associated value,fails if non existing.</returns>
@@ -129,7 +129,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.GetUserText(objectId, key)
 
     [<Extension>]
-    ///<summary>Checks if the user text stored on an object matches a given string, fails if non existing</summary>
+    ///<summary>Checks if the user text stored on an object matches a given string, fails if non existing.</summary>
     ///<param name="key">(string) The key name</param>
     ///<param name="valueToMatch">(string) The value to check for equality with</param>
     ///<param name="objectId">(Guid) The object's identifies</param>
@@ -139,7 +139,7 @@ module AutoOpenCurried =
 
         
     [<Extension>]
-    ///<summary>Checks if a User Text key is stored on an object</summary>
+    ///<summary>Checks if a User Text key is stored on an object.</summary>
     ///<param name="key">(string) The key name</param>   
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<returns>(bool) if key exist true.</returns>
@@ -147,7 +147,7 @@ module AutoOpenCurried =
         RhinoScriptSyntax.HasUserText(objectId, key)
         
     [<Extension>]
-    ///<summary>Returns user text stored on an object, returns Option.None if non existing</summary>
+    ///<summary>Returns user text stored on an object, returns Option.None if non existing.</summary>
     ///<param name="key">(string) The key name</param>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<returns>(string Option) if key is specified, Some(value) else None .</returns>
@@ -174,7 +174,7 @@ module AutoOpenCurried =
             if not <|de.Attributes.SetUserString(key,sc.Attributes.GetUserString(key))then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllUserText: Attributes failed to set key '%s' on %A from %A" key targetId sourceId
         
-    ///<summary>Copies the value for a given user text key from a scource object to a target object</summary>
+    ///<summary>Copies the value for a given user text key from a scource object to a target object.</summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
@@ -186,7 +186,7 @@ module AutoOpenCurried =
         if not <| de.Attributes.SetUserString(key,v) then RhinoScriptingException.Raise "RhinoScriptSyntax.matchUserText: failed to set key '%s' to '%s' on %A" key v targetId
         
     [<Extension>]
-    ///<summary>Copies the object name from a scource object to a target object</summary>
+    ///<summary>Copies the object name from a scource object to a target object.</summary>
     ///<param name="sourceId">(Guid) The object to take the name from </param>
     ///<param name="targetId">(Guid) The object to write the name to </param>
     ///<returns>(unit) void, nothing.</returns>
@@ -199,7 +199,7 @@ module AutoOpenCurried =
         if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchName failed for '%A' and '%A'"  sourceId targetId
 
     [<Extension>]
-    ///<summary>Puts target object on the same Layer as a scource object </summary>
+    ///<summary>Puts target object on the same Layer as a scource object .</summary>
     ///<param name="sourceId">(Guid) The object to take the layer from </param>
     ///<param name="targetId">(Guid) The object to change the layer</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -212,7 +212,7 @@ module AutoOpenCurried =
     
     [<Extension>]
     ///<summary>Matches all properties( layer, name, user text, ....) from a scource object to a target object by duplicating attributes. 
-    /// and copying user strings on geometry. </summary>
+    /// and copying user strings on geometry. .</summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
     ///<returns>(unit) void, nothing.</returns>
@@ -228,7 +228,7 @@ module AutoOpenCurried =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllProperties: Geometry failed to set key '%s' on %A from %A" key  targetId sourceId
 
     [<Extension>]
-    ///<summary>Draws any Geometry object to a given or current layer</summary>
+    ///<summary>Draws any Geometry object to a given or current layer.</summary>
     ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
     ///<param name="geo">(GeometryBase) Geometry</param>    
     ///<returns>(unit) void, nothing.</returns>
@@ -239,7 +239,7 @@ module AutoOpenCurried =
         
     [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member</summary>
+    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="objectId">(Guid) The identifier of the object</param> 
     ///<returns>(unit) void, nothing.</returns>

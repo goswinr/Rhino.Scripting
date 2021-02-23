@@ -130,7 +130,7 @@ type [<Struct>] Quat =
     /// 1) Rotate frame A about its z axis by angle gamma;
     /// 2) Rotate the resulting frame about its (new) y axis by angle beta;
     /// 3) Rotate the resulting frame about its (new) x axis by angle alpha, to arrive at frame B.
-    /// </summary>
+    /// .</summary>
     /// <returns>The EulerAngles in degrees: Alpha, Beta , Gamma.</returns>
     static member toEulerAngles(q:Quat)=
         // from https://github.com/mathnet/mathnet-spatial/blob/8f08be97b4b6d2ff676ee51dd91f88f7818bad3a/src/Spatial/Euclidean/Quaternion.cs#L499
