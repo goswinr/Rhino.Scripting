@@ -7,7 +7,7 @@ let folder = @"D:\Git\Rhino.Scripting\Src\"
 let files = IO.getAllFilesByPattern folder "*.fs" |> Rarr.ofSeq
 
 //localised
-let prevName, newName = "..</summary>" ,  ".</summary>"
+let prevName, newName = "  " ,  " "
 
 
 for f in files do
@@ -29,7 +29,7 @@ for f in files do
                 yield! ln
                     
         }
-    if true   && any then     
+    if false && any then     
         if code.EndsWith(Environment.NewLine) then 
             IO.File.WriteAllText(f, code) 
         else 
