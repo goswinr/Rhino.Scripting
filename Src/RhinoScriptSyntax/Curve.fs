@@ -199,10 +199,10 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Adds an interpolated curve object that lies on a specified
-    ///    surface.  Note, this function will not create periodic curves,
+    ///    Surface.  Note, this function will not create periodic curves,
     ///    but it will create closed curves</summary>
-    ///<param name="surfaceId">(Guid) Identifier of the surface to create the curve on</param>
-    ///<param name="points">(Point3d seq) List of 3D points that lie on the specified surface.
+    ///<param name="surfaceId">(Guid) Identifier of the Surface to create the curve on</param>
+    ///<param name="points">(Point3d seq) List of 3D points that lie on the specified Surface.
     ///    The list must contain at least 2 points</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid =
@@ -217,11 +217,11 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Adds an interpolated curve object based on surface parameters,
-    ///    that lies on a specified surface. Note, this function will not
+    ///<summary>Adds an interpolated curve object based on Surface parameters,
+    ///    that lies on a specified Surface. Note, this function will not
     ///    create periodic curves, but it will create closed curves</summary>
-    ///<param name="surfaceId">(Guid) Identifier of the surface to create the curve on</param>
-    ///<param name="points">(Point2d seq) A list of 2D surface parameters. The list must contain
+    ///<param name="surfaceId">(Guid) Identifier of the Surface to create the curve on</param>
+    ///<param name="points">(Point2d seq) A list of 2D Surface parameters. The list must contain
     ///    at least 2 sets of parameters</param>
     ///<returns>(Guid) objectId of the new curve object</returns>
     static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid =
@@ -823,7 +823,7 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Intersects a curve object with a brep object. Note, unlike the
-    ///    CurveSurfaceIntersection function, this function works on trimmed surfaces</summary>
+    ///    CurveSurfaceIntersection function, this function works on trimmed Surfaces</summary>
     ///<param name="curveId">(Guid) Identifier of a curve object</param>
     ///<param name="brepId">(Guid) Identifier of a brep object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
@@ -859,7 +859,7 @@ module ExtensionsCurve =
     ///    each other. Note, this function provides similar functionality to that of
     ///    Rhino's ClosestPt command</summary>
     ///<param name="curveId">(Guid) Identifier of the curve object to test</param>
-    ///<param name="objectIds">(Guid seq) List of identifiers of point cloud, curve, surface, or
+    ///<param name="objectIds">(Guid seq) List of identifiers of point cloud, curve, Surface, or
     ///    polysurface to test against</param>
     ///<returns>(Guid * Point3d * Point3d) containing the results of the closest point calculation.
     ///    The elements are as follows:
@@ -1486,8 +1486,8 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Calculates intersection of a curve object with a surface object.
-    ///    Note, this function works on the untrimmed portion of the surface</summary>
+    ///<summary>Calculates intersection of a curve object with a Surface object.
+    ///    Note, this function works on the untrimmed portion of the Surface</summary>
     ///<param name="curveId">(Guid) The identifier of the first curve object</param>
     ///<param name="surfaceId">(Guid) The identifier of the second curve object. If omitted,
     ///    the a self-intersection test will be performed on curve</param>
@@ -1496,7 +1496,7 @@ module ExtensionsCurve =
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>Doc.ModelAngleToleranceRadians</c>
     ///    Angle tolerance in degrees. The angle
     ///    tolerance is used to determine when the curve is tangent to the
-    ///    surface.</param>
+    ///    Surface.</param>
     ///<returns>(Rarr of int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) of intersection information .
     ///    The list will contain one or more of the following elements:
     ///      Element Type     Description
@@ -1509,27 +1509,27 @@ module ExtensionsCurve =
     ///        intersection end point on the first curve.
     ///      [n][3]  Point3d  If the event type is Point(1), then the intersection point
     ///        on the second curve. If the event type is Overlap(2), then
-    ///        intersection start point on the surface.
+    ///        intersection start point on the Surface.
     ///      [n][4]  Point3d  If the event type is Point(1), then the intersection point
     ///        on the second curve. If the event type is Overlap(2), then
-    ///        intersection end point on the surface.
+    ///        intersection end point on the Surface.
     ///      [n][5]  Number   If the event type is Point(1), then the first curve parameter.
     ///        If the event type is Overlap(2), then the start value of the
     ///        first curve parameter range.
     ///      [n][6]  Number   If the event type is Point(1), then the first curve parameter.
     ///        If the event type is Overlap(2), then the end value of the
     ///        curve parameter range.
-    ///      [n][7]  Number   If the event type is Point(1), then the U surface parameter.
-    ///        If the event type is Overlap(2), then the U surface parameter
+    ///      [n][7]  Number   If the event type is Point(1), then the U Surface parameter.
+    ///        If the event type is Overlap(2), then the U Surface parameter
     ///        for curve at (n, 5).
-    ///      [n][8]  Number   If the event type is Point(1), then the V surface parameter.
-    ///        If the event type is Overlap(2), then the V surface parameter
+    ///      [n][8]  Number   If the event type is Point(1), then the V Surface parameter.
+    ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for curve at (n, 5).
-    ///      [n][9]  Number   If the event type is Point(1), then the U surface parameter.
-    ///        If the event type is Overlap(2), then the U surface parameter
+    ///      [n][9]  Number   If the event type is Point(1), then the U Surface parameter.
+    ///        If the event type is Overlap(2), then the U Surface parameter
     ///        for curve at (n, 6).
-    ///      [n][10] Number   If the event type is Point(1), then the V surface parameter.
-    ///        If the event type is Overlap(2), then the V surface parameter
+    ///      [n][10] Number   If the event type is Point(1), then the V Surface parameter.
+    ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for curve at (n, 6)</returns>
     static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -1797,7 +1797,7 @@ module ExtensionsCurve =
     ///    0 = extend from the start of the curve
     ///    1 = extend from the end of the curve
     ///    2 = extend from both the start and the end of the curve</param>
-    ///<param name="boundarycurveIds">(Guid seq) Curve, surface, and polysurface objects to extend to</param>
+    ///<param name="boundarycurveIds">(Guid seq) Curve, Surface, and polysurface objects to extend to</param>
     ///<param name="replaceInput">(bool) Optional, Default Value <c>false</c> Replace input or add new?</param>
     ///<returns>(Guid) The identifier of the new object or orignal curve ( depending on 'replaceInput')</returns>
     static member ExtendCurve(  curveId:Guid, 
@@ -2359,7 +2359,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Offset a curve on a surface. The source curve must lie on the surface.
+    ///<summary>Offset a curve on a Surface. The source curve must lie on the Surface.
     ///    The offset curve or curves will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
@@ -2376,7 +2376,7 @@ module ExtensionsCurve =
         rc
 
     [<Extension>]
-    ///<summary>Offset a curve on a surface. The source curve must lie on the surface.
+    ///<summary>Offset a curve on a Surface. The source curve must lie on the Surface.
     ///    The offset curve or curves will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
@@ -2484,7 +2484,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Projects one or more curves onto one or more surfaces or meshes</summary>
+    ///<summary>Projects one or more curves onto one or more Surfaces or meshes</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
     ///<param name="meshIds">(Guid seq) Identifiers of meshes to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>
@@ -2500,9 +2500,9 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Projects one or more curves onto one or more surfaces or polysurfaces</summary>
+    ///<summary>Projects one or more curves onto one or more Surfaces or polysurfaces</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
-    ///<param name="surfaceIds">(Guid seq) Identifiers of surfaces to project onto</param>
+    ///<param name="surfaceIds">(Guid seq) Identifiers of Surfaces to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid Rarr) list of identifiers</returns>
     static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid Rarr =

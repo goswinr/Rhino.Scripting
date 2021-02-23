@@ -296,7 +296,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompt the user to pick one or more surface or polysurface edge curves</summary>
+    ///<summary>Prompt the user to pick one or more Surface or polysurface edge curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
     ///    A prompt or message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
@@ -420,7 +420,7 @@ module ExtensionsUserinterface =
     ///    Line definition mode.
     ///    0  Default - Show all modes, start in two-point mode
     ///    1  Two-point - Defines a line from two points.
-    ///    2  Normal - Defines a line normal to a location on a surface.
+    ///    2  Normal - Defines a line normal to a location on a Surface.
     ///    3  Angled - Defines a line at a specified angle from a reference line.
     ///    4  Vertical - Defines a line vertical to the construction plane.
     ///    5  Four-point - Defines a line using two points to establish direction and two points to establish length.
@@ -615,9 +615,9 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point constrained to a surface or polysurface
+    ///<summary>Pauses for user input of a point constrained to a Surface or polysurface
     ///    object</summary>
-    ///<param name="surfaceId">(Guid) Identifier of the surface to get a point on</param>
+    ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>

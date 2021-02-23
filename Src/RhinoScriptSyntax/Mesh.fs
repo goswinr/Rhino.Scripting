@@ -747,8 +747,8 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Duplicates each polygon in a mesh with a NURBS surface. The resulting
-    ///    surfaces are then joined into a polysurface and added to the document</summary>
+    ///<summary>Duplicates each polygon in a mesh with a NURBS Surface. The resulting
+    ///    Surfaces are then joined into a polysurface and added to the document</summary>
     ///<param name="objectId">(Guid) Identifier of a mesh object</param>
     ///<param name="trimmedTriangles">(bool) Optional, Default Value: <c>true</c>
     ///    If True, triangles in the mesh will be

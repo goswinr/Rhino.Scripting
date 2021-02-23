@@ -268,9 +268,9 @@ module ExtensionsPointvector =
 
 
     [<Extension>]
-    ///<summary>Projects one or more points onto one or more surfaces or polysurfaces</summary>
+    ///<summary>Projects one or more points onto one or more Surfaces or polysurfaces</summary>
     ///<param name="points">(Point3d seq) One or more 3D points</param>
-    ///<param name="surfaceIds">(Guid seq) Identifiers of one or more surfaces/polysurfaces</param>
+    ///<param name="surfaceIds">(Guid seq) Identifiers of one or more Surfaces/polysurfaces</param>
     ///<param name="direction">(Vector3d) Direction vector to project the points</param>
     ///<returns>(Point3d array) projected points</returns>
     static member ProjectPointToSurface( points:Point3d seq,
@@ -282,11 +282,11 @@ module ExtensionsPointvector =
 
 
     [<Extension>]
-    ///<summary>Pulls an array of points to a surface or mesh object. For more
+    ///<summary>Pulls an array of points to a Surface or mesh object. For more
     ///    information, see the Rhino help file Pull command</summary>
-    ///<param name="objectId">(Guid) The identifier of the surface or mesh object that pulls</param>
+    ///<param name="objectId">(Guid) The identifier of the Surface or mesh object that pulls</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<returns>(Point3d array) 3D points pulled onto surface or mesh</returns>
+    ///<returns>(Point3d array) 3D points pulled onto Surface or mesh</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array =
         //id = RhinoScriptSyntax.Coerceguid(objectId)
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)

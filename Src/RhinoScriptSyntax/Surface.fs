@@ -55,7 +55,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a planar surface through objects at a designated location. For more
+    ///<summary>Adds a planar Surface through objects at a designated location. For more
     ///    information, see the Rhino help file for the CutPlane command</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects that the cutting plane will
     ///    pass through</param>
@@ -63,7 +63,7 @@ module ExtensionsSurface =
     ///<param name="endPoint">(Point3d) End point of line that defines the cutting plane</param>
     ///<param name="normal">(Vector3d) Optional, Default Value: <c>world Z axis</c>
     ///    Vector that will be contained in the returned planar
-    ///    surface.
+    ///    Surface.
     ///    If omitted, the world Z axis is used</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddCutPlane( objectIds:Guid seq,
@@ -114,7 +114,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a surface from 2, 3, or 4 edge curves</summary>
+    ///<summary>Creates a Surface from 2, 3, or 4 edge curves</summary>
     ///<param name="curveIds">(Guid seq) List or tuple of curves</param>
     ///<returns>(Guid) identifier of new object</returns>
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
@@ -128,8 +128,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a surface from a network of crossing curves</summary>
-    ///<param name="curves">(Guid seq) Curves from which to create the surface</param>
+    ///<summary>Creates a Surface from a network of crossing curves</summary>
+    ///<param name="curves">(Guid seq) Curves from which to create the Surface</param>
     ///<param name="continuity">(int) Optional, Default Value: <c>1</c>
     ///    How the edges match the input geometry
     ///    0 = loose
@@ -155,15 +155,15 @@ module ExtensionsSurface =
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddNetworkSrf failed on %A" curves
 
     [<Extension>]
-    ///<summary>Adds a NURBS surface object to the document</summary>
+    ///<summary>Adds a NURBS Surface object to the document</summary>
     ///<param name="pointCount">(int * int) Number of control points in the u and v direction</param>
     ///<param name="points">(Point3d IList) List or Array of 3D points</param>
-    ///<param name="knotsU">(float IList) List or Array of Knot values for the surface in the u direction.
+    ///<param name="knotsU">(float IList) List or Array of Knot values for the Surface in the u direction.
     ///    Must contain pointCount[0]+degree[0]-1 elements</param>
-    ///<param name="knotsV">(float IList) List or Array of Knot values for the surface in the v direction.
+    ///<param name="knotsV">(float IList) List or Array of Knot values for the Surface in the v direction.
     ///    Must contain pointCount[1]+degree[1]-1 elements</param>
-    ///<param name="degree">(int * int) Degree of the surface in the u and v directions</param>
-    ///<param name="weights">(float IList) Optional, List or Array ofWeight values for the surface. The number of elements in
+    ///<param name="degree">(int * int) Degree of the Surface in the u and v directions</param>
+    ///<param name="weights">(float IList) Optional, List or Array ofWeight values for the Surface. The number of elements in
     ///    weights must equal the number of elements in points. Values must be
     ///    greater than zero</param>
     ///<returns>(Guid) identifier of new object</returns>
@@ -220,32 +220,32 @@ module ExtensionsSurface =
         objectId
 
     [<Extension>]
-    ///<summary>Fits a surface through curve, point, point cloud, and mesh objects</summary>
+    ///<summary>Fits a Surface through curve, point, point cloud, and mesh objects</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
     ///    Acceptable object types include curves, points, point clouds, and meshes</param>
-    ///<param name="startSurfaceId">(Guid) The identifier of the starting surface.  It is best if you create a starting surface that is similar in shape
-    ///    to the surface you are trying to create</param>
+    ///<param name="startSurfaceId">(Guid) The identifier of the starting Surface.  It is best if you create a starting Surface that is similar in shape
+    ///    to the Surface you are trying to create</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    ///    Try to find an outside curve and trims the surface to it.  The default value is True</param>
+    ///    Try to find an outside curve and trims the Surface to it.  The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
     ///    The basic distance between points sampled from input curves.  The default value is 0.1</param>
     ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
-    ///    Determines the behavior of the surface in areas where its not otherwise controlled by the input.
-    ///    Lower numbers make the surface behave more like a stiff material, higher, more like a flexible material.
+    ///    Determines the behavior of the Surface in areas where its not otherwise controlled by the input.
+    ///    Lower numbers make the Surface behave more like a stiff material, higher, more like a flexible material.
     ///    That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
-    ///    mapping to that area of the surface when the flexibility value is low.  The scale is logarithmic.
+    ///    mapping to that area of the Surface when the flexibility value is low.  The scale is logarithmic.
     ///    For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
-    ///    make the surface flexible.  The default value is 1.0</param>
+    ///    make the Surface flexible.  The default value is 1.0</param>
     ///<param name="surfacePull">(float) Optional, Default Value: <c>1.0</c>
-    ///    Similar to stiffness, but applies to the starting surface. The bigger the pull, the closer
-    ///    the resulting surface shape will be to the starting surface.  The default value is 1.0</param>
+    ///    Similar to stiffness, but applies to the starting Surface. The bigger the pull, the closer
+    ///    the resulting Surface shape will be to the starting Surface.  The default value is 1.0</param>
     ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
-    ///    Clamps the edges of the starting surface in place. This option is useful if you are using a
-    ///    curve or points for deforming an existing surface, and you do not want the edges of the starting surface
+    ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
+    ///    curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
     ///    to move.  The default if False</param>
-    ///<returns>(Guid) Identifier of the new surface object</returns>
+    ///<returns>(Guid) Identifier of the new Surface object</returns>
     static member AddPatch( objectIds:Guid seq,
                               startSurfaceId: Guid,
                               [<OPT;DEF(0.0)>]tolerance:float,
@@ -268,32 +268,32 @@ module ExtensionsSurface =
                         RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch faild for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) startSurfaceId
 
     [<Extension>]
-    ///<summary>Fits a surface through curve, point, point cloud, and mesh objects</summary>
+    ///<summary>Fits a Surface through curve, point, point cloud, and mesh objects</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
     ///    Acceptable object types include curves, points, point clouds, and meshes</param>
-    ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated surface . however it is best if you create a starting surface that is similar in shape
-    ///    to the surface you are trying to create an use the other overload of this method</param>
+    ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated Surface . however it is best if you create a starting Surface that is similar in shape
+    ///    to the Surface you are trying to create an use the other overload of this method</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    ///    Try to find an outside curve and trims the surface to it.  The default value is True</param>
+    ///    Try to find an outside curve and trims the Surface to it.  The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
     ///    The basic distance between points sampled from input curves.  The default value is 0.1</param>
     ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
-    ///    Determines the behavior of the surface in areas where its not otherwise controlled by the input.
-    ///    Lower numbers make the surface behave more like a stiff material, higher, more like a flexible material.
+    ///    Determines the behavior of the Surface in areas where its not otherwise controlled by the input.
+    ///    Lower numbers make the Surface behave more like a stiff material, higher, more like a flexible material.
     ///    That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
-    ///    mapping to that area of the surface when the flexibility value is low.  The scale is logarithmic.
+    ///    mapping to that area of the Surface when the flexibility value is low.  The scale is logarithmic.
     ///    For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
-    ///    make the surface flexible.  The default value is 1.0</param>
+    ///    make the Surface flexible.  The default value is 1.0</param>
     ///<param name="surfacePull">(float) Optional, Default Value: <c>1.0</c>
-    ///    Similar to stiffness, but applies to the starting surface. The bigger the pull, the closer
-    ///    the resulting surface shape will be to the starting surface.  The default value is 1.0</param>
+    ///    Similar to stiffness, but applies to the starting Surface. The bigger the pull, the closer
+    ///    the resulting Surface shape will be to the starting Surface.  The default value is 1.0</param>
     ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
-    ///    Clamps the edges of the starting surface in place. This option is useful if you are using a
-    ///    curve or points for deforming an existing surface, and you do not want the edges of the starting surface
+    ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
+    ///    curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
     ///    to move.  The default if False</param>
-    ///<returns>(Guid) Identifier of the new surface object</returns>
+    ///<returns>(Guid) Identifier of the new Surface object</returns>
     static member AddPatch( objectIds:Guid seq,
                             uvSpans: int * int ,
                             [<OPT;DEF(0.0)>]tolerance:float,
@@ -317,7 +317,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a single walled surface with a circular profile around a curve</summary>
+    ///<summary>Creates a single walled Surface with a circular profile around a curve</summary>
     ///<param name="curveId">(Guid) Identifier of rail curve</param>
     ///<param name="parameters">(float seq) normalized curve parameters</param>
     ///<param name="radii">(float seq) radius values at normalized curve parameters</param>
@@ -326,7 +326,7 @@ module ExtensionsSurface =
     ///<param name="cap">(int) Optional, Default Value: <c>0</c>
     ///    0(none), 1(flat), 2(round)</param>
     ///<param name="fit">(bool) Optional, Default Value: <c>false</c>
-    ///    Attempt to fit a single surface</param>
+    ///    Attempt to fit a single Surface</param>
     ///<returns>(Guid Rarr) identifiers of new objects created</returns>
     static member AddPipe( curveId:Guid,
                            parameters:float seq,
@@ -345,9 +345,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates one or more surfaces from planar curves</summary>
-    ///<param name="objectIds">(Guid seq) Curves to use for creating planar surfaces</param>
-    ///<returns>(Guid Rarr) identifiers of surfaces created </returns>
+    ///<summary>Creates one or more Surfaces from planar curves</summary>
+    ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
+    ///<returns>(Guid Rarr) identifiers of Surfaces created </returns>
     static member AddPlanarSrf(objectIds:Guid seq) : Guid Rarr =
         let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let tolerance = Doc.ModelAbsoluteTolerance
@@ -361,7 +361,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create a plane surface and add it to the document</summary>
+    ///<summary>Create a plane Surface and add it to the document</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uDir">(float) The magnitude in the U direction</param>
     ///<param name="vDir">(float) The magnitude in the V direction</param>
@@ -381,7 +381,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a surface created by lofting curves to the document.
+    ///<summary>Adds a Surface created by lofting curves to the document.
     ///    - no curve sorting performed. pass in curves in the order you want them sorted
     ///    - directions of open curves not adjusted. Use CurveDirectionsMatch and
     ///      ReverseCurve to adjust the directions of open curves
@@ -393,19 +393,19 @@ module ExtensionsSurface =
     ///<param name="loftType">(int) Optional, Default Value: <c>0</c>
     ///    Type of loft. Possible options are:
     ///    0 = Normal. Uses chord-length parameterization in the loft direction
-    ///    1 = Loose. The surface is allowed to move away from the original curves
-    ///      to make a smoother surface. The surface control points are created
+    ///    1 = Loose. The Surface is allowed to move away from the original curves
+    ///      to make a smoother Surface. The Surface control points are created
     ///      at the same locations as the control points of the loft input curves.
     ///    2 = Straight. The sections between the curves are straight. This is
-    ///      also known as a ruled surface.
-    ///    3 = Tight. The surface sticks closely to the original curves. Uses square
+    ///      also known as a ruled Surface.
+    ///    3 = Tight. The Surface sticks closely to the original curves. Uses square
     ///      root of chord-length parameterization in the loft direction</param>
     ///<param name="rebuild">(int) Optional, Default Value: <c>0</c>
     ///    If not 0 then Rebuilds the shape curves before lofting with this control poin count</param>
     ///<param name="refit">(float) Optional, if given the loft is refitted, the value is the tolerance used to rebuild</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
     ///    Close the loft back to the first curve</param>
-    ///<returns>(Guid Rarr) Array containing the identifiers of the new surface objects</returns>
+    ///<returns>(Guid Rarr) Array containing the identifiers of the new Surface objects</returns>
     static member AddLoftSrf( objectIds:Guid seq,
                               [<OPT;DEF(Point3d())>]start:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                               [<OPT;DEF(Point3d())>]ende:Point3d,
@@ -441,7 +441,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create a surface by revolving a curve around an axis</summary>
+    ///<summary>Create a Surface by revolving a curve around an axis</summary>
     ///<param name="curveId">(Guid) Identifier of profile curve</param>
     ///<param name="axis">(Line) Line for the rail revolve axis</param>
     ///<param name="startAngle">(float) Optional, Default Value: <c>0.0</c>
@@ -467,7 +467,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Add a spherical surface to the document</summary>
+    ///<summary>Add a spherical Surface to the document</summary>
     ///<param name="center">(Point3d) Center point of the sphere</param>
     ///<param name="radius">(float) Radius of the sphere in the current model units</param>
     ///<returns>(Guid) identifier of the new object </returns>
@@ -481,7 +481,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
-    ///    defined cutting planes through a surface or polysurface. For more
+    ///    defined cutting planes through a Surface or polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
     ///<param name="plane">(Plane) The plane that defines the cutting plane</param>    
@@ -501,7 +501,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a spaced series of planar curves resulting from the intersection of
-    ///    defined cutting planes through a surface or polysurface. For more
+    ///    defined cutting planes through a Surface or polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
     ///<param name="startPoint">(Point3d)  the startpoint of a center line</param>
@@ -523,11 +523,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a surface from a grid of points</summary>
+    ///<summary>Creates a Surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u, v directions</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the surface in the U directions</param>
-    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the surface in the V directions</param>
+    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the Surface in the U directions</param>
+    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the Surface in the V directions</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfControlPtGrid( count:int * int,
                                        points:Point3d seq,                                       
@@ -544,7 +544,7 @@ module ExtensionsSurface =
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
 
     [<Extension>]
-    ///<summary>Creates a new surface from four corner points</summary>
+    ///<summary>Creates a new Surface from four corner points</summary>
     ///<param name="pointA">(Point3d) First corner point</param>
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
@@ -559,7 +559,7 @@ module ExtensionsSurface =
         rc
 
     [<Extension>]
-    ///<summary>Creates a new surface from three corner points</summary>
+    ///<summary>Creates a new Surface from three corner points</summary>
     ///<param name="pointA">(Point3d) First corner point</param>
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
@@ -574,13 +574,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a surface from a grid of points</summary>
+    ///<summary>Creates a Surface from a grid of points</summary>
     ///<param name="count">(int * int) Tuple of two numbers defining number of points in the u, v directions</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the surface in the U directions</param>
-    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the surface in the V directions</param>
-    ///<param name="closedU">(bool * bool) Optional, Default Value: <c>false</c>  boolean defining if the surface is closed in the U directions</param>
-    ///<param name="closedV">(bool * bool) Optional, Default Value: <c>false</c>  boolean defining if the surface is closed in the V directions</param>
+    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the Surface in the U directions</param>
+    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the Surface in the V directions</param>
+    ///<param name="closedU">(bool * bool) Optional, Default Value: <c>false</c>  boolean defining if the Surface is closed in the U directions</param>
+    ///<param name="closedV">(bool * bool) Optional, Default Value: <c>false</c>  boolean defining if the Surface is closed in the V directions</param>
     ///<returns>(Guid) The identifier of the new object</returns>
     static member AddSrfPtGrid( count:int * int,
                                 points:Point3d seq,
@@ -600,13 +600,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a surface created through profile curves that define the surface
-    ///    shape and one curve that defines a surface edge</summary>
+    ///<summary>Adds a Surface created through profile curves that define the Surface
+    ///    shape and one curve that defines a Surface edge</summary>
     ///<param name="rail">(Guid) Identifier of the rail curve</param>
     ///<param name="shapes">(Guid seq) One or more cross section shape curves</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, then create a closed surface</param>
-    ///<returns>(Guid Rarr) of new surface objects</returns>
+    ///    If True, then create a closed Surface</param>
+    ///<returns>(Guid Rarr) of new Surface objects</returns>
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
@@ -621,13 +621,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a surface created through profile curves that define the surface
-    ///    shape and two curves that defines a surface edge</summary>
+    ///<summary>Adds a Surface created through profile curves that define the Surface
+    ///    shape and two curves that defines a Surface edge</summary>
     ///<param name="rails">(Guid * Guid) Identifiers of the two rail curve</param>
     ///<param name="shapes">(Guid seq) One or more cross section shape curves</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, then create a closed surface</param>
-    ///<returns>(Guid Rarr) of new surface objects</returns>
+    ///    If True, then create a closed Surface</param>
+    ///<returns>(Guid Rarr) of new Surface objects</returns>
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
@@ -643,13 +643,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a surface created through profile curves that define the surface
-    ///    shape and two curves that defines a surface edge</summary>
+    ///<summary>Adds a Surface created through profile curves that define the Surface
+    ///    shape and two curves that defines a Surface edge</summary>
     ///<param name="profile">(Guid) Identifier of the profile curve</param>
     ///<param name="rail">(Guid) Identifier of the rail curve</param>
     ///<param name="axis">(Line) A LIne identifying the start point and end point of the rail revolve axis</param>
     ///<param name="scaleHeight">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, surface will be locally scaled. Defaults to False</param>
+    ///    If True, Surface will be locally scaled. Defaults to False</param>
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddRailRevSrf( profile:Guid,
                                  rail:Guid,
@@ -665,7 +665,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Adds a torus shaped revolved surface to the document</summary>
+    ///<summary>Adds a torus shaped revolved Surface to the document</summary>
     ///<param name="basis">(Plane)  the basis plane of the torus</param>
     ///<param name="majorRadius">(float) Major radius of  the torus</param>
     ///<param name="minorRadius">(float) Minor radius of  torus</param>
@@ -681,11 +681,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Performs a boolean difference operation on two sets of input surfaces
+    ///<summary>Performs a boolean difference operation on two sets of input Surfaces
     ///    and polysurfaces. For more details, see the BooleanDifference command in
     ///    the Rhino help file</summary>
-    ///<param name="input0">(Guid seq) List of surfaces to subtract from</param>
-    ///<param name="input1">(Guid seq) List of surfaces to be subtracted</param>
+    ///<param name="input0">(Guid seq) List of Surfaces to subtract from</param>
+    ///<param name="input1">(Guid seq) List of Surfaces to be subtracted</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete all input objects</param>
     ///<returns>(Guid Rarr) of identifiers of newly created objects </returns>
@@ -707,11 +707,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Performs a boolean intersection operation on two sets of input surfaces
+    ///<summary>Performs a boolean intersection operation on two sets of input Surfaces
     ///    and polysurfaces. For more details, see the BooleanIntersection command in
     ///    the Rhino help file</summary>
-    ///<param name="input0">(Guid seq) List of surfaces</param>
-    ///<param name="input1">(Guid seq) List of surfaces</param>
+    ///<param name="input0">(Guid seq) List of Surfaces</param>
+    ///<param name="input1">(Guid seq) List of Surfaces</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete all input objects</param>
     ///<returns>(Guid Rarr) of identifiers of newly created objects </returns>
@@ -732,10 +732,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Performs a boolean union operation on a set of input surfaces and
+    ///<summary>Performs a boolean union operation on a set of input Surfaces and
     ///    polysurfaces. For more details, see the BooleanUnion command in the
     ///    Rhino help file</summary>
-    ///<param name="input">(Guid seq) List of surfaces to union</param>
+    ///<param name="input">(Guid seq) List of Surfaces to union</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete all input objects</param>
     ///<returns>(Guid Rarr) of identifiers of newly created objects </returns>
@@ -753,8 +753,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the point on a surface or polysurface that is closest to a test
-    ///    point. This function works on both untrimmed and trimmed surfaces</summary>
+    ///<summary>Returns the point on a Surface or polysurface that is closest to a test
+    ///    point. This function works on both untrimmed and trimmed Surfaces</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<returns>(Point3d * float * float * ComponentIndexType * int * Vector3d) of closest point information . The list will
@@ -790,8 +790,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Caps planar holes in a surface or polysurface</summary>
-    ///<param name="surfaceId">(Guid) The identifier of the surface or polysurface to cap</param>
+    ///<summary>Caps planar holes in a Surface or polysurface</summary>
+    ///<param name="surfaceId">(Guid) The identifier of the Surface or polysurface to cap</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member CapPlanarHoles(surfaceId:Guid) : bool =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
@@ -811,10 +811,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Duplicates the edge curves of a surface or polysurface. For more
+    ///<summary>Duplicates the edge curves of a Surface or polysurface. For more
     ///    information, see the Rhino help file for information on the DupEdge
     ///    command</summary>
-    ///<param name="objectId">(Guid) The identifier of the surface or polysurface object</param>
+    ///<param name="objectId">(Guid) The identifier of the Surface or polysurface object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge curves. The default is not to select (False)</param>
     ///<returns>(Guid Rarr) identifying the newly created curve objects</returns>
@@ -836,8 +836,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create curves that duplicate a surface or polysurface border</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<summary>Create curves that duplicate a Surface or polysurface border</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="typ">(int) Optional, Default Value: <c>0</c>
     ///    The border curves to return
     ///    0 = both exterior and interior,
@@ -859,7 +859,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Evaluates a surface at a U, V parameter</summary>
+    ///<summary>Evaluates a Surface at a U, V parameter</summary>
     ///<param name="surfaceId">(Guid) The object's identifier</param>
     ///<param name="u">(float) U of u, v parameters to evaluate</param>
     ///<param name="v">(float) V of u, v parameters to evaluate</param>
@@ -874,15 +874,15 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Lengthens an untrimmed surface object</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<summary>Lengthens an untrimmed Surface object</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="parameter">(float * float) Tuple of two values definfing the U, V parameter to evaluate.
-    ///    The surface edge closest to the U, V parameter will be the edge that is
+    ///    The Surface edge closest to the U, V parameter will be the edge that is
     ///    extended</param>
-    ///<param name="length">(float) Amount to extend to surface</param>
+    ///<param name="length">(float) Amount to extend to Surface</param>
     ///<param name="smooth">(bool) Optional, Default Value: <c>true</c>
-    ///    If True, the surface is extended smoothly curving from the
-    ///    edge. If False, the surface is extended in a straight line from the edge</param>
+    ///    If True, the Surface is extended smoothly curving from the
+    ///    edge. If False, the Surface is extended in a straight line from the edge</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member ExtendSurface( surfaceId:Guid,
                                  parameter:float * float,
@@ -901,7 +901,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Explodes, or unjoins, one or more polysurface objects. Polysurfaces
-    ///    will be exploded into separate surfaces</summary>
+    ///    will be exploded into separate Surfaces</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of polysurfaces to explode</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input objects after exploding</param>
@@ -921,9 +921,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Extracts isoparametric curves from a surface</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
-    ///<param name="parameter">(float * float) U, v parameter of the surface to evaluate</param>
+    ///<summary>Extracts isoparametric curves from a Surface</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
+    ///<param name="parameter">(float * float) U, v parameter of the Surface to evaluate</param>
     ///<param name="direction">(int) Direction to evaluate
     ///    0 = u
     ///    1 = v
@@ -963,12 +963,12 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Separates or copies a surface or a copy of a surface from a polysurface</summary>
+    ///<summary>Separates or copies a Surface or a copy of a Surface from a polysurface</summary>
     ///<param name="objectId">(Guid) Polysurface identifier</param>
     ///<param name="faceIndices">(int seq) One or more numbers representing faces</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    If True the faces are copied. If False, the faces are extracted</param>
-    ///<returns>(Guid Rarr) identifiers of extracted surface objects </returns>
+    ///<returns>(Guid Rarr) identifiers of extracted Surface objects </returns>
     static member ExtractSurface( objectId:Guid,
                                   faceIndices:int seq,
                                   [<OPT;DEF(false)>]copy:bool) : Guid Rarr =
@@ -988,10 +988,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a surface by extruding a curve along a path</summary>
+    ///<summary>Creates a Surface by extruding a curve along a path</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="pathId">(Guid) Identifier of the path curve</param>
-    ///<returns>(Guid) identifier of new surface </returns>
+    ///<returns>(Guid) identifier of new Surface </returns>
     static member ExtrudeCurve(curveId:Guid, pathId:Guid) : Guid =
         let curve1 = RhinoScriptSyntax.CoerceCurve(curveId)
         let curve2 = RhinoScriptSyntax.CoerceCurve(pathId)
@@ -1003,10 +1003,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a surface by extruding a curve to a point</summary>
+    ///<summary>Creates a Surface by extruding a curve to a point</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="point">(Point3d) 3D point</param>
-    ///<returns>(Guid) identifier of new surface </returns>
+    ///<returns>(Guid) identifier of new Surface </returns>
     static member ExtrudeCurvePoint(curveId:Guid, point:Point3d) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
@@ -1018,11 +1018,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create surface by extruding a curve along two points that define a line</summary>
+    ///<summary>Create Surface by extruding a curve along two points that define a line</summary>
     ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
     ///<param name="startPoint">(Point3d) Start point</param>
     ///<param name="endPoint">(Point3d) End point, that specifyies distance and direction</param>
-    ///<returns>(Guid) identifier of new surface </returns>
+    ///<returns>(Guid) identifier of new Surface </returns>
     static member ExtrudeCurveStraight( curveId:Guid,
                                         startPoint:Point3d,
                                         endPoint:Point3d) : Guid =
@@ -1038,12 +1038,12 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create surface by extruding along a path curve</summary>
-    ///<param name="surface">(Guid) Identifier of the surface to extrude</param>
+    ///<summary>Create Surface by extruding along a path curve</summary>
+    ///<param name="surface">(Guid) Identifier of the Surface to extrude</param>
     ///<param name="curve">(Guid) Identifier of the path curve</param>
     ///<param name="cap">(bool) Optional, Default Value: <c>true</c>
     ///    Extrusion is capped at both ends</param>
-    ///<returns>(Guid) identifier of new surface </returns>
+    ///<returns>(Guid) identifier of new Surface </returns>
     static member ExtrudeSurface( surface:Guid,
                                   curve:Guid,
                                   [<OPT;DEF(true)>]cap:bool) : Guid =
@@ -1059,15 +1059,15 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create constant radius rolling ball fillets between two surfaces. Note,
-    ///    this function does not trim the original surfaces of the fillets</summary>
-    ///<param name="surface0">(Guid) first surface</param>
-    ///<param name="surface1">(Guid) second surface</param>
+    ///<summary>Create constant radius rolling ball fillets between two Surfaces. Note,
+    ///    this function does not trim the original Surfaces of the fillets</summary>
+    ///<param name="surface0">(Guid) first Surface</param>
+    ///<param name="surface1">(Guid) second Surface</param>
     ///<param name="radius">(float) A positive fillet radius</param>
-    ///<param name="uvparam0">(Point2d) Optional, A u, v surface parameter of surface0 near where the fillet
-    ///    is expected to hit the surface</param>
-    ///<param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for surface1</param>
-    ///<returns>(Guid Rarr) ids of surfaces created </returns>
+    ///<param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
+    ///    is expected to hit the Surface</param>
+    ///<param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
+    ///<returns>(Guid Rarr) ids of Surfaces created </returns>
     static member FilletSurfaces( surface0:Guid,
                                   surface1:Guid,
                                   radius:float,
@@ -1090,9 +1090,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the normal direction of a surface. This feature can
+    ///<summary>Returns the normal direction of a Surface. This feature can
     /// also be found in Rhino's Dir command</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<returns>(bool) The current normal orientation</returns>
     static member FlipSurface(surfaceId:Guid) : bool = //GET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
@@ -1102,9 +1102,9 @@ module ExtensionsSurface =
         oldreverse
 
     [<Extension>]
-    ///<summary>Changes the normal direction of a surface. This feature can
+    ///<summary>Changes the normal direction of a Surface. This feature can
     /// also be found in Rhino's Dir command</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
     ///<returns>(unit) void, nothing</returns>
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
@@ -1117,9 +1117,9 @@ module ExtensionsSurface =
             Doc.Objects.Replace(surfaceId, brep)|> ignore
             Doc.Views.Redraw()
     [<Extension>]
-    ///<summary>Changes the normal direction of multiple surface. This feature can
+    ///<summary>Changes the normal direction of multiple Surface. This feature can
     /// also be found in Rhino's Dir command</summary>
-    ///<param name="surfaceIds">(Guid seq) Identifiers of multiple surface objects</param>
+    ///<param name="surfaceIds">(Guid seq) Identifiers of multiple Surface objects</param>
     ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
     ///<returns>(unit) void, nothing</returns>
     static member FlipSurface(surfaceIds:Guid seq, flip:bool) : unit = //MULTISET
@@ -1136,7 +1136,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Intersects a brep object with another brep object. Note, unlike the
-    ///    SurfaceSurfaceIntersection function this function works on trimmed surfaces</summary>
+    ///    SurfaceSurfaceIntersection function this function works on trimmed Surfaces</summary>
     ///<param name="brep1">(Guid) Identifier of first brep object</param>
     ///<param name="brep2">(Guid) Identifier of second brep object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
@@ -1214,8 +1214,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Determines if a surface is a portion of a cone</summary>
-    ///<param name="objectId">(Guid) The surface object's identifier</param>
+    ///<summary>Determines if a Surface is a portion of a cone</summary>
+    ///<param name="objectId">(Guid) The Surface object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsCone(objectId:Guid) : bool =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
@@ -1223,7 +1223,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Determines if a surface is a portion of a cone</summary>
+    ///<summary>Determines if a Surface is a portion of a cone</summary>
     ///<param name="objectId">(Guid) The cylinder object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsCylinder(objectId:Guid) : bool =
@@ -1232,8 +1232,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a plane surface. Plane surfaces can be created by
-    ///    the Plane command. Note, a plane surface is not a planar NURBS surface</summary>
+    ///<summary>Verifies an object is a plane Surface. Plane Surfaces can be created by
+    ///    the Plane command. Note, a plane Surface is not a planar NURBS Surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPlaneSurface(objectId:Guid) : bool =
@@ -1308,7 +1308,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Verifies an object is a Folysurface or Extrusion. Polysurfaces consist of two or more
-    ///    surfaces joined together. </summary>
+    ///    Surfaces joined together. </summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False</returns>
     static member IsPolysurface(objectId:Guid) : bool =
@@ -1336,7 +1336,7 @@ module ExtensionsSurface =
        
 
     [<Extension>]
-    ///<summary>Determines if a surface is a portion of a Sphere</summary>
+    ///<summary>Determines if a Surface is a portion of a Sphere</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsSphere(objectId:Guid) : bool =
@@ -1347,8 +1347,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a surface. Brep objects with only one face are
-    ///    also considered surfaces</summary>
+    ///<summary>Verifies an object is a Surface. Brep objects with only one face are
+    ///    also considered Surfaces</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsSurface(objectId:Guid) : bool =
@@ -1357,8 +1357,8 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Verifies a Surface object is closed in the specified direction.  If the
-    ///    surface fully encloses a volume, it is considered a solid</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///    Surface fully encloses a volume, it is considered a solid</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="direction">(int) 
     ///    0 = U direction check, 
     ///    1 = V direction check</param>
@@ -1371,7 +1371,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Verifies a Surface object is periodic in the specified direction</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="direction">(int) 
     ///    0 = U direction check, 
     ///    1 = V direction check</param>
@@ -1384,8 +1384,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a surface object is planar</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///<summary>Verifies a Surface object is planar</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    Tolerance used when checked. If omitted, the current absolute
     ///    tolerance is used</param>
@@ -1399,8 +1399,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a surface object is rational</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Verifies a Surface object is rational</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsSurfaceRational(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions
@@ -1413,9 +1413,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a surface object is singular in the specified direction.
+    ///<summary>Verifies a Surface object is singular in the specified direction.
     ///    Surfaces are considered singular if a side collapses to a point</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="direction">(int) 
     ///    0 = south
     ///    1 = east
@@ -1430,8 +1430,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a surface object has been trimmed</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Verifies a Surface object has been trimmed</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(bool) True or False</returns>
     static member IsSurfaceTrimmed(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceBrep(surfaceId) with
@@ -1441,8 +1441,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Determines if a surface is a portion of a torus</summary>
-    ///<param name="surfaceId">(Guid) The surface object's identifier</param>
+    ///<summary>Determines if a Surface is a portion of a torus</summary>
+    ///<param name="surfaceId">(Guid) The Surface object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsTorus(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions
@@ -1452,8 +1452,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Gets the sphere definition from a surface, if possible</summary>
-    ///<param name="surfaceId">(Guid) The identifier of the surface object</param>
+    ///<summary>Gets the sphere definition from a Surface, if possible</summary>
+    ///<param name="surfaceId">(Guid) The identifier of the Surface object</param>
     ///<returns>(Plane * float) The equatorial plane of the sphere, and its radius</returns>
     static member SurfaceSphere(surfaceId:Guid) : Plane * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -1465,11 +1465,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Joins two or more surface or polysurface objects together to form one
+    ///<summary>Joins two or more Surface or polysurface objects together to form one
     ///    polysurface object</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///    Delete the original surfaces</param>
+    ///    Delete the original Surfaces</param>
     ///<returns>(Guid) identifier of newly created object</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let breps =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
@@ -1491,14 +1491,14 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Makes an existing surface a periodic NURBS surface</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Makes an existing Surface a periodic NURBS Surface</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="direction">(int) The direction to make periodic, either 
     ///    0 = U  
     ///    1 = V</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///    Delete the input surface</param>
-    ///<returns>(Guid) if deleteInput is False, identifier of the new surface</returns>
+    ///    Delete the input Surface</param>
+    ///<returns>(Guid) if deleteInput is False, identifier of the new Surface</returns>
     static member MakeSurfacePeriodic( surfaceId:Guid,
                                        direction:int,
                                        [<OPT;DEF(false)>]deleteInput:bool) : Guid =
@@ -1517,15 +1517,15 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Offsets a trimmed or untrimmed surface by a distance. The offset surface
+    ///<summary>Offsets a trimmed or untrimmed Surface by a distance. The offset Surface
     ///    will be added to Rhino</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="distance">(float) The distance to offset</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
     ///    document's absolute tolerance is usually sufficient</param>
     ///<param name="bothSides">(bool) Optional, Default Value: <c>false</c>
-    ///    Offset to both sides of the input surface</param>
+    ///    Offset to both sides of the input Surface</param>
     ///<param name="createSolid">(bool) Optional, Default Value: <c>false</c>
     ///    Make a solid object</param>
     ///<returns>(Guid) identifier of the new object</returns>
@@ -1548,8 +1548,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Pulls a curve object to a surface object</summary>
-    ///<param name="surface">(Guid) The surface's identifier</param>
+    ///<summary>Pulls a curve object to a Surface object</summary>
+    ///<param name="surface">(Guid) The Surface's identifier</param>
     ///<param name="curve">(Guid) The curve's identifier</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Should the input items be deleted</param>
@@ -1570,13 +1570,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Rebuilds a surface to a given degree and control point count. For more
+    ///<summary>Rebuilds a Surface to a given degree and control point count. For more
     ///    information see the Rhino help file for the Rebuild command</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
-    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the surface in the U directions</param>
-    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the surface in the V directions</param>
-    ///<param name="pointcountU">(int) Optional, Default Value: <c>10*</c> the surface point count in U  directions</param>
-    ///<param name="pointcountV">(int) Optional, Default Value: <c>10*</c> the surface point count in V  directions</param>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
+    ///<param name="degreeU">(int) Optional, Default Value: <c>3</c> degree of the Surface in the U directions</param>
+    ///<param name="degreeV">(int) Optional, Default Value: <c>3</c> degree of the Surface in the V directions</param>
+    ///<param name="pointcountU">(int) Optional, Default Value: <c>10*</c> the Surface point count in U  directions</param>
+    ///<param name="pointcountV">(int) Optional, Default Value: <c>10*</c> the Surface point count in V  directions</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
     static member RebuildSurface( objectId:Guid,
                                   [<OPT;DEF(3)>]degreeU:int,
@@ -1596,8 +1596,8 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Deletes a knot from a Surface object</summary>
-    ///<param name="surface">(Guid) The reference of the surface object</param>
-    ///<param name="uvParameter">(float * float)): An indexable item containing a U, V parameter on the surface. List, tuples and UVIntervals will work.
+    ///<param name="surface">(Guid) The reference of the Surface object</param>
+    ///<param name="uvParameter">(float * float)): An indexable item containing a U, V parameter on the Surface. List, tuples and UVIntervals will work.
     ///    Note, if the parameter is not equal to one of the existing knots, then the knot closest to the specified parameter will be removed</param>
     ///<param name="vDirection">(bool) If True, or 1, the V direction will be addressed. If False, or 0, the U direction</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
@@ -1623,9 +1623,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Reverses U or V directions of a surface, or swaps (transposes) U and V
+    ///<summary>Reverses U or V directions of a Surface, or swaps (transposes) U and V
     ///    directions</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="direction">(int) As a bit coded flag to swap
     ///    1 = reverse U
     ///    2 = reverse V
@@ -1644,8 +1644,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Shoots a ray at a collection of surfaces or Polysurfaces</summary>
-    ///<param name="surfaceIds">(Guid seq) One of more surface identifiers</param>
+    ///<summary>Shoots a ray at a collection of Surfaces or Polysurfaces</summary>
+    ///<param name="surfaceIds">(Guid seq) One of more Surface identifiers</param>
     ///<param name="startPoint">(Point3d) Starting point of the ray</param>
     ///<param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
     ///<param name="reflections">(int) Optional, Default Value: <c>10</c>
@@ -1668,11 +1668,11 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Creates the shortest possible curve(geodesic) between two points on a
-    ///    surface. For more details, see the ShortPath command in Rhino help</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface</param>
+    ///    Surface. For more details, see the ShortPath command in Rhino help</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="startPoint">(Point3d) Start point the short curve</param>
     ///<param name="endPoint">(Point3d) End point of the short curve</param>
-    ///<returns>(Guid) identifier of the new surface</returns>
+    ///<returns>(Guid) identifier of the new Surface</returns>
     static member ShortPath( surfaceId:Guid,
                              startPoint:Point3d,
                              endPoint:Point3d) : Guid =
@@ -1694,11 +1694,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Shrinks the underlying untrimmed surfaces near to the trimming
+    ///<summary>Shrinks the underlying untrimmed Surfaces near to the trimming
     ///    boundaries. See the ShrinkTrimmedSrf command in the Rhino help</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<param name="createCopy">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the original surface is not deleted</param>
+    ///    If True, the original Surface is not deleted</param>
     ///<returns>(Guid) If createCopy is true the new Guid, else the input Guid</returns>
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
@@ -1741,9 +1741,9 @@ module ExtensionsSurface =
     
 
     [<Extension>]
-    ///<summary>Calculate the area of a surface Geometry. 
+    ///<summary>Calculate the area of a Surface Geometry. 
     /// The results are based on the current drawing units</summary>
-    ///<param name="srf">(Geometry.Surface) The surface geometry</param>
+    ///<param name="srf">(Geometry.Surface) The Surface geometry</param>
     ///<returns>(float) of area</returns>
     static member SurfaceArea(srf:Surface) : float  =        
         let amp = AreaMassProperties.Compute(srf, true, false, false, false)
@@ -1761,9 +1761,9 @@ module ExtensionsSurface =
         amp.Area
 
     [<Extension>]
-    ///<summary>Calculate the area of a surface or polysurface object. 
+    ///<summary>Calculate the area of a Surface or polysurface object. 
     /// The results are based on the current drawing units</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float) of area</returns>
     static member SurfaceArea(objectId:Guid) : float  =        
         match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -1776,8 +1776,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates the area centroid of a surface or polysurface</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<summary>Calculates the area centroid of a Surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(Point3d ) Area centroid</returns>
     static member SurfaceAreaCentroid(objectId:Guid) : Point3d =
         objectId
@@ -1793,9 +1793,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates area moments of inertia of a surface or polysurface object.
+    ///<summary>Calculates area moments of inertia of a Surface or polysurface object.
     ///    See the Rhino help for "Mass Properties calculation details"</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>((float*float*float) Rarr ) of moments and error bounds in tuples(X, Y, Z) - see help topic
     ///    Index   Description
     ///    [0]     First Moments.
@@ -1842,10 +1842,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the point on a surface that is closest to a test point</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<summary>Returns the point on a Surface that is closest to a test point</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
-    ///<returns>(Point3d) The closest point on the surface</returns>
+    ///<returns>(Point3d) The closest point on the Surface</returns>
     static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
@@ -1854,10 +1854,10 @@ module ExtensionsSurface =
         surface.PointAt(u, v)
 
     [<Extension>]
-    ///<summary>Returns U, V parameters of point on a surface that is closest to a test point</summary>
-    ///<param name="surfaceId">(Guid) Identifier of a surface object</param>
+    ///<summary>Returns U, V parameters of point on a Surface that is closest to a test point</summary>
+    ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
-    ///<returns>(float * float) The U, V parameters of the closest point on the surface</returns>
+    ///<returns>(float * float) The U, V parameters of the closest point on the Surface</returns>
     static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //point = RhinoScriptSyntax.Coerce3dpoint(testPoint)
@@ -1867,8 +1867,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the definition of a surface cone</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the definition of a Surface cone</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the cone
     ///    [0]   the plane of the cone. The apex of the cone is at the
     ///      plane's origin and the axis of the cone is the plane's z-axis
@@ -1882,9 +1882,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the curvature of a surface at a U, V parameter. See Rhino help
-    ///    for details of surface curvature</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the curvature of a Surface at a U, V parameter. See Rhino help
+    ///    for details of Surface curvature</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter</param>
     ///<returns>(Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float) of curvature information
     ///    [0]   point at specified U, V parameter
@@ -1904,8 +1904,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the definition of a cylinder surface</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the definition of a cylinder Surface</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) of the cylinder plane, height and radius</returns>
     static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -1920,8 +1920,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the U and V degrees of a surface</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the U and V degrees of a Surface</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(int*int) The degree in U and V direction</returns>
     static member SurfaceDegree(surfaceId:Guid ) : int*int =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -1929,8 +1929,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the domain of a surface object in the specified direction</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the domain of a Surface object in the specified direction</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
     ///<returns>(float * float) containing the domain interval in the specified direction</returns>
     static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
@@ -1941,13 +1941,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the edit, or Greville points of a surface object. For each
-    ///    surface control point, there is a corresponding edit point</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the edit, or Greville points of a Surface object. For each
+    ///    Surface control point, there is a corresponding edit point</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
-    ///    If True, all surface edit points are returned. If False,
-    ///    the function will return surface edit points based on whether or not the
-    ///    surface is closed or periodic</param>
+    ///    If True, all Surface edit points are returned. If False,
+    ///    the function will return Surface edit points based on whether or not the
+    ///    Surface is closed or periodic</param>
     ///<returns>(Point3d Rarr) a list of 3D points</returns>
     static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -1976,13 +1976,13 @@ module ExtensionsSurface =
                     nurb.PointAt(pt.X, pt.Y)
                     }
     [<Extension>]
-    ///<summary>Returns the parameters at edit, or Greville points of a surface object. For each
-    ///    surface control point, there is a corresponding edit point</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the parameters at edit, or Greville points of a Surface object. For each
+    ///    Surface control point, there is a corresponding edit point</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
-    ///    If True, all surface edit points are returned. If False,
-    ///    the function will return surface edit points based on whether or not the
-    ///    surface is closed or periodic</param>
+    ///    If True, all Surface edit points are returned. If False,
+    ///    the function will return Surface edit points based on whether or not the
+    ///    Surface is closed or periodic</param>
     ///<returns>((float*float) Rarr) a list of U and V parameters</returns>
     static member SurfaceEditPointPrameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -2014,8 +2014,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>A general purpose surface evaluator</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>A general purpose Surface evaluator</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter to evaluate</param>
     ///<param name="derivative">(int) Number of derivatives to evaluate</param>
     ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2 .  The elements are as follows:
@@ -2042,9 +2042,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns a plane based on the normal, u, and v directions at a surface
+    ///<summary>Returns a plane based on the normal, u, and v directions at a Surface
     ///    U, V parameter</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="uvParameter">(float * float) U, v parameter to evaluate</param>
     ///<returns>(Plane) plane</returns>
     static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
@@ -2055,13 +2055,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the isocurve density of a surface or polysurface object.
-    /// An isoparametric curve is a curve of constant U or V value on a surface.
-    /// Rhino uses isocurves and surface edge curves to visualize the shape of a
-    /// NURBS surface</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the isocurve density of a Surface or polysurface object.
+    /// An isoparametric curve is a curve of constant U or V value on a Surface.
+    /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
+    /// NURBS Surface</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(int) The current isocurve density
-    ///      -1: Hides the surface isocurves
+    ///      -1: Hides the Surface isocurves
     ///      0: Display boundary and knot wires
     ///      1: Display boundary and knot wires and one interior wire if there are no interior knots
     ///      bigger than 1: Display boundary and knot wires and (N + 1) interior wires</returns>
@@ -2077,13 +2077,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Sets the isocurve density of a surface or polysurface object.
-    /// An isoparametric curve is a curve of constant U or V value on a surface.
-    /// Rhino uses isocurves and surface edge curves to visualize the shape of a
-    /// NURBS surface</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Sets the isocurve density of a Surface or polysurface object.
+    /// An isoparametric curve is a curve of constant U or V value on a Surface.
+    /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
+    /// NURBS Surface</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="density">(int) The isocurve wireframe density. The possible values are
-    ///      -1: Hides the surface isocurves
+    ///      -1: Hides the Surface isocurves
     ///      0: Display boundary and knot wires
     ///      1: Display boundary and knot wires and one interior wire if there are no interior knots
     ///      bigger than 1: Display boundary and knot wires and (N + 1) interior wires</param>
@@ -2109,13 +2109,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Sets the isocurve density of multiple surface or polysurface objects.
-    /// An isoparametric curve is a curve of constant U or V value on a surface.
-    /// Rhino uses isocurves and surface edge curves to visualize the shape of a
-    /// NURBS surface</summary>
-    ///<param name="surfaceIds">(Guid seq) The surface's identifiers</param>
+    ///<summary>Sets the isocurve density of multiple Surface or polysurface objects.
+    /// An isoparametric curve is a curve of constant U or V value on a Surface.
+    /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
+    /// NURBS Surface</summary>
+    ///<param name="surfaceIds">(Guid seq) The Surface's identifiers</param>
     ///<param name="density">(int) The isocurve wireframe density. The possible values are
-    ///      -1: Hides the surface isocurves
+    ///      -1: Hides the Surface isocurves
     ///      0: Display boundary and knot wires
     ///      1: Display boundary and knot wires and one interior wire if there are no interior knots
     ///      bigger than 1: Display boundary and knot wires and (N + 1) interior wires</param>
@@ -2139,9 +2139,9 @@ module ExtensionsSurface =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Returns the control point count of a surface
-    ///    surfaceId = the surface's identifier</summary>
-    ///<param name="surfaceId">(Guid) The surface object's identifier</param>
+    ///<summary>Returns the control point count of a Surface
+    ///    SurfaceId = the Surface's identifier</summary>
+    ///<param name="surfaceId">(Guid) The Surface object's identifier</param>
     ///<returns>(int * int) a list containing (U count, V count)</returns>
     static member SurfaceKnotCount(surfaceId:Guid) : int * int =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -2150,9 +2150,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the knots, or knot vector, of a surface object</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<returns>(NurbsSurfaceKnotList * NurbsSurfaceKnotList) knot values of the surface. 
+    ///<summary>Returns the knots, or knot vector, of a Surface object</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
+    ///<returns>(NurbsSurfaceKnotList * NurbsSurfaceKnotList) knot values of the Surface. 
     ///    The list will contain the following information:
     ///    Element   Description
     ///      [0]     Knot vectors in U direction
@@ -2169,8 +2169,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns 3D vector that is the normal to a surface at a parameter</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns 3D vector that is the normal to a Surface at a parameter</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="uvParameter">(float * float) The uv parameter to evaluate</param>
     ///<returns>(Vector3d) Normal vector</returns>
     static member SurfaceNormal(surfaceId:Guid, uvParameter:float * float) : Vector3d =
@@ -2178,8 +2178,8 @@ module ExtensionsSurface =
         surface.NormalAt(uvParameter|> fst, uvParameter|> snd)
 
     [<Extension>]
-    ///<summary>Returns 3D vector that is the normal to a surface at mid parameter</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns 3D vector that is the normal to a Surface at mid parameter</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Vector3d) Normal vector</returns>
     static member SurfaceNormal(surfaceId:Guid) : Vector3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -2189,11 +2189,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Converts surface parameter to a normalized surface parameter; one that
+    ///<summary>Converts Surface parameter to a normalized Surface parameter; one that
     ///    ranges between 0.0 and 1.0 in both the U and V directions</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
-    ///<param name="parameter">(float * float) The surface parameter to convert</param>
-    ///<returns>(float * float) normalized surface parameter</returns>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
+    ///<param name="parameter">(float * float) The Surface parameter to convert</param>
+    ///<returns>(float * float) normalized Surface parameter</returns>
     static member SurfaceNormalizedParameter(surfaceId:Guid, parameter:float * float) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let udomain = surface.Domain(0)
@@ -2208,11 +2208,11 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Converts normalized surface parameter to a surface domain specific (regular) parameter.
-    /// or a paranter within the surface's domain</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Converts normalized Surface parameter to a Surface domain specific (regular) parameter.
+    /// or a paranter within the Surface's domain</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) The normalized parameter to convert</param>
-    ///<returns>(float * float) u and v surface parameters</returns>
+    ///<returns>(float * float) u and v Surface parameters</returns>
     static member SurfaceParameter(surfaceId:Guid, parameter:float * float) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let x = surface.Domain(0).ParameterAt(parameter|> fst)
@@ -2221,9 +2221,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the control point count of a surface
-    ///    surfaceId = the surface's identifier</summary>
-    ///<param name="surfaceId">(Guid) The surface object's identifier</param>
+    ///<summary>Returns the control point count of a Surface
+    ///    SurfaceId = the Surface's identifier</summary>
+    ///<param name="surfaceId">(Guid) The Surface object's identifier</param>
     ///<returns>(int * int) THe number of control points in UV direction. (U count, V count)</returns>
     static member SurfacePointCount(surfaceId:Guid) : int * int =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -2232,12 +2232,12 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the control points, or control vertices, of a surface object</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the control points, or control vertices, of a Surface object</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="returnAll">(bool) Optional, Default Value: <c>true</c>
-    ///    If True all surface edit points are returned. If False,
-    ///    the function will return surface edit points based on whether or not
-    ///    the surface is closed or periodic</param>
+    ///    If True all Surface edit points are returned. If False,
+    ///    the function will return Surface edit points based on whether or not
+    ///    the Surface is closed or periodic</param>
     ///<returns>(Point3d Rarr) the control points</returns>
     static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
@@ -2252,8 +2252,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns the definition of a surface torus</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Returns the definition of a Surface torus</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the torus
     ///    [0]   the base plane of the torus
     ///    [1]   the major radius of the torus
@@ -2266,8 +2266,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates volume of a closed surface or polysurface</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<summary>Calculates volume of a closed Surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float) the volume</returns>
     static member SurfaceVolume(objectId:Guid) : float =
         objectId
@@ -2283,8 +2283,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates volume centroid of a closed surface or polysurface</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<summary>Calculates volume centroid of a closed Surface or polysurface</summary>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(Point3d) Volume Centriod</returns>
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
         objectId
@@ -2302,9 +2302,9 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Calculates volume moments of inertia of a surface or polysurface object.
+    ///<summary>Calculates volume moments of inertia of a Surface or polysurface object.
     ///    For more information, see Rhino help for "Mass Properties calculation details"</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>((float*float*float) Rarr) of moments and error bounds in tuple(X, Y, Z) - see help topic
     ///    Index   Description
     ///    [0]     First Moments.
@@ -2354,10 +2354,10 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns list of weight values assigned to the control points of a surface.
+    ///<summary>Returns list of weight values assigned to the control points of a Surface.
     ///    The number of weights returned will be equal to the number of control points
     ///    in the U and V directions</summary>
-    ///<param name="objectId">(Guid) The surface's identifier</param>
+    ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float Rarr) point weights</returns>
     static member SurfaceWeights(objectId:Guid) : float Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
@@ -2371,7 +2371,7 @@ module ExtensionsSurface =
         rc
 
     [<Extension>]
-    ///<summary>Trims a surface or polysurface using an oriented cutter brep or surface</summary>
+    ///<summary>Trims a Surface or polysurface using an oriented cutter brep or Surface</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
     ///<param name="cutter">(Guid) Surface or polysurface  performing the trim</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
@@ -2402,7 +2402,7 @@ module ExtensionsSurface =
             rc
 
     [<Extension>]
-    ///<summary>Trims a surface using an oriented cutter Plane</summary>
+    ///<summary>Trims a Surface using an oriented cutter Plane</summary>
     ///<param name="objectId">(Guid) Surface or polysurface identifier</param>
     ///<param name="cutter">(Plane) Plane performing the trim</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
@@ -2432,12 +2432,12 @@ module ExtensionsSurface =
             rc
 
     [<Extension>]
-    ///<summary>Remove portions of the surface outside of the specified interval in U direction</summary>
+    ///<summary>Remove portions of the Surface outside of the specified interval in U direction</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
-    ///<param name="interval">(float*float) Sub section of the surface to keep.</param>
+    ///<param name="interval">(float*float) Sub section of the Surface to keep.</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///    Should the input surface be deleted</param>
-    ///<returns>(Guid) new surface identifier</returns>
+    ///    Should the input Surface be deleted</param>
+    ///<returns>(Guid) new Surface identifier</returns>
     static member TrimSurfaceU( surfaceId:Guid,
                                 interval:float*float,
                                 [<OPT;DEF(false)>]deleteInput:bool) : Guid =
@@ -2456,12 +2456,12 @@ module ExtensionsSurface =
             RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceU faild on %A with domain %A" surfaceId interval
 
     [<Extension>]
-    ///<summary>Remove portions of the surface outside of the specified interval in V direction</summary>
+    ///<summary>Remove portions of the Surface outside of the specified interval in V direction</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
-    ///<param name="interval">(float*float) Sub section of the surface to keep.</param>
+    ///<param name="interval">(float*float) Sub section of the Surface to keep.</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///    Should the input surface be deleted</param>
-    ///<returns>(Guid) new surface identifier</returns>
+    ///    Should the input Surface be deleted</param>
+    ///<returns>(Guid) new Surface identifier</returns>
     static member TrimSurfaceV( surfaceId:Guid,
                                interval:float*float,
                                [<OPT;DEF(false)>]deleteInput:bool) : Guid =
@@ -2481,13 +2481,13 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Remove portions of the surface outside of the specified interval ain U and V direction</summary>
+    ///<summary>Remove portions of the Surface outside of the specified interval ain U and V direction</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
-    ///<param name="intervalU">(float*float) Sub section of the surface to keep in U direction</param>
-    ///<param name="intervalV">(float*float) Sub section of the surface to keep in V direction</param>
+    ///<param name="intervalU">(float*float) Sub section of the Surface to keep in U direction</param>
+    ///<param name="intervalV">(float*float) Sub section of the Surface to keep in V direction</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///    Should the input surface be deleted</param>
-    ///<returns>(Guid) new surface identifier</returns>
+    ///    Should the input Surface be deleted</param>
+    ///<returns>(Guid) new Surface identifier</returns>
     static member TrimSurfaceUV( surfaceId:Guid,
                                intervalU:float*float,
                                intervalV:float*float,
@@ -2511,17 +2511,17 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Flattens a developable surface or polysurface</summary>
-    ///<param name="surfaceId">(Guid) The surface's identifier</param>
+    ///<summary>Flattens a developable Surface or polysurface</summary>
+    ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the resulting surfaces ar not joined</param>
+    ///    If True, the resulting Surfaces ar not joined</param>
     ///<param name="followingGeometry">(Guid seq) Optional, List of curves, dots, and points which
-    ///    should be unrolled with the surface</param>
+    ///    should be unrolled with the Surface</param>
     ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    Absolute tolerance</param>
     ///<param name="relativeTolerance">(float) Optional, Default Value: <c>Doc.ModelRelativeTolerance</c>
     ///    Relative tolerance</param>
-    ///<returns>(Guid Rarr * Guid Rarr) Two lists: List of unrolled surface ids and list of following objects</returns>
+    ///<returns>(Guid Rarr * Guid Rarr) Two lists: List of unrolled Surface ids and list of following objects</returns>
     static member UnrollSurface( surfaceId:Guid,
                                  [<OPT;DEF(false)>]explode:bool,
                                  [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq,
@@ -2561,7 +2561,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Changes the degree of a surface object.  For more information see the Rhino help file for the ChangeDegree command</summary>
+    ///<summary>Changes the degree of a Surface object.  For more information see the Rhino help file for the ChangeDegree command</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     ///<returns>(bool) True of False indicating success or failure</returns>

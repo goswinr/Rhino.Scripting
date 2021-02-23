@@ -38,7 +38,7 @@ module AutoOpenActiveDocument =
     /// To store last created object form executing a rs.Command(...)
     let mutable internal commandSerialNumbers : option<uint32*uint32> = None // will be reset in EndOpenDocument Event
    
-    /// Gets a description on Rhino object type (curve , point, surface ....)
+    /// Gets a description on Rhino object type (curve , point, Surface ....)
     /// including Layer and object name
     let internal rhType (g:Guid)=
         if g = Guid.Empty then "-Guid.Empty-"
@@ -52,7 +52,7 @@ module AutoOpenActiveDocument =
                 else 
                     sprintf "Guid %A (an unnamed %s on Layer '%s')" g (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath)
 
-    /// Gets a localised description on Rhino layer and  object type (e.g. curve , point, surface ....)
+    /// Gets a localized description on Rhino layer and  object type (e.g. curve , point, Surface ....)
     let internal typeDescr (x:'a)=
        match box x with 
        | :? Guid as g -> rhType g

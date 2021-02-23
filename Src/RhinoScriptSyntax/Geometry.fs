@@ -58,7 +58,7 @@ module ExtensionsGeometry =
     ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
     ///    If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the function will make a PictureFrame object from a mesh rather than a plane surface</param>
+    ///    If True, the function will make a PictureFrame object from a mesh rather than a plane Surface</param>
     ///<returns>(Guid) object identifier</returns>
     static member AddPictureFrame(  plane:Plane,
                                     filename:string,
@@ -253,7 +253,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Compute the area of a closed curve, hatch, surface, polysurface, or mesh</summary>
+    ///<summary>Compute the area of a closed curve, hatch, Surface, polysurface, or mesh</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area</returns>
     static member Area(objectId:Guid) : float =
@@ -574,7 +574,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Returns a list of lists of point indices in a point cloud that are
-    ///    closest to needlePoints. Each inner list references all points within or on the surface of a sphere of distance radius</summary>
+    ///    closest to needlePoints. Each inner list references all points within or on the Surface of a sphere of distance radius</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>

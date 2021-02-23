@@ -18,7 +18,7 @@ module ExtensionsGrips =
   type RhinoScriptSyntax with
 
     [<Extension>]
-    ///<summary>Enables or disables an object's grips. For curves and surfaces, these are
+    ///<summary>Enables or disables an object's grips. For curves and Surfaces, these are
     ///    also called control points</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="enable">(bool) Optional, Default Value: <c>true</c>

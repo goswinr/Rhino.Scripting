@@ -318,18 +318,18 @@ module ExtensionsDocument =
 
 
     [<Extension>]
-    ///<summary>Returns the render mesh maximum distance, edge to surface parameter of the active document.
+    ///<summary>Returns the render mesh maximum distance, edge to Surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<returns>(float) The current render mesh maximum distance, edge to surface</returns>
+    ///<returns>(float) The current render mesh maximum distance, edge to Surface</returns>
     static member RenderMeshMaxDistEdgeToSrf() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
         let rc = current.Tolerance
         rc
 
     [<Extension>]
-    ///<summary>Sets the render mesh maximum distance, edge to surface parameter of the active document.
+    ///<summary>Sets the render mesh maximum distance, edge to Surface parameter of the active document.
     /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
-    ///<param name="distance">(float) The render mesh maximum distance, edge to surface</param>
+    ///<param name="distance">(float) The render mesh maximum distance, edge to Surface</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit = //SET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)

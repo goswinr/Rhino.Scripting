@@ -857,7 +857,7 @@ type RhinoScriptSyntax private () =
 
   
 
-    ///<summary>Attempt to get surface geometry from the document with a given objectId</summary>
+    ///<summary>Attempt to get Surface geometry from the document with a given objectId</summary>
     ///<param name="objectId">the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface) Fails on bad input</returns>
     static member CoerceSurface(objectId:Guid): Surface =
@@ -868,7 +868,7 @@ type RhinoScriptSyntax private () =
             else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on %A from Brep with %d Faces" objectId b.Faces.Count
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceSurface failed on: %A " objectId
 
-    ///<summary>Attempt to get surface geometry from the document with a given objectId</summary>
+    ///<summary>Attempt to get Surface geometry from the document with a given objectId</summary>
     ///<param name="objectId">the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface) Fails on bad input</returns>
     static member CoerceNurbsSurface(objectId:Guid): NurbsSurface =
