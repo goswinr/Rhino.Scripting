@@ -19,7 +19,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Adds a new empty group to the document</summary>
-    ///<param name="groupName">(string) Optional, Name of the new group. If omitted, rhino automatically
+    ///<param name="groupName">(string) Optional, Name of the new group. If omitted, Rhino automatically
     ///    generates the group name</param>
     ///<returns>(string) name of the new group</returns>
     static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string =

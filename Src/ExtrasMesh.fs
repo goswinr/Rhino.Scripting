@@ -1,4 +1,4 @@
-﻿namespace Rhino.Scripting.Extra
+namespace Rhino.Scripting.Extra
 
 open FsEx
 open Rhino.Geometry

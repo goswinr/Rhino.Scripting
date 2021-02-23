@@ -415,7 +415,7 @@ module ExtensionsApplication =
 
 
     [<Extension>]
-    ///<summary>Closes the rhino application</summary>
+    ///<summary>Closes the Rhino application</summary>
     ///<returns>(unit) void, nothing</returns>
     static member Exit() : unit =
         Synchronisation.DoSync false false (fun () -> 
