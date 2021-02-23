@@ -514,7 +514,7 @@ module ExtensionsSelection =
                     let selmethod = objref.SelectionMethod()
                     let point = objref.SelectionPoint()
                     let viewname = go.View().ActiveViewport.Name
-                    rc.Add( (objectId, presel, selmethod, point, viewname) )
+                    rc.Add( (objectId, presel, selmethod, point, viewname))
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then 

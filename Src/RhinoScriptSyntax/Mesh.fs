@@ -603,7 +603,7 @@ module ExtensionsMesh =
         let rc = Rarr()
         for i in range(mesh.Faces.Count) do
             let face = mesh.Faces.GetFace(i)
-            rc.Add( (face.A, face.B, face.C, face.D) ) //TODO add ngon support
+            rc.Add( (face.A, face.B, face.C, face.D)) //TODO add ngon support
         rc
 
 

@@ -343,7 +343,7 @@ module ExtensionsGeometry =
         let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
         objects
         |> Seq.map RhinoScriptSyntax.CoerceGeometry
-        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)) )
+        |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)))
 
         if  inWorldCoords then
             let planetoworld = Transform.ChangeBasis(plane, Plane.WorldXY)

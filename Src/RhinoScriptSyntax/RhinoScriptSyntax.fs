@@ -384,7 +384,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get a System.Drawing.Color also works on natrural language color strings see Drawing.ColorTranslator.FromHtml</summary>
     ///<param name="color">string, tuple with  or 3 or 4 items</param>
     ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provIde better comparison to other colors.
-    /// For example the named color Red is not equal to fromRGB(255, 0, 0) ) Fails on bad input</returns>
+    /// For example the named color Red is not equal to fromRGB(255, 0, 0)) Fails on bad input</returns>
     static member CoerceColor(color:'T) : Drawing.Color =
         match box color with
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects

@@ -81,7 +81,7 @@ module QRcode =
                                     Point3d(x1,y1,0.0) ,
                                     Point3d(x2,y1,0.0) ,
                                     Point3d(x2,y2,0.0) ,
-                                    Point3d(x1,y2,0.0) )
+                                    Point3d(x1,y2,0.0))
             iyy <- iyy + 1
         m
 

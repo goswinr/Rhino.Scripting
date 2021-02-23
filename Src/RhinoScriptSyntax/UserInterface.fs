@@ -284,7 +284,7 @@ module ExtensionsUserinterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    RhinoScriptSyntax.Print ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true, true, false, false) )
+                    RhinoScriptSyntax.Print ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true, true, false, false))
                     gp2.Dispose()
                     Some d
                 | _ ->
@@ -328,7 +328,7 @@ module ExtensionsUserinterface =
                         let curveid = Doc.Objects.AddCurve(crv)
                         let parentid = go.Object(i).ObjectId
                         let pt = go.Object(i).SelectionPoint()
-                        r.Add( (curveid, parentid, pt) )
+                        r.Add( (curveid, parentid, pt))
                 if  select then
                     for item in r do
                         let rhobj = Doc.Objects.FindId(t1 item)

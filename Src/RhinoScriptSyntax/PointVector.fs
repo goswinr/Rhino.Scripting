@@ -145,7 +145,7 @@ module ExtensionsPointvector =
             | :?  Curve as curve ->
                 let rc, t = curve.ClosestPoint(point)
                 if rc then
-                    distance <- point.DistanceTo( curve.PointAt(t) )
+                    distance <- point.DistanceTo( curve.PointAt(t))
                     if distance < t3 closest then
                         closest  <-  objectId, curve.PointAt(t), distance
 
@@ -301,7 +301,7 @@ module ExtensionsPointvector =
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId) )
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId))
 
 
     [<Extension>]

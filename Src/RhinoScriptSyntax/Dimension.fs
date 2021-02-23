@@ -93,7 +93,7 @@ module ExtensionsDimension =
         for point in points do
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader failed.  points %A, text:%s, plane %A" points text plane
-            points2d.Add( Rhino.Geometry.Point2d(s, t) )
+            points2d.Add( Rhino.Geometry.Point2d(s, t))
         Doc.Objects.AddLeader(text, plane0, points2d)
 
 

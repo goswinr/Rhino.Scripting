@@ -98,11 +98,11 @@ type [<Struct>] Quat =
         let sa = sin (angleRadian * 0.5)
         li <- 1. / li // inverse
         //printfn "Build with ang %g " (Math.radToDeg angleRadian)
-        //printfn "Build with w %g "   (cos (angleRadian * 0.5) )
+        //printfn "Build with w %g "   (cos (angleRadian * 0.5))
         Quat ( axis.X * li * sa, //unitizing vector
                axis.Y * li * sa,
                axis.Z * li * sa,               
-               cos (angleRadian * 0.5) )
+               cos (angleRadian * 0.5))
 
     /// Given a Rotation Axis(Vec) and an Angle in Deghree returns a Quaternion
     static member fromVecDeg (axis:Vector3d, angleDeg) = 

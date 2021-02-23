@@ -2363,7 +2363,7 @@ module ExtensionsCurve =
     ///    The offset curve or curves will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
-    ///<param name="parameter">(Point2d) ):  U, V parameter that the curve will be offset through</param>
+    ///<param name="parameter">(Point2d)):  U, V parameter that the curve will be offset through</param>
     ///<returns>(Guid Rarr) identifiers of the new curves</returns>
     static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -2380,7 +2380,7 @@ module ExtensionsCurve =
     ///    The offset curve or curves will be added to Rhino</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
-    ///<param name="distance">(float) ):the distance of the offset. Based on the curve's direction, a positive value
+    ///<param name="distance">(float)):the distance of the offset. Based on the curve's direction, a positive value
     ///    will offset to the left and a negative value will offset to the right</param>
     ///<returns>(Guid Rarr) identifiers of the new curves</returns>
     static member OffsetCurveOnSurface(curveId:Guid, surfaceId:Guid, distance:float) : Guid Rarr =

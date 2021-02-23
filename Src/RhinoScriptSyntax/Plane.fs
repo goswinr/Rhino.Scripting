@@ -148,7 +148,7 @@ module ExtensionsPlane =
                 let i = intersection.OverlapA.[1]
                 let j = intersection.OverlapB.[0]
                 let k = intersection.OverlapB.[1]
-                rc.Add( (a, b, c, d, e, f, g, h, i, j, k) )
+                rc.Add( (a, b, c, d, e, f, g, h, i, j, k))
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneCurveIntersection faild on %A; %A tolerance %A" plane curve tolerance

@@ -74,7 +74,7 @@ module ExtensionsSurface =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let geometry = rhobj.Geometry
-            bbox.Union( geometry.GetBoundingBox(true) )
+            bbox.Union( geometry.GetBoundingBox(true))
         //startPoint = RhinoScriptSyntax.Coerce3dpoint(startPoint)
         //endPoint = RhinoScriptSyntax.Coerce3dpoint(endPoint)
         if not bbox.IsValid then
@@ -1084,7 +1084,7 @@ module ExtensionsSurface =
         if isNull surfaces then RhinoScriptingException.Raise "RhinoScriptSyntax.FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
         let rc = Rarr()
         for surf in surfaces do
-            rc.Add( Doc.Objects.AddSurface(surf) )
+            rc.Add( Doc.Objects.AddSurface(surf))
         Doc.Views.Redraw()
         rc
 
@@ -1597,7 +1597,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Deletes a knot from a Surface object</summary>
     ///<param name="surface">(Guid) The reference of the surface object</param>
-    ///<param name="uvParameter">(float * float) ): An indexable item containing a U, V parameter on the surface. List, tuples and UVIntervals will work.
+    ///<param name="uvParameter">(float * float)): An indexable item containing a U, V parameter on the surface. List, tuples and UVIntervals will work.
     ///    Note, if the parameter is not equal to one of the existing knots, then the knot closest to the specified parameter will be removed</param>
     ///<param name="vDirection">(bool) If True, or 1, the V direction will be addressed. If False, or 0, the U direction</param>
     ///<returns>(bool) True of False indicating success or failure</returns>
@@ -1788,7 +1788,7 @@ module ExtensionsSurface =
             |> RhinoScriptSyntax.TryCoerceSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceAreaCentroid failed.  objectId:'%s'" (rhType objectId) )
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceAreaCentroid failed.  objectId:'%s'" (rhType objectId))
         |> fun amp -> amp.Centroid
 
 

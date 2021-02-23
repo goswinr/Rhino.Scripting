@@ -56,8 +56,8 @@ module ExtensionsUtility =
         y <- vto * plane.YAxis - vfrom * plane.YAxis
         z <- vto * plane.ZAxis - vfrom * plane.ZAxis
         let h = Math.Sqrt( x * x + y * y)
-        let angleXY = toDegrees( Math.Atan2( y, x ) )
-        let elevation = toDegrees( Math.Atan2( z, h ) )
+        let angleXY = toDegrees( Math.Atan2( y, x ))
+        let elevation = toDegrees( Math.Atan2( z, h ))
         angleXY, elevation, x, y, z
 
 
