@@ -186,6 +186,11 @@ module ExtensionsPrint =
   do
     NiceStringSettings.externalFormater <- RhinoScriptSyntax.formatRhinoObject
 
+    NiceStringSettings.roundToZeroBelow                                              <- Doc.ModelAbsoluteTolerance * 0.1
+    RhinoApp.AppSettingsChanged.Add    (fun _ -> NiceStringSettings.roundToZeroBelow <- Doc.ModelAbsoluteTolerance * 0.1)
+    RhinoDoc.ActiveDocumentChanged.Add (fun _ -> NiceStringSettings.roundToZeroBelow <- Doc.ModelAbsoluteTolerance * 0.1)
+    
+
   //TODO add these too becaue printcolorfn does not print to rhino command window?
 
   (*

@@ -15,6 +15,7 @@ open System.Runtime.CompilerServices
 module AutoOpenRhinoTypeExtensions =  
     open Rhino.Geometry
     open FsEx
+    
 
     type Point3d with  
         
@@ -24,7 +25,7 @@ module AutoOpenRhinoTypeExtensions =
             if pt = Point3d.Unset then  
                 "Point3d.Unset"
             else
-                sprintf "Point3d(%s, %s, %s)" (NiceString.floatToString  pt.X) (NiceString.floatToString  pt.Y) (NiceString.floatToString  pt.Z)
+                sprintf "Point3d(%s, %s, %s)" (NiceFormat.float  pt.X) (NiceFormat.float  pt.Y) (NiceFormat.float  pt.Z)
         
         
         /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in meshes)
@@ -41,7 +42,7 @@ module AutoOpenRhinoTypeExtensions =
             if pt = Point3f.Unset then  
                 "Point3f.Unset"
             else
-                sprintf "Point3f(%s, %s, %s)" (NiceString.singleToString  pt.X) (NiceString.singleToString  pt.Y) (NiceString.singleToString  pt.Z)
+                sprintf "Point3f(%s, %s, %s)" (NiceFormat.single  pt.X) (NiceFormat.single  pt.Y) (NiceFormat.single  pt.Z)
         
         
         /// To convert a Point3f (as it is used in meshes) to Point3d (as it is used in most other Rhino Geometries)
@@ -57,7 +58,7 @@ module AutoOpenRhinoTypeExtensions =
             if v = Vector3d.Unset then  
                 "Vector3d.Unset"
             else
-                sprintf "Vector3d(%s, %s, %s)" (NiceString.floatToString  v.X) (NiceString.floatToString  v.Y) (NiceString.floatToString  v.Z)
+                sprintf "Vector3d(%s, %s, %s)" (NiceFormat.float  v.X) (NiceFormat.float  v.Y) (NiceFormat.float  v.Z)
         
         /// To convert Vector3d (as it is used in most other Rhino Geometries) to a Vector3f (as it is used in mesh noramls)
         [<Extension>] 
@@ -83,7 +84,7 @@ module AutoOpenRhinoTypeExtensions =
             if v = Vector3f.Unset then  
                 "Vector3f.Unset"
             else
-                sprintf "Vector3f(%s, %s, %s)" (NiceString.singleToString  v.X) (NiceString.singleToString  v.Y) (NiceString.singleToString  v.Z)
+                sprintf "Vector3f(%s, %s, %s)" (NiceFormat.single  v.X) (NiceFormat.single  v.Y) (NiceFormat.single  v.Z)
    
         /// To convert a Vector3f (as it is used in mesh noramls) to a Vector3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
@@ -95,7 +96,7 @@ module AutoOpenRhinoTypeExtensions =
         [<Extension>]     
         ///Like the ToString function but with appropiate precision formating
         member ln.ToNiceString = 
-            sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceString.floatToString  ln.From.X) (NiceString.floatToString  ln.From.Y) (NiceString.floatToString  ln.From.Z) (NiceString.floatToString  ln.To.X) (NiceString.floatToString  ln.To.Y) (NiceString.floatToString  ln.To.Z)
+            sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceFormat.float  ln.From.X) (NiceFormat.float  ln.From.Y) (NiceFormat.float  ln.From.Z) (NiceFormat.float  ln.To.X) (NiceFormat.float  ln.To.Y) (NiceFormat.float  ln.To.Z)
     
         [<Extension>]     
         ///Middle point of line
