@@ -62,7 +62,7 @@ type ObjectFilterEnum internal () =
     member _.Extrusion = 1073741824 
 
 
-/// A static class with static members providing functions Identical to RhinoScript in Pyhton or VBscript 
+/// A static class with static members providing functions Identical to RhinoScript in Python or VBscript 
 [<AbstractClass; Sealed>]
 type RhinoScriptSyntax private () =
     
@@ -705,7 +705,7 @@ type RhinoScriptSyntax private () =
     
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="vec">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>    
-    ///<returns> aRhino.Geometry.Vector3d, Fails on bad input.</returns>
+    ///<returns> a Rhino.Geometry.Vector3d, Fails on bad input.</returns>
     static member Coerce3dVector(vec:'T) : Vector3d =
         let inline vecOf3(x:^x, y:^y, z:^z) = 
             try Vector3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))

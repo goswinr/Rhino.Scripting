@@ -647,7 +647,7 @@ module ExtensionsSurface =
     ///    shape and two Curves that defines a Surface edge.</summary>
     ///<param name="profile">(Guid) Identifier of the profile Curve</param>
     ///<param name="rail">(Guid) Identifier of the rail Curve</param>
-    ///<param name="axis">(Line) A LIne identifying the start point and end point of the rail revolve axis</param>
+    ///<param name="axis">(Line) A Line identifying the start point and end point of the rail revolve axis</param>
     ///<param name="scaleHeight">(bool) Optional, Default Value: <c>false</c>
     ///    If True, Surface will be locally scaled. Defaults to False</param>
     ///<returns>(Guid) identifier of the new object.</returns>

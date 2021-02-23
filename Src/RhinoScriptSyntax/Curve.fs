@@ -1765,7 +1765,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Explodes, or un-joins, one Curve. Polycurves will be exploded into Curve
+    ///<summary>Explodes, or un-joins, one Curve. PolyCurves will be exploded into Curve
     ///    segments. Polylines will be exploded into line segments. ExplodeCurves will
     ///    return the Curves in topological order.</summary>
     ///<param name="curveId">(Guid) The Curve object to explode</param>
@@ -2461,7 +2461,7 @@ module ExtensionsCurve =
     ///<summary>Returns the number of Curve segments that make up a polycurve.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///    If `curveId` identifies a Polycurve object, then `segmentIndex` identifies the Curve segment of the Polycurve to query</param>
+    ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(int) The number of Curve segments in a polycurve.</returns>
     static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
@@ -2474,7 +2474,7 @@ module ExtensionsCurve =
     ///<summary>Returns the vertices of a Polyline Curve.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///    If CurveId identifies a Polycurve object, then segmentIndex identifies the Curve segment of the Polycurve to query</param>
+    ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(Point3d Rarr) an list of Point3d vertex points.</returns>
     static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
@@ -2571,14 +2571,14 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Replace a Curve with a geometrically equivalent polycurve.
-    ///    The Polycurve will have the following properties:
-    ///      - All the Polycurve segments are lines, polylines, arcs, or NURBS Curves.
+    ///    The PolyCurve will have the following properties:
+    ///      - All the PolyCurve segments are lines, polylines, arcs, or NURBS Curves.
     ///      - The NURBS Curves segments do not have fully multiple interior knots.
     ///      - Rational NURBS Curves do not have constant weights.
     ///      - Any segment for which IsCurveLinear or IsArc is True:  a line, Polyline segment, or an arc.
     ///      - Adjacent co-linear or co-circular segments are combined.
     ///      - Segments that meet with G1-continuity have there ends tuned up so that they meet with G1-continuity to within machine precision.
-    ///      - If the Polycurve is a polyline, a Polyline will be created.</summary>
+    ///      - If the PolyCurve is a polyline, a Polyline will be created.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
     ///    The simplification methods to use. By default, all methods are used (flags = 0)

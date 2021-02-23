@@ -22,7 +22,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
-    ///    matrix. The matrix acts on the left. To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    matrix. The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
@@ -42,7 +42,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    The matrix acts on the left.  To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>

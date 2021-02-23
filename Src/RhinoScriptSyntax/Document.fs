@@ -107,7 +107,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Enables or disables screen redrawing.
-    ///  All UI interaccing functions (such as rs.GetObject) of Rhino.Scripting 
+    ///  All UI interacting functions (such as rs.GetObject) of Rhino.Scripting 
     ///  will automatically enable redraw if needed 
     ///  and afterwards disable it again if it was disabled before.
     ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
@@ -119,7 +119,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Disables screen redrawing.
-    ///  All UI interaccing functions (such as rs.GetObject) of Rhino.Scripting 
+    ///  All UI interacting functions (such as rs.GetObject) of Rhino.Scripting 
     ///  will automatically enable redraw if needed 
     ///  and afterwards disable it again if it was disabled before.
     ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>    

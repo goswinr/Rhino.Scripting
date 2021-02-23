@@ -239,7 +239,7 @@ module AutoOpenCurried =
         
     [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    The matrix acts on the left.  To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="objectId">(Guid) The identifier of the object</param> 
     ///<returns>(unit) void, nothing.</returns>
