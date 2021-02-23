@@ -255,7 +255,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh density property of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render Mesh density</returns>
     static member RenderMeshDensity() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -263,7 +263,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh density property of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="density">(float) The new render Mesh density, which is a number between 0.0 and 1.0</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshDensity(density:float) : unit = //SET
@@ -276,7 +276,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh maximum angle property of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current maximum angle</returns>
     static member RenderMeshMaxAngle() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -284,7 +284,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh maximum angle property of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="angleDegrees">(float) The new maximum angle, which is a positive number in degrees</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAngle(angleDegrees:float) : unit = //SET
@@ -297,7 +297,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh maximum aspect ratio property of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render Mesh maximum aspect ratio</returns>
     static member RenderMeshMaxAspectRatio() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -306,7 +306,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh maximum aspect ratio property of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="ratio">(float) The render Mesh maximum aspect ratio.  The suggested range, when not zero, is from 1 to 100</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxAspectRatio(ratio:float) : unit = //SET
@@ -319,7 +319,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh maximum distance, edge to Surface parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render Mesh maximum distance, edge to Surface</returns>
     static member RenderMeshMaxDistEdgeToSrf() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -328,7 +328,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh maximum distance, edge to Surface parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="distance">(float) The render Mesh maximum distance, edge to Surface</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxDistEdgeToSrf(distance:float) : unit = //SET
@@ -341,7 +341,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh maximum edge length parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render Mesh maximum edge length</returns>
     static member RenderMeshMaxEdgeLength() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -350,7 +350,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh maximum edge length parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="distance">(float) The render Mesh maximum edge length</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMaxEdgeLength(distance:float) : unit = //SET
@@ -363,7 +363,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh minimum edge length parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(float) The current render Mesh minimum edge length</returns>
     static member RenderMeshMinEdgeLength() : float = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -372,7 +372,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh minimum edge length parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="distance">(float) The render Mesh minimum edge length</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
@@ -386,7 +386,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh minimum initial grid quads parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render Mesh minimum initial grid quads</returns>
     static member RenderMeshMinInitialGridQuads() : int = //GET
         let current = Doc.GetMeshingParameters(Doc.MeshingParameterStyle)
@@ -395,7 +395,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh minimum initial grid quads parameter of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="quads">(int) The render Mesh minimum initial grid quads. The suggested range is from 0 to 10000</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderMeshMinInitialGridQuads(quads:int) : unit = //SET
@@ -409,7 +409,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh quality of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render Mesh quality .
     ///    0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
     ///    1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
@@ -423,7 +423,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh quality of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="quality">(int) The render Mesh quality, either:
     ///    0: Jagged and faster.  Objects may look jagged, but they should shade and render relatively quickly.
     ///    1: Smooth and slower.  Objects should look smooth, but they may take a very long time to shade and render.
@@ -444,7 +444,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Returns the render Mesh settings of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<returns>(int) The current render Mesh settings .
     ///      0: No settings enabled.
     ///      1: Refine Mesh enabled.
@@ -461,7 +461,7 @@ module ExtensionsDocument =
 
     [<Extension>]
     ///<summary>Sets the render Mesh settings of the active document.
-    /// For more information on render meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
+    /// For more information on render Meshes, see the Document Properties: Mesh topic in the Rhino help file</summary>
     ///<param name="settings">(int) The render Mesh settings, which is a bit-coded number that allows or disallows certain features.
     ///    The bits can be added together in any combination to form a value between 0 and 7.  The bit values are as follows:
     ///      0: No settings enabled.

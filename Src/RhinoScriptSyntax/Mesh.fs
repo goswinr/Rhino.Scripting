@@ -20,12 +20,12 @@ module ExtensionsMesh =
 
     [<Extension>]
     ///<summary>Add a Mesh object to the document</summary>
-    ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
+    ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the Mesh</param>
     ///<param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
-    ///    vertex indices for each face of the mesh. If the third a fourth vertex
+    ///    vertex indices for each face of the Mesh. If the third a fourth vertex
     ///      indices of a face are identical, a triangular face will be created</param>
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
-    ///    the mesh. Note, for every vertex, there must be a corresponding vertex
+    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex
     ///    normal</param>
     ///<param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
     ///    vertex, there must be a corresponding texture coordinate</param>
@@ -78,12 +78,12 @@ module ExtensionsMesh =
     
     [<Extension>]
     ///<summary>Add a Mesh object to the document</summary>
-    ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the mesh</param>
+    ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the Mesh</param>
     ///<param name="faceVertices">(int*int*int*int seq) Tuple  of  4 integers that define the
-    ///    vertex indices for each face of the mesh. If the third a fourth vertex
+    ///    vertex indices for each face of the Mesh. If the third a fourth vertex
     ///      indices of a face are identical, a triangular face will be created</param>
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
-    ///    the mesh. Note, for every vertex, there must be a corresponding vertex
+    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex
     ///    normal</param>
     ///<param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
     ///    vertex, there must be a corresponding texture coordinate</param>
@@ -140,7 +140,7 @@ module ExtensionsMesh =
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<param name="pointD">(Point3d) Fourth corner point</param>
-    ///<returns>(Guid) The identifier of the new mesh</returns>
+    ///<returns>(Guid) The identifier of the new Mesh</returns>
     static member AddMeshQuad(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
           let mesh = new Mesh()
           mesh.Vertices.Add(pointA) |> ignore
@@ -158,7 +158,7 @@ module ExtensionsMesh =
     ///<param name="pointA">(Point3d) First corner point</param>
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
-    ///<returns>(Guid) The identifier of the new mesh</returns>
+    ///<returns>(Guid) The identifier of the new Mesh</returns>
     static member AddMeshTriangle(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
           let mesh = new Mesh()
           mesh.Vertices.Add(pointA) |> ignore
@@ -175,7 +175,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a closed, planar curve</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    If True, delete the input Curve defined by objectId</param>
-    ///<returns>(Guid) id of the new mesh</returns>
+    ///<returns>(Guid) id of the new Mesh</returns>
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
         let tolerance = Doc.ModelAbsoluteTolerance
@@ -209,9 +209,9 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns number of meshes that could be created by calling SplitDisjointMesh</summary>
+    ///<summary>Returns number of Meshes that could be created by calling SplitDisjointMesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(int) The number of meshes that could be created</returns>
+    ///<returns>(int) The number of Meshes that could be created</returns>
     static member DisjointMeshCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.DisjointMeshCount
@@ -241,7 +241,7 @@ module ExtensionsMesh =
     ///    at both ends of the edge</summary>
     ///<param name="meshIds">(Guid seq) List of Mesh identifiers</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
-    ///    Delete the input meshes</param>
+    ///    Delete the input Meshes</param>
     ///<returns>(Guid Rarr) List of resulting objects after explode</returns>
     static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid Rarr =
         //id = RhinoScriptSyntax.Coerceguid(meshIds)
@@ -261,7 +261,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Verifies if an object is a mesh</summary>
+    ///<summary>Verifies if an object is a Mesh</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsMesh(objectId:Guid) : bool =
@@ -293,7 +293,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Verifies a point is on a mesh</summary>
+    ///<summary>Verifies a point is on a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<param name="point">(Point3d) Test point</param>
     ///<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
@@ -326,7 +326,7 @@ module ExtensionsMesh =
     ///<param name="objectIds">(Guid seq) Identifiers of two or more Mesh objects</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input after joining</param>
-    ///<returns>(Guid) identifier of newly created mesh</returns>
+    ///<returns>(Guid) identifier of newly created Mesh</returns>
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let joinedmesh = new Mesh()
@@ -344,7 +344,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Returns approximate area of onemesh object</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh objects</param>
-    ///<returns>(float) total area of mesh</returns>
+    ///<returns>(float) total area of Mesh</returns>
     static member MeshArea(objectId:Guid ) :float =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
@@ -367,12 +367,12 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Performs boolean difference operation on two sets of input meshes</summary>
+    ///<summary>Performs boolean difference operation on two sets of input Meshes</summary>
     ///<param name="input0">(Guid seq) Meshes to subtract from</param>
     ///<param name="input1">(Guid seq) Meshes to subtract with</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
-    ///    Delete the input meshes</param>
-    ///<returns>(Guid Rarr) identifiers of newly created meshes</returns>
+    ///    Delete the input Meshes</param>
+    ///<returns>(Guid Rarr) identifiers of newly created Meshes</returns>
     static member MeshBooleanDifference( input0:Guid seq,
                                          input1:Guid seq,
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
@@ -393,12 +393,12 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Performs boolean intersection operation on two sets of input meshes</summary>
+    ///<summary>Performs boolean intersection operation on two sets of input Meshes</summary>
     ///<param name="input0">(Guid seq) Meshes to intersect</param>
     ///<param name="input1">(Guid seq) Meshes to intersect</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
-    ///    Delete the input meshes</param>
-    ///<returns>(Guid Rarr) identifiers of new meshes</returns>
+    ///    Delete the input Meshes</param>
+    ///<returns>(Guid Rarr) identifiers of new Meshes</returns>
     static member MeshBooleanIntersection( input0:Guid seq,
                                            input1:Guid seq,
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
@@ -420,12 +420,12 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Performs boolean split operation on two sets of input meshes</summary>
+    ///<summary>Performs boolean split operation on two sets of input Meshes</summary>
     ///<param name="input0">(Guid seq) Meshes to split from</param>
     ///<param name="input1">(Guid seq) Meshes to split with</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
-    ///    Delete the input meshes</param>
-    ///<returns>(Guid Rarr) identifiers of new meshes</returns>
+    ///    Delete the input Meshes</param>
+    ///<returns>(Guid Rarr) identifiers of new Meshes</returns>
     static member MeshBooleanSplit( input0:Guid seq,
                                     input1:Guid seq,
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
@@ -447,11 +447,11 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Performs boolean union operation on a set of input meshes</summary>
-    ///<param name="meshIds">(Guid seq) Identifiers of meshes</param>
+    ///<summary>Performs boolean union operation on a set of input Meshes</summary>
+    ///<param name="meshIds">(Guid seq) Identifiers of Meshes</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
-    ///    Delete the input meshes</param>
-    ///<returns>(Guid Rarr) identifiers of new meshes</returns>
+    ///    Delete the input Meshes</param>
+    ///<returns>(Guid Rarr) identifiers of new Meshes</returns>
     static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
         let meshes =  rarr { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
@@ -477,7 +477,7 @@ module ExtensionsMesh =
     ///    point.DistanceTo(Q) is smaller than maximumDistance, then set maximumDistance to
     ///    that value</param>
     ///<returns>(Point3d * int) containing the results of the calculation where
-    ///    [0] = the 3-D point on the mesh
+    ///    [0] = the 3-D point on the Mesh
     ///    [1] = the index of the Mesh face on which the 3-D point lies</returns>
     static member MeshClosestPoint( objectId:Guid,
                                     point:Point3d,
@@ -511,7 +511,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Returns the face unit normal for each face of a Mesh object</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(Vector3d Rarr) 3D vectors that define the face unit normals of the mesh</returns>
+    ///<returns>(Vector3d Rarr) 3D vectors that define the face unit normals of the Mesh</returns>
     static member MeshFaceNormals(meshId:Guid) : Vector3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
@@ -524,13 +524,13 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns face vertices of a mesh</summary>
+    ///<summary>Returns face vertices of a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<param name="faceType">(bool) Optional, Default Value: <c>true</c>
     ///    The face type to be returned. 
     ///    True = both triangles and quads. 
     ///    False = Quads are broken down into triangles</param>
-    ///<returns>(Point3d Rarr) List of 3D points that define the face vertices of the mesh. 
+    ///<returns>(Point3d Rarr) List of 3D points that define the face vertices of the Mesh. 
     ///    If faceType is True, then faces are returned as both quads and triangles
     ///    (every four  3D points). For triangles, the third and fourth vertex will be identical.     
     ///    If faceType is False, then faces are returned as only triangles
@@ -559,7 +559,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Returns vertices of each face in a Mesh as tuple of 4 points</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(Point3d Rarr) List of 3D points that define the face vertices of the mesh. 
+    ///<returns>(Point3d Rarr) List of 3D points that define the face vertices of the Mesh. 
     ///    the faces are returned as both quads and triangles. For triangles, the third and fourth vertex will be identical.</returns>
     static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) Rarr = // TODO mark functions not part of rhinopython
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
@@ -579,7 +579,7 @@ module ExtensionsMesh =
     ///<summary>Returns the vertex indices of all faces of a Ngon Mesh object.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object.</param>
     ///<returns>(int Rarr Rarr) containing a nested List that define the vertex indices for
-    ///    each face of the mesh. Ngons, quad and triangle faces are returned.</returns>
+    ///    each face of the Mesh. Ngons, quad and triangle faces are returned.</returns>
     static member MeshNgonFaceVertices(objectId:Guid) : Rarr<Rarr<int>> = //TODO add more ngon support functions like this ???
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
@@ -596,7 +596,7 @@ module ExtensionsMesh =
     ///<summary>Returns the vertex indices of all faces of a Mesh object, Does not suport Ngons yet</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>((int*int*int*int) Rarr) containing tuples of 4 numbers that define the vertex indices for
-    ///    each face of the mesh. Both quad and triangle faces are returned. If the
+    ///    each face of the Mesh. Both quad and triangle faces are returned. If the
     ///    third and fourth vertex indices are identical, the face is a triangle</returns>
     static member MeshFaceVertices(objectId:Guid) : Rarr<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
@@ -662,7 +662,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Identifies the naked edge points of a Mesh object. This function shows
     ///    where Mesh vertices are not completely surrounded by faces. Joined
-    ///    meshes, such as are made by MeshBox, have naked Mesh edge points where
+    ///    Meshes, such as are made by MeshBox, have naked Mesh edge points where
     ///    the sub-meshes are joined</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool array) of boolean values that represent whether or not a Mesh vertex is
@@ -693,7 +693,7 @@ module ExtensionsMesh =
 
     [<Extension>]
     ///<summary>Creates Polyline Curve outlines of Mesh objects</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
+    ///<param name="objectIds">(Guid seq) Identifiers of Meshes to outline</param>
     ///<param name="view">(string) Optional, Default Value: <c>Top View</c>
     ///    View to use for outline direction</param>
     ///<returns>(Guid Rarr) Polyline Curve identifiers</returns>
@@ -771,7 +771,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns number of triangular faces of a mesh</summary>
+    ///<summary>Returns number of triangular faces of a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of triangular Mesh faces</returns>
     static member MeshTriangleCount(objectId:Guid) : int =
@@ -780,7 +780,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns vertex colors of a mesh</summary>
+    ///<summary>Returns vertex colors of a Mesh</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Drawing.Color Rarr) The current vertex colors</returns>
     static member MeshVertexColors(meshId:Guid) : Drawing.Color Rarr= //GET
@@ -789,11 +789,11 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Modifies vertex colors of a mesh</summary>
+    ///<summary>Modifies vertex colors of a Mesh</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<param name="colors">(Drawing.Color seq), optional) A list of color values. Note, for each vertex, there must
     ///    be a corresponding vertex color. If the value is null or empty list , then any
-    ///    existing vertex colors will be removed from the mesh</param>
+    ///    existing vertex colors will be removed from the Mesh</param>
     ///<returns>(unit) void, nothing</returns>
     static member MeshVertexColors(meshId:Guid, colors:Drawing.Color seq) : unit = //SET
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
@@ -811,7 +811,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns the vertex count of a mesh</summary>
+    ///<summary>Returns the vertex count of a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of Mesh vertices</returns>
     static member MeshVertexCount(objectId:Guid) : int =
@@ -830,7 +830,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns the vertex unit normal for each vertex of a mesh</summary>
+    ///<summary>Returns the vertex unit normal for each vertex of a Mesh</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Vector3d Rarr) of vertex normals, (empty list if no normals exist)</returns>
     static member MeshVertexNormals(meshId:Guid) : Vector3d Rarr =
@@ -841,9 +841,9 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns the vertices of a mesh</summary>
+    ///<summary>Returns the vertices of a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(Point3d Rarr) vertex points in the mesh</returns>
+    ///<returns>(Point3d Rarr) vertex points in the Mesh</returns>
     static member MeshVertices(objectId:Guid) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let count = mesh.Vertices.Count
@@ -855,9 +855,9 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Returns the approximate volume of one or more closed meshes</summary>
+    ///<summary>Returns the approximate volume of one or more closed Meshes</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
-    ///<returns>(float)  total volume of all meshes</returns>
+    ///<returns>(float)  total volume of all Meshes</returns>
     static member MeshVolume(objectIds:Guid seq) : float =
         let mutable totalvolume  = 0.0
         for objectId in objectIds do
@@ -871,7 +871,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Calculates the volume centroid of a mesh</summary>
+    ///<summary>Calculates the volume centroid of a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Point3d) Point3d representing the volume centroid</returns>
     static member MeshVolumeCentroid(objectId:Guid) : Point3d =
@@ -882,9 +882,9 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Pulls a Curve to a mesh. The function makes a Polyline approximation of
+    ///<summary>Pulls a Curve to a Mesh. The function makes a Polyline approximation of
     ///    the input Curve and gets the closest point on the Mesh for each point on
-    ///    the polyline. Then it "connects the points" to create a Polyline on the mesh</summary>
+    ///    the polyline. Then it "connects the points" to create a Polyline on the Mesh</summary>
     ///<param name="meshId">(Guid) Identifier of Mesh that pulls</param>
     ///<param name="curveId">(Guid) Identifier of Curve to pull</param>
     ///<returns>(Guid) identifier new curve</returns>
@@ -905,7 +905,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the input object</param>
-    ///<returns>(Guid Rarr) identifiers for the new meshes</returns>
+    ///<returns>(Guid Rarr) identifiers for the new Meshes</returns>
     static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
@@ -918,7 +918,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Fixes inconsistencies in the directions of faces of a mesh</summary>
+    ///<summary>Fixes inconsistencies in the directions of faces of a Mesh</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) the number of faces that were modified</returns>
     static member UnifyMeshNormals(objectId:Guid) : int =

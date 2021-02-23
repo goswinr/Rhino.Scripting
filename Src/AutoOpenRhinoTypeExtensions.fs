@@ -28,7 +28,7 @@ module AutoOpenRhinoTypeExtensions =
                 sprintf "Point3d(%s, %s, %s)" (NiceFormat.float  pt.X) (NiceFormat.float  pt.Y) (NiceFormat.float  pt.Z)
         
         
-        /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in meshes)
+        /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in Meshes)
         [<Extension>] 
         member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
      
@@ -45,7 +45,7 @@ module AutoOpenRhinoTypeExtensions =
                 sprintf "Point3f(%s, %s, %s)" (NiceFormat.single  pt.X) (NiceFormat.single  pt.Y) (NiceFormat.single  pt.Z)
         
         
-        /// To convert a Point3f (as it is used in meshes) to Point3d (as it is used in most other Rhino Geometries)
+        /// To convert a Point3f (as it is used in Meshes) to Point3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
         member pt.ToPoint3d = Point3d(pt)
 

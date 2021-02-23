@@ -253,9 +253,9 @@ module ExtensionsPointvector =
 
 
     [<Extension>]
-    ///<summary>Projects one or more points onto one or more meshes</summary>
+    ///<summary>Projects one or more points onto one or more Meshes</summary>
     ///<param name="points">(Point3d seq) One or more 3D points</param>
-    ///<param name="meshIds">(Guid seq) Identifiers of one or more meshes</param>
+    ///<param name="meshIds">(Guid seq) Identifiers of one or more Meshes</param>
     ///<param name="direction">(Vector3d) Direction vector to project the points</param>
     ///<returns>(Point3d array) projected points</returns>
     static member ProjectPointToMesh( points:Point3d seq,
@@ -286,7 +286,7 @@ module ExtensionsPointvector =
     ///    information, see the Rhino help file Pull command</summary>
     ///<param name="objectId">(Guid) The identifier of the Surface or Mesh object that pulls</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
-    ///<returns>(Point3d array) 3D points pulled onto Surface or mesh</returns>
+    ///<returns>(Point3d array) 3D points pulled onto Surface or Mesh</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array =
         //id = RhinoScriptSyntax.Coerceguid(objectId)
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)

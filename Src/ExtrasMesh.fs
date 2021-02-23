@@ -17,14 +17,14 @@ module ExtrasMesh =
     type RhinoScriptSyntax with 
         
         [<Extension>]
-        /// Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? sort points counterclockwise
+        /// Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? sort points counterclockwise
         static member MeshAddTriaFace (m:Mesh, a:Point3f, b:Point3f, c:Point3f)  =  
             m.Faces.AddFace(
                 m.Vertices.Add a ,
                 m.Vertices.Add b, 
                 m.Vertices.Add c) |>ignore        
         [<Extension>]
-        /// Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? sort points counterclockwise
+        /// Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? sort points counterclockwise
         static member MeshAddTriaFace (m:Mesh, a:Point3d, b:Point3d, c:Point3d)  = 
             m.Faces.AddFace(    
                 m.Vertices.Add(a.X,a.Y,a.Z) , 
@@ -34,39 +34,39 @@ module ExtrasMesh =
         
         
         [<Extension>]
-        /// Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? sort points counterclockwise
+        /// Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? sort points counterclockwise
         static member MeshAddQuadFace (m:Mesh, a:Point3f, b:Point3f, c:Point3f, d:Point3f) =  
             m.Faces.AddFace(    m.Vertices.Add a , 
                                 m.Vertices.Add b, 
                                 m.Vertices.Add c,
                                 m.Vertices.Add d) |>ignore        
         [<Extension>]
-        /// Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? 
+        /// Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? 
         static member MeshAddQuadFace (m:Mesh, a:Point3d, b:Point3d, c:Point3d, d:Point3d) =  
             m.Faces.AddFace(    m.Vertices.Add (a.X,a.Y,a.Z), 
                                 m.Vertices.Add (b.X,b.Y,b.Z), 
                                 m.Vertices.Add (c.X,c.Y,c.Z), 
                                 m.Vertices.Add (d.X,d.Y,d.Z)) |>ignore        
         [<Extension>]
-        /// Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? 
+        /// Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? 
         static member MeshAddQuadFace ((m:Mesh), l:Line, ll:Line) = RhinoScriptSyntax.MeshAddQuadFace(m, l.From ,l.To ,ll.From , ll.To)
        
        
 
         [<Extension>]
-        /// Appends a welded Quad to last 2 vertices, Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ??
+        /// Appends a welded Quad to last 2 vertices, Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ??
         static member MeshAddQuadFaceToLastTwo (m:Mesh, a:Point3d, b:Point3d) = 
             let c = m.Vertices.Count
             if c<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot append Quad to mesh %A" m     
             else m.Faces.AddFace(c-1, c-2,  m.Vertices.Add (b.X,b.Y,b.Z), m.Vertices.Add (a.X,a.Y,a.Z)) |>ignore 
         [<Extension>]
-        /// Appends a welded Quad to last 2 vertices,  Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ??
+        /// Appends a welded Quad to last 2 vertices,  Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ??
         static member MeshAddQuadFaceToLastTwo (m:Mesh, l:Line) = RhinoScriptSyntax.MeshAddQuadFaceToLastTwo (m, l.From ,l.To) 
        
 
         
         [<Extension>]
-        /// Adds a welded quad and tria face to simulate Pentagon, Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? 
+        /// Adds a welded quad and tria face to simulate Pentagon, Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? 
         /// Obsolete? Use built in Ngons instead ?
         static member MeshAddPentaFace (m:Mesh, a:Point3d, b:Point3d, c:Point3d, d:Point3d, e:Point3d) =  
             let a = m.Vertices.Add (a.X,a.Y,a.Z)
@@ -76,7 +76,7 @@ module ExtrasMesh =
         
 
         [<Extension>]
-        /// Adds two welded quad faces to simulate hexagon, Call  mesh.Normals.ComputeNormals() and mesh.Compact() after adding the faces ?? 
+        /// Adds two welded quad faces to simulate hexagon, Call  Mesh.Normals.ComputeNormals() and Mesh.Compact() after adding the faces ?? 
         /// Obsolete? Use built in Ngons instead ?
         static member MeshAddHexaFace (m:Mesh, a:Point3d, b:Point3d, c:Point3d, d:Point3d, e:Point3d, f:Point3d) =  
             let a = m.Vertices.Add (a.X,a.Y,a.Z)

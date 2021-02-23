@@ -222,7 +222,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Fits a Surface through curve, point, point cloud, and Mesh objects</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
-    ///    Acceptable object types include curves, points, point clouds, and meshes</param>
+    ///    Acceptable object types include curves, points, point clouds, and Meshes</param>
     ///<param name="startSurfaceId">(Guid) The identifier of the starting Surface.  It is best if you create a starting Surface that is similar in shape
     ///    to the Surface you are trying to create</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
@@ -270,7 +270,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Fits a Surface through curve, point, point cloud, and Mesh objects</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
-    ///    Acceptable object types include curves, points, point clouds, and meshes</param>
+    ///    Acceptable object types include curves, points, point clouds, and Meshes</param>
     ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated Surface . however it is best if you create a starting Surface that is similar in shape
     ///    to the Surface you are trying to create an use the other overload of this method</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>

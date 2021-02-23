@@ -2484,9 +2484,9 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Projects one or more curves onto one or more Surfaces or meshes</summary>
+    ///<summary>Projects one or more curves onto one or more Surfaces or Meshes</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of curves to project</param>
-    ///<param name="meshIds">(Guid seq) Identifiers of meshes to project onto</param>
+    ///<param name="meshIds">(Guid seq) Identifiers of Meshes to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid Rarr) list of identifiers for the resulting curves</returns>
     static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid Rarr =
