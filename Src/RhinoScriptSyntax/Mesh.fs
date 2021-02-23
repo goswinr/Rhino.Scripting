@@ -832,7 +832,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(Vector3d Rarr) of vertex normals, (empty list if no normals exist).</returns>
+    ///<returns>(Vector3d Rarr) List of vertex normals, (empty list if no normals exist).</returns>
     static member MeshVertexNormals(meshId:Guid) : Vector3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let count = mesh.Normals.Count

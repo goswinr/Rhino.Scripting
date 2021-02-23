@@ -718,7 +718,7 @@ module ExtensionsView =
     ///    0 = standard model views
     ///    1 = page layout views
     ///    2 = both standard and page layout views</param>
-    ///<returns>(string Rarr) of the view names.</returns>
+    ///<returns>(string Rarr) List of the view names.</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType

@@ -606,7 +606,7 @@ module ExtensionsSurface =
     ///<param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    ///<returns>(Guid Rarr) of new Surface objects.</returns>
+    ///<returns>(Guid Rarr) List of new Surface objects.</returns>
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
@@ -627,7 +627,7 @@ module ExtensionsSurface =
     ///<param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    ///<returns>(Guid Rarr) of new Surface objects.</returns>
+    ///<returns>(Guid Rarr) List of new Surface objects.</returns>
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
@@ -688,7 +688,7 @@ module ExtensionsSurface =
     ///<param name="input1">(Guid seq) List of Surfaces to be subtracted</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete all input objects</param>
-    ///<returns>(Guid Rarr) of identifiers of newly created objects .</returns>
+    ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
     static member BooleanDifference( input0:Guid seq,
                                      input1:Guid seq,
                                      [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
@@ -714,7 +714,7 @@ module ExtensionsSurface =
     ///<param name="input1">(Guid seq) List of Surfaces</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete all input objects</param>
-    ///<returns>(Guid Rarr) of identifiers of newly created objects .</returns>
+    ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
                                        [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
@@ -738,7 +738,7 @@ module ExtensionsSurface =
     ///<param name="input">(Guid seq) List of Surfaces to union</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c>
     ///    Delete all input objects</param>
-    ///<returns>(Guid Rarr) of identifiers of newly created objects .</returns>
+    ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
     static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         if Seq.length(input)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let breps =  rarr { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
@@ -905,7 +905,7 @@ module ExtensionsSurface =
     ///<param name="objectIds">(Guid seq) Identifiers of Polysurfaces to explode</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Delete input objects after exploding</param>
-    ///<returns>(Guid Rarr) of identifiers of exploded pieces .</returns>
+    ///<returns>(Guid Rarr) List of identifiers of exploded pieces .</returns>
     static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let ids = Rarr()
         for objectId in objectIds do
@@ -928,7 +928,7 @@ module ExtensionsSurface =
     ///    0 = u
     ///    1 = v
     ///    2 = both</param>
-    ///<returns>(Guid Rarr) of Curve ids .</returns>
+    ///<returns>(Guid Rarr) List of Curve ids .</returns>
     static member ExtractIsoCurve( surfaceId:Guid,
                                    parameter:float * float,
                                    direction:int) : Guid Rarr =
@@ -1553,7 +1553,7 @@ module ExtensionsSurface =
     ///<param name="curve">(Guid) The Curve's identifier</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    Should the input items be deleted</param>
-    ///<returns>(Guid Rarr) of new Curves.</returns>
+    ///<returns>(Guid Rarr) List of new Curves.</returns>
     static member PullCurve( surface:Guid,
                              curve:Guid,
                              [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
@@ -2305,7 +2305,7 @@ module ExtensionsSurface =
     ///<summary>Calculates volume moments of inertia of a Surface or Polysurface object.
     ///    For more information, see Rhino help for "Mass Properties calculation details".</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
-    ///<returns>((float*float*float) Rarr) of moments and error bounds in tuple(X, Y, Z) - see help topic
+    ///<returns>((float*float*float) Rarr) List of moments and error bounds in tuple(X, Y, Z) - see help topic
     ///    Index   Description
     ///    [0]     First Moments.
     ///    [1]     The absolute (+/-) error bound for the First Moments.
