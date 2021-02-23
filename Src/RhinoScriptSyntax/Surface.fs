@@ -228,7 +228,7 @@ module ExtensionsSurface =
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    ///    Try to find an outside curve and trims the Surface to it.  The default value is True</param>
+    ///    Try to find an outside Curve and trims the Surface to it.  The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
     ///    The basic distance between points sampled from input curves.  The default value is 0.1</param>
     ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
@@ -243,7 +243,7 @@ module ExtensionsSurface =
     ///    the resulting Surface shape will be to the starting Surface.  The default value is 1.0</param>
     ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
     ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
-    ///    curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
+    ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
     ///    to move.  The default if False</param>
     ///<returns>(Guid) Identifier of the new Surface object</returns>
     static member AddPatch( objectIds:Guid seq,
@@ -276,7 +276,7 @@ module ExtensionsSurface =
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    ///    Try to find an outside curve and trims the Surface to it.  The default value is True</param>
+    ///    Try to find an outside Curve and trims the Surface to it.  The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
     ///    The basic distance between points sampled from input curves.  The default value is 0.1</param>
     ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
@@ -291,7 +291,7 @@ module ExtensionsSurface =
     ///    the resulting Surface shape will be to the starting Surface.  The default value is 1.0</param>
     ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
     ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
-    ///    curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
+    ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
     ///    to move.  The default if False</param>
     ///<returns>(Guid) Identifier of the new Surface object</returns>
     static member AddPatch( objectIds:Guid seq,
@@ -319,8 +319,8 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Creates a single walled Surface with a circular profile around a curve</summary>
     ///<param name="curveId">(Guid) Identifier of rail curve</param>
-    ///<param name="parameters">(float seq) normalized curve parameters</param>
-    ///<param name="radii">(float seq) radius values at normalized curve parameters</param>
+    ///<param name="parameters">(float seq) normalized Curve parameters</param>
+    ///<param name="radii">(float seq) radius values at normalized Curve parameters</param>
     ///<param name="blendType">(int) Optional, Default Value: <c>0</c>
     ///    0(local) or 1(global)</param>
     ///<param name="cap">(int) Optional, Default Value: <c>0</c>
@@ -382,7 +382,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a Surface created by lofting curves to the document.
-    ///    - no curve sorting performed. pass in curves in the order you want them sorted
+    ///    - no Curve sorting performed. pass in curves in the order you want them sorted
     ///    - directions of open curves not adjusted. Use CurveDirectionsMatch and
     ///      ReverseCurve to adjust the directions of open curves
     ///    - seams of closed curves are not adjusted. Use CurveSeam to adjust the seam
@@ -441,7 +441,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create a Surface by revolving a curve around an axis</summary>
+    ///<summary>Create a Surface by revolving a Curve around an axis</summary>
     ///<param name="curveId">(Guid) Identifier of profile curve</param>
     ///<param name="axis">(Line) Line for the rail revolve axis</param>
     ///<param name="startAngle">(float) Optional, Default Value: <c>0.0</c>
@@ -601,7 +601,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a Surface created through profile curves that define the Surface
-    ///    shape and one curve that defines a Surface edge</summary>
+    ///    shape and one Curve that defines a Surface edge</summary>
     ///<param name="rail">(Guid) Identifier of the rail curve</param>
     ///<param name="shapes">(Guid seq) One or more cross section shape curves</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
@@ -817,7 +817,7 @@ module ExtensionsSurface =
     ///<param name="objectId">(Guid) The identifier of the Surface or Polysurface object</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge curves. The default is not to select (False)</param>
-    ///<returns>(Guid Rarr) identifying the newly created curve objects</returns>
+    ///<returns>(Guid Rarr) identifying the newly created Curve objects</returns>
     static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let outcurves = brep.DuplicateEdgeCurves()
@@ -843,7 +843,7 @@ module ExtensionsSurface =
     ///    0 = both exterior and interior,
     ///    1 = exterior
     ///    2 = interior</param>
-    ///<returns>(Guid Rarr) list of curve ids </returns>
+    ///<returns>(Guid Rarr) list of Curve ids </returns>
     static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let inner = typ = 0 || typ = 2
@@ -928,7 +928,7 @@ module ExtensionsSurface =
     ///    0 = u
     ///    1 = v
     ///    2 = both</param>
-    ///<returns>(Guid Rarr) of curve ids </returns>
+    ///<returns>(Guid Rarr) of Curve ids </returns>
     static member ExtractIsoCurve( surfaceId:Guid,
                                    parameter:float * float,
                                    direction:int) : Guid Rarr =
@@ -988,8 +988,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a Surface by extruding a curve along a path</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
+    ///<summary>Creates a Surface by extruding a Curve along a path</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve to extrude</param>
     ///<param name="pathId">(Guid) Identifier of the path curve</param>
     ///<returns>(Guid) identifier of new Surface </returns>
     static member ExtrudeCurve(curveId:Guid, pathId:Guid) : Guid =
@@ -1003,8 +1003,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Creates a Surface by extruding a curve to a point</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
+    ///<summary>Creates a Surface by extruding a Curve to a point</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve to extrude</param>
     ///<param name="point">(Point3d) 3D point</param>
     ///<returns>(Guid) identifier of new Surface </returns>
     static member ExtrudeCurvePoint(curveId:Guid, point:Point3d) : Guid =
@@ -1018,8 +1018,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create Surface by extruding a curve along two points that define a line</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve to extrude</param>
+    ///<summary>Create Surface by extruding a Curve along two points that define a line</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve to extrude</param>
     ///<param name="startPoint">(Point3d) Start point</param>
     ///<param name="endPoint">(Point3d) End point, that specifyies distance and direction</param>
     ///<returns>(Guid) identifier of new Surface </returns>
@@ -1142,7 +1142,7 @@ module ExtensionsSurface =
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    Distance tolerance at segment midpoints. If omitted,
     ///    the current absolute tolerance is used</param>
-    ///<returns>(Guid Rarr) identifying the newly created intersection curve and point objects</returns>
+    ///<returns>(Guid Rarr) identifying the newly created intersection Curve and point objects</returns>
     static member IntersectBreps( brep1:Guid,
                                   brep2:Guid,
                                   [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
@@ -1548,7 +1548,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Pulls a curve object to a Surface object</summary>
+    ///<summary>Pulls a Curve object to a Surface object</summary>
     ///<param name="surface">(Guid) The Surface's identifier</param>
     ///<param name="curve">(Guid) The curve's identifier</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
@@ -2056,7 +2056,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Returns the isocurve density of a Surface or Polysurface object.
-    /// An isoparametric curve is a curve of constant U or V value on a Surface.
+    /// An isoparametric Curve is a Curve of constant U or V value on a Surface.
     /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
     /// NURBS Surface</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
@@ -2078,7 +2078,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Sets the isocurve density of a Surface or Polysurface object.
-    /// An isoparametric curve is a curve of constant U or V value on a Surface.
+    /// An isoparametric Curve is a Curve of constant U or V value on a Surface.
     /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
     /// NURBS Surface</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
@@ -2110,7 +2110,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Sets the isocurve density of multiple Surface or Polysurface objects.
-    /// An isoparametric curve is a curve of constant U or V value on a Surface.
+    /// An isoparametric Curve is a Curve of constant U or V value on a Surface.
     /// Rhino uses isocurves and Surface edge curves to visualize the shape of a
     /// NURBS Surface</summary>
     ///<param name="surfaceIds">(Guid seq) The Surface's identifiers</param>

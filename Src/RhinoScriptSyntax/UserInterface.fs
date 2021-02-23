@@ -578,8 +578,8 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point constrainted to a curve object</summary>
-    ///<param name="curveId">(Guid) Identifier of the curve to get a point on</param>
+    ///<summary>Pauses for user input of a point constrainted to a Curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>

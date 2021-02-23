@@ -52,7 +52,7 @@ module AutoOpenActiveDocument =
                 else 
                     sprintf "Guid %A (an unnamed %s on Layer '%s')" g (o.ShortDescription(false)) (Doc.Layers.[o.Attributes.LayerIndex].FullPath)
 
-    /// Gets a localized description on Rhino layer and  object type (e.g. curve , point, Surface ....)
+    /// Gets a localized description on Rhino layer and  object type (e.g. Curve , point, Surface ....)
     let internal typeDescr (x:'a)=
        match box x with 
        | :? Guid as g -> rhType g

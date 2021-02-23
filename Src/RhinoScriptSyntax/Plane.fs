@@ -99,9 +99,9 @@ module ExtensionsPlane =
 
 
     [<Extension>]
-    ///<summary>Intersect an infinite plane and a curve object</summary>
+    ///<summary>Intersect an infinite plane and a Curve object</summary>
     ///<param name="plane">(Plane) The plane to intersect</param>
-    ///<param name="curve">(Guid) The identifier of the curve object</param>
+    ///<param name="curve">(Guid) The identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The intersection tolerance.</param>
     ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
@@ -115,18 +115,18 @@ module ExtensionsPlane =
     ///      If the event type is Overlap (2), then intersection start point on the plane.
     ///    [4]       Point3d     If the event type is Point (1), then the intersection point on the plane.
     ///      If the event type is Overlap (2), then intersection end point on the plane.
-    ///    [5]       Number      If the event type is Point (1), then the curve parameter.
-    ///      If the event type is Overlap (2), then the start value of the curve parameter range.
-    ///    [6]       Number      If the event type is Point (1), then the curve parameter.
-    ///      If the event type is Overlap (2), then the end value of the curve parameter range.
+    ///    [5]       Number      If the event type is Point (1), then the Curve parameter.
+    ///      If the event type is Overlap (2), then the start value of the Curve parameter range.
+    ///    [6]       Number      If the event type is Point (1), then the Curve parameter.
+    ///      If the event type is Overlap (2), then the end value of the Curve parameter range.
     ///    [7]       Number      If the event type is Point (1), then the U plane parameter.
-    ///      If the event type is Overlap (2), then the U plane parameter for curve at (n, 5).
+    ///      If the event type is Overlap (2), then the U plane parameter for Curve at (n, 5).
     ///    [8]       Number      If the event type is Point (1), then the V plane parameter.
-    ///      If the event type is Overlap (2), then the V plane parameter for curve at (n, 5).
+    ///      If the event type is Overlap (2), then the V plane parameter for Curve at (n, 5).
     ///    [9]       Number      If the event type is Point (1), then the U plane parameter.
-    ///      If the event type is Overlap (2), then the U plane parameter for curve at (n, 6).
+    ///      If the event type is Overlap (2), then the U plane parameter for Curve at (n, 6).
     ///    [10]      Number      If the event type is Point (1), then the V plane parameter.
-    ///      If the event type is Overlap (2), then the V plane parameter for curve at (n, 6)</returns>
+    ///      If the event type is Overlap (2), then the V plane parameter for Curve at (n, 6)</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =

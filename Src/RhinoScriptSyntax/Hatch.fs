@@ -90,8 +90,8 @@ module ExtensionsHatch =
         ids
 
     [<Extension>]
-    ///<summary>Creates a new Hatch object from a closed planar curve object</summary>
-    ///<param name="curveId">(Guid) Identifier of the closed planar curve that defines the
+    ///<summary>Creates a new Hatch object from a closed planar Curve object</summary>
+    ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the
     ///    boundary of the Hatch object</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch
     ///    object. If omitted, the current Hatch pattern will be used</param>
@@ -157,7 +157,7 @@ module ExtensionsHatch =
     [<Extension>]
     ///<summary>Explodes a Hatch object into its component objects. The exploded objects
     ///    will be added to the document. If the Hatch object uses a solid pattern,
-    ///    then planar face Brep objects will be created. Otherwise, line curve objects
+    ///    then planar face Brep objects will be created. Otherwise, line Curve objects
     ///    will be created</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>

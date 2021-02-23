@@ -148,7 +148,7 @@ module ExtensionsSelection =
 
 
     [<Extension>]
-    ///<summary>Prompts user to pick or select a single curve object</summary>
+    ///<summary>Prompts user to pick or select a single Curve object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
@@ -156,11 +156,11 @@ module ExtensionsSelection =
     ///    Select the picked objects. If False, objects that
     ///    are picked are not selected</param>
     ///<returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
-    ///    [0]  guid     identifier of the curve object
-    ///    [1]  bool     True if the curve was preselected, otherwise False
+    ///    [0]  guid     identifier of the Curve object
+    ///    [1]  bool     True if the Curve was preselected, otherwise False
     ///    [2]  Enum     DocObjects.SelectionMethod
     ///    [3]  point    selection point
-    ///    [4]  number   the curve parameter of the selection point
+    ///    [4]  number   the Curve parameter of the selection point
     ///    [5]  str      name of the view selection was made</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,

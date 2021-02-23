@@ -174,7 +174,7 @@ module ExtensionsMesh =
     ///<summary>Creates a planar Mesh from a closed, planar curve</summary>
     ///<param name="objectId">(Guid) Identifier of a closed, planar curve</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, delete the input curve defined by objectId</param>
+    ///    If True, delete the input Curve defined by objectId</param>
     ///<returns>(Guid) id of the new mesh</returns>
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
@@ -191,8 +191,8 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Calculates the intersection of a curve object and a Mesh object</summary>
-    ///<param name="curveId">(Guid) Identifier of a curve object</param>
+    ///<summary>Calculates the intersection of a Curve object and a Mesh object</summary>
+    ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="meshId">(Guid) Identifier or a Mesh object</param>
     ///<returns>(Point3d array * int array) two arrays as tuple:
     ///        [0] = point of intersection
@@ -220,7 +220,7 @@ module ExtensionsMesh =
     [<Extension>]
     ///<summary>Creates curves that duplicates a Mesh border</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(Guid Rarr) list of curve ids</returns>
+    ///<returns>(Guid Rarr) list of Curve ids</returns>
     static member DuplicateMeshBorder(meshId:Guid) : Guid Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let polylines = mesh.GetNakedEdges()
@@ -692,11 +692,11 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Creates polyline curve outlines of Mesh objects</summary>
+    ///<summary>Creates polyline Curve outlines of Mesh objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
     ///<param name="view">(string) Optional, Default Value: <c>Top View</c>
     ///    View to use for outline direction</param>
-    ///<returns>(Guid Rarr) polyline curve identifiers</returns>
+    ///<returns>(Guid Rarr) polyline Curve identifiers</returns>
     static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid Rarr =
         let  meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = Rarr()
@@ -882,11 +882,11 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Pulls a curve to a mesh. The function makes a polyline approximation of
-    ///    the input curve and gets the closest point on the Mesh for each point on
+    ///<summary>Pulls a Curve to a mesh. The function makes a polyline approximation of
+    ///    the input Curve and gets the closest point on the Mesh for each point on
     ///    the polyline. Then it "connects the points" to create a polyline on the mesh</summary>
     ///<param name="meshId">(Guid) Identifier of Mesh that pulls</param>
-    ///<param name="curveId">(Guid) Identifier of curve to pull</param>
+    ///<param name="curveId">(Guid) Identifier of Curve to pull</param>
     ///<returns>(Guid) identifier new curve</returns>
     static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)

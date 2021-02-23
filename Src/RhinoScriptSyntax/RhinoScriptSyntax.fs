@@ -245,7 +245,7 @@ type RhinoScriptSyntax private () =
                 | :? Extrusion as b -> Some (b.ToBrep(true))
                 | _ -> None
 
-    ///<summary>Attempt to get curve geometry from the document with a given objectId</summary>
+    ///<summary>Attempt to get Curve geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>a Rhino.Geometry.Curve Option</returns>
@@ -837,7 +837,7 @@ type RhinoScriptSyntax private () =
 
 
     
-    ///<summary>Attempt to get curve geometry from the document with a given objectId</summary>
+    ///<summary>Attempt to get Curve geometry from the document with a given objectId</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>(Rhino.Geometry.Curve) Fails on bad input</returns>
