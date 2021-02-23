@@ -189,10 +189,10 @@ module ExtrasBrep =
         brep
         
     [<Extension>]
-    ///<summary> Calls Mesh.CreateFromBrep, and mesh.HealNakedEdges() to try to ensure mesh is closed if input is closed</summary>
-    ///<param name="brep">(Brep)the Polysurface to extract mesh from</param>
+    ///<summary> Calls Mesh.CreateFromBrep, and mesh.HealNakedEdges() to try to ensure Mesh is closed if input is closed</summary>
+    ///<param name="brep">(Brep)the Polysurface to extract Mesh from</param>
     ///<param name="meshingParameters">(MeshingParameters) Optional, The meshing parameters , if omitted the current meshing parameters are used </param>
-    ///<returns>((Mesh Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output mesh not
+    ///<returns>((Mesh Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output Mesh not
     /// fails if no meshes can be extracted </returns>
     static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Result<Mesh,Mesh> =            
         let meshing =                

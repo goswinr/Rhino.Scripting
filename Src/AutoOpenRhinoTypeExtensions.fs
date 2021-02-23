@@ -60,7 +60,7 @@ module AutoOpenRhinoTypeExtensions =
             else
                 sprintf "Vector3d(%s, %s, %s)" (NiceFormat.float  v.X) (NiceFormat.float  v.Y) (NiceFormat.float  v.Z)
         
-        /// To convert Vector3d (as it is used in most other Rhino Geometries) to a Vector3f (as it is used in mesh noramls)
+        /// To convert Vector3d (as it is used in most other Rhino Geometries) to a Vector3f (as it is used in Mesh noramls)
         [<Extension>] 
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
         
@@ -86,7 +86,7 @@ module AutoOpenRhinoTypeExtensions =
             else
                 sprintf "Vector3f(%s, %s, %s)" (NiceFormat.single  v.X) (NiceFormat.single  v.Y) (NiceFormat.single  v.Z)
    
-        /// To convert a Vector3f (as it is used in mesh noramls) to a Vector3d (as it is used in most other Rhino Geometries)
+        /// To convert a Vector3f (as it is used in Mesh noramls) to a Vector3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
         member v.ToVector3d = Vector3d(v)
 

@@ -282,9 +282,9 @@ module ExtensionsPointvector =
 
 
     [<Extension>]
-    ///<summary>Pulls an array of points to a Surface or mesh object. For more
+    ///<summary>Pulls an array of points to a Surface or Mesh object. For more
     ///    information, see the Rhino help file Pull command</summary>
-    ///<param name="objectId">(Guid) The identifier of the Surface or mesh object that pulls</param>
+    ///<param name="objectId">(Guid) The identifier of the Surface or Mesh object that pulls</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<returns>(Point3d array) 3D points pulled onto Surface or mesh</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array =

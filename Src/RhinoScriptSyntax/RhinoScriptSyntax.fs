@@ -881,7 +881,7 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on: %A "  objectId
 
 
-    ///<summary>Attempt to get mesh geometry from the document with a given objectId</summary>
+    ///<summary>Attempt to get Mesh geometry from the document with a given objectId</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>(Rhino.Geometry.Mesh) Fails on bad input</returns>    
     static member CoerceMesh(objectId:Guid) : Mesh =

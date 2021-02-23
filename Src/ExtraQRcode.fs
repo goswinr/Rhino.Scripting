@@ -60,7 +60,7 @@ module QRcode =
         arr2d
     
     
-    /// Creats a QRcode mesh of size 1 unit at 0,0
+    /// Creats a QRcode Mesh of size 1 unit at 0,0
     let private asRhinoMesh (ar:bool[,]):Mesh =
         let m = new Mesh()
         let sizeX = Array2D.length1 ar 
@@ -119,7 +119,7 @@ module QRcode =
     type RhinoScriptSyntax with 
         
         [<Extension>]
-        /// creats mesh of size 1 at 0,0
+        /// creats Mesh of size 1 at 0,0
         static member QrCodeAsMesh txt :Mesh = 
             txt
             |> BMofTxt 50

@@ -479,8 +479,8 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick one or more mesh faces</summary>
-    ///<param name="objectId">(Guid) The mesh object's identifier</param>
+    ///<summary>Prompts the user to pick one or more Mesh faces</summary>
+    ///<param name="objectId">(Guid) The Mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Faces"</c>
     ///    A prompt of message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
@@ -489,7 +489,7 @@ module ExtensionsUserinterface =
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int Rarr) an Option of of mesh face indices</returns>
+    ///<returns>(int Rarr) an Option of of Mesh face indices</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
@@ -513,8 +513,8 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompts the user to pick one or more mesh vertices</summary>
-    ///<param name="objectId">(Guid) The mesh object's identifier</param>
+    ///<summary>Prompts the user to pick one or more Mesh vertices</summary>
+    ///<param name="objectId">(Guid) The Mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Vertices"</c>
     ///    A prompt of message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
@@ -523,7 +523,7 @@ module ExtensionsUserinterface =
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int Rarr) an Option of of mesh vertex indices</returns>
+    ///<returns>(int Rarr) an Option of of Mesh vertex indices</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -600,8 +600,8 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Pauses for user input of a point constrained to a mesh object</summary>
-    ///<param name="meshId">(Guid) Identifier of the mesh to get a point on</param>
+    ///<summary>Pauses for user input of a point constrained to a Mesh object</summary>
+    ///<param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point</returns>

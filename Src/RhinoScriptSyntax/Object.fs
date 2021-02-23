@@ -275,7 +275,7 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Determines if an object is closed, solid</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is solid, or a mesh is closed., False otherwise</returns>
+    ///<returns>(bool) True if the object is solid, or a Mesh is closed., False otherwise</returns>
     static member IsObjectSolid(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry

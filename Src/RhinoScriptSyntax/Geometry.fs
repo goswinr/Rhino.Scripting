@@ -58,7 +58,7 @@ module ExtensionsGeometry =
     ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
     ///    If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the function will make a PictureFrame object from a mesh rather than a plane Surface</param>
+    ///    If True, the function will make a PictureFrame object from a Mesh rather than a plane Surface</param>
     ///<returns>(Guid) object identifier</returns>
     static member AddPictureFrame(  plane:Plane,
                                     filename:string,

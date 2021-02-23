@@ -2315,10 +2315,10 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Creates a polygon mesh object based on a closed polyline curve object.
-    ///    The created mesh object is added to the document</summary>
+    ///<summary>Creates a polygon Mesh object based on a closed polyline curve object.
+    ///    The created Mesh object is added to the document</summary>
     ///<param name="polylineId">(Guid) Identifier of the polyline curve object</param>
-    ///<returns>(Guid) identifier of the new mesh object</returns>
+    ///<returns>(Guid) identifier of the new Mesh object</returns>
     static member MeshPolyline(polylineId:Guid) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve polylineId
         let ispolyline, polyline = curve.TryGetPolyline()

@@ -220,7 +220,7 @@ module ExtensionsSurface =
         objectId
 
     [<Extension>]
-    ///<summary>Fits a Surface through curve, point, point cloud, and mesh objects</summary>
+    ///<summary>Fits a Surface through curve, point, point cloud, and Mesh objects</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
     ///    Acceptable object types include curves, points, point clouds, and meshes</param>
     ///<param name="startSurfaceId">(Guid) The identifier of the starting Surface.  It is best if you create a starting Surface that is similar in shape
@@ -268,7 +268,7 @@ module ExtensionsSurface =
                         RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch faild for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) startSurfaceId
 
     [<Extension>]
-    ///<summary>Fits a Surface through curve, point, point cloud, and mesh objects</summary>
+    ///<summary>Fits a Surface through curve, point, point cloud, and Mesh objects</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
     ///    Acceptable object types include curves, points, point clouds, and meshes</param>
     ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated Surface . however it is best if you create a starting Surface that is similar in shape
