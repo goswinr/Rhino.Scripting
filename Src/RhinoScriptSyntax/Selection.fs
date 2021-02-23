@@ -57,7 +57,7 @@ module ExtensionsSelection =
     ///    Include grips objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid Rarr) Identifiers for all the objects in the document</returns>
+    ///<returns>(Guid Rarr) Identifiers for all the objects in the document.</returns>
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
                                [<OPT;DEF(false)>]includeGrips:bool,
@@ -92,7 +92,7 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips objects</param>  
-    ///<returns>(Guid Rarr) Identifiers for all the objects that are not hidden and who's layer is on and visible</returns>
+    ///<returns>(Guid Rarr) Identifiers for all the objects that are not hidden and who's layer is on and visible.</returns>
     static member ShownObjects(     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
@@ -130,7 +130,7 @@ module ExtensionsSelection =
     ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips objects.  If omitted, grips objects are not returned</param>
-    ///<returns>(Guid) The identifier of the object</returns>
+    ///<returns>(Guid) The identifier of the object.</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid =
@@ -161,7 +161,7 @@ module ExtensionsSelection =
     ///    [2]  Enum     DocObjects.SelectionMethod
     ///    [3]  point    selection point
     ///    [4]  number   the Curve parameter of the selection point
-    ///    [5]  str      name of the view selection was made</returns>
+    ///    [5]  str      name of the view selection was made.</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
@@ -211,7 +211,7 @@ module ExtensionsSelection =
     ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
     ///    If True, subobjects can be selected. When this is the
     ///    case, for tracking  of the subobject go via the Object Ref</param>
-    ///<returns>(Guid) Identifier of the picked object</returns>
+    ///<returns>(Guid) Identifier of the picked object.</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
@@ -269,7 +269,7 @@ module ExtensionsSelection =
     ///         (2) selected by being inside of amouse window.
     ///         (3) selected by intersecting a mousecrossing window.
     ///    [3] selection point
-    ///    [4] name of the view selection was made</returns>
+    ///    [4] name of the view selection was made.</returns>
     static member GetObjectEx(      [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
@@ -333,7 +333,7 @@ module ExtensionsSelection =
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) List of identifiers of the picked objects</returns>
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects.</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -402,7 +402,7 @@ module ExtensionsSelection =
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) List of identifiers of the picked objects</returns>
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects.</returns>
     static member GetObjectsAndRemember(message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]group:bool,
@@ -437,7 +437,7 @@ module ExtensionsSelection =
     ///    Select the picked objects.  If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
-    ///<returns>(Guid) a identifier of the picked object</returns>
+    ///<returns>(Guid) a identifier of the picked object.</returns>
     static member GetObjectAndRemember( message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]preselect:bool,
@@ -477,7 +477,7 @@ module ExtensionsSelection =
     ///    [n][1]  True if the object was preselected, otherwise False
     ///    [n][2]  selection method (DocObjects.SelectionMethod)
     ///    [n][3]  selection point
-    ///    [n][4]  name of the view selection was made</returns>
+    ///    [n][4]  name of the view selection was made.</returns>
     static member GetObjectsEx(     [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -535,7 +535,7 @@ module ExtensionsSelection =
     ///    A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
-    ///<returns>(Point3d Rarr) List of 3d points</returns>
+    ///<returns>(Point3d Rarr) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr =
         let ids =  RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect) 
@@ -562,7 +562,7 @@ module ExtensionsSelection =
     ///    [2]  selection method ( DocObjects.SelectionMethod )
     ///    [3]  selection point
     ///    [4]  u, v Surface parameter of the selection point
-    ///    [5]  name of the view in which the selection was made</returns>
+    ///    [5]  name of the view in which the selection was made.</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
@@ -612,7 +612,7 @@ module ExtensionsSelection =
     ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid Rarr) identifiers the locked objects</returns>
+    ///<returns>(Guid Rarr) identifiers the locked objects.</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) :Guid Rarr =
@@ -640,7 +640,7 @@ module ExtensionsSelection =
     ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid Rarr) identifiers of the hidden objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the hidden objects.</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
@@ -666,7 +666,7 @@ module ExtensionsSelection =
     ///    Include grips objects.  If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid Rarr) identifiers of the newly selected objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the newly selected objects.</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
                                         [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
@@ -694,7 +694,7 @@ module ExtensionsSelection =
     ///    most recently created or changed object identifiers will be returned</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the object.  If omitted, the object is not selected</param>
-    ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr =
         match commandSerialNumbers with
         |None -> Rarr()
@@ -720,7 +720,7 @@ module ExtensionsSelection =
     ///    Include lights in the potential set</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips in the potential set</param>
-    ///<returns>(Guid) identifier of the object</returns>
+    ///<returns>(Guid) identifier of the object.</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
                               [<OPT;DEF(false)>]includeGrips:bool) : Guid =
@@ -747,7 +747,7 @@ module ExtensionsSelection =
     ///    Include lights in the potential set</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips in the potential set</param>
-    ///<returns>(Guid) identifier of the object</returns>
+    ///<returns>(Guid) identifier of the object.</returns>
     static member NextObject( objectId:Guid,
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
@@ -774,7 +774,7 @@ module ExtensionsSelection =
     ///    Include light objects.  If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips objects.  If omitted, grips objects are not returned</param>
-    ///<returns>(Guid Rarr) identifier of normal objects</returns>
+    ///<returns>(Guid Rarr) identifier of normal objects.</returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true
@@ -791,7 +791,7 @@ module ExtensionsSelection =
     ///    Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include lights in the set</param>
-    ///<returns>(Guid Rarr) identifiers of objects of the selected color</returns>
+    ///<returns>(Guid Rarr) identifiers of objects of the selected color.</returns>
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr =
@@ -807,7 +807,7 @@ module ExtensionsSelection =
     ///<param name="groupName">(string) Name of the group</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid Rarr) identifiers for objects in the group</returns>
+    ///<returns>(Guid Rarr) identifiers for objects in the group.</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let groupinstance = Doc.Groups.FindName(groupName)
         if isNull groupinstance  then RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
@@ -826,7 +826,7 @@ module ExtensionsSelection =
     ///<param name="layerName">(string) Name of the layer</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the objects</param>
-    ///<returns>(Guid Rarr) identifiers for objects in the specified layer</returns>
+    ///<returns>(Guid Rarr) identifiers for objects in the specified layer.</returns>
     static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         let rhinoobjects = Doc.Objects.FindByLayer(layer)
@@ -848,7 +848,7 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
-    ///<returns>(Guid Rarr) identifiers for objects with the specified name</returns>
+    ///<returns>(Guid Rarr) identifiers for objects with the specified name.</returns>
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(false)>]includeLights:bool,
@@ -904,7 +904,7 @@ module ExtensionsSelection =
     ///      1         Normal objects
     ///      2         Locked objects
     ///      4         Hidden objects</param>
-    ///<returns>(Guid Rarr) identifiers of object that fit the specified type(s)</returns>
+    ///<returns>(Guid Rarr) identifiers of object that fit the specified type(s).</returns>
     static member ObjectsByType( geometryType:int,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(0)>]state:int) : Guid Rarr =
@@ -970,7 +970,7 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
-    ///<returns>(Guid Rarr) identifiers of selected objects</returns>
+    ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let selobjects = Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
         rarr {for obj in selobjects do obj.Id }
@@ -978,7 +978,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Unselects all objects in the document</summary>
-    ///<returns>(int) the number of objects that were unselected</returns>
+    ///<returns>(int) The number of objects that were unselected.</returns>
     static member UnselectAllObjects() : int =
         let rc = Doc.Objects.UnselectAll()
         if rc>0 then Doc.Views.Redraw()
@@ -996,7 +996,7 @@ module ExtensionsSelection =
     ///    Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
-    ///<returns>(Guid Rarr) identifiers of the visible objects</returns>
+    ///<returns>(Guid Rarr) identifiers of the visible objects.</returns>
     static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
                                           [<OPT;DEF(false)>]select:bool,
                                           [<OPT;DEF(false)>]includeLights:bool,
@@ -1030,7 +1030,7 @@ module ExtensionsSelection =
     ///    Select picked objects</param>
     ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
     ///    If False, then a crossing window selection is performed</param>
-    ///<returns>(Guid Rarr) identifiers of selected objects</returns>
+    ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
     static member WindowPick( corner1:Point3d,
                               corner2:Point3d,
                               [<OPT;DEF(null:string)>]view:string,

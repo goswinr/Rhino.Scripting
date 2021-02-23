@@ -22,7 +22,7 @@ module AutoOpenCurried =
     ///<summary>Modifies the layer of an object, creates layer if not yet existing</summary>
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
     ///<param name="objectId">(Guid) The identifier of the object</param>    
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setLayer (layer:string) (objectId:Guid) : unit =
         RhinoScriptSyntax.ObjectLayer(objectId,layer,true)
 
@@ -30,7 +30,7 @@ module AutoOpenCurried =
     ///<summary>Modifies the layer of several objects, creates layer if not yet existing</summary>
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
     ///<param name="objectIds">(Guid seq) The identifiers of several objects</param>    
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setLayers (layer:string) (objectIds:seq<Guid>) : unit =
         RhinoScriptSyntax.ObjectLayer(objectIds,layer,true)
 
@@ -39,7 +39,7 @@ module AutoOpenCurried =
     ///<summary>Returns the full layername of an object. 
     /// parent layers are separated by <c>::</c></summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
-    ///<returns>(string) The object's current layer</returns>
+    ///<returns>(string) The object's current layer.</returns>
     static member getLayer (objectId:Guid) : string = 
         RhinoScriptSyntax.ObjectLayer(objectId)
 
@@ -47,7 +47,7 @@ module AutoOpenCurried =
     ///<summary>Returns the short layer of an object.
     ///    Without Parent Layers</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
-    ///<returns>(string) The object's current layer</returns>
+    ///<returns>(string) The object's current layer.</returns>
     static member getLayerShort (objectId:Guid) : string = 
         RhinoScriptSyntax.ObjectLayerShort(objectId)
         
@@ -55,7 +55,7 @@ module AutoOpenCurried =
     ///<summary>Sets the name of an object</summary>
     ///<param name="name">(string) The new object name.</param>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setName (name:string) (objectId:Guid) : unit = 
         RhinoScriptSyntax.ObjectName(objectId, name)  
         
@@ -63,7 +63,7 @@ module AutoOpenCurried =
     ///<summary>Sets the name of several objects</summary>
     ///<param name="name">(string) The new object name.</param>
     ///<param name="objectIds">(Guid seq)Ids of several objects</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setNames (name:string) (objectIds:seq<Guid>) : unit = 
         RhinoScriptSyntax.ObjectName(objectIds, name)  
 
@@ -71,7 +71,7 @@ module AutoOpenCurried =
     [<Extension>]
     ///<summary>Returns the name of an object or "" if none given</summary>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(string) The current object name, empty string if no name given </returns>
+    ///<returns>(string) The current object name, empty string if no name given .</returns>
     static member getName (objectId:Guid) : string = 
         RhinoScriptSyntax.ObjectName(objectId)    
 
@@ -80,7 +80,7 @@ module AutoOpenCurried =
     ///<summary>Sets the Color of an object</summary>
     ///<param name="color">(Drawing.Color) The new object color.</param>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setColor(color:Drawing.Color) (objectId:Guid) : unit = 
         RhinoScriptSyntax.ObjectColor(objectId, color)  
         
@@ -88,14 +88,14 @@ module AutoOpenCurried =
     ///<summary>Sets the Color of several objects</summary>
     ///<param name="color">(Drawing.Color) The new object color.</param>
     ///<param name="objectIds">(Guid seq)Id of several objects</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setColors(color:Drawing.Color) (objectIds:seq<Guid>) : unit = 
         RhinoScriptSyntax.ObjectColor(objectIds, color)  
     
     [<Extension>]
     ///<summary>Returns the color of an object </summary>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(string) The current object color</returns>
+    ///<returns>(string) The current object color.</returns>
     static member getColor (objectId:Guid) : Drawing.Color = 
         RhinoScriptSyntax.ObjectColor(objectId) 
 
@@ -106,7 +106,7 @@ module AutoOpenCurried =
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setUserText( key:string) ( value :string) (objectId:Guid) : unit = 
         RhinoScriptSyntax.SetUserText(objectId, key, value)
 
@@ -115,7 +115,7 @@ module AutoOpenCurried =
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
     ///<param name="objectIds">(Guid seq) The identifiers of several objects</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member setUserTexts( key:string) ( value :string) (objectIds:seq<Guid>) : unit = 
         RhinoScriptSyntax.SetUserText(objectIds, key, value)
 
@@ -124,7 +124,7 @@ module AutoOpenCurried =
     ///<summary>Returns user text stored on an object, fails if non existing</summary>
     ///<param name="key">(string) The key name</param>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
+    ///<returns>(string) if key is specified, the associated value,fails if non existing.</returns>
     static member getUserText( key:string) (objectId:Guid) : string = 
         RhinoScriptSyntax.GetUserText(objectId, key)
 
@@ -133,7 +133,7 @@ module AutoOpenCurried =
     ///<param name="key">(string) The key name</param>
     ///<param name="valueToMatch">(string) The value to check for equality with</param>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<returns>(string) if key is specified, the associated value,fails if non existing</returns>
+    ///<returns>(string) if key is specified, the associated value,fails if non existing.</returns>
     static member isUserTextValue( key:string) (valueToMatch:string) (objectId:Guid) : bool = 
         valueToMatch = RhinoScriptSyntax.GetUserText(objectId, key)
 
@@ -142,7 +142,7 @@ module AutoOpenCurried =
     ///<summary>Checks if a User Text key is stored on an object</summary>
     ///<param name="key">(string) The key name</param>   
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<returns>(bool) if key exist true</returns>
+    ///<returns>(bool) if key exist true.</returns>
     static member hasUserText( key:string) (objectId:Guid) : bool = 
         RhinoScriptSyntax.HasUserText(objectId, key)
         
@@ -150,7 +150,7 @@ module AutoOpenCurried =
     ///<summary>Returns user text stored on an object, returns Option.None if non existing</summary>
     ///<param name="key">(string) The key name</param>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<returns>(string Option) if key is specified, Some(value) else None </returns>
+    ///<returns>(string Option) if key is specified, Some(value) else None .</returns>
     static member tryGetUserText( key:string) (objectId:Guid) : string option= 
         RhinoScriptSyntax.TryGetUserText(objectId, key)
 
@@ -159,7 +159,7 @@ module AutoOpenCurried =
     ///from both Geometry and Object.Attributes. Existing values are overwitten.</summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member matchAllUserText (sourceId:Guid) (targetId:Guid) : unit= 
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
@@ -178,7 +178,7 @@ module AutoOpenCurried =
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member matchUserText (sourceId:Guid) ( key:string) (targetId:Guid) : unit= 
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
@@ -189,7 +189,7 @@ module AutoOpenCurried =
     ///<summary>Copies the object name from a scource object to a target object</summary>
     ///<param name="sourceId">(Guid) The object to take the name from </param>
     ///<param name="targetId">(Guid) The object to write the name to </param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member matchName (sourceId:Guid) (targetId:Guid) : unit = 
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
@@ -202,7 +202,7 @@ module AutoOpenCurried =
     ///<summary>Puts target object on the same Layer as a scource object </summary>
     ///<param name="sourceId">(Guid) The object to take the layer from </param>
     ///<param name="targetId">(Guid) The object to change the layer</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member matchLayer (sourceId:Guid) (targetId:Guid) : unit = 
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
@@ -215,7 +215,7 @@ module AutoOpenCurried =
     /// and copying user strings on geometry. </summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
     ///<param name="targetId">(Guid) The object to write  all keys to </param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member matchAllProperties (sourceId:Guid) (targetId:Guid) : unit = 
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
@@ -231,7 +231,7 @@ module AutoOpenCurried =
     ///<summary>Draws any Geometry object to a given or current layer</summary>
     ///<param name="layer">(string) Name of an layer or empty string for current layer</param>
     ///<param name="geo">(GeometryBase) Geometry</param>    
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member draw (layer:string) (geo:'AnyRhinoGeometry) : unit =  
         RhinoScriptSyntax.Add(geo) |> RhinoScriptSyntax.setLayer layer
 
@@ -242,7 +242,7 @@ module AutoOpenCurried =
     ///    The matrix acts on the left.  To transfrom Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member</summary>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="objectId">(Guid) The identifier of the object</param> 
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member transform (matrix:Transform) (objectId:Guid) : Guid =  
         RhinoScriptSyntax.TransformObject(objectId,matrix,false)       
         // TODO test to ensure GUID is the same ?

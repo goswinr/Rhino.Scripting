@@ -19,7 +19,7 @@ module ExtensionsLinetype =
     [<Extension>]
     ///<summary>Verifies the existance of a linetype in the document</summary>
     ///<param name="name">(string) The name of an existing linetype</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsLinetype(name:string) : bool =
         notNull <| Doc.Linetypes.FindName(name)
 
@@ -27,7 +27,7 @@ module ExtensionsLinetype =
     [<Extension>]
     ///<summary>Verifies that an existing linetype is from a reference file</summary>
     ///<param name="name">(string) The name of an existing linetype</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool =
         let lt = Doc.Linetypes.FindName(name)
         if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a linetypes" name
@@ -36,14 +36,14 @@ module ExtensionsLinetype =
 
     [<Extension>]
     ///<summary>Returns number of linetypes in the document</summary>
-    ///<returns>(int) the number of linetypes in the document</returns>
+    ///<returns>(int) The number of linetypes in the document.</returns>
     static member LinetypeCount() : int =
         Doc.Linetypes.Count
 
 
     [<Extension>]
     ///<summary>Returns names of all linetypes in the document</summary>
-    ///<returns>(string Rarr) list of linetype names</returns>
+    ///<returns>(string Rarr) list of linetype names.</returns>
     static member LinetypeNames() : string Rarr =
         let count = Doc.Linetypes.Count
         let rc = Rarr()

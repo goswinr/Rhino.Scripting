@@ -26,7 +26,7 @@ module ExtensionsUserinterface =
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<returns>(string option) selected folder option or None if selection was canceled</returns>
+    ///<returns>(string option) selected folder option or None if selection was canceled.</returns>
     static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string option =
         let getKeepEditor () = 
             use dlg = new System.Windows.Forms.FolderBrowserDialog()
@@ -58,7 +58,7 @@ module ExtensionsUserinterface =
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>((string*bool) Rarr option) Option of tuples containing the input string in items along with their new boolean check value</returns>
+    ///<returns>((string*bool) Rarr option) Option of tuples containing the input string in items along with their new boolean check value.</returns>
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) : option<Rarr<string*bool>> =
@@ -81,7 +81,7 @@ module ExtensionsUserinterface =
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string option) Option of The selected item</returns>
+    ///<returns>(string option) Option of The selected item.</returns>
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option=
         let getKeepEditor () = 
             match UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
@@ -97,7 +97,7 @@ module ExtensionsUserinterface =
     ///<param name="defaultValString">(string) Optional, A default string value</param>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations</returns>
+    ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations.</returns>
     static member EditBox(  [<OPT;DEF(null:string)>]defaultValString:string,
                             [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(null:string)>]title:string) : string option =
@@ -115,7 +115,7 @@ module ExtensionsUserinterface =
     ///    If specified, the reference angle is calculated from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
     ///<param name="message">(string) Optional, A prompt to display</param>
-    ///<returns>(float option) Option of angle in degree</returns>
+    ///<returns>(float option) Option of angle in degree.</returns>
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float,
@@ -140,7 +140,7 @@ module ExtensionsUserinterface =
     ///    [n][2]    string identifying the false value
     ///    [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
-    ///<returns>(bool Rarr) Option of a list of values that represent the boolean values</returns>
+    ///<returns>(bool Rarr) Option of a list of values that represent the boolean values.</returns>
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<Rarr<bool>> =
         let get () = 
             use go = new Input.Custom.GetOption()
@@ -183,7 +183,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt1">(string) Optional, Prompt1 of 'optional prompts to set'</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
-    ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box</returns>
+    ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box.</returns>
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(null:string)>]prompt1:string,
@@ -211,7 +211,7 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c></param>
-    ///<returns>(Drawing.Color option) an Option of RGB color</returns>
+    ///<returns>(Drawing.Color option) an Option of RGB color.</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         let get () = 
             let zero = Drawing.Color()
@@ -228,7 +228,7 @@ module ExtensionsUserinterface =
     ///    0  Point3d: cursor position in world coordinates
     ///    1  Point2d: cursor position in screen coordinates
     ///    2  Guid:    objectId of the active viewport
-    ///    3  Point2d: cursor position in client coordinates</returns>
+    ///    3  Point2d: cursor position in client coordinates.</returns>
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
             let view = Doc.Views.ActiveView
@@ -251,7 +251,7 @@ module ExtensionsUserinterface =
     ///    Prompt for the first distance point</param>
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///    Prompt for the second distance point</param>
-    ///<returns>(float option) an Option of The distance between the two points</returns>
+    ///<returns>(float option) an Option of The distance between the two points.</returns>
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
@@ -305,7 +305,7 @@ module ExtensionsUserinterface =
     ///    Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge Curves</param>
-    ///<returns>((Guid*Guid*Point3d) Rarr) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
+    ///<returns>((Guid*Guid*Point3d) Rarr) an Option of a List of selection prompts (curve objectId, parent objectId, selection point).</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
@@ -345,7 +345,7 @@ module ExtensionsUserinterface =
     ///<param name="number">(int) Optional, A default whole number value</param>
     ///<param name="minimum">(int) Optional, A minimum allowable value</param>
     ///<param name="maximum">(int) Optional, A maximum allowable value</param>
-    ///<returns>(int option) an Option of The whole number input by the user</returns>
+    ///<returns>(int option) an Option of The whole number input by the user.</returns>
     static member GetInteger(   [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(2147482999)>]number:int,
                                 [<OPT;DEF(2147482999)>]minimum:int,
@@ -376,7 +376,7 @@ module ExtensionsUserinterface =
     ///    Show new button of on the dialog</param>
     ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
     ///    Show set current  button on the dialog</param>
-    ///<returns>(string option) an Option of name of selected layer</returns>
+    ///<returns>(string option) an Option of name of selected layer.</returns>
     static member GetLayer( [<OPT;DEF("Select Layer")>]title:string,
                             [<OPT;DEF(null:string)>]layer:string,
                             [<OPT;DEF(false)>]showNewButton:bool,
@@ -401,7 +401,7 @@ module ExtensionsUserinterface =
     ///    Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
     ///    Optional button to show on the dialog</param>
-    ///<returns>(string Rarr) an Option of The names of selected layers</returns>
+    ///<returns>(string Rarr) an Option of The names of selected layers.</returns>
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string Rarr> =
         let getKeepEditor () = 
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
@@ -432,7 +432,7 @@ module ExtensionsUserinterface =
     ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
     ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
-    ///<returns>(Line option) an Option of a Line</returns>
+    ///<returns>(Line option) an Option of a Line.</returns>
     static member GetLine(  [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]point:Point3d,
                             [<OPT;DEF(null:string)>]message1:string,
@@ -461,7 +461,7 @@ module ExtensionsUserinterface =
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the "by Layer" linetype will show. Defaults to False</param>
-    ///<returns>(string option) an Option of The names of selected linetype</returns>
+    ///<returns>(string option) an Option of The names of selected linetype.</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
                                 [<OPT;DEF(false)>]showByLayer:bool) : string option =
         let getKeepEditor () = 
@@ -489,7 +489,7 @@ module ExtensionsUserinterface =
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int Rarr) an Option of of Mesh face indices</returns>
+    ///<returns>(int Rarr) an Option of of Mesh face indices.</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
@@ -523,7 +523,7 @@ module ExtensionsUserinterface =
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int Rarr) an Option of of Mesh vertex indices</returns>
+    ///<returns>(int Rarr) an Option of of Mesh vertex indices.</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -553,7 +553,7 @@ module ExtensionsUserinterface =
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///    Constrains the point selections to the active construction Plane</param>
-    ///<returns>(Point3d option) an Option of point3d</returns>
+    ///<returns>(Point3d option) an Option of point3d.</returns>
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(0.0)>]distance:float,
@@ -582,7 +582,7 @@ module ExtensionsUserinterface =
     ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
-    ///<returns>(Point3d option) an Option of 3d point</returns>
+    ///<returns>(Point3d option) an Option of 3d point.</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d option =
         let get () = 
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -604,7 +604,7 @@ module ExtensionsUserinterface =
     ///<param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
-    ///<returns>(Point3d option) an Option of 3d point</returns>
+    ///<returns>(Point3d option) an Option of 3d point.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d option =
         let get () = 
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
@@ -620,7 +620,7 @@ module ExtensionsUserinterface =
     ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
-    ///<returns>(Point3d option) an Option of 3d point</returns>
+    ///<returns>(Point3d option) an Option of 3d point.</returns>
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d option =
         let get () = 
             use gp = new Input.Custom.GetPoint()
@@ -655,7 +655,7 @@ module ExtensionsUserinterface =
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
     ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
     ///    unlimited number of points can be picked</param>
-    ///<returns>(Point3d array) an Option of of 3d points</returns>
+    ///<returns>(Point3d array) an Option of of 3d points.</returns>
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
@@ -732,7 +732,7 @@ module ExtensionsUserinterface =
     ///    The minimum number of points to require. The default is 2</param>
     ///<param name="max">(int) Optional, Default Value: <c>0</c>
     ///    The maximum number of points to require; 0 for no limit.</param>
-    ///<returns>(Polyline option) an Option of a  polyline</returns>
+    ///<returns>(Polyline option) an Option of a  polyline.</returns>
     static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
                                         [<OPT;DEF(null:string)>]message1:string,
                                         [<OPT;DEF(null:string)>]message2:string,
@@ -763,7 +763,7 @@ module ExtensionsUserinterface =
     ///<param name="number">(float) Optional, A default number value</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(float option) an Option of The number input by the user</returns>
+    ///<returns>(float option) an Option of The number input by the user.</returns>
     static member GetReal(              [<OPT;DEF("Number")>]message:string,
                                         [<OPT;DEF(7e89)>]number:float,
                                         [<OPT;DEF(7e89)>]minimum:float,
@@ -796,7 +796,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt1">(string) Optional, Prompt1 of optional prompts</param>
     ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
-    ///<returns>(Point3d * Point3d * Point3d * Point3d) an Option of four 3d points that define the corners of the rectangle</returns>
+    ///<returns>(Point3d * Point3d * Point3d * Point3d) an Option of four 3d points that define the corners of the rectangle.</returns>
     static member GetRectangle(
                                         [<OPT;DEF(0)>]mode:int,
                                         [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -825,7 +825,7 @@ module ExtensionsUserinterface =
     ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
     ///    Note, strings cannot begin with a numeric character</param>
     ///<returns>(string option) an Option of The string either input or selected by the user .
-    ///    If the user presses the Enter key without typing in a string, an empty string "" is returned</returns>
+    ///    If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
     static member GetString(
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]defaultValString:string,
@@ -854,7 +854,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="defaultVal">(string) Optional, Selected item in the list</param>
-    ///<returns>(string option) an Option of he selected item</returns>
+    ///<returns>(string option) an Option of he selected item.</returns>
     static member ListBox(              items:string IList,
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]title:string,
@@ -902,7 +902,7 @@ module ExtensionsUserinterface =
     ///    4      Retry button was clicked.
     ///    5      Ignore button was clicked.
     ///    6      Yes button was clicked.
-    ///    7      No button was clicked</returns>
+    ///    7      No button was clicked.</returns>
     static member MessageBox(           message:string,
                                         [<OPT;DEF(0)>]buttons:int,
                                         [<OPT;DEF("")>]title:string) : int option =
@@ -944,10 +944,10 @@ module ExtensionsUserinterface =
     [<Extension>]
     ///<summary>Displays list of items and their values in a property-style list box dialog</summary>
     ///<param name="items">(string IList) list of string items</param>
-    ///<param name="values">(string seq) the corresponding values to the items</param>
+    ///<param name="values">(string seq) The corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string array option) an Option of of new values</returns>
+    ///<returns>(string array option) an Option of of new values.</returns>
     static member PropertyListBox(  items:string IList,
                                     values:string seq,
                                     [<OPT;DEF(null:string)>]message:string,
@@ -966,7 +966,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="defaultVals">(string IList) Optional, a list if multiple items that are pre-selected</param>
-    ///<returns>(string array option) an Option of containing the selected items</returns>
+    ///<returns>(string array option) an Option of containing the selected items.</returns>
     static member MultiListBox(     items:string IList,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string,
@@ -987,7 +987,7 @@ module ExtensionsUserinterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string option) an Option of file name is successful</returns>
+    ///<returns>(string option) an Option of file name is successful.</returns>
     static member OpenFileName(     [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
@@ -1015,7 +1015,7 @@ module ExtensionsUserinterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string array option) an Option of of selected file names</returns>
+    ///<returns>(string array option) an Option of of selected file names.</returns>
     static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
@@ -1049,7 +1049,7 @@ module ExtensionsUserinterface =
     ///    will appear at the current cursor position</param>
     ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
     ///    If omitted, the active view is used</param>
-    ///<returns>(int) index of the menu item picked or -1 if no menu item was picked</returns>
+    ///<returns>(int) index of the menu item picked or -1 if no menu item was picked.</returns>
     static member PopupMenu(        items:string seq,
                                     [<OPT;DEF(null:int seq)>]modes:int seq,
                                     [<OPT;DEF(Point3d())>]point:Point3d,
@@ -1074,7 +1074,7 @@ module ExtensionsUserinterface =
     ///    A dialog box title</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
-    ///<returns>(float option) an Option of The newly entered number</returns>
+    ///<returns>(float option) an Option of The newly entered number.</returns>
     static member RealBox(          [<OPT;DEF("")>]message:string,
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,
                                     [<OPT;DEF("")>]title:string,
@@ -1102,7 +1102,7 @@ module ExtensionsUserinterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string option) an Option of the file name is successful</returns>
+    ///<returns>(string option) an Option of the file name is successful.</returns>
     static member SaveFileName(     [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
@@ -1124,7 +1124,7 @@ module ExtensionsUserinterface =
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="defaultValValue">(string) Optional, A default string value</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string option) an Option of the newly entered string value</returns>
+    ///<returns>(string option) an Option of the newly entered string value.</returns>
     static member StringBox(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]defaultValValue:string,
                                     [<OPT;DEF(null:string)>]title:string) : string option =
@@ -1138,7 +1138,7 @@ module ExtensionsUserinterface =
     ///<summary>Display a text dialog box similar to the one used by the _What command</summary>
     ///<param name="message">(string) The message</param>
     ///<param name="title">(string) Optional, The message title</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member TextOut(message:string,
                           [<OPT;DEF(null:string)>]title:string) : unit =
         let getKeepEditor () = 

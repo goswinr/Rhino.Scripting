@@ -25,7 +25,7 @@ module ExtrasCurve =
     ///<param name="midPt">(Point3d)The middle point of polyline, that will get the fillet</param>    
     ///<param name="nextPt">(Point3d)The last (or third) point of polyline</param>
     ///<param name="radius">(float)The radius of the fillet to atempt to creat</param>
-    ///<returns>An Arc Geometry</returns>
+    ///<returns>An Arc Geometry.</returns>
     static member FilletArc  (prevPt:Point3d, midPt:Point3d, nextPt:Point3d, radius:float)  : Arc   = 
         let A = prevPt-midPt
         let B = nextPt-midPt
@@ -49,7 +49,7 @@ module ExtrasCurve =
     ///<summary>Fillest some corners of polyline</summary>
     ///<param name="fillets">(int*float Rarr)The index of the cornes to filet and the fillet radius</param>
     ///<param name="polyline">(Point3d Rarr) The Polyline as pointlist </param> 
-    ///<returns>a PolyCurve object</returns>
+    ///<returns>a PolyCurve object.</returns>
     static member FilletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
         for i in fillets.Keys do 
             if i >= polyline.LastIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.FilletPolyline: cannot fillet corner %d . in polyline of %d points" i polyline.Count                
@@ -94,7 +94,7 @@ module ExtrasCurve =
     ///<param name="lineA">(Line) First line to fillet, must not be prependicular to direction, the lines might also be skew  </param> 
     ///<param name="lineB">(Line) Second line to fillet, must not be prependicular to direction or first line, the lines might also be skew  </param> 
     ///<returns>The needed trimming of two planar Surfaces in order to fit a fillet of given radius.
-    ///    the Lines can be anywhere on Plane ( except paralel to axis)</returns>
+    ///    the Lines can be anywhere on Plane ( except paralel to axis).</returns>
     static member filletSkewLinesTrims (radius:float) (direction:Vector3d) (lineA:Line) (lineB:Line): float  =         
         let ok,axis = 
             let pla = Plane(lineA.From, lineA.Direction, direction)
@@ -127,7 +127,7 @@ module ExtrasCurve =
     ///<param name="lineB">(Line) Second line to fillet, must not be prependicular to direction or first line, the lines might also be skew  </param> 
     ///<returns>(NurbsCurve)Fillet Curve Geometry, 
     ///    the true fillet arc on cylinder(wrong ends), 
-    ///    the point where fillet would be at radius 0, (same Plane as arc) </returns>
+    ///    the point where fillet would be at radius 0, (same Plane as arc) .</returns>
     static member filletSkewLines makeSCurve (radius:float)  (direction:Vector3d) (lineA:Line) (lineB:Line): NurbsCurve*Arc*Point3d   = 
         let ok,axis = 
             let pla = Plane(lineA.From, lineA.Direction, direction)

@@ -220,7 +220,7 @@ module ExtensionsLayer =
     ///   1 = explicitly Locked (even if parent is already Locked)
     ///   2 = inherited from parent, or Unlocked default</param>
     ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
-    ///<returns>(string) The full name of the new layer</returns>
+    ///<returns>(string) The full name of the new layer.</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,
                             [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
                             [<OPT;DEF(2)>]visible:int,
@@ -254,7 +254,7 @@ module ExtensionsLayer =
     ///<summary>Returns the full layername of an object. 
     /// parent layers are separated by <c>::</c></summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
-    ///<returns>(string) The object's current layer</returns>
+    ///<returns>(string) The object's current layer.</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
@@ -266,7 +266,7 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
     ///     Set true to create Layer if it does not exist yet.</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
         let layerIndex =
@@ -282,7 +282,7 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
     ///     Set true to create Layer if it does not exist yet.</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
         let layerIndex =
             if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, ByParent, ByParent)
@@ -299,7 +299,7 @@ module ExtensionsLayer =
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed</summary>
     ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
     ///<param name="newLayerName">(string) The new name</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ChangeLayerName(currentLayerName:string, newLayerName:string) : unit = 
         let i = Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
@@ -318,7 +318,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the current layer</summary>
-    ///<returns>(string) The full name of the current layer</returns>
+    ///<returns>(string) The full name of the current layer.</returns>
     static member CurrentLayer() : string = //GET
         Doc.Layers.CurrentLayer.FullPath
 
@@ -326,7 +326,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Changes the current layer</summary>
     ///<param name="layer">(string) The name of an existing layer to make current</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member CurrentLayer(layer:string) : unit = //SET
         let rc = Doc.Layers.CurrentLayer.FullPath
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
@@ -342,7 +342,7 @@ module ExtensionsLayer =
     ///    are children of the specified layer will also be removed if they are also
     ///    empty</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteLayer(layer:string) : bool =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
@@ -353,7 +353,7 @@ module ExtensionsLayer =
     ///<summary>Expands a layer. Expanded layers can be viewed in Rhino's layer dialog</summary>
     ///<param name="layer">(string) Name of the layer to expand</param>
     ///<param name="expand">(bool) True to expand, False to collapse</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ExpandLayer(layer:string, expand:bool) : unit =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
@@ -367,7 +367,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies the existance of a layer in the document</summary>
     ///<param name="layer">(string) The name of a layer to search for</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayer(layer:string) : bool =
         let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         i <> RhinoMath.UnsetIntIndex
@@ -376,7 +376,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that the objects on a layer can be changed (normal)</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerChangeable(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsVisible && not layer.IsLocked
@@ -387,7 +387,7 @@ module ExtensionsLayer =
     ///<summary>Verifies that a layer is a child of another layer</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerChildOf(layer:string, test:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let test = RhinoScriptSyntax.CoerceLayer(test)
@@ -397,7 +397,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that a layer is the current layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerCurrent(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Index = Doc.Layers.CurrentLayerIndex
@@ -406,7 +406,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that an existing layer is empty, or contains no objects</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerEmpty(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rhobjs = Doc.Objects.FindByLayer(layer)
@@ -417,7 +417,7 @@ module ExtensionsLayer =
     ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
     ///    Rhino's layer dialog</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerExpanded(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsExpanded
@@ -428,7 +428,7 @@ module ExtensionsLayer =
     /// persistent or non persitent locking return true
     /// via layer.IsLocked</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerLocked(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsLocked
@@ -437,7 +437,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that a layer is on</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerOn(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible
@@ -446,7 +446,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that an existing layer is selectable (normal and reference)</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerSelectable(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible && not layer.IsLocked
@@ -456,7 +456,7 @@ module ExtensionsLayer =
     ///<summary>Verifies that a layer is a parent of another layer</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerParentOf(layer:string, test:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let test = RhinoScriptSyntax.CoerceLayer(test)
@@ -466,7 +466,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that a layer is from a reference file</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerReference(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsReference
@@ -475,7 +475,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Verifies that a layer is visible.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(bool) True on success, otherwise False</returns>
+    ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerVisible(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible
@@ -484,7 +484,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the number of immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(int) the number of immediate child layers</returns>
+    ///<returns>(int) The number of immediate child layers.</returns>
     static member LayerChildCount(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
@@ -495,7 +495,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the immediate child layers of a layer</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(string Rarr) List of children layer names</returns>
+    ///<returns>(string Rarr) List of children layer names.</returns>
     static member LayerChildren(layer:string) : string Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
@@ -506,7 +506,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the color of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<returns>(Drawing.Color) The current color value </returns>
+    ///<returns>(Drawing.Color) The current color value .</returns>
     static member LayerColor(layer:string) : Drawing.Color = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Color
@@ -515,7 +515,7 @@ module ExtensionsLayer =
     ///<summary>Changes the color of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Color <- color
@@ -524,14 +524,14 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the number of layers in the document</summary>
-    ///<returns>(int) the number of layers in the document</returns>
+    ///<returns>(int) The number of layers in the document.</returns>
     static member LayerCount() : int =
         Doc.Layers.ActiveCount
 
 
     [<Extension>]
     ///<summary>Return identifiers of all layers in the document</summary>
-    ///<returns>(Guid Rarr) the identifiers of all layers in the document</returns>
+    ///<returns>(Guid Rarr) The identifiers of all layers in the document.</returns>
     static member LayerIds() : Guid Rarr =
         rarr {for layer in Doc.Layers do
                         if not layer.IsDeleted then
@@ -541,7 +541,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<returns>(string) Name of the current linetype</returns>
+    ///<returns>(string) Name of the current linetype.</returns>
     static member LayerLinetype(layer:string) : string = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let index = layer.LinetypeIndex
@@ -552,7 +552,7 @@ module ExtensionsLayer =
     ///<summary>Changes the linetype of a layer</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="linetyp">(string) Name of a linetype</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerLinetype(layer:string, linetyp:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let mutable index = layer.LinetypeIndex
@@ -570,7 +570,7 @@ module ExtensionsLayer =
     ///<summary>Returns the visible property of a layer, 
     ///  if layer is on but invisble because of a parent that is off this returns false</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(bool) The current layer visibility</returns>
+    ///<returns>(bool) The current layer visibility.</returns>
     static member LayerVisible(layer:string) : bool = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsVisible
@@ -582,7 +582,7 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="forceVisible">(bool) Optional, Default Value: <c>true</c>
     ///     Turn on parent layers too if needed. True by default</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         visibleSetTrue(lay,forceVisible)
@@ -594,7 +594,7 @@ module ExtensionsLayer =
     ///<param name="persist">(bool) Optional, Default Value: <c>false</c>
     ///     Turn layer persitently off? even if it is already invisible because of a parent layer that is turned off.
     ///     By default alreaday invisibe layers are not changed</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         visibleSetFalse(lay,persist)
@@ -608,7 +608,7 @@ module ExtensionsLayer =
     ///<param name="forcevisibleOrDonotpersist">(bool) 
     ///    If visible is True then turn parent layers on if True.  
     ///    If visible is False then do not persist if True</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerVisible(layer:string, visible:bool, [<OPT;DEF(false)>]forcevisibleOrDonotpersist:bool) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible <- visible
@@ -625,14 +625,14 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Turn a layer off if visible, does nothing if parent layer is already invisible. </summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerOff(layer:string) : unit = 
         RhinoScriptSyntax.LayerVisibleSetFalse(layer,false)
     
     [<Extension>]
     ///<summary>Turn a layer on if not  visible , enforces visibility  of parents</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerOn(layer:string) : unit = //SET
         RhinoScriptSyntax.LayerVisibleSetTrue(layer, true)
     
@@ -640,7 +640,7 @@ module ExtensionsLayer =
     ///<summary>Returns the locked property of a layer, 
     ///  if layer is unlocked but parent layer is locked this still returns true</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(bool) The current layer visibility</returns>
+    ///<returns>(bool) The current layer visibility.</returns>
     static member LayerLocked(layer:string) : bool =       
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsLocked //not same as // https://github.com/mcneel/rhinoscriptsyntax/pull/193 // TODO ??
@@ -651,7 +651,7 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="forceLocked">(bool) Optional, Default Value: <c>false</c>
     ///     Lock layer even if it is already locked via a parent layer</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         lockedSetTrue(lay,forceLocked)       
@@ -662,7 +662,7 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="parentsToo">(bool) Optional, Default Value: <c>true</c>
     ///     Unlock parent layers to if needed</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         lockedSetFalse(lay,parentsToo)                      
@@ -672,14 +672,14 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Unlocks a layer and all parents if needed </summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerUnlock(layer:string) : unit = 
         RhinoScriptSyntax.LayerLockedSetFalse(layer,true)
     
     [<Extension>]
     ///<summary>Locks a layer if it is not already locked via a parent</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerLock(layer:string) : unit = //SET
         RhinoScriptSyntax.LayerLockedSetTrue(layer, false)
 
@@ -688,7 +688,7 @@ module ExtensionsLayer =
     ///<summary>Changes the locked mode of a layer, enforces presistent locking.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="locked">(bool) New layer locked mode</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerLocked(layer:string, locked:bool) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.ParentLayerId <> Guid.Empty then 
@@ -708,7 +708,7 @@ module ExtensionsLayer =
     /// indicates that no material has been assigned to the layer. Thus, the layer
     /// will use Rhino's default layer material</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(int) a zero-based material index</returns>
+    ///<returns>(int) a zero-based material index.</returns>
     static member LayerMaterialIndex(layer:string) : int = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.RenderMaterialIndex
@@ -719,7 +719,7 @@ module ExtensionsLayer =
     /// will use Rhino's default layer material</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="index">(int) The new material index</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerMaterialIndex(layer:string, index:int) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if  index >= -1 then
@@ -731,7 +731,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Returns the identifier of a layer given the layer's name</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(Guid) The layer's identifier</returns>
+    ///<returns>(Guid) The layer's identifier.</returns>
     static member LayerId(layer:string) : Guid =
         let idx = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if idx = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerId not found for name %s" layer
@@ -744,7 +744,7 @@ module ExtensionsLayer =
     ///<param name="layerId">(Guid) Layer identifier</param>
     ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
     ///    Return the full path name `True` or short name `False`</param>
-    ///<returns>(string) the layer's name</returns>
+    ///<returns>(string) The layer's name.</returns>
     static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullpath:bool) : string =
         let layer = RhinoScriptSyntax.CoerceLayer(layerId)
         if fullpath then layer.FullPath
@@ -753,7 +753,7 @@ module ExtensionsLayer =
 
     [<Extension>]
     ///<summary>Returns the names of all layers in the document</summary>
-    ///<returns>(string Rarr) list of layer names</returns>
+    ///<returns>(string Rarr) list of layer names.</returns>
     static member LayerNames() : string Rarr =
         let rc = Rarr()
         for layer in Doc.Layers do
@@ -766,7 +766,7 @@ module ExtensionsLayer =
     ///    layer dialog box. A display order index of -1 indicates that the current
     ///    layer dialog filter does not allow the layer to appear in the layer list</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(int) zero based index of layer</returns>
+    ///<returns>(int) zero based index of layer.</returns>
     static member LayerOrder(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.SortIndex
@@ -776,7 +776,7 @@ module ExtensionsLayer =
     ///<summary>Returns the print color of a layer. Layer print colors are
     /// represented as RGB colors</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(Drawing.Color) The current layer print color</returns>
+    ///<returns>(Drawing.Color) The current layer print color.</returns>
     static member LayerPrintColor(layer:string) : Drawing.Color = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.PlotColor
@@ -787,7 +787,7 @@ module ExtensionsLayer =
     /// represented as RGB colors</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="color">(Drawing.Color) New print color</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerPrintColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.PlotColor
@@ -801,7 +801,7 @@ module ExtensionsLayer =
     ///<summary>Returns the print width of a layer. Print width is specified
     /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
     ///<param name="layer">(string) Name of existing layer</param>
-    ///<returns>(float) The current layer print width</returns>
+    ///<returns>(float) The current layer print width.</returns>
     static member LayerPrintWidth(layer:string) : float = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.PlotWeight
@@ -812,7 +812,7 @@ module ExtensionsLayer =
     /// in millimeters. A print width of 0.0 denotes the "default" print width</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="width">(float) New print width</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LayerPrintWidth(layer:string, width:float) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.PlotWeight
@@ -825,7 +825,7 @@ module ExtensionsLayer =
     [<Extension>]
     ///<summary>Return the parent layer of a layer or mepty string if no parent present</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<returns>(string) The name of the current parent layer</returns>
+    ///<returns>(string) The name of the current parent layer.</returns>
     static member ParentLayer(layer:string) : string = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.ParentLayerId = Guid.Empty then ""
@@ -841,7 +841,7 @@ module ExtensionsLayer =
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="parent">(string) Name of new parent layer. To remove the parent layer,
     ///    thus making a root-level layer, specify an empty string</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ParentLayer(layer:string, parent:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if parent = "" then
@@ -858,7 +858,7 @@ module ExtensionsLayer =
     ///    current layer
     ///    empty</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
     static member PurgeLayer(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = Doc.Layers.Purge( layer.Index, true)
@@ -870,7 +870,7 @@ module ExtensionsLayer =
     ///<summary>Renames an existing layer</summary>
     ///<param name="oldname">(string) Original layer name</param>
     ///<param name="newname">(string) New layer name</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RenameLayer(oldname:string, newname:string) : unit =
         if oldname <> newname then
             let layer = RhinoScriptSyntax.CoerceLayer(oldname)

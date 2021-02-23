@@ -20,7 +20,7 @@ module ExtensionsLight =
     ///<summary>Adds a new directional light object to the document</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
-    ///<returns>(Guid) identifier of the new object</returns>
+    ///<returns>(Guid) identifier of the new object.</returns>
     static member AddDirectionalLight(startPoint:Point3d, endPoint:Point3d) : Guid =
         let start =  startPoint
         let ende =  endPoint
@@ -40,7 +40,7 @@ module ExtensionsLight =
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
     ///<param name="width">(float) Optional, Width of the light</param>
-    ///<returns>(Guid) identifier of the new object</returns>
+    ///<returns>(Guid) identifier of the new object.</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
                                   [<OPT;DEF(0.0)>]width:float) : Guid =
@@ -77,7 +77,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Adds a new point light object to the document</summary>
     ///<param name="point">(Point3d) The 3d location of the point</param>
-    ///<returns>(Guid) identifier of the new object</returns>
+    ///<returns>(Guid) identifier of the new object.</returns>
     static member AddPointLight(point:Point3d) : Guid =
         let light = new Light()
         light.LightStyle <- LightStyle.WorldPoint
@@ -94,7 +94,7 @@ module ExtensionsLight =
     ///<param name="origin">(Point3d) 3d origin point of the light</param>
     ///<param name="widthPoint">(Point3d) 3d width and direction point of the light</param>
     ///<param name="heightPoint">(Point3d) 3d height and direction point of the light</param>
-    ///<returns>(Guid) identifier of the new object</returns>
+    ///<returns>(Guid) identifier of the new object.</returns>
     static member AddRectangularLight( origin:Point3d,
                                        widthPoint:Point3d,
                                        heightPoint:Point3d) : Guid =
@@ -122,7 +122,7 @@ module ExtensionsLight =
     ///<param name="origin">(Point3d) 3d origin point of the light</param>
     ///<param name="radius">(float) Radius of the cone</param>
     ///<param name="apexPoint">(Point3d) 3d apex point of the light</param>
-    ///<returns>(Guid) identifier of the new object</returns>
+    ///<returns>(Guid) identifier of the new object.</returns>
     static member AddSpotLight( origin:Point3d,
                                 radius:float,
                                 apexPoint:Point3d) : Guid =
@@ -143,7 +143,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Get On / Off status of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) The current enabled status</returns>
+    ///<returns>(bool) The current enabled status.</returns>
     static member EnableLight(objectId:Guid) : bool = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         let rc = light.IsEnabled
@@ -153,7 +153,7 @@ module ExtensionsLight =
     ///<summary>Enables or disables a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="enable">(bool) The light's enabled status</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member EnableLight(objectId:Guid, enable:bool) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsEnabled <- enable
@@ -166,7 +166,7 @@ module ExtensionsLight =
     ///<summary>Enables or disables multiple light objects</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="enable">(bool) The light's enabled status</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member EnableLight(objectIds:Guid seq, enable:bool) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -180,7 +180,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is a directional light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsDirectionalLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsDirectionalLight
@@ -189,7 +189,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies an object is a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsLight(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceLight(objectId)
         |> Option.isSome
@@ -198,7 +198,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is enabled</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsLightEnabled(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsEnabled
@@ -207,7 +207,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is referenced from another file</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsLightReference(objectId:Guid) : bool =
         let light = Doc.Lights.FindId(objectId)
         if isNull light then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLightReference light (a %s) not found" (rhType objectId)
@@ -217,7 +217,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is a linear light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsLinearLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsLinearLight
@@ -226,7 +226,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is a point light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsPointLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsPointLight
@@ -235,7 +235,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is a rectangular light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsRectangularLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsRectangularLight
@@ -244,7 +244,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Verifies a light object is a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsSpotLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsSpotLight
@@ -253,7 +253,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(Drawing.Color) The current color</returns>
+    ///<returns>(Drawing.Color) The current color.</returns>
     static member LightColor(objectId:Guid) : Drawing.Color = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         let rc = light.Diffuse
@@ -263,7 +263,7 @@ module ExtensionsLight =
     ///<summary>Changes the color of a light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="color">(Drawing.Color) The light's new color</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Diffuse <- color
@@ -275,7 +275,7 @@ module ExtensionsLight =
     ///<summary>Changes the color of multiple light</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="color">(Drawing.Color) The light's new color</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -287,7 +287,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Returns the number of light objects in the document</summary>
-    ///<returns>(int) the number of light objects in the document</returns>
+    ///<returns>(int) The number of light objects in the document.</returns>
     static member LightCount() : int =
         Doc.Lights.Count
 
@@ -295,7 +295,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(Vector3d) The current direction</returns>
+    ///<returns>(Vector3d) The current direction.</returns>
     static member LightDirection(objectId:Guid) : Vector3d = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         let rc = light.Direction
@@ -305,7 +305,7 @@ module ExtensionsLight =
     ///<summary>Changes the direction of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="direction">(Vector3d) The light's new direction</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightDirection(objectId:Guid, direction:Vector3d) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Direction <- direction
@@ -317,7 +317,7 @@ module ExtensionsLight =
     ///<summary>Changes the direction of multiple light objects</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="direction">(Vector3d) The light's new direction</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightDirection(objectIds:Guid seq, direction:Vector3d) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -330,7 +330,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(Point3d) The current location</returns>
+    ///<returns>(Point3d) The current location.</returns>
     static member LightLocation(objectId:Guid) : Point3d = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         let rc = light.Location
@@ -340,7 +340,7 @@ module ExtensionsLight =
     ///<summary>Changes the location of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="location">(Point3d) The light's new location</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightLocation(objectId:Guid, location:Point3d) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Location <- location
@@ -352,7 +352,7 @@ module ExtensionsLight =
     ///<summary>Changes the location of multiple light objects</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="location">(Point3d) The light's new location</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightLocation(objectIds:Guid seq, location:Point3d) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -365,7 +365,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(string) The current name</returns>
+    ///<returns>(string) The current name.</returns>
     static member LightName(objectId:Guid) : string = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         let rc = light.Name
@@ -375,7 +375,7 @@ module ExtensionsLight =
     ///<summary>Changes the name of a light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="name">(string) The light's new name</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightName(objectId:Guid, name:string) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.Name <- name
@@ -386,7 +386,7 @@ module ExtensionsLight =
     ///<summary>Changes the name of multiple light objects</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="name">(string) The light's new name</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member LightName(objectIds:Guid seq, name:string) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -398,7 +398,7 @@ module ExtensionsLight =
 
     [<Extension>]
     ///<summary>Returns list of identifiers of light objects in the document</summary>
-    ///<returns>(Guid Rarr) the list of identifiers of light objects in the document</returns>
+    ///<returns>(Guid Rarr) The list of identifiers of light objects in the document.</returns>
     static member LightObjects() : Guid Rarr =
         let count = Doc.Lights.Count
         let rc = Rarr()
@@ -411,7 +411,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the Plane of a rectangular light object</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(Plane*float*float) the Plane, X and Y length</returns>
+    ///<returns>(Plane*float*float) The Plane, X and Y length.</returns>
     static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldRectangular then
@@ -428,7 +428,7 @@ module ExtensionsLight =
     ///<summary>Returns the hardness of a spot light. Spotlight hardness
     /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(float) The current hardness</returns>
+    ///<returns>(float) The current hardness.</returns>
     static member SpotLightHardness(objectId:Guid) : float = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
@@ -441,7 +441,7 @@ module ExtensionsLight =
     /// controls the fully illuminated region</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="hardness">(float) The light's new hardness</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member SpotLightHardness(objectId:Guid, hardness:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
@@ -456,7 +456,7 @@ module ExtensionsLight =
     /// controls the fully illuminated region</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="hardness">(float) The light's new hardness</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member SpotLightHardness(objectIds:Guid seq, hardness:float) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -471,7 +471,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(float) The current radius</returns>
+    ///<returns>(float) The current radius.</returns>
     static member SpotLightRadius(objectId:Guid) : float = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
@@ -484,7 +484,7 @@ module ExtensionsLight =
     ///<summary>Changes the radius of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="radius">(float) The light's new radius</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member SpotLightRadius(objectId:Guid, radius:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
@@ -499,7 +499,7 @@ module ExtensionsLight =
     ///<summary>Changes the radius of multiple spot light</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="radius">(float) The light's new radius</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member SpotLightRadius(objectIds:Guid seq, radius:float) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)
@@ -515,7 +515,7 @@ module ExtensionsLight =
     [<Extension>]
     ///<summary>Returns the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
-    ///<returns>(float) The current intensity</returns>
+    ///<returns>(float) The current intensity.</returns>
     static member SpotLightShadowIntensity(objectId:Guid) : float = //GET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
@@ -527,7 +527,7 @@ module ExtensionsLight =
     ///<summary>Changes the shadow intensity of a spot light</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<param name="intensity">(float) The light's new intensity</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member SpotLightShadowIntensity(objectId:Guid, intensity:float) : unit = //SET
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldSpot then
@@ -540,7 +540,7 @@ module ExtensionsLight =
     ///<summary>Changes the shadow intensity of multiple spot light</summary>
     ///<param name="objectIds">(Guid seq) The light objects's identifiers</param>
     ///<param name="intensity">(float) The light's new intensity</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member SpotLightShadowIntensity(objectIds:Guid seq, intensity:float) : unit = //MULTISET
         for objectId in objectIds do 
             let light = RhinoScriptSyntax.CoerceLight(objectId)

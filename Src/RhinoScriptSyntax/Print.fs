@@ -35,7 +35,7 @@ module ExtensionsPrint =
     ///<param name="x">('T): the value or object to represent as string</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
-    ///<returns>(string) the string</returns>
+    ///<returns>(string) The string.</returns>
     static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
         if trim then NiceString.toNiceString(x)
         else         NiceString.toNiceStringFull(x)       
@@ -44,7 +44,7 @@ module ExtensionsPrint =
     ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
     ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq</summary>
     ///<param name="x">('T): the value or object to print</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member Print (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, true)
         |>! RhinoApp.WriteLine 
@@ -55,7 +55,7 @@ module ExtensionsPrint =
     ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line.
     ///    If the value is a Seq the string will contain a line for each item and per nested item.</summary>
     ///<param name="x">('T): the value or object to print</param>   
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member PrintFull (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, false)
         |>! RhinoApp.WriteLine 
@@ -66,7 +66,7 @@ module ExtensionsPrint =
     ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value</summary>
     ///<param name="xs">('T): the values or objects to print</param>
     ///<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member PrintSeq (xs:'T seq, [<OPT;DEF(" ")>]separator:string) : unit =
         xs
         |>  Seq.map RhinoScriptSyntax.ToNiceString
@@ -163,7 +163,7 @@ module ExtensionsPrint =
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<param name="msg">The format string</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member PrintfColor (red:int) (green:int) (blue:int) msg  =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
@@ -176,7 +176,7 @@ module ExtensionsPrint =
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<param name="msg">The format string</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member PrintfnColor (red:int) (green:int) (blue:int) msg  =
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s

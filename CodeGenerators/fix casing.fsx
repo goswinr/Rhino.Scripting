@@ -7,7 +7,7 @@ let folder = @"D:\Git\Rhino.Scripting\Src\"
 let files = IO.getAllFilesByPattern folder "*.fs" |> Rarr.ofSeq
 
 //localised
-let prevName,newName = " curve" ,  " Curve"
+let prevName, newName = "..</returns>" ,  ".</returns>"
 
 
 for f in files do

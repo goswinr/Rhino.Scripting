@@ -21,7 +21,7 @@ module ExtensionsPlane =
     ///<summary>Returns the distance from a 3D point to a Plane</summary>
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
-    ///<returns>(float) The distance</returns>
+    ///<returns>(float) The distance.</returns>
     static member DistanceToPlane(plane:Plane, point:Point3d) : float =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
@@ -33,7 +33,7 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) The Plane to evaluate</param>
     ///<param name="u">(float) U parameter to evaluate</param>
     ///<param name="v">(float) V parameter to evaluate</param>
-    ///<returns>(Point3d) Point3d</returns>
+    ///<returns>(Point3d) Point3d.</returns>
     static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         plane.PointAt(u, v)
@@ -44,7 +44,7 @@ module ExtensionsPlane =
     ///<param name="plane1">(Plane) The 1st Plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd Plane to intersect</param>
     ///<param name="plane3">(Plane) The 3rd Plane to intersect</param>
-    ///<returns>(Point3d) the intersection point between the 3 Planes</returns>
+    ///<returns>(Point3d) The intersection point between the 3 Planes.</returns>
     static member IntersectPlanes( plane1:Plane,
                                    plane2:Plane,
                                    plane3:Plane) : Point3d =
@@ -60,7 +60,7 @@ module ExtensionsPlane =
     ///<summary>Moves the origin of a Plane</summary>
     ///<param name="plane">(Plane) Plane </param>
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
-    ///<returns>(Plane) moved Plane</returns>
+    ///<returns>(Plane) moved Plane.</returns>
     static member MovePlane(plane:Plane, origin:Point3d) : Plane =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         //origin = RhinoScriptSyntax.Coerce3dpoint(origin)
@@ -71,7 +71,7 @@ module ExtensionsPlane =
     [<Extension>]
     ///<summary>Flip this Plane by swapping out the X and Y axes and inverting the Z axis.</summary>
     ///<param name="plane">(Plane) Plane </param>
-    ///<returns>(Plane) moved Plane</returns>
+    ///<returns>(Plane) moved Plane.</returns>
     static member FlipPlane(plane:Plane) : Plane =
         let pl = Plane(plane)
         pl.Flip()
@@ -82,7 +82,7 @@ module ExtensionsPlane =
     ///<summary>Returns the point on a Plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
-    ///<returns>(Point3d) the 3-D point</returns>
+    ///<returns>(Point3d) The 3-D point.</returns>
     static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d =
         plane.ClosestPoint(point)
 
@@ -91,7 +91,7 @@ module ExtensionsPlane =
     ///<summary>Returns the point on a Plane that is closest to a test point</summary>
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
-    ///<returns>(float*float) The u and v paramter on the Plane of the closest point</returns>
+    ///<returns>(float*float) The u and v paramter on the Plane of the closest point.</returns>
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
@@ -126,7 +126,7 @@ module ExtensionsPlane =
     ///    [9]       Number      If the event type is Point (1), then the U Plane parameter.
     ///      If the event type is Overlap (2), then the U Plane parameter for Curve at (n, 6).
     ///    [10]      Number      If the event type is Point (1), then the V Plane parameter.
-    ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6)</returns>
+    ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6).</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
@@ -158,7 +158,7 @@ module ExtensionsPlane =
     ///<summary>Returns the equation of a Plane as a tuple of four numbers. The standard
     ///    equation of a Plane with a non-zero vector is Ax + By + Cz + D = 0</summary>
     ///<param name="plane">(Plane) The Plane to deconstruct</param>
-    ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D)</returns>
+    ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D).</returns>
     static member PlaneEquation(plane:Plane) : float * float * float * float =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         let rc = plane.GetPlaneEquation()
@@ -168,7 +168,7 @@ module ExtensionsPlane =
     [<Extension>]
     ///<summary>Returns a Plane that was fit through an array of 3D points</summary>
     ///<param name="points">(Point3d seq) An array of 3D points</param>
-    ///<returns>(Plane) The Plane</returns>
+    ///<returns>(Plane) The Plane.</returns>
     static member PlaneFitFromPoints(points:Point3d seq) : Plane =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
@@ -184,7 +184,7 @@ module ExtensionsPlane =
     ///<param name="yAxis">(Vector3d) A non-zero 3D vector not parallel to xAxis that is used
     ///    to determine the Y axis direction. Note, yAxis does not
     ///    have to be perpendicular to xAxis</param>
-    ///<returns>(Plane) The Plane</returns>
+    ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
                                   yAxis:Vector3d) : Plane =
@@ -199,7 +199,7 @@ module ExtensionsPlane =
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the Plane</param>
     ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the Plane</param>
     ///<param name="xaxis">(Vector3d) Optional, vector defining the Plane's x-axis</param>
-    ///<returns>(Plane) The Plane</returns>
+    ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
                                    [<OPT;DEF(Vector3d())>]xaxis:Vector3d) : Plane =
@@ -220,7 +220,7 @@ module ExtensionsPlane =
     ///<param name="origin">(Point3d) Origin point of the Plane</param>
     ///<param name="x">(Point3d) X point on the Plane's x  axis</param>
     ///<param name="y">(Point3d) Y point on the Plane's y axis</param>
-    ///<returns>(Plane) The Plane</returns>
+    ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromPoints( origin:Point3d,
                                    x:Point3d,
                                    y:Point3d) : Plane =
@@ -236,7 +236,7 @@ module ExtensionsPlane =
     ///<summary>Calculates the intersection of two Planes</summary>
     ///<param name="plane1">(Plane) The 1st Plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd Plane to intersect</param>
-    ///<returns>(Line) a line with two 3d points identifying the starting/ending points of the intersection</returns>
+    ///<returns>(Line) a line with two 3d points identifying the starting/ending points of the intersection.</returns>
     static member PlanePlaneIntersection(plane1:Plane, plane2:Plane) : Line =
         //plane1 = RhinoScriptSyntax.Coerceplane(plane1)
         //plane2 = RhinoScriptSyntax.Coerceplane(plane2)
@@ -256,7 +256,7 @@ module ExtensionsPlane =
     ///    [0]      number     The type of intersection, where 0 = point and 1 = circle.
     ///    [1]      Plane      If a point intersection, the a Point3d identifying the 3-D intersection location is Plane.Origin
     ///                        If a circle intersection, then the circle's Plane. The origin of the Plane will be the center point of the circle
-    ///    [2]      number     If a circle intersection, then the radius of the circle</returns>
+    ///    [2]      number     If a circle intersection, then the radius of the circle.</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
                                            sphereRadius:float) : int * Plane * float =
@@ -276,7 +276,7 @@ module ExtensionsPlane =
     ///<summary>Transforms a Plane</summary>
     ///<param name="plane">(Plane) Plane to transform</param>
     ///<param name="xForm">(Transform) Transformation to apply</param>
-    ///<returns>(Plane) the resulting Plane</returns>
+    ///<returns>(Plane) The resulting Plane.</returns>
     static member PlaneTransform(plane:Plane, xForm:Transform) : Plane =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
@@ -290,7 +290,7 @@ module ExtensionsPlane =
     ///<param name="plane">(Plane) Plane to rotate</param>
     ///<param name="angleDegrees">(float) Rotation angle in degrees</param>
     ///<param name="axis">(Vector3d) Axis of rotation or list of three numbers</param>
-    ///<returns>(Plane) rotated Plane</returns>
+    ///<returns>(Plane) rotated Plane.</returns>
     static member RotatePlane( plane:Plane,
                                angleDegrees:float,
                                axis:Vector3d) : Plane =
@@ -304,21 +304,21 @@ module ExtensionsPlane =
 
     [<Extension>]
     ///<summary>Returns Rhino's world XY Plane</summary>
-    ///<returns>(Plane) Rhino's world XY Plane</returns>
+    ///<returns>(Plane) Rhino's world XY Plane.</returns>
     static member WorldXYPlane() : Plane =
         Plane.WorldXY
 
 
     [<Extension>]
     ///<summary>Returns Rhino's world YZ Plane</summary>
-    ///<returns>(Plane) Rhino's world YZ Plane</returns>
+    ///<returns>(Plane) Rhino's world YZ Plane.</returns>
     static member WorldYZPlane() : Plane =
         Plane.WorldYZ
 
 
     [<Extension>]
     ///<summary>Returns Rhino's world ZX Plane</summary>
-    ///<returns>(Plane) Rhino's world ZX Plane</returns>
+    ///<returns>(Plane) Rhino's world ZX Plane.</returns>
     static member WorldZXPlane() : Plane =
         Plane.WorldZX
 

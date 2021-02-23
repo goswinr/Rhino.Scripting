@@ -20,7 +20,7 @@ module ExtrasBrep =
     ///<param name="length">(float) total length of sloted hole</param>
     ///<param name="width">(float) width = radius of sloted hole</param>
     ///<param name="height">(float) height of sloted hole volume</param> 
-    ///<returns>(Brep) Brep Geometry</returns>
+    ///<returns>(Brep) Brep Geometry.</returns>
     static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =
         if length<width then RhinoScriptingException.Raise "RhinoScriptSyntax.SlotedHole: length= %g must be more than width= %g" length width
         let root05  = sqrt 0.5
@@ -79,7 +79,7 @@ module ExtrasBrep =
     ///<param name="plane">(Plane) Origin is center of base of cylinder</param>
     ///<param name="diameter">(float) Diameter of cylinder</param>
     ///<param name="length">(float) total length of the screw brep</param>
-    ///<returns>(Brep) Brep Geometry</returns>
+    ///<returns>(Brep) Brep Geometry.</returns>
     static member CreateCylinder ( plane:Plane, diameter, length):Brep  =            
         let circ = Circle(plane,diameter*0.5)
         let cy = Cylinder(circ,length)
@@ -92,7 +92,7 @@ module ExtrasBrep =
     ///<param name="outerDiameter">(float) diameter of cone base</param>
     ///<param name="innerDiameter">(float) Diameter of cylinder</param>
     ///<param name="length">(float) total length of the screw brep</param>
-    ///<returns>(Brep) Brep Geometry</returns>
+    ///<returns>(Brep) Brep Geometry.</returns>
     static member CreateCounterSunkScrewVolume ( plane:Plane, outerDiameter, innerDiameter, length):Brep  =
         let r = outerDiameter*0.5
         let mutable plco = Plane(plane)
@@ -134,11 +134,11 @@ module ExtrasBrep =
     /// so that a single brep is returned, 
     /// draws objects and zooms on them if an error occures</summary>
     ///<param name="trimmer">(Brep)the volume to cut out</param>
-    ///<param name="keep">(Brep) the volume to keep</param>
+    ///<param name="keep">(Brep) The volume to keep</param>
     ///<param name="subtractionLocations">(int) Optional, The amount of locations where the brep is expected to be cut
     ///  This is an optional safety check that makes it twice as slow. 
     ///  It ensures that the count of breps from  Brep.CreateBooleanIntersection is equal to subtractionLocations </param>
-    ///<returns>(Brep) Brep Geometry</returns>
+    ///<returns>(Brep) Brep Geometry.</returns>
     static member SubstractBrep (keep:Brep,trimmer:Brep,[<OPT;DEF(0)>]subtractionLocations:int)  :Brep =
         if not trimmer.IsSolid then
             RhinoScriptSyntax.draw "debug trimmer" trimmer
@@ -193,7 +193,7 @@ module ExtrasBrep =
     ///<param name="brep">(Brep)the Polysurface to extract Mesh from</param>
     ///<param name="meshingParameters">(MeshingParameters) Optional, The Meshing parameters , if omitted the current Meshing parameters are used </param>
     ///<returns>((Mesh Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output Mesh not
-    /// fails if no Meshes can be extracted </returns>
+    /// fails if no Meshes can be extracted .</returns>
     static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Result<Mesh,Mesh> =            
         let meshing =                
             if notNull meshingParameters then 

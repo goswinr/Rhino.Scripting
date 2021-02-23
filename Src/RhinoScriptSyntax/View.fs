@@ -32,7 +32,7 @@ module ExtensionsView =
     ///    5 = parallel front view
     ///    6 = parallel back view
     ///    7 = perspective view</param>
-    ///<returns>(Guid) identifier of the newly created detail</returns>
+    ///<returns>(Guid) identifier of the newly created detail.</returns>
     static member AddDetail( layoutName:string,
                              corner1:Point2d,
                              corner2:Point2d,
@@ -53,7 +53,7 @@ module ExtensionsView =
     ///<param name="title">(string) Optional, Title of new layout</param>
     ///<param name="width">(float)  Optional, width  of paper for the new layout</param>
     ///<param name="height">(floatt) Optional, height of paper for the new layout</param>
-    ///<returns>(Guid*string) Id and Name of new layout</returns>
+    ///<returns>(Guid*string) Id and Name of new layout.</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string, 
                             [<OPT;DEF(0.0)>]width:float, 
                             [<OPT;DEF(0.0)>]height:float) : Guid*string =
@@ -68,7 +68,7 @@ module ExtensionsView =
     ///<summary>Adds new named construction Plane to the document</summary>
     ///<param name="cplaneName">(string) The name of the new named construction Plane</param>
     ///<param name="plane">(Plane) The construction Plane</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member AddNamedCPlane(cplaneName:string, plane:Plane) : unit =
         if isNull cplaneName then RhinoScriptingException.Raise "RhinoScriptSyntax.CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
         let index = Doc.NamedConstructionPlanes.Add(cplaneName, plane)
@@ -81,7 +81,7 @@ module ExtensionsView =
     ///<param name="name">(string) The name of the new named view</param>
     ///<param name="view">(string) Optional, The title of the view to save. If omitted, the current
     ///    active view is saved</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax.Name = empty.  name:'%A' view:'%A'" name view
@@ -94,7 +94,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the current detail view in a page layout view</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
-    ///<returns>(string option) Option of The name  the current detail view, None if Page is current view</returns>
+    ///<returns>(string option) Option of The name  the current detail view, None if Page is current view.</returns>
     static member CurrentDetail(layout:string) : string option = //GET
         let page = RhinoScriptSyntax.CoercePageView(layout)
         if page.MainViewport.Id = page.ActiveViewport.Id then None
@@ -104,7 +104,7 @@ module ExtensionsView =
     ///<summary>Changes the current detail view in a page layout view</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
     ///<param name="detail">(string) Title of the detail view to set</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member CurrentDetail(layout:string, detail:string) : unit = //SET
         let page = RhinoScriptSyntax.CoercePageView(layout)
         if layout = detail then page.SetPageAsActive()
@@ -116,14 +116,14 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Returns the currently active view</summary>
-    ///<returns>(string) The title of the current view</returns>
+    ///<returns>(string) The title of the current view.</returns>
     static member CurrentView() : string = //GET
         Doc.Views.ActiveView.MainViewport.Name
 
     [<Extension>]
     ///<summary>Sets the currently active view</summary>
     ///<param name="view">(string) Title of the view to set current</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member CurrentView(view:string) : unit = //SET
         Doc.Views.ActiveView <- RhinoScriptSyntax.CoerceView(view)
 
@@ -132,7 +132,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Removes a named construction Plane from the document</summary>
     ///<param name="name">(string) Name of the construction Plane to remove</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteNamedCPlane(name:string) : bool =
         Doc.NamedConstructionPlanes.Delete(name)
 
@@ -140,7 +140,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Removes a named view from the document</summary>
     ///<param name="name">(string) Name of the named view to remove</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteNamedView(name:string) : bool =
         Doc.NamedViews.Delete(name)
 
@@ -148,7 +148,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the projection locked state of a detail viewport rectangle</summary>
     ///<param name="detailId">(Guid) Identifier of a detail rectangle object</param>
-    ///<returns>(bool) the current detail projection locked state</returns>
+    ///<returns>(bool) The current detail projection locked state.</returns>
     static member DetailLock(detailId:Guid) : bool = //GET
         let detail = RhinoScriptSyntax.CoerceDetailView(detailId)
         detail.IsProjectionLocked
@@ -157,7 +157,7 @@ module ExtensionsView =
     ///<summary>Modifies the projection locked state of a detail</summary>
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
     ///<param name="lock">(bool) The new lock state</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
             try Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
@@ -171,7 +171,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the scale of a detail object</summary>
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
-    ///<returns>(float) current page to model scale ratio if model Length and page Length are both None</returns>
+    ///<returns>(float) current page to model scale ratio if model Length and page Length are both None.</returns>
     static member DetailScale(detailId:Guid) : float = //GET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
         detail.DetailGeometry.PageToModelRatio
@@ -181,7 +181,7 @@ module ExtensionsView =
     ///<param name="detailId">(Guid) Identifier of a detail object</param>
     ///<param name="modelLength">(float) A length in the current model units</param>
     ///<param name="pageLength">(float) A length in the current page units</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member DetailScale(detailId:Guid, modelLength:float, pageLength:float) : unit = //SET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
         let modelunits = Doc.ModelUnitSystem
@@ -198,7 +198,7 @@ module ExtensionsView =
     ///<summary>Verifies that a detail view exists on a page layout view</summary>
     ///<param name="layout">(string) Title of an existing page layout</param>
     ///<param name="detail">(string) Title of an existing detail view</param>
-    ///<returns>(bool) True if detail is a detail view, False if detail is not a detail view</returns>
+    ///<returns>(bool) True if detail is a detail view, False if detail is not a detail view.</returns>
     static member IsDetail(layout:string, detail:string) : bool =
         let view = RhinoScriptSyntax.CoercePageView(layout)
         let det = RhinoScriptSyntax.CoerceView(detail)
@@ -209,7 +209,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Verifies that a view is a page layout view</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
-    ///<returns>(bool) True if layout is a page layout view, False is layout is a standard model view</returns>
+    ///<returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
     static member IsLayout(layout:string) : bool =
         //layoutid = RhinoScriptSyntax.Coerceguid(layout)
         if   Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then true
@@ -220,7 +220,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Verifies that the specified view exists</summary>
     ///<param name="view">(string) Title of the view</param>
-    ///<returns>(bool) True of False indicating success or failure</returns>
+    ///<returns>(bool) True of False indicating success or failure.</returns>
     static member IsView(view:string) : bool =
         Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
 
@@ -229,7 +229,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Verifies that the specified view is the current, or active view</summary>
     ///<param name="view">(string) Title of the view</param>
-    ///<returns>(bool) True of False indicating success or failure</returns>
+    ///<returns>(bool) True of False indicating success or failure.</returns>
     static member IsViewCurrent(view:string) : bool =
         let activeview = Doc.Views.ActiveView
         view = activeview.MainViewport.Name
@@ -240,7 +240,7 @@ module ExtensionsView =
     ///    the entire Rhino window)</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current
     ///    view is used</param>
-    ///<returns>(bool) True of False</returns>
+    ///<returns>(bool) True of False.</returns>
     static member IsViewMaximized([<OPT;DEF("")>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.Maximized
@@ -249,7 +249,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Verifies that the specified view's projection is set to perspective</summary>
     ///<param name="view">(string) Title of the view</param>
-    ///<returns>(bool) True of False</returns>
+    ///<returns>(bool) True of False.</returns>
     static member IsViewPerspective(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.MainViewport.IsPerspectiveProjection
@@ -259,7 +259,7 @@ module ExtensionsView =
     ///<summary>Verifies that the specified view's title window is visible</summary>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
-    ///<returns>(bool) True of False</returns>
+    ///<returns>(bool) True of False.</returns>
     static member IsViewTitleVisible([<OPT;DEF("")>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible
@@ -268,7 +268,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Verifies that the specified view contains a wallpaper image</summary>
     ///<param name="view">(string) View to verify</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsWallpaper(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.MainViewport.WallpaperFilename.Length > 0
@@ -278,7 +278,7 @@ module ExtensionsView =
     ///<summary>Toggles a view's maximized/restore window state of the specified view</summary>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
-    ///<returns>(unit)</returns>
+    ///<returns>(unit).</returns>
     static member MaximizeRestoreView([<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.Maximized <- not view.Maximized
@@ -287,7 +287,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the Plane geometry of the specified named construction Plane</summary>
     ///<param name="name">(string) The name of the construction Plane</param>
-    ///<returns>(Plane) a Plane</returns>
+    ///<returns>(Plane) a Plane.</returns>
     static member NamedCPlane(name:string) : Plane =
         let index = Doc.NamedConstructionPlanes.Find(name)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.NamedCPlane failed.  name:'%A'" name
@@ -296,7 +296,7 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Returns the names of all named construction Planes in the document</summary>
-    ///<returns>(string Rarr) the names of all named construction Planes in the document</returns>
+    ///<returns>(string Rarr) The names of all named construction Planes in the document.</returns>
     static member NamedCPlanes() : string Rarr =
         let count = Doc.NamedConstructionPlanes.Count
         rarr {for i in range(count) do Doc.NamedConstructionPlanes.[i].Name }
@@ -305,7 +305,7 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Returns the names of all named views in the document</summary>
-    ///<returns>(string Rarr) the names of all named views in the document</returns>
+    ///<returns>(string Rarr) The names of all named views in the document.</returns>
     static member NamedViews() : string Rarr =
         let count = Doc.NamedViews.Count
         rarr {for i in range(count) do Doc.NamedViews.[i].Name }
@@ -315,7 +315,7 @@ module ExtensionsView =
     ///<summary>Changes the title of the specified view</summary>
     ///<param name="oldTitle">(string) The title of the view to rename</param>
     ///<param name="newTitle">(string) The new title of the view</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RenameView(oldTitle:string, newTitle:string) : unit =
         if isNull oldTitle || isNull newTitle then RhinoScriptingException.Raise "RhinoScriptSyntax.RenameView failed.  oldTitle:'%A' newTitle:'%A'" oldTitle newTitle
         let foundview = RhinoScriptSyntax.CoerceView(oldTitle)
@@ -328,7 +328,7 @@ module ExtensionsView =
     ///<param name="cplaneName">(string) Name of the construction Plane to restore</param>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
-    ///<returns>(string) name of the restored named construction Plane</returns>
+    ///<returns>(string) name of the restored named construction Plane.</returns>
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = Doc.NamedConstructionPlanes.Find(cplaneName)
@@ -346,7 +346,7 @@ module ExtensionsView =
     ///    If omitted, the current active view is used</param>
     ///<param name="restoreBitmap">(bool) Optional, Default Value: <c>false</c>
     ///    Restore the named view's background bitmap</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RestoreNamedView( namedView:string,
                                     [<OPT;DEF("")>]view:string,
                                     [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
@@ -372,7 +372,7 @@ module ExtensionsView =
     ///    3 = up</param>
     ///<param name="angle">(float) The angle to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RotateCamera( direction:int,
                                 angle:float,
                                 [<OPT;DEF("")>]view:string) : unit =
@@ -412,7 +412,7 @@ module ExtensionsView =
     ///    by the "Increment in divisions of a circle" parameter specified in
     ///    Options command's View tab</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RotateView( direction:int,
                               angle:float,
                               [<OPT;DEF("")>]view:string) : unit =
@@ -430,7 +430,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Get status of a view's construction Plane grid</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The grid display state</returns>
+    ///<returns>(bool) The grid display state.</returns>
     static member ShowGrid(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -440,7 +440,7 @@ module ExtensionsView =
     ///<summary>Shows or hides a view's construction Plane grid</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="show">(bool) The grid state to set</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ShowGrid(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -454,7 +454,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Get status of a view's construction Plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The grid axes display state</returns>
+    ///<returns>(bool) The grid axes display state.</returns>
     static member ShowGridAxes(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -465,7 +465,7 @@ module ExtensionsView =
     ///<summary>Shows or hides a view's construction Plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="show">(bool) The state to set</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ShowGridAxes(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -479,7 +479,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Get status of the title window of a view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The state to View Title visibility</returns>
+    ///<returns>(bool) The state to View Title visibility.</returns>
     static member ShowViewTitle(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible
@@ -488,7 +488,7 @@ module ExtensionsView =
     ///<summary>Shows or hides the title window of a view</summary>
     ///<param name="view">(string) Title of the view. If omitted, the current active view is used</param>
     ///<param name="show">(bool) The state to set</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ShowViewTitle(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible <- show
@@ -497,7 +497,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Get status of a view's world axis icon</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The world axes display state</returns>
+    ///<returns>(bool) The world axes display state.</returns>
     static member ShowWorldAxes(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -508,7 +508,7 @@ module ExtensionsView =
     ///<summary>Shows or hides a view's world axis icon</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="show">(bool) The state to set</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ShowWorldAxes(view:string, show:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -527,7 +527,7 @@ module ExtensionsView =
     ///    1 = left</param>
     ///<param name="angle">(float) The angle in degrees to rotate</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member TiltView( direction:int,
                             angle:float,
                             [<OPT;DEF("")>]view:string) : unit =
@@ -545,7 +545,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the camera location of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Point3d) The current camera location</returns>
+    ///<returns>(Point3d) The current camera location.</returns>
     static member ViewCamera(view:string) : Point3d = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.CameraLocation
@@ -554,7 +554,7 @@ module ExtensionsView =
     ///<summary>Sets the camera location of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="cameraLocation">(Point3d) A 3D point identifying the new camera location</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewCamera(view:string, cameraLocation:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.SetCameraLocation(cameraLocation, true)
@@ -566,7 +566,7 @@ module ExtensionsView =
     ///<summary>Returns the 35mm camera lens length of the specified perspective
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// projection view</summary>
-    ///<returns>(float) The current lens length</returns>
+    ///<returns>(float) The current lens length.</returns>
     static member ViewCameraLens(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.Camera35mmLensLength
@@ -576,7 +576,7 @@ module ExtensionsView =
     /// projection view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="length">(float) The new 35mm camera lens length</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewCameraLens(view:string, length:float) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.Camera35mmLensLength <- length
@@ -587,7 +587,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the orientation of a view's camera</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
-    ///<returns>(Plane) the view's camera Plane</returns>
+    ///<returns>(Plane) The view's camera Plane.</returns>
     static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
@@ -598,7 +598,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the camera and target positions of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Point3d * Point3d) the 3d points containing the current camera and target locations</returns>
+    ///<returns>(Point3d * Point3d) The 3d points containing the current camera and target locations.</returns>
     static member ViewCameraTarget(view:string) : Point3d * Point3d = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.CameraLocation, view.ActiveViewport.CameraTarget
@@ -608,7 +608,7 @@ module ExtensionsView =
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="camera">(Point3d) 3d point identifying the new camera location</param>
     ///<param name="target">(Point3d) 3d point identifying the new target location</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewCameraTarget(view:string, camera:Point3d, target:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.SetCameraLocations(target, camera)
@@ -618,7 +618,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the camera up direction of a specified</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Vector3d) The current camera up direction</returns>
+    ///<returns>(Vector3d) The current camera up direction.</returns>
     static member ViewCameraUp(view:string) : Vector3d = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.CameraUp
@@ -627,7 +627,7 @@ module ExtensionsView =
     ///<summary>Sets the camera up direction of a specified</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="upVector">(Vector3d) 3D vector identifying the new camera up direction</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewCameraUp(view:string, upVector:Vector3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.CameraUp <- upVector
@@ -638,7 +638,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return a view's construction Plane</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Plane) The current construction Plane</returns>
+    ///<returns>(Plane) The current construction Plane.</returns>
     static member ViewCPlane(view:string) : Plane = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.ConstructionPlane()
@@ -647,7 +647,7 @@ module ExtensionsView =
     ///<summary>Set a view's construction Plane</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="plane">(Plane) The new construction Plane if setting</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewCPlane(view:string, plane:Plane) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.SetConstructionPlane(plane)
@@ -658,7 +658,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return a view display mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(string) the current mode</returns>
+    ///<returns>(string) The current mode.</returns>
     static member ViewDisplayMode(view:string) : string = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let current = view.ActiveViewport.DisplayMode
@@ -668,7 +668,7 @@ module ExtensionsView =
     ///<summary>Set a view display mode</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="mode">(string) Name of a display mode</param>
-    ///<returns>(string) If mode is not specified, the current mode</returns>
+    ///<returns>(string) If mode is not specified, the current mode.</returns>
     static member ViewDisplayMode(view:string, mode:string) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let desc = Display.DisplayModeDescription.FindByName(mode)
@@ -683,7 +683,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return id of a display mode given it's name</summary>
     ///<param name="name">(string) Name of the display mode</param>
-    ///<returns>(Guid) The id of the display mode</returns>
+    ///<returns>(Guid) The id of the display mode.</returns>
     static member ViewDisplayModeId(name:string) : Guid =
         let desc = Display.DisplayModeDescription.FindByName(name)
         if notNull desc then desc.Id
@@ -694,7 +694,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Return name of a display mode given it's id</summary>
     ///<param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method</param>
-    ///<returns>(string) The name of the display mode</returns>
+    ///<returns>(string) The name of the display mode.</returns>
     static member ViewDisplayModeName(modeId:Guid) : string =
         //modeId = RhinoScriptSyntax.Coerceguid(modeId)
         let desc = Display.DisplayModeDescription.GetDisplayMode(modeId)
@@ -705,7 +705,7 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Return list of display modes</summary>
-    ///<returns>(string Rarr) strings identifying the display mode names</returns>
+    ///<returns>(string Rarr) strings identifying the display mode names.</returns>
     static member ViewDisplayModes() : string Rarr =
         let modes = Display.DisplayModeDescription.GetDisplayModes()
         rarr {for mode in modes do mode.EnglishName }
@@ -718,7 +718,7 @@ module ExtensionsView =
     ///    0 = standard model views
     ///    1 = page layout views
     ///    2 = both standard and page layout views</param>
-    ///<returns>(string Rarr) of the view names</returns>
+    ///<returns>(string Rarr) of the view names.</returns>
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr =
         let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
@@ -730,7 +730,7 @@ module ExtensionsView =
     ///<summary>Return 3d corners of a view's near clipping Plane rectangle. Useful
     ///    in determining the "real world" size of a parallel-projected view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order)</returns>
+    ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order).</returns>
     static member ViewNearCorners([<OPT;DEF("")>]view:string) : Point3d * Point3d * Point3d * Point3d =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc = view.ActiveViewport.GetNearRect()
@@ -743,7 +743,7 @@ module ExtensionsView =
     ///<returns>(int) The current projection mode for the specified view
     ///    1 = parallel
     ///    2 = perspective
-    ///    3 = two point perspective</returns>
+    ///    3 = two point perspective.</returns>
     static member ViewProjection(view:string) : int = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -759,7 +759,7 @@ module ExtensionsView =
     ///    1 = parallel
     ///    2 = perspective
     ///    3 = two point perspective</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewProjection(view:string, mode:int) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -774,7 +774,7 @@ module ExtensionsView =
     ///<summary>Returns the radius of a parallel-projected view. Useful
     /// when you need an absolute zoom factor for a parallel-projected view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(float) The current view radius for the specified view</returns>
+    ///<returns>(float) The current view radius for the specified view.</returns>
     static member ViewRadius(view:string) : float = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -794,7 +794,7 @@ module ExtensionsView =
     ///    towards/away from the target so that the amount of the screen
     ///    subtended by an object changes.  true = perform a "zoom"
     ///    magnification by adjusting the "lens" angle</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -813,7 +813,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the width and height in pixels of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(int * int ) of two numbers identifying width and height</returns>
+    ///<returns>(int * int ) of two numbers identifying width and height.</returns>
     static member ViewSize([<OPT;DEF(null:string)>]view:string) : int * int =
         let view = RhinoScriptSyntax.CoerceView(view)
         let cr = view.ClientRectangle
@@ -835,7 +835,7 @@ module ExtensionsView =
     ///    3 = Up</param>
     ///<param name="angleDegrees">(float) Optional, Default Value: <c>5</c>
     ///    The angle to rotate. If omitted, the rotation angle of 5.0 degrees will be used</param>
-    ///<returns>(float) The number of seconds it took to regenerate the view frames number of times</returns>
+    ///<returns>(float) The number of seconds it took to regenerate the view frames number of times.</returns>
     static member ViewSpeedTest( [<OPT;DEF("")>]view:string,
                                  [<OPT;DEF(100)>]frames:int,
                                  [<OPT;DEF(true)>]freeze:bool,
@@ -849,7 +849,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the target location of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(Point3d) The current target location</returns>
+    ///<returns>(Point3d) The current target location.</returns>
     static member ViewTarget(view:string) : Point3d = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -859,7 +859,7 @@ module ExtensionsView =
     ///<summary>Sets the target location of the specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="target">(Point3d) 3d point identifying the new target location</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member ViewTarget(view:string, target:Point3d) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
@@ -871,7 +871,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the name, or title, of a given view's identifier</summary>
     ///<param name="viewId">(Guid) The identifier of the view</param>
-    ///<returns>(string) name or title of the view</returns>
+    ///<returns>(string) name or title of the view.</returns>
     static member ViewTitle(viewId:Guid) : string =
         let view = RhinoScriptSyntax.CoerceView(viewId)
         view.MainViewport.Name
@@ -881,7 +881,7 @@ module ExtensionsView =
     ///<summary>Returns the wallpaper bitmap of the specified view. To remove a
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// wallpaper bitmap, pass an empty string ""</summary>
-    ///<returns>(string option) The current wallpaper bitmap filename</returns>
+    ///<returns>(string option) The current wallpaper bitmap filename.</returns>
     static member Wallpaper(view:string) : string option= //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         let f= view.ActiveViewport.WallpaperFilename
@@ -892,7 +892,7 @@ module ExtensionsView =
     /// wallpaper bitmap, pass an empty string ""</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="filename">(string) Name of the bitmap file to set as wallpaper</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let rc = viewo.ActiveViewport.WallpaperFilename
@@ -905,7 +905,7 @@ module ExtensionsView =
     ///<summary>Returns the grayscale display option of the wallpaper bitmap in a
     /// specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The current grayscale display option</returns>
+    ///<returns>(bool) The current grayscale display option.</returns>
     static member WallpaperGrayScale(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         view.ActiveViewport.WallpaperGrayscale
@@ -915,7 +915,7 @@ module ExtensionsView =
     /// specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="grayscale">(bool) Display the wallpaper in gray(True) or color (False)</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member WallpaperGrayScale(view:string, grayscale:bool) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
@@ -927,7 +927,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Returns the visibility of the wallpaper bitmap in a specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The current hidden state</returns>
+    ///<returns>(bool) The current hidden state.</returns>
     static member WallpaperHidden(view:string) : bool = //GET
         let view = RhinoScriptSyntax.CoerceView(view)
         not view.ActiveViewport.WallpaperVisible
@@ -937,7 +937,7 @@ module ExtensionsView =
     ///<summary>Sets the visibility of the wallpaper bitmap in a specified view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="hidden">(bool) Show or hide the wallpaper</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member WallpaperHidden(view:string, hidden:bool) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
         let filename = view.ActiveViewport.WallpaperFilename
@@ -953,7 +953,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///    Zoom extents in all views</param>
-    ///<returns>(unit)</returns>
+    ///<returns>(unit).</returns>
     static member ZoomBoundingBox( boundingBox:BoundingBox,
                                    [<OPT;DEF("")>]view:string,
                                    [<OPT;DEF(false)>]all:bool) : unit =
@@ -971,7 +971,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, Title of the view. If omitted, current active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///    Zoom extents in all views</param>
-    ///<returns>(unit)</returns>
+    ///<returns>(unit).</returns>
     static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
             let views = Doc.Views.GetViewList(true, true)
@@ -987,7 +987,7 @@ module ExtensionsView =
     ///<param name="view">(string) Optional, Title of the view. If omitted, active view is used</param>
     ///<param name="all">(bool) Optional, Default Value: <c>false</c>
     ///    Zoom extents in all views</param>
-    ///<returns>(unit)</returns>
+    ///<returns>(unit).</returns>
     static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
             let views = Doc.Views.GetViewList(true, true)

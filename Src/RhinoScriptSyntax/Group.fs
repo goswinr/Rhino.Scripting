@@ -21,7 +21,7 @@ module ExtensionsGroup =
     ///<summary>Adds a new empty group to the document</summary>
     ///<param name="groupName">(string) Optional, Name of the new group. If omitted, Rhino automatically
     ///    generates the group name</param>
-    ///<returns>(string) name of the new group</returns>
+    ///<returns>(string) name of the new group.</returns>
     static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string =
         let mutable index = -1
         if isNull groupName then
@@ -37,7 +37,7 @@ module ExtensionsGroup =
     ///<summary>Adds one or more objects to an existing group</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member AddObjectToGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = Doc.Groups.Find(groupName)
         if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Can't add objects to group, group '%s' not found" groupName
@@ -48,7 +48,7 @@ module ExtensionsGroup =
     [<Extension>]
     ///<summary>Adds two or more objects to new group</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq) : unit = 
         let index = Doc.Groups.Add()
         if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects needes to have more than one objects but has %d" (Seq.length objectIds)
@@ -59,7 +59,7 @@ module ExtensionsGroup =
     ///<summary>Adds two or more objects to new group, sets group name</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of group to create</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq, groupName:string) : unit = 
         let index = Doc.Groups.Add( groupName )
         if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed to creat group with name '%s' for %d objects" groupName (Seq.length objectIds)
@@ -71,7 +71,7 @@ module ExtensionsGroup =
     ///<summary>Adds a single object to an existing group</summary>
     ///<param name="objectId">(Guid) String or Guid representing the object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member AddObjectToGroup(objectId:Guid, groupName:string) : unit =
         let index = Doc.Groups.Find(groupName)
         if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Can't add object to group, group '%s' not found" groupName
@@ -83,7 +83,7 @@ module ExtensionsGroup =
     ///<summary>Removes an existing group from the document. Reference groups cannot be
     ///    removed. Deleting a group does not delete the member objects</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member DeleteGroup(groupName:string) : unit =
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Can't DeleteGroup, group '%s' not found" groupName
@@ -92,7 +92,7 @@ module ExtensionsGroup =
 
     [<Extension>]
     ///<summary>Returns the number of groups in the document</summary>
-    ///<returns>(int) the number of groups in the document</returns>
+    ///<returns>(int) The number of groups in the document.</returns>
     static member GroupCount() : int =
         Doc.Groups.Count
 
@@ -100,7 +100,7 @@ module ExtensionsGroup =
     [<Extension>]
     ///<summary>Returns the names of all the groups in the document
     ///    None if no names exist in the document</summary>
-    ///<returns>(string array) the names of all the groups in the document.  None if no names exist in the document</returns>
+    ///<returns>(string array) The names of all the groups in the document.  None if no names exist in the document.</returns>
     static member GroupNames() : string array =
         let names = Doc.Groups.GroupNames(true)
         if names|> isNull  then [| |]
@@ -111,7 +111,7 @@ module ExtensionsGroup =
     ///<summary>Hides a group of objects. Hidden objects are not visible, cannot be
     ///    snapped to, and cannot be selected</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(int) The number of objects that were hidden</returns>
+    ///<returns>(int) The number of objects that were hidden.</returns>
     static member HideGroup(groupName:string) : int =
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Can't HideGroup, group '%s' not found" groupName
@@ -121,7 +121,7 @@ module ExtensionsGroup =
     [<Extension>]
     ///<summary>Verifies the existance of a group</summary>
     ///<param name="groupName">(string) The name of the group to check for</param>
-    ///<returns>(bool) True or False</returns>
+    ///<returns>(bool) True or False.</returns>
     static member IsGroup(groupName:string) : bool =
         Doc.Groups.Find(groupName)>=0
 
@@ -129,7 +129,7 @@ module ExtensionsGroup =
     [<Extension>]
     ///<summary>Verifies that an existing group is empty, or contains no object members</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(bool) True or False if groupName is empty</returns>
+    ///<returns>(bool) True or False if groupName is empty.</returns>
     static member IsGroupEmpty(groupName:string) : bool =
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Can't check IsGroupEmpty, group '%s' not found" groupName
@@ -140,7 +140,7 @@ module ExtensionsGroup =
     ///<summary>Locks a group of objects. Locked objects are visible and they can be
     ///    snapped to. But, they cannot be selected</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(int) Number of objects that were locked</returns>
+    ///<returns>(int) Number of objects that were locked.</returns>
     static member LockGroup(groupName:string) : int =
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.LockGroup failed.  groupName:'%A'" groupName
@@ -151,7 +151,7 @@ module ExtensionsGroup =
     ///<summary>Removes a single object from any and all groups that it is a member.
     ///    Neither the object nor the group can be reference objects</summary>
     ///<param name="objectId">(Guid) The object identifier</param>
-    ///<returns>(bool) True or False indicating success or failure</returns>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RemoveObjectFromAllGroups(objectId:Guid) : bool =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if rhinoobject.GroupCount<1 then false
@@ -165,7 +165,7 @@ module ExtensionsGroup =
     ///<summary>Remove a single object from an existing group</summary>
     ///<param name="objectId">(Guid) The object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = Doc.Groups.Find(groupName)
@@ -180,7 +180,7 @@ module ExtensionsGroup =
     ///<summary>Removes multiple objects from an existing group</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RemoveObjectFromGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) groupName        
@@ -197,7 +197,7 @@ module ExtensionsGroup =
     ///<summary>Renames an existing group</summary>
     ///<param name="oldName">(string) The name of an existing group</param>
     ///<param name="newName">(string) The new group name</param>
-    ///<returns>(unit) void, nothing</returns>
+    ///<returns>(unit) void, nothing.</returns>
     static member RenameGroup(oldName:string, newName:string) : unit =
         let index = Doc.Groups.Find(oldName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RenameGroup failed.  oldName:'%A' newName:'%A'" oldName newName
@@ -209,7 +209,7 @@ module ExtensionsGroup =
     ///<summary>Shows a group of previously hidden objects. Hidden objects are not
     ///    visible, cannot be snapped to, and cannot be selected</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(int) The number of objects that were shown</returns>
+    ///<returns>(int) The number of objects that were shown.</returns>
     static member ShowGroup(groupName:string) : int =
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowGroup failed.  groupName:'%A'" groupName
@@ -220,7 +220,7 @@ module ExtensionsGroup =
     ///<summary>Unlocks a group of previously locked objects. Lockes objects are visible,
     ///    can be snapped to, but cannot be selected</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
-    ///<returns>(int) The number of objects that were unlocked</returns>
+    ///<returns>(int) The number of objects that were unlocked.</returns>
     static member UnlockGroup(groupName:string) : int =
         let index = Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockGroup failed.  groupName:'%A'" groupName
@@ -230,7 +230,7 @@ module ExtensionsGroup =
     ///<summary>Returns the top most group name that an object is assigned.  
     ///   This function primarily applies to objects that are members of nested groups</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
-    ///<returns>(int) The top group's name. Fails if object is not in a group</returns>
+    ///<returns>(int) The top group's name. Fails if object is not in a group.</returns>
     static member ObjectTopGroup(objId:Guid) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
@@ -243,7 +243,7 @@ module ExtensionsGroup =
     ///<summary>Returns the names of all groups that an object is part of .  
     ///   This function primarily applies to objects that are members of nested groups</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
-    ///<returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group</returns>
+    ///<returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group.</returns>
     static member ObjectGroups(objId:Guid) : Rarr<string> =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
