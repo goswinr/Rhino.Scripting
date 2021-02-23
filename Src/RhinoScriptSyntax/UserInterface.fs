@@ -720,9 +720,9 @@ module ExtensionsUserinterface =
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
     ///    The options are bit coded flags. Values can be added together to specify more than one option. 
     ///    value description
-    ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed polyline will be returned.
-    ///    2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed polyline will be returned.
-    ///    4     Force close. If specified, then the returned polyline is always closed. If specified, then max must bebet 0 or bigger than 4.
+    ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed Polyline will be returned.
+    ///    2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed Polyline will be returned.
+    ///    4     Force close. If specified, then the returned Polyline is always closed. If specified, then max must bebet 0 or bigger than 4.
     ///    Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>

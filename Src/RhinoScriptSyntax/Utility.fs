@@ -318,7 +318,7 @@ module ExtensionsUtility =
 
 
     [<Extension>]
-    ///<summary>Sorts list of points so they will be connected in a "reasonable" polyline order</summary>
+    ///<summary>Sorts list of points so they will be connected in a "reasonable" Polyline order</summary>
     ///<param name="points">(Point3d seq) The points to sort</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    Minimum distance between points. Points that fall within this tolerance

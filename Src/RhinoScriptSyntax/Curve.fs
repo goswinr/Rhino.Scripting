@@ -337,7 +337,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Adds a polyline curve</summary>
+    ///<summary>Adds a Polyline curve</summary>
     ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least two points. If the
     ///    list contains less than four points, then the first point and
     ///    last point must be different</param>
@@ -356,7 +356,7 @@ module ExtensionsCurve =
         rc
     
     [<Extension>]
-    ///<summary>Adds a closed polyline Curve , 
+    ///<summary>Adds a closed Polyline Curve , 
     ///    if the endpoint is already closer than Doc.ModelAbsoluteTolerance to the start it wil be set to start point
     ///    else an additional point will be added with the same position as start</summary>
     ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
@@ -583,7 +583,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Convert Curve to a polyline curve</summary>
+    ///<summary>Convert Curve to a Polyline curve</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="angleTolerance">(float) Optional, Default Value: <c>5.0</c>
     ///    The maximum angle between Curve tangents at line endpoints.</param>
@@ -2315,9 +2315,9 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Creates a polygon Mesh object based on a closed polyline Curve object.
+    ///<summary>Creates a polygon Mesh object based on a closed Polyline Curve object.
     ///    The created Mesh object is added to the document</summary>
-    ///<param name="polylineId">(Guid) Identifier of the polyline Curve object</param>
+    ///<param name="polylineId">(Guid) Identifier of the Polyline Curve object</param>
     ///<returns>(Guid) identifier of the new Mesh object</returns>
     static member MeshPolyline(polylineId:Guid) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve polylineId
@@ -2471,7 +2471,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Returns the vertices of a polyline curve</summary>
+    ///<summary>Returns the vertices of a Polyline curve</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional,
     ///    If curveId identifies a Polycurve object, then segmentIndex identifies the Curve segment of the Polycurve to query</param>
@@ -2575,10 +2575,10 @@ module ExtensionsCurve =
     ///      - All the Polycurve segments are lines, polylines, arcs, or NURBS curves.
     ///      - The NURBS curves segments do not have fully multiple interior knots.
     ///      - Rational NURBS curves do not have constant weights.
-    ///      - Any segment for which IsCurveLinear or IsArc is True:  a line, polyline segment, or an arc.
+    ///      - Any segment for which IsCurveLinear or IsArc is True:  a line, Polyline segment, or an arc.
     ///      - Adjacent co-linear or co-circular segments are combined.
     ///      - Segments that meet with G1-continuity have there ends tuned up so that they meet with G1-continuity to within machine precision.
-    ///      - If the Polycurve is a polyline, a polyline will be created</summary>
+    ///      - If the Polycurve is a polyline, a Polyline will be created</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
     ///    The simplification methods to use. By default, all methods are used (flags = 0)

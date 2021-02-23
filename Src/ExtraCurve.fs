@@ -48,7 +48,7 @@ module ExtrasCurve =
     [<Extension>]
     ///<summary>Fillest some corners of polyline</summary>
     ///<param name="fillets">(int*float Rarr)The index of the cornes to filet and the fillet radius</param>
-    ///<param name="polyline">(Point3d Rarr) The polyline as pointlist </param> 
+    ///<param name="polyline">(Point3d Rarr) The Polyline as pointlist </param> 
     ///<returns>a PolyCurve object</returns>
     static member FilletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
         for i in fillets.Keys do 

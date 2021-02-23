@@ -692,11 +692,11 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Creates polyline Curve outlines of Mesh objects</summary>
+    ///<summary>Creates Polyline Curve outlines of Mesh objects</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of meshes to outline</param>
     ///<param name="view">(string) Optional, Default Value: <c>Top View</c>
     ///    View to use for outline direction</param>
-    ///<returns>(Guid Rarr) polyline Curve identifiers</returns>
+    ///<returns>(Guid Rarr) Polyline Curve identifiers</returns>
     static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid Rarr =
         let  meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = Rarr()
@@ -882,9 +882,9 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Pulls a Curve to a mesh. The function makes a polyline approximation of
+    ///<summary>Pulls a Curve to a mesh. The function makes a Polyline approximation of
     ///    the input Curve and gets the closest point on the Mesh for each point on
-    ///    the polyline. Then it "connects the points" to create a polyline on the mesh</summary>
+    ///    the polyline. Then it "connects the points" to create a Polyline on the mesh</summary>
     ///<param name="meshId">(Guid) Identifier of Mesh that pulls</param>
     ///<param name="curveId">(Guid) Identifier of Curve to pull</param>
     ///<returns>(Guid) identifier new curve</returns>

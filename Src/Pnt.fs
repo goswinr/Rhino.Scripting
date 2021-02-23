@@ -128,7 +128,7 @@ module Pnt =
     
     
 
-    /// Finds the inner offset point in a corner ( difind by a polyline from 3 points ( prevPt, thisPt and nextPt)
+    /// Finds the inner offset point in a corner ( difind by a Polyline from 3 points ( prevPt, thisPt and nextPt)
     /// The offset from first and second segment are given speratly and can vary (prevDist and nextDist).    
     /// Use negative distance for outer offset
     /// The orientation parameter is only aproximate, it might flip the output normal, so that the  dot-product is positive.

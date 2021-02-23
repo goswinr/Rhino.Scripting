@@ -155,7 +155,7 @@ module AutoOpenVector =
         /// Offsets a Polyline in 3D space by finding th local offest in each corner.
         /// Offset distances can vary per segment, Positive distance is offset inwards, negative outwards.
         /// Normal distances define a perpendicular offset at each corner.
-        /// Auto detects if given points are from a closed polyline (first point = last point) and loops them
+        /// Auto detects if given points are from a closed Polyline (first point = last point) and loops them
         /// Distances Sequence  must have exact count , be a singelton ( for repeating) or empty seq ( for ignoring)
         /// Auto detects points from closed polylines and loops them
         [<Extension>] 
@@ -283,7 +283,7 @@ module AutoOpenVector =
         /// Offsets a Polyline in 3D space by finding th local offest in each corner.
         /// Positive distance is offset inwards, negative outwards.
         /// Normal distances define a perpendicular offset at each corner.
-        /// Auto detects if given points are from a closed polyline (first point = last point) and loops them
+        /// Auto detects if given points are from a closed Polyline (first point = last point) and loops them
         /// Auto detects points from closed polylines and loops them
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistance: float, 
