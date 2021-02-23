@@ -42,7 +42,7 @@ module ExtensionsObject =
 
     [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
-    ///    The matrix acts on the left.  To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
+    ///    The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
@@ -300,7 +300,7 @@ module ExtensionsObject =
     [<Extension>]
     ///<summary>Verifies an object is visible in a view.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<param name="view">(string) Optional, Default Value: The title of the view.  If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, Default Value: The title of the view. If omitted, the current active view is used</param>
     ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
     static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)

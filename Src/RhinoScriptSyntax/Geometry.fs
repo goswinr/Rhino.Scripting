@@ -47,7 +47,7 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Creates a picture frame and adds it to the document.</summary>
-    ///<param name="plane">(Plane) The Plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at Plane's origin. The width will be in the Plane's X axis direction, and the height will be in the Plane's Y axis direction</param>
+    ///<param name="plane">(Plane) The Plane in which the PictureFrame will be created. The bottom-left corner of picture will be at Plane's origin. The width will be in the Plane's X axis direction, and the height will be in the Plane's Y axis direction</param>
     ///<param name="filename">(string) The path to a bitmap or image file</param>
     ///<param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skiped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="height">(float) Optional, If both dblWidth and dblHeight are  0.0 or skied, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
@@ -56,7 +56,7 @@ module ExtensionsGeometry =
     ///<param name="embed">(bool) Optional, Default Value: <c>false</c>
     ///    If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
     ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
-    ///    If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
+    ///    If False, the picture frame is created without any transparency texture. If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the function will make a PictureFrame object from a Mesh rather than a Plane Surface</param>
     ///<returns>(Guid) object identifier.</returns>

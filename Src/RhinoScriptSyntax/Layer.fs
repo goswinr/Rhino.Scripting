@@ -208,7 +208,7 @@ module ExtensionsLayer =
     ///<summary>Add a new layer to the document. If it does not exist yet. Currently anly ASCII characters are allowed.
     /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
-    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value.  If omitted a random (non yellow)  color wil be choosen.</param>
+    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value. If omitted a random (non yellow)  color wil be choosen.</param>
     ///<param name="visible">(int) Optional, Default Value: <c>2</c>  
     ///   Layer visibility:
     ///   0 = explicitly Off (even if parent is already Off)

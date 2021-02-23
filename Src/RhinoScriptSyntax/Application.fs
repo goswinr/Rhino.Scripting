@@ -528,7 +528,7 @@ module ExtensionsApplication =
 
 
     [<Extension>]
-    ///<summary>Returns the current language used for the Rhino interface.  The current
+    ///<summary>Returns the current language used for the Rhino interface. The current
     ///    language is returned as a locale ID, or LCID, value.</summary>
     ///<returns>(int) The current language used for the Rhino interface as a locale ID, or LCID.
     ///    1029  Czech
@@ -675,7 +675,7 @@ module ExtensionsApplication =
     ///<param name="status">(int) Optional, Default Value: <c>0</c>
     /// 0 = both loaded and unloaded, 
     /// 1 = loaded, 
-    /// 2 = unloaded.  If omitted both status is returned</param>
+    /// 2 = unloaded. If omitted both status is returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins.</returns>
     static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any

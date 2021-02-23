@@ -100,7 +100,7 @@ module ExtensionsGroup =
     [<Extension>]
     ///<summary>Returns the names of all the groups in the document
     ///    None if no names exist in the document.</summary>
-    ///<returns>(string array) The names of all the groups in the document.  None if no names exist in the document.</returns>
+    ///<returns>(string array) The names of all the groups in the document. None if no names exist in the document.</returns>
     static member GroupNames() : string array =
         let names = Doc.Groups.GroupNames(true)
         if names|> isNull  then [| |]

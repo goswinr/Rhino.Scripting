@@ -199,7 +199,7 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Adds an interpolated Curve object that lies on a specified
-    ///    Surface.  Note, this function will not create periodic Curves,
+    ///    Surface. Note, this function will not create periodic Curves,
     ///    but it will create closed Curves.</summary>
     ///<param name="surfaceId">(Guid) Identifier of the Surface to create the Curve on</param>
     ///<param name="points">(Point3d seq) List of 3D points that lie on the specified Surface.
@@ -246,12 +246,12 @@ module ExtensionsCurve =
     ///    Periodic Curves must have a degree bigger than 1. For knotstyle = 1 or 2,
     ///    the degree must be 3. For knotstyle = 4 or 5, the degree must be odd</param>
     ///<param name="knotStyle">(int) Optional, Default Value: <c>0</c>
-    ///    0 Uniform knots.  Parameter spacing between consecutive knots is 1.0.
-    ///    1 Chord length spacing.  Requires degree = 3 with arrCV1 and arrCVn1 specified.
-    ///    2 Sqrt (chord length).  Requires degree = 3 with arrCV1 and arrCVn1 specified.
+    ///    0 Uniform knots. Parameter spacing between consecutive knots is 1.0.
+    ///    1 Chord length spacing. Requires degree = 3 with arrCV1 and arrCVn1 specified.
+    ///    2 Sqrt (chord length). Requires degree = 3 with arrCV1 and arrCVn1 specified.
     ///    3 Periodic with uniform spacing.
-    ///    4 Periodic with chord length spacing.  Requires an odd degree value.
-    ///    5 Periodic with sqrt (chord length) spacing.  Requires an odd degree value</param>
+    ///    4 Periodic with chord length spacing. Requires an odd degree value.
+    ///    5 Periodic with sqrt (chord length) spacing. Requires an odd degree value</param>
     ///<param name="startTangent">(Vector3d) Optional, A vector that specifies a tangency condition at the
     ///    beginning of the Curve. If the Curve is periodic, this argument must be omitted</param>
     ///<param name="endTangent">(Vector3d) Optional, 3d vector that specifies a tangency condition at the
@@ -2682,7 +2682,7 @@ module ExtensionsCurve =
     ///<param name="method">(int) Optional, Default Value: <c>0</c>
     ///    The method for refining the output Curves, where:
     ///    0: (Default) Uses the control points of the Curves for matching. So the first control point of first Curve is matched to first control point of the second Curve.
-    ///    1: Refits the output Curves like using the FitCurve method.  Both the input Curve and the output Curve will have the same structure. The resulting Curves are usually more complex than input unless input Curves are compatible.
+    ///    1: Refits the output Curves like using the FitCurve method. Both the input Curve and the output Curve will have the same structure. The resulting Curves are usually more complex than input unless input Curves are compatible.
     ///    2: Input Curves are divided to the specified number of points on the Curve, corresponding points define new points that output Curves go through. If you are making one tween Curve, the method essentially does the following: divides the two Curves into an equal number of points, finds the midpoint between the corresponding points on the Curves, and interpolates the tween Curve through those points</param>
     ///<param name="sampleNumber">(int) Optional, Default Value: <c>10</c>
     ///    The number of samples points to use if method is 2. The default is 10</param>

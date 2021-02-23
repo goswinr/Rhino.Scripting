@@ -104,7 +104,7 @@ module ExtensionsPlane =
     ///<param name="curve">(Guid) The identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The intersection tolerance.</param>
-    ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
+    ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple . The list will contain one or more of the following tuple:
     ///    Element Type        Description
     ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
     ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the Curve.

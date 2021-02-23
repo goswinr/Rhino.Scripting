@@ -159,7 +159,7 @@ module ExtensionsUtility =
     ///<summary>Removes duplicates from an array of numbers.</summary>
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
-    ///    The minimum distance between numbers.  Numbers that fall within this tolerance will be discarded</param>
+    ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
     ///<returns>(float Rarr) numbers with duplicates removed.</returns>
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
         if Seq.length numbers < 2 then Rarr(numbers )

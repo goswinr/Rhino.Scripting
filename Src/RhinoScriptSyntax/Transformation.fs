@@ -19,7 +19,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Verifies a matrix is the identity matrix.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsXformIdentity(xForm:Transform) : bool =
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
@@ -30,7 +30,7 @@ module ExtensionsTransformation =
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
     ///    transformation can be broken into a sequence of dialations, translations,
     ///    rotations, and reflections.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
     static member IsXformSimilarity(xForm:Transform) : bool =
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
@@ -39,7 +39,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>verifies that a matrix is a zero transformation matrix.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsXformZero(xForm:Transform) : bool =
         xForm.IsZero4x4
@@ -112,7 +112,7 @@ module ExtensionsTransformation =
     ///<summary>Returns the determinant of a transformation matrix. If the determinant
     ///    of a transformation matrix is 0, the matrix is said to be singular. Singular
     ///    matrices do not have inverses.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant.</returns>
     static member XformDeterminant(xForm:Transform) : float =
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
@@ -137,7 +137,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Returns the inverse of a non-singular transformation matrix.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform.  A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix.</returns>
     static member XformInverse(xForm:Transform) : Transform =
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
@@ -159,8 +159,8 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Multiplies two transformation matrices, where result = xForm1 * xForm2.</summary>
-    ///<param name="xForm1">(Transform) List or Rhino.Geometry.Transform.  The first 4x4 transformation matrix to multiply</param>
-    ///<param name="xForm2">(Transform) List or Rhino.Geometry.Transform.  The second 4x4 transformation matrix to multiply</param>
+    ///<param name="xForm1">(Transform) List or Rhino.Geometry.Transform. The first 4x4 transformation matrix to multiply</param>
+    ///<param name="xForm2">(Transform) List or Rhino.Geometry.Transform. The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation.</returns>
     static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform =
         //xForm1 = RhinoScriptSyntax.CoercexForm(xForm1)
@@ -322,7 +322,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Creates a translation transformation matrix.</summary>
-    ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d.  A 3-D translation vector</param>
+    ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d. A 3-D translation vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix if successful.</returns>
     static member XformTranslation(vector:Vector3d) : Transform =
         //vector = RhinoScriptSyntax.Coerce3dvector(vector)

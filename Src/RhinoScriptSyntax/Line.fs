@@ -21,7 +21,7 @@ module ExtensionsLine =
     [<Extension>]
     ///<summary>Finds the point on an FINITE line that is closest to a test point.</summary>
     ///<param name="line">(Geometry.Line) The finite line</param>
-    ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d.  The test point</param>
+    ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d. The test point</param>
     ///<returns>(Point3d) The point on the finite line that is closest to the test point.</returns>
     static member LineClosestPointFinite(line:Line, testPoint:Point3d) : Point3d =
         line.ClosestPoint(testPoint, true)

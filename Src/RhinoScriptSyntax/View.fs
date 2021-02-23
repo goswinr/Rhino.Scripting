@@ -792,7 +792,7 @@ module ExtensionsView =
     ///<param name="radius">(float) The view radius</param>
     ///<param name="mode">(bool) Perform a "dolly" magnification by moving the camera
     ///    towards/away from the target so that the amount of the screen
-    ///    subtended by an object changes.  true = perform a "zoom"
+    ///    subtended by an object changes. true = perform a "zoom"
     ///    magnification by adjusting the "lens" angle</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ViewRadius(view:string, radius:float, mode:bool) : unit = //SET
@@ -822,7 +822,7 @@ module ExtensionsView =
 
     [<Extension>]
     ///<summary>Test's Rhino's display performance.</summary>
-    ///<param name="view">(string) Optional, The title of the view.  If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, The title of the view. If omitted, the current active view is used</param>
     ///<param name="frames">(int) Optional, Default Value: <c>100</c>
     ///    The number of frames, or times to regenerate the view. If omitted, the view will be regenerated 100 times</param>
     ///<param name="freeze">(bool) Optional, Default Value: <c>true</c>

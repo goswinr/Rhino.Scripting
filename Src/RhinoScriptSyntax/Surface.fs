@@ -223,28 +223,28 @@ module ExtensionsSurface =
     ///<summary>Fits a Surface through Curve, point, point cloud, and Mesh objects.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
     ///    Acceptable object types include Curves, points, point clouds, and Meshes</param>
-    ///<param name="startSurfaceId">(Guid) The identifier of the starting Surface.  It is best if you create a starting Surface that is similar in shape
+    ///<param name="startSurfaceId">(Guid) The identifier of the starting Surface. It is best if you create a starting Surface that is similar in shape
     ///    to the Surface you are trying to create</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    ///    Try to find an outside Curve and trims the Surface to it.  The default value is True</param>
+    ///    Try to find an outside Curve and trims the Surface to it. The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
-    ///    The basic distance between points sampled from input Curves.  The default value is 0.1</param>
+    ///    The basic distance between points sampled from input Curves. The default value is 0.1</param>
     ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
     ///    Determines the behavior of the Surface in areas where its not otherwise controlled by the input.
     ///    Lower numbers make the Surface behave more like a stiff material, higher, more like a flexible material.
     ///    That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
-    ///    mapping to that area of the Surface when the flexibility value is low.  The scale is logarithmic.
+    ///    mapping to that area of the Surface when the flexibility value is low. The scale is logarithmic.
     ///    For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
-    ///    make the Surface flexible.  The default value is 1.0</param>
+    ///    make the Surface flexible. The default value is 1.0</param>
     ///<param name="surfacePull">(float) Optional, Default Value: <c>1.0</c>
     ///    Similar to stiffness, but applies to the starting Surface. The bigger the pull, the closer
-    ///    the resulting Surface shape will be to the starting Surface.  The default value is 1.0</param>
+    ///    the resulting Surface shape will be to the starting Surface. The default value is 1.0</param>
     ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
     ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
     ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
-    ///    to move.  The default if False</param>
+    ///    to move. The default if False</param>
     ///<returns>(Guid) Identifier of the new Surface object.</returns>
     static member AddPatch( objectIds:Guid seq,
                               startSurfaceId: Guid,
@@ -276,23 +276,23 @@ module ExtensionsSurface =
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    ///    Try to find an outside Curve and trims the Surface to it.  The default value is True</param>
+    ///    Try to find an outside Curve and trims the Surface to it. The default value is True</param>
     ///<param name="pointSpacing">(float) Optional, Default Value: <c>0.1</c>
-    ///    The basic distance between points sampled from input Curves.  The default value is 0.1</param>
+    ///    The basic distance between points sampled from input Curves. The default value is 0.1</param>
     ///<param name="flexibility">(float) Optional, Default Value: <c>1.0</c>
     ///    Determines the behavior of the Surface in areas where its not otherwise controlled by the input.
     ///    Lower numbers make the Surface behave more like a stiff material, higher, more like a flexible material.
     ///    That is, each span is made to more closely match the spans adjacent to it if there is no input geometry
-    ///    mapping to that area of the Surface when the flexibility value is low.  The scale is logarithmic.
+    ///    mapping to that area of the Surface when the flexibility value is low. The scale is logarithmic.
     ///    For example, numbers around 0.001 or 0.1 make the patch pretty stiff and numbers around 10 or 100
-    ///    make the Surface flexible.  The default value is 1.0</param>
+    ///    make the Surface flexible. The default value is 1.0</param>
     ///<param name="surfacePull">(float) Optional, Default Value: <c>1.0</c>
     ///    Similar to stiffness, but applies to the starting Surface. The bigger the pull, the closer
-    ///    the resulting Surface shape will be to the starting Surface.  The default value is 1.0</param>
+    ///    the resulting Surface shape will be to the starting Surface. The default value is 1.0</param>
     ///<param name="fixEdges">(bool) Optional, Default Value: <c>false</c>
     ///    Clamps the edges of the starting Surface in place. This option is useful if you are using a
     ///    Curve or points for deforming an existing Surface, and you do not want the edges of the starting Surface
-    ///    to move.  The default if False</param>
+    ///    to move. The default if False</param>
     ///<returns>(Guid) Identifier of the new Surface object.</returns>
     static member AddPatch( objectIds:Guid seq,
                             uvSpans: int * int ,
@@ -1356,7 +1356,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies a Surface object is closed in the specified direction.  If the
+    ///<summary>Verifies a Surface object is closed in the specified direction. If the
     ///    Surface fully encloses a volume, it is considered a solid.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="direction">(int) 
@@ -2018,7 +2018,7 @@ module ExtensionsSurface =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter to evaluate</param>
     ///<param name="derivative">(int) Number of derivatives to evaluate</param>
-    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2 .  The elements are as follows:
+    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2 . The elements are as follows:
     ///    firts Element of tuple
     ///    [fst]      The 3-D point.
     ///    [snd]   Vectors in List:
@@ -2561,7 +2561,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Changes the degree of a Surface object.  For more information see the Rhino help file for the ChangeDegree command.</summary>
+    ///<summary>Changes the degree of a Surface object. For more information see the Rhino help file for the ChangeDegree command.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>

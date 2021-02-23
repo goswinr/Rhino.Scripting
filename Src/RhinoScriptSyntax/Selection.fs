@@ -125,11 +125,11 @@ module ExtensionsSelection =
     ///<summary>Returns identifier of the first object in the document. The first
     ///    object is the last object created by the user.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the object.  If omitted, the object is not selected</param>
+    ///    Select the object. If omitted, the object is not selected</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///    Include light objects.  If omitted, light objects are not returned</param>
+    ///    Include light objects. If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///    Include grips objects.  If omitted, grips objects are not returned</param>
+    ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid) The identifier of the object.</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
@@ -205,7 +205,7 @@ module ExtensionsSelection =
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the picked objects.  If False, the objects that are
+    ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
@@ -256,7 +256,7 @@ module ExtensionsSelection =
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the picked objects.  If False, the objects that are
+    ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
@@ -318,13 +318,13 @@ module ExtensionsSelection =
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
-    ///    Honor object grouping.  If omitted and the user picks a group,
+    ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the picked objects.  If False, the objects that are
+    ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
@@ -387,13 +387,13 @@ module ExtensionsSelection =
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
-    ///    Honor object grouping.  If omitted and the user picks a group,
+    ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the picked objects.  If False, the objects that are
+    ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
     ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
@@ -434,7 +434,7 @@ module ExtensionsSelection =
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the picked objects.  If False, the objects that are
+    ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<returns>(Guid) a identifier of the picked object.</returns>
@@ -461,7 +461,7 @@ module ExtensionsSelection =
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
-    ///    Honor object grouping.  If omitted and the user picks a group,
+    ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -534,7 +534,7 @@ module ExtensionsSelection =
     ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
     ///    A prompt message</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///    Allow for the selection of pre-selected objects.  If omitted, pre-selected objects are not accepted</param>
+    ///    Allow for the selection of pre-selected objects. If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d Rarr) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr =
@@ -661,9 +661,9 @@ module ExtensionsSelection =
     ///<summary>Inverts the current object selection. The identifiers of the newly
     ///    selected objects are returned.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///    Include light objects.  If omitted, light objects are not returned</param>
+    ///    Include light objects. If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///    Include grips objects.  If omitted, grips objects are not returned</param>
+    ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
     ///    Include refrence objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers of the newly selected objects.</returns>
@@ -693,7 +693,7 @@ module ExtensionsSelection =
     ///    call this function immediately after calling the Command function as only the
     ///    most recently created or changed object identifiers will be returned.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the object.  If omitted, the object is not selected</param>
+    ///    Select the object. If omitted, the object is not selected</param>
     ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr =
         match commandSerialNumbers with
@@ -771,9 +771,9 @@ module ExtensionsSelection =
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
     ///    are visible, can be snapped to, and are independent of selection state.</summary>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///    Include light objects.  If omitted, light objects are not returned</param>
+    ///    Include light objects. If omitted, light objects are not returned</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///    Include grips objects.  If omitted, grips objects are not returned</param>
+    ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid Rarr) identifier of normal objects.</returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let iter = DocObjects.ObjectEnumeratorSettings()
