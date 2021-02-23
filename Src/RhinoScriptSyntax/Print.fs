@@ -20,6 +20,16 @@ module ExtensionsPrint =
   
   type RhinoScriptSyntax with
     
+    static member internal formatRhinoObject (o:obj)  = 
+        match o with
+        | :? Guid       as x -> Some <| NiceStringSettings.Element (rhType x)
+        | :? Point3d    as x -> Some <| NiceStringSettings.Element x.ToNiceString
+        | :? Vector3d   as x -> Some <| NiceStringSettings.Element x.ToNiceString
+        | :? Line       as x -> Some <| NiceStringSettings.Element x.ToNiceString        
+        | :? Point3f    as x -> Some <| NiceStringSettings.Element x.ToNiceString
+        | :? Vector3f   as x -> Some <| NiceStringSettings.Element x.ToNiceString
+        | _                  -> None        
+    
     [<Extension>]
     ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString()</summary>
     ///<param name="x">('T): the value or object to represent as string</param>
@@ -27,17 +37,8 @@ module ExtensionsPrint =
     /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(string) the string</returns>
     static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
-        let formatRhinoObject (o:obj)  = 
-            match o with
-            | :? Guid       as x -> Some (rhType x)
-            | :? Point3d    as x -> Some x.ToNiceString
-            | :? Vector3d   as x -> Some x.ToNiceString
-            | :? Line       as x -> Some x.ToNiceString        
-            | :? Point3f    as x -> Some x.ToNiceString
-            | :? Vector3f   as x -> Some x.ToNiceString
-            | _                  -> None        
-        if trim then NiceString.toNiceStringWithFormater    (x, formatRhinoObject)
-        else         NiceString.toNiceStringFullWithFormater(x, formatRhinoObject)       
+        if trim then NiceString.toNiceString(x)
+        else         NiceString.toNiceStringFull(x)       
     
     [<Extension>]
     ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
@@ -47,7 +48,7 @@ module ExtensionsPrint =
     static member Print (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, true)
         |>! RhinoApp.WriteLine 
-        |> printfn "%s"  
+        |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !
  
     [<Extension>]
@@ -58,7 +59,7 @@ module ExtensionsPrint =
     static member PrintFull (x:'T) : unit =
         RhinoScriptSyntax.ToNiceString(x, false)
         |>! RhinoApp.WriteLine 
-        |> printfn "%s"  
+        |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !
 
     [<Extension>]
@@ -68,10 +69,10 @@ module ExtensionsPrint =
     ///<returns>(unit) void, nothing</returns>
     static member PrintSeq (xs:'T seq, [<OPT;DEF(" ")>]separator:string) : unit =
         xs
-        |> Seq.map RhinoScriptSyntax.ToNiceString
-        |> String.concat separator
+        |>  Seq.map RhinoScriptSyntax.ToNiceString
+        |>  String.concat separator
         |>! RhinoApp.WriteLine 
-        |> printfn "%s"
+        |>  Console.WriteLine
         RhinoApp.Wait()
 
     //printf:
@@ -82,14 +83,15 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
             printfColor 220 0 0 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            
     [<Extension>]
     /// Like printf but in Red. Adds a new line at end.
     static member PrintfnRed msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
             printfnColor 220 0 0 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     [<Extension>]
     /// Like printf but in Green. Does not add a new line at end.
@@ -97,14 +99,15 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
             printfColor 0 180 0 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            
     [<Extension>]
     /// Like printf but in Green.Adds a new line at end.
     static member PrintfnGreen msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
             printfnColor 0 180 0 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     [<Extension>]
     /// Like printf but in Light Blue. Does not add a new line at end.
@@ -112,14 +115,15 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
             printfColor 173 216 230  "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+
     [<Extension>]
     /// Like printf but in Light Blue. Adds a new line at end.
     static member PrintfnLightBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
             printfnColor 173 216 230  "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     [<Extension>]
     /// Like printf but in Blue. Does not add a new line at end.
@@ -127,14 +131,15 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
             printfColor 0 0 220 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+
     [<Extension>]
     /// Like printf but in Blue. Adds a new line at end.
     static member PrintfnBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
             printfnColor 0 0 220 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     [<Extension>]
     /// Like printf but in Grey. Does not add a new line at end.
@@ -142,14 +147,15 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
             printfColor 150 150 150 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+
     [<Extension>]
     /// Like printf but in Grey. Adds a new line at end.
     static member PrintfnGrey msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
             printfnColor 150 150 150 "%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
     [<Extension>]
     ///<summary>Like printf but in costom color. Does not add a new line at end.</summary>
@@ -162,7 +168,7 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
             printfColor red green blue"%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
     [<Extension>]
     ///<summary>Like printfn but in costom color. Adds a new line at end. </summary>
@@ -175,10 +181,12 @@ module ExtensionsPrint =
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
             printfnColor red green blue"%s" s
-            RhinoApp.Wait() )  msg // no swith to UI Thread needed !
-    
+            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+  
+  do
+    NiceStringSettings.externalFormater <- RhinoScriptSyntax.formatRhinoObject
 
-  //TODO do this via reflection checking on Rhinocommon loaded in FSEX instead ? OR only print in rhino if rs.print is called ??
+  //TODO add these too becaue printcolorfn does not print to rhino command window?
 
   (*
 
@@ -190,13 +198,13 @@ module ExtensionsPrint =
   let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// shadowing the default printfn to also print to Rhino Command line
-  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> printfn "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> Console.WriteLine  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// shadowing the default eprintf to also print to Rhino Command line
   let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// shadowing the default eprintfn to also print to Rhino Command line
-  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eprintfn "%s" ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eConsole.WriteLine ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
   
   /// prints two values separated by a space using FsEx.NiceString.toNiceString
   ///(shadows print2 from FsEx)
@@ -204,11 +212,11 @@ module ExtensionsPrint =
     
   /// prints three values separated by a space using FsEx.NiceString.toNiceString
   ///(shadows print3 from FsEx)
-  let print3 x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s" (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
+  let print3 x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s" (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z))
   
   /// prints four values separated by a space using FsEx.NiceString.toNiceString
   ///(shadows print4 from FsEx)
-  let print4 w x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s %s" (NiceString.toNiceString w) (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z) )
+  let print4 w x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s %s" (NiceString.toNiceString w) (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z))
   
   ///RhinoScriptSyntax.PrintFull (shadows printFull from FsEx)
   let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull
