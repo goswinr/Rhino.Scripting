@@ -485,7 +485,7 @@ module ExtensionsDocument =
     ///    0 = none,
     ///    1 = create shadows,
     ///    2 = use lights on layers that are off,
-    ///    4 = render curves and isocurves,
+    ///    4 = render Curves and isocurves,
     ///    8 = render dimensions and text</returns>
     static member RenderSettings() : int = //GET
         let mutable rc = 0
@@ -502,7 +502,7 @@ module ExtensionsDocument =
     ///    0 = none,
     ///    1 = create shadows,
     ///    2 = use lights on layers that are off,
-    ///    4 = render curves and isocurves,
+    ///    4 = render Curves and isocurves,
     ///    8 = render dimensions and text</param>
     ///<returns>(unit) void, nothing</returns>
     static member RenderSettings(settings:int) : unit = //SET

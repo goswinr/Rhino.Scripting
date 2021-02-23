@@ -171,8 +171,8 @@ module ExtensionsMesh =
           rc
 
     [<Extension>]
-    ///<summary>Creates a planar Mesh from a closed, planar curve</summary>
-    ///<param name="objectId">(Guid) Identifier of a closed, planar curve</param>
+    ///<summary>Creates a planar Mesh from a closed, planar Curve</summary>
+    ///<param name="objectId">(Guid) Identifier of a closed, planar Curve</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    If True, delete the input Curve defined by objectId</param>
     ///<returns>(Guid) id of the new Mesh</returns>
@@ -218,7 +218,7 @@ module ExtensionsMesh =
 
 
     [<Extension>]
-    ///<summary>Creates curves that duplicates a Mesh border</summary>
+    ///<summary>Creates Curves that duplicates a Mesh border</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Guid Rarr) list of Curve ids</returns>
     static member DuplicateMeshBorder(meshId:Guid) : Guid Rarr =
@@ -649,7 +649,7 @@ module ExtensionsMesh =
     ///<param name="mesh2">(Guid) Mesh2</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    The intersection tolerance</param>
-    ///<returns>(Polyline array) of points that define the vertices of the intersection curves</returns>
+    ///<returns>(Polyline array) of points that define the vertices of the intersection Curves</returns>
     static member MeshMeshIntersection( mesh1:Guid,
                                         mesh2:Guid,
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
@@ -887,7 +887,7 @@ module ExtensionsMesh =
     ///    the polyline. Then it "connects the points" to create a Polyline on the Mesh</summary>
     ///<param name="meshId">(Guid) Identifier of Mesh that pulls</param>
     ///<param name="curveId">(Guid) Identifier of Curve to pull</param>
-    ///<returns>(Guid) identifier new curve</returns>
+    ///<returns>(Guid) identifier new Curve</returns>
     static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)

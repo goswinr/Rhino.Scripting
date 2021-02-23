@@ -107,10 +107,10 @@ module ExtensionsPlane =
     ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple .  The list will contain one or more of the following tuple:
     ///    Element Type        Description
     ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
-    ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the curve.
-    ///      If the event type is Overlap (2), then intersection start point on the curve.
-    ///    [2]       Point3d     If the event type is Point (1), then the intersection point on the curve.
-    ///      If the event type is Overlap (2), then intersection end point on the curve.
+    ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
+    ///      If the event type is Overlap (2), then intersection start point on the Curve.
+    ///    [2]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
+    ///      If the event type is Overlap (2), then intersection end point on the Curve.
     ///    [3]       Point3d     If the event type is Point (1), then the intersection point on the Plane.
     ///      If the event type is Overlap (2), then intersection start point on the Plane.
     ///    [4]       Point3d     If the event type is Point (1), then the intersection point on the Plane.

@@ -50,8 +50,8 @@ module ExtensionsHatch =
 
 
     [<Extension>]
-    ///<summary>Creates one or more new Hatch objects a list of closed planar curves</summary>
-    ///<param name="curveIds">(Guid seq) Identifiers of the closed planar curves that defines the
+    ///<summary>Creates one or more new Hatch objects a list of closed planar Curves</summary>
+    ///<param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the
     ///    boundary of the Hatch objects</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.
     ///    If omitted, the current Hatch pattern will be used</param>

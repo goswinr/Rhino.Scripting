@@ -253,7 +253,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Compute the area of a closed curve, Hatch, Surface, Polysurface, or Mesh</summary>
+    ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area</returns>
     static member Area(objectId:Guid) : float =
@@ -409,11 +409,11 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Creates outline curves for a given text entity</summary>
+    ///<summary>Creates outline Curves for a given text entity</summary>
     ///<param name="textId">(Guid) Identifier of Text object to explode</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
-    ///    Delete the text object after the curves have been created</param>
-    ///<returns>(Guid array) of outline curves</returns>
+    ///    Delete the text object after the Curves have been created</param>
+    ///<returns>(Guid array) of outline Curves</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()

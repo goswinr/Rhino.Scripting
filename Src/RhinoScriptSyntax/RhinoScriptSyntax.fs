@@ -246,7 +246,7 @@ type RhinoScriptSyntax private () =
                 | _ -> None
 
     ///<summary>Attempt to get Curve geometry from the document with a given objectId</summary>
-    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
+    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>a Rhino.Geometry.Curve Option</returns>
     static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option =         
@@ -838,7 +838,7 @@ type RhinoScriptSyntax private () =
 
     
     ///<summary>Attempt to get Curve geometry from the document with a given objectId</summary>
-    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a curve</param>
+    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>(Rhino.Geometry.Curve) Fails on bad input</returns>
     static member CoerceCurve(objectId:Guid, [<OPT;DEF(-1)>]segmentIndex:int): Curve = 

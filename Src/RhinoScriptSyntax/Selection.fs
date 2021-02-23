@@ -80,7 +80,7 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers</summary>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///    The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
@@ -199,7 +199,7 @@ module ExtensionsSelection =
     [<Extension>]
     ///<summary>Prompts user to pick, or select, a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -250,7 +250,7 @@ module ExtensionsSelection =
     ///<summary>Prompts user to pick, or select a single object</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///    The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -314,7 +314,7 @@ module ExtensionsSelection =
     ///<summary>Prompts user to pick or select one or more objects</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
-    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
@@ -383,7 +383,7 @@ module ExtensionsSelection =
     ///<summary>Returns the same objects as in the last user interaction with the same prompt message
     /// If none found, Prompts user to pick or select one or more objects and remembers them.</summary>
     ///<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber objects</param>
-    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
@@ -428,7 +428,7 @@ module ExtensionsSelection =
     ///<summary>Returns the same object as in the last user interaction with the same prompt message
     /// If none found, Prompts user to pick one object and remembers it.</summary>
     ///<param name="message">(string) A prompt or message, should be unique, this will be the key in dictionary to remeber object</param>
-    ///<param name="filter">(int) Optional, The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -457,7 +457,7 @@ module ExtensionsSelection =
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
-    ///    The type(s) of geometry (points, curves, Surfaces, Meshes,...)
+    ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
@@ -870,7 +870,7 @@ module ExtensionsSelection =
 
     [<Extension>]
     ///<summary>Returns identifiers of all objects based on the objects' geometry type</summary>
-    ///<param name="geometryType">(int) The type(s) of geometry objects (points, curves, Surfaces,
+    ///<param name="geometryType">(int) The type(s) of geometry objects (points, Curves, Surfaces,
     ///    Meshes, etc.) that can be selected. Object types can be
     ///    added together as bit-coded flags to filter several different kinds of geometry.
     ///      Value        Description

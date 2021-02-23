@@ -120,7 +120,7 @@ module ExtrasCurve =
     ///<summary>Creates a fillet Curve between two lines, 
     ///    the fillet might be an ellipse or free form 
     ///    but it always lies on the Surface of a cylinder with the given direction and radius </summary>
-    ///<param name="makeSCurve">(bool)only relevant if curves are skew: make S-curve if true or kink if false</param>
+    ///<param name="makeSCurve">(bool)only relevant if Curves are skew: make S-curve if true or kink if false</param>
     ///<param name="radius">(float) radius of filleting zylinder</param>
     ///<param name="direction">(float) direction of filleting zylinder usually the intersection of the two  Planes to fillet, this might be the cross profuct of the two lines, but the lines might also be skew </param>
     ///<param name="lineA">(Line) First line to fillet, must not be prependicular to direction, the lines might also be skew  </param> 

@@ -296,7 +296,7 @@ module ExtensionsUserinterface =
 
 
     [<Extension>]
-    ///<summary>Prompt the user to pick one or more Surface or Polysurface edge curves</summary>
+    ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
     ///    A prompt or message</param>
     ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
@@ -304,7 +304,7 @@ module ExtensionsUserinterface =
     ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
     ///    Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the duplicated edge curves</param>
+    ///    Select the duplicated edge Curves</param>
     ///<returns>((Guid*Guid*Point3d) Rarr) an Option of a List of selection prompts (curve objectId, parent objectId, selection point)</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -425,9 +425,9 @@ module ExtensionsUserinterface =
     ///    4  Vertical - Defines a line vertical to the construction Plane.
     ///    5  Four-point - Defines a line using two points to establish direction and two points to establish length.
     ///    6  Bisector - Defines a line that bisects a specified angle.
-    ///    7  Perpendicular - Defines a line perpendicular to or from a curve
-    ///    8  Tangent - Defines a line tangent from a curve.
-    ///    9  Extension - Defines a line that extends from a curve</param>
+    ///    7  Perpendicular - Defines a line perpendicular to or from a Curve
+    ///    8  Tangent - Defines a line tangent from a Curve.
+    ///    9  Extension - Defines a line that extends from a Curve</param>
     ///<param name="point">(Point3d) Optional, Optional starting point</param>
     ///<param name="message1">(string) Optional, Message1 of optional prompts</param>
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
