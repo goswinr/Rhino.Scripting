@@ -1650,7 +1650,7 @@ module ExtensionsSurface =
     ///<param name="direction">(Vector3d) Vector identifying the direction of the ray</param>
     ///<param name="reflections">(int) Optional, Default Value: <c>10</c>
     ///    The maximum number of times the ray will be reflected</param>
-    ///<returns>(Point3d array) of reflection points.</returns>
+    ///<returns>(Point3d array) Array of reflection points.</returns>
     static member ShootRay( surfaceIds:Guid seq,
                             startPoint:Point3d,
                             direction:Vector3d,

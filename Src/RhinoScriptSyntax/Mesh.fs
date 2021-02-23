@@ -649,7 +649,7 @@ module ExtensionsMesh =
     ///<param name="mesh2">(Guid) Mesh2</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    The intersection tolerance</param>
-    ///<returns>(Polyline array) of points that define the vertices of the intersection Curves.</returns>
+    ///<returns>(Polyline array) Array of points that define the vertices of the intersection Curves.</returns>
     static member MeshMeshIntersection( mesh1:Guid,
                                         mesh2:Guid,
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
@@ -665,7 +665,7 @@ module ExtensionsMesh =
     ///    Meshes, such as are made by MeshBox, have naked Mesh edge points where
     ///    the sub-meshes are joined.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(bool array) of boolean values that represent whether or not a Mesh vertex is
+    ///<returns>(bool array) Array of boolean values that represent whether or not a Mesh vertex is
     ///    naked or not. The number of elements in the list will be equal to
     ///    the value returned by MeshVertexCount. In which case, the list will
     ///    identify the naked status for each vertex returned by MeshVertices.</returns>

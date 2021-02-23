@@ -185,7 +185,7 @@ module ExtensionsUtility =
     ///<param name="points">(Point3d seq) A list of 3D points</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
-    ///<returns>(Point3d array) of 3D points with duplicates removed.</returns>
+    ///<returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
@@ -323,7 +323,7 @@ module ExtensionsUtility =
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    Minimum distance between points. Points that fall within this tolerance
     ///    will be discarded.</param>
-    ///<returns>(Point3d array) of sorted 3D points.</returns>
+    ///<returns>(Point3d array) Array of sorted 3D points.</returns>
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         Point3d.SortAndCullPointList(points, tol)

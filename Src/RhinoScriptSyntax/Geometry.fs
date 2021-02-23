@@ -413,7 +413,7 @@ module ExtensionsGeometry =
     ///<param name="textId">(Guid) Identifier of Text object to explode</param>
     ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
     ///    Delete the text object after the Curves have been created</param>
-    ///<returns>(Guid array) of outline Curves.</returns>
+    ///<returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()

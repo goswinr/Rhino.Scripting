@@ -42,7 +42,7 @@ module ExtensionsUserdata =
     [<Extension>]
     ///<summary>Returns a user data item from the current document.</summary>
     ///<param name="section">(string) Optional, Section name. If omitted, all section names are returned</param>
-    ///<returns>(string array) of all section names if section name is omitted, 
+    ///<returns>(string array) Array of all section names if section name is omitted, 
     /// else all entry names in this  section.</returns>
     static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> =
         if notNull section then
