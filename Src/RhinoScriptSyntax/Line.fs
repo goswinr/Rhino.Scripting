@@ -41,7 +41,7 @@ module ExtensionsLine =
     [<Extension>]
     ///<summary>Calculates the intersection of a line and a cylinder</summary>
     ///<param name="line">(Geometry.Line) The line to intersect</param>
-    ///<param name="cylinderPlane">(Plane) Base plane of the cylinder</param>
+    ///<param name="cylinderPlane">(Plane) Base Plane of the cylinder</param>
     ///<param name="cylinderHeight">(float) Height of the cylinder</param>
     ///<param name="cylinderRadius">(float) Radius of the cylinder</param>
     ///<returns>(Point3d array) list of intersection points (0, 1, or 2 points)</returns>
@@ -138,8 +138,8 @@ module ExtensionsLine =
 
 
     [<Extension>]
-    ///<summary>Returns a plane that contains the line. The origin of the plane is at the start of
-    ///    the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned</summary>
+    ///<summary>Returns a Plane that contains the line. The origin of the Plane is at the start of
+    ///    the line. If possible, a Plane parallel to the world XY, YZ, or ZX Plane is returned</summary>
     ///<param name="line">(Geometry.Line) a Line</param>
     ///<returns>(Plane) the plane</returns>
     static member LinePlane(line:Line) : Plane =
@@ -151,7 +151,7 @@ module ExtensionsLine =
     [<Extension>]
     ///<summary>Calculates the intersection of a line and a plane</summary>
     ///<param name="line">(Line) The line to intersect</param>
-    ///<param name="plane">(Plane) The plane to intersect</param>
+    ///<param name="plane">(Plane) The Plane to intersect</param>
     ///<returns>(Point3d) The 3D point of intersection is successful</returns>
     static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d =
         let rc, t = Intersect.Intersection.LinePlane(line, plane)

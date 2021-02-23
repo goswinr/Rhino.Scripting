@@ -37,7 +37,7 @@ module ExtensionsUtility =
     ///<param name="point1">(Point3d) Point1 of input points</param>
     ///<param name="point2">(Point3d) Point2 of input points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldX</c>
-    ///    If a plane is provided, angle calculation is with respect to this plane</param>
+    ///    If a Plane is provided, angle calculation is with respect to this plane</param>
     ///<returns>(float * float * float * float * float) containing the following elements:
     ///    element 0 = the X, Y angle in degrees
     ///    element 1 = the elevation
@@ -284,7 +284,7 @@ module ExtensionsUtility =
     ///<param name="angleDegrees">(float) Angle in degrees</param>
     ///<param name="distance">(float) Distance from point</param>
     ///<param name="plane">(Plane) Optional, Plane to base the transformation. If omitted, the world
-    ///    x-y plane is used</param>
+    ///    x-y Plane is used</param>
     ///<returns>(Point3d) resulting point is successful</returns>
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)

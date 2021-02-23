@@ -35,7 +35,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a cone shaped Polysurface to the document</summary>
-    ///<param name="basis">(Plane) 3D origin point of the cone or a plane with an apex at the origin
+    ///<param name="basis">(Plane) 3D origin point of the cone or a Plane with an apex at the origin
     ///    and normal along the plane's z-axis</param>
     ///<param name="height">(float)  height of cone </param>
     ///<param name="radius">(float) The radius at the basis of the cone</param>
@@ -57,7 +57,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Adds a planar Surface through objects at a designated location. For more
     ///    information, see the Rhino help file for the CutPlane command</summary>
-    ///<param name="objectIds">(Guid seq) Identifiers of objects that the cutting plane will
+    ///<param name="objectIds">(Guid seq) Identifiers of objects that the cutting Plane will
     ///    pass through</param>
     ///<param name="startPoint">(Point3d) Start point of line that defines the cutting plane</param>
     ///<param name="endPoint">(Point3d) End point of line that defines the cutting plane</param>
@@ -91,7 +91,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a cylinder-shaped Polysurface to the document</summary>
-    ///<param name="basis">(Plane) The 3D basis point of the cylinder or the basis plane of the cylinder</param>
+    ///<param name="basis">(Plane) The 3D basis point of the cylinder or the basis Plane of the cylinder</param>
     ///<param name="height">(float) If basis is a point, then height is a 3D height point of the
     ///    cylinder. The height point defines the height and direction of the
     ///    cylinder. If basis is a plane, then height is the numeric height value
@@ -361,7 +361,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Create a plane Surface and add it to the document</summary>
+    ///<summary>Create a Plane Surface and add it to the document</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uDir">(float) The magnitude in the U direction</param>
     ///<param name="vDir">(float) The magnitude in the V direction</param>
@@ -484,7 +484,7 @@ module ExtensionsSurface =
     ///    defined cutting planes through a Surface or Polysurface. For more
     ///    information, see Rhino help for details on the Contour command</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
-    ///<param name="plane">(Plane) The plane that defines the cutting plane</param>    
+    ///<param name="plane">(Plane) The Plane that defines the cutting plane</param>    
     ///<returns>(Guid Rarr) ids of new contour curves </returns>
     static member AddSrfContourCrvs( objectId:Guid,
                                      plane:Plane) : Guid Rarr =
@@ -666,7 +666,7 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Adds a torus shaped revolved Surface to the document</summary>
-    ///<param name="basis">(Plane)  the basis plane of the torus</param>
+    ///<param name="basis">(Plane)  the basis Plane of the torus</param>
     ///<param name="majorRadius">(float) Major radius of  the torus</param>
     ///<param name="minorRadius">(float) Minor radius of  torus</param>
     ///<returns>(Guid) The identifier of the new object</returns>
@@ -1179,8 +1179,8 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Calculates intersections of two spheres</summary>
-    ///<param name="spherePlane0">(Plane) An equatorial plane of the first sphere. The origin of the
-    ///    plane will be the center point of the sphere</param>
+    ///<param name="spherePlane0">(Plane) An equatorial Plane of the first sphere. The origin of the
+    ///    Plane will be the center point of the sphere</param>
     ///<param name="sphereRadius0">(float) Radius of the first sphere</param>
     ///<param name="spherePlane1">(Plane) Plane for second sphere</param>
     ///<param name="sphereRadius1">(float) Radius for second sphere</param>
@@ -1232,8 +1232,8 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Verifies an object is a plane Surface. Plane Surfaces can be created by
-    ///    the Plane command. Note, a plane Surface is not a planar NURBS Surface</summary>
+    ///<summary>Verifies an object is a Plane Surface. Plane Surfaces can be created by
+    ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False</returns>
     static member IsPlaneSurface(objectId:Guid) : bool =
@@ -1454,7 +1454,7 @@ module ExtensionsSurface =
     [<Extension>]
     ///<summary>Gets the sphere definition from a Surface, if possible</summary>
     ///<param name="surfaceId">(Guid) The identifier of the Surface object</param>
-    ///<returns>(Plane * float) The equatorial plane of the sphere, and its radius</returns>
+    ///<returns>(Plane * float) The equatorial Plane of the sphere, and its radius</returns>
     static member SurfaceSphere(surfaceId:Guid) : Plane * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = Doc.ModelAbsoluteTolerance
@@ -1870,7 +1870,7 @@ module ExtensionsSurface =
     ///<summary>Returns the definition of a Surface cone</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the cone
-    ///    [0]   the plane of the cone. The apex of the cone is at the
+    ///    [0]   the Plane of the cone. The apex of the cone is at the
     ///      plane's origin and the axis of the cone is the plane's z-axis
     ///    [1]   the height of the cone
     ///    [2]   the radius of the cone</returns>
@@ -2042,7 +2042,7 @@ module ExtensionsSurface =
 
 
     [<Extension>]
-    ///<summary>Returns a plane based on the normal, u, and v directions at a Surface
+    ///<summary>Returns a Plane based on the normal, u, and v directions at a Surface
     ///    U, V parameter</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="uvParameter">(float * float) U, v parameter to evaluate</param>
@@ -2255,7 +2255,7 @@ module ExtensionsSurface =
     ///<summary>Returns the definition of a Surface torus</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) containing the definition of the torus
-    ///    [0]   the base plane of the torus
+    ///    [0]   the base Plane of the torus
     ///    [1]   the major radius of the torus
     ///    [2]   the minor radius of the torus</returns>
     static member SurfaceTorus(surfaceId:Guid) : Plane * float * float =
@@ -2514,7 +2514,7 @@ module ExtensionsSurface =
     ///<summary>Flattens a developable Surface or Polysurface</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the resulting Surfaces ar not joined</param>
+    ///    If True, the resulting Surfaces are not joined</param>
     ///<param name="followingGeometry">(Guid seq) Optional, List of curves, dots, and points which
     ///    should be unrolled with the Surface</param>
     ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>

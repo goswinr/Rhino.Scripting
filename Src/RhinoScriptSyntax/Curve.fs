@@ -21,8 +21,8 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Adds an arc Curve to the document</summary>
-    ///<param name="plane">(Plane) Plane on which the arc will lie. The origin of the plane will be
-    ///    the center point of the arc. x-axis of the plane defines the 0 angle
+    ///<param name="plane">(Plane) Plane on which the arc will lie. The origin of the Plane will be
+    ///    the center point of the arc. x-axis of the Plane defines the 0 angle
     ///    direction</param>
     ///<param name="radius">(float) Radius of the arc</param>
     ///<param name="angleDegrees">(float) Interval of arc in degrees</param>
@@ -132,8 +132,8 @@ module ExtensionsCurve =
 
     [<Extension>]
     ///<summary>Adds an elliptical Curve to the document</summary>
-    ///<param name="plane">(Plane) The plane on which the ellipse will lie. The origin of
-    ///    the plane will be the center of the ellipse</param>
+    ///<param name="plane">(Plane) The Plane on which the ellipse will lie. The origin of
+    ///    the Plane will be the center of the ellipse</param>
     ///<param name="radiusX">(float) radius in the X axis direction</param>
     ///<param name="radiusY">(float) radius in the Y axis direction</param>
     ///<returns>(Guid) objectId of the new Curve object</returns>
@@ -504,10 +504,10 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Returns the center plane of a circle Curve object</summary>
+    ///<summary>Returns the center Plane of a circle Curve object</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Plane) The 3D plane at the center point of the circle</returns>
+    ///<returns>(Plane) The 3D Plane at the center point of the circle</returns>
     static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
@@ -569,7 +569,7 @@ module ExtensionsCurve =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="direction">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
     ///    3d vector that identifies up, or Z axs, direction of
-    ///    the plane to test against</param>
+    ///    the Plane to test against</param>
     ///<returns>(int) 1 if the curve's orientation is clockwise
     ///    -1 if the curve's orientation is counter-clockwise
     ///     0 if unable to compute the curve's orientation</returns>
@@ -1231,12 +1231,12 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Returns the plane at a parameter of a curve. The plane is based on the
+    ///<summary>Returns the Plane at a parameter of a curve. The Plane is based on the
     ///    tangent and curvature vectors at a parameter</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Plane) The plane at the specified parameter</returns>
+    ///<returns>(Plane) The Plane at the specified parameter</returns>
     static member CurveFrame(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
@@ -1324,7 +1324,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Returns the normal direction of the plane in which a planar Curve object lies</summary>
+    ///<summary>Returns the normal direction of the Plane in which a planar Curve object lies</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment if curveId identifies a polycurve</param>
     ///<returns>(Vector3d) The 3D normal vector</returns>
@@ -1360,7 +1360,7 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Returns the perpendicular plane at a parameter of a curve. The result
+    ///<summary>Returns the perpendicular Plane at a parameter of a curve. The result
     ///    is relatively parallel (zero-twisting) plane</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
@@ -1372,11 +1372,11 @@ module ExtensionsCurve =
 
 
     [<Extension>]
-    ///<summary>Returns the plane in which a planar Curve lies. Note, this function works
+    ///<summary>Returns the Plane in which a planar Curve lies. Note, this function works
     ///    only on planar curves</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
-    ///<returns>(Plane) The plane in which the Curve lies</returns>
+    ///<returns>(Plane) The Plane in which the Curve lies</returns>
     static member CurvePlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let tol = Doc.ModelAbsoluteTolerance
@@ -2336,8 +2336,8 @@ module ExtensionsCurve =
     ///<param name="direction">(Point3d) Point describing direction of the offset</param>
     ///<param name="distance">(float) Distance of the offset</param>
     ///<param name="normal">(Vector3d) Optional, Default Value: <c>Vector3d.ZAxis</c>
-    ///    Normal of the plane in which the offset will occur.
-    ///    If omitted, the WorldXY  plane will be used</param>
+    ///    Normal of the Plane in which the offset will occur.
+    ///    If omitted, the WorldXY  Plane will be used</param>
     ///<param name="style">(int) Optional, Default Value: <c>1</c>
     ///    The corner style. If omitted, the style is sharp.
     ///    0 = None
@@ -2401,7 +2401,7 @@ module ExtensionsCurve =
     ///<param name="curveA">(Guid) identifier of the first  planar, closed curve</param>
     ///<param name="curveB">(Guid) identifier of the second planar, closed curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///    Test plane. If omitted, the Plane.WorldXY plane is used</param>
+    ///    Test plane. If omitted, the Plane.WorldXY Plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(int) a number identifying the relationship
     ///    0 = the regions bounded by the curves are disjoint
@@ -2422,7 +2422,7 @@ module ExtensionsCurve =
     ///<param name="curveA">(Guid) identifier of the first  planar curve</param>
     ///<param name="curveB">(Guid) identifier of the second planar curve</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
-    ///    Test plane. If omitted, the Plane.WorldXY plane is used</param>
+    ///    Test plane. If omitted, the Plane.WorldXY Plane is used</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(bool) True if the curves intersect; otherwise False</returns>
     static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =

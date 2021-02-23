@@ -19,7 +19,7 @@ module ExtensionsGeometry =
   type RhinoScriptSyntax with
 
     [<Extension>]
-    ///<summary>Create a clipping plane for visibly clipping away geometry in a specific
+    ///<summary>Create a clipping Plane for visibly clipping away geometry in a specific
     ///    view. Note, clipping planes are infinite</summary>
     ///<param name="plane">(Plane) The plane</param>
     ///<param name="uMagnitude">(float) U magnitude of the plane</param>
@@ -47,18 +47,18 @@ module ExtensionsGeometry =
 
     [<Extension>]
     ///<summary>Creates a picture frame and adds it to the document</summary>
-    ///<param name="plane">(Plane) The plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction</param>
+    ///<param name="plane">(Plane) The Plane in which the PictureFrame will be created.  The bottom-left corner of picture will be at plane's origin. The width will be in the plane's X axis direction, and the height will be in the plane's Y axis direction</param>
     ///<param name="filename">(string) The path to a bitmap or image file</param>
     ///<param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skiped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="height">(float) Optional, If both dblWidth and dblHeight are  0.0 or skied, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="selfIllumination">(bool) Optional, Default Value: <c>true</c>
-    ///    If True, then the image mapped to the picture frame plane always displays at full intensity and is not affected by light or shadow</param>
+    ///    If True, then the image mapped to the picture frame Plane always displays at full intensity and is not affected by light or shadow</param>
     ///<param name="embed">(bool) Optional, Default Value: <c>false</c>
     ///    If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
     ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
     ///    If False, the picture frame is created without any transparency texture.  If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
     ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the function will make a PictureFrame object from a Mesh rather than a plane Surface</param>
+    ///    If True, the function will make a PictureFrame object from a Mesh rather than a Plane Surface</param>
     ///<returns>(Guid) object identifier</returns>
     static member AddPictureFrame(  plane:Plane,
                                     filename:string,
@@ -132,8 +132,8 @@ module ExtensionsGeometry =
     [<Extension>]
     ///<summary>Adds a text string to the document</summary>
     ///<param name="text">(string) The text to display</param>
-    ///<param name="plane">(Plane) the plane on which the text will lie.
-    ///    The origin of the plane will be the origin point of the text</param>
+    ///<param name="plane">(Plane) the Plane on which the text will lie.
+    ///    The origin of the Plane will be the origin point of the text</param>
     ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
     ///    The text height</param>
     ///<param name="font">(string) Optional, The text font</param>
@@ -328,12 +328,12 @@ module ExtensionsGeometry =
         g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
     [<Extension>]
-    ///<summary>Returns a custom plane axis-aligned bounding box of several objects</summary>
+    ///<summary>Returns a custom Plane axis-aligned bounding box of several objects</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
-    ///<param name="plane">(Plane) plane to which the bounding box should be aligned</param>
+    ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///    Returns the box as world coordinates or custum plane coordinates.</param>
-    ///<returns>(Geometry.Box) The Box ,oriented to the plane or in plane coordinates. 
+    ///    Returns the box as world coordinates or custum Plane coordinates.</param>
+    ///<returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates. 
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
@@ -354,12 +354,12 @@ module ExtensionsGeometry =
             Box(bbox) // return in Plane coordinates not worldxy
  
     [<Extension>]
-    ///<summary>Returns a custom plane axis-aligned bounding box of one object</summary>
+    ///<summary>Returns a custom Plane axis-aligned bounding box of one object</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
-    ///<param name="plane">(Plane) plane to which the bounding box should be aligned</param>
+    ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///    Returns the box as world coordinates or custum plane coordinates.</param>
-    ///<returns>(Geometry.Box) The Box ,oriented to the plane or in plane coordinates. 
+    ///    Returns the box as world coordinates or custum Plane coordinates.</param>
+    ///<returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates. 
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box</returns>
@@ -425,7 +425,7 @@ module ExtensionsGeometry =
 
 
     [<Extension>]
-    ///<summary>Verifies that an object is a clipping plane object</summary>
+    ///<summary>Verifies that an object is a clipping Plane object</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping plane</returns>
     static member IsClippingPlane(objectId:Guid) : bool =
@@ -803,14 +803,14 @@ module ExtensionsGeometry =
         Doc.Views.Redraw()
 
     [<Extension>]
-    ///<summary>Returns the plane used by a text object</summary>
+    ///<summary>Returns the Plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Plane) The current plane</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
 
     [<Extension>]
-    ///<summary>Modifies the plane used by a text object</summary>
+    ///<summary>Modifies the Plane used by a text object</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="plane">(Plane) The new text object plane</param>
     ///<returns>(unit) void, nothing</returns>

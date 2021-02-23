@@ -98,8 +98,8 @@ module ExtensionsTransformation =
 
 
     [<Extension>]
-    ///<summary>Transform point from construction plane coordinates to world coordinates</summary>
-    ///<param name="point">(Point3d) A 3D point in construction plane coordinates</param>
+    ///<summary>Transform point from construction Plane coordinates to world coordinates</summary>
+    ///<param name="point">(Point3d) A 3D point in construction Plane coordinates</param>
     ///<param name="plane">(Plane) The construction plane</param>
     ///<returns>(Point3d) A 3D point in world coordinates</returns>
     static member XformCPlaneToWorld(point:Point3d, plane:Plane) : Point3d =
@@ -170,7 +170,7 @@ module ExtensionsTransformation =
 
     [<Extension>]
     ///<summary>Returns a transformation matrix that projects to a plane</summary>
-    ///<param name="plane">(Plane) The plane to project to</param>
+    ///<param name="plane">(Plane) The Plane to project to</param>
     ///<returns>(Transform) The 4x4 transformation matrix</returns>
     static member XformPlanarProjection(plane:Plane) : Transform =
         //plane = RhinoScriptSyntax.Coerceplane(plane)
@@ -330,10 +330,10 @@ module ExtensionsTransformation =
 
 
     [<Extension>]
-    ///<summary>Transforms a point from world coordinates to construction plane coordinates</summary>
+    ///<summary>Transforms a point from world coordinates to construction Plane coordinates</summary>
     ///<param name="point">(Point3d) A 3D point in world coordinates</param>
     ///<param name="plane">(Plane) The construction plane</param>
-    ///<returns>(Point3d) 3D point in construction plane coordinates</returns>
+    ///<returns>(Point3d) 3D point in construction Plane coordinates</returns>
     static member XformWorldToCPlane(point:Point3d, plane:Plane) : Point3d =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         //plane = RhinoScriptSyntax.Coerceplane(plane)

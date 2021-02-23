@@ -23,7 +23,7 @@ module AutoOpenVector =
         [<Extension>] 
         [<Obsolete>]
         /// Use Vec.angle .. instead
-        ///projects to plane an retuns angle in degrees in plane between -180 and + 180               
+        ///projects to Plane an retuns angle in degrees in Plane between -180 and + 180               
         static member AngleInPlane180( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -33,7 +33,7 @@ module AutoOpenVector =
         [<Extension>]
         [<Obsolete>]
         /// Use Vec.angle .. instead
-        ///projects to plane an retuns angle in degrees in plane between 0 and 360               
+        ///projects to Plane an retuns angle in degrees in Plane between 0 and 360               
         static member AngleInPlane360( plane:Plane, vector:Vector3d):float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -58,7 +58,7 @@ module AutoOpenVector =
             
     
         [<Extension>]
-        /// Draws the axes of a plane and adds TextDots to lable them.
+        /// Draws the axes of a Plane and adds TextDots to lable them.
         static member DrawPlane(    pl:Plane,
                                     [<OPT;DEF(1000.0)>]scale:float,
                                     [<OPT;DEF("")>]suffixInDot:string,
@@ -104,7 +104,7 @@ module AutoOpenVector =
         /// Finds the mean normal of many points.
         /// It finds the center point and then takes corossproducts iterating all points in pairs of two.
         /// The first two points define the orientation of the normal.
-        /// Considers current order of points too, counterclockwise in xy plane is z        
+        /// Considers current order of points too, counterclockwise in xy Plane is z        
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =            
             if Seq.hasMaximumItems 2 pts then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString

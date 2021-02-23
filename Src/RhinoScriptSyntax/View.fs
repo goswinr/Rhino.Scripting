@@ -65,7 +65,7 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Adds new named construction plane to the document</summary>
+    ///<summary>Adds new named construction Plane to the document</summary>
     ///<param name="cplaneName">(string) The name of the new named construction plane</param>
     ///<param name="plane">(Plane) The construction plane</param>
     ///<returns>(unit) void, nothing</returns>
@@ -130,8 +130,8 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Removes a named construction plane from the document</summary>
-    ///<param name="name">(string) Name of the construction plane to remove</param>
+    ///<summary>Removes a named construction Plane from the document</summary>
+    ///<param name="name">(string) Name of the construction Plane to remove</param>
     ///<returns>(bool) True or False indicating success or failure</returns>
     static member DeleteNamedCPlane(name:string) : bool =
         Doc.NamedConstructionPlanes.Delete(name)
@@ -285,7 +285,7 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Returns the plane geometry of the specified named construction plane</summary>
+    ///<summary>Returns the Plane geometry of the specified named construction plane</summary>
     ///<param name="name">(string) The name of the construction plane</param>
     ///<returns>(Plane) a plane</returns>
     static member NamedCPlane(name:string) : Plane =
@@ -324,8 +324,8 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Restores a named construction plane to the specified view</summary>
-    ///<param name="cplaneName">(string) Name of the construction plane to restore</param>
+    ///<summary>Restores a named construction Plane to the specified view</summary>
+    ///<param name="cplaneName">(string) Name of the construction Plane to restore</param>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(string) name of the restored named construction plane</returns>
@@ -428,7 +428,7 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Get status of a view's construction plane grid</summary>
+    ///<summary>Get status of a view's construction Plane grid</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(bool) The grid display state</returns>
     static member ShowGrid(view:string) : bool = //GET
@@ -437,7 +437,7 @@ module ExtensionsView =
         viewport.ConstructionGridVisible
 
     [<Extension>]
-    ///<summary>Shows or hides a view's construction plane grid</summary>
+    ///<summary>Shows or hides a view's construction Plane grid</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="show">(bool) The grid state to set</param>
     ///<returns>(unit) void, nothing</returns>
@@ -452,7 +452,7 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Get status of a view's construction plane grid axes</summary>
+    ///<summary>Get status of a view's construction Plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(bool) The grid axes display state</returns>
     static member ShowGridAxes(view:string) : bool = //GET
@@ -462,7 +462,7 @@ module ExtensionsView =
         rc
 
     [<Extension>]
-    ///<summary>Shows or hides a view's construction plane grid axes</summary>
+    ///<summary>Shows or hides a view's construction Plane grid axes</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="show">(bool) The state to set</param>
     ///<returns>(unit) void, nothing</returns>
@@ -646,7 +646,7 @@ module ExtensionsView =
     [<Extension>]
     ///<summary>Set a view's construction plane</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<param name="plane">(Plane) The new construction plane if setting</param>
+    ///<param name="plane">(Plane) The new construction Plane if setting</param>
     ///<returns>(unit) void, nothing</returns>
     static member ViewCPlane(view:string, plane:Plane) : unit = //SET
         let view = RhinoScriptSyntax.CoerceView(view)
@@ -727,7 +727,7 @@ module ExtensionsView =
 
 
     [<Extension>]
-    ///<summary>Return 3d corners of a view's near clipping plane rectangle. Useful
+    ///<summary>Return 3d corners of a view's near clipping Plane rectangle. Useful
     ///    in determining the "real world" size of a parallel-projected view</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order)</returns>

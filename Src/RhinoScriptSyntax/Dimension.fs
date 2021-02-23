@@ -65,7 +65,7 @@ module ExtensionsDimension =
 
     [<Extension>]
     ///<summary>Adds a leader to the document. Leader objects are planar.
-    ///    The 3D points passed will define the plane if no Plane given</summary>
+    ///    The 3D points passed will define the Plane if no Plane given</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
@@ -102,7 +102,7 @@ module ExtensionsDimension =
     ///<param name="startPoint">(Point3d) The origin, or first point of the dimension</param>
     ///<param name="endPoint">(Point3d) The offset, or second point of the dimension</param>
     ///<param name="pointOnDimensionLine">(Point3d) A point that lies on the dimension line</param>
-    ///<param name="plane">(Plane) Optional, The plane on which the dimension will lie. The default is World XY Plane</param>
+    ///<param name="plane">(Plane) Optional, The Plane on which the dimension will lie. The default is World XY Plane</param>
     ///<returns>(Guid) identifier of the new object</returns>
     static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,

@@ -485,7 +485,7 @@ module ExtensionsPointvector =
 
 
     [<Extension>]
-    ///<summary>Returns either a world axis-aligned or a construction plane axis-aligned
+    ///<summary>Returns either a world axis-aligned or a construction Plane axis-aligned
     ///    bounding box of an array of 3-D point locations</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>

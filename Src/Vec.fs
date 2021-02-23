@@ -204,7 +204,7 @@ module Vec =
     /// Unitizes the input vectors   
     let inline angle360Projected (pl:Geometry.Plane) (a:Vector3d) (b:Vector3d)  =  angleTwoPiProjected pl a b|> toDegrees
 
-    /// Returns positive angle of two Vector projected in XY plane in Radians
+    /// Returns positive angle of two Vector projected in XY Plane in Radians
     /// Considering positve rotation round the World ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// input vector does not need to be unitized
@@ -217,14 +217,14 @@ module Vec =
         if (cross va vb).Z >= 0.0 then ang
         else                           Math.PI * 2. - ang
 
-    /// Returns positive angle of two Vector projected in XY plane in Degrees
+    /// Returns positive angle of two Vector projected in XY Plane in Degrees
     /// Considering positve rotation round the World ZAxis 
     /// Range:  0 to 360 degrees
     /// input vector does not need to be unitized
     let inline angle360ProjectedInXYPlane (a:Vector3d) (b:Vector3d)   = angleTwoPiProjectedInXYPlane a b |> toDegrees
 
 
-    /// Returns positive angle of Vector to XAxis  projected in XY plane in Radians
+    /// Returns positive angle of Vector to XAxis  projected in XY Plane in Radians
     /// Considering positve rotation round the World ZAxis 
     /// Range: 0.0 to 2 PI ( = 0 to 360 degrees)
     /// input vector does not need to be unitized
@@ -235,7 +235,7 @@ module Vec =
         if (cross Vector3d.XAxis v).Z >= 0.0 then  ang
         else                                       Math.PI * 2. - ang
 
-    /// Returns positive angle of Vector to XAxis projected in XY plane in Degrees
+    /// Returns positive angle of Vector to XAxis projected in XY Plane in Degrees
     /// Considering positve rotation round the World ZAxis 
     /// Range: 0 to 360 degrees    
     /// input vector does not need to be unitized
@@ -366,8 +366,8 @@ module Vec =
             Vector3d(x, y, 0.0)
         
 
-    /// Returns a vector that is perpendicular to the given vector an in the same vertical plane .
-    /// Projected into the XY plane input and output vectors are parallell and of same orientation.
+    /// Returns a vector that is perpendicular to the given vector an in the same vertical Plane .
+    /// Projected into the XY Plane input and output vectors are parallell and of same orientation.
     /// Not of same length, not unitized
     /// Fails on vertical input vector where resulting vector would be of almost zero length (RhinoMath.SqrtEpsilon)
     let inline perpendicularVecInVerticalPlane (v:Vector3d) =         
