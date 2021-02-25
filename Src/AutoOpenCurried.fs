@@ -99,8 +99,6 @@ module AutoOpenCurried =
     static member getColor (objectId:Guid) : Drawing.Color = 
         RhinoScriptSyntax.ObjectColor(objectId) 
 
-
-
     [<Extension>]
     ///<summary>Sets a user text stored on an object.</summary>
     ///<param name="key">(string) The key name to set</param>
@@ -118,8 +116,24 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing.</returns>
     static member setUserTexts( key:string) ( value :string) (objectIds:seq<Guid>) : unit = 
         RhinoScriptSyntax.SetUserText(objectIds, key, value)
-
-        
+    
+    [<Extension>]
+    ///<summary>Append a string to a possibly already existing usertext value.</summary>
+    ///<param name="key">(string) The key name to set</param>
+    ///<param name="value">(string) The string value to append. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
+    ///<param name="objectId">(Guid) The identifier of the objects</param>
+    ///<returns>(unit) void, nothing.</returns>
+    static member appendtUserText(key:string) (value :string) (objectId:Guid) : unit = 
+        if String.IsNullOrWhiteSpace key then RhinoScriptingException.Raise "RhinoScriptSyntax.appendtUserText key is String.IsNullOrWhiteSpace for value  %s on %s" value (rhType objectId)
+        if isNull value then RhinoScriptingException.Raise "RhinoScriptSyntax.appendtUserText value is null  for key %s on %s" key (rhType objectId)        
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let existing = obj.Attributes.GetUserString(key)
+        if isNull existing then // only if a value already exist  appending a white space  or empty string is OK too
+            if String.IsNullOrWhiteSpace value  then RhinoScriptingException.Raise "RhinoScriptSyntax.appendtUserText failed on %s for key '%s' but value IsNullOrWhiteSpace" (rhType objectId) key
+            if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.appendtUserText failed on %s for key '%s' and value '%s'" (rhType objectId) key value
+        else 
+            if not <| obj.Attributes.SetUserString(key,  existing + value ) then RhinoScriptingException.Raise "RhinoScriptSyntax.appendtUserText failed on %s for key '%s' and value '%s'" (rhType objectId) key value
+       
     [<Extension>]
     ///<summary>Returns user text stored on an object, fails if non existing.</summary>
     ///<param name="key">(string) The key name</param>
@@ -167,12 +181,12 @@ module AutoOpenCurried =
         for  i = 0 to usg.Count-1 do 
             let key = usg.GetKey(i)
             if not <|de.Geometry.SetUserString(key,sc.Geometry.GetUserString(key)) then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllUserText: Geometry failed to set key '%s' on %A from %A" key  targetId sourceId
+                RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllUserText: Geometry failed to set key '%s' from %s on %s" key (rhType sourceId) (rhType targetId)
         let usa = sc.Attributes.GetUserStrings()
         for  i = 0 to usa.Count-1 do 
             let key = usa.GetKey(i)
             if not <|de.Attributes.SetUserString(key,sc.Attributes.GetUserString(key))then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllUserText: Attributes failed to set key '%s' on %A from %A" key targetId sourceId
+                RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllUserText: Attributes failed to set key '%s' from %s on %s" key (rhType sourceId) (rhType targetId)
         
     ///<summary>Copies the value for a given user text key from a scource object to a target object.</summary>
     ///<param name="sourceId">(Guid) The object to take all keys from </param>
@@ -183,7 +197,7 @@ module AutoOpenCurried =
     static member matchUserText (sourceId:Guid) ( key:string) (targetId:Guid) : unit= 
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
         let v = RhinoScriptSyntax.GetUserText(sourceId,key)
-        if not <| de.Attributes.SetUserString(key,v) then RhinoScriptingException.Raise "RhinoScriptSyntax.matchUserText: failed to set key '%s' to '%s' on %A" key v targetId
+        if not <| de.Attributes.SetUserString(key,v) then RhinoScriptingException.Raise "RhinoScriptSyntax.matchUserText: failed to set key '%s' to '%s' on %s" key v (rhType targetId) 
         
     [<Extension>]
     ///<summary>Copies the object name from a scource object to a target object.</summary>
@@ -194,9 +208,9 @@ module AutoOpenCurried =
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
         let n = sc.Attributes.Name 
-        if isNull n then RhinoScriptingException.Raise "RhinoScriptSyntax.matchName: scource object '%A' has no name. Targets name: '%A'"  sourceId de.Attributes.Name
+        if isNull n then RhinoScriptingException.Raise "RhinoScriptSyntax.matchName: scource object %s has no name. Targets name: '%s'" (rhType sourceId) de.Attributes.Name
         de.Attributes.Name <- n
-        if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchName failed for '%A' and '%A'"  sourceId targetId
+        if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchName failed from %s on %s" (rhType sourceId) (rhType targetId)
 
     [<Extension>]
     ///<summary>Puts target object on the same Layer as a scource object .</summary>
@@ -207,7 +221,7 @@ module AutoOpenCurried =
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
         de.Attributes.LayerIndex <- sc.Attributes.LayerIndex 
-        if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchLayer failed for '%A' and '%A'"  sourceId targetId
+        if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchLayer failed from %s on %s" (rhType sourceId) (rhType targetId)
 
     
     [<Extension>]
@@ -220,12 +234,12 @@ module AutoOpenCurried =
         let sc = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
         let de = RhinoScriptSyntax.CoerceRhinoObject(targetId)
         de.Attributes <- sc.Attributes.Duplicate()
-        if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllProperties failed for '%A' and '%A'"  sourceId targetId
+        if not <| de.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllProperties failed from %s on %s" (rhType sourceId) (rhType targetId)
         let usg = sc.Geometry.GetUserStrings()
         for  i = 0 to usg.Count-1 do 
             let key = usg.GetKey(i)
             if not <|de.Geometry.SetUserString(key,sc.Geometry.GetUserString(key)) then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllProperties: Geometry failed to set key '%s' on %A from %A" key  targetId sourceId
+                RhinoScriptingException.Raise "RhinoScriptSyntax.matchAllProperties: Geometry failed to set key '%s' from %s on %s" key (rhType sourceId) (rhType targetId)
 
     [<Extension>]
     ///<summary>Draws any Geometry object to a given or current layer.</summary>

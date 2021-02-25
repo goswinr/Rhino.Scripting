@@ -1039,23 +1039,23 @@ module ExtensionsSurface =
 
     [<Extension>]
     ///<summary>Create Surface by extruding along a path Curve.</summary>
-    ///<param name="surface">(Guid) Identifier of the Surface to extrude</param>
-    ///<param name="curve">(Guid) Identifier of the path Curve</param>
+    ///<param name="surfaceId">(Guid) Identifier of the Surface to extrude</param>
+    ///<param name="curveId">(Guid) Identifier of the path Curve</param>
     ///<param name="cap">(bool) Optional, Default Value: <c>true</c>
     ///    Extrusion is capped at both ends</param>
     ///<returns>(Guid) identifier of new Surface .</returns>
-    static member ExtrudeSurface( surface:Guid,
-                                  curve:Guid,
+    static member ExtrudeSurface( surfaceId:Guid,
+                                  curveId:Guid,
                                   [<OPT;DEF(true)>]cap:bool) : Guid =
-        let brep = RhinoScriptSyntax.CoerceBrep(surface)
-        let curve = RhinoScriptSyntax.CoerceCurve(curve)
+        let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newbrep = brep.Faces.[0].CreateExtrusion(curve, cap)
         if notNull newbrep then
             let rc = Doc.Objects.AddBrep(newbrep)
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeSurface faild on %A and %A" surface curve
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeSurface faild on Surface: %s and Curve %s" (rhType surfaceId)  (rhType curveId)
 
 
     [<Extension>]
