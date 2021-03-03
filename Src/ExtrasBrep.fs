@@ -15,12 +15,12 @@ module ExtrasBrep =
   type RhinoScriptSyntax with // TODO chnage to Brep type extensions ??!!
    
     [<Extension>]
-    ///<summary>Creates a Brep in the Shape of a Sloted Hole.</summary>
+    ///<summary>Creates a Brep in the Shape of a Sloted Hole. Closed with caps. </summary>
     ///<param name="plane">(Plane)Origin = center of hole</param>
     ///<param name="length">(float) total length of sloted hole</param>
     ///<param name="width">(float) width = radius of sloted hole</param>
     ///<param name="height">(float) height of sloted hole volume</param> 
-    ///<returns>(Brep) Brep Geometry.</returns>
+    ///<returns>(Brep) Closed Brep Geometry.</returns>
     static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =
         if length<width then RhinoScriptingException.Raise "RhinoScriptSyntax.SlotedHole: length= %g must be more than width= %g" length width
         let root05  = sqrt 0.5
@@ -75,7 +75,7 @@ module ExtrasBrep =
 
 
     [<Extension>]
-    ///<summary>Creates a solid Brep in the Shape of a  cylinder.</summary>
+    ///<summary>Creates a solid Brep in the Shape of a  cylinder. Closed with caps. </summary>
     ///<param name="plane">(Plane) Origin is center of base of cylinder</param>
     ///<param name="diameter">(float) Diameter of cylinder</param>
     ///<param name="length">(float) total length of the screw brep</param>
@@ -87,7 +87,7 @@ module ExtrasBrep =
 
     [<Extension>]
     ///<summary>Creates a Brep in the Shape of a Countersunk Screw Hole , 45 degrees slope
-    ///    a caped cone and a cylinder.</summary>
+    ///    a caped cone and a cylinder. one closed polysurface </summary>
     ///<param name="plane">(Plane) Origin is center of conebase or head</param>
     ///<param name="outerDiameter">(float) diameter of cone base</param>
     ///<param name="innerDiameter">(float) Diameter of cylinder</param>
