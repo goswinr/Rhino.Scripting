@@ -7,11 +7,14 @@ open FsEx
 open System
 
 
-//module Rotations=
+
+// TODO verify results
 
 
-/// a Quaternion that is always normalized
-/// TODO verify results
+
+//that is always normalized
+
+/// a Quaternion 
 type [<Struct>] Quat = 
     // http://www.codeproject.com/Articles/36868/Quaternion-Mathematics-and-3D-Library-with-C-and-G
     // http://physicsforgames.blogspot.co.at/2010/02/quaternions.html
@@ -19,6 +22,7 @@ type [<Struct>] Quat =
     // http://referencesource.microsoft.com/#PresentationCore/src/Core/CSharp/System/Windows/Media3D/Quaternion.cs#d7fe24535ba22e11
 
     // this implementation guarantees the Quat to be always normalized  !!!
+    // TODO can a normalized quat be scales and stay normalized 
 
     val X:float
     val Y:float
@@ -34,7 +38,7 @@ type [<Struct>] Quat =
 
     member q.Magnitude = sqrt q.MagnitudeSq
 
-    member q.ScaleBy(k)  =  Quat(k * q.X, k * q.Y, k * q.Z, k * q.W)
+    member q.ScaleBy(k)  =  Quat(k * q.X, k * q.Y, k * q.Z, k * q.W) // TODO can a normalized quat be scales and stay normalized 
 
     member q.Norm = let l = q.Magnitude in if l > 1e-8 then q.ScaleBy (1./l) else RhinoScriptingException.Raise "Quad failed to normalize %A" q
     
@@ -138,7 +142,8 @@ type [<Struct>] Quat =
         UtilMath.toDegrees (Math.Asin(2.0 *  ((q.W * q.Y) - (q.X * q.Z)))),
         UtilMath.toDegrees (Math.Atan2(2.0 * ((q.W * q.Z) + (q.X * q.Y)), (q.W * q.W) + (q.X * q.X) - (q.Y * q.Y) - (q.Z * q.Z)))
 
-    /// Point3d -> Quaternion -> rotated Point3d (about 0,0,0)
+    
+    // returns a rotated Point3d (about 0,0,0)
     static member rotatePoint (v:Point3d) (q:Quat) =        
         let  qNode = q * Quat.fromPoint v * Quat.conjugate q // kann man 0 oder W aus der multiplikation rauskürzen?
         Point3d ( qNode.X , qNode.Y , qNode.Z)
