@@ -34,7 +34,8 @@ module QRcode =
     
     let private hintMap = 
         let d = Dict()
-        d.[EncodeHintType.ERROR_CORRECTION] <-  ErrorCorrectionLevel.L :> obj // downcast required
+        //d.[EncodeHintType.ERROR_CORRECTION] <-  ErrorCorrectionLevel.L :> obj // low 7% error correction, downcast required
+        d.[EncodeHintType.ERROR_CORRECTION] <-  ErrorCorrectionLevel.H :> obj // high 30% error correction, downcast required
         d
 
     let private BMofTxt size txt = 
@@ -119,7 +120,8 @@ module QRcode =
     type RhinoScriptSyntax with 
         
         [<Extension>]
-        /// creats Mesh of size 1 at 0,0
+        /// Creats a Mesh of a QR code of size 1.0 located at World.Origin
+        /// ErrorCorrectionLevel.H = high 30% 
         static member QrCodeAsMesh txt :Mesh = 
             txt
             |> BMofTxt 50
@@ -127,7 +129,8 @@ module QRcode =
             |> asRhinoMesh
 
         [<Extension>]
-        /// creats Hatch of size 1 at 0,0
+        /// Creats a Hatch of a QR code of size 1.0 located at World.Origin
+        /// ErrorCorrectionLevel.H = high 30% 
         static member QrCodeAsHatch(txt) :Hatch [] =   
             txt
             |> BMofTxt 50
