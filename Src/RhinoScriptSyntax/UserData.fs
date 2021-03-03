@@ -230,6 +230,7 @@ module ExtensionsUserdata =
     ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
+        //TODO add null check for key and value
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (rhType objectId) key 
         if attachToGeometry then
@@ -246,6 +247,7 @@ module ExtensionsUserdata =
     ///    Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
+        //TODO add null check for key and value
         if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (RhinoScriptSyntax.ToNiceString objectIds) key 
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -256,30 +258,27 @@ module ExtensionsUserdata =
 
 
     [<Extension>]
-    ///<summary>Sets or removes user text stored on an object.</summary>
+    ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<param name="key">(string) The key name to set</param>    
+    ///<param name="key">(string) The key name to delete</param>    
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to store the user text</param>
+    ///    Location on the object to delte the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if attachToGeometry then
-            if not <| obj.Geometry.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %s for key '%s'" (rhType objectId) key 
-        else
-            if not <| obj.Attributes.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %s for key '%s'" (rhType objectId) key 
+        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // retuns false if key does not exist yet, otherwise true
+        else                     obj.Attributes.SetUserString(key, null) |> ignore
+        
 
     [<Extension>]
-    ///<summary>Sets or removes user text stored on multiple objects.</summary>
+    ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
-    ///<param name="key">(string) The key name to set</param>    
+    ///<param name="key">(string) The key name to delete</param>    
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to store the user text</param>
+    ///    Location on the object to delete the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectIds:Guid seq, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL        
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            if attachToGeometry then
-                if not <| obj.Geometry.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %s for key '%s'" (rhType objectId) key 
-            else
-                if not <| obj.Attributes.SetUserString(key, null) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteUserText failed on %s for key '%s'" (rhType objectId) key 
+            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // retuns false if key does not exist yet, otherwise true
+            else                      obj.Attributes.SetUserString(key, null) |> ignore
