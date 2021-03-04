@@ -19,7 +19,6 @@ module AutoOpenRhinoTypeExtensions =
 
     type Point3d with  
         
-        [<Extension>]     
         ///Like the ToString function but with appropiate precision formating
         member pt.ToNiceString = 
             if pt = Point3d.Unset then  
@@ -36,7 +35,6 @@ module AutoOpenRhinoTypeExtensions =
      
     type Point3f with  
         
-        [<Extension>]  
         ///Like the ToString function but with appropiate precision formating
         member pt.ToNiceString = 
             if pt = Point3f.Unset then  
@@ -52,7 +50,6 @@ module AutoOpenRhinoTypeExtensions =
      
     type Vector3d with  
         
-        [<Extension>] 
         ///Like the ToString function but with appropiate precision formating
         member v.ToNiceString =  
             if v = Vector3d.Unset then  
@@ -64,7 +61,6 @@ module AutoOpenRhinoTypeExtensions =
         [<Extension>] 
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
         
-        [<Extension>] 
         ///Unitizes the vector , checks input length to be longer than  1e-9 units
         member v.Unitized = 
             let len = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) // see Vec.unitze too
@@ -78,7 +74,6 @@ module AutoOpenRhinoTypeExtensions =
 
     type Vector3f with  
         
-        [<Extension>] 
         ///Like the ToString function but with appropiate precision formating
         member v.ToNiceString =  
             if v = Vector3f.Unset then  
@@ -93,41 +88,38 @@ module AutoOpenRhinoTypeExtensions =
   
     type Line with  
         
-        [<Extension>]     
         ///Like the ToString function but with appropiate precision formating
         member ln.ToNiceString = 
             sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceFormat.float  ln.From.X) (NiceFormat.float  ln.From.Y) (NiceFormat.float  ln.From.Z) (NiceFormat.float  ln.To.X) (NiceFormat.float  ln.To.Y) (NiceFormat.float  ln.To.Z)
     
-        [<Extension>]     
         ///Middle point of line
         member ln.Mid =  (ln.From + ln.To) * 0.5
 
     type Plane with  
       
-         [<Extension>]     
          ///WorldXY rotate 180 degrees round Z Axis
+         [<Extension>]     
          static member WorldMinusXMinusY=  
             Plane(Point3d.Origin, -Vector3d.XAxis, -Vector3d.YAxis)
 
-         [<Extension>]     
          ///WorldXY rotate 90 degrees round Z Axis counter clockwise
+         [<Extension>]     
          static member WorldYMinusX=  
             Plane(Point3d.Origin, Vector3d.YAxis, -Vector3d.XAxis)
 
-         [<Extension>]     
          ///WorldXY rotate 270 degrees round Z Axis counter clockwise
+         [<Extension>]     
          static member WorldMinusYX=  
             Plane(Point3d.Origin, -Vector3d.YAxis, Vector3d.XAxis)
 
-         [<Extension>]     
          ///WorldXY rotate 180 degrees round X Axis, Z points down now
+         [<Extension>]     
          static member WorldXMinusY=  
             Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
 
 
     type Transform with 
         
-        [<Extension>] 
         /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
         member m.ToNiceString =  
             let vs = 
@@ -153,6 +145,7 @@ module AutoOpenRhinoTypeExtensions =
     (*
     type Mesh with 
         [<Extension>]
+        [<Extension>] 
         static member join (meshes:Mesh seq) : Mesh =  // use rs.JoinMeshes overload
             let j = new Mesh()
             j.Append(meshes)

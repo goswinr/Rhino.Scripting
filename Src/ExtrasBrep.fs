@@ -14,13 +14,13 @@ module ExtrasBrep =
    
   type RhinoScriptSyntax with // TODO chnage to Brep type extensions ??!!
    
-    [<Extension>]
     ///<summary>Creates a Brep in the Shape of a Sloted Hole. Closed with caps. </summary>
     ///<param name="plane">(Plane)Origin = center of hole</param>
     ///<param name="length">(float) total length of sloted hole</param>
     ///<param name="width">(float) width = radius of sloted hole</param>
     ///<param name="height">(float) height of sloted hole volume</param> 
     ///<returns>(Brep) Closed Brep Geometry.</returns>
+    [<Extension>]
     static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =
         if length<width then RhinoScriptingException.Raise "RhinoScriptSyntax.SlotedHole: length= %g must be more than width= %g" length width
         let root05  = sqrt 0.5
@@ -74,18 +74,17 @@ module ExtrasBrep =
         
 
 
-    [<Extension>]
     ///<summary>Creates a solid Brep in the Shape of a  cylinder. Closed with caps. </summary>
     ///<param name="plane">(Plane) Origin is center of base of cylinder</param>
     ///<param name="diameter">(float) Diameter of cylinder</param>
     ///<param name="length">(float) total length of the screw brep</param>
     ///<returns>(Brep) Brep Geometry.</returns>
+    [<Extension>]
     static member CreateCylinder ( plane:Plane, diameter, length):Brep  =            
         let circ = Circle(plane,diameter*0.5)
         let cy = Cylinder(circ,length)
         Brep.CreateFromCylinder(cy, capBottom=true, capTop=true)
 
-    [<Extension>]
     ///<summary>Creates a Brep in the Shape of a Countersunk Screw Hole , 45 degrees slope
     ///    a caped cone and a cylinder. one closed polysurface </summary>
     ///<param name="plane">(Plane) Origin is center of conebase or head</param>
@@ -93,6 +92,7 @@ module ExtrasBrep =
     ///<param name="innerDiameter">(float) Diameter of cylinder</param>
     ///<param name="length">(float) total length of the screw brep</param>
     ///<returns>(Brep) Brep Geometry.</returns>
+    [<Extension>]
     static member CreateCounterSunkScrewVolume ( plane:Plane, outerDiameter, innerDiameter, length):Brep  =
         let r = outerDiameter*0.5
         let mutable plco = Plane(plane)
@@ -129,7 +129,6 @@ module ExtrasBrep =
         brep
             
 
-    [<Extension>]
     ///<summary>Subtracts trimmer from brep (= BooleanDifference), 
     /// so that a single brep is returned, 
     /// draws objects and zooms on them if an error occures.</summary>
@@ -139,6 +138,7 @@ module ExtrasBrep =
     ///  This is an optional safety check that makes it twice as slow. 
     ///  It ensures that the count of breps from  Brep.CreateBooleanIntersection is equal to subtractionLocations </param>
     ///<returns>(Brep) Brep Geometry.</returns>
+    [<Extension>]
     static member SubstractBrep (keep:Brep,trimmer:Brep,[<OPT;DEF(0)>]subtractionLocations:int)  :Brep =
         if not trimmer.IsSolid then
             RhinoScriptSyntax.draw "debug trimmer" trimmer
@@ -188,12 +188,12 @@ module ExtrasBrep =
         if brep.SolidOrientation = BrepSolidOrientation.Inward then  brep.Flip()
         brep
         
-    [<Extension>]
     ///<summary> Calls Mesh.CreateFromBrep, and Mesh.HealNakedEdges() to try to ensure Mesh is closed if input is closed.</summary>
     ///<param name="brep">(Brep)the Polysurface to extract Mesh from</param>
     ///<param name="meshingParameters">(MeshingParameters) Optional, The Meshing parameters , if omitted the current Meshing parameters are used </param>
     ///<returns>((Mesh Result) Ok Mesh Geometry or Error Mesh if input brep is closed but output Mesh not
     /// fails if no Meshes can be extracted .</returns>
+    [<Extension>]
     static member ExtractRenderMesh (brep:Brep,[<OPT;DEF(null:MeshingParameters)>]meshingParameters:MeshingParameters) :Result<Mesh,Mesh> =            
         let meshing =                
             if notNull meshingParameters then 

@@ -40,8 +40,8 @@ module AutoOpenVector =
             let ang = acos dot  |> toDegrees
             if v*plane.YAxis < 0.0 then 360.0-ang else ang
 
-        [<Extension>]
         /// Draws a line with a Curve Arrows
+        [<Extension>]
         static member DrawVector(   vector:Vector3d, 
                                     fromPoint:Point3d, 
                                     [<OPT;DEF("")>]layer:string ) : unit  =             
@@ -50,15 +50,15 @@ module AutoOpenVector =
             if layer<>"" then
                 RhinoScriptSyntax.ObjectLayer(l, layer, true)
         
-        [<Extension>]
         /// Draws a line with a Curve Arrows
+        [<Extension>]
         static member DrawVector( vector:Vector3d) : unit  =             
             let l = RhinoScriptSyntax.AddLine(Point3d.Origin, Point3d.Origin + vector )
             RhinoScriptSyntax.CurveArrows(l, 2)
             
     
-        [<Extension>]
         /// Draws the axes of a Plane and adds TextDots to lable them.
+        [<Extension>]
         static member DrawPlane(    pl:Plane,
                                     [<OPT;DEF(1000.0)>]scale:float,
                                     [<OPT;DEF("")>]suffixInDot:string,
@@ -74,24 +74,24 @@ module AutoOpenVector =
             RhinoScriptSyntax.AddObjectToGroup([a;b;c;e;f;g], gg)
        
 
-        [<Extension>]
         /// retuns a point that is at a given distance from a point in the direction of another point. 
+        [<Extension>]
         static member DistPt(fromPt:Point3d, dirPt:Point3d, distance:float) : Point3d  =
             let v = dirPt - fromPt
             let sc = distance/v.Length
             fromPt + v*sc
     
-        [<Extension>] 
         /// Retuns a Point by evaluation a line between two point with a normalized patrameter.
         /// e.g. rel=0.5 will return the middle point, rel=1.0 the endPoint
         /// if the rel parameter is omitted it is set to 0.5
+        [<Extension>] 
         static member DivPt(fromPt:Point3d, toPt:Point3d, [<OPT;DEF(0.5)>]rel:float) : Point3d  =
             let v = toPt - fromPt
             fromPt + v*rel
         
 
-        [<Extension>]
         /// returns the averge of many points
+        [<Extension>]
         static member MeanPoint(pts:Point3d seq) : Point3d  =
             let mutable p = Point3d.Origin
             let mutable k = 0.0
@@ -100,11 +100,11 @@ module AutoOpenVector =
                 p <- p + pt
             p/k
 
-        [<Extension>]
         /// Finds the mean normal of many points.
         /// It finds the center point and then takes corossproducts iterating all points in pairs of two.
         /// The first two points define the orientation of the normal.
         /// Considers current order of points too, counterclockwise in xy Plane is z        
+        [<Extension>]
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =            
             if Seq.hasMaximumItems 2 pts then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" pts.ToNiceString
@@ -127,9 +127,9 @@ module AutoOpenVector =
                 else
                     v.Unitized
 
-        [<Extension>]     
         /// Calculates the intersection of a finite line with a triangle (without using Rhinocommon) 
         /// Returns Some(Point3d) or None if no intersection found
+        [<Extension>]     
         static member LineTriangleIntersect(line:Line, p1 :Point3d ,p2 :Point3d, p3 :Point3d):  Point3d option  = 
             
             // https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d
@@ -279,12 +279,12 @@ module AutoOpenVector =
                 Pts
         
         
-        [<Extension>]
         /// Offsets a Polyline in 3D space by finding th local offest in each corner.
         /// Positive distance is offset inwards, negative outwards.
         /// Normal distances define a perpendicular offset at each corner.
         /// Auto detects if given points are from a closed Polyline (first point = last point) and loops them
         /// Auto detects points from closed polylines and loops them
+        [<Extension>]
         static member OffsetPoints(     points:Point3d IList, 
                                         offsetDistance: float, 
                                         [<OPT;DEF(0.0)>]normalDistance: float ,

@@ -20,7 +20,6 @@ module ExtensionsObject =
   type RhinoScriptSyntax with
 
 
-    [<Extension>]
     ///<summary>Moves, scales, or rotates a list of objects given a 4x4 transformation
     ///    matrix. The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="objectIds">(Guid seq) List of object identifiers</param>
@@ -28,6 +27,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) ids identifying the newly transformed objects.</returns>
+    [<Extension>]
     static member TransformObject( objectIds:Guid seq,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid Rarr =   //PLURAL    
@@ -40,7 +40,6 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         rc
 
-    [<Extension>]
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
     ///    The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
@@ -48,6 +47,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the object</param>
     ///<returns>(Guid) The identifier of the transformed object.</returns>
+    [<Extension>]
     static member TransformObject(  objectId:Guid,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid =
@@ -56,11 +56,11 @@ module ExtensionsObject =
         res
 
 
-    [<Extension>]
     ///<summary>Copies object from one location to another, or in-place.</summary>
     ///<param name="objectId">(Guid) Object to copy</param>
     ///<param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
     ///<returns>(Guid) objectId for the copy.</returns>
+    [<Extension>]
     static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
         let translation =
             if not translation.IsZero then
@@ -73,11 +73,11 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
     ///<returns>(Guid Rarr) identifiers for the copies.</returns>
+    [<Extension>]
     static member CopyObject(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
         let translation =
             if not translation.IsZero then
@@ -92,10 +92,10 @@ module ExtensionsObject =
         rc
 
 
-    [<Extension>]
     ///<summary>Deletes a single object from the document.</summary>
     ///<param name="objectId">(Guid) Identifier of object to delete</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member DeleteObject(objectId:Guid) : unit =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         if not <| Doc.Objects.Delete(objectId, true)  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObject failed on %s" (rhType objectId)
@@ -103,10 +103,10 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Deletes one or more objects from the document, Fails if not all objects can be deleted.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member DeleteObject(objectIds:Guid seq) : unit = //PLURAL
         let k = Doc.Objects.Delete(objectIds, true)
         let l = Seq.length objectIds
@@ -114,7 +114,6 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         
 
-    [<Extension>]
     ///<summary>Causes the selection state of one or more objects to change momentarily
     ///    so the object appears to flash on the screen.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to flash</param>
@@ -122,24 +121,25 @@ module ExtensionsObject =
     ///    If True, flash between object color and selection color.
     ///    If False, flash between visible and invisible</param>
     ///<returns>(unit).</returns>
+    [<Extension>]
     static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
         let rhobjs = rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.Count>0 then
             Doc.Views.FlashObjects(rhobjs, style)
 
 
-    [<Extension>]
     ///<summary>Hides a single object.</summary>
     ///<param name="objectId">(Guid) Id of object to hide</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
+    [<Extension>]
     static member HideObject(objectId:Guid) : bool =
         Doc.Objects.Hide(objectId, false)
 
 
-    [<Extension>]
     ///<summary>Hides one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden.</returns>
+    [<Extension>]
     static member HideObject(objectIds:Guid seq) : int = //PLURAL
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         //if notNull objectId then objectId <- .[objectId]
@@ -150,34 +150,33 @@ module ExtensionsObject =
         rc
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is in either page layout space or model space.</summary>
     ///<param name="objectId">(Guid) Id of an object to test</param>
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space.</returns>
+    [<Extension>]
     static member IsLayoutObject(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
 
-    [<Extension>]
     ///<summary>Verifies the existence of an objectin the Doc.Objects table. Fails on empty Guid.</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist.</returns>
+    [<Extension>]
     static member IsObject(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceRhinoObject(objectId) <> None
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is hidden. Hidden objects are not visible, cannot
     ///    be snapped to, and cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is hidden, False if the object is not hidden.</returns>
+    [<Extension>]
     static member IsObjectHidden(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsHidden
 
 
-    [<Extension>]
     ///<summary>Verifies an object's bounding box is inside of another bounding box.</summary>
     ///<param name="objectId">(Guid) Identifier of an object to be tested</param>
     ///<param name="box">(Geometry.BoundingBox) Bounding box to test for containment</param>
@@ -185,6 +184,7 @@ module ExtensionsObject =
     ///    If True, the object's bounding box must be contained by box
     ///    If False, the object's bounding box must be contained by or intersect box</param>
     ///<returns>(bool) True if object is inside box, False is object is not inside box.</returns>
+    [<Extension>]
     static member IsObjectInBox( objectId:Guid,
                                  box:BoundingBox,
                                  [<OPT;DEF(true)>]testMode:bool) : bool =
@@ -197,7 +197,6 @@ module ExtensionsObject =
           union.IsValid
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is a member of a group.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function
@@ -206,6 +205,7 @@ module ExtensionsObject =
     ///    was not specified, the object is a member of some group.
     ///    False if the object  is not a member of the specified group.
     ///    If a groupName was not specified, the object is not a member of any group.</returns>
+    [<Extension>]
     static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let count = rhobj.GroupCount
@@ -220,46 +220,45 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is locked. Locked objects are visible, and can
     ///    be snapped to, but cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is locked, False if the object is not locked.</returns>
+    [<Extension>]
     static member IsObjectLocked(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsLocked
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is normal. Normal objects are visible, can be
     ///    snapped to, and can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is normal, False if the object is not normal.</returns>
+    [<Extension>]
     static member IsObjectNormal(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsNormal
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is a reference object. Reference objects are
     ///    objects that are not part of the current document.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is a reference object, False if the object is not a reference object.</returns>
+    [<Extension>]
     static member IsObjectReference(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsReference
 
 
-    [<Extension>]
     ///<summary>Verifies that an object can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True or False.</returns>
+    [<Extension>]
     static member IsObjectSelectable(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelectable(true, false, false, false)
 
 
-    [<Extension>]
     ///<summary>Verifies that an object is currently selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(int) 
@@ -267,15 +266,16 @@ module ExtensionsObject =
     ///    1, the object is selected
     ///    2, the object is entirely persistently selected
     ///    3, one or more proper sub-objects are selected.</returns>
+    [<Extension>]
     static member IsObjectSelected(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelected(false)
 
 
-    [<Extension>]
     ///<summary>Determines if an object is closed, solid.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is solid, or a Mesh is closed., False otherwise.</returns>
+    [<Extension>]
     static member IsObjectSolid(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry
@@ -287,21 +287,21 @@ module ExtensionsObject =
         | _                 -> false
 
 
-    [<Extension>]
     ///<summary>Verifies an object's geometry is valid and without error.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is valid.</returns>
+    [<Extension>]
     static member IsObjectValid(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceRhinoObject(objectId) with
         |None -> false
         |Some rhobj ->  rhobj.IsValid
 
 
-    [<Extension>]
     ///<summary>Verifies an object is visible in a view.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<param name="view">(string) Optional, Default Value: The title of the view. If omitted, the current active view is used</param>
     ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
+    [<Extension>]
     static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
@@ -309,20 +309,20 @@ module ExtensionsObject =
         rhobj.Visible && viewport.IsVisible(bbox)
 
 
-    [<Extension>]
     ///<summary>Locks a single object. Locked objects are visible, and they can be
     ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
+    [<Extension>]
     static member LockObject(objectId:Guid) : bool =
         Doc.Objects.Lock(objectId, false)
 
 
-    [<Extension>]
     ///<summary>Locks multiple objects. Locked objects are visible, and they can be
     ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
     ///<returns>(int) number of objects locked.</returns>
+    [<Extension>]
     static member LockObject(objectIds:Guid seq) : int = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
@@ -331,12 +331,12 @@ module ExtensionsObject =
         rc
 
 
-    [<Extension>]
     ///<summary>Matches, or copies the attributes of a source object to a target object.</summary>
     ///<param name="targetIds">(Guid seq) Identifiers of objects to copy attributes to</param>
     ///<param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
     ///    then the default attributes are copied to the targetIds</param>
     ///<returns>(int) number of objects modified.</returns>
+    [<Extension>]
     static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int =
         let sourceattr =
             if Guid.Empty <> sourceId then
@@ -352,7 +352,6 @@ module ExtensionsObject =
         rc
 
 
-    [<Extension>]
     ///<summary>Mirrors a single object on World XY Plane.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror Plane</param>
@@ -360,6 +359,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the object</param>
     ///<returns>(Guid) Identifier of the mirrored object.</returns>
+    [<Extension>]
     static member MirrorObject( objectId:Guid,
                                 startPoint:Point3d,
                                 endPoint:Point3d,
@@ -375,7 +375,6 @@ module ExtensionsObject =
         res
 
 
-    [<Extension>]
     ///<summary>Mirrors a list of objects on World XY Plane.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to mirror</param>
     ///<param name="startPoint">(Point3d) Start of the mirror Plane</param>
@@ -383,6 +382,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) List of identifiers of the mirrored objects.</returns>
+    [<Extension>]
     static member MirrorObject(  objectIds:Guid seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d,
@@ -402,22 +402,22 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Moves a single object.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member MoveObject(objectId:Guid, translation:Vector3d) : unit = //TODO or return unit ??
         let xf = Transform.Translation(translation)
         let res = Doc.Objects.Transform(objectId, xf, true)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translation
         //if objectId <> res
 
-    [<Extension>]
     ///<summary>Moves one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member MoveObject(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL        
         let xf = Transform.Translation(translation)
         //let rc = Rarr()
@@ -429,23 +429,23 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Returns the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(Drawing.Color) The current color value.</returns>
+    [<Extension>]
     static member ObjectColor(objectId:Guid) : Drawing.Color = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.DrawColor(Doc)
 
-    [<Extension>]
     ///<summary>Modifies the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
@@ -454,13 +454,13 @@ module ExtensionsObject =
         if not <| Doc.Objects.ModifyAttributes( rhobj, attr, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectColor setting failed for %A; %A" (rhType objectId) color
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Modifies the color of multiple objects. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
     /// and blue to cause a specific color to be displayed.</summary>
     ///<param name="objectIds">(Guid seq)Ids of objects</param>
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -473,7 +473,6 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Returns the color source of an object.</summary>
     ///<param name="objectId">(Guid) Single identifier</param>
     ///<returns>(int) The current color source
@@ -481,11 +480,11 @@ module ExtensionsObject =
     ///    1 = color from object
     ///    2 = color from material
     ///    3 = color from parent.</returns>
+    [<Extension>]
     static member ObjectColorSource(objectId:Guid) : int = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhobj.Attributes.ColorSource)
 
-    [<Extension>]
     ///<summary>Modifies the color source of an object.</summary>
     ///<param name="objectId">(Guid) Single identifier</param>
     ///<param name="source">(int) New color source
@@ -494,6 +493,7 @@ module ExtensionsObject =
     ///    2 = color from material
     ///    3 = color from parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectColorSource(objectId:Guid, source:int) : unit = //SET
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -501,7 +501,6 @@ module ExtensionsObject =
         if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
     
-    [<Extension>]
     ///<summary>Modifies the color source of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Multiple identifiers</param>
     ///<param name="source">(int) New color source
@@ -510,6 +509,7 @@ module ExtensionsObject =
     ///    2 = color from material
     ///    3 = color from parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         for objectId in objectIds do 
@@ -522,20 +522,20 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...).</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object.</returns>
+    [<Extension>]
     static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
 
 
 
-    [<Extension>]
     ///<summary>Returns the count for each object type in a List of objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(string) A short text description of the object.</returns>
+    [<Extension>]
     static member ObjectDescription(objectIds:Guid seq) : string =
         let count =  Seq.countBy (fun id -> RhinoScriptSyntax.CoerceRhinoObject(id).ShortDescription(true)) objectIds        
         let typesk = Seq.length count        
@@ -552,10 +552,10 @@ module ExtensionsObject =
         tx
 
 
-    [<Extension>]
     ///<summary>Returns all of the group names that an object is assigned to.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string Rarr) list of group names.</returns>
+    [<Extension>]
     static member ObjectGroups(objectId:Guid) : string Rarr =
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if rhinoobject.GroupCount<1 then rarr { () }
@@ -563,11 +563,11 @@ module ExtensionsObject =
             let groupindices = rhinoobject.GetGroupList()
             rarr { for index in groupindices do yield Doc.Groups.GroupName(index) }
 
-    [<Extension>]
     ///<summary>Returns the short layer of an object.
     ///    Without Parent Layers.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer.</returns>
+    [<Extension>]
     static member ObjectLayerShort(objectId:Guid) : string = //GET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
@@ -576,10 +576,10 @@ module ExtensionsObject =
     
     //static member ObjectLayer()// all 3 overloads moved to file RhinoScriptSyntax.fs
 
-    [<Extension>]
     ///<summary>Returns the layout or model space of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string option) The object's current page layout view, None if it is in Model Space.</returns>
+    [<Extension>]
     static member ObjectLayout(objectId:Guid) : string option= //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
@@ -590,7 +590,6 @@ module ExtensionsObject =
             None
 
 
-    [<Extension>]
     ///<summary>Changes the layout or model space of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="layout">(string option) To change, or move, an object from model space to page
@@ -598,6 +597,7 @@ module ExtensionsObject =
     ///    title of an existing page layout view. To move an object
     ///    from page layout space to model space, just specify None</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectLayout(objectId:Guid, layout:string option) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let view=
@@ -624,7 +624,6 @@ module ExtensionsObject =
             if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayout failed for '%A' and '%A'"  layout objectId
             Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Changes the layout or model space of an objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of the objects</param>
     ///<param name="layout">(string option) To change, or move, an objects from model space to page
@@ -632,6 +631,7 @@ module ExtensionsObject =
     ///    title of an existing page layout view. To move an objects
     ///    from page layout space to model space, just specify None</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectLayout(objectIds:Guid seq, layout:string option) : unit = //MULTISET 
         let lay =
             if layout.IsSome then
@@ -666,20 +666,20 @@ module ExtensionsObject =
         Doc.Views.Redraw()
      
 
-    [<Extension>]
     ///<summary>Returns the linetype of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(string) The object's current linetype.</returns>
+    [<Extension>]
     static member ObjectLinetype(objectId:Guid) : string = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let oldindex = Doc.Linetypes.LinetypeIndexForObject(rhinoobject)
         Doc.Linetypes.[oldindex].Name
 
-    [<Extension>]
     ///<summary>Modifies the linetype of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="linetype">(string) Name of an existing linetyp</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let newindex = Doc.Linetypes.Find(linetype)
@@ -689,11 +689,11 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         Doc.Views.Redraw()
     
-    [<Extension>]
     ///<summary>Modifies the linetype of multiple object.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="linetype">(string) Name of an existing linetyp</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
         let newindex = Doc.Linetypes.Find(linetype)
         if newindex <0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectIds
@@ -705,19 +705,18 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Returns the linetype source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current linetype source
     ///      0 = By Layer
     ///      1 = By Object
     ///      3 = By Parent.</returns>
+    [<Extension>]
     static member ObjectLinetypeSource(objectId:Guid) : int = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let oldsource = rhinoobject.Attributes.LinetypeSource
         int(oldsource)
 
-    [<Extension>]
     ///<summary>Modifies the linetype source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New linetype source.
@@ -726,6 +725,7 @@ module ExtensionsObject =
     ///      1 = By Object
     ///      3 = By Parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
@@ -734,7 +734,6 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Modifies the linetype source of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<param name="source">(int) New linetype source.
@@ -743,6 +742,7 @@ module ExtensionsObject =
     ///      1 = By Object
     ///      3 = By Parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectLinetypeSource(objectIds:Guid seq, source:int) : unit = //MULTISET        
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
@@ -753,7 +753,6 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Returns the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
@@ -763,17 +762,18 @@ module ExtensionsObject =
     ///    the return value of this function is the index of the object's rendering
     ///    material. A material index of -1 indicates no material has been assigned,
     ///    and that Rhino's internal default material has been assigned to the object.</returns>
+    [<Extension>]
     static member ObjectMaterialIndex(objectId:Guid) : int = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.MaterialIndex
 
-    [<Extension>]
     ///<summary>Changes the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
     /// indices into this array.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<param name="materialIndex">(int) The new material index</param>
+    [<Extension>]
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <=. materialIndex .< Doc.Materials.Count then 
@@ -783,13 +783,13 @@ module ExtensionsObject =
         if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then 
             RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
-    [<Extension>]
     ///<summary>Changes the material index multiple objects. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
     /// materials associated with objects and layers are specified by zero based
     /// indices into this array.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of an objects</param>
     ///<param name="materialIndex">(int) The new material index</param>
+    [<Extension>]
     static member ObjectMaterialIndex(objectIds:Guid seq, materialIndex:int) : unit = //MULTISET
         if 0 <=. materialIndex .< Doc.Materials.Count then 
             RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectIds
@@ -800,19 +800,18 @@ module ExtensionsObject =
             if not <| Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
-    [<Extension>]
     ///<summary>Returns the rendering material source of an object.</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<returns>(int) The current rendering material source
     ///    0 = Material from layer
     ///    1 = Material from object
     ///    3 = Material from parent.</returns>
+    [<Extension>]
     static member ObjectMaterialSource(objectId:Guid) : int = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         int(rhinoobject.Attributes.MaterialSource)
 
 
-    [<Extension>]
     ///<summary>Modifies the rendering material source of an object.</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
     ///<param name="source">(int) The new rendering material source.
@@ -820,6 +819,7 @@ module ExtensionsObject =
     ///    1 = Material from object
     ///    3 = Material from parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = int(rhinoobject.Attributes.MaterialSource)
@@ -829,7 +829,6 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
     
-    [<Extension>]
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) One or more objects identifierss</param>
     ///<param name="source">(int) The new rendering material source.
@@ -837,6 +836,7 @@ module ExtensionsObject =
     ///    1 = Material from objects
     ///    3 = Material from parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectMaterialSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectIds
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
@@ -848,10 +848,10 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Returns the name of an object or "" if none given.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(string) The current object name, empty string if no name given .</returns>
+    [<Extension>]
     static member ObjectName(objectId:Guid) : string = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let n = rhinoobject.Attributes.Name
@@ -859,22 +859,22 @@ module ExtensionsObject =
         else n
         
 
-    [<Extension>]
     ///<summary>Modifies the name of an object.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name.</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
         //id = RhinoScriptSyntax.Coerceguid(objectId)
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.Name <- name
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName failed for '%A' and '%A'"  name objectId
     
-    [<Extension>]
     ///<summary>Modifies the name of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq)Id of objects</param>
     ///<param name="name">(string) The new objects name.</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectName(objectIds:Guid seq, name:string) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -883,21 +883,21 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Returns the print color of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(Drawing.Color) The object's current print color.</returns>
+    [<Extension>]
     static member ObjectPrintColor(objectId:Guid) : Drawing.Color = //GET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.PlotColor
 
 
 
-    [<Extension>]
     ///<summary>Modifies the print color of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="color">(Drawing.Color) New print color.</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
@@ -905,11 +905,11 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Modifies the print color of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="color">(Drawing.Color) New print color.</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -918,19 +918,18 @@ module ExtensionsObject =
             if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Returns the print color source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current print color source
     ///    0 = print color by layer
     ///    1 = print color by object
     ///    3 = print color by parent.</returns>
+    [<Extension>]
     static member ObjectPrintColorSource(objectId:Guid) : int = //GET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             int(rhinoobject.Attributes.PlotColorSource)
 
 
-    [<Extension>]
     ///<summary>Modifies the print color source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print color source
@@ -938,6 +937,7 @@ module ExtensionsObject =
     ///    1 = print color by object
     ///    3 = print color by parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
@@ -946,7 +946,6 @@ module ExtensionsObject =
         if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Modifies the print color source of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="source">(int) New print color source
@@ -954,6 +953,7 @@ module ExtensionsObject =
     ///    1 = print color by objects
     ///    3 = print color by parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
@@ -963,22 +963,22 @@ module ExtensionsObject =
             if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintColorSource failed for '%A' and '%A'" (rhType objectId) source
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Returns the print width of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(float) The object's current print width.</returns>
+    [<Extension>]
     static member ObjectPrintWidth(objectId:Guid) : float = //GET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoobject.Attributes.PlotWeight
 
 
-    [<Extension>]
     ///<summary>Modifies the print width of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
     ///    the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
     ///    but does not show on print)</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = rhinoobject.Attributes.PlotWeight
@@ -987,13 +987,13 @@ module ExtensionsObject =
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Modifies the print width of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="width">(float) New print width value in millimeters, where width = 0.0 means use
     ///    the default width, and width smaller than 0.0 (e.g. -1.0)means do-not-print (visible for screen display,
     ///    but does not show on print)</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintWidth(objectIds:Guid seq, width:float) : unit = //MULTISET
         for objectId in objectIds do 
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1004,19 +1004,18 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Returns the print width source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(int) The object's current print width source
     ///    0 = print width by layer
     ///    1 = print width by object
     ///    3 = print width by parent.</returns>
+    [<Extension>]
     static member ObjectPrintWidthSource(objectId:Guid) : int = //GET
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             int(rhinoobject.Attributes.PlotWeightSource)
 
 
-    [<Extension>]
     ///<summary>Modifies the print width source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<param name="source">(int) New print width source
@@ -1024,13 +1023,13 @@ module ExtensionsObject =
     ///    1 = print width by object
     ///    3 = print width by parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoobject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
         if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Modifies the print width source of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of objects</param>
     ///<param name="source">(int) New print width source
@@ -1038,6 +1037,7 @@ module ExtensionsObject =
     ///    1 = print width by objects
     ///    3 = print width by parent</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ObjectPrintWidthSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         for objectId in objectIds do     
             let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1046,7 +1046,6 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Returns the object type.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) The object type .
@@ -1072,6 +1071,7 @@ module ExtensionsObject =
     ///      268435456   Phantom
     ///      536870912   Clipping Plane
     ///      1073741824  Extrusion.</returns>
+    [<Extension>]
     static member ObjectType(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry
@@ -1087,7 +1087,6 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Rotates a single object.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
@@ -1096,6 +1095,7 @@ module ExtensionsObject =
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid) Identifier of the rotated object.</returns>
+    [<Extension>]
     static member RotateObject( objectId:Guid,
                                 centerPoint:Point3d,
                                 rotationAngle:float,
@@ -1114,7 +1114,6 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Rotates multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to rotate</param>
     ///<param name="centerPoint">(Point3d) The center of rotation</param>
@@ -1123,6 +1122,7 @@ module ExtensionsObject =
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid Rarr) identifiers of the rotated objects.</returns>
+    [<Extension>]
     static member RotateObject( objectIds:Guid seq,
                                  centerPoint:Point3d,
                                  rotationAngle:float,
@@ -1144,7 +1144,6 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
     ///    scale transformation. Scaling is based on the WorldXY Plane.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
@@ -1152,6 +1151,7 @@ module ExtensionsObject =
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>.Copy the object</param>
     ///<returns>(Guid) Identifier of the scaled object.</returns>
+    [<Extension>]
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
                                scale:float*float*float,
@@ -1164,13 +1164,13 @@ module ExtensionsObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (rhType objectId) origin scale  copy
         res
 
-    [<Extension>]
     ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid) Identifier of the scaled object.</returns>
+    [<Extension>]
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
                                scale:float,
@@ -1182,7 +1182,6 @@ module ExtensionsObject =
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (rhType objectId) origin scale  copy
         res
 
-    [<Extension>]
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
     ///    uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
@@ -1190,6 +1189,7 @@ module ExtensionsObject =
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the scaled objects.</returns>
+    [<Extension>]
     static member ScaleObject( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float*float*float,
@@ -1205,7 +1205,6 @@ module ExtensionsObject =
             rc.Add res
         rc
 
-    [<Extension>]
     ///<summary>Scales one or more objects. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to scale</param>
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
@@ -1213,6 +1212,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the scaled objects.</returns>
+    [<Extension>]
     static member ScaleObject( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float,
@@ -1229,7 +1229,6 @@ module ExtensionsObject =
 
 
 
-    [<Extension>]
     ///<summary>Selects a single object. 
     /// Throws an exception if object can't be selectyed for some reason
     ///  e.g. when locked , hidden, or on invisible layer .</summary>
@@ -1237,6 +1236,7 @@ module ExtensionsObject =
     ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hiddden or layers that are off visible and unlocked </param>
     ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member SelectObject( objectId:Guid,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =
@@ -1266,7 +1266,6 @@ module ExtensionsObject =
             Doc.Views.Redraw()
             )
 
-    [<Extension>]
     ///<summary>Selects one or more objects
     /// Throws an exception if object can't be selectyed for some reason
     ///  e.g. when locked , hidden, or on invisible layer .</summary>
@@ -1274,6 +1273,7 @@ module ExtensionsObject =
     ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hiddden or layers that are off visible and unlocked </param>
     ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member SelectObject( objectIds:Guid seq,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =  //PLURAL
@@ -1305,7 +1305,6 @@ module ExtensionsObject =
             )
         
 
-    [<Extension>]
     ///<summary>Perform a shear transformation on a single object.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
@@ -1314,6 +1313,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid) Identifier of the sheared object.</returns>
+    [<Extension>]
     static member ShearObject( objectId:Guid,
                                origin:Point3d,
                                referencePoint:Point3d,
@@ -1341,7 +1341,6 @@ module ExtensionsObject =
        res
 
 
-    [<Extension>]
     ///<summary>Shears one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to shear</param>
     ///<param name="origin">(Point3d) Origin point of the shear transformation</param>
@@ -1350,6 +1349,7 @@ module ExtensionsObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the sheared objects.</returns>
+    [<Extension>]
     static member ShearObject( objectIds:Guid seq,
                                 origin:Point3d,
                                 referencePoint:Point3d,
@@ -1379,21 +1379,21 @@ module ExtensionsObject =
                 res  }
 
 
-    [<Extension>]
     ///<summary>Shows a previously hidden object. Hidden objects are not visible, cannot
     ///    be snapped to and cannot be selected.</summary>
     ///<param name="objectId">(Guid) Representing id of object to show</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ShowObject(objectId:Guid) : unit =
         if not <| Doc.Objects.Show(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %A" (rhType objectId)
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Shows one or more objects. Hidden objects are not visible, cannot be
     ///    snapped to and cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) Ids of objects to show</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ShowObject(objectIds:Guid seq) : unit =
         let mutable rc = 0
         for objectId in objectIds do
@@ -1401,20 +1401,20 @@ module ExtensionsObject =
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Unlocks an object. Locked objects are visible, and can be snapped to,
     ///    but they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member UnlockObject(objectId:Guid) : unit =
         if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %A" (rhType objectId)
         Doc.Views.Redraw()
 
-    [<Extension>]
     ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
     ///    snapped to, but they cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member UnlockObject(objectIds:Guid seq) : unit =  //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
@@ -1422,20 +1422,20 @@ module ExtensionsObject =
         Doc.Views.Redraw()
         
 
-    [<Extension>]
     ///<summary>Unselects a single selected object.</summary>
     ///<param name="objectId">(Guid) Id of object to unselect</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member UnSelectObject(objectId:Guid) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnSelectObject failed on %A" (rhType objectId)
         Doc.Views.Redraw()
 
 
-    [<Extension>]
     ///<summary>Unselects multiple selected objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member UnSelectObject(objectIds:Guid seq) : unit = //PLURAL
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)

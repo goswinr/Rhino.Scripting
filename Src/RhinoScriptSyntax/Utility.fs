@@ -18,21 +18,20 @@ module ExtensionsUtility =
    
   type RhinoScriptSyntax with
 
-    [<Extension>]
     ///<summary>Return true if the script is being executed in the context of Rhino(currently always true).</summary>
     ///<returns>(bool) true if the script is being executed in the context of Rhino(currently always true).</returns>
+    [<Extension>]
     static member ContextIsRhino() : bool =
         true //TODO implement correctly
 
 
-    [<Extension>]
     ///<summary>Return true if the script is being executed in a grasshopper component(currently always false).</summary>
     ///<returns>(bool) true if the script is being executed in a grasshopper component(currently always false).</returns>
+    [<Extension>]
     static member ContextIsGrasshopper() : bool =
         false //TODO implement correctly
 
 
-    [<Extension>]
     ///<summary>Measures the angle between two points.</summary>
     ///<param name="point1">(Point3d) Point1 of input points</param>
     ///<param name="point2">(Point3d) Point2 of input points</param>
@@ -44,6 +43,7 @@ module ExtensionsUtility =
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
     ///    element 4 = delta in the Z direction.</returns>
+    [<Extension>]
     static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
         let plane = if plane.IsValid then plane else Plane.WorldXY
         let vector = point2 - point1
@@ -61,13 +61,13 @@ module ExtensionsUtility =
         angleXY, elevation, x, y, z
 
 
-    [<Extension>]
     ///<summary>Measures the angle between two lines.</summary>
     ///<param name="line1">(Line) List of 6 numbers or 2 Point3d</param>
     ///<param name="line2">(Line) List of 6 numbers or 2 Point3d</param>
     ///<returns>(float * float) containing the following elements .
     ///    0 The angle in degrees.
     ///    1 The reflex angle in degrees.</returns>
+    [<Extension>]
     static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
@@ -81,21 +81,20 @@ module ExtensionsUtility =
         angle, reflexAngle
 
 
-    [<Extension>]
     ///<summary>Returns a text string to the Windows clipboard.</summary>
     ///<returns>(string) The current text in the clipboard.</returns>
+    [<Extension>]
     static member ClipboardText() : string = //GET
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 
-    [<Extension>]
     ///<summary>Sets a text string to the Windows clipboard.</summary>
     ///<param name="text">(string) Text to set</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member ClipboardText(text:string) : unit = //SET
         System.Windows.Forms.Clipboard.SetText(text)
 
 
-    [<Extension>]
     ///<summary>Changes the luminance of a red-green-blue value. Hue and saturation are
     ///    not affected.</summary>
     ///<param name="rgb">(Drawing.Color) Initial rgb value</param>
@@ -105,6 +104,7 @@ module ExtensionsUtility =
     ///    If True, luma specifies how much to increment or decrement the
     ///    current luminance. If False, luma specified the absolute luminance</param>
     ///<returns>(Drawing.Color) modified rgb value.</returns>
+    [<Extension>]
     static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
         let mutable luma = luma / 1000.0
@@ -113,54 +113,54 @@ module ExtensionsUtility =
         hsl.ToArgbColor()
 
 
-    [<Extension>]
     ///<summary>Retrieves intensity value for the blue component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The blue component.</returns>
+    [<Extension>]
     static member ColorBlueValue(rgb:Drawing.Color) : int =
        int rgb.B
 
 
-    [<Extension>]
     ///<summary>Retrieves intensity value for the green component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The green component.</returns>
+    [<Extension>]
     static member ColorGreenValue(rgb:Drawing.Color) : int =
        int rgb.G
 
 
-    [<Extension>]
     ///<summary>Converts colors from hue-lumanence-saturation to RGB.</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value.</returns>
+    [<Extension>]
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
         let hls = Display.ColorHSL(hls.A.ToFloat/240.0, hls.R.ToFloat/240.0, hls.G.ToFloat/240.0, hls.B.ToFloat/240.0) // TODO test if correct with reverse function
         hls.ToArgbColor()
 
 
-    [<Extension>]
     ///<summary>Retrieves intensity value for the red component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The red color value.</returns>
+    [<Extension>]
     static member ColorRedValue(rgb:Drawing.Color) : int =
         int rgb.R
 
 
-    [<Extension>]
     ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance).</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(Display.ColorHSL) The HLS color value.</returns>
+    [<Extension>]
     static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
         let hsl = Display.ColorHSL(rgb)
         hsl
 
 
-    [<Extension>]
     ///<summary>Removes duplicates from an array of numbers.</summary>
     ///<param name="numbers">(float seq) List or tuple</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
     ///<returns>(float Rarr) numbers with duplicates removed.</returns>
+    [<Extension>]
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
         if Seq.length numbers < 2 then Rarr(numbers )
         else
@@ -180,46 +180,46 @@ module ExtensionsUtility =
                }
 
 
-    [<Extension>]
     ///<summary>Removes duplicates from a list of 3D points.</summary>
     ///<param name="points">(Point3d seq) A list of 3D points</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
     ///<returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
+    [<Extension>]
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
 
-    [<Extension>]
     ///<summary>Measures Square distance between two 3D points. Does not validate input.</summary>
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The square distance.</returns>
+    [<Extension>]
     static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float =
         let x = point1.X - point2.X
         let y = point1.Y - point2.Y        
         let z = point1.Z - point2.Z          
         x*x + y*y + z*z
 
-    [<Extension>]
     ///<summary>Measures distance between two 3D points.</summary>
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The distance.</returns>
+    [<Extension>]
     static member inline Distance(point1:Point3d, point2:Point3d) : float =
         let x = point1.X - point2.X
         let y = point1.Y - point2.Y        
         let z = point1.Z - point2.Z          
         sqrt (x*x + y*y + z*z)
 
-    [<Extension>]
     ///<summary>Returns section names or keys in one section of an ini file.</summary>
     ///<param name="filename">(string) Name  and path of the inifile</param>
     ///<param name="section">(string) Optional, Section to list keys from</param>
     ///<returns>(string array)
     ///    If section is NOT specified, a list containing all section names
     ///    If section is specified, a list containing all entry names for the given section.</returns>
+    [<Extension>]
     static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =  
         //https://github.com/rickyah/ini-parser
         
@@ -278,7 +278,6 @@ module ExtensionsUtility =
             IO.File.WriteAllText(filename,data.ToString())
 
 
-    [<Extension>]
     ///<summary>Returns 3D point that is a specified angle and distance from a 3D point.</summary>
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="angleDegrees">(float) Angle in degrees</param>
@@ -286,6 +285,7 @@ module ExtensionsUtility =
     ///<param name="plane">(Plane) Optional, Plane to base the transformation. If omitted, the world
     ///    x-y Plane is used</param>
     ///<returns>(Point3d) resulting point is successful.</returns>
+    [<Extension>]
     static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)
         let mutable offset = plane.XAxis
@@ -297,10 +297,10 @@ module ExtensionsUtility =
         rc
 
 
-    [<Extension>]
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float Rarr) A one-dimensional list containing real numbers.</returns>
+    [<Extension>]
     static member SimplifyArray(points:Point3d seq) : float Rarr =
         rarr { for  p in points do
                             yield p.X
@@ -308,28 +308,27 @@ module ExtensionsUtility =
                             yield p.Z }
 
 
-    [<Extension>]
     ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI.</summary>
     ///<param name="milliseconds">(int) Thousands of a second</param>
     ///<returns>(unit).</returns>
+    [<Extension>]
     static member Sleep(milliseconds:int) : unit =
         Threading.Thread.Sleep(milliseconds)
         RhinoApp.Wait()
 
 
-    [<Extension>]
     ///<summary>Sorts list of points so they will be connected in a "reasonable" Polyline order.</summary>
     ///<param name="points">(Point3d seq) The points to sort</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    Minimum distance between points. Points that fall within this tolerance
     ///    will be discarded.</param>
     ///<returns>(Point3d array) Array of sorted 3D points.</returns>
+    [<Extension>]
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
         Point3d.SortAndCullPointList(points, tol)
 
 
-    [<Extension>]
     ///<summary>Sorts the components of an array of 3D points.</summary>
     ///<param name="points">(Point3d seq) Points to sort</param>
     ///<param name="ascending">(bool) Optional, Default Value: <c>true</c>
@@ -344,6 +343,7 @@ module ExtensionsUtility =
     ///    4           Z, X, Y
     ///    5           Z, Y, X</param>
     ///<returns>(Point3d seq) sorted 3-D points.</returns>
+    [<Extension>]
     static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq =
         let f =
             match order with
@@ -358,49 +358,48 @@ module ExtensionsUtility =
         else              points |>  Seq.sortByDescending f
 
 
-    [<Extension>]
     ///<summary>convert a formatted string value into a 3D point value.</summary>
     ///<param name="point">(string) A string that contains a delimited point like "1, 2, 3"</param>
     ///<returns>(Point3d) Point structure from the input string.</returns>
+    [<Extension>]
     static member Str2Pt(point:string) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
 
-    [<Extension>]
     ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="point">('T) any value that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
+    [<Extension>]
     static member CreatePoint(point:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
-    [<Extension>]
     ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
+    [<Extension>]
     static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint ((x, y, z))
 
 
-    [<Extension>]
     ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="vector">('T) any value that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
+    [<Extension>]
     static member CreateVector(vector:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
-    [<Extension>]
     ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
+    [<Extension>]
     static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector ((x, y, z))
 
 
 
-    [<Extension>]
     ///<summary>Converts input into a Rhino.Geometry.Plane object if possible.</summary>
     ///<param name="origin">(Point3d) The Plane Center or Origin</param>
     ///<param name="xAxis">(Vector3d) Optional, Default Value: <c>Vector3d.XAxis</c>
@@ -408,6 +407,7 @@ module ExtensionsUtility =
     ///<param name="yAxis">(Vector3d) Optional, Default Value: <c>Vector3d.YAxis</c>
     ///    Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane.</returns>
+    [<Extension>]
     static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
         if xAxis.IsZero || yAxis.IsZero then
             Plane(origin, Vector3d.XAxis, Vector3d.YAxis)
@@ -415,30 +415,30 @@ module ExtensionsUtility =
             Plane(origin, xAxis, yAxis)
 
 
-    [<Extension>]
     ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
     ///<param name="xForm">(float seq seq) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column.</returns>
+    [<Extension>]
     static member CreateXform(xForm:seq<seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xForm) // TODO verify row, column order !!
 
 
-    [<Extension>]
     ///<summary>Creats a  RGB color,  red, green and  blue  values.</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<returns>(System.Drawing.Color) a Color.</returns>
+    [<Extension>]
     static member CreateColor(red:int, green:int, blue:int) : Drawing.Color =
         Drawing.Color.FromArgb( red, green, blue)
 
 
-    [<Extension>]
     ///<summary>Converts input into a Rhino.Geometry.Interval.</summary>
     ///<param name="start">(float) The lower bound</param>
     ///<param name="ende">(float) Uper bound of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///    [0] start of interval
     ///    [1] end of interval.</returns>
+    [<Extension>]
     static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval =
         Geometry.Interval(start , ende)

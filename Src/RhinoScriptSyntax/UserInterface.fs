@@ -22,11 +22,11 @@ module ExtensionsUserinterface =
     
 
 
-    [<Extension>]
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<returns>(string option) selected folder option or None if selection was canceled.</returns>
+    [<Extension>]
     static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string option =
         let getKeepEditor () = 
             use dlg = new System.Windows.Forms.FolderBrowserDialog()
@@ -53,12 +53,12 @@ module ExtensionsUserinterface =
         //    dlg.Directory
 
 
-    [<Extension>]
     ///<summary>Displays a list of items in a checkable-style list dialog box.</summary>
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>((string*bool) Rarr option) Option of tuples containing the input string in items along with their new boolean check value.</returns>
+    [<Extension>]
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(null:string)>]title:string) : option<Rarr<string*bool>> =
@@ -76,12 +76,12 @@ module ExtensionsUserinterface =
             None
 
 
-    [<Extension>]
     ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
     ///<param name="items">(string seq) A list of string</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string option) Option of The selected item.</returns>
+    [<Extension>]
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string option=
         let getKeepEditor () = 
             match UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
@@ -91,13 +91,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Display dialog prompting the user to enter a string. The
     ///    string value may span multiple lines.</summary>
     ///<param name="defaultValString">(string) Optional, A default string value</param>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string Option) Option of Multiple lines that are separated by carriage return-linefeed combinations.</returns>
+    [<Extension>]
     static member EditBox(  [<OPT;DEF(null:string)>]defaultValString:string,
                             [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(null:string)>]title:string) : string option =
@@ -107,7 +107,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Pause for user input of an angle.</summary>
     ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
@@ -116,6 +115,7 @@ module ExtensionsUserinterface =
     ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
     ///<param name="message">(string) Optional, A prompt to display</param>
     ///<returns>(float option) Option of angle in degree.</returns>
+    [<Extension>]
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float,
@@ -131,7 +131,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
     ///    displayed as click-able command line option toggles.</summary>
     ///<param name="message">(string) A prompt</param>
@@ -141,6 +140,7 @@ module ExtensionsUserinterface =
     ///    [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool Rarr) Option of a list of values that represent the boolean values.</returns>
+    [<Extension>]
     static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<Rarr<bool>> =
         let get () = 
             use go = new Input.Custom.GetOption()
@@ -170,7 +170,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a box.</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///    The box selection mode.
@@ -184,6 +183,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt2">(string) Optional, Prompt2 of 'optional prompts to set'</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of 'optional prompts to set'</param>
     ///<returns>(Point3d array) option) array of eight Point3d that define the corners of the box.</returns>
+    [<Extension>]
     static member GetBox(   [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(null:string)>]prompt1:string,
@@ -208,10 +208,10 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
     ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c></param>
     ///<returns>(Drawing.Color option) an Option of RGB color.</returns>
+    [<Extension>]
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : option<Drawing.Color> =
         let get () = 
             let zero = Drawing.Color()
@@ -222,13 +222,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Retrieves the cursor's position.</summary>
     ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
     ///    0  Point3d: cursor position in world coordinates
     ///    1  Point2d: cursor position in screen coordinates
     ///    2  Guid:    objectId of the active viewport
     ///    3  Point2d: cursor position in client coordinates.</returns>
+    [<Extension>]
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
             let view = Doc.Views.ActiveView
@@ -243,7 +243,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a distance.</summary>
     ///<param name="firstPt">(Point3d) Optional, First distance point</param>
     ///<param name="distance">(float) Optional, Default distance</param>
@@ -252,6 +251,7 @@ module ExtensionsUserinterface =
     ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
     ///    Prompt for the second distance point</param>
     ///<returns>(float option) an Option of The distance between the two points.</returns>
+    [<Extension>]
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
@@ -295,7 +295,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
     ///    A prompt or message</param>
@@ -306,6 +305,7 @@ module ExtensionsUserinterface =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the duplicated edge Curves</param>
     ///<returns>((Guid*Guid*Point3d) Rarr) an Option of a List of selection prompts (curve objectId, parent objectId, selection point).</returns>
+    [<Extension>]
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
@@ -339,13 +339,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a whole number.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="number">(int) Optional, A default whole number value</param>
     ///<param name="minimum">(int) Optional, A minimum allowable value</param>
     ///<param name="maximum">(int) Optional, A maximum allowable value</param>
     ///<returns>(int option) an Option of The whole number input by the user.</returns>
+    [<Extension>]
     static member GetInteger(   [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(2147482999)>]number:int,
                                 [<OPT;DEF(2147482999)>]minimum:int,
@@ -367,7 +367,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Displays dialog box prompting the user to select a layer.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
     ///    Dialog box title</param>
@@ -377,6 +376,7 @@ module ExtensionsUserinterface =
     ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
     ///    Show set current  button on the dialog</param>
     ///<returns>(string option) an Option of name of selected layer.</returns>
+    [<Extension>]
     static member GetLayer( [<OPT;DEF("Select Layer")>]title:string,
                             [<OPT;DEF(null:string)>]layer:string,
                             [<OPT;DEF(false)>]showNewButton:bool,
@@ -395,13 +395,13 @@ module ExtensionsUserinterface =
 
 
 
-    [<Extension>]
     ///<summary>Displays a dialog box prompting the user to select one or more layers.</summary>
     ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
     ///    Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
     ///    Optional button to show on the dialog</param>
     ///<returns>(string Rarr) an Option of The names of selected layers.</returns>
+    [<Extension>]
     static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : option<string Rarr> =
         let getKeepEditor () = 
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
@@ -414,7 +414,6 @@ module ExtensionsUserinterface =
 
 
 
-    [<Extension>]
     ///<summary>Prompts the user to pick points that define a line.</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///    Line definition mode.
@@ -433,6 +432,7 @@ module ExtensionsUserinterface =
     ///<param name="message2">(string) Optional, Message2 of optional prompts</param>
     ///<param name="message3">(string) Optional, Message3 of optional prompts</param>
     ///<returns>(Line option) an Option of a Line.</returns>
+    [<Extension>]
     static member GetLine(  [<OPT;DEF(0)>]mode:int,
                             [<OPT;DEF(Point3d())>]point:Point3d,
                             [<OPT;DEF(null:string)>]message1:string,
@@ -456,12 +456,12 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Displays a dialog box prompting the user to select one linetype.</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the "by Layer" linetype will show. Defaults to False</param>
     ///<returns>(string option) an Option of The names of selected linetype.</returns>
+    [<Extension>]
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
                                 [<OPT;DEF(false)>]showByLayer:bool) : string option =
         let getKeepEditor () = 
@@ -478,7 +478,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Prompts the user to pick one or more Mesh faces.</summary>
     ///<param name="objectId">(Guid) The Mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Faces"</c>
@@ -490,6 +489,7 @@ module ExtensionsUserinterface =
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
     ///<returns>(int Rarr) an Option of of Mesh face indices.</returns>
+    [<Extension>]
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
@@ -512,7 +512,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Prompts the user to pick one or more Mesh vertices.</summary>
     ///<param name="objectId">(Guid) The Mesh object's identifier</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Vertices"</c>
@@ -524,6 +523,7 @@ module ExtensionsUserinterface =
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
     ///<returns>(int Rarr) an Option of of Mesh vertex indices.</returns>
+    [<Extension>]
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -546,7 +546,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a point.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
@@ -554,6 +553,7 @@ module ExtensionsUserinterface =
     ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
     ///    Constrains the point selections to the active construction Plane</param>
     ///<returns>(Point3d option) an Option of point3d.</returns>
+    [<Extension>]
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(0.0)>]distance:float,
@@ -577,12 +577,12 @@ module ExtensionsUserinterface =
 
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a point constrainted to a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
     ///<returns>(Point3d option) an Option of 3d point.</returns>
+    [<Extension>]
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d option =
         let get () = 
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
@@ -599,12 +599,12 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a point constrained to a Mesh object.</summary>
     ///<param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point.</returns>
+    [<Extension>]
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d option =
         let get () = 
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
@@ -614,13 +614,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
     ///    object.</summary>
     ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point.</returns>
+    [<Extension>]
     static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d option =
         let get () = 
             use gp = new Input.Custom.GetPoint()
@@ -645,7 +645,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of one or more points.</summary>
     ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
     ///    Draw lines between points</param>
@@ -656,6 +655,7 @@ module ExtensionsUserinterface =
     ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
     ///    unlimited number of points can be picked</param>
     ///<returns>(Point3d array) an Option of of 3d points.</returns>
+    [<Extension>]
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
@@ -715,7 +715,6 @@ module ExtensionsUserinterface =
 
 
 
-    [<Extension>]
     ///<summary>Prompts the user to pick points that define a polyline.</summary>
     ///<param name="flags">(int) Optional, Default Value: <c>3</c>
     ///    The options are bit coded flags. Values can be added together to specify more than one option. 
@@ -733,6 +732,7 @@ module ExtensionsUserinterface =
     ///<param name="max">(int) Optional, Default Value: <c>0</c>
     ///    The maximum number of points to require; 0 for no limit.</param>
     ///<returns>(Polyline option) an Option of a  polyline.</returns>
+    [<Extension>]
     static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
                                         [<OPT;DEF(null:string)>]message1:string,
                                         [<OPT;DEF(null:string)>]message2:string,
@@ -756,7 +756,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
     ///    A prompt or message</param>
@@ -764,6 +763,7 @@ module ExtensionsUserinterface =
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
     ///<returns>(float option) an Option of The number input by the user.</returns>
+    [<Extension>]
     static member GetReal(              [<OPT;DEF("Number")>]message:string,
                                         [<OPT;DEF(7e89)>]number:float,
                                         [<OPT;DEF(7e89)>]minimum:float,
@@ -783,7 +783,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a rectangle.</summary>
     ///<param name="mode">(int) Optional, Default Value: <c>0</c>
     ///    The rectangle selection mode. The modes are as follows
@@ -797,6 +796,7 @@ module ExtensionsUserinterface =
     ///<param name="prompt2">(string) Optional, Prompt2 of optional prompts</param>
     ///<param name="prompt3">(string) Optional, Prompt3 of optional prompts</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) an Option of four 3d points that define the corners of the rectangle.</returns>
+    [<Extension>]
     static member GetRectangle(
                                         [<OPT;DEF(0)>]mode:int,
                                         [<OPT;DEF(Point3d())>]basePoint:Point3d,
@@ -818,7 +818,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Pauses for user input of a string value.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="defaultValString">(string) Optional, A default value</param>
@@ -826,6 +825,7 @@ module ExtensionsUserinterface =
     ///    Note, strings cannot begin with a numeric character</param>
     ///<returns>(string option) an Option of The string either input or selected by the user .
     ///    If the user presses the Enter key without typing in a string, an empty string "" is returned.</returns>
+    [<Extension>]
     static member GetString(
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]defaultValString:string,
@@ -848,13 +848,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Display a list of items in a list box dialog.</summary>
     ///<param name="items">(string IList) A list of values to select</param>
     ///<param name="message">(string) Optional, A prompt of message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="defaultVal">(string) Optional, Selected item in the list</param>
     ///<returns>(string option) an Option of he selected item.</returns>
+    [<Extension>]
     static member ListBox(              items:string IList,
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]title:string,
@@ -868,7 +868,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Displays a message box. A message box contains a message and
     ///    title, plus any combination of predefined icons and push buttons.</summary>
     ///<param name="message">(string) A prompt or message</param>
@@ -903,6 +902,7 @@ module ExtensionsUserinterface =
     ///    5      Ignore button was clicked.
     ///    6      Yes button was clicked.
     ///    7      No button was clicked.</returns>
+    [<Extension>]
     static member MessageBox(           message:string,
                                         [<OPT;DEF(0)>]buttons:int,
                                         [<OPT;DEF("")>]title:string) : int option =
@@ -941,13 +941,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Displays list of items and their values in a property-style list box dialog.</summary>
     ///<param name="items">(string IList) list of string items</param>
     ///<param name="values">(string seq) The corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string array option) an Option of of new values.</returns>
+    [<Extension>]
     static member PropertyListBox(  items:string IList,
                                     values:string seq,
                                     [<OPT;DEF(null:string)>]message:string,
@@ -960,13 +960,13 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Displays a list of items in a multiple-selection list box dialog.</summary>
     ///<param name="items">(string IList) A zero-based list of string items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<param name="defaultVals">(string IList) Optional, a list if multiple items that are pre-selected</param>
     ///<returns>(string array option) an Option of containing the selected items.</returns>
+    [<Extension>]
     static member MultiListBox(     items:string IList,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string,
@@ -977,7 +977,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
     ///    Note, this function does not open the file.</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -988,6 +987,7 @@ module ExtensionsUserinterface =
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
     ///<returns>(string option) an Option of file name is successful.</returns>
+    [<Extension>]
     static member OpenFileName(     [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
@@ -1005,7 +1005,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
     ///    Note, this function does not open the file.</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1016,6 +1015,7 @@ module ExtensionsUserinterface =
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
     ///<returns>(string array option) an Option of of selected file names.</returns>
+    [<Extension>]
     static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
@@ -1034,7 +1034,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
     ///    anywhere, and can be dismissed by clicking the left or right mouse buttons.</summary>
     ///<param name="items">(string seq) List of strings representing the menu items. An empty string or None
@@ -1050,6 +1049,7 @@ module ExtensionsUserinterface =
     ///<param name="view">(string) Optional, If point is specified, the view in which the point is computed.
     ///    If omitted, the active view is used</param>
     ///<returns>(int) index of the menu item picked or -1 if no menu item was picked.</returns>
+    [<Extension>]
     static member PopupMenu(        items:string seq,
                                     [<OPT;DEF(null:int seq)>]modes:int seq,
                                     [<OPT;DEF(Point3d())>]point:Point3d,
@@ -1065,7 +1065,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Display a dialog box prompting the user to enter a number.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>""</c>
     ///    A prompt message</param>
@@ -1075,6 +1074,7 @@ module ExtensionsUserinterface =
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
     ///<returns>(float option) an Option of The newly entered number.</returns>
+    [<Extension>]
     static member RealBox(          [<OPT;DEF("")>]message:string,
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,
                                     [<OPT;DEF("")>]title:string,
@@ -1092,7 +1092,6 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync true true get
 
 
-    [<Extension>]
     ///<summary>Display a save dialog box allowing the user to enter a file name.
     ///    Note, this function does not save the file.</summary>
     ///<param name="title">(string) Optional, A dialog box title</param>
@@ -1103,6 +1102,7 @@ module ExtensionsUserinterface =
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
     ///<returns>(string option) an Option of the file name is successful.</returns>
+    [<Extension>]
     static member SaveFileName(     [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
@@ -1119,12 +1119,12 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
     ///<param name="message">(string) Optional, A prompt message</param>
     ///<param name="defaultValValue">(string) Optional, A default string value</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string option) an Option of the newly entered string value.</returns>
+    [<Extension>]
     static member StringBox(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]defaultValValue:string,
                                     [<OPT;DEF(null:string)>]title:string) : string option =
@@ -1134,11 +1134,11 @@ module ExtensionsUserinterface =
         Synchronisation.DoSync false false getKeepEditor
 
 
-    [<Extension>]
     ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
     ///<param name="message">(string) The message</param>
     ///<param name="title">(string) Optional, The message title</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member TextOut(message:string,
                           [<OPT;DEF(null:string)>]title:string) : unit =
         let getKeepEditor () = 

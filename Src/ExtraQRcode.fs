@@ -119,18 +119,18 @@ module QRcode =
 
     type RhinoScriptSyntax with 
         
-        [<Extension>]
         /// Creats a Mesh of a QR code of size 1.0 located at World.Origin
         /// ErrorCorrectionLevel.H = high 30% 
+        [<Extension>]
         static member QrCodeAsMesh txt :Mesh = 
             txt
             |> BMofTxt 50
             |> as2dArray
             |> asRhinoMesh
 
-        [<Extension>]
         /// Creats a Hatch of a QR code of size 1.0 located at World.Origin
         /// ErrorCorrectionLevel.H = high 30% 
+        [<Extension>]
         static member QrCodeAsHatch(txt) :Hatch [] =   
             txt
             |> BMofTxt 50

@@ -18,7 +18,6 @@ module ExtensionsBlock =
   type RhinoScriptSyntax with
 
 
-    [<Extension>]
     ///<summary>Adds a new block definition to the document.</summary>
     ///<param name="objectIds">(Guid seq) Objects that will be included in the block</param>
     ///<param name="basePoint">(Point3d) 3D base point for the block definition</param>
@@ -27,6 +26,7 @@ module ExtensionsBlock =
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the objectIds will be deleted</param>
     ///<returns>(string) name of new block definition.</returns>
+    [<Extension>]
     static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
         let name = if name="" then Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = Doc.InstanceDefinitions.Find(name)
@@ -63,11 +63,11 @@ module ExtensionsBlock =
 
 
 
-    [<Extension>]
     ///<summary>Returns names of the block definitions that contain a specified block
     ///    definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string Rarr) A list of block definition names.</returns>
+    [<Extension>]
     static member BlockContainers(blockName:string) : string Rarr =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -77,43 +77,42 @@ module ExtensionsBlock =
             if not <| item.IsDeleted then  rc.Add(item.Name)
         rc
 
-    [<Extension>]
     ///<summary>Returns number of block definitions that contain a specified
     ///    block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(int) The number of block definitions that contain a specified block definition.</returns>
+    [<Extension>]
     static member BlockContainerCount(blockName:string) : int =
         (RhinoScriptSyntax.BlockContainers(blockName)).Count
 
 
-    [<Extension>]
     ///<summary>Returns the number of block definitions in the document.</summary>
     ///<returns>(int) The number of block definitions in the document.</returns>
+    [<Extension>]
     static member BlockCount() : int =
         Doc.InstanceDefinitions.ActiveCount
 
 
-    [<Extension>]
     ///<summary>Returns the description of a block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string) The current description.</returns>
+    [<Extension>]
     static member BlockDescription(blockName:string) : string = //GET
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         idef.Description
 
-    [<Extension>]
     ///<summary>Sets the description of a block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="description">(string) The new description</param>
     ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
     static member BlockDescription(blockName:string, description:string) : unit = //SET
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         Doc.InstanceDefinitions.Modify( idef, idef.Name, description, true ) |>ignore
 
 
-    [<Extension>]
     ///<summary>Counts number of instances of the block in the document.
     ///    Nested instances are not included in the count. Attention this may include deleted blocks.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
@@ -123,6 +122,7 @@ module ExtensionsBlock =
     ///      If a block is nested more than once within another block it will be counted only once.
     ///    2 = check for references from other instance definitions, counts every instance of nested block</param>
     ///<returns>(int) The number of instances of the block in the document.</returns>
+    [<Extension>]
     static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -130,10 +130,10 @@ module ExtensionsBlock =
         refs.Length
 
 
-    [<Extension>]
     ///<summary>Returns the insertion point of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Point3d) The insertion 3D point.</returns>
+    [<Extension>]
     static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  xf = instance.InstanceXform
@@ -142,17 +142,16 @@ module ExtensionsBlock =
         pt
 
 
-    [<Extension>]
     ///<summary>Returns the block name of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(string) The block name of a block instance.</returns>
+    [<Extension>]
     static member BlockInstanceName(objectId:Guid) : string =
         let mutable instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let mutable idef = instance.InstanceDefinition
         idef.Name
 
 
-    [<Extension>]
     ///<summary>Returns the identifiers of the inserted instances of a block.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
@@ -160,6 +159,7 @@ module ExtensionsBlock =
     ///    1 = get top level and nested references in active document.
     ///    2 = check for references from other instance definitions</param>
     ///<returns>(Guid Rarr) Ids identifying the instances of a block in the model.</returns>
+    [<Extension>]
     static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -167,41 +167,41 @@ module ExtensionsBlock =
         rarr { for item in instances do yield item.Id }
 
 
-    [<Extension>]
     ///<summary>Returns the location of a block instance relative to the world coordinate
     ///    system origin (0, 0, 0). The position is returned as a 4x4 transformation
     ///    matrix.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Transform) The location, as a transform matrix, of a block instance relative to the world coordinate
     ///    system origin.</returns>
+    [<Extension>]
     static member BlockInstanceXform(objectId:Guid) : Transform =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         instance.InstanceXform
 
 
-    [<Extension>]
     ///<summary>Returns the names of all block definitions in the document.</summary>
     ///<returns>(string Rarr) The names of all block definitions in the document.</returns>
+    [<Extension>]
     static member BlockNames() : string Rarr =
         let  ideflist = Doc.InstanceDefinitions.GetList(true)
         rarr { for item in ideflist do yield item.Name}
 
 
 
-    [<Extension>]
     ///<summary>Returns number of objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(int) The number of objects that make up a block definition.</returns>
+    [<Extension>]
     static member BlockObjectCount(blockName:string) : int =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         idef.ObjectCount
 
 
-    [<Extension>]
     ///<summary>Returns identifiers of the objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(Guid Rarr) list of identifiers.</returns>
+    [<Extension>]
     static member BlockObjects(blockName:string) : Rarr<Guid> =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -209,19 +209,18 @@ module ExtensionsBlock =
         rarr { for obj in rhobjs -> obj.Id}
 
 
-    [<Extension>]
     ///<summary>Returns path to the source of a linked or embedded block definition.
     ///    A linked or embedded block definition is a block definition that was
     ///    inserted from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block.</returns>
+    [<Extension>]
     static member BlockPath(blockName:string) : string =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         idef.SourceArchive
 
 
-    [<Extension>]
     ///<summary>Returns the status of a linked block.</summary>
     ///<param name="blockName">(string) Name of an existing block</param>
     ///<returns>(int) The status of a linked block
@@ -233,16 +232,17 @@ module ExtensionsBlock =
     ///      1    The linked block definition's file is newer than definition.
     ///      2    The linked block definition's file is older than definition.
     ///      3    The linked block definition's file is different than definition.</returns>
+    [<Extension>]
     static member BlockStatus(blockName:string) : int =
         let  idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  -3
         else int(idef.ArchiveFileStatus)
 
 
-    [<Extension>]
     ///<summary>Deletes a block definition and all of it's inserted instances.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
+    [<Extension>]
     static member DeleteBlock(blockName:string) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -251,13 +251,13 @@ module ExtensionsBlock =
         rc
 
 
-    [<Extension>]
     ///<summary>Explodes a block instance into it's geometric components. The
     ///    exploded objects are added to the document.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
     ///    By default nested blocks are not exploded</param>
     ///<returns>(Guid array) identifiers for the newly exploded objects.</returns>
+    [<Extension>]
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  guids = Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance= true)
@@ -266,11 +266,11 @@ module ExtensionsBlock =
 
 
 
-    [<Extension>]
     ///<summary>Inserts a block whose definition already exists in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="xForm">(Transform) 4x4 transformation matrix to apply</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
+    [<Extension>]
     static member InsertBlock2(blockName:string, xForm:Transform) : Guid =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -280,7 +280,6 @@ module ExtensionsBlock =
         objectId
 
 
-    [<Extension>]
     ///<summary>Inserts a block whose definition already exists in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="insertionPoint">(Point3d) Insertion point for the block</param>
@@ -291,6 +290,7 @@ module ExtensionsBlock =
     ///<param name="rotationNormal">(Vector3d) Optional, Default Value: <c> Vector3d.ZAxis</c>
     ///    The axis of rotation</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
+    [<Extension>]
     static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
         let sc= if scale.IsZero then Vector3d(1. , 1. , 1.) else scale
@@ -302,19 +302,19 @@ module ExtensionsBlock =
         RhinoScriptSyntax.InsertBlock2 (blockName, xForm)
 
 
-    [<Extension>]
     ///<summary>Verifies the existence of a block definition in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
+    [<Extension>]
     static member IsBlock(blockName:string) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         not <| isNull idef
 
 
-    [<Extension>]
     ///<summary>Verifies a block definition is embedded, or linked, from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
+    [<Extension>]
     static member IsBlockEmbedded(blockName:string) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
@@ -324,17 +324,16 @@ module ExtensionsBlock =
         |_-> false
 
 
-    [<Extension>]
     ///<summary>Verifies an object is a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False.</returns>
+    [<Extension>]
     static member IsBlockInstance(objectId:Guid) : bool =
          match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  //Coerce should not be needed
          | :? DocObjects.InstanceObject as b -> true
          | _ -> false
 
 
-    [<Extension>]
     ///<summary>Verifies that a block definition is being used by an inserted instance.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
@@ -343,27 +342,28 @@ module ExtensionsBlock =
     ///    1 = Check for top level and nested references in active document
     ///    2 = Check for references in other instance definitions</param>
     ///<returns>(bool) True or False.</returns>
+    [<Extension>]
     static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         idef.InUse(whereToLook)
 
 
-    [<Extension>]
     ///<summary>Verifies that a block definition is from a reference file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
+    [<Extension>]
     static member IsBlockReference(blockName:string) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         idef.IsReference
 
 
-    [<Extension>]
     ///<summary>Renames an existing block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="newName">(string) Name to change to</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
+    [<Extension>]
     static member RenameBlock(blockName:string, newName:string) : bool =
         let idef = Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
