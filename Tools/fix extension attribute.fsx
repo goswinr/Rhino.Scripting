@@ -5,7 +5,7 @@
 open System
 open FsEx
 
-let dir = @"D:\Git\Rhino.Scripting\Src\RhinoScriptSyntax" 
+let dir = @"D:\Git\Rhino.Scripting\Src" 
 
 type Arg =  
     |Str of string
@@ -105,19 +105,27 @@ let doAddNullcheck(path) =
     //|> fun xs -> IO.File.WriteAllLines(file, xs) 
 
 let doFixAttr (path) = 
+    printfn "doing %s" path 
     let mutable addExt = null
     rarr{
-        for ln in IO.File.ReadAllLines(path)  do 
-            let tln = ln.Trim() 
-            if tln= "[<Extension>]" then  
-                addExt <- ln
+        for prev, this, next in IO.File.ReadAllLines(path) |> Seq.prevThisNext do 
+            let p = prev.Trim() 
+            let t = this.Trim() 
+            let n = next.Trim() 
+            
+            if t = "[<Extension>]" && n.StartsWith "///" then  
+                addExt <- this
+            
+            elif notNull addExt && t.StartsWith "static member" then  
+                yield addExt
+                yield this
+                addExt <- null
             else 
-                if notNull addExt && tln.StartsWith "static member" then  
-                    yield addExt
-                yield ln
+                yield this
+           
         }
                 
-    //|> Seq.iter (printfn "%s") 
+    //|>! Seq.iter (printfn "%s") 
     |> fun xs -> IO.File.WriteAllLines(path, xs) 
     
     
@@ -126,7 +134,7 @@ let doFixAttr (path) =
     
 let files = IO.getAllFilesByPattern dir "*.fs"
 
-for file in files |> Seq.truncate 1 do
+for file in files |> Seq.truncate 99 do
     doFixAttr file
 
 printfn "*Done!"
