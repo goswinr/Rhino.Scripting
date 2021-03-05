@@ -48,14 +48,10 @@ module ExtensionsSelection =
     
 
     ///<summary>Returns identifiers of all objects in the document.</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///    Include grips objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///    Include refrence objects such as work session objects</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the objects</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects</param>
+    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c> Include refrence objects such as work session objects</param>
     ///<returns>(Guid Rarr) Identifiers for all the objects in the document.</returns>
     [<Extension>]
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
@@ -77,28 +73,27 @@ module ExtensionsSelection =
             if objectIds.Count > 0 && select then Doc.Views.Redraw()           
             objectIds
 
-    ///<summary>Returns identifiers of all objects that are not hidden or on turned off layers.</summary>
+    ///<summary>Returns identifiers of all objects in the current model or paper space that are not hidden or on turned off layers.</summary>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///    Include refrence objects such as work session objects</param>
-    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c>
-    ///    Include locked objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///    Include grips objects</param>  
+    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c> Include refrence objects such as work session objects</param>
+    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c> Include locked objects</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects</param>  
     ///<returns>(Guid Rarr) Identifiers for all the objects that are not hidden and who's layer is on and visible.</returns>
     [<Extension>]
     static member ShownObjects(     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
-                                    [<OPT;DEF(true)>]includeLockedObjects:bool,
+                                    [<OPT;DEF(true)>] includeLockedObjects:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
+            let viewId = // only get object from model space if current or current page
+                if Doc.Views.ActiveView :? Display.RhinoPageView then Doc.Views.ActiveView.MainViewport.Id
+                else Guid.Empty                        
             let Vis = new Collections.Generic.HashSet<int>()
             for layer in Doc.Layers do
                 if not layer.IsDeleted && layer.IsVisible then 
@@ -111,11 +106,14 @@ module ExtensionsSelection =
             it.HiddenObjects <- false
             it.ReferenceObjects <- includeReferences            
             it.ObjectTypeFilter <- getFilterEnum(filter)
-            let e = Doc.Objects.GetObjectList(it)
+            it.DeletedObjects <- false
+            //it.VisibleFilter <- true
+            let objects = Doc.Objects.GetObjectList(it)
             let objectIds = Rarr()            
-            for object in e do  
-                if Vis.Contains(object.Attributes.LayerIndex) then 
-                    objectIds.Add(object.Id)                    
+            for ob in objects do  
+                if ob.Attributes.ViewportId = viewId then // only get object from model space if current or current page
+                    if Vis.Contains(ob.Attributes.LayerIndex) then 
+                         objectIds.Add(ob.Id)                    
             if printCount then
                 RhinoScriptSyntax.Print ("ShownObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))                   
             objectIds
@@ -123,12 +121,9 @@ module ExtensionsSelection =
 
     ///<summary>Returns identifier of the first object in the document. The first
     ///    object is the last object created by the user.</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the object. If omitted, the object is not selected</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
-    ///    Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
-    ///    Include grips objects. If omitted, grips objects are not returned</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the object. If omitted, the object is not selected</param>
+    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects. If omitted, light objects are not returned</param>
+    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid) The identifier of the object.</returns>
     [<Extension>]
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
@@ -149,11 +144,8 @@ module ExtensionsSelection =
 
     ///<summary>Prompts user to pick or select a single Curve object.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
-    ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
-    ///    Select the picked objects. If False, objects that
-    ///    are picked are not selected</param>
+    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c> Allow for the selection of pre-selected objects</param>
+    ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the picked objects. If False, objects that are picked are not selected</param>
     ///<returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
     ///    [0]  guid     identifier of the Curve object
     ///    [1]  bool     True if the Curve was preselected, otherwise False
@@ -331,7 +323,8 @@ module ExtensionsSelection =
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
-    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
+    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes 
+    ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid Rarr) List of identifiers of the picked objects.</returns>
     [<Extension>]
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
@@ -400,7 +393,8 @@ module ExtensionsSelection =
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
-    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
+    ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes 
+    ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid Rarr) List of identifiers of the picked objects.</returns>
     [<Extension>]
     static member GetObjectsAndRemember(message:string,

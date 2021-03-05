@@ -216,8 +216,8 @@ module ExtensionsApplication =
     ///    scripts. The command can be a built-in Rhino command or one provided by a
     ///    3rd party plug-in.
     ///    Write command scripts just as you would type the command sequence at the
-    ///    command line. A space or a new line acts like pressing 'Enter' at the
-    ///    command line. For more information, see "Scripting" in Rhino help.
+    ///    Commandline. A space or a new line acts like pressing 'Enter' at the
+    ///    Commandline. For more information, see "Scripting" in Rhino help.
     ///    Note, this function is designed to run one command and one command only.
     ///    Do not combine multiple Rhino commands into a single call to this method.
     ///      WRONG:
@@ -741,8 +741,8 @@ module ExtensionsApplication =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
 
-    ///<summary>Sends a string of printable characters to Rhino's command line.</summary>
-    ///<param name="keys">(string) A string of characters to send to the command line</param>
+    ///<summary>Sends a string of printable characters to Rhino's Commandline.</summary>
+    ///<param name="keys">(string) A string of characters to send to the Commandline</param>
     ///<param name="addReturn">(bool) Optional, Default Value: <c>true</c>
     ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) void, nothing.</returns>

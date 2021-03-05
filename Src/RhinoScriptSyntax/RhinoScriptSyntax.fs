@@ -161,6 +161,8 @@ type RhinoScriptSyntax private () =
     //---------------------------------------------------------------
 
 
+    /// TODO all the functions taking a generic paramnter should not be called coerce but rather try convert ?? no ?
+
     ///<summary>Attempt to get a Guids from input.</summary>
     ///<param name="objectId">objcts , Guid or string</param>
     ///<returns>a Guid Option.</returns>
@@ -180,9 +182,7 @@ type RhinoScriptSyntax private () =
         else 
             let o = Doc.Objects.FindId(objectId) 
             if isNull o then None
-            else Some o     
-    
-
+            else Some o 
 
     //<summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>   // it doe not make sens to have this just use rs.CoerceGeometry none is never returned
     //<param name="objectId">geometry Identifier (Guid)</param>
@@ -536,7 +536,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailView (objectId:Guid) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  DetailView as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %A : %A" g.ObjectType objectId            
+        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %s"  (rhType objectId)          
     
     ///<summary>Attempt to get Detail view rectangle Object.</summary>
     ///<param name="objectId">(Guid): objectId of Detail object</param> 
@@ -544,7 +544,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailViewObject failed on %A : %A" g.ObjectType objectId
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailViewObject failed on %s"  (rhType objectId)
    
         
     //-------Annotation ----
@@ -556,7 +556,7 @@ type RhinoScriptSyntax private () =
     static member CoerceTextDot (objectId:Guid) : TextDot =
        match RhinoScriptSyntax.CoerceGeometry objectId with
        | :?  TextDot as a -> a
-       | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextDot failed on: %s " (typeDescr objectId)
+       | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextDot failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) .</summary>
     ///<param name="objectId">(Guid): objectId of TextEntity object</param> 
@@ -564,7 +564,7 @@ type RhinoScriptSyntax private () =
     static member CoerceTextEntity (objectId:Guid) : TextEntity =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextEntity failed on: %s " (typeDescr objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextEntity failed on: %s " (rhType objectId)
 
 
     ///<summary>Attempt to get Rhino TextObject Annotation Object.</summary>
@@ -573,7 +573,7 @@ type RhinoScriptSyntax private () =
     static member CoerceTextObject (objectId:Guid): DocObjects.TextObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.TextObject as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextObject failed on: %s " (typeDescr objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextObject failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get Hatch Geometry.</summary>
     ///<param name="objectId">(Guid): objectId of Hatch object</param> 
@@ -581,7 +581,7 @@ type RhinoScriptSyntax private () =
     static member CoerceHatch (objectId:Guid) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatch failed on: %s " (typeDescr objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatch failed on: %s " (rhType objectId)
 
 
     ///<summary>Attempt to get Rhino Hatch Object.</summary>
@@ -590,7 +590,7 @@ type RhinoScriptSyntax private () =
     static member CoerceHatchObject (objectId:Guid): DocObjects.HatchObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatchObject failed on: %s " (typeDescr objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatchObject failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get Rhino Annotation Base Object.</summary>
     ///<param name="objectId">(Guid): objectId of annotation object</param> 
@@ -598,7 +598,7 @@ type RhinoScriptSyntax private () =
     static member CoerceAnnotation (objectId:Guid): DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (typeDescr objectId)
+        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (rhType objectId)
 
 
     ///<summary>Attempt to get Rhino Leader Annotation Object.</summary>
@@ -607,7 +607,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLeader (objectId:Guid): DocObjects.LeaderObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LeaderObject as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (typeDescr objectId)
+        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get Rhino LinearDimension Annotation Object.</summary>
     ///<param name="objectId">(Guid): objectId of LinearDimension object</param> 
@@ -615,7 +615,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLinearDimension (objectId:Guid): DocObjects.LinearDimensionObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LinearDimensionObject as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (typeDescr objectId)
+        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (rhType objectId)
     
     //---------Geometry (Base)------------
 
@@ -833,7 +833,7 @@ type RhinoScriptSyntax private () =
     static member CoerceBrep(objectId:Guid) : Brep  =
         match RhinoScriptSyntax.TryCoerceBrep(objectId) with 
         | Some b -> b
-        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceBrep failed on: %s " (typeDescr objectId)
+        | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceBrep failed on: %s " (rhType objectId)
 
 
     
@@ -845,15 +845,15 @@ type RhinoScriptSyntax private () =
         if segmentIndex < 0 then 
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? Curve as c -> c
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCurve failed on: %s " (typeDescr objectId)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCurve failed on: %s " (rhType objectId)
         else
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? PolyCurve as c -> 
                 let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCurve failed on segment index %d for %s" segmentIndex   (typeDescr crv)
+                if isNull crv then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCurve failed on segment index %d for %s" segmentIndex  (rhType objectId)
                 crv
             | :? Curve as c -> c
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCurve failed for %s"  (typeDescr objectId)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCurve failed for %s"  (rhType objectId)
 
   
 
@@ -877,7 +877,7 @@ type RhinoScriptSyntax private () =
         | :? Surface as c -> c.ToNurbsSurface()
         | :? Brep as b -> 
             if b.Faces.Count = 1 then (b.Faces.[0] :> Surface).ToNurbsSurface()
-            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on %s from Brep with %d Faces" (typeDescr objectId)   b.Faces.Count
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on %s from Brep with %d Faces" (rhType objectId)   b.Faces.Count
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceNurbsSurface failed on: %A "  objectId
 
 
@@ -887,7 +887,7 @@ type RhinoScriptSyntax private () =
     static member CoerceMesh(objectId:Guid) : Mesh =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Mesh as m -> m        
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceMesh failed on: %s " (typeDescr objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceMesh failed on: %s " (rhType objectId)
 
 
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
@@ -896,7 +896,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLight (objectId:Guid) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLight failed on: %s " (typeDescr objectId)
+        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLight failed on: %s " (rhType objectId)
 
 
     ///<summary>Attempt to get Rhino PointCloud Geometry.</summary>
@@ -905,7 +905,7 @@ type RhinoScriptSyntax private () =
     static member CoercePointCloud (objectId:Guid) : PointCloud =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePointCloud failed on: %s " (typeDescr objectId)
+        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePointCloud failed on: %s " (rhType objectId)
                 
 
     

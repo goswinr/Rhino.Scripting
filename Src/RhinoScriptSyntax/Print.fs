@@ -18,9 +18,9 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ExtensionsPrint =
   
-  type RhinoScriptSyntax with
-    
-    static member internal formatRhinoObject (o:obj)  = 
+  let mutable internal doInit = true
+
+  let internal formatRhinoObject (o:obj)  = 
         match o with
         | :? Guid       as x -> Some <| NiceStringSettings.Element (rhType x)
         | :? Point3d    as x -> Some <| NiceStringSettings.Element x.ToNiceString
@@ -28,20 +28,44 @@ module ExtensionsPrint =
         | :? Line       as x -> Some <| NiceStringSettings.Element x.ToNiceString        
         | :? Point3f    as x -> Some <| NiceStringSettings.Element x.ToNiceString
         | :? Vector3f   as x -> Some <| NiceStringSettings.Element x.ToNiceString
-        | _                  -> None        
+        | _                  -> None   
+
+  let internal init()=    
+      doInit <- false
+      NiceStringSettings.externalFormater                                              <- formatRhinoObject
+      NiceStringSettings.roundToZeroBelow                                              <- Doc.ModelAbsoluteTolerance * 0.1 // so that any float small than Doc.ModelAbsoluteTolerance wil be shown as 0.0
+      RhinoApp.AppSettingsChanged.Add    (fun _ -> NiceStringSettings.roundToZeroBelow <- Doc.ModelAbsoluteTolerance * 0.1 )
+      RhinoDoc.ActiveDocumentChanged.Add (fun _ -> NiceStringSettings.roundToZeroBelow <- Doc.ModelAbsoluteTolerance * 0.1 )
+
+  type RhinoScriptSyntax with    
     
-    ///<summary>Returns a nice string for any kinds of objects or values, for most objects this is just calling *.ToString().</summary>
+    ///<summary>
+    /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
+    /// Shows numbers smaller than Doc.ModelAbsoluteTolerance * 0.1 as 0.0
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    ///   • thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
+    ///   • toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    ///   • toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
+    ///   • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  </summary>
     ///<param name="x">('T): the value or object to represent as string</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    /// Applicable if the value x is a Seq: If true  the string will only show the first 4 items per seq or nested seq. If false all itemes will be in the string</param>
+    /// Applicable if the value x is a Seq: If true  the string will only show the first 5 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(string) The string.</returns>
     [<Extension>]
     static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
+        if doInit then init()
         if trim then NiceString.toNiceString(x)
         else         NiceString.toNiceStringFull(x)       
     
-    ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line. 
-    ///    If the value is a Seq the string will only show the first 4 items per seq or nested seq.</summary>
+    ///<summary>
+    /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
+    /// Prints to Console.Out and to Rhino Commandline
+    /// Shows numbers smaller than Doc.ModelAbsoluteTolerance * 0.1 as 0.0
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    ///   • thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
+    ///   • toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    ///   • toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
+    ///   • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  </summary>
     ///<param name="x">('T): the value or object to print</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
@@ -51,8 +75,13 @@ module ExtensionsPrint =
         |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !
  
-    ///<summary>Prints an object or value to Seff editor (if present,otherwise to StandardOut stream) and to Rhino Command line.
-    ///    If the value is a Seq the string will contain a line for each item and per nested item.</summary>
+    ///<summary> 
+    /// Nice formating for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
+    /// Prints to Console.Out and to Rhino Commandline
+    /// Shows numbers smaller than Doc.ModelAbsoluteTolerance * 0.1 as 0.0
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    ///   • thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
+    ///   • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.</summary>
     ///<param name="x">('T): the value or object to print</param>   
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
@@ -61,11 +90,14 @@ module ExtensionsPrint =
         |>! RhinoApp.WriteLine 
         |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !
-
-    ///<summary>Prints Sequence of objects or values separated by a space charcter or a custom value.</summary>
-    ///<param name="xs">('T): the values or objects to print</param>
-    ///<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
-    ///<returns>(unit) void, nothing.</returns>
+    
+    (*
+    //<summary>
+    // Prints Sequence of objects or values separated by a space charcter or a custom value.
+    // Prints to Console.Out and to Rhino Commandline.</summary>
+    //<param name="xs">('T): the values or objects to print</param>
+    //<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
+    //<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member PrintSeq (xs:'T seq, [<OPT;DEF(" ")>]separator:string) : unit =
         xs
@@ -74,10 +106,11 @@ module ExtensionsPrint =
         |>! RhinoApp.WriteLine 
         |>  Console.WriteLine
         RhinoApp.Wait()
+    *)
 
-    //printf:
     
-    /// Like printf but in Red. Does not add a new line at end.
+    /// Like printf but in Red if used from Seff Editor. Does not add a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfRed msg =  
         Printf.kprintf (fun s -> 
@@ -85,7 +118,8 @@ module ExtensionsPrint =
             printfColor 220 0 0 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
             
-    /// Like printf but in Red. Adds a new line at end.
+    /// Like printfn but in Red if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfnRed msg =  
         Printf.kprintf (fun s -> 
@@ -93,7 +127,8 @@ module ExtensionsPrint =
             printfnColor 220 0 0 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Green. Does not add a new line at end.
+    /// Like printf but in Green if used from Seff Editor. Does not add a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfGreen msg =  
         Printf.kprintf (fun s -> 
@@ -101,7 +136,8 @@ module ExtensionsPrint =
             printfColor 0 180 0 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
             
-    /// Like printf but in Green.Adds a new line at end.
+    /// Like printfn but in Green if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfnGreen msg =  
         Printf.kprintf (fun s -> 
@@ -109,7 +145,8 @@ module ExtensionsPrint =
             printfnColor 0 180 0 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Light Blue. Does not add a new line at end.
+    /// Like printf but in Light Blue if used from Seff Editor. Does not add a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfLightBlue msg =  
         Printf.kprintf (fun s -> 
@@ -117,7 +154,8 @@ module ExtensionsPrint =
             printfColor 173 216 230  "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Light Blue. Adds a new line at end.
+    /// Like printfn but in Light Blue if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfnLightBlue msg =  
         Printf.kprintf (fun s -> 
@@ -125,7 +163,8 @@ module ExtensionsPrint =
             printfnColor 173 216 230  "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Blue. Does not add a new line at end.
+    /// Like printf but in Blue if used from Seff Editor. Does not add a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfBlue msg =  
         Printf.kprintf (fun s -> 
@@ -133,7 +172,8 @@ module ExtensionsPrint =
             printfColor 0 0 220 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Blue. Adds a new line at end.
+    /// Like printfn but in Blue if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfnBlue msg =  
         Printf.kprintf (fun s -> 
@@ -141,7 +181,8 @@ module ExtensionsPrint =
             printfnColor 0 0 220 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Grey. Does not add a new line at end.
+    /// Like printf but in Grey if used from Seff Editor. Does not add a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfGrey msg =  
         Printf.kprintf (fun s -> 
@@ -149,7 +190,8 @@ module ExtensionsPrint =
             printfColor 150 150 150 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Grey. Adds a new line at end.
+    /// Like printfn but in Grey if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
     static member PrintfnGrey msg =  
         Printf.kprintf (fun s -> 
@@ -157,7 +199,8 @@ module ExtensionsPrint =
             printfnColor 150 150 150 "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
-    ///<summary>Like printf but in costom color. Does not add a new line at end.</summary>
+    ///<summary>Like printf but in custom color if used from Seff Editor. Does not add a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
@@ -170,7 +213,8 @@ module ExtensionsPrint =
             printfColor red green blue"%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
-    ///<summary>Like printfn but in costom color. Adds a new line at end. .</summary>
+    ///<summary>Like printfn but in costom color if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
@@ -183,47 +227,50 @@ module ExtensionsPrint =
             printfnColor red green blue"%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
   
-  do
-    NiceStringSettings.externalFormater                                              <- RhinoScriptSyntax.formatRhinoObject
-
-    NiceStringSettings.roundToZeroBelow                                              <- Doc.ModelAbsoluteTolerance * 0.1 // so that any float small than Doc.ModelAbsoluteTolerance wil be shown as 0.0
-    RhinoApp.AppSettingsChanged.Add    (fun _ -> NiceStringSettings.roundToZeroBelow <- Doc.ModelAbsoluteTolerance * 0.1 )
-    RhinoDoc.ActiveDocumentChanged.Add (fun _ -> NiceStringSettings.roundToZeroBelow <- Doc.ModelAbsoluteTolerance * 0.1 )
-    
-
-  //TODO add these too becaue printcolorfn does not print to rhino command window?
-
-  (*
+  
+  //---------------------------------------------------------------------------
+  // Shadowing the built in print and prinFull to inculde external formater
+  //---------------------------------------------------------------------------
 
 
-  ///same as RhinoScriptSyntax.Print (shadows print from FsEx)
-  let print x = RhinoScriptSyntax.Print x 
+  /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
+  /// Only prints to Console.Out, NOT to Rhino Commandline
+  /// Shows numbers smaller than Doc.ModelAbsoluteTolerance * 0.1 as 0.0
+  /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+  /// • thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
+  /// • toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+  /// • toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
+  /// • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  
+  let print x = 
+    if doInit then init() 
+    print x
   
-  /// shadowing the default printf to also print to Rhino Command line
-  let printf   msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> printf "%s"   ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  /// Nice formating for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
+  /// Only prints to Console.Out, NOT to Rhino Commandline
+  /// Shows numbers smaller than Doc.ModelAbsoluteTolerance * 0.1 as 0.0
+  /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+  /// • thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
+  /// • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.
+  let printFull x = 
+    if doInit then init() 
+    printFull x  
+
+  /// Prints two values separated by a space using FsEx.NiceString.toNiceString
+  /// Only prints to Console.Out, NOT to Rhino Commandline
+  let print2 x y = 
+    if doInit then init()
+    print2 x y
   
-  /// shadowing the default printfn to also print to Rhino Command line
-  let printfn  msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> Console.WriteLine  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
+  /// Prints three values separated by a space using FsEx.NiceString.toNiceString
+  /// Only prints to Console.Out, NOT to Rhino Commandline
+  let print3 x y z = 
+    if doInit then init()
+    print3 x y z
   
-  /// shadowing the default eprintf to also print to Rhino Command line
-  let eprintf  msg= Printf.kprintf (fun s -> s |>! RhinoApp.Write     |> eprintf "%s"  ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
-  
-  /// shadowing the default eprintfn to also print to Rhino Command line
-  let eprintfn msg= Printf.kprintf (fun s -> s |>! RhinoApp.WriteLine |> eConsole.WriteLine ; RhinoApp.Wait()) msg // no swith to UI Thread needed !
-  
-  /// prints two values separated by a space using FsEx.NiceString.toNiceString
-  ///(shadows print2 from FsEx)
-  let print2 x y = RhinoScriptSyntax.Print (sprintf "%s %s" (NiceString.toNiceString x) (NiceString.toNiceString y))
-    
-  /// prints three values separated by a space using FsEx.NiceString.toNiceString
-  ///(shadows print3 from FsEx)
-  let print3 x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s" (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z))
-  
-  /// prints four values separated by a space using FsEx.NiceString.toNiceString
-  ///(shadows print4 from FsEx)
-  let print4 w x y z = RhinoScriptSyntax.Print (sprintf "%s %s %s %s" (NiceString.toNiceString w) (NiceString.toNiceString x) (NiceString.toNiceString y) (NiceString.toNiceString z))
-  
-  ///RhinoScriptSyntax.PrintFull (shadows printFull from FsEx)
-  let printFull x = RhinoScriptSyntax.PrintFull x //shadows FsEx.TypeExtensionsObject.printFull
-    
-  *)
+  /// Prints four values separated by a space using FsEx.NiceString.toNiceString
+  /// Only prints to Console.Out, NOT to Rhino Commandline
+  let print4 w x y z = 
+    if doInit then init() 
+    print4 w x y z
+
+

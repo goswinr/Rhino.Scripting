@@ -132,7 +132,7 @@ module ExtensionsUserinterface =
 
 
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
-    ///    displayed as click-able command line option toggles.</summary>
+    ///    displayed as click-able Commandline option toggles.</summary>
     ///<param name="message">(string) A prompt</param>
     ///<param name="items">((string*string*string) array) List of options. Each option is a tuple of three strings
     ///    [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)

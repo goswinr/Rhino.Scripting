@@ -25,62 +25,34 @@ type Synchronisation private () = // no public constructor
     static let mutable seffAssembly : Reflection.Assembly = null //set via reflection below from Seff.Rhino    
     
     static let mutable seffWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
-
-    (* in fsEx now
-    static let mutable colorLogger : int-> int -> int -> string -> unit = //set via reflection below from Seff.Rhino
-        fun r g b s -> 
-             RhinoApp.Write s
-             printf "%s" s    
-    
-    static let mutable colorLoggerNl : int-> int -> int -> string -> unit = //set via reflection below from Seff.Rhino
-        fun r g b s -> 
-             RhinoApp.WriteLine s
-             printfn "%s" s
-    *)
-   
+       
     static let init()=
         if HostUtils.RunningInRhino  && HostUtils.RunningOnWindows then 
             if isNull syncContext || isNull seffAssembly then
                 try
-                // some reflection hacks because Rhinocommon does not expose a UI sync context
-                // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7 
+                    // some reflection hacks because Rhinocommon does not expose a UI sync context
+                    // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7 
                     let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831") // the GUID of Seff.Rhino Plugin set in it's AssemblyInfo.fs
                     let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
                     seffAssembly <- seffRh.Assembly
                     seffRhinoSyncModule <- seffAssembly.GetType("Seff.Rhino.Sync") 
                     syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
+                    if isNull syncContext then 
+                        eprintfn "Seff.Rhino.Sync.syncContext is still -null-, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!"
                 with ex ->
                     eprintfn "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread! \r\nMessage: %A" ex
-                if isNull syncContext then 
-                    eprintfn "Seff.Rhino.Sync.syncContext is still -null-, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!" 
-                if isNull seffAssembly then  
-                    eprintfn "Seff.Rhino.Print.colorLogger is still -null-. If you are not using the Seff Editor Plugin this is normal." 
-                
-                (*
-                try   
-                    let printModule = seffAssembly.GetType("Seff.Rhino.Print") 
-                    colorLogger   <- printModule.GetProperty("colorLogger").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
-                    colorLoggerNl <- printModule.GetProperty("colorLoggerNl").GetValue(seffAssembly) :?>  int-> int -> int -> string -> unit
-                with ex ->
-                    eprintfn "Failed to get Seff.Rhino.Print.colorLogger or colorLoggerNl via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\nMessage: %A" ex                    
-                *)
-                
+                                
                     
             if isNull seffWindow then 
                 try   
                     seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
+                    if isNull seffWindow then 
+                        eprintfn "Seff.Rhino.SeffPlugin.Instance.Window is still -null-., If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions" 
                 with ex ->
                     eprintfn "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions: \r\n%A" ex 
-                if isNull seffWindow then 
-                    "Seff.Rhino.SeffPlugin.Instance.Window is still -null-., If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions"                    
-                    |> eprintfn "%s"
-
-            //if notNull syncContext && notNull seffWindow then 
-                //"Rhino.Scripting SynchronizationContext and Seff Window refrence is set up."
-                //|>! RhinoApp.WriteLine 
-                //|> printfn "%s"
+               
         else
-            eprintfn "Synchronisation.init() not done because HostUtils.RunningInRhino %b HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
+            eprintfn "Synchronisation.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
     
   
     // ---------------------------------
@@ -92,21 +64,12 @@ type Synchronisation private () = // no public constructor
     static member isCurrrenThreadUI()=
         // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails
         RhinoApp.InvokeRequired
-    (*
-    /// print with rgb colors. does not add a new line
-    /// red -> green -> blue -> string -> unit
-    static member ColorLogger = colorLogger
-
-    /// print with rgb colors. adds a new line
-    /// red -> green -> blue -> string -> unit
-    static member ColorLoggerNl = colorLoggerNl
-    *)
+   
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin      
     static member SyncContext = 
-        if isNull syncContext then 
-            Synchronisation.Initialize()
+        if isNull syncContext then init()
         syncContext
     
     ///the WPF Window of currently running Seff Editor
@@ -122,11 +85,8 @@ type Synchronisation private () = // no public constructor
     static member DoSync ensureRedrawEnabled hideEditor (func:unit->'T): 'T =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then 
-                Synchronisation.Initialize()
-             if isNull syncContext then 
-                RhinoScriptingException.Raise "Rhino.Synchronisation.syncContext is still null and not set up. UI code only works when started in sync mode."
-                
+             if isNull syncContext then Synchronisation.Initialize()
+             if isNull syncContext then RhinoScriptingException.Raise "Rhino.Synchronisation.syncContext is still null and not set up. UI code only works when started in sync mode."                
              async{
                     do! Async.SwitchToContext syncContext
                     if hideEditor && notNull seffWindow then seffWindow.Hide()

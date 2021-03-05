@@ -273,7 +273,7 @@ module ExtensionsLayer =
             if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, ByParent, ByParent)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (typeDescr objectId)
+        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (rhType objectId)
         Doc.Views.Redraw()
    
     ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
