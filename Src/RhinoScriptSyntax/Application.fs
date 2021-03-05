@@ -22,7 +22,8 @@ module ExtensionsApplication =
     ///<param name="macro">(string) The macro to run when the alias is executed</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
-    static member AddAlias(alias:string, macro:string) : bool =
+    static member AddAlias( alias:string, 
+                            macro:string) : bool =
         Synchronisation.DoSync false false (fun () -> 
             ApplicationSettings.CommandAliasList.Add(alias, macro))
 
@@ -35,7 +36,8 @@ module ExtensionsApplication =
     ///<returns>(int) The index where the item was inserted.
     ///    -1 on failure.</returns>
     [<Extension>]
-    static member AddSearchPath(folder:string, [<OPT;DEF(-1)>]index:int) : int =
+    static member AddSearchPath(    folder:string, 
+                                    [<OPT;DEF(-1)>]index:int) : int =
         Synchronisation.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.AddSearchPath(folder, index))
 
@@ -160,11 +162,6 @@ module ExtensionsApplication =
             else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor: setting item %d is out of range" item
             Doc.Views.Redraw()
             )
-
-
-
-
-
 
 
     ///<summary>Returns the file name used by Rhino's automatic file saving.</summary>
