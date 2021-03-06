@@ -32,9 +32,9 @@ module ExtensionsLayer =
     if name.Contains "::" then 
         RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing two colons(::)  '%s'. " name        
    
-    match Char.GetUnicodeCategory(name.First) with
+    match Char.GetUnicodeCategory(name.[0]) with
     | UnicodeCategory.OpenPunctuation | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) dont work at start of layer name
-        RhinoScriptingException.Raise  "RhinoScriptSyntax found an invalid layer name: '%s'. The name may not start with a '%c' " name name.First
+        RhinoScriptingException.Raise  "RhinoScriptSyntax found an invalid layer name: '%s'. The name may not start with a '%c' " name name.[0]
     | _ -> ()      
    
     for c in name do

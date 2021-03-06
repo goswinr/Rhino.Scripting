@@ -16,6 +16,7 @@ module ExtrasCurve =
 
   open Line
   open Vec
+  open FsEx.ExtensionsIList
    
   type RhinoScriptSyntax with 
     
