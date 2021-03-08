@@ -272,19 +272,27 @@ module ExtensionsObject =
         rhobj.IsSelected(false)
 
 
-    ///<summary>Determines if an object is closed, solid.</summary>
+    ///<summary>Determines if an object is closed or solid.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<returns>(bool) True if the object is solid, or a Mesh is closed., False otherwise.</returns>
+    ///<returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
     [<Extension>]
     static member IsObjectSolid(objectId:Guid) : bool =
-        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)        
+        // rhobj.IsSolid //TODO see https://github.com/mcneel/rhinoscriptsyntax/pull/197
         let geom = rhobj.Geometry
         match geom with
         | :? Mesh      as m -> m.IsClosed
         | :? Extrusion as s -> s.IsSolid
         | :? Surface   as s -> s.IsSolid
         | :? Brep      as s -> s.IsSolid
-        | _                 -> false
+        #if RHINO6
+        //nothing more
+        #else
+        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
+        #endif
+        | _                 -> 
+            RhinoScriptingException.Raise " only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (rhType objectId)
+            
 
 
     ///<summary>Verifies an object's geometry is valid and without error.</summary>
