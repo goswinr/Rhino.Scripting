@@ -301,7 +301,7 @@ module ExtensionsMesh =
     [<Extension>]
     static member IsPointOnMesh(    objectId:Guid,
                                     point:Point3d,
-                                    [<OPT;DEF(0.0)>]tolerance:float): bool =
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let maxdistance = ifZero1 tolerance RhinoMath.SqrtEpsilon
@@ -345,7 +345,7 @@ module ExtensionsMesh =
     ///<param name="objectId">(Guid) Identifier of a Mesh objects</param>
     ///<returns>(float) total area of Mesh.</returns>
     [<Extension>]
-    static member MeshArea(objectId:Guid ) :float =
+    static member MeshArea(objectId:Guid ) : float =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
         if notNull mp then

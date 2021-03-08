@@ -315,7 +315,7 @@ module ExtensionsApplication =
         ApplicationSettings.EdgeAnalysisSettings.ShowEdgeColor
 
     ///<summary>Modifies edge analysis color displayed by the ShowEdges command.</summary>
-    ///<param name="color">(Drawing.Color), optional): The new color for the analysis</param>
+    ///<param name="color">(Drawing.Color), optional) The new color for the analysis</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member EdgeAnalysisColor(color:Drawing.Color) : unit = //SET

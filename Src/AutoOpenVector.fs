@@ -24,7 +24,7 @@ module AutoOpenVector =
         [<Obsolete>]
         /// Use Vec.angle .. instead
         ///projects to Plane an retuns angle in degrees in Plane between -180 and + 180               
-        static member AngleInPlane180( plane:Plane, vector:Vector3d):float  = 
+        static member AngleInPlane180( plane:Plane, vector:Vector3d) : float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
             let ang = acos dot  |> toDegrees
@@ -34,7 +34,7 @@ module AutoOpenVector =
         [<Obsolete>]
         /// Use Vec.angle .. instead
         ///projects to Plane an retuns angle in degrees in Plane between 0 and 360               
-        static member AngleInPlane360( plane:Plane, vector:Vector3d):float  = 
+        static member AngleInPlane360( plane:Plane, vector:Vector3d) : float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
             let ang = acos dot  |> toDegrees
@@ -130,7 +130,7 @@ module AutoOpenVector =
         /// Calculates the intersection of a finite line with a triangle (without using Rhinocommon) 
         /// Returns Some(Point3d) or None if no intersection found
         [<Extension>]     
-        static member LineTriangleIntersect(line:Line, p1 :Point3d ,p2 :Point3d, p3 :Point3d):  Point3d option  = 
+        static member LineTriangleIntersect(line:Line, p1 :Point3d ,p2 :Point3d, p3 :Point3d) : Point3d option  = 
             
             // https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d
             /// computes the signed Volume of a Tetrahedron

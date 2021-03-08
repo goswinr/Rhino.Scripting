@@ -21,7 +21,7 @@ module ExtrasBrep =
     ///<param name="height">(float) height of sloted hole volume</param> 
     ///<returns>(Brep) Closed Brep Geometry.</returns>
     [<Extension>]
-    static member CreateSlotedHoleVolume( plane:Plane, length, width, height):Brep  =
+    static member CreateSlotedHoleVolume( plane:Plane, length, width, height) : Brep  =
         if length<width then RhinoScriptingException.Raise "RhinoScriptSyntax.SlotedHole: length= %g must be more than width= %g" length width
         let root05  = sqrt 0.5
         let y05 = 0.5 * width
@@ -80,7 +80,7 @@ module ExtrasBrep =
     ///<param name="length">(float) total length of the screw brep</param>
     ///<returns>(Brep) Brep Geometry.</returns>
     [<Extension>]
-    static member CreateCylinder ( plane:Plane, diameter, length):Brep  =            
+    static member CreateCylinder ( plane:Plane, diameter, length) : Brep  =            
         let circ = Circle(plane,diameter*0.5)
         let cy = Cylinder(circ,length)
         Brep.CreateFromCylinder(cy, capBottom=true, capTop=true)
@@ -93,7 +93,7 @@ module ExtrasBrep =
     ///<param name="length">(float) total length of the screw brep</param>
     ///<returns>(Brep) Brep Geometry.</returns>
     [<Extension>]
-    static member CreateCounterSunkScrewVolume ( plane:Plane, outerDiameter, innerDiameter, length):Brep  =
+    static member CreateCounterSunkScrewVolume ( plane:Plane, outerDiameter, innerDiameter, length) : Brep  =
         let r = outerDiameter*0.5
         let mutable plco = Plane(plane)
         plco.Origin <- plco.Origin + plco.ZAxis * r
@@ -109,12 +109,12 @@ module ExtrasBrep =
         brep
 
     ///<summary>if brep.SolidOrientation is inward then flip brep .</summary>
-    static member OrientBrep (brep:Brep):Brep  =
+    static member OrientBrep (brep:Brep) : Brep  =
         if brep.SolidOrientation = BrepSolidOrientation.Inward then  
             brep.Flip()
         brep
 
-    static member CreateExrusionAtPlane(curveToExtrudeInWorldXY:Curve, plane:Plane, height, [<OPT;DEF(0.0)>]extraHeightPerSide:float): Brep =
+    static member CreateExrusionAtPlane(curveToExtrudeInWorldXY:Curve, plane:Plane, height, [<OPT;DEF(0.0)>]extraHeightPerSide:float) : Brep =
         let mutable pl = Plane(plane)
         if extraHeightPerSide <> 0.0 then 
             pl.Origin <- pl.Origin - pl.ZAxis*extraHeightPerSide

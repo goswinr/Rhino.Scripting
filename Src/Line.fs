@@ -35,7 +35,7 @@ module Line =
     /// Fails if lines are paralell or skew by more than 1e-6 units
     /// Considers Lines infinte
     /// Returns point on lnB
-    let intersectInOnePoint (lnA:Line) (lnB:Line):Point3d = 
+    let intersectInOnePoint (lnA:Line) (lnB:Line) : Point3d = 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
         if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Line.intersectInOnePoint failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
         let a = lnA.PointAt(ta)

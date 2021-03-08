@@ -47,7 +47,7 @@ module ExtensionsPrint =
     ///   • toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
     ///   • toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
     ///   • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  </summary>
-    ///<param name="x">('T): the value or object to represent as string</param>
+    ///<param name="x">('T) the value or object to represent as string</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     /// Applicable if the value x is a Seq: If true  the string will only show the first 5 items per seq or nested seq. If false all itemes will be in the string</param>
     ///<returns>(string) The string.</returns>
@@ -66,7 +66,7 @@ module ExtensionsPrint =
     ///   • toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
     ///   • toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
     ///   • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  </summary>
-    ///<param name="x">('T): the value or object to print</param>
+    ///<param name="x">('T) the value or object to print</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Print (x:'T) : unit =
@@ -82,7 +82,7 @@ module ExtensionsPrint =
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
     ///   • thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
     ///   • maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.</summary>
-    ///<param name="x">('T): the value or object to print</param>   
+    ///<param name="x">('T) the value or object to print</param>   
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member PrintFull (x:'T) : unit =
@@ -95,7 +95,7 @@ module ExtensionsPrint =
     //<summary>
     // Prints Sequence of objects or values separated by a space charcter or a custom value.
     // Prints to Console.Out and to Rhino Commandline.</summary>
-    //<param name="xs">('T): the values or objects to print</param>
+    //<param name="xs">('T) the values or objects to print</param>
     //<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
     //<returns>(unit) void, nothing.</returns>
     [<Extension>]

@@ -82,7 +82,7 @@ type Synchronisation private () = // no public constructor
     static member Initialize() = init() // called in ActiveDocument module
 
     ///Evaluates a function on UI Thread. Optionally ensures that redraw is enabled . Optionally hides Seff editor window if it exists. 
-    static member DoSync ensureRedrawEnabled hideEditor (func:unit->'T): 'T =
+    static member DoSync ensureRedrawEnabled hideEditor (func:unit->'T) : 'T =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
              if isNull syncContext then Synchronisation.Initialize()

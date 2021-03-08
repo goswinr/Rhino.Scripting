@@ -14,9 +14,13 @@ type Arg =
     |ChAr of string
     |Int of string 
     |Oth of string 
-    
+
+let argTyps = Hashset<string>() 
+
 let doAddNullcheck(path) =
-    printfn "doing %s ..." path 
+    printfnColor 0 155 0 "doing %s ..." path 
+    
+    
     
     let getRaiseFail (a:Arg) (n:String) (decl:string)  (args:Rarr<Arg>) = 
         stringBuffer{ 
@@ -90,13 +94,23 @@ let doAddNullcheck(path) =
         let doc,code = String.splitOnce "static member" txt 
         let decl,body = String.splitOnce "=" code
         let name,args = String.splitOnce "(" decl
-        let args, retType = String.splitOnce  " : " args 
-        let name = name.Trim() 
-        let args = 
-            args
-            |> String.trimEnd [| ' '; ')'|]
-            |> String.split ","
-            |> Array.map String.trim
+        try
+            let args, retType = String.splitOnce " : " args 
+            let name = name.Trim() 
+            let args = 
+                args
+                |> String.trimEnd [| ' '; ')'|]
+                |> String.split ","
+                |> Array.map (String.splitMaybeOnce ":") 
+                |> Array.map (fun (a,t)  -> a.Trim() ,  t.Trim() ) 
+            
+            for argName, argTyp in args do  
+                argTyps.Add argTyp  |> ignore 
+        with e ->  
+            printfn "static member %s" name
+            eprintfn "%A" e
+        
+        //printfn "name:%s args:%s" name (String.concat "|" args) 
         () 
         
         
@@ -111,7 +125,8 @@ let doAddNullcheck(path) =
     let defs = es |> Array.skip 1 
     
     for def in defs do 
-        doDef <| "///<summary>" + def
+        doDef( "///<summary>" + def) 
+    
     
     
    
@@ -121,6 +136,12 @@ let doAddNullcheck(path) =
 let files = IO.getAllFilesByPattern dir "*.fs"
 
 for file in files |> Seq.truncate 99 do
-    doAddNullcheck file
+    if not (file.EndsWith "Print.fs")  then 
+        doAddNullcheck file
+        
+    
+argTyps
+|> Seq.sort
+|> printFull
 
 printfn "*Done!"

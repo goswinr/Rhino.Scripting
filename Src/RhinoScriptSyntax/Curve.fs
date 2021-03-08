@@ -631,7 +631,7 @@ module ExtensionsCurve =
             if length = 0.0 then  s <- 0.0
             elif abs(length-curveLength) < Doc.ModelAbsoluteTolerance then  s <- 1.0
             else s <- length / curveLength
-            let dupe = if not fromStart then curve.Duplicate():?> Curve else curve
+            let dupe = if not fromStart then curve.Duplicate() :?> Curve else curve
             if notNull dupe then
                 if not fromStart then  dupe.Reverse() |> ignore
                 let rc, t = dupe.NormalizedLengthParameter(s)
@@ -1453,7 +1453,7 @@ module ExtensionsCurve =
         if (not <| curve.IsClosed || not <| curve.Domain.IncludesParameter(parameter)) then
             false
         else
-            let dupe = curve.Duplicate():?>Curve
+            let dupe = curve.Duplicate() :?>Curve
             if notNull dupe then
                 let r = dupe.ChangeClosedCurveSeam(parameter)
                 if not r then r
@@ -2362,7 +2362,7 @@ module ExtensionsCurve =
     ///    The offset Curve or Curves will be added to Rhino.</summary>
     ///<param name="curveId">(Guid) Curve identifiers</param>
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
-    ///<param name="parameter">(Point2d)):  U, V parameter that the Curve will be offset through</param>
+    ///<param name="parameter">(Point2d))  U, V parameter that the Curve will be offset through</param>
     ///<returns>(Guid Rarr) identifiers of the new Curves.</returns>
     [<Extension>]
     static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid Rarr =
@@ -2376,10 +2376,10 @@ module ExtensionsCurve =
         rc
 
     ///<summary>Offset a Curve on a Surface. The source Curve must lie on the Surface.
-    ///    The offset Curve or Curves will be added to Rhino.</summary>
-    ///<param name="curveId">(Guid) Curve identifiers</param>
-    ///<param name="surfaceId">(Guid) Surface identifiers</param>
-    ///<param name="distance">(float)):the distance of the offset. Based on the Curve's direction, a positive value
+    ///    The offset Curve or Curves will be added to Rhino Document.</summary>
+    ///<param name="curveId">(Guid) The Curve identifiers</param>
+    ///<param name="surfaceId">(Guid) The Surface identifiers</param>
+    ///<param name="distance">(float)) The distance of the offset. Based on the Curve's direction, a positive value
     ///    will offset to the left and a negative value will offset to the right</param>
     ///<returns>(Guid Rarr) identifiers of the new Curves.</returns>
     [<Extension>]

@@ -62,7 +62,7 @@ module QRcode =
     
     
     /// Creats a QRcode Mesh of size 1 unit at 0,0
-    let private asRhinoMesh (ar:bool[,]):Mesh =
+    let private asRhinoMesh (ar:bool[,]) : Mesh =
         let m = new Mesh()
         let sizeX = Array2D.length1 ar 
         let sizeY = Array2D.length2 ar 
@@ -87,7 +87,7 @@ module QRcode =
         m
 
     /// creats Hatch of size 1 at 0,0
-    let private asRhinoHatch (ar:bool[,]):Hatch [] =        
+    let private asRhinoHatch (ar:bool[,]) : Hatch [] =        
         let crvs = Rarr<Curve>()
         let sizeX = Array2D.length1 ar 
         let sizeY = Array2D.length2 ar 
@@ -122,7 +122,7 @@ module QRcode =
         /// Creats a Mesh of a QR code of size 1.0 located at World.Origin
         /// ErrorCorrectionLevel.H = high 30% 
         [<Extension>]
-        static member QrCodeAsMesh txt :Mesh = 
+        static member QrCodeAsMesh txt : Mesh = 
             txt
             |> BMofTxt 50
             |> as2dArray
@@ -131,7 +131,7 @@ module QRcode =
         /// Creats a Hatch of a QR code of size 1.0 located at World.Origin
         /// ErrorCorrectionLevel.H = high 30% 
         [<Extension>]
-        static member QrCodeAsHatch(txt) :Hatch [] =   
+        static member QrCodeAsHatch(txt) : Hatch [] =   
             txt
             |> BMofTxt 50
             |> as2dArray

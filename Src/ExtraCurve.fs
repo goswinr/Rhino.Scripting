@@ -50,7 +50,7 @@ module ExtrasCurve =
     ///<param name="polyline">(Point3d Rarr) The Polyline as pointlist </param> 
     ///<returns>a PolyCurve object.</returns>
     [<Extension>]
-    static member FilletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>): PolyCurve =            
+    static member FilletPolyline (fillets: IDictionary<int,float>, polyline:IList<Point3d>) : PolyCurve =            
         for i in fillets.Keys do 
             if i >= polyline.LastIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.FilletPolyline: cannot fillet corner %d . in polyline of %d points" i polyline.Count                
         
@@ -95,7 +95,7 @@ module ExtrasCurve =
     ///<returns>The needed trimming of two planar Surfaces in order to fit a fillet of given radius.
     ///    the Lines can be anywhere on Plane ( except paralel to axis).</returns>
     [<Extension>]
-    static member filletSkewLinesTrims (radius:float) (direction:Vector3d) (lineA:Line) (lineB:Line): float  =         
+    static member filletSkewLinesTrims (radius:float) (direction:Vector3d) (lineA:Line) (lineB:Line) : float  =         
         let ok,axis = 
             let pla = Plane(lineA.From, lineA.Direction, direction)
             let plb = Plane(lineB.From, lineB.Direction, direction)            
@@ -128,7 +128,7 @@ module ExtrasCurve =
     ///    the true fillet arc on cylinder(wrong ends), 
     ///    the point where fillet would be at radius 0, (same Plane as arc) .</returns>
     [<Extension>]
-    static member filletSkewLines makeSCurve (radius:float)  (direction:Vector3d) (lineA:Line) (lineB:Line): NurbsCurve*Arc*Point3d   = 
+    static member filletSkewLines makeSCurve (radius:float)  (direction:Vector3d) (lineA:Line) (lineB:Line) : NurbsCurve*Arc*Point3d   = 
         let ok,axis = 
             let pla = Plane(lineA.From, lineA.Direction, direction)
             let plb = Plane(lineB.From, lineB.Direction, direction)            

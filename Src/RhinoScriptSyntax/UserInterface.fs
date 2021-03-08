@@ -141,7 +141,7 @@ module ExtensionsUserinterface =
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool Rarr) Option of a list of values that represent the boolean values.</returns>
     [<Extension>]
-    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) :option<Rarr<bool>> =
+    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : option<Rarr<bool>> =
         let get () = 
             use go = new Input.Custom.GetOption()
             go.AcceptNothing(true)

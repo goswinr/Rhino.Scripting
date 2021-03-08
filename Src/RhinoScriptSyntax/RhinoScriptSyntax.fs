@@ -77,7 +77,7 @@ type RhinoScriptSyntax private () =
     
     ///Tests to see if the user has pressed the escape key.
     ///raises an OperationCanceledException.
-    static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool): bool =         
+    static member EscapeTest() : unit = //[<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool) : bool =         
         RhinoApp.Wait() //does not need to be on  UI thread
         if escapePressed  then           
             escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset 
@@ -87,10 +87,10 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Clamps a value between a lower and an upper bound.</summary>
-    ///<param name="minVal">(float): lower bound</param>
-    ///<param name="maxVal">(float): upper bound</param>
-    ///<param name="value">(float): the value to clamp</param>
-    ///<returns>(float):clamped value.</returns>
+    ///<param name="minVal">(float) The lower bound</param>
+    ///<param name="maxVal">(float) The upper bound</param>
+    ///<param name="value">(float) The value to clamp</param>
+    ///<returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float =
         if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
         max minVal (min maxVal value) 
@@ -99,9 +99,9 @@ type RhinoScriptSyntax private () =
     ///<summary>Like the Python 'xrange' function for integers this creates a range of floating point values.
     ///    The last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
     ///    Use FsEx.UtilMath.floatRange(...) to include stop value in range.</summary>
-    ///<param name="start">(float): first value of range</param> 
-    ///<param name="stop">(float): end of range (The last value will not be included in range, Python semantics.)</param>    
-    ///<param name="step">(float): step size between two values</param>
+    ///<param name="start">(float) first value of range</param> 
+    ///<param name="stop">(float) end of range (The last value will not be included in range, Python semantics.)</param>    
+    ///<param name="step">(float) step size between two values</param>
     ///<returns>(float seq) a lazy seq of loats.</returns>
     static member  FxrangePython (start:float, stop:float, step:float) : float seq =
         if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
@@ -127,9 +127,9 @@ type RhinoScriptSyntax private () =
     ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
     ///    This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
     ///    Use FsEx.UtilMath.floatRange(...) to include stop value in range.</summary>
-    ///<param name="start">(float): first value of range</param> 
-    ///<param name="stop">(float): end of range( The last value will not be included in range, Python semantics.)</param>    
-    ///<param name="step">(float): step size between two values</param>
+    ///<param name="start">(float) first value of range</param> 
+    ///<param name="stop">(float) end of range( The last value will not be included in range, Python semantics.)</param>    
+    ///<param name="step">(float) step size between two values</param>
     ///<returns>(float Rarr).</returns>
     static member FrangePython (start:float, stop:float, step:float) : float Rarr =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
@@ -177,7 +177,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get RhinoObject from the document with a given objectId. Fails on empty Guid.</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>a RhinoObject Option.</returns>
-    static member TryCoerceRhinoObject (objectId:Guid): DocObjects.RhinoObject option =     
+    static member TryCoerceRhinoObject (objectId:Guid) : DocObjects.RhinoObject option =     
         if Guid.Empty = objectId then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceRhinoObject failed on empty Guid"
         else 
             let o = Doc.Objects.FindId(objectId) 
@@ -195,7 +195,7 @@ type RhinoScriptSyntax private () =
     //        | o -> Some o.Geometry   
             
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
-    ///<param name="objectId">(Guid): light Identifier</param>
+    ///<param name="objectId">(Guid) light Identifier</param>
     ///<returns>a Rhino.Geometry.Light. Option.</returns>
     static member TryCoerceLight (objectId:Guid) : Light option =        
         match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -205,7 +205,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Mesh Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option.</returns>
-    static member TryCoerceMesh (objectId:Guid) :Mesh option =
+    static member TryCoerceMesh (objectId:Guid) : Mesh option =
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceMesh failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
@@ -218,7 +218,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Surface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option.</returns>
-    static member TryCoerceSurface (objectId:Guid) :Surface option =
+    static member TryCoerceSurface (objectId:Guid) : Surface option =
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceSurface failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
@@ -234,7 +234,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Fails on empty Guid.</summary>
     ///<param name="objectId">Polysurface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Mesh Option.</returns>
-    static member TryCoerceBrep (objectId:Guid) :Brep option =
+    static member TryCoerceBrep (objectId:Guid) : Brep option =
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TryCoerceBrep failed on empty Guid"
         else
             match Doc.Objects.FindId(objectId) with 
@@ -330,7 +330,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="cir">Guid, RhinoObject or Curve </param>
     ///<returns>a Geometry.Ellipse Option.</returns>
-    static member TryCoerceEllipse(cir:'T) :  Ellipse option=
+    static member TryCoerceEllipse(cir:'T) : Ellipse option=
         match box cir with
         | :? Ellipse as a -> Some(a)
         | :? Curve as crv ->
@@ -370,7 +370,7 @@ type RhinoScriptSyntax private () =
     //<summary>Attempt to get a Sequence of Guids from input</summary>
     //<param name="Ids">list of Guids</param>
     //<returns>Guid seq) Fails on bad input</returns>
-    //static member CoerceGuidList(Ids:'T):seq<Guid> =
+    //static member CoerceGuidList(Ids:'T) : seq<Guid> =
     //    match box Ids with
     //    | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
     //    | :? seq<obj> as gs -> 
@@ -422,7 +422,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
     ///<param name="objectId">(Guid) Object Identifier </param>
     ///<returns>a RhinoObject, Fails on bad input.</returns>
-    static member CoerceRhinoObject(objectId:Guid): DocObjects.RhinoObject =  
+    static member CoerceRhinoObject(objectId:Guid) : DocObjects.RhinoObject =  
         //match box objectId with
         //| :? Guid  as g -> 
         //    if Guid.Empty = g then raise <|  RhinoScriptingException "RhinoScriptSyntax.CoerceRhinoObject: Empty Guid in RhinoScriptSyntax.CoerceRhinoObject" 
@@ -448,7 +448,7 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Attempt to get Rhino LayerObject from the document with a given objectId or fullame.</summary>
-    ///<param name="nameOrId">(string or Guid or index): layers Identifier name</param>
+    ///<param name="nameOrId">(string or Guid or index) layers Identifier name</param>
     ///<returns>DocObjectys.Layer  Fails on bad input.</returns>
     static member CoerceLayer (nameOrId:'T) : DocObjects.Layer=       
             match box nameOrId with
@@ -487,7 +487,7 @@ type RhinoScriptSyntax private () =
     //-------------------views ---------------------
 
     ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standart or page view.</summary>
-    ///<param name="nameOrId">(string or Guid): Name or Guid the view, empty string will return the Active view</param> 
+    ///<param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param> 
     ///<returns>a Doc.View object) Fails on bad input.</returns>
     static member CoerceView (nameOrId:'T) : Display.RhinoView =    
         match box nameOrId with
@@ -508,7 +508,7 @@ type RhinoScriptSyntax private () =
 
     
     ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
-    ///<param name="nameOrId">(string): Name of the Layout</param> 
+    ///<param name="nameOrId">(string) Name of the Layout</param> 
     ///<returns>a Doc.View object) Fails on bad input.</returns>
     static member CoercePageView (nameOrId:'T) : Display.RhinoPageView =    
         match box nameOrId with
@@ -531,7 +531,7 @@ type RhinoScriptSyntax private () =
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot get view from %A" nameOrId
     
     ///<summary>Attempt to get Detail view rectangle Geometry.</summary>
-    ///<param name="objectId">(Guid): objectId of Detail object</param> 
+    ///<param name="objectId">(Guid) objectId of Detail object</param> 
     ///<returns>a Geometry.DetailView) Fails on bad input.</returns>
     static member CoerceDetailView (objectId:Guid) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -539,7 +539,7 @@ type RhinoScriptSyntax private () =
         | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %s"  (rhType objectId)          
     
     ///<summary>Attempt to get Detail view rectangle Object.</summary>
-    ///<param name="objectId">(Guid): objectId of Detail object</param> 
+    ///<param name="objectId">(Guid) objectId of Detail object</param> 
     ///<returns>a DocObjects.DetailViewObject) Fails on bad input.</returns>
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
@@ -551,7 +551,7 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Attempt to get TextDot Geometry.</summary>
-    ///<param name="objectId">(Guid): objectId of TextDot object</param> 
+    ///<param name="objectId">(Guid) objectId of TextDot object</param> 
     ///<returns>a Geometry.TextDot) Fails on bad input.</returns>
     static member CoerceTextDot (objectId:Guid) : TextDot =
        match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -559,7 +559,7 @@ type RhinoScriptSyntax private () =
        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextDot failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) .</summary>
-    ///<param name="objectId">(Guid): objectId of TextEntity object</param> 
+    ///<param name="objectId">(Guid) objectId of TextEntity object</param> 
     ///<returns>a Geometry.TextEntity) Fails on bad input.</returns>
     static member CoerceTextEntity (objectId:Guid) : TextEntity =
         match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -568,15 +568,15 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Attempt to get Rhino TextObject Annotation Object.</summary>
-    ///<param name="objectId">(Guid): objectId of TextObject</param> 
+    ///<param name="objectId">(Guid) objectId of TextObject</param> 
     ///<returns>(DocObjects.TextObject) Fails on bad input.</returns>
-    static member CoerceTextObject (objectId:Guid): DocObjects.TextObject =
+    static member CoerceTextObject (objectId:Guid) : DocObjects.TextObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.TextObject as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextObject failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get Hatch Geometry.</summary>
-    ///<param name="objectId">(Guid): objectId of Hatch object</param> 
+    ///<param name="objectId">(Guid) objectId of Hatch object</param> 
     ///<returns>a Geometry.CoerceHatch) Fails on bad input.</returns>
     static member CoerceHatch (objectId:Guid) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -585,34 +585,34 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Attempt to get Rhino Hatch Object.</summary>
-    ///<param name="objectId">(Guid): objectId of Hatch object</param> 
+    ///<param name="objectId">(Guid) objectId of Hatch object</param> 
     ///<returns>(DocObjects.HatchObject) Fails on bad input.</returns>
-    static member CoerceHatchObject (objectId:Guid): DocObjects.HatchObject =
+    static member CoerceHatchObject (objectId:Guid) : DocObjects.HatchObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatchObject failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get Rhino Annotation Base Object.</summary>
-    ///<param name="objectId">(Guid): objectId of annotation object</param> 
+    ///<param name="objectId">(Guid) objectId of annotation object</param> 
     ///<returns>(DocObjects.AnnotationObjectBase) Fails on bad input.</returns>
-    static member CoerceAnnotation (objectId:Guid): DocObjects.AnnotationObjectBase =
+    static member CoerceAnnotation (objectId:Guid) : DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (rhType objectId)
 
 
     ///<summary>Attempt to get Rhino Leader Annotation Object.</summary>
-    ///<param name="objectId">(Guid): objectId of Leader object</param> 
+    ///<param name="objectId">(Guid) objectId of Leader object</param> 
     ///<returns>(DocObjects.LeaderObject) Fails on bad input.</returns>
-    static member CoerceLeader (objectId:Guid): DocObjects.LeaderObject =
+    static member CoerceLeader (objectId:Guid) : DocObjects.LeaderObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LeaderObject as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (rhType objectId)
 
     ///<summary>Attempt to get Rhino LinearDimension Annotation Object.</summary>
-    ///<param name="objectId">(Guid): objectId of LinearDimension object</param> 
+    ///<param name="objectId">(Guid) objectId of LinearDimension object</param> 
     ///<returns>(DocObjects.LinearDimensionObject) Fails on bad input.</returns>
-    static member CoerceLinearDimension (objectId:Guid): DocObjects.LinearDimensionObject =
+    static member CoerceLinearDimension (objectId:Guid) : DocObjects.LinearDimensionObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LinearDimensionObject as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (rhType objectId)
@@ -686,7 +686,7 @@ type RhinoScriptSyntax private () =
                 RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (typeDescr pt)
     
     ///<summary>Attempt to get Rhino Point Object.</summary>
-    ///<param name="objectId">(Guid): objectId of Point object</param> 
+    ///<param name="objectId">(Guid) objectId of Point object</param> 
     ///<returns>a DocObjects.PointObject, Fails on bad input.</returns>
     static member CoercePointObject (objectId:Guid) : DocObjects.PointObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
@@ -841,7 +841,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>(Rhino.Geometry.Curve) Fails on bad input.</returns>
-    static member CoerceCurve(objectId:Guid, [<OPT;DEF(-1)>]segmentIndex:int): Curve = 
+    static member CoerceCurve(objectId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Curve = 
         if segmentIndex < 0 then 
             match RhinoScriptSyntax.CoerceGeometry(objectId) with 
             | :? Curve as c -> c
@@ -860,7 +860,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Surface geometry from the document with a given objectId.</summary>
     ///<param name="objectId">the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface) Fails on bad input.</returns>
-    static member CoerceSurface(objectId:Guid): Surface =
+    static member CoerceSurface(objectId:Guid) : Surface =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? Surface as c -> c
         | :? Brep as b -> 
@@ -871,7 +871,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Surface geometry from the document with a given objectId.</summary>
     ///<param name="objectId">the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface) Fails on bad input.</returns>
-    static member CoerceNurbsSurface(objectId:Guid): NurbsSurface =
+    static member CoerceNurbsSurface(objectId:Guid) : NurbsSurface =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with 
         | :? NurbsSurface as s -> s
         | :? Surface as c -> c.ToNurbsSurface()
@@ -891,7 +891,7 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
-    ///<param name="objectId">(Guid): light Identifier</param>
+    ///<param name="objectId">(Guid) light Identifier</param>
     ///<returns>a  Rhino.Geometry.Light) Fails on bad input.</returns>
     static member CoerceLight (objectId:Guid) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
@@ -900,7 +900,7 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Attempt to get Rhino PointCloud Geometry.</summary>
-    ///<param name="objectId">(Guid): objectId of PointCloud object</param> 
+    ///<param name="objectId">(Guid) objectId of PointCloud object</param> 
     ///<returns>a Geometry.PointCloud) Fails on bad input.</returns>
     static member CoercePointCloud (objectId:Guid) : PointCloud =
         match RhinoScriptSyntax.CoerceGeometry objectId with

@@ -549,7 +549,7 @@ module ExtensionsSelection =
     ///    Allow for preselected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked object</param>
-    ///<returns>((Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string)):
+    ///<returns>((Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string)) 
     ///    [0]  identifier of the Surface
     ///    [1]  True if the Surface was preselected, otherwise False
     ///    [2]  selection method ( DocObjects.SelectionMethod )
@@ -609,7 +609,7 @@ module ExtensionsSelection =
     [<Extension>]
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) :Guid Rarr =
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
             let settings = DocObjects.ObjectEnumeratorSettings()
             settings.ActiveObjects <- true
             settings.NormalObjects <- true

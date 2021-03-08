@@ -1596,7 +1596,7 @@ module ExtensionsSurface =
 
     ///<summary>Deletes a knot from a Surface object.</summary>
     ///<param name="surface">(Guid) The reference of the Surface object</param>
-    ///<param name="uvParameter">(float * float)): An indexable item containing a U, V parameter on the Surface. List, tuples and UVIntervals will work.
+    ///<param name="uvParameter">(float * float)) An indexable item containing a U, V parameter on the Surface. List, tuples and UVIntervals will work.
     ///    Note, if the parameter is not equal to one of the existing knots, then the knot closest to the specified parameter will be removed</param>
     ///<param name="vDirection">(bool) If True, or 1, the V direction will be addressed. If False, or 0, the U direction</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
