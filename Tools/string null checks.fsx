@@ -15,6 +15,26 @@ type Arg =
     |Int of string 
     |Oth of string 
 
+
+type ArgKind =  
+    |Infer of string //  name
+    |Typed of string* string //  name, typ
+    |Opt of string*string*string // def, name, typ
+    
+    static member parse (s:string)  =  
+        match String.splitMaybeOnce ")>]" s with 
+        | s, "" ->  
+            match String.splitMaybeOnce ":" s with 
+            | n, "" ->  Infer (n.Trim() ) 
+            | n, t -> Typed (n.Trim(), t.Trim())  
+        | d, nt ->  
+            let d = String.after "(" d |> String.before ":" // to find default value
+            let n, t = String.splitOnce ":" nt 
+            Opt (d.Trim() , n.Trim(), t.Trim()) 
+        
+        
+        
+
 let argTyps = Hashset<string>() 
 
 let doAddNullcheck(path) =
@@ -101,11 +121,13 @@ let doAddNullcheck(path) =
                 args
                 |> String.trimEnd [| ' '; ')'|]
                 |> String.split ","
-                |> Array.map (String.splitMaybeOnce ":") 
-                |> Array.map (fun (a,t)  -> a.Trim() ,  t.Trim() ) 
+                |> Array.map (ArgKind.parse)
             
-            for argName, argTyp in args do  
-                argTyps.Add argTyp  |> ignore 
+            for arg in args do   
+                match arg with
+                |Typed(n, t)  -> argTyps.Add t  |> ignore 
+                |Opt _ |Infer _ -> () 
+                
         with e ->  
             printfn "static member %s" name
             eprintfn "%A" e
