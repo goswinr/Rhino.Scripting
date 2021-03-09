@@ -31,6 +31,23 @@ module Line =
     /// Move Line (same as Line.move)
     let translate (v:Vector3d) (ln:Line) = Line(ln.From + v, ln.To + v)
 
+    /// returns an array of points of length: segment count plus one 
+    /// includes start and endpoint of line
+    let divide (segments:int) (ln:Line) =        
+        match segments with 
+        | x when x < 1 -> RhinoScriptingException.Raise "Rhino.Scripting.Line.divide faild for %d segments. Minimum one. for %s"  segments ln.ToNiceString
+        | 1 -> [|ln.From;  ln.To|]
+        | k -> 
+            let r = Array.zeroCreate (k+1)
+            let v = ln.Direction   
+            let st = ln.From
+            let kk = float k
+            r.[0] <- ln.From
+            for i = 1 to k-1 do
+                r.[i] <- st + v * (float i / kk)
+            r.[k] <- ln.To
+            r
+
     /// Finds intersection of two infinite lines.
     /// Fails if lines are paralell or skew by more than 1e-6 units
     /// Considers Lines infinte
