@@ -15,7 +15,7 @@ type UserInteractionException (s:string) =
     inherit System.Exception(s)
     static member inline Raise msg = Printf.kprintf (fun s -> raise (new UserInteractionException(s))) msg 
 
-/// A static classs to help access the UI thread from other threads
+/// A static classs to help access the UI thread of Rhino from other threads
 type Synchronisation private () = // no public constructor
     
     static let mutable seffRhinoSyncModule:Type = null
