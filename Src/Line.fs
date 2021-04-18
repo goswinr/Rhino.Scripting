@@ -17,21 +17,30 @@ open FsEx.SaveIgnore
 module Line =
     
     /// Reverse or flip  the Line (same as Line.flip)
-    let reverse (ln:Line) = Line(ln.To,ln.From)
+    let inline reverse (ln:Line) = Line(ln.To,ln.From)
     
     /// Reverse or flip  the Line (same as Line.reverse)
-    let flip (ln:Line) = Line(ln.To,ln.From)
+    let inline flip (ln:Line) = Line(ln.To,ln.From)
     
     /// Get point at center of line
-    let mid (ln:Line) = (ln.To + ln.From)* 0.5
+    let inline mid (ln:Line) = (ln.To + ln.From)* 0.5
 
     /// Move Line (same as Line.translate)
-    let move (v:Vector3d) (ln:Line) = Line(ln.From + v, ln.To + v)
+    let inline move (v:Vector3d) (ln:Line) = Line(ln.From + v, ln.To + v)
 
-    /// Move Line (same as Line.move)
-    let translate (v:Vector3d) (ln:Line) = Line(ln.From + v, ln.To + v)
+    /// Translate Line (same as Line.move)
+    let inline translate (v:Vector3d) (ln:Line) = Line(ln.From + v, ln.To + v)
 
-    /// returns an array of points of length: segment count plus one 
+    /// Offset line in XY Plane to left side in line direction
+    let offset amount (ln:Line) = 
+        let v = ln.Direction
+        let lenXY = sqrt(v.X*v.X + v.Y*v.Y)
+        if lenXY  < 1e-9 then RhinoScriptingException.Raise "Rhino.Scripting: Line.offset: Cannot offset vertical Line  (by %g) %s" amount ln.ToNiceString        
+        let ov = Vector3d(-v.Y / lenXY  , v.X / lenXY , 0.0) // unitized, horizontal , perpendicular  vector
+        let shift = ov * amount
+        Line(ln.From + shift, ln.To + shift)  
+
+    /// Returns an array of points of length: segment count plus one 
     /// includes start and endpoint of line
     let divide (segments:int) (ln:Line) =        
         match segments with 
@@ -48,10 +57,10 @@ module Line =
             r.[k] <- ln.To
             r
 
-    /// Finds intersection of two infinite lines.
+    /// Finds intersection of two Infinite Lines.
     /// Fails if lines are paralell or skew by more than 1e-6 units
-    /// Considers Lines infinte
-    /// Returns point on lnB
+    /// Considers Lines Infinte
+    /// Returns point on lnB (the last parameter)
     let intersectInOnePoint (lnA:Line) (lnB:Line) : Point3d = 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
         if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Line.intersectInOnePoint failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
@@ -61,7 +70,7 @@ module Line =
             RhinoScriptingException.Raise "Rhino.Scripting.Line.intersect intersectInOnePoint, they are skew. distance: %g  on %s and %s" (a-b).Length lnA.ToNiceString lnB.ToNiceString
         b
     
-    /// Finds intersection of two infinite lines.
+    /// Finds intersection of two Infinite Lines.
     /// Returns a point for each line where they are the closest to each other.
     /// (in same order as input)
     /// Fails if lines are paralell.
@@ -74,7 +83,8 @@ module Line =
         a,b
     
 
-    /// Checks if two finite lines intersect.
+    /// Checks if two Finite lines intersect.
+    /// Also returns true for skew lines if the virtual Intersection Point's Domain is between 0.0 and 1.0 for both Lines
     let doIntersectFinite (lnA:Line) (lnB:Line) : bool= 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
         if ok then 
@@ -83,7 +93,7 @@ module Line =
             false
 
 
-    /// Finds intersection of two finite lines.
+    /// Finds intersection of two Finite Lines.
     /// Returns: 
     ///    an enpty array if they are paralell,
     ///    an array with one point if they intersect by Doc.ModelAbsoluteTolerance (point will be the average of the two points within the tolerance)
@@ -104,9 +114,9 @@ module Line =
                 else [| Pnt.divPt a b 0.5|]
             else [|a ; b|]
 
-    /// Returns the distance between two infinite lines.
+    /// Returns the distance between two Infinite Lines.
     /// At the point where they are closest to each other.
-    /// works even if lines are paralell.
+    /// works even if lines are parallel.
     let distanceToLine (lnA:Line) (lnB:Line) :float= 
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
         if not ok then // paralell
@@ -118,12 +128,12 @@ module Line =
             let b = lnB.PointAt(tb)
             (a-b).Length
     
-    /// Returns the distance between a point and an infinite line.
+    /// Returns the distance between a point and an Infinite Line.
     let distanceToPoint (pt:Point3d) (ln:Line) :float= 
         let cl = ln.ClosestPoint(pt,false)
         (cl-pt).Length
 
-    /// returns a new transformed line
+    /// Returns a new transformed Line
     let transform(xForm:Transform) (line:Line) =
         let ln = Line(line.From,line.To)
         if ln.Transform(xForm) then 
