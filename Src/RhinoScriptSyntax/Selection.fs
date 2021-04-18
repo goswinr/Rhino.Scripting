@@ -188,7 +188,8 @@ module ExtensionsSelection =
         Synchronisation.DoSync true true get
 
 
-    ///<summary>Prompts user to pick, or select, a single object.</summary>
+    ///<summary>Prompts user to pick, or select, a single object. 
+    /// Raises a UserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
@@ -238,7 +239,8 @@ module ExtensionsSelection =
         Synchronisation.DoSync true true get
                 
 
-    ///<summary>Prompts user to pick, or select a single object.</summary>
+    ///<summary>Prompts user to pick, or select a single object.
+    /// Raises a UserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
@@ -302,7 +304,8 @@ module ExtensionsSelection =
         Synchronisation.DoSync true true get
 
 
-    ///<summary>Prompts user to pick or select one or more objects.</summary>
+    ///<summary>Prompts user to pick or select one or more objects.
+    /// Raises a UserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
@@ -446,7 +449,8 @@ module ExtensionsSelection =
             RhinoScriptSyntax.Sticky.[message] <- rarr {id}
             id
 
-    ///<summary>Prompts user to pick, or select one or more objects.</summary>
+    ///<summary>Prompts user to pick, or select one or more objects.
+    /// Raises a UserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
@@ -542,7 +546,8 @@ module ExtensionsSelection =
 
 
 
-    ///<summary>Prompts the user to select a single Surface.</summary>
+    ///<summary>Prompts the user to select a single Surface.
+    /// Raises a UserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Surface"</c>
     ///    Prompt displayed</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
