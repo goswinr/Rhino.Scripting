@@ -468,7 +468,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLayer (layerId:Guid) : DocObjects.Layer= 
         let l = Doc.Layers.FindId(layerId)            
         if isNull l then 
-            if notNull Doc.Objects.FindId(layerId) then 
+            if notNull (Doc.Objects.FindId(layerId)) then 
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Documnt Object (with Geometry) '%s'" (rhType layerId )
             else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not find Guid %A in Doc.Layer table'" layerId  
