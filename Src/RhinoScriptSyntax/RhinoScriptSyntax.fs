@@ -447,31 +447,33 @@ type RhinoScriptSyntax private () =
             else o  
 
 
-    ///<summary>Attempt to get Rhino LayerObject from the document with a given objectId or fullame.</summary>
-    ///<param name="nameOrId">(string or Guid or index) layers Identifier name</param>
-    ///<returns>DocObjectys.Layer  Fails on bad input.</returns>
-    static member CoerceLayer (nameOrId:'T) : DocObjects.Layer=       
-            match box nameOrId with
-            | :? string as s -> 
-                    let i = Doc.Layers.FindByFullPath(s, RhinoMath.UnsetIntIndex)
-                    if i = RhinoMath.UnsetIntIndex then 
-                        let lay = Doc.Layers.FindName s
-                        if isNull lay then 
-                            RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could find name '%s'" s
-                        else
-                            lay
-                    else
-                        Doc.Layers.[i]
-            | :? Guid as g   -> 
-                    let l = Doc.Layers.FindId(g)            
-                    if isNull l then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from Id '%A'" nameOrId  
-                    l
-            //| :? int as ix  -> // TODO better not allow ints here ??
-            //        if ix<0 || ix >= Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not find Layer at index %d from '%A'" ix nameOrId  
-            //        Doc.Layers.[ix]
+    ///<summary>Attempt to get Rhino LayerObject from the document for a given fullame.</summary>
+    ///<param name="name">(string) The layer's name.</param>
+    ///<returns>DocObjectys.Layer </returns>
+    static member CoerceLayer (name:string) : DocObjects.Layer = 
+        let i = Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex)
+        if i = RhinoMath.UnsetIntIndex then 
+            let lay = Doc.Layers.FindName name
+            if isNull lay then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could find name '%s'" name
+            else
+                lay
+        else
+            Doc.Layers.[i]
+       
 
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not Coerce Layer from '%A'" nameOrId    
-    
+    ///<summary>Attempt to get Rhino LayerObject from the document with a given objectId.</summary>
+    ///<param name="layerId">(Guid) The layer's Guid.</param>
+    ///<returns>DocObjectys.Layer</returns>
+    static member CoerceLayer (layerId:Guid) : DocObjects.Layer= 
+        let l = Doc.Layers.FindId(layerId)            
+        if isNull l then 
+            if notNull Doc.Objects.FindId(layerId) then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Documnt Object (with Geometry) '%s'" (rhType layerId )
+            else
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: could not find Guid %A in Doc.Layer table'" layerId  
+        l
+
     
         
     ///<summary>Returns the Rhino Block instance object for a given Id.</summary>
