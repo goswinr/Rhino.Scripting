@@ -1248,7 +1248,7 @@ module ExtensionsObject =
     static member SelectObject( objectId:Guid,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if 0 = rhobj.Select(true) then 
                 if not ignoreErrors then 
@@ -1285,7 +1285,7 @@ module ExtensionsObject =
     static member SelectObject( objectIds:Guid seq,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =  //PLURAL
-        Synchronisation.DoSync false false (fun () ->             
+        SyncRhino.DoSync false false (fun () ->             
             for objectId in objectIds do
                 let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 if 0 = rhobj.Select(true) then 

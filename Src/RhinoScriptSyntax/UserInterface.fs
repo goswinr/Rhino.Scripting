@@ -40,7 +40,7 @@ module ExtensionsUserinterface =
                 Some(dlg.SelectedPath)
             else
                 None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
         // or use ETO ??
         //let dlg = Eto.Forms.SelectFolderDialog()
         //if notNull folder then
@@ -67,7 +67,7 @@ module ExtensionsUserinterface =
 
         let newcheckstates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
-            Synchronisation.DoSync false false getKeepEditor
+            SyncRhino.DoSync false false getKeepEditor
 
         if notNull newcheckstates then
             Some (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
@@ -88,7 +88,7 @@ module ExtensionsUserinterface =
             | null -> None
             | :? string as s -> Some s
             | _ -> None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Display dialog prompting the user to enter a string. The
@@ -104,7 +104,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
             if rc then Some text else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Pause for user input of an angle.</summary>
@@ -127,8 +127,8 @@ module ExtensionsUserinterface =
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then Some(toDegrees(angle))
             else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
@@ -165,9 +165,9 @@ module ExtensionsUserinterface =
                     None
                 else
                     Some (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
-            if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
             res
-        Synchronisation.DoSync true true get
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a box.</summary>
@@ -204,8 +204,8 @@ module ExtensionsUserinterface =
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then Some ((!box).GetCorners())
             else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
@@ -218,8 +218,8 @@ module ExtensionsUserinterface =
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
             if rc then Some (!col) else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Retrieves the cursor's position.</summary>
@@ -238,9 +238,9 @@ module ExtensionsUserinterface =
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
             worldpt.Transform(xf)
-            if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show() //or skip ?
+            if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show() //or skip ?
             worldpt, screenpt, viewport.Id, clientpt
-        Synchronisation.DoSync true true get
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a distance.</summary>
@@ -291,8 +291,8 @@ module ExtensionsUserinterface =
                     gp2.Dispose()
                     None
             | _ -> None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
@@ -335,8 +335,8 @@ module ExtensionsUserinterface =
                         rhobj.Select(true)|> ignore //TODO make sync ?
                     Doc.Views.Redraw()
                 Some r
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a whole number.</summary>
@@ -363,8 +363,8 @@ module ExtensionsUserinterface =
                 let rc = gi.Number()
                 gi.Dispose()
                 Some rc
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Displays dialog box prompting the user to select a layer.</summary>
@@ -391,7 +391,7 @@ module ExtensionsUserinterface =
             else
                 let layer = Doc.Layers.[!layerindex]
                 Some layer.FullPath
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
 
@@ -409,7 +409,7 @@ module ExtensionsUserinterface =
                 Some (rarr { for index in layerindices do yield  Doc.Layers.[index].FullPath })
             else
                 None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
 
@@ -452,8 +452,8 @@ module ExtensionsUserinterface =
                 Some line
             else
                 None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Displays a dialog box prompting the user to select one linetype.</summary>
@@ -475,7 +475,7 @@ module ExtensionsUserinterface =
                 Some linetype.Name
             with _ ->
                 None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Prompts the user to pick one or more Mesh faces.</summary>
@@ -508,8 +508,8 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Prompts the user to pick one or more Mesh vertices.</summary>
@@ -542,8 +542,8 @@ module ExtensionsUserinterface =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a point.</summary>
@@ -572,8 +572,8 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
 
@@ -595,8 +595,8 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a point constrained to a Mesh object.</summary>
@@ -610,8 +610,8 @@ module ExtensionsUserinterface =
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
             if cmdrc = Commands.Result.Success then Some point
             else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
@@ -641,8 +641,8 @@ module ExtensionsUserinterface =
             else
                 let pt = gp.Point()
                 Some pt
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of one or more points.</summary>
@@ -708,9 +708,9 @@ module ExtensionsUserinterface =
                     Some rc
                 else
                     None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
 
-        Synchronisation.DoSync true true get
+        SyncRhino.DoSync true true get
 
 
 
@@ -752,8 +752,8 @@ module ExtensionsUserinterface =
             Doc.Views.Redraw()
             if rc = Commands.Result.Success then Some polyline
             else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a number.</summary>
@@ -779,8 +779,8 @@ module ExtensionsUserinterface =
                 let rc = gn.Number()
                 gn.Dispose()
                 Some rc
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a rectangle.</summary>
@@ -814,8 +814,8 @@ module ExtensionsUserinterface =
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
             else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Pauses for user input of a string value.</summary>
@@ -844,8 +844,8 @@ module ExtensionsUserinterface =
                 Some <| gs.Option().EnglishName
             else
                 Some <| gs.StringResult()
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Display a list of items in a list box dialog.</summary>
@@ -865,7 +865,7 @@ module ExtensionsUserinterface =
             |  :? string as s -> Some s
             | _ -> None
 
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Displays a message box. A message box contains a message and
@@ -938,7 +938,7 @@ module ExtensionsUserinterface =
             elif dlgresult = UI.ShowMessageResult.Yes then    Some 6
             elif dlgresult = UI.ShowMessageResult.No then     Some 7
             else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Displays list of items and their values in a property-style list box dialog.</summary>
@@ -957,7 +957,7 @@ module ExtensionsUserinterface =
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null ->  None
             | s -> Some s
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Displays a list of items in a multiple-selection list box dialog.</summary>
@@ -974,7 +974,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             if notNull r then Some r else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
@@ -1002,7 +1002,7 @@ module ExtensionsUserinterface =
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowOpenDialog() then Some fd.FileName
             else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
@@ -1031,7 +1031,7 @@ module ExtensionsUserinterface =
             fd.MultiSelect <- true
             if fd.ShowOpenDialog() then Some fd.FileNames
             else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
@@ -1062,7 +1062,7 @@ module ExtensionsUserinterface =
                 let point2d = viewport.WorldToClient(point)
                 screenpoint <- viewport.ClientToScreen(point2d)
             UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Display a dialog box prompting the user to enter a number.</summary>
@@ -1088,8 +1088,8 @@ module ExtensionsUserinterface =
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)            
             if  rc then Some (!defaultValNumber)
             else None
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Display a save dialog box allowing the user to enter a file name.
@@ -1116,7 +1116,7 @@ module ExtensionsUserinterface =
             if notNull filename then fd.FileName <- filename
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowSaveDialog() then Some fd.FileName else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
@@ -1131,7 +1131,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
             if rc then Some text else None
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
@@ -1143,6 +1143,6 @@ module ExtensionsUserinterface =
                           [<OPT;DEF(null:string)>]title:string) : unit =
         let getKeepEditor () = 
             UI.Dialogs.ShowTextDialog(message, title)
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 

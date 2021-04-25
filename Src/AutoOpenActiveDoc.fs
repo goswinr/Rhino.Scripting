@@ -72,7 +72,7 @@ module AutoOpenActiveDocument =
 
     do
         if HostUtils.RunningInRhino then
-            Synchronisation.Initialize() //declared in Synchronisation static class
+            SyncRhino.Initialize() //declared in Synchronisation static class
             
             // keep the reference to the active Document (3d file ) updated.  
             let updateDoc (doc:RhinoDoc) = 
@@ -99,8 +99,8 @@ module AutoOpenActiveDocument =
                 
             
             if RhinoApp.InvokeRequired then 
-                if isNull Synchronisation.SyncContext then                    
-                    "Synchronisation.syncContext could not be set via reflection.\r\n"+
+                if isNull SyncRhino.SyncContext then                    
+                    "SyncRhino.syncContext could not be set via reflection.\r\n"+
                     "Rhino.Scripting.dll is not loaded from main thread \r\n"+
                     "it needs to set up callbacks for pressing Esc key and changing the active document. \r\n"+
                     "Setting up these event handlers async can trigger a fatal access violation exception \r\n"+
@@ -114,7 +114,7 @@ module AutoOpenActiveDocument =
                     |> eprintfn "%s"  
                 else
                     async{ 
-                        do! Async.SwitchToContext Synchronisation.SyncContext // ensure its done on UI thread
+                        do! Async.SwitchToContext SyncRhino.SyncContext // ensure its done on UI thread
                         setup() 
                         } |> Async.RunSynchronously
             else

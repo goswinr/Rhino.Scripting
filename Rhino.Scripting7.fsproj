@@ -61,7 +61,8 @@
 
 
   <ItemGroup>
-    <Compile Include="Src\Synchronisation.fs" />
+    <Compile Include="Src\Exceptions.fs" />
+    <Compile Include="Src\SyncRhino.fs" />
     <Compile Include="Src\AutoOpenActiveDoc.fs" />
     <Compile Include="Src\AutoOpenRhinoTypeExtensions.fs" />
     

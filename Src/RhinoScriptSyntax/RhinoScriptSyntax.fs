@@ -653,7 +653,7 @@ type RhinoScriptSyntax private () =
     ///<returns>a Rhino.Geometry.Point3d, Fails on bad input.</returns>
     static member Coerce3dPoint(pt:'T) : Point3d =               
         let inline  point3dOf3(x:^x, y:^y, z:^z) = 
-            try Point3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
+            try Point3d(float (x), float(y), float(z))
             with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint: Could not Coerce the 3 values %A, %A and %A to a Point3d" x y z
         
         let b = box pt
@@ -710,7 +710,7 @@ type RhinoScriptSyntax private () =
     ///<returns> a Rhino.Geometry.Vector3d, Fails on bad input.</returns>
     static member Coerce3dVector(vec:'T) : Vector3d =
         let inline vecOf3(x:^x, y:^y, z:^z) = 
-            try Vector3d(floatOfObj (x), floatOfObj(y), floatOfObj(z))
+            try Vector3d(float (x), float(y), float(z))
             with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dVector: Could not Coerce %A, %A and %A to Vector3d" x y z
         
         let b = box vec

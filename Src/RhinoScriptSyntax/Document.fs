@@ -16,6 +16,15 @@ open FsEx.SaveIgnore
 /// This module is automatically opened when Rhino.Scripting namspace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsDocument =
+  
+ 
+  /// Gives a float from int / int division
+  /// <c>(float(i)) / (float(j))</c> 
+  let inline ( ./. ) (i:int) (j:int) = (float(i)) / (float(j))
+
+  /// Allows ints to be multiplied by floats, returns int
+  /// <c>int(round(float(i) * f))</c> 
+  let inline private ( *. ) (i:int) (f:float) = int(round(float(i) * f))
 
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with

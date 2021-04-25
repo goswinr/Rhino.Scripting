@@ -6,17 +6,8 @@ open Rhino
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
-type RhinoScriptingException (s:string) =
-    inherit System.Exception(s)
-    static member inline Raise msg = Printf.kprintf (fun s -> raise (new RhinoScriptingException(s))) msg 
-    static member inline FailIfFalse s b = if not b then raise (new RhinoScriptingException(s))
-
-type UserInteractionException (s:string) =
-    inherit System.Exception(s)
-    static member inline Raise msg = Printf.kprintf (fun s -> raise (new UserInteractionException(s))) msg 
-
 /// A static classs to help access the UI thread of Rhino from other threads
-type Synchronisation private () = // no public constructor
+type SyncRhino private () = // no public constructor
     
     static let mutable seffRhinoSyncModule:Type = null
 
@@ -52,7 +43,7 @@ type Synchronisation private () = // no public constructor
                     eprintfn "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions: \r\n%A" ex 
                
         else
-            eprintfn "Synchronisation.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
+            eprintfn "SyncRhino.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
     
   
     // ---------------------------------
@@ -85,8 +76,8 @@ type Synchronisation private () = // no public constructor
     static member DoSync ensureRedrawEnabled hideEditor (func:unit->'T) : 'T =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then Synchronisation.Initialize()
-             if isNull syncContext then RhinoScriptingException.Raise "Rhino.Synchronisation.syncContext is still null and not set up. UI code only works when started in sync mode."                
+             if isNull syncContext then SyncRhino.Initialize()
+             if isNull syncContext then RhinoScriptingException.Raise "Rhino.SyncRhino.syncContext is still null and not set up. UI code only works when started in sync mode."                
              async{
                     do! Async.SwitchToContext syncContext
                     if hideEditor && notNull seffWindow then seffWindow.Hide()

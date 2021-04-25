@@ -227,7 +227,7 @@ module ExtensionsLayer =
                             [<OPT;DEF(2)>]locked:int,
                             [<OPT;DEF(null:string)>]parent:string) : string = 
 
-        let col   = if color.IsEmpty then Color.randomColorForRhino else (fun () -> color)
+        let col   = if color.IsEmpty then Color.randomForRhino else (fun () -> color)
         if notNull parent && isNull name then  
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer if parent name is given (%s) the child name must be given too." parent
         
@@ -270,7 +270,7 @@ module ExtensionsLayer =
     static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
         let layerIndex =
-            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, ByParent, ByParent)
+            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomForRhino, ByParent, ByParent)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (rhType objectId)
@@ -285,7 +285,7 @@ module ExtensionsLayer =
     [<Extension>]
     static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
         let layerIndex =
-            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomColorForRhino, ByParent, ByParent)
+            if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomForRhino, ByParent, ByParent)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index   
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)

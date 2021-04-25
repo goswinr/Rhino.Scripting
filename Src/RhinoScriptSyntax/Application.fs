@@ -24,7 +24,7 @@ module ExtensionsApplication =
     [<Extension>]
     static member AddAlias( alias:string, 
                             macro:string) : bool =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.CommandAliasList.Add(alias, macro))
 
 
@@ -38,7 +38,7 @@ module ExtensionsApplication =
     [<Extension>]
     static member AddSearchPath(    folder:string, 
                                     [<OPT;DEF(-1)>]index:int) : int =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.AddSearchPath(folder, index))
 
 
@@ -62,7 +62,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member AliasMacro(alias:string, macro:string) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.CommandAliasList.SetMacro(alias, macro)
             |> ignore)
 
@@ -71,7 +71,7 @@ module ExtensionsApplication =
     ///<returns>(string array) a array of command alias names.</returns>
     [<Extension>]
     static member AliasNames() : array<string> =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.CommandAliasList.GetNames())
 
 
@@ -144,7 +144,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member AppearanceColor(item:int, color:Drawing.Color) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             if item = 0 then AppearanceSettings.ViewportBackgroundColor <- color
             elif item = 1 then AppearanceSettings.GridThickLineColor <- color
             elif item = 2 then AppearanceSettings.GridThinLineColor <- color
@@ -175,7 +175,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member AutosaveFile(filename:string) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.AutoSaveFile <- filename)
 
 
@@ -192,7 +192,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member AutosaveInterval(minutes:float) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.AutoSaveInterval <- TimeSpan.FromMinutes(minutes))
 
 
@@ -208,7 +208,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member ClearCommandHistory() : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             RhinoApp.ClearCommandHistoryWindow())
 
 
@@ -249,14 +249,14 @@ module ExtensionsApplication =
             commandSerialNumbers <- None
             if start<>ende then  commandSerialNumbers <- Some(start, ende)
             rc
-        Synchronisation.DoSync false false getKeepEditor
+        SyncRhino.DoSync false false getKeepEditor
 
 
     ///<summary>Returns the contents of Rhino's command history window.</summary>
     ///<returns>(string) The contents of Rhino's command history window.</returns>
     [<Extension>]
     static member CommandHistory() : string =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             RhinoApp.CommandHistoryWindowText)
 
 
@@ -273,7 +273,7 @@ module ExtensionsApplication =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member DefaultRenderer(renderer:string) : bool = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             let objectId = Rhino.PlugIns.PlugIn.IdFromName(renderer)
             Rhino.Render.Utilities.SetDefaultRenderPlugIn(objectId)
             )
@@ -294,7 +294,7 @@ module ExtensionsApplication =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member DeleteSearchPath(folder:string) : bool =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.DeleteSearchPath(folder))
 
 
@@ -303,7 +303,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DisplayOleAlerts(enable:bool) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             Rhino.Runtime.HostUtils.DisplayOleAlerts( enable )
             )
 
@@ -319,7 +319,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member EdgeAnalysisColor(color:Drawing.Color) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.EdgeAnalysisSettings.ShowEdgeColor <- color
             )
 
@@ -339,7 +339,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member EdgeAnalysisMode(mode:int) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             if mode = 1 || mode = 2 then
                 ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
             else
@@ -352,7 +352,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.AutoSaveEnabled <- enable)
 
 
@@ -361,7 +361,7 @@ module ExtensionsApplication =
     ///<returns>(bool) True if set to load silently otherwise False.</returns>
     [<Extension>]
     static member EnablePlugIn(plugin:string) : bool = //GET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             let objectId = PlugIns.PlugIn.IdFromName(plugin)
             let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then loadSilent
@@ -374,7 +374,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member EnablePlugIn(plugin:string, enable:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () ->
+        SyncRhino.DoSync false false (fun () ->
             let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
             let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
@@ -415,7 +415,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Exit() : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             RhinoApp.Exit())
 
 
@@ -520,7 +520,7 @@ module ExtensionsApplication =
     ///    4 = unknown command (the command was not found).</returns>
     [<Extension>]
     static member LastCommandResult() : int =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             int(Commands.Command.LastCommandResult))
 
 
@@ -552,7 +552,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Ortho(enable:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.Ortho <- enable)
 
 
@@ -569,7 +569,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Osnap(enable:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.Osnap <- enable)
 
 
@@ -584,7 +584,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member OsnapDialog(visible:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.UseHorizontalDialog <- visible)
 
 
@@ -629,7 +629,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member OsnapMode(mode:int) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.OsnapModes <- LanguagePrimitives.EnumOfValue mode)
 
 
@@ -644,7 +644,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Planar(enable:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.Planar <- enable)
 
 
@@ -683,7 +683,7 @@ module ExtensionsApplication =
         if types = 16 then filter <- Rhino.PlugIns.PlugInType.Utility
         let loaded = status = 0 || status = 1
         let unloaded = status = 0 || status = 2
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             Rhino.PlugIns.PlugIn.GetInstalledPlugInNames(filter, loaded, unloaded))
 
 
@@ -697,7 +697,7 @@ module ExtensionsApplication =
     ///<param name="enable">(bool) The new enabled status.</param>
     [<Extension>]
     static member ProjectOsnaps(enable:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.ProjectSnapToCPlane <- enable)
 
 
@@ -706,7 +706,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Prompt(message:string) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             RhinoApp.SetCommandPrompt(message))
 
 
@@ -748,7 +748,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             RhinoApp.SendKeystrokes(keys, addReturn))
 
 
@@ -762,7 +762,7 @@ module ExtensionsApplication =
     ///<param name="enable">(bool) The new enabled status.</param>
     [<Extension>]
     static member Snap(enable:bool) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ModelAidSettings.GridSnap <- enable)
 
 
@@ -771,7 +771,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member StatusBarDistance(distance:float) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             UI.StatusBar.SetDistancePane(distance))
 
 
@@ -780,7 +780,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member StatusBarMessage(message:string) : unit =
-        Synchronisation.DoSync false false (fun () ->  
+        SyncRhino.DoSync false false (fun () ->  
             UI.StatusBar.SetMessagePane(message))
 
 
@@ -789,7 +789,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member StatusBarPoint(point:Point3d) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             UI.StatusBar.SetPointPane(point))
 
 
@@ -805,7 +805,7 @@ module ExtensionsApplication =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             let mutable rc = UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
             rc = 1)
 
@@ -817,7 +817,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             UI.StatusBar.UpdateProgressMeter(position, absolute)
             |> ignore)
 
@@ -826,7 +826,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member StatusBarProgressMeterHide() : unit =
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             UI.StatusBar.HideProgressMeter())
 
 
@@ -843,7 +843,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member TemplateFile(filename:string) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.TemplateFile <- filename)
 
 
@@ -858,7 +858,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member TemplateFolder(folder:string) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.TemplateFolder <- folder)
 
 
@@ -882,7 +882,7 @@ module ExtensionsApplication =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member WorkingFolder(folder:string) : unit = //SET
-        Synchronisation.DoSync false false (fun () -> 
+        SyncRhino.DoSync false false (fun () -> 
             ApplicationSettings.FileSettings.WorkingFolder <- folder)
 
 

@@ -62,8 +62,8 @@ module ExtensionsGrips =
                     Doc.Views.Redraw()
                 Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
 
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
 
@@ -97,9 +97,9 @@ module ExtensionsGrips =
                     rc.Add((objectId, index, location))
                     if select then grip.Select(true, true)|>ignore
                 if select then Doc.Views.Redraw()
-            if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
+            if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
             rc
-        Synchronisation.DoSync true true get
+        SyncRhino.DoSync true true get
 
 
 

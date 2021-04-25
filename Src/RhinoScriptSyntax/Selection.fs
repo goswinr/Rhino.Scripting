@@ -184,8 +184,8 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
                 (objectId, presel, selmethod, point, curveparameter, viewname)
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Prompts user to pick, or select, a single object. 
@@ -236,7 +236,7 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                 Doc.Views.Redraw()
                 obj.Id
-        Synchronisation.DoSync true true get
+        SyncRhino.DoSync true true get
                 
 
     ///<summary>Prompts user to pick, or select a single object.
@@ -300,8 +300,8 @@ module ExtensionsSelection =
                     Doc.Views.Redraw()
                 obj.Select(select) |> ignore
                 (objectId, presel, selmethod, point, viewname)
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Prompts user to pick or select one or more objects.
@@ -371,8 +371,8 @@ module ExtensionsSelection =
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                 rc
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Returns the same objects as in the last user interaction with the same prompt message
@@ -523,8 +523,8 @@ module ExtensionsSelection =
                     |> RhinoScriptSyntax.Print
 
                 rc
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Prompts the user to select one or more point objects.</summary>
@@ -598,8 +598,8 @@ module ExtensionsSelection =
                     Doc.Objects.UnselectAll() |> ignore
                     Doc.Views.Redraw()
                 (objectId, prepicked, selmethod, point, uv, name)
-            |>! fun _ -> if notNull Synchronisation.SeffWindow then Synchronisation.SeffWindow.Show()
-        Synchronisation.DoSync true true get
+            |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
+        SyncRhino.DoSync true true get
 
 
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
@@ -1076,6 +1076,6 @@ module ExtensionsSelection =
                     if select then rhobj.Select(true) |> ignore //TODO make sync ?
                 if select then Doc.Views.Redraw()
             rc
-        Synchronisation.DoSync true true pick
+        SyncRhino.DoSync true true pick
 
 
