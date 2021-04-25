@@ -82,8 +82,7 @@ type RhinoScriptSyntax private () =
         if escapePressed  then           
             escapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset 
             raise (new OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest()"))
-
-     
+    
 
 
     ///<summary>Clamps a value between a lower and an upper bound.</summary>
@@ -135,12 +134,14 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
         
     
-    ///<summary>Adds any geometry object (stuct or class) to the Rhino document.</summary>
+    ///<summary>Adds any geometry object (stuct or class) to the Rhino document. 
+    /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param> 
     ///<returns>(Guid) The Guid of the added Object.</returns>
-    static member Add (geo:'AnyRhinoGeometry) : Guid = 
+    static member Add (geo:'T) : Guid = 
         match box geo with
         | :? GeometryBase as g -> Doc.Objects.Add(g)
+        // now the structs:
         | :? Point3d    as pt->   Doc.Objects.AddPoint pt
         | :? Point3f    as pt->   Doc.Objects.AddPoint(pt)
         | :? Line       as ln->   Doc.Objects.AddLine(ln)
@@ -162,6 +163,7 @@ type RhinoScriptSyntax private () =
 
 
     /// TODO all the functions taking a generic paramnter should not be called coerce but rather try convert ?? no ?
+    /// TODO none of the coerce function should take generic paramter, just a few overloads
 
     ///<summary>Attempt to get a Guids from input.</summary>
     ///<param name="objectId">objcts , Guid or string</param>
