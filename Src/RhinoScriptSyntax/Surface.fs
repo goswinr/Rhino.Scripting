@@ -265,7 +265,7 @@ module ExtensionsSurface =
                         Doc.Views.Redraw()
                         rc
                     else
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch faild for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) startSurfaceId
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) startSurfaceId
 
     ///<summary>Fits a Surface through Curve, point, point cloud, and Mesh objects.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
@@ -313,7 +313,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch faild for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) uvSpans
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) uvSpans
 
 
     ///<summary>Creates a single walled Surface with a circular profile around a Curve.</summary>
@@ -342,7 +342,52 @@ module ExtensionsSurface =
         let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
         Doc.Views.Redraw()
         rc
+    
 
+
+    ///<summary>Creates one Surface from one Polyline Geometry.</summary>
+    ///<param name="polyline">(Polyline) one Polyline Geometry to use for creating planar Surfaces</param>
+    ///<returns>(Guid) identifier of Surface created .</returns>
+    [<Extension>]
+    static member AddPlanarSrf(polyline:Polyline) : Guid=
+        let tolerance = Doc.ModelAbsoluteTolerance
+        let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
+        if notNull breps then
+            if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (RhinoScriptSyntax.ToNiceString polyline) 
+            let rc =  Doc.Objects.AddBrep(breps.[0])
+            Doc.Views.Redraw()
+            rc
+        else
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(polyline:Polyline) failed on  %s" (RhinoScriptSyntax.ToNiceString polyline) 
+
+    ///<summary>Creates one Surface from one planar Curve.</summary>
+    ///<param name="curve">(Curve) one Curve Geometry to use for creating planar Surfaces</param>
+    ///<returns>(Guid) identifier of Surface created .</returns>
+    [<Extension>]
+    static member AddPlanarSrf(curve:Curve) : Guid=
+        let tolerance = Doc.ModelAbsoluteTolerance
+        let breps = Brep.CreatePlanarBreps(curve, tolerance)
+        if notNull breps then
+            if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (RhinoScriptSyntax.ToNiceString curve) 
+            let rc =  Doc.Objects.AddBrep(breps.[0])
+            Doc.Views.Redraw()
+            rc           
+        else
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(curve:Curve) failed on %s" (RhinoScriptSyntax.ToNiceString curve) 
+
+    ///<summary>Creates one or more Surfaces from planar Curves.</summary>
+    ///<param name="curves">(Curve seq) several Curves Geometries to use for creating planar Surfaces</param>
+    ///<returns>(Guid Rarr) identifiers of Surfaces created .</returns>
+    [<Extension>]
+    static member AddPlanarSrf(curves:Curve seq) : Guid Rarr =
+        let tolerance = Doc.ModelAbsoluteTolerance
+        let breps = Brep.CreatePlanarBreps(curves, tolerance)
+        if notNull breps then
+            let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
+            Doc.Views.Redraw()
+            rc
+        else
+            RhinoScriptingException.Raise "RhinoScriptSyntax. AddPlanarSrf(curves:Curve seq) failed on %s" (RhinoScriptSyntax.ToNiceString curves) 
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
@@ -357,7 +402,8 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf faild on %A" (RhinoScriptSyntax.ToNiceString objectIds) 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(objectIds:Guid seq) failed on %s" (RhinoScriptSyntax.ToNiceString objectIds) 
+
 
 
     ///<summary>Create a Plane Surface and add it to the document.</summary>
@@ -1055,7 +1101,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeSurface faild on Surface: %s and Curve %s" (rhType surfaceId)  (rhType curveId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeSurface failed on Surface: %s and Curve %s" (rhType surfaceId)  (rhType curveId)
 
 
     ///<summary>Create constant radius rolling ball fillets between two Surfaces. Note,
@@ -2453,7 +2499,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceU faild on %A with domain %A" surfaceId interval
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceU failed on %A with domain %A" surfaceId interval
 
     ///<summary>Remove portions of the Surface outside of the specified interval in V direction.</summary>
     ///<param name="surfaceId">(Guid) Surface identifier</param>
@@ -2477,7 +2523,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceV faild on %A with domain %A" surfaceId interval
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceV failed on %A with domain %A" surfaceId interval
 
 
     ///<summary>Remove portions of the Surface outside of the specified interval ain U and V direction.</summary>
@@ -2506,7 +2552,7 @@ module ExtensionsSurface =
             Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceUV faild on %A with domain %A and %A" surfaceId intervalU intervalV
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceUV failed on %A with domain %A and %A" surfaceId intervalU intervalV
 
 
 
