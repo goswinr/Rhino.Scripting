@@ -260,3 +260,47 @@ module AutoOpenCurried =
     static member transform (matrix:Transform) (objectId:Guid) : Guid =  
         RhinoScriptSyntax.TransformObject(objectId,matrix,false)       
         // TODO test to ensure GUID is the same ?
+
+    ///<summary>Moves a single object.</summary>
+    ///<param name="translation">(Vector3d) Vector3d</param>
+    ///<param name="objectId">(Guid) The identifier of an object to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member move (translation:Vector3d)  (objectId:Guid): unit = 
+        let xf = Transform.Translation(translation)
+        let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translation
+
+    ///<summary>Moves a single object in X Direction.</summary>
+    ///<param name="translationX">(float) movement in X direction</param>
+    ///<param name="objectId">(Guid) The identifier of an object to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveX (translationX:float)  (objectId:Guid): unit = 
+        let xf = Transform.Translation(Vector3d(translationX, 0.0, 0.0 ))
+        let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translationX
+
+    ///<summary>Moves a single object in Y Direction.</summary>
+    ///<param name="translationY">(float) movement in Y direction</param>
+    ///<param name="objectId">(Guid) The identifier of an object to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveY (translationY:float)  (objectId:Guid): unit = 
+        let xf = Transform.Translation(Vector3d(0.0, translationY, 0.0))
+        let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translationY
+
+    ///<summary>Moves a single object in Z Direction.</summary>
+    ///<param name="translationZ">(float) movement in Z direction</param>
+    ///<param name="objectId">(Guid) The identifier of an object to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveZ (translationZ:float)  (objectId:Guid): unit = 
+        let xf = Transform.Translation(Vector3d(0.0, 0.0, translationZ))
+        let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translationZ
+
+
+
+    
