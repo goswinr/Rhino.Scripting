@@ -20,7 +20,7 @@ module AutoOpenVector =
     open Vec
 
     type RhinoScriptSyntax with
-        
+        (*
         [<Extension>] 
         [<Obsolete>]
         /// Use Vec.angle .. instead
@@ -40,6 +40,7 @@ module AutoOpenVector =
             let dot = v * plane.XAxis 
             let ang = acos dot  |> toDegrees
             if v*plane.YAxis < 0.0 then 360.0-ang else ang
+        *)
 
         /// Draws a line with a Curve Arrows
         [<Extension>]
