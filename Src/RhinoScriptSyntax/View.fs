@@ -896,7 +896,7 @@ module ExtensionsView =
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let rc = viewo.ActiveViewport.WallpaperFilename
-        if not <| viewo.ActiveViewport.SetWallpaper(filename, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper faild to set walleper to %s in view %s" filename view
+        if not <| viewo.ActiveViewport.SetWallpaper(filename, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper failed to set walleper to %s in view %s" filename view
         viewo.Redraw()
 
 
@@ -919,7 +919,7 @@ module ExtensionsView =
     static member WallpaperGrayScale(view:string, grayscale:bool) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
-        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then RhinoScriptingException.Raise "RhinoScriptSyntax.WallpaperGrayScale faild to set walleper to %s in view %s" filename view
+        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then RhinoScriptingException.Raise "RhinoScriptSyntax.WallpaperGrayScale failed to set walleper to %s in view %s" filename view
         viewo.Redraw()
 
 

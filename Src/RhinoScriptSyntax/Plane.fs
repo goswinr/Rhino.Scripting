@@ -95,7 +95,7 @@ module ExtensionsPlane =
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter faild for %A; %A" plane point
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter failed for %A; %A" plane point
 
 
     ///<summary>Intersect an infinite Plane and a Curve object.</summary>
@@ -151,7 +151,7 @@ module ExtensionsPlane =
                 rc.Add( (a, b, c, d, e, f, g, h, i, j, k))
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneCurveIntersection faild on %A; %A tolerance %A" plane curve tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneCurveIntersection failed on %A; %A tolerance %A" plane curve tolerance
 
 
     ///<summary>Returns the equation of a Plane as a tuple of four numbers. The standard
@@ -173,7 +173,7 @@ module ExtensionsPlane =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
         if rc = PlaneFitResult.Success then plane
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFitFromPoints faild for %A" points
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFitFromPoints failed for %A" points
 
 
     ///<summary>Construct a Plane from a point, and two vectors in the Plane.</summary>
@@ -282,7 +282,7 @@ module ExtensionsPlane =
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
         let rc = Plane(plane)
         if rc.Transform(xForm) then rc
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform faild for %A; %A" plane xForm
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform failed for %A; %A" plane xForm
 
 
     ///<summary>Rotates a Plane.</summary>

@@ -38,7 +38,7 @@ module Line =
     /// includes start and endpoint of line
     let divide (segments:int) (ln:Line) =        
         match segments with 
-        | x when x < 1 -> RhinoScriptingException.Raise "Rhino.Scripting.Line.divide faild for %d segments. Minimum one. for %s"  segments ln.ToNiceString
+        | x when x < 1 -> RhinoScriptingException.Raise "Rhino.Scripting.Line.divide failed for %d segments. Minimum one. for %s"  segments ln.ToNiceString
         | 1 -> [|ln.From;  ln.To|]
         | k -> 
             let r = Array.zeroCreate (k+1)

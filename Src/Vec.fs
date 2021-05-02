@@ -120,7 +120,7 @@ module Vec =
     let projectToLine (ln:Line) (v:Vector3d) (pt:Point3d) =
         let h = Line(pt,v)
         let ok,tln,th = Intersect.Intersection.LineLine(ln,h)
-        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: project in direction faild. (are they paralell?)"
+        if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: project in direction failed. (are they paralell?)"
         let a = ln.PointAt(tln)
         let b = h.PointAt(th)
         if (a-b).SquareLength > RhinoMath.ZeroTolerance then 

@@ -412,7 +412,7 @@ module ExtensionsObject =
 
     ///<summary>Moves a single object.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
-    ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
+    ///<param name="translation">(Vector3d) Vector3d</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MoveObject(objectId:Guid, translation:Vector3d) : unit = //TODO or return unit ??
@@ -423,7 +423,7 @@ module ExtensionsObject =
 
     ///<summary>Moves one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
-    ///<param name="translation">(Vector3d) List of 3 numbers or Vector3d</param>
+    ///<param name="translation">(Vector3d)Vector3d</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MoveObject(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL        
@@ -434,7 +434,6 @@ module ExtensionsObject =
             if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (rhType objectId) translation
             //rc.Add objectId
         //rc
-
 
 
     ///<summary>Returns the color of an object. Object colors are represented
@@ -1415,7 +1414,7 @@ module ExtensionsObject =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member UnlockObject(objectId:Guid) : unit =
-        if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %s" (rhType objectId)
+        if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject failed on %s" (rhType objectId)
         Doc.Views.Redraw()
 
     ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
@@ -1426,7 +1425,7 @@ module ExtensionsObject =
     static member UnlockObject(objectIds:Guid seq) : unit =  //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
-            if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject faild on %s" (rhType objectId)
+            if not <| Doc.Objects.Unlock(objectId, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject failed on %s" (rhType objectId)
         Doc.Views.Redraw()
         
 
