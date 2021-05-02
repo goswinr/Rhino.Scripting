@@ -17,10 +17,13 @@ module Pnt =
     
     /// Returns the distance between two points
     let inline distance (a:Point3d) (b:Point3d) = let v = a-b in sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
-    
+       
+    /// Returns the horizontal distance between two points(ignoring their Z Value)
+    let inline distanceXY (a:Point3d) (b:Point3d) = let x = a.X-b.X in let y=a.Y-b.Y in  sqrt(x*x + y*y)
+
     /// Returns the squared distance bewteen two points. 
     /// This operation is slighty faster than the distance function, and sufficient for many algorithms like finding closest points.
-    let inline distanceSq (a:Point3d) (b:Point3d) = let v = a-b in    v.X*v.X + v.Y*v.Y + v.Z*v.Z
+    let inline distanceSq (a:Point3d) (b:Point3d) = let v = a-b in  v.X*v.X + v.Y*v.Y + v.Z*v.Z
 
     
     /// retuns a point that is at a given distance from a point in the direction of another point. 
