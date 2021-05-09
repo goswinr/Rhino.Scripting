@@ -65,17 +65,27 @@ module ExtensionsLayer =
         |UnicodeCategory.OtherNotAssigned 
         |UnicodeCategory.ModifierSymbol ->
             RhinoScriptingException.Raise "RhinoScriptSyntax found a probably not supported charcater in short layer name containing %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" cat  name
-                   
+        
         | _ -> ()
+
    
         if not allowSpecialChars then
              match cat with
-             |UnicodeCategory.OtherPunctuation when c > '\\' -> 
+
+             (*
+             |UnicodeCategory.UppercaseLetter when c > 'Z' -> //always allow ?                 
+                RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+             
+             |UnicodeCategory.LowercaseLetter when c > 'z' -> //always allow ß ä ö ü and similar                 
                  RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              
-             |UnicodeCategory.CurrencySymbol when c > '¥' -> //Unicode	U+00A5 ¥ YEN SIGN
+             |UnicodeCategory.CurrencySymbol when c > '¥' -> //Unicode	U+00A5 ¥ YEN SIGN //always allow ?
                  RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
-
+             *)
+             
+             |UnicodeCategory.OtherPunctuation when c > '\\' -> 
+                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+            
              |UnicodeCategory.OpenPunctuation when c > '{' -> 
                  RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
 
@@ -87,13 +97,6 @@ module ExtensionsLayer =
              
              |UnicodeCategory.DecimalDigitNumber when c > '9' -> 
                  RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
-             
-             |UnicodeCategory.UppercaseLetter when c > 'Z' -> 
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
-             
-             |UnicodeCategory.LowercaseLetter when c > 'z' ->
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
-             
              |UnicodeCategory.OtherSymbol 
              |UnicodeCategory.InitialQuotePunctuation 
              |UnicodeCategory.FinalQuotePunctuation 
