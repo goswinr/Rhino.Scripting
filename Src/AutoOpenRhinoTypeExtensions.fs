@@ -142,6 +142,13 @@ module AutoOpenRhinoTypeExtensions =
                     if coli = 3 then yield! ""
                 //yield! sprintf "Scale x: %g ; y: %g z: %g" m.M00 m.M11 m.M22
                 }
+    
+    type PolylineCurve with 
+        
+        /// Gets a lazy seq (= IEnumerable) of the Points that make up the Polyline
+        member pl.Points = 
+            seq { for i = 0 to pl.PointCount - 1 do pl.Point(i) }
+    
     (*
     type Mesh with 
         [<Extension>]
