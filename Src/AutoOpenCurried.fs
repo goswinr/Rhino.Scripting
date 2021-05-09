@@ -249,7 +249,6 @@ module AutoOpenCurried =
     static member draw (layer:string) (geo:'AnyRhinoGeometry) : unit =  
         RhinoScriptSyntax.Add(geo) |> RhinoScriptSyntax.setLayer layer
 
-
         
     ///<summary>Moves, scales, or rotates an object given a 4x4 transformation matrix.
     ///    The matrix acts on the left. To transform Geometry objects instead of DocObjects or Guids use their .Transform(xForm) member.</summary>
@@ -269,7 +268,7 @@ module AutoOpenCurried =
     static member move (translation:Vector3d)  (objectId:Guid): unit = 
         let xf = Transform.Translation(translation)
         let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translation
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.move to from objectId:'%s' translation:'%A'" (rhType objectId) translation
 
     ///<summary>Moves a single object in X Direction.</summary>
     ///<param name="translationX">(float) movement in X direction</param>
@@ -279,7 +278,7 @@ module AutoOpenCurried =
     static member moveX (translationX:float)  (objectId:Guid): unit = 
         let xf = Transform.Translation(Vector3d(translationX, 0.0, 0.0 ))
         let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translationX
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.moveX to from objectId:'%s' translation:'%A'" (rhType objectId) translationX
 
     ///<summary>Moves a single object in Y Direction.</summary>
     ///<param name="translationY">(float) movement in Y direction</param>
@@ -289,7 +288,7 @@ module AutoOpenCurried =
     static member moveY (translationY:float)  (objectId:Guid): unit = 
         let xf = Transform.Translation(Vector3d(0.0, translationY, 0.0))
         let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translationY
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.moveY to from objectId:'%s' translation:'%A'" (rhType objectId) translationY
 
     ///<summary>Moves a single object in Z Direction.</summary>
     ///<param name="translationZ">(float) movement in Z direction</param>
@@ -299,8 +298,38 @@ module AutoOpenCurried =
     static member moveZ (translationZ:float)  (objectId:Guid): unit = 
         let xf = Transform.Translation(Vector3d(0.0, 0.0, translationZ))
         let res = Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
-        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Cannot apply move to from objectId:'%s' translation:'%A'" (rhType objectId) translationZ
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.moveZ to from objectId:'%s' translation:'%A'" (rhType objectId) translationZ
 
 
+    ///<summary>Moves a Geometry.</summary>
+    ///<param name="translation">(Vector3d) Vector3d</param>
+    ///<param name="geo">(GeometryBase) The Geometry to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveGeo (translation:Vector3d)  (geo:GeometryBase): unit = 
+        if not <|  geo.Translate translation then RhinoScriptingException.Raise "RhinoScriptSyntax.moveGeo to from geo:'%A' translation:'%A'"  geo translation
+        
+    ///<summary>Moves a Geometry in X Direction.</summary>
+    ///<param name="translationX">(float) movement in X direction</param>
+    ///<param name="geo">(GeometryBase) The Geometry to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveGeoX (translationX:float)  (geo:GeometryBase): unit = 
+        if not <| geo.Translate (Vector3d(translationX, 0.0, 0.0 )) then RhinoScriptingException.Raise "RhinoScriptSyntax.moveGeoX to from geo:'%A' translation:'%f'"  geo translationX
 
+    ///<summary>Moves a Geometry in Y Direction.</summary>
+    ///<param name="translationY">(float) movement in Y direction</param>
+    ///<param name="geo">(GeometryBase) The Geometry to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveGeoY (translationY:float)  (geo:GeometryBase): unit = 
+        if not <| geo.Translate (Vector3d(0.0, translationY, 0.0)) then RhinoScriptingException.Raise "RhinoScriptSyntax.moveGeoY to from geo:'%A' translation:'%f'"  geo translationY
+
+    ///<summary>Moves a Geometry in Z Direction.</summary>
+    ///<param name="translationZ">(float) movement in Z direction</param>
+    ///<param name="geo">(GeometryBase) The Geometry to move</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member moveGeoZ (translationZ:float)  (geo:GeometryBase): unit =
+        if not <| geo.Translate (Vector3d(0.0, 0.0, translationZ)) then RhinoScriptingException.Raise "RhinoScriptSyntax.moveGeoZ to from geo:'%A' translation:'%f'"  geo translationZ
     
