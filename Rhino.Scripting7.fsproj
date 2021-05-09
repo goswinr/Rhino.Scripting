@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     
-    <TargetFramework>net472</TargetFramework>    <!--4.7.2 because ini-parser is netstandard 2.0-->
+    <TargetFramework>net48</TargetFramework>    <!-- 4.8 neded by rhino common 7 , 4.7.2 because ini-parser is netstandard 2.0-->
     <LangVersion>preview</LangVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!--to only have the english resources--> 
     <RootNamespace>Rhino.Scripting</RootNamespace>
