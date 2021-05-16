@@ -266,7 +266,7 @@ module ExtensionsHatch =
     static member HatchPatternNames() : string Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
         let rc = Rarr()
-        for i in Util.range(State.Doc.HatchPatterns.Count) do
+        for i = 0 to State.Doc.HatchPatterns.Count - 1 do
             let hatchpattern = State.Doc.HatchPatterns.[i]
             if not hatchpattern.IsDeleted then
                 rc.Add(hatchpattern.Name)

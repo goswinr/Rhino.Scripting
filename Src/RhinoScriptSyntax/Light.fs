@@ -402,7 +402,7 @@ module ExtensionsLight =
     static member LightObjects() : Guid Rarr =
         let count = State.Doc.Lights.Count
         let rc = Rarr()
-        for i in Util.range(count) do
+        for i = 0 to count - 1 do
             let rhlight = State.Doc.Lights.[i]
             if not rhlight.IsDeleted then rc.Add(rhlight.Id)
         rc

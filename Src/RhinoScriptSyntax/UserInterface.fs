@@ -149,7 +149,7 @@ module ExtensionsUserinterface =
             let count = Seq.length(items)
             if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
             let toggles = Rarr()
-            for i in Util.range(count) do
+            for i = 0 to count - 1 do
                 let initial = defaultVals.[i]
                 let item = items.[i]
                 let name, off, on = item
@@ -321,7 +321,7 @@ module ExtensionsUserinterface =
             if rc <> Input.GetResult.Object then None
             else
                 let r = Rarr()
-                for i in Util.range(go.ObjectCount) do
+                for i = 0 to go.ObjectCount - 1 do
                     let edge = go.Object(i).Edge()
                     if notNull edge then
                         let crv = edge.Duplicate() :?> NurbsCurve

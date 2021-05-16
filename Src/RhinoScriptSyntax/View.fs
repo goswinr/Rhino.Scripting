@@ -299,7 +299,7 @@ module ExtensionsView =
     [<Extension>]
     static member NamedCPlanes() : string Rarr =
         let count = State.Doc.NamedConstructionPlanes.Count
-        rarr {for i in Util.range(count) do State.Doc.NamedConstructionPlanes.[i].Name }
+        rarr {for i = 0 to count - 1 do State.Doc.NamedConstructionPlanes.[i].Name }
 
 
 
@@ -308,7 +308,7 @@ module ExtensionsView =
     [<Extension>]
     static member NamedViews() : string Rarr =
         let count = State.Doc.NamedViews.Count
-        rarr {for i in Util.range(count) do State.Doc.NamedViews.[i].Name }
+        rarr {for i = 0 to count - 1 do State.Doc.NamedViews.[i].Name }
 
 
     ///<summary>Changes the title of the specified view.</summary>

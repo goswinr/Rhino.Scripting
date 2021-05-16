@@ -364,7 +364,7 @@ module ExtensionsSelection =
                     State.Doc.Views.Redraw()
                 let rc = Rarr()
                 let count = go.ObjectCount
-                for i in Util.range(count) do
+                for i = 0 to count - 1 do
                     let objref = go.Object(i)
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
@@ -505,7 +505,7 @@ module ExtensionsSelection =
                     State.Doc.Views.Redraw()
                 let rc = Rarr()
                 let count = go.ObjectCount
-                for i in Util.range(count) do
+                for i = 0 to count - 1 do
                     let objref = go.Object(i)
                     let objectId = objref.ObjectId
                     let presel = go.ObjectsWerePreselected

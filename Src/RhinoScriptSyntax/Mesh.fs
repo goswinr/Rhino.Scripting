@@ -496,7 +496,7 @@ module ExtensionsMesh =
     [<Extension>]
     static member MeshFaceCenters(meshId:Guid) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        rarr {for i in Util.range(mesh.Faces.Count) do mesh.Faces.GetFaceCenter(i) }
+        rarr {for i = 0 to mesh.Faces.Count - 1 do mesh.Faces.GetFaceCenter(i) }
 
 
     ///<summary>Returns total face count of a Mesh object.</summary>
@@ -517,7 +517,7 @@ module ExtensionsMesh =
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
             mesh.FaceNormals.ComputeFaceNormals() |> ignore
         let rc = Rarr()
-        for i in Util.range(mesh.FaceNormals.Count) do
+        for i = 0 to mesh.FaceNormals.Count - 1 do
             let normal = mesh.FaceNormals.[i]
             rc.Add(Vector3d(normal))
         rc
@@ -538,7 +538,7 @@ module ExtensionsMesh =
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
-        for i in Util.range(mesh.Faces.Count) do
+        for i = 0 to mesh.Faces.Count - 1 do
             let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
@@ -564,7 +564,7 @@ module ExtensionsMesh =
     static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) Rarr = // TODO mark functions not part of rhinopython
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
-        for i in Util.range(mesh.Faces.Count) do
+        for i = 0 to mesh.Faces.Count - 1 do
             let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
@@ -601,7 +601,7 @@ module ExtensionsMesh =
     static member MeshFaceVertices(objectId:Guid) : Rarr<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
-        for i in Util.range(mesh.Faces.Count) do
+        for i = 0 to mesh.Faces.Count - 1 do
             let face = mesh.Faces.GetFace(i)
             rc.Add( (face.A, face.B, face.C, face.D)) //TODO add ngon support
         rc
@@ -785,7 +785,7 @@ module ExtensionsMesh =
     [<Extension>]
     static member MeshVertexColors(meshId:Guid) : Drawing.Color Rarr= //GET
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        rarr { for i in Util.range(mesh.VertexColors.Count) do mesh.VertexColors.[i] }
+        rarr { for i = 0 to mesh.VertexColors.Count - 1 do mesh.VertexColors.[i] }
 
 
     ///<summary>Modifies vertex colors of a Mesh.</summary>
@@ -837,7 +837,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let count = mesh.Normals.Count
         if count<1 then rarr {()}
-        else rarr { for i in Util.range(count) do Vector3d(mesh.Normals.[i])}
+        else rarr { for i = 0 to count - 1 do Vector3d(mesh.Normals.[i])}
 
 
     ///<summary>Returns the vertices of a Mesh.</summary>
@@ -848,7 +848,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let count = mesh.Vertices.Count
         let rc = Rarr()
-        for i in Util.range(count) do
+        for i = 0 to count - 1 do
             let vertex = mesh.Vertices.[i]
             rc.Add(Point3d(vertex))
         rc

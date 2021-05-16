@@ -282,7 +282,7 @@ module ExtensionsGrips =
             let grips = rhobj.GetGrips()
 
             if notNull grips then
-                for i in Util.range(grips.Length) do
+                for i = 0 to grips.Length - 1 do
                     if grips.[i].IsSelected(false) > 0 then rc.Add(i)
             rc
 

@@ -186,20 +186,20 @@ module ExtensionsSurface =
         if notNull weights then
             if weights.Count < (pu*pv) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
-            for i in Util.range(pu) do
-                for j in Util.range(pv) do
+            for i = 0 to pu - 1 do
+                for j = 0 to pv - 1 do
                     let cp = ControlPoint(points.[index], weights.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
                     index <- index + 1
         else
-            for i in Util.range(pu) do
-                for j in Util.range(pv) do
+            for i = 0 to pu - 1 do
+                for j = 0 to pv - 1 do
                     let cp = ControlPoint(points.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
                     index <- index + 1
 
-        for i in Util.range(pu) do
-            for j in Util.range(pv) do
+        for i = 0 to pu - 1 do
+            for j = 0 to pv - 1 do
                 if notNull weights then
                     let cp = ControlPoint(points.[index], weights.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
@@ -209,9 +209,9 @@ module ExtensionsSurface =
                 index <- index + 1
 
         //add the knots
-        for i in Util.range(ns.KnotsU.Count) do
+        for i = 0 to ns.KnotsU.Count - 1 do
             ns.KnotsU.[i] <-  knotsU.[i]
-        for i in Util.range(ns.KnotsV.Count) do
+        for i = 0 to ns.KnotsV.Count - 1 do
             ns.KnotsV.[i] <-  knotsV.[i]
         if not ns.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
         let objectId = State.Doc.Objects.AddSurface(ns)
@@ -957,7 +957,7 @@ module ExtensionsSurface =
         for objectId in objectIds do
             let brep = RhinoScriptSyntax.CoerceBrep(objectId)
             if brep.Faces.Count>1 then
-                for i in Util.range(brep.Faces.Count) do
+                for i = 0 to brep.Faces.Count - 1 do
                     let copyface = brep.Faces.[i].DuplicateFace(false)
                     let faceid = State.Doc.Objects.AddBrep(copyface)
                     if faceid <> Guid.Empty then ids.Add(faceid)
@@ -2290,8 +2290,8 @@ module ExtensionsSurface =
         let ns = surface.ToNurbsSurface()
         if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (Print.guid surfaceId) returnAll
         let rc = Rarr()
-        for u in Util.range(ns.Points.CountU) do
-            for v in Util.range(ns.Points.CountV) do
+        for u = 0 to ns.Points.CountU - 1 do
+            for v = 0 to ns.Points.CountV - 1 do
                 let pt = ns.Points.GetControlPoint(u, v)
                 rc.Add(pt.Location)
         rc
@@ -2410,8 +2410,8 @@ module ExtensionsSurface =
         let ns = surface.ToNurbsSurface()
         if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceWeights failed.  objectId:'%s'" (Print.guid objectId)
         let rc = Rarr()
-        for u in Util.range(ns.Points.CountU) do
-            for v in Util.range(ns.Points.CountV) do
+        for u = 0 to ns.Points.CountU - 1 do
+            for v = 0 to ns.Points.CountV - 1 do
                 let pt = ns.Points.GetControlPoint(u, v)
                 rc.Add(pt.Weight)
         rc
@@ -2434,7 +2434,7 @@ module ExtensionsSurface =
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
             let rc = Rarr()
-            for i in Util.range(breps.Length) do
+            for i = 0 to breps.Length - 1 do
                 if i = 0 then
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
                     rc.Add(objectId)
@@ -2464,7 +2464,7 @@ module ExtensionsSurface =
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
             let rc = Rarr()
-            for i in Util.range(breps.Length) do
+            for i = 0 to breps.Length - 1 do
                 if i = 0 then
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
                     rc.Add(objectId)
