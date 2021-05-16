@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     
-    <TargetFramework>net48</TargetFramework>    <!-- 4.8 neded by rhino common 7 , 4.7.2 because ini-parser is netstandard 2.0-->
+    <TargetFramework>net48</TargetFramework>    <!--  net48 needed since RhinoCommon.dll 7.5 -->
     <LangVersion>preview</LangVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages> <!--to only have the english resources--> 
     <RootNamespace>Rhino.Scripting</RootNamespace>
@@ -19,21 +19,21 @@
     <Authors>Goswin Rothenthal</Authors>
     <Product>Rhino.Scripting for Rhino 7</Product>
     <Description>Rhino Script Syntax for F# (and C#)</Description>
-    <Copyright>Copyright: Goswin Rothenthal 2020 </Copyright>
+    <Copyright>Goswin Rothenthal</Copyright>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>
       <!-- $(OtherFlags)  warnon:3390 to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
   
     <Configurations>Debug;Release</Configurations>
+    <Platform>x64</Platform>
     
-    <!-- <DefineConstants>RHINO7</DefineConstants> Only done for Rhino 6-->
-    
+    <!-- <DefineConstants>RHINO7</DefineConstants> Only done for Rhino 6 -->    
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <OutputPath>binRh7/Debug/</OutputPath>
   </PropertyGroup> 
   
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <OutputPath>binRh7/Release/</OutputPath>
   </PropertyGroup>
 
