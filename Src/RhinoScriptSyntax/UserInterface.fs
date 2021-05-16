@@ -607,7 +607,11 @@ module ExtensionsUserinterface =
     [<Extension>]
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d option =
         let get () = 
+            #if RHINO6
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
+            #else
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, false)
+            #endif
             if cmdrc = Commands.Result.Success then Some point
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
