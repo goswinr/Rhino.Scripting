@@ -7,18 +7,19 @@ open Rhino.Runtime
 open FsEx.SaveIgnore
 
 /// A static classs to help access the UI thread of Rhino from other threads
-type SyncRhino private () = // no public constructor
+[<AbstractClass; Sealed>] 
+type SyncRhino private () = //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f   
     
     static let mutable seffRhinoSyncModule:Type = null
 
-    static let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below from Seff.Rhino    
+    static let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below ;from Seff.Rhino    
    
-    static let mutable seffAssembly : Reflection.Assembly = null //set via reflection below from Seff.Rhino    
+    static let mutable seffAssembly : Reflection.Assembly = null //set via reflection belo;w from Seff.Rhino    
     
-    static let mutable seffWindow : System.Windows.Window = null //set via reflection below from Seff.Rhino
+    static let mutable seffWindow : System.Windows.Window = null //set via reflection below; from Seff.Rhino
        
     static let init()=
-        if HostUtils.RunningInRhino  && HostUtils.RunningOnWindows then 
+        if HostUtils.RunningInRhino && HostUtils.RunningOnWindows then 
             if isNull syncContext || isNull seffAssembly then
                 try
                     // some reflection hacks because Rhinocommon does not expose a UI sync context
@@ -41,7 +42,6 @@ type SyncRhino private () = // no public constructor
                         eprintfn "Seff.Rhino.SeffPlugin.Instance.Window is still -null-., If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions" 
                 with ex ->
                     eprintfn "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions: \r\n%A" ex 
-               
         else
             eprintfn "SyncRhino.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
     
@@ -50,11 +50,15 @@ type SyncRhino private () = // no public constructor
     // PUBLIC MEMBERS:
     // ---------------------------------
     
-    /// test if the current thread is the main WPF UI thread
+    /// Test if the current thread is the main UI thread
     /// just calls RhinoApp.InvokeRequired
-    static member isCurrrenThreadUI()=
-        // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails
+    static member IsCurrrenThreadUIThread()=
+        // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails ! if not in WPF ??
         RhinoApp.InvokeRequired
+        //this calls: (via ILSpy)
+        //[DllImport("rhcommon_c", CallingConvention = CallingConvention.Cdecl)]
+        //[return: MarshalAs(UnmanagedType.U1)]
+        //internal static extern bool CRhMainFrame_InvokeRequired();
    
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
@@ -77,7 +81,7 @@ type SyncRhino private () = // no public constructor
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
              if isNull syncContext then SyncRhino.Initialize()
-             if isNull syncContext then RhinoScriptingException.Raise "Rhino.SyncRhino.syncContext is still null and not set up. UI code only works when started in sync mode."                
+             if isNull syncContext then SyncRhinoException.Raise "Rhino.SyncRhino.syncContext is still null and not set up. UI code only works when started in sync mode."                
              async{
                     do! Async.SwitchToContext syncContext
                     if hideEditor && notNull seffWindow then seffWindow.Hide()

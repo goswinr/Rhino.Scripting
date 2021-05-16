@@ -11,7 +11,7 @@ open FsEx.SaveIgnore
 
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsMesh =
 
@@ -71,9 +71,9 @@ module ExtensionsMesh =
                 //colors.[i] = RhinoScriptSyntax.Coercecolor(color)
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
-        let rc = Doc.Objects.AddMesh(mesh)
+        let rc = State.Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
     
     ///<summary>Add a Mesh object to the document.</summary>
@@ -127,9 +127,9 @@ module ExtensionsMesh =
                 //colors.[i] = RhinoScriptSyntax.Coercecolor(color)
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
-        let rc = Doc.Objects.AddMesh(mesh)
+        let rc = State.Doc.Objects.AddMesh(mesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -148,9 +148,9 @@ module ExtensionsMesh =
           mesh.Vertices.Add(pointC) |> ignore
           mesh.Vertices.Add(pointD) |> ignore
           mesh.Faces.AddFace(0,1,2,3) |> ignore
-          let rc = Doc.Objects.AddMesh(mesh)
+          let rc = State.Doc.Objects.AddMesh(mesh)
           if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
-          Doc.Views.Redraw()
+          State.Doc.Views.Redraw()
           rc
 
     ///<summary>Creates a new Mesh with just one triangle face .</summary>
@@ -165,9 +165,9 @@ module ExtensionsMesh =
           mesh.Vertices.Add(pointB) |> ignore
           mesh.Vertices.Add(pointC) |> ignore
           mesh.Faces.AddFace(0,1,2) |> ignore
-          let rc = Doc.Objects.AddMesh(mesh)
+          let rc = State.Doc.Objects.AddMesh(mesh)
           if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddMeshQuad failed.  points:'%A, %A and %A" pointA pointB pointC 
-          Doc.Views.Redraw()
+          State.Doc.Views.Redraw()
           rc
 
     ///<summary>Creates a planar Mesh from a closed, planar Curve.</summary>
@@ -178,15 +178,15 @@ module ExtensionsMesh =
     [<Extension>]
     static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (rhType objectId) deleteInput
+        if isNull mesh then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (Print.guid objectId) deleteInput
         if deleteInput then
             let ob = RhinoScriptSyntax.CoerceGuid(objectId)
-            if not<| Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (rhType objectId) deleteInput
-        let rc = Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (rhType objectId) deleteInput
-        Doc.Views.Redraw()
+            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Print.guid objectId) deleteInput
+        let rc = State.Doc.Objects.AddMesh(mesh)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Print.guid objectId) deleteInput
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -201,10 +201,10 @@ module ExtensionsMesh =
                                          meshId:Guid) : array<Point3d>*array<int> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (rhType curveId) (rhType meshId)
+        if isNull pts then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (Print.guid curveId) (Print.guid meshId)
         pts, faceids
 
 
@@ -227,9 +227,9 @@ module ExtensionsMesh =
         let rc = Rarr()
         if notNull polylines then
             for polyline in polylines do
-                let objectId = Doc.Objects.AddPolyline(polyline)
+                let objectId = State.Doc.Objects.AddPolyline(polyline)
                 if objectId <> Guid.Empty then rc.Add(objectId)
-        if rc.Count <> 0 then Doc.Views.Redraw()
+        if rc.Count <> 0 then State.Doc.Views.Redraw()
         rc
 
 
@@ -252,11 +252,11 @@ module ExtensionsMesh =
                 let submeshes = mesh.ExplodeAtUnweldedEdges()
                 if notNull submeshes then
                     for submesh in submeshes do
-                        let objectId = Doc.Objects.AddMesh(submesh)
+                        let objectId = State.Doc.Objects.AddMesh(submesh)
                         if objectId <> Guid.Empty then rc.Add(objectId)
                 if delete then
-                    Doc.Objects.Delete(meshid, true)|> ignore
-        if rc.Count>0 then Doc.Views.Redraw()
+                    State.Doc.Objects.Delete(meshid, true)|> ignore
+        if rc.Count>0 then State.Doc.Views.Redraw()
         rc
 
 
@@ -304,7 +304,7 @@ module ExtensionsMesh =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
-        let maxdistance = ifZero1 tolerance RhinoMath.SqrtEpsilon
+        let maxdistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maxdistance)
         face>=0
@@ -331,13 +331,13 @@ module ExtensionsMesh =
         let meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let joinedmesh = new Mesh()
         joinedmesh.Append(meshes)
-        let rc = Doc.Objects.AddMesh(joinedmesh)
+        let rc = State.Doc.Objects.AddMesh(joinedmesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Failed to join Meshes %A" (RhinoScriptSyntax.ToNiceString objectIds) 
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -351,7 +351,7 @@ module ExtensionsMesh =
         if notNull mp then
             mp.Area
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.MeshArea failed.  objectId:'%s'" (rhType objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.MeshArea failed.  objectId:'%s'" (Print.guid objectId)
 
 
 
@@ -362,7 +362,7 @@ module ExtensionsMesh =
     static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%s'" (rhType objectId)
+        if mp|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%s'" (Print.guid objectId)
         mp.Centroid
 
 
@@ -382,13 +382,13 @@ module ExtensionsMesh =
         let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
-            let objectId = Doc.Objects.AddMesh(mesh)
+            let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -408,13 +408,13 @@ module ExtensionsMesh =
         let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
-            let objectId = Doc.Objects.AddMesh(mesh)
+            let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -435,13 +435,13 @@ module ExtensionsMesh =
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
-            let objectId = Doc.Objects.AddMesh(mesh)
+            let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -458,13 +458,13 @@ module ExtensionsMesh =
         let newmeshes = Mesh.CreateBooleanUnion(meshes)
         let rc = Rarr()
         for mesh in newmeshes do
-            let objectId = Doc.Objects.AddMesh(mesh)
+            let objectId = State.Doc.Objects.AddMesh(mesh)
             if objectId <> Guid.Empty then rc.Add(objectId)
         if rc.Count>0 && deleteInput then
             for objectId in meshIds do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -486,7 +486,7 @@ module ExtensionsMesh =
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (rhType objectId) point maximumDistance
+        if face<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Print.guid objectId) point maximumDistance
         !pt, face
 
 
@@ -496,7 +496,7 @@ module ExtensionsMesh =
     [<Extension>]
     static member MeshFaceCenters(meshId:Guid) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        rarr {for i in range(mesh.Faces.Count) do mesh.Faces.GetFaceCenter(i) }
+        rarr {for i in Util.range(mesh.Faces.Count) do mesh.Faces.GetFaceCenter(i) }
 
 
     ///<summary>Returns total face count of a Mesh object.</summary>
@@ -517,7 +517,7 @@ module ExtensionsMesh =
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
             mesh.FaceNormals.ComputeFaceNormals() |> ignore
         let rc = Rarr()
-        for i in range(mesh.FaceNormals.Count) do
+        for i in Util.range(mesh.FaceNormals.Count) do
             let normal = mesh.FaceNormals.[i]
             rc.Add(Vector3d(normal))
         rc
@@ -538,7 +538,7 @@ module ExtensionsMesh =
     static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
-        for i in range(mesh.Faces.Count) do
+        for i in Util.range(mesh.Faces.Count) do
             let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
@@ -564,7 +564,7 @@ module ExtensionsMesh =
     static member MeshFacePoints(objectId:Guid) : (Point3d*Point3d*Point3d*Point3d) Rarr = // TODO mark functions not part of rhinopython
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
-        for i in range(mesh.Faces.Count) do
+        for i in Util.range(mesh.Faces.Count) do
             let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
@@ -601,7 +601,7 @@ module ExtensionsMesh =
     static member MeshFaceVertices(objectId:Guid) : Rarr<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
-        for i in range(mesh.Faces.Count) do
+        for i in Util.range(mesh.Faces.Count) do
             let face = mesh.Faces.GetFace(i)
             rc.Add( (face.A, face.B, face.C, face.D)) //TODO add ngon support
         rc
@@ -655,7 +655,7 @@ module ExtensionsMesh =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
         let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
-        let tolerance = ifZero1 tolerance RhinoMath.ZeroTolerance
+        let tolerance = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
 
@@ -684,10 +684,10 @@ module ExtensionsMesh =
     static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset failed.  meshId:'%s' distance:'%A'" (rhType meshId) distance
-        let rc = Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  meshId:'%s' distance:'%A'" (rhType meshId) distance
-        Doc.Views.Redraw()
+        if offsetmesh|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset failed.  meshId:'%s' distance:'%A'" (Print.guid meshId) distance
+        let rc = State.Doc.Objects.AddMesh(offsetmesh)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Print.guid meshId) distance
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -701,23 +701,23 @@ module ExtensionsMesh =
         let  meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = Rarr()
         if notNull view then
-            let viewport = Doc.Views.Find(view, false).MainViewport
+            let viewport = State.Doc.Views.Find(view, false).MainViewport
             if isNull viewport then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.MeshOutline: did not find view named '%A'" view
             else
                 for mesh in meshes do
                     let polylines = mesh.GetOutlines(viewport)
                     if notNull polylines then
                         for polyline in polylines do
-                            let objectId = Doc.Objects.AddPolyline(polyline)
+                            let objectId = State.Doc.Objects.AddPolyline(polyline)
                             rc.Add(objectId)
         else
             for mesh in meshes do
                 let polylines = mesh.GetOutlines(Plane.WorldXY)
                 if notNull polylines then
                     for polyline in polylines do
-                        let objectId = Doc.Objects.AddPolyline(polyline)
+                        let objectId = State.Doc.Objects.AddPolyline(polyline)
                         rc.Add(objectId)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -741,8 +741,8 @@ module ExtensionsMesh =
             rc <- mesh.Faces.ConvertQuadsToTriangles()
             if rc  then
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Replace(objectId, mesh) |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.Replace(objectId, mesh) |> ignore
+                State.Doc.Views.Redraw()
         rc
 
 
@@ -764,9 +764,9 @@ module ExtensionsMesh =
         let breps =  rarr { for piece in pieces do yield Brep.CreateFromMesh(piece, trimmedTriangles) }
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
-        let ids =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep, attr) }
-        if deleteInput then Doc.Objects.Delete(rhobj, true)|> ignore
-        Doc.Views.Redraw()
+        let ids =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep, attr) }
+        if deleteInput then State.Doc.Objects.Delete(rhobj, true)|> ignore
+        State.Doc.Views.Redraw()
         ids
 
 
@@ -785,7 +785,7 @@ module ExtensionsMesh =
     [<Extension>]
     static member MeshVertexColors(meshId:Guid) : Drawing.Color Rarr= //GET
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
-        rarr { for i in range(mesh.VertexColors.Count) do mesh.VertexColors.[i] }
+        rarr { for i in Util.range(mesh.VertexColors.Count) do mesh.VertexColors.[i] }
 
 
     ///<summary>Modifies vertex colors of a Mesh.</summary>
@@ -802,11 +802,11 @@ module ExtensionsMesh =
         else
             let colorcount = Seq.length(colors)
             if colorcount <> mesh.Vertices.Count then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (rhType meshId) colors
+                RhinoScriptingException.Raise "RhinoScriptSyntax.Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Print.guid meshId) colors
             mesh.VertexColors.Clear()
             for c in colors do mesh.VertexColors.Add(c) |> ignore
-        Doc.Objects.Replace(meshId, mesh) |> ignore
-        Doc.Views.Redraw()
+        State.Doc.Objects.Replace(meshId, mesh) |> ignore
+        State.Doc.Views.Redraw()
 
 
 
@@ -837,7 +837,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let count = mesh.Normals.Count
         if count<1 then rarr {()}
-        else rarr { for i in range(count) do Vector3d(mesh.Normals.[i])}
+        else rarr { for i in Util.range(count) do Vector3d(mesh.Normals.[i])}
 
 
     ///<summary>Returns the vertices of a Mesh.</summary>
@@ -848,7 +848,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let count = mesh.Vertices.Count
         let rc = Rarr()
-        for i in range(count) do
+        for i in Util.range(count) do
             let vertex = mesh.Vertices.[i]
             rc.Add(Point3d(vertex))
         rc
@@ -866,7 +866,7 @@ module ExtensionsMesh =
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume
             else
-                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolume failed on objectId:'%s'" (rhType objectId)
+                RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolume failed on objectId:'%s'" (Print.guid objectId)
         totalvolume
 
 
@@ -878,7 +878,7 @@ module ExtensionsMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolumeCentroid failed.  objectId:'%s'" (rhType objectId)
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.MeshVolumeCentroid failed.  objectId:'%s'" (Print.guid objectId)
 
 
     ///<summary>Pulls a Curve to a Mesh. The function makes a Polyline approximation of
@@ -891,12 +891,12 @@ module ExtensionsMesh =
     static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let tol = Doc.ModelAbsoluteTolerance
+        let tol = State.Doc.ModelAbsoluteTolerance
         let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then RhinoScriptingException.Raise "RhinoScriptSyntax.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (rhType meshId)  (rhType curveId)
-        let rc = Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (rhType meshId) (rhType curveId)
-        Doc.Views.Redraw()
+        if isNull polyline then RhinoScriptingException.Raise "RhinoScriptSyntax.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Print.guid meshId)  (Print.guid curveId)
+        let rc = State.Doc.Objects.AddCurve(polyline)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Print.guid meshId) (Print.guid curveId)
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -909,11 +909,11 @@ module ExtensionsMesh =
     static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
-        let rc =  rarr { for piece in pieces do yield Doc.Objects.AddMesh(piece) }
+        let rc =  rarr { for piece in pieces do yield State.Doc.Objects.AddMesh(piece) }
         if rc.Count <> 0 && deleteInput then
             //id = RhinoScriptSyntax.Coerceguid(objectId)
-            Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+            State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -926,8 +926,8 @@ module ExtensionsMesh =
         let rc = mesh.UnifyNormals()
         if rc>0 then
             //id = RhinoScriptSyntax.Coerceguid(objectId)
-            Doc.Objects.Replace(objectId, mesh)|> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.Replace(objectId, mesh)|> ignore
+            State.Doc.Views.Redraw()
         rc
 
 

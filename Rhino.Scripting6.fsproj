@@ -60,13 +60,15 @@
   <ItemGroup>
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/SyncRhino.fs" />
+    <Compile Include="Src/State.fs" />
+    <Compile Include="Src/Util.fs" />
+    <Compile Include="Src/Print.fs" />
     <Compile Include="Src/AutoOpenActiveDoc.fs" />
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     
-    <Compile Include="Src/RhinoScriptSyntax/RhinoScriptSyntax.fs" />
-    
-    <Compile Include="Src/RhinoScriptSyntax/Print.fs" />
-    
+    <Compile Include="Src/RhinoScriptSyntax/RhinoScriptSyntax.fs" />    
+    <Compile Include="Src/RhinoScriptSyntax/Printing.fs" />    
+    <Compile Include="Src/RhinoScriptSyntax/Coerce.fs" />    
     <Compile Include="Src/RhinoScriptSyntax/Layer.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Application.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Block.fs" />

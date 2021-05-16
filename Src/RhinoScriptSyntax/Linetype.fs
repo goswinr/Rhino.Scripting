@@ -9,7 +9,7 @@ open FsEx.SaveIgnore
 
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsLinetype =
 
@@ -21,7 +21,7 @@ module ExtensionsLinetype =
     ///<returns>(bool) True or False.</returns>
     [<Extension>]
     static member IsLinetype(name:string) : bool =
-        notNull <| Doc.Linetypes.FindName(name)
+        notNull <| State.Doc.Linetypes.FindName(name)
 
 
     ///<summary>Verifies that an existing linetype is from a reference file.</summary>
@@ -29,7 +29,7 @@ module ExtensionsLinetype =
     ///<returns>(bool) True or False.</returns>
     [<Extension>]
     static member IsLinetypeReference(name:string) : bool =
-        let lt = Doc.Linetypes.FindName(name)
+        let lt = State.Doc.Linetypes.FindName(name)
         if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a linetypes" name
         lt.IsReference
 
@@ -38,17 +38,17 @@ module ExtensionsLinetype =
     ///<returns>(int) The number of linetypes in the document.</returns>
     [<Extension>]
     static member LinetypeCount() : int =
-        Doc.Linetypes.Count
+        State.Doc.Linetypes.Count
 
 
     ///<summary>Returns names of all linetypes in the document.</summary>
     ///<returns>(string Rarr) list of linetype names.</returns>
     [<Extension>]
     static member LinetypeNames() : string Rarr =
-        let count = Doc.Linetypes.Count
+        let count = State.Doc.Linetypes.Count
         let rc = Rarr()
         for i = 0 to count - 1 do
-            let linetype = Doc.Linetypes.[i]
+            let linetype = State.Doc.Linetypes.[i]
             if not linetype.IsDeleted then  rc.Add(linetype.Name)
         rc
 

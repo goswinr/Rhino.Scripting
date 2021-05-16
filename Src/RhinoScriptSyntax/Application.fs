@@ -9,7 +9,7 @@ open Rhino.ApplicationSettings
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsApplication =
 
@@ -160,7 +160,7 @@ module ExtensionsApplication =
             elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor <- color
             elif item = 13 then AppearanceSettings.CommandPromptHypertextColor <- color
             else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor: setting item %d is out of range" item
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             )
 
 
@@ -246,8 +246,8 @@ module ExtensionsApplication =
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
             let rc = RhinoApp.RunScript(commandString, echo)
             let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
-            commandSerialNumbers <- None
-            if start<>ende then  commandSerialNumbers <- Some(start, ende)
+            State.CommandSerialNumbers <- None
+            if start<>ende then  State.CommandSerialNumbers <- Some(start, ende)
             rc
         SyncRhino.DoSync false false getKeepEditor
 

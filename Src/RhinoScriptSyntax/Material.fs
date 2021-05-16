@@ -9,7 +9,7 @@ open FsEx.SaveIgnore
 
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsMaterial =
 
@@ -27,9 +27,9 @@ module ExtensionsMaterial =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.RenderMaterialIndex> -1 then layer.RenderMaterialIndex
         else
-            let materialindex = Doc.Materials.Add()
+            let materialindex = State.Doc.Materials.Add()
             layer.RenderMaterialIndex <- materialindex
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             materialindex
 
     ///<summary>Adds material to an object and returns the new material's index. If the
@@ -42,14 +42,14 @@ module ExtensionsMaterial =
         let mutable attr = rhinoobject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
             attr.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-            Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
             attr <- rhinoobject.Attributes
         let mutable materialindex = attr.MaterialIndex
         if materialindex> -1 then materialindex
         else
-            materialindex <- Doc.Materials.Add()
+            materialindex <- State.Doc.Materials.Add()
             attr.MaterialIndex <- materialindex
-            Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
             materialindex
 
 
@@ -61,11 +61,11 @@ module ExtensionsMaterial =
     static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool =
         if sourceIndex = destinationIndex then true // orignaly false
         else
-            let source = Doc.Materials.[sourceIndex]
+            let source = State.Doc.Materials.[sourceIndex]
             if source|> isNull  then false
             else
-                let rc = Doc.Materials.Modify(source, destinationIndex, true)
-                if rc then Doc.Views.Redraw()
+                let rc = State.Doc.Materials.Modify(source, destinationIndex, true)
+                if rc then State.Doc.Views.Redraw()
                 rc
 
 
@@ -76,7 +76,7 @@ module ExtensionsMaterial =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member IsMaterialDefault(materialIndex:int) : bool =
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         notNull mat && mat.IsDefaultMaterial
 
 
@@ -85,7 +85,7 @@ module ExtensionsMaterial =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member IsMaterialReference(materialIndex:int) : bool =
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         notNull mat && mat.IsReference
 
 
@@ -98,16 +98,16 @@ module ExtensionsMaterial =
     static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
-        let mat = Doc.Materials.[source]
+        let mat = State.Doc.Materials.[source]
         if isNull mat then RhinoScriptingException.Raise "RhinoScriptSyntax.MatchMaterial failed.  source:'%A' destination:'%A'" source destination
 
         for objectId in destination do
-            let rhobj = Doc.Objects.FindId(objectId)
+            let rhobj = State.Doc.Objects.FindId(objectId)
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
                 rhobj.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -116,7 +116,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current bump bitmap filename.</returns>
     [<Extension>]
     static member MaterialBump(materialIndex:int) : string option= //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A'" materialIndex
         #if RHINO6
         let texture = mat.GetBumpTexture() 
@@ -132,7 +132,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO6            
@@ -144,7 +144,7 @@ module ExtensionsMaterial =
             #endif
         
             mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
@@ -154,7 +154,7 @@ module ExtensionsMaterial =
     ///<returns>(Drawing.Color) The current material color.</returns>
     [<Extension>]
     static member MaterialColor(materialIndex:int) : Drawing.Color = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.DiffuseColor
         rc
@@ -165,11 +165,11 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialColor(materialIndex:int, color:Drawing.Color) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
         mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns a material's environment bitmap filename.</summary>
@@ -177,7 +177,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current environment bitmap filename.</returns>
     [<Extension>]
     static member MaterialEnvironmentMap(materialIndex:int) : string option= //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
         #if RHINO6
         let texture = mat.GetEnvironmentTexture()
@@ -192,7 +192,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO6
@@ -203,7 +203,7 @@ module ExtensionsMaterial =
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename     
             #endif
             mat.CommitChanges() |> ignore
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
@@ -214,7 +214,7 @@ module ExtensionsMaterial =
     ///<returns>(string) The current material name.</returns>
     [<Extension>]
     static member MaterialName(materialIndex:int) : string = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Name
         rc
@@ -225,7 +225,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialName(materialIndex:int, name:string) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
         mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
@@ -237,7 +237,7 @@ module ExtensionsMaterial =
     ///<returns>(Drawing.Color) The current material reflective color.</returns>
     [<Extension>]
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.ReflectionColor
         rc
@@ -248,11 +248,11 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialReflectiveColor(materialIndex:int, color:Drawing.Color) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.ReflectionColor <- color
         mat.CommitChanges() |> ignore
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -262,7 +262,7 @@ module ExtensionsMaterial =
     ///    0.0 being matte and 255.0 being glossy.</returns>
     [<Extension>]
     static member MaterialShine(materialIndex:int) : float = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Shine
         rc
@@ -274,11 +274,11 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
         mat.Shine <- shine
         mat.CommitChanges() |> ignore
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -287,7 +287,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current texture bitmap filename.</returns>
     [<Extension>]
     static member MaterialTexture(materialIndex:int) : string option = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A'" materialIndex
         #if RHINO6
         let texture = mat.GetBitmapTexture()
@@ -302,7 +302,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO6
@@ -314,7 +314,7 @@ module ExtensionsMaterial =
             #endif
             
             mat.CommitChanges() |> ignore
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
@@ -325,7 +325,7 @@ module ExtensionsMaterial =
     ///    0.0 being opaque and 1.0 being transparent.</returns>
     [<Extension>]
     static member MaterialTransparency(materialIndex:int) : float = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Transparency
         rc
@@ -337,11 +337,11 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialTransparency(materialIndex:int, transparency:float) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         mat.Transparency <- transparency
         mat.CommitChanges() |> ignore
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -350,7 +350,7 @@ module ExtensionsMaterial =
     ///<returns>(string option) The current transparency bitmap filename.</returns>
     [<Extension>]
     static member MaterialTransparencyMap(materialIndex:int) : string option = //GET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
         #if RHINO6
         let texture = mat.GetTransparencyTexture()
@@ -366,7 +366,7 @@ module ExtensionsMaterial =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO6
@@ -377,7 +377,7 @@ module ExtensionsMaterial =
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename            
             #endif            
             mat.CommitChanges() |> ignore
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
@@ -388,11 +388,11 @@ module ExtensionsMaterial =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member ResetMaterial(materialIndex:int) : bool =
-        let mat = Doc.Materials.[materialIndex]
+        let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then false
         else
-            let rc = Doc.Materials.ResetMaterial(materialIndex)
-            Doc.Views.Redraw()
+            let rc = State.Doc.Materials.ResetMaterial(materialIndex)
+            State.Doc.Views.Redraw()
             rc
 
 

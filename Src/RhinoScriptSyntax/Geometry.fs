@@ -11,7 +11,7 @@ open System.Collections.Generic
 
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsGeometry =
     
@@ -32,16 +32,16 @@ module ExtensionsGeometry =
                                     vMagnitude:float,
                                     [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
         let viewlist =
-            if isNull views then [Doc.Views.ActiveView.ActiveViewportID]
+            if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
-                let modelviews = Doc.Views.GetViewList(true, false)
+                let modelviews = State.Doc.Views.GetViewList(true, false)
                 [for view in views do
                     for item in modelviews do
                         if item.ActiveViewport.Name = view then
                             yield item.ActiveViewportID]
-        let rc = Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
+        let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -69,9 +69,9 @@ module ExtensionsGeometry =
                                     [<OPT;DEF(false)>]useAlpha:bool,
                                     [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame image %s does not exist" filename
-        let rc = Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
+        let rc = State.Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
     ///<summary>Adds point object to the document.</summary>
@@ -81,9 +81,9 @@ module ExtensionsGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     [<Extension>]
     static member AddPoint(x:float, y:float, z:float) : Guid =
-        let rc = Doc.Objects.AddPoint(Point3d(x, y, z))
+        let rc = State.Doc.Objects.AddPoint(Point3d(x, y, z))
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  x:'%A' y:'%A' z:'%A'" x y z
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
     ///<summary>Adds point object to the document.</summary>
@@ -91,9 +91,9 @@ module ExtensionsGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     [<Extension>]
     static member AddPoint(point:Point3d) : Guid =
-        let rc = Doc.Objects.AddPoint(point)
+        let rc = State.Doc.Objects.AddPoint(point)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  point:'%A'" point
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -108,14 +108,14 @@ module ExtensionsGeometry =
             for i = 0  to -1 + (Seq.length(points)) do
                 let color = RhinoScriptSyntax.CoerceColor(colors.[i])
                 pc.Add(points.[i], color)
-            let rc = Doc.Objects.AddPointCloud(pc)
+            let rc = State.Doc.Objects.AddPointCloud(pc)
             if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPointCloud: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             rc
         else
-            let rc = Doc.Objects.AddPointCloud(points)
+            let rc = State.Doc.Objects.AddPointCloud(points)
             if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPointCloud: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             rc
 
 
@@ -124,8 +124,8 @@ module ExtensionsGeometry =
     ///<returns>(Guid Rarr) List of identifiers of the new objects.</returns>
     [<Extension>]
     static member AddPoints(points:Point3d seq) : Guid Rarr =
-        let rc = rarr{ for point in points do yield Doc.Objects.AddPoint(point) }
-        Doc.Views.Redraw()
+        let rc = rarr{ for point in points do yield State.Doc.Objects.AddPoint(point) }
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -169,7 +169,7 @@ module ExtensionsGeometry =
         if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let bold = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
-        let ds = Doc.DimStyles.Current
+        let ds = State.Doc.DimStyles.Current
         let qn, quartetBoldProp , quartetItalicProp =
             if isNull font then
               ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
@@ -197,9 +197,9 @@ module ExtensionsGeometry =
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
-        let objectId = Doc.Objects.Add(te);
+        let objectId = State.Doc.Objects.Add(te);
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         objectId
     
     ///<summary>Adds a text string to the document.</summary>
@@ -246,9 +246,9 @@ module ExtensionsGeometry =
     ///<returns>(Guid) The identifier of the new object.</returns>
     [<Extension>]
     static member AddTextDot(text:string, point:Point3d) : Guid =
-        let rc = Doc.Objects.AddTextDot(text, point)
+        let rc = State.Doc.Objects.AddTextDot(text, point)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add text dot to document.  text:'%A' point:'%A'" text point
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -259,7 +259,7 @@ module ExtensionsGeometry =
     static member Area(objectId:Guid) : float =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties.  objectId:'%s'" (rhType objectId)
+        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties.  objectId:'%s'" (Print.guid objectId)
         mp.Area
     
     ///<summary>Returns a world axis-aligned bounding box of several objects.
@@ -418,9 +418,9 @@ module ExtensionsGeometry =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = rarr { for curve in curves do yield Doc.Objects.AddCurve(curve, attr) }
-        if delete then Doc.Objects.Delete(rhobj, true) |>ignore
-        Doc.Views.Redraw()
+        let rc = rarr { for curve in curves do yield State.Doc.Objects.AddCurve(curve, attr) }
+        if delete then State.Doc.Objects.Delete(rhobj, true) |>ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -517,7 +517,7 @@ module ExtensionsGeometry =
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
         (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -543,7 +543,7 @@ module ExtensionsGeometry =
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
         (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -598,8 +598,8 @@ module ExtensionsGeometry =
     [<Extension>]
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
-        if not <| Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %s to %A" (rhType objectId) point
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %s to %A" (Print.guid objectId) point
+        State.Doc.Views.Redraw()
 
 
 
@@ -618,8 +618,8 @@ module ExtensionsGeometry =
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontFace <-  fontface
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (rhType objectId) fontface
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Print.guid objectId) fontface
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font of multiple text dots.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
@@ -630,8 +630,8 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontFace <-  fontface
-            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (rhType objectId) fontface
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Print.guid objectId) fontface
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the font height of a text dot.</summary>
@@ -649,8 +649,8 @@ module ExtensionsGeometry =
     static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontHeight <- height
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (rhType objectId) height
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Print.guid objectId) height
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font height of multiple text dots.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
@@ -661,8 +661,8 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontHeight <- height
-            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (rhType objectId) height
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Print.guid objectId) height
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the location, or insertion point, on a text dot object.</summary>
@@ -681,8 +681,8 @@ module ExtensionsGeometry =
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Point <-  point
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %s to %A" (rhType objectId) point
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %s to %A" (Print.guid objectId) point
+        State.Doc.Views.Redraw()
 
 
 
@@ -704,8 +704,8 @@ module ExtensionsGeometry =
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
         let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Text <-  text
-        if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (rhType objectId) text
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Print.guid objectId) text
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the text on multiple text dot objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text dot objects</param>
@@ -716,8 +716,8 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.Text <-  text
-            if not <| Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (rhType objectId) text
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Print.guid objectId) text
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the font used by a text object.</summary>
@@ -744,10 +744,10 @@ module ExtensionsGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, true, false)
             |? DocObjects.Font.FromQuartetProperties(font, false, true)
             |? DocObjects.Font.FromQuartetProperties(font, true, true)
-            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font)
+            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
         annotation.Font <- f
-        if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font used by multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
@@ -766,10 +766,10 @@ module ExtensionsGeometry =
                 |? DocObjects.Font.FromQuartetProperties(font, true, false)
                 |? DocObjects.Font.FromQuartetProperties(font, false, true)
                 |? DocObjects.Font.FromQuartetProperties(font, true, true)
-                |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font)
+                |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
             annotation.Font <- f
-            if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (rhType objectId) font
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the height of a text object.</summary>
@@ -787,8 +787,8 @@ module ExtensionsGeometry =
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.TextHeight <-  height        
-        if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%A'" (rhType objectId) height
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%A'" (Print.guid objectId) height
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the height of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
@@ -799,8 +799,8 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.TextHeight <-  height            
-            if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%A'" (rhType objectId) height
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%A'" (Print.guid objectId) height
+        State.Doc.Views.Redraw()
 
     ///<summary>Returns the Plane used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
@@ -817,8 +817,8 @@ module ExtensionsGeometry =
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.Plane <-  plane        
-        if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPlane failed.  objectId:'%s' plane:'%A'" (rhType objectId) plane
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPlane failed.  objectId:'%s' plane:'%A'" (Print.guid objectId) plane
+        State.Doc.Views.Redraw()
 
     
     ///<summary>Returns the location of a text object.</summary>
@@ -839,8 +839,8 @@ module ExtensionsGeometry =
         plane.Origin <-  point
         text.Plane <-  plane
         
-        if not <| Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPoint failed.  objectId:'%s' point:'%A'" (rhType objectId) point
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPoint failed.  objectId:'%s' point:'%A'" (Print.guid objectId) point
+        State.Doc.Views.Redraw()
 
 
 
@@ -878,12 +878,12 @@ module ExtensionsGeometry =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
-            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style)
-            |?    (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (rhType objectId) style fontdata.QuartetName)
+            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+            |?    (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName)
  
-        if not <| Doc.Objects.Replace(objectId, annotation) then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font style of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
@@ -904,12 +904,12 @@ module ExtensionsGeometry =
                 |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
                 |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
                 |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
-                |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style)
-                |?   (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (rhType objectId) style fontdata.QuartetName)
+                |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+                |?   (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName)
      
-            if not <| Doc.Objects.Replace(objectId, annotation) then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (rhType objectId) style
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the text string of a text object.</summary>
@@ -930,8 +930,8 @@ module ExtensionsGeometry =
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
         
-        if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%A'" (rhType objectId) text
-        Doc.Views.Redraw()
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%A'" (Print.guid objectId) text
+        State.Doc.Views.Redraw()
     
     ///<summary>Modifies the text string of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
@@ -942,8 +942,8 @@ module ExtensionsGeometry =
         for objectId in objectIds do 
             let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.PlainText <-  text
-            if not <| Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%A'" (rhType objectId) text
-        Doc.Views.Redraw()
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%A'" (Print.guid objectId) text
+        State.Doc.Views.Redraw()
 
 
 

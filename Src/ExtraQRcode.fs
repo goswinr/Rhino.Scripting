@@ -25,7 +25,7 @@ open ZXing.QrCode.Internal
 
 [<AutoOpen>]
 /// This module provides functions to create or QR codes as Hatch or Mesh
-/// This module is automatically opened when Rhino.Scripting.Extra namspace is opened.
+/// This module is automatically opened when Rhino.Scripting.Extra namespace is opened.
 module QRcode = 
 
     // http://crunchify.com/java-simple-qr-code-generator-example/
@@ -110,7 +110,7 @@ module QRcode =
                     let pl = new PolylineCurve(pts)
                     pl |> crvs.Add                    
             iyy <- iyy + 1        
-        let pat = Doc.HatchPatterns.FindName("SOLID")
+        let pat = State.Doc.HatchPatterns.FindName("SOLID")
         if isNull pat then RhinoScriptingException.Raise "RhinoScriptSyntax.Hatchpattern for QR code not found: SOLID"
         let hs = Hatch.Create (crvs, pat.Index , 0.0 , 100.0, 0.01)
         if isNull hs then RhinoScriptingException.Raise "RhinoScriptSyntax.Hatchpattern for QR code is null"

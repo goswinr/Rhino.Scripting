@@ -10,7 +10,7 @@ open FsEx.SaveIgnore
 
   
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsGrips =
 
@@ -29,7 +29,7 @@ module ExtensionsGrips =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if enable <> rhobj.GripsOn then
             rhobj.GripsOn <- enable
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         enable = rhobj.GripsOn
 
 
@@ -49,8 +49,8 @@ module ExtensionsGrips =
                                  [<OPT;DEF(false)>]select:bool) : option<Guid * int * Point3d> =
         let get () = 
             if not preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             let grip = ref null
             let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
@@ -59,7 +59,7 @@ module ExtensionsGrips =
             else
                 if select then
                     grip.Select(true, true)|> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Views.Redraw()
                 Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
 
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
@@ -83,8 +83,8 @@ module ExtensionsGrips =
                                   [<OPT;DEF(false)>]select:bool) : Rarr<Guid * int * Point3d> =
         let get () = 
             if not preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             let grips = ref null
             let re = Input.RhinoGet.GetGrips(grips, message)
             let grips = !grips
@@ -96,7 +96,7 @@ module ExtensionsGrips =
                     let location = grip.CurrentLocation
                     rc.Add((objectId, index, location))
                     if select then grip.Select(true, true)|>ignore
-                if select then Doc.Views.Redraw()
+                if select then State.Doc.Views.Redraw()
             if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
             rc
         SyncRhino.DoSync true true get
@@ -120,7 +120,7 @@ module ExtensionsGrips =
                         grip.NeighborGrip(0, i, 0, false)
                 if notNull ng && enable then
                     ng.Select(true) |> ignore //TODO make sync ?
-                    Doc.Views.Redraw()
+                    State.Doc.Views.Redraw()
                 Ok ng
 
 
@@ -148,7 +148,7 @@ module ExtensionsGrips =
     static member ObjectGripCount(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripCount failed.  objectId:'%s'" (rhType objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripCount failed.  objectId:'%s'" (Print.guid objectId)
         grips.Length
 
 
@@ -159,10 +159,10 @@ module ExtensionsGrips =
     [<Extension>]
     static member ObjectGripLocation(objectId:Guid, index:int) : Point3d = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (rhType objectId) index
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Print.guid objectId) index
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (rhType objectId) index
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Print.guid objectId) index
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         rc
@@ -175,15 +175,15 @@ module ExtensionsGrips =
     [<Extension>]
     static member ObjectGripLocation(objectId:Guid, index:int, point:Point3d) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (rhType objectId) index point
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Print.guid objectId) index point
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (rhType objectId) index point
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Print.guid objectId) index point
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         grip.CurrentLocation <-  point
-        Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
-        Doc.Views.Redraw()
+        State.Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
+        State.Doc.Views.Redraw()
 
 
 
@@ -197,9 +197,9 @@ module ExtensionsGrips =
     [<Extension>]
     static member ObjectGripLocations(objectId:Guid) : Point3d Rarr = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (rhType objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Print.guid objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (rhType objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Print.guid objectId)
         rarr { for grip in grips do yield grip.CurrentLocation }
 
 
@@ -215,14 +215,14 @@ module ExtensionsGrips =
     [<Extension>]
     static member ObjectGripLocations(objectId:Guid, points:Point3d seq) : unit = //SET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (rhType objectId) points
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Print.guid objectId) points
         let grips = rhobj.GetGrips()
-        if grips |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (rhType objectId) points
+        if grips |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Print.guid objectId) points
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
-            Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
-            Doc.Views.Redraw()
+            State.Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
+            State.Doc.Views.Redraw()
 
 
 
@@ -282,7 +282,7 @@ module ExtensionsGrips =
             let grips = rhobj.GetGrips()
 
             if notNull grips then
-                for i in range(grips.Length) do
+                for i in Util.range(grips.Length) do
                     if grips.[i].IsSelected(false) > 0 then rc.Add(i)
             rc
 
@@ -304,7 +304,7 @@ module ExtensionsGrips =
                 else
                     let grip = grips.[index]
                     if grip.Select(true, true) >0 then
-                        Doc.Views.Redraw()
+                        State.Doc.Views.Redraw()
                         true
                     else
                         false
@@ -317,17 +317,17 @@ module ExtensionsGrips =
     [<Extension>]
     static member SelectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (rhType objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Print.guid objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (rhType objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Print.guid objectId)
         let mutable count = 0
         for grip in grips do
             if grip.Select(true, true)>0 then count<- count +  1
         if count>0 then
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             count
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (rhType objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Print.guid objectId)
 
 
     ///<summary>Unselects a single grip owned by an object. If the object's grips are
@@ -347,7 +347,7 @@ module ExtensionsGrips =
                 else
                     let grip = grips.[index]
                     if grip.Select(false) = 0 then
-                        Doc.Views.Redraw()
+                        State.Doc.Views.Redraw()
                         true
                     else
                         false
@@ -359,16 +359,16 @@ module ExtensionsGrips =
     [<Extension>]
     static member UnselectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (rhType objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Print.guid objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (rhType objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Print.guid objectId)
         let mutable count = 0
         for grip in grips do
             if grip.Select(false) = 0 then count <- count +   1
         if count>0 then
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             count
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (rhType objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Print.guid objectId)
 
 

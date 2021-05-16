@@ -13,7 +13,7 @@ open FsEx.SaveIgnore
  
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsUserinterface =
 
@@ -149,7 +149,7 @@ module ExtensionsUserinterface =
             let count = Seq.length(items)
             if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
             let toggles = Rarr()
-            for i in range(count) do
+            for i in Util.range(count) do
                 let initial = defaultVals.[i]
                 let item = items.[i]
                 let name, off, on = item
@@ -231,7 +231,7 @@ module ExtensionsUserinterface =
     [<Extension>]
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
-            let view = Doc.Views.ActiveView
+            let view = State.Doc.Views.ActiveView
             let screenpt = UI.MouseCursor.Location
             let clientpt = view.ScreenToClient(screenpt)
             let viewport = view.ActiveViewport
@@ -284,7 +284,7 @@ module ExtensionsUserinterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    RhinoScriptSyntax.Print ("Distance: " + d.ToNiceString + " " + Doc.GetUnitSystemName(true, true, false, false))
+                    RhinoScriptSyntax.Print ("Distance: " + d.ToNiceString + " " + State.Doc.GetUnitSystemName(true, true, false, false))
                     gp2.Dispose()
                     Some d
                 | _ ->
@@ -321,19 +321,19 @@ module ExtensionsUserinterface =
             if rc <> Input.GetResult.Object then None
             else
                 let r = Rarr()
-                for i in range(go.ObjectCount) do
+                for i in Util.range(go.ObjectCount) do
                     let edge = go.Object(i).Edge()
                     if notNull edge then
                         let crv = edge.Duplicate() :?> NurbsCurve
-                        let curveid = Doc.Objects.AddCurve(crv)
+                        let curveid = State.Doc.Objects.AddCurve(crv)
                         let parentid = go.Object(i).ObjectId
                         let pt = go.Object(i).SelectionPoint()
                         r.Add( (curveid, parentid, pt))
                 if  select then
                     for item in r do
-                        let rhobj = Doc.Objects.FindId(t1 item)
+                        let rhobj = State.Doc.Objects.FindId(t1 item)
                         rhobj.Select(true)|> ignore //TODO make sync ?
-                    Doc.Views.Redraw()
+                    State.Doc.Views.Redraw()
                 Some r
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
         SyncRhino.DoSync true true get
@@ -382,14 +382,14 @@ module ExtensionsUserinterface =
                             [<OPT;DEF(false)>]showNewButton:bool,
                             [<OPT;DEF(false)>]showSetCurrent:bool) : string option =
         let getKeepEditor () = 
-            let layerindex = ref Doc.Layers.CurrentLayerIndex
+            let layerindex = ref State.Doc.Layers.CurrentLayerIndex
             if notNull layer then
-                let layerinstance = Doc.Layers.FindName(layer)
+                let layerinstance = State.Doc.Layers.FindName(layer)
                 if notNull layerinstance then layerindex := layerinstance.Index
             let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
             if not rc then None
             else
-                let layer = Doc.Layers.[!layerindex]
+                let layer = State.Doc.Layers.[!layerindex]
                 Some layer.FullPath
         SyncRhino.DoSync false false getKeepEditor
 
@@ -406,7 +406,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
             if rc then
-                Some (rarr { for index in layerindices do yield  Doc.Layers.[index].FullPath })
+                Some (rarr { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
             else
                 None
         SyncRhino.DoSync false false getKeepEditor
@@ -465,13 +465,13 @@ module ExtensionsUserinterface =
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
                                 [<OPT;DEF(false)>]showByLayer:bool) : string option =
         let getKeepEditor () = 
-            let mutable ltinstance = Doc.Linetypes.CurrentLinetype
+            let mutable ltinstance = State.Doc.Linetypes.CurrentLinetype
             if notNull defaultValLinetype then
-                let ltnew = Doc.Linetypes.FindName(defaultValLinetype)
+                let ltnew = State.Doc.Linetypes.FindName(defaultValLinetype)
                 if notNull ltnew  then ltinstance <- ltnew
             try
-                let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", Doc) :?> Guid  // this fails if clicking in void
-                let linetype = Doc.Linetypes.FindId(objectId)
+                let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
+                let linetype = State.Doc.Linetypes.FindId(objectId)
                 Some linetype.Name
             with _ ->
                 None
@@ -495,8 +495,8 @@ module ExtensionsUserinterface =
                                 [<OPT;DEF(1)>]minCount:int,
                                 [<OPT;DEF(0)>]maxCount:int) : option<Rarr<int>> =
         let get () = 
-            Doc.Objects.UnselectAll() |> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.UnselectAll() |> ignore
+            State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoobject _ _ -> objectId = rhinoobject.Id)
             go.SetCommandPrompt(message)
@@ -529,8 +529,8 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int) : option<Rarr<int>> =
         let get () = 
-            Doc.Objects.UnselectAll() |> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.UnselectAll() |> ignore
+            State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCustomGeometryFilter(fun rhinoobject _ _ -> objectId = rhinoobject.Id)
             go.SetCommandPrompt(message)
@@ -633,7 +633,7 @@ module ExtensionsUserinterface =
                 gp.Constrain(brep, -1, -1, false) |> ignore
 
             | _ ->
-                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (rhType surfaceId) message
+                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (Print.guid surfaceId) message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then
@@ -669,7 +669,7 @@ module ExtensionsUserinterface =
             gp.EnableDrawLineFromPoint( drawLines )
             if inPlane then
                 gp.ConstrainToConstructionPlane(true) |> ignore
-                let plane = Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
+                let plane = State.Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
                 gp.Constrain(plane, false) |> ignore
             let mutable getres = gp.Get()
             if gp.CommandResult() <> Commands.Result.Success then None
@@ -749,7 +749,7 @@ module ExtensionsUserinterface =
             gpl.MinPointCount <- min
             if max>min then gpl.MaxPointCount <- max
             let rc, polyline = gpl.Get()
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             if rc = Commands.Result.Success then Some polyline
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()

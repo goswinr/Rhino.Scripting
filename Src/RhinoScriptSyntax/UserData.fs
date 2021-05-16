@@ -9,7 +9,7 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsUserdata =
 
@@ -22,21 +22,21 @@ module ExtensionsUserdata =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit =
-        Doc.Strings.Delete(section, entry) //TODO check null case
+        State.Doc.Strings.Delete(section, entry) //TODO check null case
 
 
     ///<summary>Returns the number of user data strings in the current document.</summary>
     ///<returns>(int) The number of user data strings in the current document.</returns>
     [<Extension>]
     static member DocumentDataCount() : int =
-        Doc.Strings.DocumentDataCount
+        State.Doc.Strings.DocumentDataCount
 
   
     ///<summary>Returns the number of user text strings in the current document.</summary>
     ///<returns>(int) The number of user text strings in the current document.</returns>
     [<Extension>]
     static member DocumentUserTextCount() : int =
-        Doc.Strings.DocumentUserTextCount
+        State.Doc.Strings.DocumentUserTextCount
 
 
     ///<summary>Returns a user data item from the current document.</summary>
@@ -46,9 +46,9 @@ module ExtensionsUserdata =
     [<Extension>]
     static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> =
         if notNull section then
-            Doc.Strings.GetSectionNames()
+            State.Doc.Strings.GetSectionNames()
         else
-            Doc.Strings.GetEntryNames(section)
+            State.Doc.Strings.GetEntryNames(section)
 
     ///<summary>Returns a user data item  entry from the current document.</summary>
     ///<param name="section">(string) Section name</param>
@@ -56,7 +56,7 @@ module ExtensionsUserdata =
     ///<returns>(string) The entry value.</returns>
     [<Extension>]
     static member GetDocumentDataEntry(section:string, entry:string) : string =
-        Doc.Strings.GetValue(section, entry)
+        State.Doc.Strings.GetValue(section, entry)
 
 
     ///<summary>Returns user text stored in the document.</summary>
@@ -64,14 +64,14 @@ module ExtensionsUserdata =
     ///<returns>(string) If key is specified, then the associated value.</returns>
     [<Extension>]
     static member GetDocumentUserText(key:string) : string =
-        Doc.Strings.GetValue(key) //TODO add null checking
+        State.Doc.Strings.GetValue(key) //TODO add null checking
 
     ///<summary>Returns all document user text keys.</summary>
     ///<returns>(string Rarr) all document user text keys.</returns>
     [<Extension>]
     static member GetDocumentUserTextKeys() : string Rarr =
-        rarr { for i = 0 to Doc.Strings.Count-1  do
-                    let k = Doc.Strings.GetKey(i)
+        rarr { for i = 0 to State.Doc.Strings.Count-1  do
+                    let k = State.Doc.Strings.GetKey(i)
                     if not <| k.Contains "\\" then  // TODO why ??
                         yield k }
 
@@ -110,7 +110,7 @@ module ExtensionsUserdata =
         if isNull s then             
             let err = 
                 stringBuffer{
-                yield! sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (rhType objectId)
+                yield! sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Print.guid objectId)
                 let ks = RhinoScriptSyntax.GetUserTextKeys(objectId,false)
                 if ks.Count = 0 then 
                     yield!  "This Object does not have any UserText."
@@ -165,14 +165,14 @@ module ExtensionsUserdata =
     ///<returns>(bool) True or False indicating the presence of Script user data.</returns>
     [<Extension>]
     static member IsDocumentData() : bool =
-        Doc.Strings.Count > 0 //DocumentDataCount > 0
+        State.Doc.Strings.Count > 0 //DocumentDataCount > 0
 
 
     ///<summary>Verifies the current document contains user text.</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text.</returns>
     [<Extension>]
     static member IsDocumentUserText() : bool =
-        Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
+        State.Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
 
 
     ///<summary>Verifies that an object contains user text.</summary>
@@ -198,7 +198,7 @@ module ExtensionsUserdata =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
-        Doc.Strings.SetString(section, entry, value) |> ignoreObj
+        State.Doc.Strings.SetString(section, entry, value) |> ignoreObj
 
 
     ///<summary>Sets a user text stored in the document.</summary>
@@ -209,7 +209,7 @@ module ExtensionsUserdata =
     static member SetDocumentUserText(key:string, value:string) : unit =
         if isNull key || isNull value then RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText failed on for null key and/or null value" 
         if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText failed on for key '%s' and value \"\" (empty string)"  key 
-        Doc.Strings.SetString(key, value) |> ignoreObj
+        State.Doc.Strings.SetString(key, value) |> ignoreObj
         
 
     ///<summary>Removes user text stored in the document.</summary>
@@ -218,7 +218,7 @@ module ExtensionsUserdata =
     [<Extension>]
     static member DeleteDocumentUserText(key:string) : unit =
         if isNull key  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed on for null key" 
-        let p = Doc.Strings.SetString(key, null) 
+        let p = State.Doc.Strings.SetString(key, null) 
         if isNull p then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key    
 
     ///<summary>Sets a user text stored on an object.</summary>
@@ -232,11 +232,11 @@ module ExtensionsUserdata =
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         //TODO add null check for key and value
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (rhType objectId) key 
+        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (Print.guid objectId) key 
         if attachToGeometry then
-            if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (rhType objectId) key value
+            if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
         else
-            if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (rhType objectId) key value
+            if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
 
     ///<summary>Sets or removes user text stored on multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
@@ -252,9 +252,9 @@ module ExtensionsUserdata =
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
-                if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (rhType objectId) key value
+                if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
             else
-                if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (rhType objectId) key value
+                if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
 
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
@@ -266,7 +266,7 @@ module ExtensionsUserdata =
     [<Extension>]
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // retuns false if key does not exist yet, otherwise true
+        if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
         else                     obj.Attributes.SetUserString(key, null) |> ignore
         
 
@@ -280,5 +280,5 @@ module ExtensionsUserdata =
     static member DeleteUserText(objectIds:Guid seq, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL        
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // retuns false if key does not exist yet, otherwise true
+            if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
             else                      obj.Attributes.SetUserString(key, null) |> ignore

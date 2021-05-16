@@ -12,7 +12,7 @@ open IniParser.Model
 
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsUtility =
    
@@ -164,7 +164,7 @@ module ExtensionsUtility =
     static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
         if Seq.length numbers < 2 then Rarr(numbers )
         else
-            let tol = ifZero1 tolerance  RhinoMath.ZeroTolerance // or Doc.ModelAbsoluteTolerance
+            let tol = Util.ifZero1 tolerance  RhinoMath.ZeroTolerance // or State.Doc.ModelAbsoluteTolerance
             let nums = numbers|> Seq.sort
             let first = Seq.head nums
             let second = (Seq.item 1 nums)
@@ -187,7 +187,7 @@ module ExtensionsUtility =
     ///<returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     [<Extension>]
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
-        let tol = ifZero1 tolerance Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
+        let tol = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
 
@@ -325,7 +325,7 @@ module ExtensionsUtility =
     ///<returns>(Point3d array) Array of sorted 3D points.</returns>
     [<Extension>]
     static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
-        let tol = ifZero2 RhinoMath.ZeroTolerance tolerance
+        let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         Point3d.SortAndCullPointList(points, tol)
 
 

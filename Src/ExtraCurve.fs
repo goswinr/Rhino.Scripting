@@ -11,7 +11,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 /// This module provides functions to create or manipulate Rhino Curves
-/// This module is automatically opened when Rhino.Scripting.Extra namspace is opened.
+/// This module is automatically opened when Rhino.Scripting.Extra namespace is opened.
 module ExtrasCurve =
 
   open Line
@@ -55,7 +55,7 @@ module ExtrasCurve =
         for i in fillets.Keys do 
             if i >= polyline.LastIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.FilletPolyline: cannot fillet corner %d . in polyline of %d points" i polyline.Count                
         
-        let closed = RhinoScriptSyntax.Distance(polyline.[0], polyline.Last) < Doc.ModelAbsoluteTolerance 
+        let closed = RhinoScriptSyntax.Distance(polyline.[0], polyline.Last) < State.Doc.ModelAbsoluteTolerance 
         let mutable prevPt = polyline.[0]
         let mutable endPt = polyline.Last
         let plc = new PolyCurve()        

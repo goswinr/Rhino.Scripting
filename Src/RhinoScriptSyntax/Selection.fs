@@ -11,7 +11,7 @@ open FsEx.SaveIgnore
 
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsSelection =
   
@@ -65,12 +65,12 @@ module ExtensionsSelection =
             it.LockedObjects <- true
             it.HiddenObjects <- true
             it.ReferenceObjects <- includeReferences
-            let es = Doc.Objects.GetObjectList(it)
+            let es = State.Doc.Objects.GetObjectList(it)
             let objectIds = Rarr()            
             for ob in es do
                 objectIds.Add ob.Id
                 if select then ob.Select(true) |> ignore   //TODO make sync ?             
-            if objectIds.Count > 0 && select then Doc.Views.Redraw()           
+            if objectIds.Count > 0 && select then State.Doc.Views.Redraw()           
             objectIds
 
     ///<summary>Returns identifiers of all objects in the current model or paper space that are not hidden or on turned off layers.</summary>
@@ -92,10 +92,10 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
             let viewId = // only get object from model space if current or current page
-                if Doc.Views.ActiveView :? Display.RhinoPageView then Doc.Views.ActiveView.MainViewport.Id
+                if State.Doc.Views.ActiveView :? Display.RhinoPageView then State.Doc.Views.ActiveView.MainViewport.Id
                 else Guid.Empty                        
             let Vis = new Collections.Generic.HashSet<int>()
-            for layer in Doc.Layers do
+            for layer in State.Doc.Layers do
                 if not layer.IsDeleted && layer.IsVisible then 
                     Vis.Add(layer.Index) |> ignore
             let it = DocObjects.ObjectEnumeratorSettings()
@@ -108,7 +108,7 @@ module ExtensionsSelection =
             it.ObjectTypeFilter <- getFilterEnum(filter)
             it.DeletedObjects <- false
             //it.VisibleFilter <- true
-            let objects = Doc.Objects.GetObjectList(it)
+            let objects = State.Doc.Objects.GetObjectList(it)
             let objectIds = Rarr()            
             for ob in objects do  
                 if ob.Attributes.ViewportId = viewId then // only get object from model space if current or current page
@@ -132,7 +132,7 @@ module ExtensionsSelection =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
-            let e = Doc.Objects.GetObjectList(it).GetEnumerator()
+            let e = State.Doc.Objects.GetObjectList(it).GetEnumerator()
             if not <| e.MoveNext() then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found"
             let object = e.Current
             if isNull object then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found(null)"
@@ -159,8 +159,8 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
         let get () =  // TODO Add check if already hidden, then dont even hide and show
             if not <| preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             let go = new Input.Custom.GetObject()
             if notNull message then go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.Curve
@@ -180,8 +180,8 @@ module ExtensionsSelection =
                 let obj = go.Object(0).Object()
                 go.Dispose()
                 if not <| select && not <| preselect then
-                    Doc.Objects.UnselectAll()|> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Objects.UnselectAll()|> ignore
+                    State.Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
                 (objectId, presel, selmethod, point, curveparameter, viewname)
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
@@ -213,8 +213,8 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]subObjects:bool) : Guid =
         let get () = 
             if not  preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull customFilter then go.SetCustomGeometryFilter(customFilter)
             if notNull message then go.SetCommandPrompt(message)            
@@ -229,12 +229,12 @@ module ExtensionsSelection =
                 let obj = objref.Object()
                 //let presel = go.ObjectsWerePreselected
                 go.Dispose()
-                //if not <| select && not <| preselect then Doc.Objects.UnselectAll() |> ignore  Doc.Views.Redraw()
+                //if not <| select && not <| preselect then State.Doc.Objects.UnselectAll() |> ignore  State.Doc.Views.Redraw()
                 if select then 
                     obj.Select(select)  |> ignore
                 else
-                    Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                    State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
                 obj.Id
         SyncRhino.DoSync true true get
                 
@@ -271,8 +271,8 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string = 
         let get () = 
             if not <| preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objects then
                 let s = System.Collections.Generic.HashSet(objects)
@@ -296,8 +296,8 @@ module ExtensionsSelection =
                 let obj = go.Object(0).Object()
                 go.Dispose()
                 if not <| select && not <| presel then
-                    Doc.Objects.UnselectAll() |> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Views.Redraw()
                 obj.Select(select) |> ignore
                 (objectId, presel, selmethod, point, viewname)
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
@@ -342,8 +342,8 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Rarr<Guid> =
         let get () = 
             if not <| preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
                 let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
@@ -360,11 +360,11 @@ module ExtensionsSelection =
             if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
-                    Doc.Objects.UnselectAll() |> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Views.Redraw()
                 let rc = Rarr()
                 let count = go.ObjectCount
-                for i in range(count) do
+                for i in Util.range(count) do
                     let objref = go.Object(i)
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
@@ -485,8 +485,8 @@ module ExtensionsSelection =
                                     [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr =
         let get () = 
             if not <| preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
                 let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
@@ -501,11 +501,11 @@ module ExtensionsSelection =
             if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjectsEx(message=%A), Interaction result: %A" message res            
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
-                    Doc.Objects.UnselectAll() |> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Views.Redraw()
                 let rc = Rarr()
                 let count = go.ObjectCount
-                for i in range(count) do
+                for i in Util.range(count) do
                     let objref = go.Object(i)
                     let objectId = objref.ObjectId
                     let presel = go.ObjectsWerePreselected
@@ -567,8 +567,8 @@ module ExtensionsSelection =
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
         let get () = 
             if not <| preselect then
-                Doc.Objects.UnselectAll() |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Objects.UnselectAll() |> ignore
+                State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.Surface
@@ -581,7 +581,7 @@ module ExtensionsSelection =
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
                 rhobj.Select(select) |> ignore
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
                 let objectId = rhobj.Id
                 let prepicked = go.ObjectsWerePreselected
                 let selmethod = objref.SelectionMethod()
@@ -595,8 +595,8 @@ module ExtensionsSelection =
                 let name = view.ActiveViewport.Name
                 go.Dispose()
                 if not <| select && not <| prepicked then
-                    Doc.Objects.UnselectAll() |> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Objects.UnselectAll() |> ignore
+                    State.Doc.Views.Redraw()
                 (objectId, prepicked, selmethod, point, uv, name)
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
         SyncRhino.DoSync true true get
@@ -624,8 +624,8 @@ module ExtensionsSelection =
             settings.IncludeGrips <- includeGrips
             settings.ReferenceObjects <- includeReferences
             rarr{
-                for i in Doc.Objects.GetObjectList(settings) do
-                    if i.IsLocked || (Doc.Layers.[i.Attributes.LayerIndex]).IsLocked then
+                for i in State.Doc.Objects.GetObjectList(settings) do
+                    if i.IsLocked || (State.Doc.Layers.[i.Attributes.LayerIndex]).IsLocked then
                         yield i.Id }
 
 
@@ -651,8 +651,8 @@ module ExtensionsSelection =
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.ReferenceObjects <- includeReferences
-        rarr {for i in Doc.Objects.GetObjectList(settings) do
-                        if i.IsHidden || not <| (Doc.Layers.[i.Attributes.LayerIndex]).IsVisible then
+        rarr {for i in State.Doc.Objects.GetObjectList(settings) do
+                        if i.IsHidden || not <| (State.Doc.Layers.[i.Attributes.LayerIndex]).IsVisible then
                             i.Id }
 
 
@@ -674,7 +674,7 @@ module ExtensionsSelection =
         settings.IncludeGrips <- includeGrips
         settings.IncludePhantoms <- true
         settings.ReferenceObjects <- includeReferences
-        let rhobjs = Doc.Objects.GetObjectList(settings)
+        let rhobjs = State.Doc.Objects.GetObjectList(settings)
         let rc = Rarr()
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
@@ -682,7 +682,7 @@ module ExtensionsSelection =
                 obj.Select(true) |> ignore //TODO make sync ?
             else
                 obj.Select(false) |> ignore
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -695,18 +695,18 @@ module ExtensionsSelection =
     ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
     [<Extension>]
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr =
-        match commandSerialNumbers with
+        match State.CommandSerialNumbers with
         |None -> Rarr()
         |Some (serialnum, ende) ->
             let mutable serialnumber = serialnum
             let rc = Rarr()
             while serialnumber < ende do
-                let obj = Doc.Objects.Find(serialnumber)
+                let obj = State.Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
                     rc.Add(obj.Id)
                 if select then obj.Select(true) |> ignore //TODO make sync ?
                 serialnumber <- serialnumber + 1u
-                if select && rc.Count > 1 then Doc.Views.Redraw()
+                if select && rc.Count > 1 then State.Doc.Views.Redraw()
             rc
 
 
@@ -727,13 +727,13 @@ module ExtensionsSelection =
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
-        let rhobjs = Doc.Objects.GetObjectList(settings)
+        let rhobjs = State.Doc.Objects.GetObjectList(settings)
         if isNull rhobjs || Seq.isEmpty rhobjs then RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         let firstobj = Seq.last rhobjs
         if isNull firstobj then RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
             firstobj.Select(true) |> ignore //TODO make sync ?
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         firstobj.Id
 
 
@@ -755,12 +755,12 @@ module ExtensionsSelection =
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
-        Doc.Objects.GetObjectList(settings)
+        State.Doc.Objects.GetObjectList(settings)
         |> Seq.thisNext
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None ->RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (rhType objectId)
+            |None ->RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Print.guid objectId)
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id
@@ -780,7 +780,7 @@ module ExtensionsSelection =
         iter.LockedObjects <- false
         iter.IncludeLights <- includeLights
         iter.IncludeGrips <- includeGrips
-        rarr {for obj in Doc.Objects.GetObjectList(iter) do yield obj.Id }
+        rarr {for obj in State.Doc.Objects.GetObjectList(iter) do yield obj.Id }
 
 
     ///<summary>Returns identifiers of all objects based on color.</summary>
@@ -794,10 +794,10 @@ module ExtensionsSelection =
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr =
-        let rhinoobjects = Doc.Objects.FindByDrawColor(color, includeLights)
+        let rhinoobjects = State.Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore //TODO make sync ?
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         rarr {for obj in rhinoobjects do yield obj.Id }
 
 
@@ -808,15 +808,15 @@ module ExtensionsSelection =
     ///<returns>(Guid Rarr) identifiers for objects in the group.</returns>
     [<Extension>]
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
-        let groupinstance = Doc.Groups.FindName(groupName)
+        let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance  then RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
-        let rhinoobjects = Doc.Groups.GroupMembers(groupinstance.Index)
+        let rhinoobjects = State.Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             Rarr()
         else
             if select then
                 for obj in rhinoobjects do obj.Select(true) |> ignore //TODO make sync ?
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
             rarr { for obj in rhinoobjects do yield obj.Id }
 
 
@@ -828,12 +828,12 @@ module ExtensionsSelection =
     [<Extension>]
     static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
-        let rhinoobjects = Doc.Objects.FindByLayer(layer)
+        let rhinoobjects = State.Doc.Objects.FindByLayer(layer)
         if isNull rhinoobjects then Rarr()
         else
             if select then
                 for rhobj in rhinoobjects do rhobj.Select(true) |> ignore //TODO make sync ?
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
             rarr {for obj in rhinoobjects do yield obj.Id }
 
 
@@ -860,11 +860,11 @@ module ExtensionsSelection =
         settings.IncludeLights <- includeLights
         settings.NameFilter <- name
         settings.ReferenceObjects <- includeReferences
-        let objects = Doc.Objects.GetObjectList(settings)
+        let objects = State.Doc.Objects.GetObjectList(settings)
         let ids = rarr{ for rhobj in objects do yield rhobj.Id }
         if ids.Count>0 && select then
             for rhobj in objects do rhobj.Select(true) |> ignore //TODO make sync ?
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         ids
 
     ///<summary>Returns identifiers of all objects based on the objects' geometry type.</summary>
@@ -935,7 +935,7 @@ module ExtensionsSelection =
         if (state &&& 2) <> 0 then it.LockedObjects <- true
         if (state &&& 4) <> 0 then it.HiddenObjects <- true
         let objectIds = Rarr()
-        let e = Doc.Objects.GetObjectList(it)
+        let e = State.Doc.Objects.GetObjectList(it)
         for object in e do
             let  mutable bFound = false
             let objecttyp = object.ObjectType
@@ -959,7 +959,7 @@ module ExtensionsSelection =
             if bFound then
                 if select then object.Select(true) |> ignore //TODO make sync ?
                 objectIds.Add(object.Id)
-        if objectIds.Count > 0 && select then Doc.Views.Redraw()
+        if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
         objectIds
 
 
@@ -971,7 +971,7 @@ module ExtensionsSelection =
     ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
     [<Extension>]
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
-        let selobjects = Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
+        let selobjects = State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
         rarr {for obj in selobjects do obj.Id }
 
 
@@ -979,8 +979,8 @@ module ExtensionsSelection =
     ///<returns>(int) The number of objects that were unselected.</returns>
     [<Extension>]
     static member UnselectAllObjects() : int =
-        let rc = Doc.Objects.UnselectAll()
-        if rc>0 then Doc.Views.Redraw()
+        let rc = State.Doc.Objects.UnselectAll()
+        if rc>0 then State.Doc.Views.Redraw()
         rc
 
 
@@ -1007,16 +1007,16 @@ module ExtensionsSelection =
         it.IncludeLights <- includeLights
         it.IncludeGrips <- includeGrips
         it.VisibleFilter <- true
-        let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else Doc.Views.ActiveView.MainViewport
+        let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else State.Doc.Views.ActiveView.MainViewport
         it.ViewportFilter <- viewport
         let objectIds = Rarr()
-        let e = Doc.Objects.GetObjectList(it)
+        let e = State.Doc.Objects.GetObjectList(it)
         for object in e do
             let bbox = object.Geometry.GetBoundingBox(true)
             if viewport.IsVisible(bbox) then
                 if select then object.Select(true) |> ignore //TODO make sync ? TEST !!!
                 objectIds.Add(object.Id)
-        if objectIds.Count>0 && select then Doc.Views.Redraw()
+        if objectIds.Count>0 && select then State.Doc.Views.Redraw()
         objectIds
 
 
@@ -1037,7 +1037,7 @@ module ExtensionsSelection =
                               [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr =
         
         let pick () = 
-            let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else Doc.Views.ActiveView
+            let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else State.Doc.Views.ActiveView
             let viewport = view.MainViewport
             let screen1 = Point2d(corner1)
             let screen2 = Point2d(corner2)
@@ -1065,7 +1065,7 @@ module ExtensionsSelection =
                 pc.SetPickTransform(viewport.GetPickTransform(rect))
                 pc.UpdateClippingPlanes()
         
-                Doc.Objects.PickObjects(pc)
+                State.Doc.Objects.PickObjects(pc)
 
             let rc = Rarr()
             if notNull objects then
@@ -1074,7 +1074,7 @@ module ExtensionsSelection =
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)
                     if select then rhobj.Select(true) |> ignore //TODO make sync ?
-                if select then Doc.Views.Redraw()
+                if select then State.Doc.Views.Redraw()
             rc
         SyncRhino.DoSync true true pick
 

@@ -90,7 +90,7 @@ module Line =
     /// Finds intersection of two Finite Lines.
     /// Returns: 
     ///    an enpty array if they are paralell,
-    ///    an array with one point if they intersect by Doc.ModelAbsoluteTolerance (point will be the average of the two points within the tolerance)
+    ///    an array with one point if they intersect by State.Doc.ModelAbsoluteTolerance (point will be the average of the two points within the tolerance)
     ///    an array with two points where they are the closest to each other. (in same order as input)
     /// Fails if lines are paralell.
     /// Considers Lines finte
@@ -103,7 +103,7 @@ module Line =
             let a = lnA.PointAt(ca)
             let b = lnB.PointAt(cb) 
             let d = Pnt.distance a b
-            if  d < Doc.ModelAbsoluteTolerance * 0.5 then 
+            if  d < State.Doc.ModelAbsoluteTolerance * 0.5 then 
                 if d < RhinoMath.ZeroTolerance then [|a|]
                 else [| Pnt.divPt a b 0.5|]
             else [|a ; b|]

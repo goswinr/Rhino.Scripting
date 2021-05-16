@@ -11,7 +11,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 /// This module provides functions to create or manipulate Rhino Meshes 
-/// This module is automatically opened when Rhino.Scripting.Extra namspace is opened.
+/// This module is automatically opened when Rhino.Scripting.Extra namespace is opened.
 module ExtrasMesh =
    
     type RhinoScriptSyntax with 

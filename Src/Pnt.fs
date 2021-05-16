@@ -26,20 +26,20 @@ module Pnt =
     let inline distanceSq (a:Point3d) (b:Point3d) = let v = a-b in  v.X*v.X + v.Y*v.Y + v.Z*v.Z
 
     
-    /// retuns a point that is at a given distance from a point in the direction of another point. 
+    /// returns a point that is at a given distance from a point in the direction of another point. 
     let inline distPt (fromPt:Point3d) ( dirPt:Point3d) ( distance:float) : Point3d  =
         let v = dirPt - fromPt
         let sc = distance/v.Length
         fromPt + v*sc
     
     
-    /// Retuns a Point by evaluation a line between two point with a normalized patrameter.
+    /// returns a Point by evaluation a line between two point with a normalized patrameter.
     /// e.g. rel=0.5 will return the middle point, rel=1.0 the endPoint
     let inline divPt(fromPt:Point3d)( toPt:Point3d)(rel:float) : Point3d  =
         let v = toPt - fromPt
         fromPt + v*rel
     
-    /// retuns a point that is at a given Z level, 
+    /// returns a point that is at a given Z level, 
     /// going from a point in the direction of another point. 
     let extendToZLevel (fromPt:Point3d)( toPt:Point3d) (z:float) =
         let v = toPt - fromPt
@@ -52,13 +52,13 @@ module Pnt =
         fromPt + v * fac
     
 
-    /// Sets the X value and retuns new Point3d
+    /// Sets the X value and returns new Point3d
     let inline setX x (pt:Point3d) =  Point3d(x, pt.Y, pt.Z)
 
-    /// Sets the Y value and retuns new Point3d
+    /// Sets the Y value and returns new Point3d
     let inline setY y (pt:Point3d) =  Point3d(pt.X, y, pt.Z)
 
-    /// Sets the Z value and retuns new Point3d
+    /// Sets the Z value and returns new Point3d
     let inline setZ z (pt:Point3d) =  Point3d(pt.X, pt.Y, z)
 
     /// Gets the X value of  Point3d
@@ -92,9 +92,9 @@ module Pnt =
     let inline translateZ (zShift:float) (pt:Point3d ) =
         Point3d(pt.X, pt.Y, pt.Z+zShift)
    
-    /// Snap to point if within Doc.ModelAbsoluteTolerance
+    /// Snap to point if within State.Doc.ModelAbsoluteTolerance
     let snapIfClose (snapTo:Point3d) (pt:Point3d) =
-        if (snapTo-pt).Length < Doc.ModelAbsoluteTolerance then snapTo else pt
+        if (snapTo-pt).Length < State.Doc.ModelAbsoluteTolerance then snapTo else pt
     
     /// Every line has a normal vector in XY Plane.
     /// If line is vertical then XAxis is returned
@@ -135,11 +135,11 @@ module Pnt =
     /// The offset from first and second segment are given speratly and can vary (prevDist and nextDist).    
     /// Use negative distance for outer offset
     /// The orientation parameter is only aproximate, it might flip the output normal, so that the  dot-product is positive.
-    /// Returns :
-    ///   • the first segment offset vector in actual length  , 
-    ///   • second segment offset vector, 
-    ///   • the offsseted corner,
-    ///   • and the unitized normal at the corner. fliped if needed to match orientation of the orintation input vector (positive dot product)
+    /// Returns a Value tuple of :
+    ///   - the first segment offset vector in actual length  , 
+    ///   - second segment offset vector, 
+    ///   - the offsseted corner,
+    ///   - and the unitized normal at the corner. fliped if needed to match orientation of the orintation input vector (positive dot product)
     /// If Points are  colinear returns: Vector3d.Zero, Vector3d.Zero, Point3d.Origin, Vector3d.Zero
     let findOffsetCorner(   prevPt:Point3d,
                             thisPt:Point3d, 
@@ -159,8 +159,8 @@ module Pnt =
             
             let sp = Vector3d.CrossProduct(vp, n) |> Vec.setLength prevDist 
             let sn = Vector3d.CrossProduct(n, vn) |> Vec.setLength nextDist    
-            let lp = Line(thisPt + sp , vp)  //|>! (Doc.Objects.AddLine>>ignore)
-            let ln = Line(thisPt + sn , vn)  //|>! (Doc.Objects.AddLine>> ignore)               
+            let lp = Line(thisPt + sp , vp)  //|>! (State.Doc.Objects.AddLine>>ignore)
+            let ln = Line(thisPt + sn , vn)  //|>! (State.Doc.Objects.AddLine>> ignore)               
             let ok, tp , tn = Intersect.Intersection.LineLine(lp, ln) //could also be solved with trigonometry functions            
             if not ok then RhinoScriptingException.Raise "Rhino.Scripting.Pnt.findOffsetCorner: Intersect.Intersection.LineLine failed on %s and %s" lp.ToNiceString ln.ToNiceString
             struct(sp, sn, lp.PointAt(tp), n)  //or ln.PointAt(tn), should be same

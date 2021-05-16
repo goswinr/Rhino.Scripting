@@ -10,7 +10,7 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsPlane =
 
@@ -101,7 +101,7 @@ module ExtensionsPlane =
     ///<summary>Intersect an infinite Plane and a Curve object.</summary>
     ///<param name="plane">(Plane) The Plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the Curve object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The intersection tolerance.</param>
     ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple . The list will contain one or more of the following tuple:
     ///    Element Type        Description
@@ -131,7 +131,7 @@ module ExtensionsPlane =
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
-        let  tolerance = if tolerance = 0.0 then  Doc.ModelAbsoluteTolerance else tolerance
+        let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
         if notNull intersections then
             let rc = Rarr()

@@ -9,7 +9,7 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsDimension =
 
@@ -42,12 +42,12 @@ module ExtensionsDimension =
         if isNull ldim then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
         ldim.Aligned <- true
         if style <> "" then
-            let ds = Doc.DimStyles.FindName(style)
+            let ds = State.Doc.DimStyles.FindName(style)
             if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension, style not found, failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
             ldim.DimensionStyleId <- ds.Id
-        let rc = Doc.Objects.AddLinearDimension(ldim)
+        let rc = State.Doc.Objects.AddLinearDimension(ldim)
         if rc = Guid.Empty then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension: Unable to add dimension to document.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -57,7 +57,7 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member AddDimStyle(dimStyleName:string) : unit =
-        let index = Doc.DimStyles.Add(dimStyleName)
+        let index = State.Doc.DimStyles.Add(dimStyleName)
         if index<0 then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddDimStyle failed.  dimStyleName:'%A'" dimStyleName
 
 
@@ -94,7 +94,7 @@ module ExtensionsDimension =
             let cprc, s, t = plane0.ClosestParameter( point )
             if not cprc then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader failed.  points %A, text:%s, plane %A" points text plane
             points2d.Add( Rhino.Geometry.Point2d(s, t))
-        Doc.Objects.AddLeader(text, plane0, points2d)
+        State.Doc.Objects.AddLeader(text, plane0, points2d)
 
 
     ///<summary>Adds a linear dimension to the document.</summary>
@@ -121,10 +121,10 @@ module ExtensionsDimension =
         let ldim = new LinearDimension(plane0, start, ende, onpoint)
         if isNull ldim then
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddLinearDimension failed.  plane:'%A' startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" plane startPoint endPoint pointOnDimensionLine
-        let rc = Doc.Objects.AddLinearDimension(ldim)
+        let rc = State.Doc.Objects.AddLinearDimension(ldim)
         if rc= Guid.Empty then
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddLinearDimension: Unable to add dimension to document. plane:'%A' startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" plane startPoint endPoint pointOnDimensionLine
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -132,16 +132,16 @@ module ExtensionsDimension =
     ///<returns>(string) Name of the current dimension style.</returns>
     [<Extension>]
     static member CurrentDimStyle() : string = //GET
-        Doc.DimStyles.Current.Name
+        State.Doc.DimStyles.Current.Name
 
     ///<summary>Changes the current default dimension style.</summary>
     ///<param name="dimStyleName">(string) Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member CurrentDimStyle(dimStyleName:string) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyleName)
+        let ds = State.Doc.DimStyles.FindName(dimStyleName)
         if notNull ds  then  RhinoScriptingException.Raise "RhinoScriptSyntax.SetCurrentDimStyle failed.  dimStyleName:'%A'" dimStyleName
-        if not <| Doc.DimStyles.SetCurrent(ds.Index, false) then
+        if not <| State.Doc.DimStyles.SetCurrent(ds.Index, false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.SetCurrentDimStyle failed.  dimStyleName:'%A'" dimStyleName
 
 
@@ -152,10 +152,10 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing (fails on error).</returns>
     [<Extension>]
     static member DeleteDimStyle(dimStyleName:string) : unit =
-        let ds = Doc.DimStyles.FindName(dimStyleName)
+        let ds = State.Doc.DimStyles.FindName(dimStyleName)
         if isNull ds then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDimStyle failed. dimStyleName:'%A'" dimStyleName
-        let ok = Doc.DimStyles.Delete(ds.Index, true)
+        let ok = State.Doc.DimStyles.Delete(ds.Index, true)
         if not ok then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDimStyle failed. dimStyleName:' %A '" dimStyleName
 
@@ -179,12 +179,12 @@ module ExtensionsDimension =
     [<Extension>]
     static member DimensionStyle(objectId:Guid, dimStyleName:string) : unit = //SET
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
-        let ds =  Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%A'" (rhType objectId) dimStyleName
+        let ds =  State.Doc.DimStyles.FindName(dimStyleName)
+        if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%A'" (Print.guid objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
     ///<summary>Modifies the dimension style of multiple dimension objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of the objects</param>
@@ -192,14 +192,14 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
-        let ds =  Doc.DimStyles.FindName(dimStyleName)
+        let ds =  State.Doc.DimStyles.FindName(dimStyleName)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) dimStyleName
         for objectId in objectIds do         
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
             annotation.DimensionStyleId <- ds.Id
             annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
     ///<summary>Returns the text displayed by a dimension object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -231,7 +231,7 @@ module ExtensionsDimension =
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
         annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
     
     ///<summary>Modifies the user text string of multiple dimension objects. The user
     /// text is the string that gets printed when the dimension is defined.</summary>
@@ -245,7 +245,7 @@ module ExtensionsDimension =
             let geo = annotationObject.Geometry :?> AnnotationBase
             geo.PlainText <- usertext
             annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
     ///<summary>Returns the value of a dimension object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
@@ -262,7 +262,7 @@ module ExtensionsDimension =
     ///<returns>(int) The current angle precision.</returns>
     [<Extension>]
     static member DimStyleAnglePrecision(dimStyle:string) : int = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision get failed.  dimStyle:'%A'" dimStyle
         ds.AngleResolution
 
@@ -272,13 +272,13 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleAnglePrecision(dimStyle:string, precision:int) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
         let rc = ds.AngleResolution
         if precision >= 0 then
             ds.AngleResolution <- precision
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+            State.Doc.Views.Redraw()
 
 
 
@@ -287,7 +287,7 @@ module ExtensionsDimension =
     ///<returns>(float) The current arrow size.</returns>
     [<Extension>]
     static member DimStyleArrowSize(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize get failed.  dimStyle:'%A'" dimStyle
         ds.ArrowLength
 
@@ -297,13 +297,13 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleArrowSize(dimStyle:string, size:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
         let rc = ds.ArrowLength
         if size > 0.0 then
             ds.ArrowLength <- size
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
 
@@ -313,7 +313,7 @@ module ExtensionsDimension =
     ///<returns>(int) The number of dimension styles in the document.</returns>
     [<Extension>]
     static member DimStyleCount() : int =
-        Doc.DimStyles.Count
+        State.Doc.DimStyles.Count
 
 
     ///<summary>Returns the extension line extension of a dimension style.</summary>
@@ -321,7 +321,7 @@ module ExtensionsDimension =
     ///<returns>(float) The current extension line extension.</returns>
     [<Extension>]
     static member DimStyleExtension(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension get failed.  dimStyle:'%A'" dimStyle
         ds.ExtensionLineExtension
 
@@ -331,13 +331,13 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleExtension(dimStyle:string, extension:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension set failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
         let rc = ds.ExtensionLineExtension
         if extension > 0.0 then
             ds.ExtensionLineExtension <- extension
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension set failed.  dimStyle:'%A' extension:'%A'" dimStyle extension
 
@@ -348,7 +348,7 @@ module ExtensionsDimension =
     ///<returns>(string) The current font.</returns>
     [<Extension>]
     static member DimStyleFont(dimStyle:string) : string = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleFont get failed.  dimStyle:'%A'" dimStyle
         ds.Font.FaceName
 
@@ -359,14 +359,14 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleFont(dimStyle:string, font:string) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleFont set failed.  dimStyle:'%A' font:'%A'" dimStyle font
 
         ds.Font <- DocObjects.Font(font) // TODO check if works OK !
-        // let newindex = Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
-        // ds.Font <- Doc.Fonts.[newindex]
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleFont set failed.  dimStyle:'%A' font:'%A'" dimStyle font
-        Doc.Views.Redraw()
+        // let newindex = State.Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
+        // ds.Font <- State.Doc.Fonts.[newindex]
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleFont set failed.  dimStyle:'%A' font:'%A'" dimStyle font
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Gets all Available Font Face Names.</summary>
@@ -382,7 +382,7 @@ module ExtensionsDimension =
     ///<returns>(float) The current leader arrow size.</returns>
     [<Extension>]
     static member DimStyleLeaderArrowSize(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLeaderArrowSize get failed.  dimStyle:'%A'" dimStyle
         ds.LeaderArrowLength
 
@@ -392,12 +392,12 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleLeaderArrowSize(dimStyle:string, size:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLeaderArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
         if size > 0.0 then
             ds.LeaderArrowLength <- size
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLeaderArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLeaderArrowSize set failed.  dimStyle:'%A' size:'%A'" dimStyle size
+            State.Doc.Views.Redraw()
 
 
 
@@ -407,7 +407,7 @@ module ExtensionsDimension =
     ///<returns>(float) if factor is not defined, the current length factor.</returns>
     [<Extension>]
     static member DimStyleLengthFactor(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLengthFactor get failed.  dimStyle:'%A'" dimStyle
         ds.LengthFactor
 
@@ -418,11 +418,11 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleLengthFactor(dimStyle:string, factor:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLengthFactor set failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
         ds.LengthFactor <- factor
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLengthFactor set failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLengthFactor set failed.  dimStyle:'%A' factor:'%A'" dimStyle factor
+        State.Doc.Views.Redraw()
 
 
 
@@ -431,7 +431,7 @@ module ExtensionsDimension =
     ///<returns>(int) The current linear precision value.</returns>
     [<Extension>]
     static member DimStyleLinearPrecision(dimStyle:string) : int = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLinearPrecision get failed.  dimStyle:'%A'" dimStyle
         ds.LengthResolution
 
@@ -441,12 +441,12 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleLinearPrecision(dimStyle:string, precision:int) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLinearPrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
         if precision >= 0 then
             ds.LengthResolution <- precision
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLinearPrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLinearPrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleLinearPrecision set failed.  dimStyle:'%A' precision:'%A'" dimStyle precision
 
@@ -456,7 +456,7 @@ module ExtensionsDimension =
     ///<returns>(string Rarr) The names of all dimension styles in the document.</returns>
     [<Extension>]
     static member DimStyleNames() : string Rarr =
-        rarr {for  ds in Doc.DimStyles -> ds.Name }
+        rarr {for  ds in State.Doc.DimStyles -> ds.Name }
 
 
     ///<summary>Returns the number display format of a dimension style.</summary>
@@ -474,7 +474,7 @@ module ExtensionsDimension =
     ///     Miles            9  Decimal Miles.</returns>
     [<Extension>]
     static member DimStyleNumberFormat(dimStyle:string) : int = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleNumberFormat get failed.  dimStyle:'%A'" dimStyle
         int ds.DimensionLengthDisplay
 
@@ -495,12 +495,12 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleNumberFormat(dimStyle:string, format:int) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleNumberFormat set failed.  dimStyle:'%A' format:'%A'" dimStyle format
         if  format<0 || format>9 then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleNumberFormat set failed.  dimStyle:'%A' format:'%A'" dimStyle format
         ds.DimensionLengthDisplay <- LanguagePrimitives.EnumOfValue format
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleNumberFormat set failed.  dimStyle:'%A' format:'%A'" dimStyle format
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleNumberFormat set failed.  dimStyle:'%A' format:'%A'" dimStyle format
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the extension line offset of a dimension style.</summary>
@@ -508,7 +508,7 @@ module ExtensionsDimension =
     ///<returns>(float) The current extension line offset.</returns>
     [<Extension>]
     static member DimStyleOffset(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleOffset get failed.  dimStyle:'%A'" dimStyle
         ds.ExtensionLineOffset
 
@@ -518,11 +518,11 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleOffset(dimStyle:string, offset:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleOffset set failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
         ds.ExtensionLineOffset <- offset
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleOffset set failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleOffset set failed.  dimStyle:'%A' offset:'%A'" dimStyle offset
+        State.Doc.Views.Redraw()
 
 
 
@@ -532,7 +532,7 @@ module ExtensionsDimension =
     ///<returns>(string) The current prefix.</returns>
     [<Extension>]
     static member DimStylePrefix(dimStyle:string) : string = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStylePrefix get failed.  dimStyle:'%A'" dimStyle
         ds.Prefix
 
@@ -543,11 +543,11 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStylePrefix(dimStyle:string, prefix:string) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStylePrefix set failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
         ds.Prefix <- prefix
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStylePrefix set failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStylePrefix set failed.  dimStyle:'%A' prefix:'%A'" dimStyle prefix
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the scale of a dimension style .</summary>
@@ -555,7 +555,7 @@ module ExtensionsDimension =
     ///<returns>(string) The current suffix.</returns>
     [<Extension>]
     static member DimStyleScale(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale get failed.  dimStyle:'%A'" dimStyle
         ds.DimensionScale
 
@@ -565,11 +565,11 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleScale(dimStyle:string, scale:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale set failed.  dimStyle:'%A' scale:'%A'" dimStyle scale
         ds.DimensionScale <- scale
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale set failed.  dimStyle:'%A' scale:'%A'" dimStyle scale
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleScale set failed.  dimStyle:'%A' scale:'%A'" dimStyle scale
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the suffix of a dimension style - the text to
@@ -578,7 +578,7 @@ module ExtensionsDimension =
     ///<returns>(string) The current suffix.</returns>
     [<Extension>]
     static member DimStyleSuffix(dimStyle:string) : string = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix get failed.  dimStyle:'%A'" dimStyle
         ds.Suffix
 
@@ -589,11 +589,11 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleSuffix(dimStyle:string, suffix:string) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
         ds.Suffix <- suffix
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleSuffix set failed.  dimStyle:'%A' suffix:'%A'" dimStyle suffix
+        State.Doc.Views.Redraw()
 
 
 
@@ -609,7 +609,7 @@ module ExtensionsDimension =
     ///     BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</returns>
     [<Extension>]
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment get failed.  dimStyle:'%A'" dimStyle
         int ds.TextVerticalAlignment
 
@@ -626,12 +626,12 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment not found.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
         elif alignment<0 || alignment>6 then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
         ds.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue (byte alignment)
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
-        Doc.Views.Redraw()
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextAlignment set failed.  dimStyle:'%A' alignment:'%A'" dimStyle alignment
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the text gap used by a dimension style.</summary>
@@ -639,7 +639,7 @@ module ExtensionsDimension =
     ///<returns>(float) The current text gap.</returns>
     [<Extension>]
     static member DimStyleTextGap(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextGap get failed.  dimStyle:'%A'" dimStyle
         ds.TextGap
 
@@ -649,12 +649,12 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleTextGap(dimStyle:string, gap:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextGap set failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
         if gap >= 0.0 then
             ds.TextGap <- gap
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextGap set failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextGap set failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextGap set failed.  dimStyle:'%A' gap:'%A'" dimStyle gap
 
@@ -665,7 +665,7 @@ module ExtensionsDimension =
     ///<returns>(float) The current text height.</returns>
     [<Extension>]
     static member DimStyleTextHeight(dimStyle:string) : float = //GET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextHeight get failed.  dimStyle:'%A'" dimStyle
         ds.TextHeight
 
@@ -675,12 +675,12 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DimStyleTextHeight(dimStyle:string, height:float) : unit = //SET
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextHeight set failed.  dimStyle:'%A' height:'%A'" dimStyle height
         if height>0.0 then
             ds.TextHeight <- height
-            if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextHeight set failed.  dimStyle:'%A' height:'%A'" dimStyle height
-            Doc.Views.Redraw()
+            if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextHeight set failed.  dimStyle:'%A' height:'%A'" dimStyle height
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleTextHeight set failed.  dimStyle:'%A' height:'%A'" dimStyle height
 
@@ -730,7 +730,7 @@ module ExtensionsDimension =
     ///<returns>(bool) True or False.</returns>
     [<Extension>]
     static member IsDimStyle(dimStyle:string) : bool =
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         notNull ds
 
 
@@ -739,7 +739,7 @@ module ExtensionsDimension =
     ///<returns>(bool) True or False.</returns>
     [<Extension>]
     static member IsDimStyleReference(dimStyle:string) : bool =
-        let ds = Doc.DimStyles.FindName(dimStyle)
+        let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then false
         else ds.IsReference
 
@@ -793,7 +793,7 @@ module ExtensionsDimension =
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (rhType objectId)
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (Print.guid objectId)
 
     ///<summary>Modifies the text string of a dimension leader object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -805,10 +805,10 @@ module ExtensionsDimension =
             | :? Leader as g ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
-                if not <| Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (rhType objectId)                
+                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Print.guid objectId)                
                 annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-                Doc.Views.Redraw()
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (rhType objectId)
+                State.Doc.Views.Redraw()
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (Print.guid objectId)
 
     ///<summary>Modifies the text string of multiple dimension leader objects.</summary>
     ///<param name="objectIds">(Guid seq) The objects's identifiers</param>
@@ -825,9 +825,9 @@ module ExtensionsDimension =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member RenameDimStyle(oldstyle:string, newstyle:string) : unit =
-        let mutable ds = Doc.DimStyles.FindName(oldstyle)
+        let mutable ds = State.Doc.DimStyles.FindName(oldstyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
         ds.Name <- newstyle
-        if not <| Doc.DimStyles.Modify(ds, ds.Id, false) then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
+        if not <| State.Doc.DimStyles.Modify(ds, ds.Id, false) then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
 
 

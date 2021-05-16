@@ -10,7 +10,7 @@ open FsEx.SaveIgnore
  
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsLine =
 
@@ -188,10 +188,10 @@ module ExtensionsLine =
         let success = ln.Transform(xForm)
         if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
         if copy then
-            Ot.AddLine(ln)
+            State.Ot.AddLine(ln)
         else            
             let lo = RhinoScriptSyntax.CoerceRhinoObject(lineId)
-            if not <| Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to replace geometry: line %A with  %A" line xForm
+            if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to replace geometry: line %A with  %A" line xForm
             lineId
 
 

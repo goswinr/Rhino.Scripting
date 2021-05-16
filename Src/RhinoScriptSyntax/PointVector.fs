@@ -12,7 +12,7 @@ open FsEx.SaveIgnore
 
  
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsPointvector =
 
@@ -187,7 +187,7 @@ module ExtensionsPointvector =
                                 [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //point1 = RhinoScriptSyntax.Coerce3dpoint(point1)
         //point2 = RhinoScriptSyntax.Coerce3dpoint(point2)
-        let tolerance = ifZero2 RhinoMath.ZeroTolerance  tolerance
+        let tolerance = Util.ifZero2 RhinoMath.ZeroTolerance  tolerance
         let vector = point2-point1
         vector.IsTiny(tolerance)
 
@@ -212,7 +212,7 @@ module ExtensionsPointvector =
     [<Extension>]
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
-        let tolerance = ifZero1 tolerance RhinoMath.ZeroTolerance
+        let tolerance = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
         Point3d.ArePointsCoplanar(points, tolerance)
 
 
@@ -262,7 +262,7 @@ module ExtensionsPointvector =
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array =
         let meshes =  rarr { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
 
 
@@ -277,7 +277,7 @@ module ExtensionsPointvector =
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array =
         let breps =  rarr { for objectId in surfaceIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 
 
@@ -297,7 +297,7 @@ module ExtensionsPointvector =
         //brep = RhinoScriptSyntax.Coercebrep(objectId)
         | :? Brep as brep->
             if brep.Faces.Count = 1 then
-                let tolerance = Doc.ModelAbsoluteTolerance
+                let tolerance = State.Doc.ModelAbsoluteTolerance
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count

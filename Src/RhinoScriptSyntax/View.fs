@@ -10,7 +10,7 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsView =
   
@@ -44,7 +44,7 @@ module ExtensionsView =
         let projection : Display.DefinedViewportProjection = LanguagePrimitives.EnumOfValue  projection
         let detail = layout.AddDetailView(title, corner1, corner2, projection)
         if isNull detail then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail failed.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         detail.Id
 
 
@@ -58,8 +58,8 @@ module ExtensionsView =
                             [<OPT;DEF(0.0)>]width:float, 
                             [<OPT;DEF(0.0)>]height:float) : Guid*string =
         let page =
-            if width=0.0 || height=0.0  then Doc.Views.AddPageView(title)
-            else                             Doc.Views.AddPageView(title, width, height)
+            if width=0.0 || height=0.0  then State.Doc.Views.AddPageView(title)
+            else                             State.Doc.Views.AddPageView(title, width, height)
         if notNull page then page.MainViewport.Id, page.PageName
         else RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayout failed for %A %A" title (width, height)
 
@@ -71,7 +71,7 @@ module ExtensionsView =
     [<Extension>]
     static member AddNamedCPlane(cplaneName:string, plane:Plane) : unit =
         if isNull cplaneName then RhinoScriptingException.Raise "RhinoScriptSyntax.CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
-        let index = Doc.NamedConstructionPlanes.Add(cplaneName, plane)
+        let index = State.Doc.NamedConstructionPlanes.Add(cplaneName, plane)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedCPlane failed.  cplaneName:'%A' plane:'%A'" cplaneName plane
         ()
 
@@ -86,7 +86,7 @@ module ExtensionsView =
         let view = RhinoScriptSyntax.CoerceView(view)
         if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax.Name = empty.  name:'%A' view:'%A'" name view
         let viewportId = view.MainViewport.Id
-        let index = Doc.NamedViews.Add(name, viewportId)
+        let index = State.Doc.NamedViews.Add(name, viewportId)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedView failed.  name:'%A' view:'%A'" name view
 
 
@@ -110,7 +110,7 @@ module ExtensionsView =
         if layout = detail then page.SetPageAsActive()
         else
             if not <| page.SetActiveDetail(detail, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentDetail set failed for %s to %s" layout detail
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -118,14 +118,14 @@ module ExtensionsView =
     ///<returns>(string) The title of the current view.</returns>
     [<Extension>]
     static member CurrentView() : string = //GET
-        Doc.Views.ActiveView.MainViewport.Name
+        State.Doc.Views.ActiveView.MainViewport.Name
 
     ///<summary>Sets the currently active view.</summary>
     ///<param name="view">(string) Title of the view to set current</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member CurrentView(view:string) : unit = //SET
-        Doc.Views.ActiveView <- RhinoScriptSyntax.CoerceView(view)
+        State.Doc.Views.ActiveView <- RhinoScriptSyntax.CoerceView(view)
 
 
 
@@ -134,7 +134,7 @@ module ExtensionsView =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member DeleteNamedCPlane(name:string) : bool =
-        Doc.NamedConstructionPlanes.Delete(name)
+        State.Doc.NamedConstructionPlanes.Delete(name)
 
 
     ///<summary>Removes a named view from the document.</summary>
@@ -142,7 +142,7 @@ module ExtensionsView =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member DeleteNamedView(name:string) : bool =
-        Doc.NamedViews.Delete(name)
+        State.Doc.NamedViews.Delete(name)
 
 
     ///<summary>Returns the projection locked state of a detail viewport rectangle.</summary>
@@ -160,8 +160,8 @@ module ExtensionsView =
     [<Extension>]
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail =
-            try Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.Set DetailLock failed. detailId is a %s  lock:'%A'" (rhType detailId)  lock
+            try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
+            with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.Set DetailLock failed. detailId is a %s  lock:'%A'" (Print.guid detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore
@@ -184,13 +184,13 @@ module ExtensionsView =
     [<Extension>]
     static member DetailScale(detailId:Guid, modelLength:float, pageLength:float) : unit = //SET
         let detail = RhinoScriptSyntax.CoerceDetailViewObject(detailId)
-        let modelunits = Doc.ModelUnitSystem
-        let pageunits = Doc.PageUnitSystem
+        let modelunits = State.Doc.ModelUnitSystem
+        let pageunits = State.Doc.PageUnitSystem
         if detail.DetailGeometry.SetScale(modelLength, modelunits, pageLength, pageunits) then
             detail.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (rhType detailId) modelLength pageLength
+            RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Print.guid detailId) modelLength pageLength
 
 
 
@@ -212,8 +212,8 @@ module ExtensionsView =
     [<Extension>]
     static member IsLayout(layout:string) : bool =
         //layoutid = RhinoScriptSyntax.Coerceguid(layout)
-        if   Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then true
-        elif Doc.Views.GetViewList(true, false) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then false
+        if   State.Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then true
+        elif State.Doc.Views.GetViewList(true, false) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then false
         else RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
 
 
@@ -222,7 +222,7 @@ module ExtensionsView =
     ///<returns>(bool) True of False indicating success or failure.</returns>
     [<Extension>]
     static member IsView(view:string) : bool =
-        Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
+        State.Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
 
 
 
@@ -231,7 +231,7 @@ module ExtensionsView =
     ///<returns>(bool) True of False indicating success or failure.</returns>
     [<Extension>]
     static member IsViewCurrent(view:string) : bool =
-        let activeview = Doc.Views.ActiveView
+        let activeview = State.Doc.Views.ActiveView
         view = activeview.MainViewport.Name
 
 
@@ -289,17 +289,17 @@ module ExtensionsView =
     ///<returns>(Plane) a Plane.</returns>
     [<Extension>]
     static member NamedCPlane(name:string) : Plane =
-        let index = Doc.NamedConstructionPlanes.Find(name)
+        let index = State.Doc.NamedConstructionPlanes.Find(name)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.NamedCPlane failed.  name:'%A'" name
-        Doc.NamedConstructionPlanes.[index].Plane
+        State.Doc.NamedConstructionPlanes.[index].Plane
 
 
     ///<summary>Returns the names of all named construction Planes in the document.</summary>
     ///<returns>(string Rarr) The names of all named construction Planes in the document.</returns>
     [<Extension>]
     static member NamedCPlanes() : string Rarr =
-        let count = Doc.NamedConstructionPlanes.Count
-        rarr {for i in range(count) do Doc.NamedConstructionPlanes.[i].Name }
+        let count = State.Doc.NamedConstructionPlanes.Count
+        rarr {for i in Util.range(count) do State.Doc.NamedConstructionPlanes.[i].Name }
 
 
 
@@ -307,8 +307,8 @@ module ExtensionsView =
     ///<returns>(string Rarr) The names of all named views in the document.</returns>
     [<Extension>]
     static member NamedViews() : string Rarr =
-        let count = Doc.NamedViews.Count
-        rarr {for i in range(count) do Doc.NamedViews.[i].Name }
+        let count = State.Doc.NamedViews.Count
+        rarr {for i in Util.range(count) do State.Doc.NamedViews.[i].Name }
 
 
     ///<summary>Changes the title of the specified view.</summary>
@@ -331,9 +331,9 @@ module ExtensionsView =
     [<Extension>]
     static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
-        let index = Doc.NamedConstructionPlanes.Find(cplaneName)
+        let index = State.Doc.NamedConstructionPlanes.Find(cplaneName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
-        let cplane = Doc.NamedConstructionPlanes.[index]
+        let cplane = State.Doc.NamedConstructionPlanes.[index]
         view.MainViewport.PushConstructionPlane(cplane)
         view.Redraw()
         cplaneName
@@ -351,9 +351,9 @@ module ExtensionsView =
                                     [<OPT;DEF("")>]view:string,
                                     [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
-        let index = Doc.NamedViews.FindByName(namedView)
+        let index = State.Doc.NamedViews.FindByName(namedView)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
-        let viewinfo = Doc.NamedViews.[index]
+        let viewinfo = State.Doc.NamedViews.[index]
         if view.MainViewport.PushViewInfo(viewinfo, restoreBitmap) then
             view.Redraw()
             //view.MainViewport.Name
@@ -674,7 +674,7 @@ module ExtensionsView =
         let desc = Display.DisplayModeDescription.FindByName(mode)
         if notNull desc then
             view.ActiveViewport.DisplayMode <- desc
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ViewDisplayMode set mode %s not found." mode
 
@@ -720,7 +720,7 @@ module ExtensionsView =
     ///<returns>(string Rarr) List of the view names.</returns>
     [<Extension>]
     static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr =
-        let views = Doc.Views.GetViewList(viewType <> 1, viewType>0)
+        let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
         rarr { for view in views do view.MainViewport.Name}
 
@@ -958,12 +958,12 @@ module ExtensionsView =
                                    [<OPT;DEF("")>]view:string,
                                    [<OPT;DEF(false)>]all:bool) : unit =
           if all then
-              let views = Doc.Views.GetViewList(true, true)
+              let views = State.Doc.Views.GetViewList(true, true)
               for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
           else
               let view = RhinoScriptSyntax.CoerceView(view)
               view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
-          Doc.Views.Redraw()
+          State.Doc.Views.Redraw()
 
 
     ///<summary>Zooms to extents of visible objects in the specified view.</summary>
@@ -974,12 +974,12 @@ module ExtensionsView =
     [<Extension>]
     static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
-            let views = Doc.Views.GetViewList(true, true)
+            let views = State.Doc.Views.GetViewList(true, true)
             for view in views do view.ActiveViewport.ZoomExtents()|> ignore
         else
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtents()|> ignore
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Zoom to extents of selected objects in a view.</summary>
@@ -990,11 +990,11 @@ module ExtensionsView =
     [<Extension>]
     static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
-            let views = Doc.Views.GetViewList(true, true)
+            let views = State.Doc.Views.GetViewList(true, true)
             for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore
         else
             let view = RhinoScriptSyntax.CoerceView(view)
             view.ActiveViewport.ZoomExtentsSelected()|> ignore
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 

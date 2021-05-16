@@ -26,13 +26,13 @@ module Vec =
     /// Gets the Z value of  Vector3d
     let inline getZ (v:Vector3d) =  v.Z
 
-    /// Sets the X value and retuns new Vector3d
+    /// Sets the X value and returns new Vector3d
     let inline setX x (v:Vector3d) =  Vector3d(x, v.Y, v.Z)
 
-    /// Sets the Y value and retuns new Vector3d
+    /// Sets the Y value and returns new Vector3d
     let inline setY y (v:Vector3d) =  Vector3d(v.X, y, v.Z)
 
-    /// Sets the Z value and retuns new Vector3d
+    /// Sets the Z value and returns new Vector3d
     let inline setZ z (v:Vector3d) =  Vector3d(v.X, v.Y, z)
 
     /// Scales the vector
@@ -124,9 +124,9 @@ module Vec =
         let a = ln.PointAt(tln)
         let b = h.PointAt(th)
         if (a-b).SquareLength > RhinoMath.ZeroTolerance then 
-            Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "Error-projectToLine"
-            Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "Error-projectToLineDirection"
-            Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "Error-projectToLineFrom"            
+            State.Doc.Objects.AddLine ln   |> RhinoScriptSyntax.setLayer "Error-projectToLine"
+            State.Doc.Objects.AddLine h    |> RhinoScriptSyntax.setLayer "Error-projectToLineDirection"
+            State.Doc.Objects.AddPoint pt  |> RhinoScriptSyntax.setLayer "Error-projectToLineFrom"            
             RhinoScriptingException.Raise "Rhino.Scripting.Vec.projectToLine: missed Line by: %g " (a-b).Length
         a
     
@@ -392,10 +392,10 @@ module Vec =
             RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s.SquareLength < RhinoMath.SqrtEpsilon; prevPt - thisPt:%s " b.ToNiceString a.ToNiceString
         let lena = sqrt sa
         let lenb = sqrt sb
-        if lena < Doc.ModelAbsoluteTolerance then 
-            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelow1Degree: prevPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; nextPt - thisPt:%s " a.ToNiceString Doc.ModelAbsoluteTolerance b.ToNiceString
-        if lenb < Doc.ModelAbsoluteTolerance then 
-            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; prevPt - thisPt:%s " b.ToNiceString Doc.ModelAbsoluteTolerance a.ToNiceString  
+        if lena < State.Doc.ModelAbsoluteTolerance then 
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelow1Degree: prevPt - thisPt: %s < State.Doc.ModelAbsoluteTolerance: %f; nextPt - thisPt:%s " a.ToNiceString State.Doc.ModelAbsoluteTolerance b.ToNiceString
+        if lenb < State.Doc.ModelAbsoluteTolerance then 
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelow1Degree: nextPt - thisPt: %s < State.Doc.ModelAbsoluteTolerance: %f; prevPt - thisPt:%s " b.ToNiceString State.Doc.ModelAbsoluteTolerance a.ToNiceString  
         let au = a * (1.0 / lena)
         let bu = b * (1.0 / lenb)
         abs(bu*au) > 0.999847695156391 // = cosine of 1 degree (2 degrees would be =  0.999390827019096)
@@ -416,10 +416,10 @@ module Vec =
             RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelowQuaterDegree: nextPt - thisPt: %s.SquareLength < RhinoMath.SqrtEpsilon; prevPt - thisPt:%s " b.ToNiceString a.ToNiceString
         let lena = sqrt sa
         let lenb = sqrt sb
-        if lena < Doc.ModelAbsoluteTolerance then 
-            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelowQuaterDegree: prevPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; nextPt - thisPt:%s " a.ToNiceString Doc.ModelAbsoluteTolerance b.ToNiceString
-        if lenb < Doc.ModelAbsoluteTolerance then 
-            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelowQuaterDegree: nextPt - thisPt: %s < Doc.ModelAbsoluteTolerance: %f; prevPt - thisPt:%s " b.ToNiceString Doc.ModelAbsoluteTolerance a.ToNiceString  
+        if lena < State.Doc.ModelAbsoluteTolerance then 
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelowQuaterDegree: prevPt - thisPt: %s < State.Doc.ModelAbsoluteTolerance: %f; nextPt - thisPt:%s " a.ToNiceString State.Doc.ModelAbsoluteTolerance b.ToNiceString
+        if lenb < State.Doc.ModelAbsoluteTolerance then 
+            RhinoScriptingException.Raise "Rhino.Scripting.Vec Duplicate points: isAngleBelowQuaterDegree: nextPt - thisPt: %s < State.Doc.ModelAbsoluteTolerance: %f; prevPt - thisPt:%s " b.ToNiceString State.Doc.ModelAbsoluteTolerance a.ToNiceString  
         let au = a * (1.0 / lena)
         let bu = b * (1.0 / lenb)
         abs(bu*au) > 0.999990480720734 // = cosine of 0.25 degree: printfn "%.18f" (cos( 0.25 * (System.Math.PI / 180.)))

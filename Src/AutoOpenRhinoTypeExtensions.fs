@@ -2,46 +2,27 @@ namespace Rhino.Scripting
 
 open System.Runtime.CompilerServices
 
-// to expose CLI-standard extension members that can be consumed from C# or VB,
-// http://www.latkin.org/blog/2014/04/30/f-extension-methods-in-roslyn/
-// declare all Extension attributes explicitly
-[<assembly:Extension>] do () 
-
 
 [<AutoOpen>]
-/// This module provides  type extensions for Points , Vector,  Lines
-/// Mostly for pretty printing and coneversion to other types
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module provides type extensions for Points , Vector,  Lines
+/// Mostly for conversion to other types
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 module AutoOpenRhinoTypeExtensions =  
     open Rhino.Geometry
     open FsEx
     
+    // Extensions for .ToNiceString are in Print Module !!
 
-    type Point3d with  
-        
-        ///Like the ToString function but with appropiate precision formating
-        member pt.ToNiceString = 
-            if pt = Point3d.Unset then  
-                "Point3d.Unset"
-            else
-                sprintf "Point3d(%s, %s, %s)" (NiceFormat.float  pt.X) (NiceFormat.float  pt.Y) (NiceFormat.float  pt.Z)
-        
-        
+
+    type Point3d with 
+
         /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in Meshes)
         [<Extension>] 
         member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
      
 
      
-    type Point3f with  
-        
-        ///Like the ToString function but with appropiate precision formating
-        member pt.ToNiceString = 
-            if pt = Point3f.Unset then  
-                "Point3f.Unset"
-            else
-                sprintf "Point3f(%s, %s, %s)" (NiceFormat.single  pt.X) (NiceFormat.single  pt.Y) (NiceFormat.single  pt.Z)
-        
+    type Point3f with         
         
         /// To convert a Point3f (as it is used in Meshes) to Point3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
@@ -49,13 +30,6 @@ module AutoOpenRhinoTypeExtensions =
 
      
     type Vector3d with  
-        
-        ///Like the ToString function but with appropiate precision formating
-        member v.ToNiceString =  
-            if v = Vector3d.Unset then  
-                "Vector3d.Unset"
-            else
-                sprintf "Vector3d(%s, %s, %s)" (NiceFormat.float  v.X) (NiceFormat.float  v.Y) (NiceFormat.float  v.Z)
         
         /// To convert Vector3d (as it is used in most other Rhino Geometries) to a Vector3f (as it is used in Mesh noramls)
         [<Extension>] 
@@ -74,13 +48,6 @@ module AutoOpenRhinoTypeExtensions =
 
     type Vector3f with  
         
-        ///Like the ToString function but with appropiate precision formating
-        member v.ToNiceString =  
-            if v = Vector3f.Unset then  
-                "Vector3f.Unset"
-            else
-                sprintf "Vector3f(%s, %s, %s)" (NiceFormat.single  v.X) (NiceFormat.single  v.Y) (NiceFormat.single  v.Z)
-   
         /// To convert a Vector3f (as it is used in Mesh noramls) to a Vector3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
         member v.ToVector3d = Vector3d(v)
@@ -88,10 +55,6 @@ module AutoOpenRhinoTypeExtensions =
   
     type Line with  
         
-        ///Like the ToString function but with appropiate precision formating
-        member ln.ToNiceString = 
-            sprintf "Geometry.Line from %s, %s, %s to %s, %s, %s" (NiceFormat.float  ln.From.X) (NiceFormat.float  ln.From.Y) (NiceFormat.float  ln.From.Z) (NiceFormat.float  ln.To.X) (NiceFormat.float  ln.To.Y) (NiceFormat.float  ln.To.Z)
-    
         ///Middle point of line
         member ln.Mid =  (ln.From + ln.To) * 0.5
 
@@ -117,32 +80,6 @@ module AutoOpenRhinoTypeExtensions =
          static member WorldXMinusY=  
             Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
 
-
-    type Transform with 
-        
-        /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
-        member m.ToNiceString =  
-            let vs = 
-                m.ToFloatArray(true)
-                |> Array.map (sprintf "%g")
-            let cols = 
-                [| for i=0 to 3 do
-                    [| vs.[0+i];vs.[4+i];vs.[8+i];vs.[12+i] |]
-                    |> Array.map String.length
-                    |> Array.max
-                |]
-                
-            stringBuffer{
-                yield! "Rhino.Geometry.Transform:"
-                for i,s in Seq.indexed vs do
-                    let coli = i%4
-                    let len = cols.[coli]                
-                    yield "| "
-                    yield String.prefixToLength len ' ' s
-                    if coli = 3 then yield! ""
-                //yield! sprintf "Scale x: %g ; y: %g z: %g" m.M00 m.M11 m.M22
-                }
-    
     type PolylineCurve with 
         
         /// Gets a lazy seq (= IEnumerable) of the Points that make up the Polyline

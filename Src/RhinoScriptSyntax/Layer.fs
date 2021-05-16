@@ -13,7 +13,7 @@ open Rhino.DocObjects
 
  
 
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 [<AutoOpen>]
 module ExtensionsLayer =
@@ -109,7 +109,7 @@ module ExtensionsLayer =
       let rec find (l:Layer) ps = 
           if l.ParentLayerId = Guid.Empty then ps
           else
-            let pl = Doc.Layers.FindId(l.ParentLayerId)
+            let pl = State.Doc.Layers.FindId(l.ParentLayerId)
             if isNull pl then RhinoScriptingException.Raise "RhinoScriptSyntax let internal getParents: ParentLayerId not found in layers"   
             find pl (pl::ps)
       find lay []
@@ -117,7 +117,7 @@ module ExtensionsLayer =
   let internal visibleSetTrue(lay:Layer, forceVisible:bool) : unit = 
     if not lay.IsVisible then
         if forceVisible then
-            if not (Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "rs.LayerVisibleSetTrue Failed to turn on sublayers of layer  %s"  lay.FullPath        
+            if not (State.Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "rs.LayerVisibleSetTrue Failed to turn on sublayers of layer  %s"  lay.FullPath        
         else
             lay.SetPersistentVisibility(true)
         
@@ -149,7 +149,7 @@ module ExtensionsLayer =
   /// returns index
   /// empty string returns current layer
   let internal getOrCreateLayer(name, color, visible:LayerState, locked:LayerState) : int = 
-      match Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
+      match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
       | RhinoMath.UnsetIntIndex -> 
           match name with 
           | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer from null string" 
@@ -164,7 +164,7 @@ module ExtensionsLayer =
                       | [] -> prevIdx // exit recursion
                       | branch :: rest -> 
                           let fullpath = if root="" then branch else root + "::" + branch 
-                          match Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
+                          match State.Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
                           | RhinoMath.UnsetIntIndex -> // actually create layer:                          
                               ensureValidShortLayerName (branch,false)   // only check non existing layer names                          
                               let layer = DocObjects.Layer.GetDefaultLayerProperties()
@@ -182,12 +182,12 @@ module ExtensionsLayer =
                               
                               layer.Name <- branch
                               layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)                              
-                              let i = Doc.Layers.Add(layer)
-                              let id = Doc.Layers.[i].Id //just using layer.Id would be empty guid                                
+                              let i = State.Doc.Layers.Add(layer)
+                              let id = State.Doc.Layers.[i].Id //just using layer.Id would be empty guid                                
                               createLayer(rest , id , i,  fullpath)
                           
                           | i -> 
-                              createLayer(rest , Doc.Layers.[i].Id , i ,fullpath)
+                              createLayer(rest , State.Doc.Layers.[i].Id , i ,fullpath)
               
                   createLayer( ns |> List.ofArray, Guid.Empty, 0, "")
       | i -> i
@@ -200,7 +200,7 @@ module ExtensionsLayer =
       if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "how can a new default layer have a parent ? %A" layer      
       layer.IsVisible <- visible 
       layer.IsLocked <- locked 
-      Doc.Layers.Add(layer)        
+      State.Doc.Layers.Add(layer)        
 
 
   //[<Extension>] //Error 3246
@@ -246,11 +246,11 @@ module ExtensionsLayer =
                      | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddLayer Bad value vor Locked: %d, it may be 0, 1 or 2" locked
 
         if isNull name then 
-            Doc.Layers.[createDefaultLayer(col, true, false)].FullPath
+            State.Doc.Layers.[createDefaultLayer(col, true, false)].FullPath
         else
             let names = if isNull parent then name else parent+ "::" + name            
             let i     = getOrCreateLayer(names, col, vis, loc)
-            Doc.Layers.[i].FullPath
+            State.Doc.Layers.[i].FullPath
   
 
     ///<summary>Returns the full layername of an object. 
@@ -261,7 +261,7 @@ module ExtensionsLayer =
     static member ObjectLayer(objectId:Guid) : string = //GET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
-        Doc.Layers.[index].FullPath
+        State.Doc.Layers.[index].FullPath
 
     ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
@@ -276,8 +276,8 @@ module ExtensionsLayer =
             if createLayerIfMissing then  getOrCreateLayer(layer, Color.randomForRhino, ByParent, ByParent)
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (rhType objectId)
-        Doc.Views.Redraw()
+        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' on: %s " layer (Print.guid objectId)
+        State.Doc.Views.Redraw()
    
     ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
@@ -294,7 +294,7 @@ module ExtensionsLayer =
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
             if not <| obj.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectLayer failed for layer '%s' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -304,15 +304,15 @@ module ExtensionsLayer =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member ChangeLayerName(currentLayerName:string, newLayerName:string) : unit = 
-        let i = Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
+        let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
         else 
             ensureValidShortLayerName (newLayerName, false)
-            let lay = Doc.Layers.[i]
+            let lay = State.Doc.Layers.[i]
             let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
             ps.Last <- newLayerName
             let np = String.concat "::" ps
-            let ni = Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
+            let ni = State.Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
             if i >= 0 then 
                 RhinoScriptingException.Raise "rs.ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
             else
@@ -323,7 +323,7 @@ module ExtensionsLayer =
     ///<returns>(string) The full name of the current layer.</returns>
     [<Extension>]
     static member CurrentLayer() : string = //GET
-        Doc.Layers.CurrentLayer.FullPath
+        State.Doc.Layers.CurrentLayer.FullPath
 
 
     ///<summary>Changes the current layer.</summary>
@@ -331,10 +331,10 @@ module ExtensionsLayer =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member CurrentLayer(layer:string) : unit = //SET
-        let rc = Doc.Layers.CurrentLayer.FullPath
-        let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+        let rc = State.Doc.Layers.CurrentLayer.FullPath
+        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
-        if not<|  Doc.Layers.SetCurrentLayerIndex(i, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer Set CurrentLayer to %s failed" layer
+        if not<|  State.Doc.Layers.SetCurrentLayerIndex(i, true) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer Set CurrentLayer to %s failed" layer
 
 
 
@@ -347,9 +347,9 @@ module ExtensionsLayer =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member DeleteLayer(layer:string) : bool =
-        let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
-        Doc.Layers.Delete(i, true)
+        State.Doc.Layers.Delete(i, true)
 
 
     ///<summary>Expands a layer. Expanded layers can be viewed in Rhino's layer dialog.</summary>
@@ -358,9 +358,9 @@ module ExtensionsLayer =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member ExpandLayer(layer:string, expand:bool) : unit =
-        let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
-        let layer = Doc.Layers.[i]
+        let layer = State.Doc.Layers.[i]
         if layer.IsExpanded <> expand then
             layer.IsExpanded <- expand
 
@@ -372,7 +372,7 @@ module ExtensionsLayer =
     ///<returns>(bool) True on success, otherwise False.</returns>
     [<Extension>]
     static member IsLayer(layer:string) : bool =
-        let i = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+        let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         i <> RhinoMath.UnsetIntIndex
 
 
@@ -403,7 +403,7 @@ module ExtensionsLayer =
     [<Extension>]
     static member IsLayerCurrent(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        layer.Index = Doc.Layers.CurrentLayerIndex
+        layer.Index = State.Doc.Layers.CurrentLayerIndex
 
 
     ///<summary>Verifies that an existing layer is empty, or contains no objects.</summary>
@@ -412,7 +412,7 @@ module ExtensionsLayer =
     [<Extension>]
     static member IsLayerEmpty(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let rhobjs = Doc.Objects.FindByLayer(layer)
+        let rhobjs = State.Doc.Objects.FindByLayer(layer)
         isNull rhobjs || rhobjs.Length = 0
 
 
@@ -522,21 +522,21 @@ module ExtensionsLayer =
     static member LayerColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Color <- color
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the number of layers in the document.</summary>
     ///<returns>(int) The number of layers in the document.</returns>
     [<Extension>]
     static member LayerCount() : int =
-        Doc.Layers.ActiveCount
+        State.Doc.Layers.ActiveCount
 
 
     ///<summary>Return identifiers of all layers in the document.</summary>
     ///<returns>(Guid Rarr) The identifiers of all layers in the document.</returns>
     [<Extension>]
     static member LayerIds() : Guid Rarr =
-        rarr {for layer in Doc.Layers do
+        rarr {for layer in State.Doc.Layers do
                         if not layer.IsDeleted then
                             layer.Id }
 
@@ -548,7 +548,7 @@ module ExtensionsLayer =
     static member LayerLinetype(layer:string) : string = //GET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let index = layer.LinetypeIndex
-        Doc.Linetypes.[index].Name
+        State.Doc.Linetypes.[index].Name
 
 
     ///<summary>Changes the linetype of a layer.</summary>
@@ -559,14 +559,14 @@ module ExtensionsLayer =
     static member LayerLinetype(layer:string, linetyp:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let mutable index = layer.LinetypeIndex
-        if linetyp = Doc.Linetypes.ContinuousLinetypeName then
+        if linetyp = State.Doc.Linetypes.ContinuousLinetypeName then
             index <- -1
         else
-            let lt = Doc.Linetypes.FindName(linetyp)
+            let lt = State.Doc.Linetypes.FindName(linetyp)
             if lt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerLinetype not found.  layer:'%A' linetyp:'%A'" layer linetyp
             index <- lt.LinetypeIndex
         layer.LinetypeIndex <- index
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the visible property of a layer, 
@@ -589,7 +589,7 @@ module ExtensionsLayer =
     static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         visibleSetTrue(lay,forceVisible)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
     
     ///<summary>Makes a layer invisible.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -601,7 +601,7 @@ module ExtensionsLayer =
     static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         visibleSetFalse(lay,persist)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
     (*
     ///<summary>Changes the visible property of a layer.</summary>
@@ -616,12 +616,12 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible <- visible
         if visible && forcevisibleOrDonotpersist then
-            Doc.Layers.ForceLayerVisible(layer.Id) |> ignore
+            State.Doc.Layers.ForceLayerVisible(layer.Id) |> ignore
         if not visible && not forcevisibleOrDonotpersist then
             if layer.ParentLayerId <> Guid.Empty then
                 layer.SetPersistentVisibility(visible)
             // layer.CommitChanges() |> ignore //obsolete !!
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
     *)
     
 
@@ -658,7 +658,7 @@ module ExtensionsLayer =
     static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         lockedSetTrue(lay,forceLocked)       
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
     
     ///<summary>Makes a layer unlocked.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
@@ -669,7 +669,7 @@ module ExtensionsLayer =
     static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit = 
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         lockedSetFalse(lay,parentsToo)                      
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Unlocks a layer and all parents if needed .</summary>
@@ -698,11 +698,11 @@ module ExtensionsLayer =
             let l = layer.GetPersistentLocking()
             if l <> locked then 
                 layer.SetPersistentLocking(locked)
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
         else
             if locked <> layer.IsLocked then
                 layer.IsLocked <- locked 
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
     *)
 
 
@@ -727,7 +727,7 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if  index >= -1 then
             layer.RenderMaterialIndex <- index
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
 
 
 
@@ -736,9 +736,9 @@ module ExtensionsLayer =
     ///<returns>(Guid) The layer's identifier.</returns>
     [<Extension>]
     static member LayerId(layer:string) : Guid =
-        let idx = Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
+        let idx = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if idx = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerId not found for name %s" layer
-        Doc.Layers.[idx].Id
+        State.Doc.Layers.[idx].Id
 
 
 
@@ -759,7 +759,7 @@ module ExtensionsLayer =
     [<Extension>]
     static member LayerNames() : string Rarr =
         let rc = Rarr()
-        for layer in Doc.Layers do
+        for layer in State.Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
         rc
 
@@ -796,7 +796,7 @@ module ExtensionsLayer =
         let rc = layer.PlotColor
         //color = RhinoScriptSyntax.Coercecolor(color)
         layer.PlotColor <- color
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
 
 
 
@@ -821,7 +821,7 @@ module ExtensionsLayer =
         let rc = layer.PlotWeight
         if width <> rc then
             layer.PlotWeight <- width
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
 
 
 
@@ -833,7 +833,7 @@ module ExtensionsLayer =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.ParentLayerId = Guid.Empty then ""
         else
-            let oldparentlayer = Doc.Layers.FindId(layer.ParentLayerId)
+            let oldparentlayer = State.Doc.Layers.FindId(layer.ParentLayerId)
             if isNull oldparentlayer then "" // TODO test! is fail better ?
             else
                 oldparentlayer.FullPath
@@ -864,8 +864,8 @@ module ExtensionsLayer =
     [<Extension>]
     static member PurgeLayer(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let rc = Doc.Layers.Purge( layer.Index, true)
-        Doc.Views.Redraw()
+        let rc = State.Doc.Layers.Purge( layer.Index, true)
+        State.Doc.Views.Redraw()
         rc
 
 

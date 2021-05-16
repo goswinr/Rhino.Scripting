@@ -12,7 +12,7 @@ open FsEx.SaveIgnore
 
 
 [<AutoOpen>]
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 module ExtensionsSurface =
 
@@ -28,9 +28,9 @@ module ExtensionsSurface =
         //box = RhinoScriptSyntax.Coerce3dpointlist(corners)
         let brep = Brep.CreateFromBox(corners)
         if isNull brep then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBox: Unable to create brep from box.  %d corners:'%A'" (Seq.length corners) corners
-        let rc = Doc.Objects.AddBrep(brep)
+        let rc = State.Doc.Objects.AddBrep(brep)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBox: Unable to add brep to document. corners:'%A'" corners
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
     ///<summary>Adds a cone shaped Polysurface to the document.</summary>
@@ -48,8 +48,8 @@ module ExtensionsSurface =
                            [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// TODO cone is upside down??
-        let rc = Doc.Objects.AddBrep(brep)
-        Doc.Views.Redraw()
+        let rc = State.Doc.Objects.AddBrep(brep)
+        State.Doc.Views.Redraw()
         rc
         //TODO add version with two points
 
@@ -83,9 +83,9 @@ module ExtensionsSurface =
         let normal = if normal.IsZero then Vector3d.ZAxis else normal
         let surface = PlaneSurface.CreateThroughBox(line, normal, bbox)
         if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) startPoint endPoint normal
-        let objectId = Doc.Objects.AddSurface(surface)
+        let objectId = State.Doc.Objects.AddSurface(surface)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) startPoint endPoint normal
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         objectId
 
 
@@ -107,9 +107,9 @@ module ExtensionsSurface =
         let circle = Circle(basis, radius)
         let cylinder = Cylinder(circle, height)
         let brep = cylinder.ToBrep(cap, cap)
-        let objectId = Doc.Objects.AddBrep(brep)
+        let objectId = State.Doc.Objects.AddBrep(brep)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCylinder failed.  basis:'%A' height:'%A' radius:'%A' cap:'%A'" basis height radius cap
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         objectId
 
 
@@ -121,9 +121,9 @@ module ExtensionsSurface =
         let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let brep = Brep.CreateEdgeSurface(curves)
         if brep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (RhinoScriptSyntax.ToNiceString curveIds)
-        let objectId = Doc.Objects.AddBrep(brep)
+        let objectId = State.Doc.Objects.AddBrep(brep)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (RhinoScriptSyntax.ToNiceString curveIds)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         objectId
 
 
@@ -148,8 +148,8 @@ module ExtensionsSurface =
         let curves =  rarr { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) }
         let surf, err = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
-            let rc = Doc.Objects.AddSurface(surf)
-            Doc.Views.Redraw()
+            let rc = State.Doc.Objects.AddSurface(surf)
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddNetworkSrf failed on %A" curves
@@ -186,20 +186,20 @@ module ExtensionsSurface =
         if notNull weights then
             if weights.Count < (pu*pv) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
-            for i in range(pu) do
-                for j in range(pv) do
+            for i in Util.range(pu) do
+                for j in Util.range(pv) do
                     let cp = ControlPoint(points.[index], weights.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
                     index <- index + 1
         else
-            for i in range(pu) do
-                for j in range(pv) do
+            for i in Util.range(pu) do
+                for j in Util.range(pv) do
                     let cp = ControlPoint(points.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
                     index <- index + 1
 
-        for i in range(pu) do
-            for j in range(pv) do
+        for i in Util.range(pu) do
+            for j in Util.range(pv) do
                 if notNull weights then
                     let cp = ControlPoint(points.[index], weights.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
@@ -209,14 +209,14 @@ module ExtensionsSurface =
                 index <- index + 1
 
         //add the knots
-        for i in range(ns.KnotsU.Count) do
+        for i in Util.range(ns.KnotsU.Count) do
             ns.KnotsU.[i] <-  knotsU.[i]
-        for i in range(ns.KnotsV.Count) do
+        for i in Util.range(ns.KnotsV.Count) do
             ns.KnotsV.[i] <-  knotsV.[i]
         if not ns.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
-        let objectId = Doc.Objects.AddSurface(ns)
+        let objectId = State.Doc.Objects.AddSurface(ns)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         objectId
 
     ///<summary>Fits a Surface through Curve, point, point cloud, and Mesh objects.</summary>
@@ -224,7 +224,7 @@ module ExtensionsSurface =
     ///    Acceptable object types include Curves, points, point clouds, and Meshes</param>
     ///<param name="startSurfaceId">(Guid) The identifier of the starting Surface. It is best if you create a starting Surface that is similar in shape
     ///    to the Surface you are trying to create</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     ///    Try to find an outside Curve and trims the Surface to it. The default value is True</param>
@@ -257,12 +257,12 @@ module ExtensionsSurface =
                     let uspan, vspan = 10, 10
                     let geometry =   rarr{for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
                     let surface = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
-                    let tolerance = if 0.0 = tolerance then Doc.ModelAbsoluteTolerance else tolerance
+                    let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
                     let b =  Array.create 4 fixEdges
                     let brep = Brep.CreatePatch(geometry, surface, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance)
                     if notNull brep then
-                        let rc =  Doc.Objects.AddBrep(brep)
-                        Doc.Views.Redraw()
+                        let rc =  State.Doc.Objects.AddBrep(brep)
+                        State.Doc.Views.Redraw()
                         rc
                     else
                         RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) startSurfaceId
@@ -272,7 +272,7 @@ module ExtensionsSurface =
     ///    Acceptable object types include Curves, points, point clouds, and Meshes</param>
     ///<param name="uvSpans">(int * int) The U and V direction span counts for the automatically generated Surface . however it is best if you create a starting Surface that is similar in shape
     ///    to the Surface you are trying to create an use the other overload of this method</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The tolerance used by input analysis functions.</param>
     ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
     ///    Try to find an outside Curve and trims the Surface to it. The default value is True</param>
@@ -305,12 +305,12 @@ module ExtensionsSurface =
 
         let uspan, vspan = uvSpans
         let geometry =   rarr{for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
-        let tolerance = if 0.0 = tolerance then Doc.ModelAbsoluteTolerance else tolerance
+        let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
         if notNull brep then
-            let rc =  Doc.Objects.AddBrep(brep)
-            Doc.Views.Redraw()
+            let rc =  State.Doc.Objects.AddBrep(brep)
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) uvSpans
@@ -335,12 +335,12 @@ module ExtensionsSurface =
                            [<OPT;DEF(0)>]cap:int,
                            [<OPT;DEF(false)>]fit:bool) : Guid Rarr =
         let rail = RhinoScriptSyntax.CoerceCurve(curveId)
-        let abstol = Doc.ModelAbsoluteTolerance
-        let angtol = Doc.ModelAngleToleranceRadians
+        let abstol = State.Doc.ModelAbsoluteTolerance
+        let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
         let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
-        let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-        Doc.Views.Redraw()
+        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        State.Doc.Views.Redraw()
         rc
     
 
@@ -350,12 +350,12 @@ module ExtensionsSurface =
     ///<returns>(Guid) identifier of Surface created .</returns>
     [<Extension>]
     static member AddPlanarSrf(polyline:Polyline) : Guid=
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
             if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (RhinoScriptSyntax.ToNiceString polyline) 
-            let rc =  Doc.Objects.AddBrep(breps.[0])
-            Doc.Views.Redraw()
+            let rc =  State.Doc.Objects.AddBrep(breps.[0])
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(polyline:Polyline) failed on  %s" (RhinoScriptSyntax.ToNiceString polyline) 
@@ -365,12 +365,12 @@ module ExtensionsSurface =
     ///<returns>(Guid) identifier of Surface created .</returns>
     [<Extension>]
     static member AddPlanarSrf(curve:Curve) : Guid=
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
             if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (RhinoScriptSyntax.ToNiceString curve) 
-            let rc =  Doc.Objects.AddBrep(breps.[0])
-            Doc.Views.Redraw()
+            let rc =  State.Doc.Objects.AddBrep(breps.[0])
+            State.Doc.Views.Redraw()
             rc           
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(curve:Curve) failed on %s" (RhinoScriptSyntax.ToNiceString curve) 
@@ -380,11 +380,11 @@ module ExtensionsSurface =
     ///<returns>(Guid Rarr) identifiers of Surfaces created .</returns>
     [<Extension>]
     static member AddPlanarSrf(curves:Curve seq) : Guid Rarr =
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-            Doc.Views.Redraw()
+            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax. AddPlanarSrf(curves:Curve seq) failed on %s" (RhinoScriptSyntax.ToNiceString curves) 
@@ -395,11 +395,11 @@ module ExtensionsSurface =
     [<Extension>]
     static member AddPlanarSrf(objectIds:Guid seq) : Guid Rarr =
         let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-            Doc.Views.Redraw()
+            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(objectIds:Guid seq) failed on %s" (RhinoScriptSyntax.ToNiceString objectIds) 
@@ -420,9 +420,9 @@ module ExtensionsSurface =
         let vinterval = Interval(0.0, vDir)
         let planesurface = new PlaneSurface(plane, uinterval, vinterval)
         if planesurface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlaneSurface failed.  plane:'%A' uDir:'%A' vDir:'%A'" plane uDir vDir
-        let rc = Doc.Objects.AddSurface(planesurface)
+        let rc = State.Doc.Objects.AddSurface(planesurface)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlaneSurface failed.  plane:'%A' uDir:'%A' vDir:'%A'" plane uDir vDir
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -480,9 +480,9 @@ module ExtensionsSurface =
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) start ende loftType rebuild refit closed
         let idlist = Rarr()
         for brep in breps do
-            let objectId = Doc.Objects.AddBrep(brep)
+            let objectId = State.Doc.Objects.AddBrep(brep)
             if objectId <> Guid.Empty then idlist.Add(objectId)
-        if idlist.IsNotEmpty then Doc.Views.Redraw()
+        if idlist.IsNotEmpty then State.Doc.Views.Redraw()
         idlist
 
 
@@ -504,11 +504,11 @@ module ExtensionsSurface =
         let startAngle = toRadians(startAngle)
         let endAngle = toRadians(endAngle)
         let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then RhinoScriptingException.Raise "RhinoScriptSyntax.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (rhType curveId) axis startAngle endAngle
+        if isNull srf then RhinoScriptingException.Raise "RhinoScriptSyntax.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Print.guid curveId) axis startAngle endAngle
         let ns = srf.ToNurbsSurface()
-        if isNull ns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (rhType curveId) axis startAngle endAngle
-        let rc = Doc.Objects.AddSurface(ns)
-        Doc.Views.Redraw()
+        if isNull ns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Print.guid curveId) axis startAngle endAngle
+        let rc = State.Doc.Objects.AddSurface(ns)
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -519,9 +519,9 @@ module ExtensionsSurface =
     [<Extension>]
     static member AddSphere(center:Point3d, radius:float) : Guid =
         let sphere = Sphere(center, radius)
-        let rc = Doc.Objects.AddSphere(sphere)
+        let rc = State.Doc.Objects.AddSphere(sphere)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSphere failed.  centerOrPlane:'%A' radius:'%A'" center radius
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -539,9 +539,9 @@ module ExtensionsSurface =
         let curves =  Brep.CreateContourCurves(brep, plane)
         let rc = Rarr()
         for crv in curves do
-            let objectId = Doc.Objects.AddCurve(crv)
+            let objectId = State.Doc.Objects.AddCurve(crv)
             if objectId <> Guid.Empty then rc.Add(objectId)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -562,9 +562,9 @@ module ExtensionsSurface =
         let curves =  Brep.CreateContourCurves(brep, startPoint , endPoint, interval)
         let rc = Rarr()
         for crv in curves do
-            let objectId = Doc.Objects.AddCurve(crv)
+            let objectId = State.Doc.Objects.AddCurve(crv)
             if objectId <> Guid.Empty then rc.Add(objectId)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -582,9 +582,9 @@ module ExtensionsSurface =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let surf = NurbsSurface.CreateFromPoints(points, fst count, snd count,  degreeU,  degreeV)
         if isNull surf then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
-        let objectId = Doc.Objects.AddSurface(surf)
+        let objectId = State.Doc.Objects.AddSurface(surf)
         if objectId <> Guid.Empty then
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             objectId
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV) 
@@ -599,9 +599,9 @@ module ExtensionsSurface =
     static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC , pointD)
         if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
-        let rc = Doc.Objects.AddSurface(surface)
+        let rc = State.Doc.Objects.AddSurface(surface)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
     ///<summary>Creates a new Surface from three corner points.</summary>
@@ -613,9 +613,9 @@ module ExtensionsSurface =
     static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC)
         if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
-        let rc = Doc.Objects.AddSurface(surface)
+        let rc = State.Doc.Objects.AddSurface(surface)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -637,9 +637,9 @@ module ExtensionsSurface =
         //points = RhinoScriptSyntax.Coerce3dpointlist(points)
         let surf = NurbsSurface.CreateThroughPoints(points, fst count, snd count, degreeU, degreeV, closedU, closedV)
         if isNull surf then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
-        let objectId = Doc.Objects.AddSurface(surf)
+        let objectId = State.Doc.Objects.AddSurface(surf)
         if objectId <> Guid.Empty then
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             objectId
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
@@ -658,11 +658,11 @@ module ExtensionsSurface =
                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
         let rail = RhinoScriptSyntax.CoerceCurve(rail)
         let shapes =  rarr { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
-        let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-        Doc.Views.Redraw()
+        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -680,11 +680,11 @@ module ExtensionsSurface =
         let rail1 = RhinoScriptSyntax.CoerceCurve(fst rails)
         let rail2 = RhinoScriptSyntax.CoerceCurve(snd rails)
         let shapes =  rarr { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
-        let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-        Doc.Views.Redraw()
+        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -705,8 +705,8 @@ module ExtensionsSurface =
         let railinst = RhinoScriptSyntax.CoerceCurve(rail)
         let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
         if isNull surface then RhinoScriptingException.Raise "RhinoScriptSyntax.AddRailRevSrf failed.  profile:'%A' rail:'%A' axis:'%A' scaleHeight:'%A'" profile rail axis scaleHeight
-        let rc = Doc.Objects.AddSurface(surface)
-        Doc.Views.Redraw()
+        let rc = State.Doc.Objects.AddSurface(surface)
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -721,8 +721,8 @@ module ExtensionsSurface =
                             minorRadius:float) : Guid = 
         let torus = Torus(basis, majorRadius, minorRadius) 
         let revsurf = torus.ToRevSurface()
-        let rc = Doc.Objects.AddSurface(revsurf)
-        Doc.Views.Redraw()
+        let rc = State.Doc.Objects.AddSurface(revsurf)
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -741,14 +741,14 @@ module ExtensionsSurface =
 
         let breps0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let breps1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc =  rarr { for brep in newbreps do yield Doc.Objects.AddBrep(brep) }
+        let rc =  rarr { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
         if deleteInput then
-            for objectId in input0 do Doc.Objects.Delete(objectId, true)|> ignore
-            for objectId in input1 do Doc.Objects.Delete(objectId, true)|> ignore
-        Doc.Views.Redraw()
+            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -766,14 +766,14 @@ module ExtensionsSurface =
                                        [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let breps0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let breps1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc =  rarr { for brep in newbreps do yield Doc.Objects.AddBrep(brep) }
+        let rc =  rarr { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
         if deleteInput then
-            for objectId in input0 do Doc.Objects.Delete(objectId, true)|> ignore
-            for objectId in input1 do Doc.Objects.Delete(objectId, true)|> ignore
-        Doc.Views.Redraw()
+            for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
+            for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -788,13 +788,13 @@ module ExtensionsSurface =
     static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         if Seq.length(input)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let breps =  rarr { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let rc =  rarr { for brep in newbreps do yield Doc.Objects.AddBrep(brep) }
+        let rc =  rarr { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
         if  deleteInput then
-            for objectId in input do Doc.Objects.Delete(objectId, true)|> ignore
-        Doc.Views.Redraw()
+            for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -832,7 +832,7 @@ module ExtensionsSurface =
             let idx = (!ci).Index
             !clpt,!s,!t, typ, idx, !n
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.BrepClosestPoint faile for %A and %A" (rhType objectId) point
+            RhinoScriptingException.Raise "RhinoScriptSyntax.BrepClosestPoint faile for %A and %A" (Print.guid objectId) point
 
 
     ///<summary>Caps planar holes in a Surface or Polysurface.</summary>
@@ -841,14 +841,14 @@ module ExtensionsSurface =
     [<Extension>]
     static member CapPlanarHoles(surfaceId:Guid) : bool =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbrep = brep.CapPlanarHoles(tolerance)
         if notNull newbrep then
             if newbrep.SolidOrientation = BrepSolidOrientation.Inward then
                 newbrep.Flip()
             //surfaceId = RhinoScriptSyntax.Coerceguid(surfaceId)
-            if Doc.Objects.Replace(surfaceId, newbrep) then
-                Doc.Views.Redraw()
+            if State.Doc.Objects.Replace(surfaceId, newbrep) then
+                State.Doc.Views.Redraw()
                 true
             else
                 false
@@ -870,14 +870,14 @@ module ExtensionsSurface =
         let curves = Rarr()
         for curve in outcurves do
             if curve.IsValid then
-                let rc = Doc.Objects.AddCurve(curve)
+                let rc = State.Doc.Objects.AddCurve(curve)
                 curve.Dispose()
                 if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateEdgeCurves faile on one of the edge curves"
                 curves.Add(rc)
                 if select then
                     let rhobject = RhinoScriptSyntax.CoerceRhinoObject(rc)
                     rhobject.Select(true)  |>  ignore //TODO make sync ?
-        if curves.IsNotEmpty then Doc.Views.Redraw()
+        if curves.IsNotEmpty then State.Doc.Views.Redraw()
         curves
 
 
@@ -895,12 +895,12 @@ module ExtensionsSurface =
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
         let mutable curves = brep.DuplicateNakedEdgeCurves(outer, inner)
-        if curves|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%s' typ:'%d'" (rhType surfaceId) typ
-        let tolerance = Doc.ModelAbsoluteTolerance * 2.1
+        if curves|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%s' typ:'%d'" (Print.guid surfaceId) typ
+        let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
-        if curves|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%s' typ:'%d'" (rhType surfaceId) typ
-        let rc =  rarr { for c in curves do yield Doc.Objects.AddCurve(c) }
-        Doc.Views.Redraw()
+        if curves|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%s' typ:'%d'" (Print.guid surfaceId) typ
+        let rc =  rarr { for c in curves do yield State.Doc.Objects.AddCurve(c) }
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -916,7 +916,7 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc = surface.PointAt(u, v)
         if rc.IsValid then rc
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.EvaluateSurface failed.  surfaceId:'%s' u:'%f' v:'%f'" (rhType surfaceId) u v
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.EvaluateSurface failed.  surfaceId:'%s' u:'%f' v:'%f'" (Print.guid surfaceId) u v
 
 
     ///<summary>Lengthens an untrimmed Surface object.</summary>
@@ -938,8 +938,8 @@ module ExtensionsSurface =
         let edge = surface.ClosestSide(parameter|> fst, parameter|> snd)
         let newsrf = surface.Extend(edge, length, smooth)
         if notNull newsrf then
-            Doc.Objects.Replace(surfaceId, newsrf)|> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.Replace(surfaceId, newsrf)|> ignore
+            State.Doc.Views.Redraw()
         else
             ()
         notNull newsrf
@@ -957,12 +957,12 @@ module ExtensionsSurface =
         for objectId in objectIds do
             let brep = RhinoScriptSyntax.CoerceBrep(objectId)
             if brep.Faces.Count>1 then
-                for i in range(brep.Faces.Count) do
+                for i in Util.range(brep.Faces.Count) do
                     let copyface = brep.Faces.[i].DuplicateFace(false)
-                    let faceid = Doc.Objects.AddBrep(copyface)
+                    let faceid = State.Doc.Objects.AddBrep(copyface)
                     if faceid <> Guid.Empty then ids.Add(faceid)
-                if  deleteInput then Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                if  deleteInput then State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         ids
 
 
@@ -990,7 +990,7 @@ module ExtensionsSurface =
                 curves <- [|surface.IsoCurve(0, parameter|> snd) |]
             if notNull curves then
                 for curve in curves do
-                    let objectId = Doc.Objects.AddCurve(curve)
+                    let objectId = State.Doc.Objects.AddCurve(curve)
                     if objectId <> Guid.Empty then ids.Add(objectId)
 
         if direction = 1 || direction = 2 then
@@ -1002,9 +1002,9 @@ module ExtensionsSurface =
                 curves <- [|surface.IsoCurve(1, parameter|> fst)|]
             if notNull curves then
                 for curve in curves do
-                    let objectId = Doc.Objects.AddCurve(curve)
+                    let objectId = State.Doc.Objects.AddCurve(curve)
                     if objectId <> Guid.Empty then ids.Add(objectId)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         ids
 
 
@@ -1024,12 +1024,12 @@ module ExtensionsSurface =
         for index in faceIndices do
             let face = brep.Faces.[index]
             let newbrep = face.DuplicateFace(true)
-            let objectId = Doc.Objects.AddBrep(newbrep)
+            let objectId = State.Doc.Objects.AddBrep(newbrep)
             rc.Add(objectId)
         if copy then
             for index in faceIndices do brep.Faces.RemoveAt(index)
-            Doc.Objects.Replace(objectId, brep)|> ignore
-        Doc.Views.Redraw()
+            State.Doc.Objects.Replace(objectId, brep)|> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1042,9 +1042,9 @@ module ExtensionsSurface =
         let curve1 = RhinoScriptSyntax.CoerceCurve(curveId)
         let curve2 = RhinoScriptSyntax.CoerceCurve(pathId)
         let srf = SumSurface.Create(curve1, curve2)
-        let rc = Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeCurve failed. curveId:'%s' pathId:'%s'" (rhType curveId) <| rhType pathId
-        Doc.Views.Redraw()
+        let rc = State.Doc.Objects.AddSurface(srf)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeCurve failed. curveId:'%s' pathId:'%s'" (Print.guid curveId) <| Print.guid pathId
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1057,9 +1057,9 @@ module ExtensionsSurface =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
         let srf = Surface.CreateExtrusionToPoint(curve, point)
-        let rc = Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeCurvePoint failed. curveId:'%s' point:'%A'" (rhType curveId) point
-        Doc.Views.Redraw()
+        let rc = State.Doc.Objects.AddSurface(srf)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeCurvePoint failed. curveId:'%s' point:'%A'" (Print.guid curveId) point
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1077,9 +1077,9 @@ module ExtensionsSurface =
         //endPoint = RhinoScriptSyntax.Coerce3dpoint(endPoint)
         let vec = endPoint - startPoint
         let srf = Surface.CreateExtrusion(curve, vec)
-        let rc = Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeCurveStraight failed. curveId:'%s' startPoint:'%A' endPoint:'%A'" (rhType curveId) startPoint endPoint
-        Doc.Views.Redraw()
+        let rc = State.Doc.Objects.AddSurface(srf)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeCurveStraight failed. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid curveId) startPoint endPoint
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1097,11 +1097,11 @@ module ExtensionsSurface =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newbrep = brep.Faces.[0].CreateExtrusion(curve, cap)
         if notNull newbrep then
-            let rc = Doc.Objects.AddBrep(newbrep)
-            Doc.Views.Redraw()
+            let rc = State.Doc.Objects.AddBrep(newbrep)
+            State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeSurface failed on Surface: %s and Curve %s" (rhType surfaceId)  (rhType curveId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtrudeSurface failed on Surface: %s and Curve %s" (Print.guid surfaceId)  (Print.guid curveId)
 
 
     ///<summary>Create constant radius rolling ball fillets between two Surfaces. Note,
@@ -1121,7 +1121,7 @@ module ExtensionsSurface =
                                   [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Guid Rarr=
         let surface0 = RhinoScriptSyntax.CoerceSurface(surface0)
         let surface1 = RhinoScriptSyntax.CoerceSurface(surface1)
-        let tol = Doc.ModelAbsoluteTolerance
+        let tol = State.Doc.ModelAbsoluteTolerance
         let surfaces =
             if uvparam0<>Point2d.Origin && uvparam1<>Point2d.Origin then
                 Surface.CreateRollingBallFillet(surface0, uvparam0, surface1, uvparam1, radius, tol)
@@ -1130,8 +1130,8 @@ module ExtensionsSurface =
         if isNull surfaces then RhinoScriptingException.Raise "RhinoScriptSyntax.FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
         let rc = Rarr()
         for surf in surfaces do
-            rc.Add( Doc.Objects.AddSurface(surf))
-        Doc.Views.Redraw()
+            rc.Add( State.Doc.Objects.AddSurface(surf))
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1142,7 +1142,7 @@ module ExtensionsSurface =
     [<Extension>]
     static member FlipSurface(surfaceId:Guid) : bool = //GET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface Get failed.  surfaceId:'%s'" (rhType surfaceId)
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface Get failed.  surfaceId:'%s'" (Print.guid surfaceId)
         let face = brep.Faces.[0]
         let oldreverse = face.OrientationIsReversed
         oldreverse
@@ -1155,13 +1155,13 @@ module ExtensionsSurface =
     [<Extension>]
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (rhType surfaceId) flip
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
         let face = brep.Faces.[0]
         let oldreverse = face.OrientationIsReversed
         if brep.IsSolid = false && oldreverse <> flip then
             brep.Flip()
-            Doc.Objects.Replace(surfaceId, brep)|> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+            State.Doc.Views.Redraw()
     ///<summary>Changes the normal direction of multiple Surface. This feature can
     /// also be found in Rhino's Dir command.</summary>
     ///<param name="surfaceIds">(Guid seq) Identifiers of multiple Surface objects</param>
@@ -1171,20 +1171,20 @@ module ExtensionsSurface =
     static member FlipSurface(surfaceIds:Guid seq, flip:bool) : unit = //MULTISET
         for surfaceId in surfaceIds do 
             let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-            if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (rhType surfaceId) flip
+            if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
             let face = brep.Faces.[0]
             let oldreverse = face.OrientationIsReversed
             if brep.IsSolid = false && oldreverse <> flip then
                 brep.Flip()
-                Doc.Objects.Replace(surfaceId, brep)|> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+        State.Doc.Views.Redraw()
 
 
     ///<summary>Intersects a brep object with another brep object. Note, unlike the
     ///    SurfaceSurfaceIntersection function this function works on trimmed Surfaces.</summary>
     ///<param name="brep1">(Guid) Identifier of first brep object</param>
     ///<param name="brep2">(Guid) Identifier of second brep object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Distance tolerance at segment midpoints. If omitted,
     ///    the current absolute tolerance is used</param>
     ///<returns>(Guid Rarr) identifying the newly created intersection Curve and point objects.</returns>
@@ -1194,7 +1194,7 @@ module ExtensionsSurface =
                                   [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let brep1 = RhinoScriptSyntax.CoerceBrep(brep1)
         let brep2 = RhinoScriptSyntax.CoerceBrep(brep2)
-        let tolerance = ifZero2 Doc.ModelAbsoluteTolerance  tolerance
+        let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance  tolerance
         let ok, outcurves, outpoints = Intersect.Intersection.BrepBrep(brep1, brep2, tolerance)
         let ids = Rarr()
         if not ok then ids // empty array TODO or fail ?
@@ -1204,22 +1204,22 @@ module ExtensionsSurface =
             if notNull mergedcurves then
                 for curve in mergedcurves do
                     if curve.IsValid then
-                        let rc = Doc.Objects.AddCurve(curve)
+                        let rc = State.Doc.Objects.AddCurve(curve)
                         curve.Dispose()
                         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
                         ids.Add(rc)
             else
                 for curve in outcurves do
                     if curve.IsValid then
-                        let rc = Doc.Objects.AddCurve(curve)
+                        let rc = State.Doc.Objects.AddCurve(curve)
                         curve.Dispose()
                         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
                         ids.Add(rc)
             for point in outpoints do
-                let rc = Doc.Objects.AddPoint(point)
+                let rc = State.Doc.Objects.AddPoint(point)
                 if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectBreps failed.  brep1:'%A' brep2:'%A' tolerance:'%A'" brep1 brep2 tolerance
                 ids.Add(rc)
-            Doc.Views.Redraw()
+            State.Doc.Views.Redraw()
             ids
 
 
@@ -1311,9 +1311,9 @@ module ExtensionsSurface =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //objectId = RhinoScriptSyntax.Coerceguid(objectId)
         //point = RhinoScriptSyntax.Coerce3dpoint(point)
-        //if objectId|> isNull  || point|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsPointInSurface failed.  objectId:'%s' point:'%A' strictlyIn:'%A' tolerance:'%A'" (rhType objectId) point strictlyIn tolerance
-        let obj = Doc.Objects.FindId(objectId)
-        let  tolerance= ifZero1 tolerance RhinoMath.SqrtEpsilon
+        //if objectId|> isNull  || point|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsPointInSurface failed.  objectId:'%s' point:'%A' strictlyIn:'%A' tolerance:'%A'" (Print.guid objectId) point strictlyIn tolerance
+        let obj = State.Doc.Objects.FindId(objectId)
+        let  tolerance= Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         match obj with
         | :? DocObjects.ExtrusionObject as es->
             let brep= es.ExtrusionGeometry.ToBrep(false)
@@ -1340,7 +1340,7 @@ module ExtensionsSurface =
         let mutable rc, u, v = surf.ClosestPoint(point)
         if rc  then
             let srfpt = surf.PointAt(u, v)
-            if srfpt.DistanceTo(point) > Doc.ModelAbsoluteTolerance then
+            if srfpt.DistanceTo(point) > State.Doc.ModelAbsoluteTolerance then
                 rc <- false
             else
                 match RhinoScriptSyntax.TryCoerceBrep(objectId) with
@@ -1348,7 +1348,7 @@ module ExtensionsSurface =
                     rc <- b.Faces.[0].IsPointOnFace(u, v) <> PointFaceRelation.Exterior
                 | _ -> ()
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.IsPointOnSurface failed for surf.ClosestPoint on %A %A" (rhType objectId) point
+            RhinoScriptingException.Raise "RhinoScriptSyntax.IsPointOnSurface failed for surf.ClosestPoint on %A %A" (Print.guid objectId) point
         rc
 
 
@@ -1358,8 +1358,8 @@ module ExtensionsSurface =
     ///<returns>(bool) True if successful, otherwise False.</returns>
     [<Extension>]
     static member IsPolysurface(objectId:Guid) : bool =
-        match Doc.Objects.FindId(objectId) with 
-        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurface: %A is not an object in Doc.Objects table" objectId
+        match State.Doc.Objects.FindId(objectId) with 
+        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurface: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with          
                 | :? Brep as b -> b.Faces.Count > 1 
                 | :? Extrusion  -> true   
@@ -1373,8 +1373,8 @@ module ExtensionsSurface =
     ///<returns>(bool) True if successful, otherwise False.</returns>
     [<Extension>]
     static member IsPolysurfaceClosed(objectId:Guid) : bool =
-        match Doc.Objects.FindId(objectId) with 
-        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurfaceClosed: %A is not an object in Doc.Objects table" objectId
+        match State.Doc.Objects.FindId(objectId) with 
+        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurfaceClosed: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with          
                 | :? Brep as b -> b.IsSolid
                 | :? Extrusion as e -> e.IsSolid   
@@ -1431,13 +1431,13 @@ module ExtensionsSurface =
 
     ///<summary>Verifies a Surface object is planar.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Tolerance used when checked. If omitted, the current absolute
     ///    tolerance is used</param>
     ///<returns>(bool) True or False.</returns>
     [<Extension>]
     static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
-        let tolerance = ifZero1 tolerance Doc.ModelAbsoluteTolerance
+        let tolerance = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
         | Some surface ->  surface.IsPlanar(tolerance)
         | _ -> false
@@ -1503,7 +1503,7 @@ module ExtensionsSurface =
     [<Extension>]
     static member SurfaceSphere(surfaceId:Guid) : Plane * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let tol = Doc.ModelAbsoluteTolerance
+        let tol = State.Doc.ModelAbsoluteTolerance
         let sphere = ref Sphere.Unset
         let issphere = surface.TryGetSphere(sphere, tol)
         if issphere then (!sphere).EquatorialPlane, (!sphere).Radius
@@ -1520,19 +1520,19 @@ module ExtensionsSurface =
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let breps =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         if breps.Count<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) deleteInput
-        let tol = Doc.ModelAbsoluteTolerance * 2.1
+        let tol = State.Doc.ModelAbsoluteTolerance * 2.1
         let joinedbreps = Brep.JoinBreps(breps, tol)
         if joinedbreps|> isNull  then
             RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) deleteInput
         if joinedbreps.Length <> 1 then
             RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
-        let rc = Doc.Objects.AddBrep(joinedbreps.[0])
+        let rc = State.Doc.Objects.AddBrep(joinedbreps.[0])
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) deleteInput
         if  deleteInput then
             for objectId in objectIds do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)
-                Doc.Objects.Delete(objectId, true) |> ignore
-        Doc.Views.Redraw()
+                State.Doc.Objects.Delete(objectId, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1550,15 +1550,15 @@ module ExtensionsSurface =
                                        [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let newsurf = Surface.CreatePeriodicSurface(surface, direction)
-        if newsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (rhType surfaceId) direction deleteInput
+        if newsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (Print.guid surfaceId) direction deleteInput
         //id = RhinoScriptSyntax.Coerceguid(surfaceId)
         if deleteInput then
-            Doc.Objects.Replace(surfaceId, newsurf)|> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore
+            State.Doc.Views.Redraw()
             surfaceId
         else
-            let objectIdn = Doc.Objects.AddSurface(newsurf)
-            Doc.Views.Redraw()
+            let objectIdn = State.Doc.Objects.AddSurface(newsurf)
+            State.Doc.Views.Redraw()
             objectIdn
 
 
@@ -1566,7 +1566,7 @@ module ExtensionsSurface =
     ///    will be added to Rhino.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="distance">(float) The distance to offset</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The offset tolerance. Use 0.0 to make a loose offset. Otherwise, the
     ///    document's absolute tolerance is usually sufficient</param>
     ///<param name="bothSides">(bool) Optional, Default Value: <c>false</c>
@@ -1583,13 +1583,13 @@ module ExtensionsSurface =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let mutable face = null
         if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
-        if face|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (rhType surfaceId) distance tolerance bothSides createSolid
-        let tolerance= ifZero1 tolerance Doc.ModelAbsoluteTolerance
+        if face|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Print.guid surfaceId) distance tolerance bothSides createSolid
+        let tolerance= Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
-        if newbrep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (rhType surfaceId) distance tolerance bothSides createSolid
-        let rc = Doc.Objects.AddBrep(newbrep)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (rhType surfaceId) distance tolerance bothSides createSolid
-        Doc.Views.Redraw()
+        if newbrep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Print.guid surfaceId) distance tolerance bothSides createSolid
+        let rc = State.Doc.Objects.AddBrep(newbrep)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Print.guid surfaceId) distance tolerance bothSides createSolid
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1606,12 +1606,12 @@ module ExtensionsSurface =
         let crvobj = RhinoScriptSyntax.CoerceRhinoObject(curve)
         let brep = RhinoScriptSyntax.CoerceBrep(surface)
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
-        let tol = Doc.ModelAbsoluteTolerance
+        let tol = State.Doc.ModelAbsoluteTolerance
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
-        let rc =  rarr { for curve in curves do yield Doc.Objects.AddCurve(curve) }
+        let rc =  rarr { for curve in curves do yield State.Doc.Objects.AddCurve(curve) }
         if deleteInput  then
-            Doc.Objects.Delete(crvobj, true) |> ignore
-        Doc.Views.Redraw()
+            State.Doc.Objects.Delete(crvobj, true) |> ignore
+        State.Doc.Views.Redraw()
         rc
 
 
@@ -1635,8 +1635,8 @@ module ExtensionsSurface =
         if newsurf|> isNull  then false
         else
             //objectId = RhinoScriptSyntax.Coerceguid(objectId)
-            let rc = Doc.Objects.Replace(objectId, newsurf)
-            if rc then Doc.Views.Redraw()
+            let rc = State.Doc.Objects.Replace(objectId, newsurf)
+            if rc then State.Doc.Views.Redraw()
             rc
 
 
@@ -1663,8 +1663,8 @@ module ExtensionsSurface =
                 let success = knots.RemoveKnotsAt(nuparam, nvparam)
                 if not success then false
                 else
-                    Doc.Objects.Replace(surface, nsrf)|> ignore
-                    Doc.Views.Redraw()
+                    State.Doc.Objects.Replace(surface, nsrf)|> ignore
+                    State.Doc.Views.Redraw()
                     true
 
 
@@ -1679,13 +1679,13 @@ module ExtensionsSurface =
     [<Extension>]
     static member ReverseSurface(surfaceId:Guid, direction:int) : unit =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
-        if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (rhType surfaceId) direction
+        if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (Print.guid surfaceId) direction
         let face = brep.Faces.[0]
         if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignoreObj
         if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignoreObj
         if direction &&& 4 <> 0 then            face.Transpose(true) |> ignoreObj
-        Doc.Objects.Replace(surfaceId, brep)|> ignore
-        Doc.Views.Redraw()
+        State.Doc.Objects.Replace(surfaceId, brep)|> ignore
+        State.Doc.Views.Redraw()
 
 
 
@@ -1727,15 +1727,15 @@ module ExtensionsSurface =
         //end = RhinoScriptSyntax.Coerce3dpoint(endPoint)
         let rcstart, ustart, vstart = surface.ClosestPoint(startPoint)
         let rcend, uend, vend = surface.ClosestPoint(endPoint)
-        if not rcstart || not rcend then RhinoScriptingException.Raise "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (rhType surfaceId) startPoint endPoint
+        if not rcstart || not rcend then RhinoScriptingException.Raise "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid surfaceId) startPoint endPoint
         let start = Point2d(ustart, vstart)
         let ende = Point2d(uend, vend)
-        let tolerance = Doc.ModelAbsoluteTolerance
+        let tolerance = State.Doc.ModelAbsoluteTolerance
         let curve = surface.ShortPath(start, ende, tolerance)
-        if curve|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (rhType surfaceId) startPoint endPoint
-        let objectId = Doc.Objects.AddCurve(curve)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (rhType surfaceId) startPoint endPoint
-        Doc.Views.Redraw()
+        if curve|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid surfaceId) startPoint endPoint
+        let objectId = State.Doc.Objects.AddCurve(curve)
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid surfaceId) startPoint endPoint
+        State.Doc.Views.Redraw()
         objectId
 
 
@@ -1748,16 +1748,16 @@ module ExtensionsSurface =
     [<Extension>]
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        if brep.Faces.ShrinkFaces() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShrinkTrimmedSurface failed.  objectId:'%s' createCopy:'%A'" (rhType objectId) createCopy
+        if brep.Faces.ShrinkFaces() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShrinkTrimmedSurface failed.  objectId:'%s' createCopy:'%A'" (Print.guid objectId) createCopy
         if  createCopy then
-            let oldobj = Doc.Objects.FindId(objectId)
+            let oldobj = State.Doc.Objects.FindId(objectId)
             let attr = oldobj.Attributes
-            let rc = Doc.Objects.AddBrep(brep, attr)
-            Doc.Views.Redraw()
+            let rc = State.Doc.Objects.AddBrep(brep, attr)
+            State.Doc.Views.Redraw()
             rc
         else
-            Doc.Objects.Replace(objectId, brep)|> ignore
-            Doc.Views.Redraw()
+            State.Doc.Objects.Replace(objectId, brep)|> ignore
+            State.Doc.Views.Redraw()
             objectId
 
 
@@ -1775,14 +1775,14 @@ module ExtensionsSurface =
                              [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let cutter = RhinoScriptSyntax.CoerceBrep(cutterId)
-        let tol = Doc.ModelAbsoluteTolerance
+        let tol = State.Doc.ModelAbsoluteTolerance
         let pieces = brep.Split(cutter, tol)
-        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (rhType brepId) (rhType cutterId) deleteInput
+        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (Print.guid brepId) (Print.guid cutterId) deleteInput
         if  deleteInput then
             //brepId = RhinoScriptSyntax.Coerceguid(brepId)
-            Doc.Objects.Delete(brepId, true) |> ignore
-        let rc =  rarr { for piece in pieces do yield Doc.Objects.AddBrep(piece) }
-        Doc.Views.Redraw()
+            State.Doc.Objects.Delete(brepId, true) |> ignore
+        let rc =  rarr { for piece in pieces do yield State.Doc.Objects.AddBrep(piece) }
+        State.Doc.Views.Redraw()
         rc
     
 
@@ -1815,7 +1815,7 @@ module ExtensionsSurface =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Surface as s -> RhinoScriptSyntax.SurfaceArea s        
         | :? Brep    as b -> RhinoScriptSyntax.SurfaceArea b
-        | x -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea doesnt work on on %A" (rhType  objectId)
+        | x -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea doesnt work on on %A" (Print.guid  objectId)
    
 
 
@@ -1834,7 +1834,7 @@ module ExtensionsSurface =
             |> RhinoScriptSyntax.TryCoerceSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceAreaCentroid failed.  objectId:'%s'" (rhType objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceAreaCentroid failed.  objectId:'%s'" (Print.guid objectId))
         |> fun amp -> amp.Centroid
 
 
@@ -1923,7 +1923,7 @@ module ExtensionsSurface =
     static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, cone = surface.TryGetCone()
-        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCone failed.  surfaceId:'%s'" (rhType surfaceId)
+        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCone failed.  surfaceId:'%s'" (Print.guid surfaceId)
         cone.Plane, cone.Height, cone.Radius
 
 
@@ -1943,9 +1943,9 @@ module ExtensionsSurface =
     [<Extension>]
     static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float=
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        //if Seq.length(parameter)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (rhType surfaceId) parameter
+        //if Seq.length(parameter)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
         let c = surface.CurvatureAt(parameter|> fst, parameter|> snd)
-        if c|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (rhType surfaceId) parameter
+        if c|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
         c.Point, c.Normal, c.Kappa(0), c.Direction(0), c.Kappa(1), c.Direction(1), c.Gaussian, c.Mean
 
 
@@ -1955,7 +1955,7 @@ module ExtensionsSurface =
     [<Extension>]
     static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let tol = Doc.ModelAbsoluteTolerance
+        let tol = State.Doc.ModelAbsoluteTolerance
         let cy = ref Cylinder.Unset
         let rc = surface.TryGetFiniteCylinder(cy, tol)
         if rc  then
@@ -1980,7 +1980,7 @@ module ExtensionsSurface =
     ///<returns>(float * float) containing the domain interval in the specified direction.</returns>
     [<Extension>]
     static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
-        if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceDomain failed.  surfaceId:'%s' direction:'%A'" (rhType surfaceId) direction
+        if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceDomain failed.  surfaceId:'%s' direction:'%A'" (Print.guid surfaceId) direction
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let domain = surface.Domain(direction)
         domain.T0, domain.T1
@@ -1998,7 +1998,7 @@ module ExtensionsSurface =
     static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (rhType surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (Print.guid surfaceId) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -2033,7 +2033,7 @@ module ExtensionsSurface =
     static member SurfaceEditPointPrameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPointParameterss failed.  surfaceId:'%s'  returnAll:'%A'" (rhType surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPointParameterss failed.  surfaceId:'%s'  returnAll:'%A'" (Print.guid surfaceId) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -2080,7 +2080,7 @@ module ExtensionsSurface =
                                    derivative:int) : Point3d * Vector3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
-        if not success then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (rhType surfaceId) parameter derivative
+        if not success then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (Print.guid surfaceId) parameter derivative
         let rc = rarr{()}
         if der.Length > 0 then
           for d in der do rc.Add(d)
@@ -2119,7 +2119,7 @@ module ExtensionsSurface =
                 rhinoobject.Attributes.WireDensity
         | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 rhinoobject.Attributes.WireDensity
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s'" (rhType surfaceId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s'" (Print.guid surfaceId)
 
 
     ///<summary>Sets the isocurve density of a Surface or Polysurface object.
@@ -2140,18 +2140,18 @@ module ExtensionsSurface =
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-                Doc.Views.Redraw()
+                State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-                Doc.Views.Redraw()
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (rhType surfaceId) density
+                State.Doc.Views.Redraw()
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Print.guid surfaceId) density
 
 
     ///<summary>Sets the isocurve density of multiple Surface or Polysurface objects.
@@ -2181,8 +2181,8 @@ module ExtensionsSurface =
                     let dens = if density<0 then -1 else density
                     rhinoobject.Attributes.WireDensity <- dens
                     rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed" 
-            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (rhType surfaceId) density
-        Doc.Views.Redraw()
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Print.guid surfaceId) density
+        State.Doc.Views.Redraw()
 
     ///<summary>Returns the control point count of a Surface
     ///    SurfaceId = the Surface's identifier.</summary>
@@ -2206,11 +2206,11 @@ module ExtensionsSurface =
     static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList=
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurbsurf = surface.ToNurbsSurface()
-        if nurbsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (rhType surfaceId)
+        if nurbsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (Print.guid surfaceId)
         nurbsurf.KnotsU , nurbsurf.KnotsV
         //let sknots =  rarr { for knot in nurbsurf.KnotsU do yield knot }
         //let tknots =  rarr { for knot in nurbsurf.KnotsV do yield knot }
-        //if isNull sknots || not tknots then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (rhType surfaceId)
+        //if isNull sknots || not tknots then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (Print.guid surfaceId)
         //sknots, tknots
 
 
@@ -2245,9 +2245,9 @@ module ExtensionsSurface =
         let udomain = surface.Domain(0)
         let vdomain = surface.Domain(1)
         if parameter|> fst<udomain.Min || parameter|> fst>udomain.Max then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (rhType surfaceId) parameter
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
         if parameter|> snd<vdomain.Min || parameter|> snd>vdomain.Max then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (rhType surfaceId) parameter
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
         let u = udomain.NormalizedParameterAt(parameter|> fst)
         let v = vdomain.NormalizedParameterAt(parameter|> snd)
         u, v
@@ -2288,10 +2288,10 @@ module ExtensionsSurface =
     static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (rhType surfaceId) returnAll
+        if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (Print.guid surfaceId) returnAll
         let rc = Rarr()
-        for u in range(ns.Points.CountU) do
-            for v in range(ns.Points.CountV) do
+        for u in Util.range(ns.Points.CountU) do
+            for v in Util.range(ns.Points.CountV) do
                 let pt = ns.Points.GetControlPoint(u, v)
                 rc.Add(pt.Location)
         rc
@@ -2324,7 +2324,7 @@ module ExtensionsSurface =
             |> RhinoScriptSyntax.TryCoerceSurface
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolume failed on %A" (rhType objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolume failed on %A" (Print.guid objectId))
         |> fun amp -> amp.Volume
 
 
@@ -2335,15 +2335,15 @@ module ExtensionsSurface =
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Brep %A" (rhType objectId))
+        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Brep %A" (Print.guid objectId))
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
             objectId
             |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Surface %A" (rhType objectId))
+            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Surface %A" (Print.guid objectId))
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on %A" (rhType objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on %A" (Print.guid objectId))
         |> fun amp -> amp.Centroid
 
 
@@ -2370,15 +2370,15 @@ module ExtensionsSurface =
     static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) Rarr =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Brep %A" (rhType objectId))
+        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Brep %A" (Print.guid objectId))
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
             objectId
             |> RhinoScriptSyntax.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Surface %A" (rhType objectId))
+            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Surface %A" (Print.guid objectId))
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on %A" (rhType objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on %A" (Print.guid objectId))
         |> fun mp ->
             rarr{
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -2408,10 +2408,10 @@ module ExtensionsSurface =
     static member SurfaceWeights(objectId:Guid) : float Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceWeights failed.  objectId:'%s'" (rhType objectId)
+        if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceWeights failed.  objectId:'%s'" (Print.guid objectId)
         let rc = Rarr()
-        for u in range(ns.Points.CountU) do
-            for v in range(ns.Points.CountV) do
+        for u in Util.range(ns.Points.CountU) do
+            for v in Util.range(ns.Points.CountV) do
                 let pt = ns.Points.GetControlPoint(u, v)
                 rc.Add(pt.Weight)
         rc
@@ -2419,7 +2419,7 @@ module ExtensionsSurface =
     ///<summary>Trims a Surface or Polysurface using an oriented cutter brep or Surface.</summary>
     ///<param name="objectId">(Guid) Surface or Polysurface identifier</param>
     ///<param name="cutter">(Guid) Surface or Polysurface  performing the trim</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(Guid Rarr) identifiers of retained components.</returns>
     [<Extension>]
     static member TrimBrep( objectId:Guid,
@@ -2427,54 +2427,54 @@ module ExtensionsSurface =
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
-        let tolerance= ifZero1 tolerance  Doc.ModelAbsoluteTolerance
+        let tolerance= Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
         let attrs = None
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
             let rc = Rarr()
-            for i in range(breps.Length) do
+            for i in Util.range(breps.Length) do
                 if i = 0 then
-                    Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
                     rc.Add(objectId)
                 else
-                    rc.Add(Doc.Objects.AddBrep(breps.[i], attrs))
-            Doc.Views.Redraw()
+                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
+            State.Doc.Views.Redraw()
             rc
         else
-            let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-            Doc.Views.Redraw()
+            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            State.Doc.Views.Redraw()
             rc
 
     ///<summary>Trims a Surface using an oriented cutter Plane.</summary>
     ///<param name="objectId">(Guid) Surface or Polysurface identifier</param>
     ///<param name="cutter">(Plane) Plane performing the trim</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c></param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(Guid Rarr) identifiers of retained components.</returns>
     [<Extension>]
     static member TrimBrep( objectId:Guid,
                             cutter:Plane,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let tolerance= ifZero1 tolerance  Doc.ModelAbsoluteTolerance
+        let tolerance = Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
         let attrs = None
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
             let rc = Rarr()
-            for i in range(breps.Length) do
+            for i in Util.range(breps.Length) do
                 if i = 0 then
-                    Doc.Objects.Replace(objectId, breps.[i]) |> ignore
+                    State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
                     rc.Add(objectId)
                 else
-                    rc.Add(Doc.Objects.AddBrep(breps.[i], attrs))
-            Doc.Views.Redraw()
+                    rc.Add(State.Doc.Objects.AddBrep(breps.[i], attrs))
+            State.Doc.Views.Redraw()
             rc
         else
-            let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
-            Doc.Views.Redraw()
+            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            State.Doc.Views.Redraw()
             rc
 
     ///<summary>Remove portions of the Surface outside of the specified interval in U direction.</summary>
@@ -2494,9 +2494,9 @@ module ExtensionsSurface =
         u.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  Doc.Objects.Delete(surfaceId, true) |> ignore
-            Doc.Views.Redraw()
+            let rc = State.Doc.Objects.AddSurface(newsurface)
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceU failed on %A with domain %A" surfaceId interval
@@ -2518,9 +2518,9 @@ module ExtensionsSurface =
         v.[1] <-  interval|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  Doc.Objects.Delete(surfaceId, true) |> ignore
-            Doc.Views.Redraw()
+            let rc = State.Doc.Objects.AddSurface(newsurface)
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceV failed on %A with domain %A" surfaceId interval
@@ -2547,9 +2547,9 @@ module ExtensionsSurface =
         v.[1]  <- intervalV|> snd
         let newsurface = surface.Trim(u, v)
         if notNull newsurface then
-            let rc = Doc.Objects.AddSurface(newsurface)
-            if deleteInput then  Doc.Objects.Delete(surfaceId, true) |> ignore
-            Doc.Views.Redraw()
+            let rc = State.Doc.Objects.AddSurface(newsurface)
+            if deleteInput then  State.Doc.Objects.Delete(surfaceId, true) |> ignore
+            State.Doc.Views.Redraw()
             rc
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.TrimSurfaceUV failed on %A with domain %A and %A" surfaceId intervalU intervalV
@@ -2562,9 +2562,9 @@ module ExtensionsSurface =
     ///    If True, the resulting Surfaces are not joined</param>
     ///<param name="followingGeometry">(Guid seq) Optional, List of Curves, dots, and points which
     ///    should be unrolled with the Surface</param>
-    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>Doc.ModelAbsoluteTolerance</c>
+    ///<param name="absoluteTolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Absolute tolerance</param>
-    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>Doc.ModelRelativeTolerance</c>
+    ///<param name="relativeTolerance">(float) Optional, Default Value: <c>State.Doc.ModelRelativeTolerance</c>
     ///    Relative tolerance</param>
     ///<returns>(Guid Rarr * Guid Rarr) Two lists: List of unrolled Surface ids and list of following objects.</returns>
     [<Extension>]
@@ -2576,8 +2576,8 @@ module ExtensionsSurface =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let unroll = Unroller(brep)
         unroll.ExplodeOutput <- explode
-        let relativeTolerance = ifZero1 relativeTolerance  Doc.ModelRelativeTolerance
-        let  absoluteTolerance = ifZero1 absoluteTolerance  Doc.ModelAbsoluteTolerance
+        let relativeTolerance = Util.ifZero1 relativeTolerance  State.Doc.ModelRelativeTolerance
+        let  absoluteTolerance = Util.ifZero1 absoluteTolerance  State.Doc.ModelAbsoluteTolerance
         unroll.AbsoluteTolerance <- absoluteTolerance
         unroll.RelativeTolerance <- relativeTolerance
         if notNull followingGeometry then
@@ -2587,22 +2587,22 @@ module ExtensionsSurface =
                 | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
                 | :? Point as g -> unroll.AddFollowingGeometry(g)
                 | :? TextDot as g -> unroll.AddFollowingGeometry(g)
-                | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.UnrollSurface: cannot add (a %s) as following Geometry" (rhType objectId)
+                | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.UnrollSurface: cannot add (a %s) as following Geometry" (Print.guid objectId)
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.UnrollSurface: failed on  %A" surfaceId
-        let rc =  rarr { for brep in breps do yield Doc.Objects.AddBrep(brep) }
+        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
         let newfollowing = Rarr()
         for curve in curves do
-            let objectId = Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
+            let objectId = State.Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
             newfollowing.Add(objectId)
         for point in points do
-            let objectId = Doc.Objects.AddPoint(point)
+            let objectId = State.Doc.Objects.AddPoint(point)
             newfollowing.Add(objectId)
         for dot in dots do
-            let objectId = Doc.Objects.AddTextDot(dot)
+            let objectId = State.Doc.Objects.AddTextDot(dot)
             newfollowing.Add(objectId)
-        Doc.Views.Redraw()
+        State.Doc.Views.Redraw()
         rc, newfollowing
 
 
@@ -2615,11 +2615,11 @@ module ExtensionsSurface =
         let surface = RhinoScriptSyntax.CoerceNurbsSurface(objectId)
         let u, v = degree
         let maxnurbsdegree = 11
-        if u < 1 || u > maxnurbsdegree || v < 1 || v > maxnurbsdegree ||  (surface.Degree(0) = u && surface.Degree(1) = v) then RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeSurfaceDegree failed on %A" (rhType objectId)
+        if u < 1 || u > maxnurbsdegree || v < 1 || v > maxnurbsdegree ||  (surface.Degree(0) = u && surface.Degree(1) = v) then RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeSurfaceDegree failed on %A" (Print.guid objectId)
         let mutable r = false
         if surface.IncreaseDegreeU(u) then
             if surface.IncreaseDegreeV(v) then
-                r <- Doc.Objects.Replace(objectId, surface)
+                r <- State.Doc.Objects.Replace(objectId, surface)
         r
 
 

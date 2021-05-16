@@ -14,7 +14,7 @@ open FsEx.ExtensionsIList
 
 [<AutoOpen>]
 /// This module provides functions to manipulate Rhino Vector3d
-/// This module is automatically opened when Rhino.Scripting namspace is opened.
+/// This module is automatically opened when Rhino.Scripting namespace is opened.
 module AutoOpenVector =
     
     open Vec
@@ -24,7 +24,7 @@ module AutoOpenVector =
         [<Extension>] 
         [<Obsolete>]
         /// Use Vec.angle .. instead
-        ///projects to Plane an retuns angle in degrees in Plane between -180 and + 180               
+        ///projects to Plane an returns angle in degrees in Plane between -180 and + 180               
         static member AngleInPlane180( plane:Plane, vector:Vector3d) : float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -34,7 +34,7 @@ module AutoOpenVector =
         [<Extension>]
         [<Obsolete>]
         /// Use Vec.angle .. instead
-        ///projects to Plane an retuns angle in degrees in Plane between 0 and 360               
+        ///projects to Plane an returns angle in degrees in Plane between 0 and 360               
         static member AngleInPlane360( plane:Plane, vector:Vector3d) : float  = 
             let v = projectToPlane plane vector |> unitize
             let dot = v * plane.XAxis 
@@ -76,14 +76,14 @@ module AutoOpenVector =
             RhinoScriptSyntax.AddObjectToGroup([a;b;c;e;f;g], gg)
        
 
-        /// retuns a point that is at a given distance from a point in the direction of another point. 
+        /// returns a point that is at a given distance from a point in the direction of another point. 
         [<Extension>]
         static member DistPt(fromPt:Point3d, dirPt:Point3d, distance:float) : Point3d  =
             let v = dirPt - fromPt
             let sc = distance/v.Length
             fromPt + v*sc
     
-        /// Retuns a Point by evaluation a line between two point with a normalized patrameter.
+        /// returns a Point by evaluation a line between two point with a normalized patrameter.
         /// e.g. rel=0.5 will return the middle point, rel=1.0 the endPoint
         /// if the rel parameter is omitted it is set to 0.5
         [<Extension>] 
@@ -186,7 +186,7 @@ module AutoOpenVector =
                 let a, b = Pnt.offsetTwoPt(points.[0], points.[1] , offDist, normDist)
                 rarr { a; b}                                        
             else // regular case more than 2 points
-                let lastIsFirst = (points.[0] - points.Last).Length < Doc.ModelAbsoluteTolerance //auto detect closed polyline points:                                            
+                let lastIsFirst = (points.[0] - points.Last).Length < State.Doc.ModelAbsoluteTolerance //auto detect closed polyline points:                                            
                 let distsNeeded = 
                     if lastIsFirst then pointk - 1
                     elif loop      then pointk
