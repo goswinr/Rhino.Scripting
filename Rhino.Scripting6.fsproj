@@ -25,11 +25,11 @@
   
     <Configurations>Debug;Release</Configurations>
     <Platform>x64</Platform>
-
-    <DefineConstants>RHINO6</DefineConstants>    
+    
+    <DefineConstants>RHINO6</DefineConstants>   
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)=='Debug'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <OutputPath>binRh6/Debug/</OutputPath>
   </PropertyGroup> 
   
@@ -52,10 +52,7 @@
     <Reference Include="RhinoCommon"> <HintPath>C:/Program Files/Rhino 6/System/RhinoCommon.dll</HintPath> <Private>False</Private> </Reference>      
     
     <!-- take from https://github.com/goswinr/FsEx -->   
-    <Reference Include="FsEx"> <HintPath>../FsEx/bin/Release/netstandard2.0/FsEx.dll</HintPath> </Reference>  
-
-  </ItemGroup>
-
+    <Reference Include="FsEx">  <HintPath>../FsEx/bin/Release/netstandard2.0/FsEx.dll</HintPath> </Reference> </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Src/Exceptions.fs" />
