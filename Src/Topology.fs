@@ -50,7 +50,7 @@ module Topology =
         /// for each line end it finds the next closest start point or end point
         /// Line is used as an abstraction to hold start and end of arbitrary curve
         /// Reverse input in place,  where required
-        let sortToLoopWithReversing (getLine: 'T -> Line) (reverse: 'T-> unit) (xs:Rarr<'T>) : unit = 
+        let sortToLoopWithReversing (getLine: 'T -> Line) (reverseInPlace: int -> 'T -> unit) (xs:Rarr<'T>) : unit = 
             for i = 0 to xs.Count - 2 do // only run till second last
                 let thisLine = getLine xs.[i] 
                 // could be optimised using a R-Tree for very large lists instead of minBy function
@@ -61,6 +61,6 @@ module Topology =
                     RhinoScriptSyntax.DistanceSquare ((getLine xs.[nextIdxEn]).To   ,  thisLine.To) then 
                         xs |> swap (i+1) nextIdxSt
                 else 
-                        reverse(xs.[nextIdxEn]) 
+                        reverseInPlace nextIdxEn xs.[nextIdxEn]
                         xs |> swap (i+1) nextIdxEn
                
