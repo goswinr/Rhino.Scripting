@@ -63,6 +63,9 @@ module AutoOpenRhinoTypeExtensions =
         [<Extension>] 
         member inline ln.Mid =  (ln.From + ln.To) * 0.5
         
+        /// Returns a new instance of a reversed line 
+        [<Extension>]  
+        member inline ln.Reversed =  Line(ln.To,ln.From)
 
     type Plane with  
       
