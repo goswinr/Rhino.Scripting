@@ -31,11 +31,14 @@ module AutoOpenRhinoTypeExtensions =
      
     type Vector3d with  
         
-        /// To convert Vector3d (as it is used in most other Rhino Geometries) to a Vector3f (as it is used in Mesh noramls)
+        /// To convert Vector3d (as it is used in most other Rhino Geometries) 
+        /// to a Vector3f (as it is used in Mesh noramls)
         [<Extension>] 
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z) 
         
-        ///Unitizes the vector , checks input length to be longer than  1e-9 units
+        /// Unitizes the vector. 
+        /// Checks input length to be longer than  1e-9 units
+        [<Extension>]
         member v.Unitized = 
             let len = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) // see Vec.unitze too
             if len > 1e-9 then v * (1./len) 
@@ -48,41 +51,45 @@ module AutoOpenRhinoTypeExtensions =
 
     type Vector3f with  
         
-        /// To convert a Vector3f (as it is used in Mesh noramls) to a Vector3d (as it is used in most other Rhino Geometries)
+        /// To convert a Vector3f (as it is used in Mesh noramls) 
+        /// to a Vector3d (as it is used in most other Rhino Geometries)
         [<Extension>] 
         member v.ToVector3d = Vector3d(v)
 
   
     type Line with  
         
-        ///Middle point of line
-        member ln.Mid =  (ln.From + ln.To) * 0.5
+        /// Get middle point of line
+        [<Extension>] 
+        member inline ln.Mid =  (ln.From + ln.To) * 0.5
+        
 
     type Plane with  
       
-         ///WorldXY rotate 180 degrees round Z Axis
+         /// WorldXY rotated 180 degrees round Z Axis
          [<Extension>]     
          static member WorldMinusXMinusY=  
             Plane(Point3d.Origin, -Vector3d.XAxis, -Vector3d.YAxis)
 
-         ///WorldXY rotate 90 degrees round Z Axis counter clockwise
+         /// WorldXY rotated 90 degrees round Z Axis counter clockwise from top
          [<Extension>]     
          static member WorldYMinusX=  
             Plane(Point3d.Origin, Vector3d.YAxis, -Vector3d.XAxis)
 
-         ///WorldXY rotate 270 degrees round Z Axis counter clockwise
+         /// WorldXY rotated 270 degrees round Z Axis counter clockwise from top
          [<Extension>]     
          static member WorldMinusYX=  
             Plane(Point3d.Origin, -Vector3d.YAxis, Vector3d.XAxis)
 
-         ///WorldXY rotate 180 degrees round X Axis, Z points down now
+         /// WorldXY rotated 180 degrees round X Axis, Z points down now
          [<Extension>]     
          static member WorldXMinusY=  
             Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
 
     type PolylineCurve with 
         
-        /// Gets a lazy seq (= IEnumerable) of the Points that make up the Polyline
+        /// Gets a lazy seq (= IEnumerable) of the Points that make up the Polyline.
+        [<Extension>]
         member pl.Points = 
             seq { for i = 0 to pl.PointCount - 1 do pl.Point(i) }
     
