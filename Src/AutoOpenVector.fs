@@ -271,11 +271,11 @@ module AutoOpenVector =
                         let nln = Line(points.[ni], points.[saveIdx (ni-1) pointk])
                         let nclp = nln.ClosestPoint(npt, false)
                         let nv = npt - nclp
-                        print (pi,"prev i")
-                        print (i,"is colinear")
-                        print (ni,"next i")
+                        //print (pi,"prev i")
+                        //print (i,"is colinear")
+                        //print (ni,"next i")
                         if offDists.[pi] <> offDists.[saveIdx (ni-1) distsNeeded] then 
-                            RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: cant fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk]                                                     
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: can't fix colinear at index %d with index %d and %d because offset distances are missmatching: %f, %f" i pi ni offDists.[pi] offDists.[saveIdx (ni-1) pointk]                                                     
                         Pts.[i] <- points.[i] + (nv + pv)*0.5                                            
                 if lastIsFirst then Pts.[lastIndex] <- Pts.[0]
                 Pts
