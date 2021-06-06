@@ -18,7 +18,6 @@ type internal OPT = Runtime.InteropServices.OptionalAttribute
 type internal DEF = Runtime.InteropServices.DefaultParameterValueAttribute
 
 
-
 // -------------Custom exceptions used across this library including printf formating:
 
 /// Exception for Errors in script execution

@@ -248,7 +248,7 @@ module ExtensionsUserdata =
     [<Extension>]
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
         //TODO add null check for key and value
-        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (RhinoScriptSyntax.ToNiceString objectIds) key 
+        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (Print.nice objectIds) key 
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then

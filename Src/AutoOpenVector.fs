@@ -1,16 +1,18 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
-open Rhino
-open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
-
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
+open FsEx
+open FsEx.UtilMath
 open FsEx.SaveIgnore 
 open FsEx.ExtensionsIList
+
+open Rhino
+open Rhino.Geometry
+
+
 
 [<AutoOpen>]
 /// This module provides functions to manipulate Rhino Vector3d
@@ -109,12 +111,12 @@ module AutoOpenVector =
         [<Extension>]
         static member NormalOfPoints(pts:Point3d IList) : Vector3d  =            
             if Seq.hasMaximumItems 2 pts then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" (RhinoScriptSyntax.ToNiceString pts)
+                RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints can't find normal of two or less points %s" (Print.nice pts)
             elif Seq.hasItems 3 pts   then  
                 let a = pts.[0] - pts.[1]
                 let b = pts.[2] - pts.[1]
                 let v= Vector3d.CrossProduct(b, a)
-                if v.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints: three points are in a line  %s" (RhinoScriptSyntax.ToNiceString pts)
+                if v.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints: three points are in a line  %s" (Print.nice pts)
                 else
                     v.Unitized
             else
@@ -125,7 +127,7 @@ module AutoOpenVector =
                     let b = n-cen
                     let x = Vector3d.CrossProduct(a, b)  |> Vec.matchOrientation v // TODO do this matching?
                     v <- v + x              
-                if v.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints: points are in a line  %s" (RhinoScriptSyntax.ToNiceString pts)
+                if v.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.NormalOfPoints: points are in a line  %s" (Print.nice pts)
                 else
                     v.Unitized
 
@@ -173,16 +175,16 @@ module AutoOpenVector =
             let lenDist = offDists0.Length
             let lenDistNorm = normDists0.Length                                        
             if pointk < 2 then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints needs at least two points but %s given" (RhinoScriptSyntax.ToNiceString points)                                       
+                RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints needs at least two points but %s given" (Print.nice points)                                       
             elif pointk = 2 then
                 let offDist = 
                     if   lenDist = 0 then 0.0
                     elif lenDist = 1 then offDists0.[0]
-                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: offsetDistances has %d items but should have 1 or 0 for 2 given points %s" lenDist (RhinoScriptSyntax.ToNiceString points)
+                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: offsetDistances has %d items but should have 1 or 0 for 2 given points %s" lenDist (Print.nice points)
                 let normDist = 
                     if   lenDistNorm = 0 then 0.0
                     elif lenDistNorm = 1 then normDists0.[0]
-                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm (RhinoScriptSyntax.ToNiceString points)
+                    else RhinoScriptingException.Raise "RhinoScriptSyntax.OffsetPoints: normalDistances has %d items but should have 1 or 0 for 2 given points %s" lenDistNorm (Print.nice points)
                 let a, b = Pnt.offsetTwoPt(points.[0], points.[1] , offDist, normDist)
                 rarr { a; b}                                        
             else // regular case more than 2 points

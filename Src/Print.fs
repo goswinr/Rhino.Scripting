@@ -1,24 +1,10 @@
 namespace Rhino.Scripting
 
 open System
+
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
-open System.Globalization
-open System.Collections.Generic
-open FsEx
-open FsEx.SaveIgnore
-open System.Runtime.CompilerServices
 
-
-
-namespace Rhino.Scripting
-
-open System
-open System.Runtime.CompilerServices
-open Rhino
-open Rhino.Geometry
 open FsEx  
 
 [<AutoOpen>]
@@ -109,8 +95,6 @@ module internal Print =
             // the Print.guid function gets injected into FsEx.NiceString, below
             // so that using the print function still works on other Guids if Rhino.Scripting is referenced from outside of rhino wher there is no active Doc
             sprintf "Guid %O" g
-        
-
 
 
     /// Gets a localized description on Rhino layer and object type (e.g. Curve , point, Surface ....)
@@ -142,3 +126,9 @@ module internal Print =
             RhinoApp.AppSettingsChanged.Add    (fun _ -> NiceStringSettings.roundToZeroBelow <- State.Doc.ModelAbsoluteTolerance  * 0.1 )
             RhinoDoc.ActiveDocumentChanged.Add (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
             RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
+
+    
+    let nice (x:'T) =
+        if doInit then init()
+        NiceString.toNiceString x
+

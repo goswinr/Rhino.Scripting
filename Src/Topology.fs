@@ -1,16 +1,11 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
-open Rhino
-open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
 
-open System.Collections.Generic
-open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
-open FsEx.SaveIgnore 
-open FsEx.ExtensionsIList
+open Rhino.Geometry
+
+open FsEx
+open FsEx.UtilMath
 
 
 module Topology =

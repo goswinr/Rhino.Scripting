@@ -1,16 +1,17 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
-open Rhino
 open System.Globalization
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
-open FsEx.SaveIgnore
+
+open Rhino
 open Rhino.DocObjects
+
+open FsEx
+open FsEx.SaveIgnore
 
 
 // -------------------- Layer related functions moved in fist position sinsce they are used in other modules. -------------------
-
  
 
 /// This module is automatically opened when Rhino.Scripting namespace is opened.

@@ -351,7 +351,7 @@ module ExtensionsCurve =
                 let d = State.Doc.Objects.AddTextDot(string i, pt) 
                 RhinoScriptSyntax.ObjectLayer(d,"ERROR-AddPolyline", createLayerIfMissing=true)
             eprintf "See %d TextDots on layer 'ERROR-AddPolyline'"  (Seq.length points)
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document form points:\r\n'%A'" (RhinoScriptSyntax.ToNiceString points)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolyline: Unable to add polyline to document form points:\r\n'%A'" (Print.nice points)
         State.Doc.Views.Redraw()
         rc
     
@@ -363,7 +363,7 @@ module ExtensionsCurve =
     [<Extension>]
     static member AddPolylineClosed(points:Point3d seq) : Guid =
         let pl = Polyline(points)
-        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:\r\n'%A'" (RhinoScriptSyntax.ToNiceString points)       
+        if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:\r\n'%A'" (Print.nice points)       
         if (pl.First-pl.Last).Length <= State.Doc.ModelAbsoluteTolerance then 
             pl.[pl.Count-1] <- pl.First
         else
@@ -822,7 +822,7 @@ module ExtensionsCurve =
                 if notNull curve && curve.IsValid then
                     let rc = State.Doc.Objects.AddCurve(curve)
                     curve.Dispose()
-                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanUnion: Unable to add curve to document.  curveIds:'%s'" (RhinoScriptSyntax.ToNiceString curveIds)
+                    if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanUnion: Unable to add curve to document.  curveIds:'%s'" (Print.nice curveIds)
                     curves.Add(rc)
             State.Doc.Views.Redraw()
         curves 
@@ -879,7 +879,7 @@ module ExtensionsCurve =
         for curveId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
             geometry.Add( rhobj.Geometry )
-        if Seq.isEmpty geometry then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject: objectIds must contain at least one item. curveId:'%s' objectIds:'%s'" (Print.guid curveId) (RhinoScriptSyntax.ToNiceString objectIds)
+        if Seq.isEmpty geometry then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestObject: objectIds must contain at least one item. curveId:'%s' objectIds:'%s'" (Print.guid curveId) (Print.nice objectIds)
         let curvePoint = ref Point3d.Unset
         let geomPoint  = ref Point3d.Unset
         let whichGeom = ref 0
@@ -1826,17 +1826,17 @@ module ExtensionsCurve =
         if extensionType = 0 then  extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
 
         let sidet = 
             match side with 
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
+            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
 
         let rhobjs = rarr { for objectId in boundarycurveIds -> RhinoScriptSyntax.CoerceRhinoObject(objectId) }
-        if rhobjs.IsEmpty then  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve BoundarycurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side (RhinoScriptSyntax.ToNiceString boundarycurveIds)
+        if rhobjs.IsEmpty then  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve BoundarycurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side (Print.nice boundarycurveIds)
         let geometry = rarr { for obj in rhobjs -> obj.Geometry }
         let newcurve = curve.Extend(sidet, extensionTypet, geometry)
         if notNull newcurve && newcurve.IsValid then
@@ -1845,13 +1845,13 @@ module ExtensionsCurve =
                  State.Doc.Views.Redraw()
                  curveId
               else
-                 RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
+                 RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
             else
               let g= State.Doc.Objects.AddCurve(newcurve)
               State.Doc.Views.Redraw()
               g
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (RhinoScriptSyntax.ToNiceString boundarycurveIds)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
 
 
     ///<summary>Extends a non-closed Curve by a line, arc, or smooth extension for a specified distance.</summary>
@@ -2257,13 +2257,13 @@ module ExtensionsCurve =
     [<Extension>]
     static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         if Seq.hasMaximumItems 1 curveIds then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.JoinCurves: curveIds must contain at least two items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) deleteInput tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.JoinCurves: curveIds must contain at least two items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Print.nice curveIds) deleteInput tolerance
 
         let curves = rarr { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         let tolerance0 = Util.ifZero1 tolerance (2.1 * State.Doc.ModelAbsoluteTolerance)
         let newcurves = Curve.JoinCurves(curves, tolerance0)
         if isNull newcurves then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.JoinCurves failed on curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (RhinoScriptSyntax.ToNiceString curveIds) deleteInput tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.JoinCurves failed on curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Print.nice curveIds) deleteInput tolerance
 
         let rc = rarr { for crv in newcurves -> State.Doc.Objects.AddCurve(crv) }
         if deleteInput then

@@ -332,7 +332,7 @@ module ExtensionsMesh =
         let joinedmesh = new Mesh()
         joinedmesh.Append(meshes)
         let rc = State.Doc.Objects.AddMesh(joinedmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Failed to join Meshes %A" (RhinoScriptSyntax.ToNiceString objectIds) 
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Failed to join Meshes %A" (Print.nice objectIds) 
         if deleteInput then
             for objectId in objectIds do
                 //guid = RhinoScriptSyntax.Coerceguid(objectId)

@@ -78,13 +78,13 @@ module ExtensionsSurface =
         //startPoint = RhinoScriptSyntax.Coerce3dpoint(startPoint)
         //endPoint = RhinoScriptSyntax.Coerce3dpoint(endPoint)
         if not bbox.IsValid then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) startPoint endPoint normal
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
         let line = Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal
         let surface = PlaneSurface.CreateThroughBox(line, normal, bbox)
-        if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) startPoint endPoint normal
+        if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
         let objectId = State.Doc.Objects.AddSurface(surface)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) startPoint endPoint normal
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
         State.Doc.Views.Redraw()
         objectId
 
@@ -120,9 +120,9 @@ module ExtensionsSurface =
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
         let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let brep = Brep.CreateEdgeSurface(curves)
-        if brep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (RhinoScriptSyntax.ToNiceString curveIds)
+        if brep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (Print.nice curveIds)
         let objectId = State.Doc.Objects.AddBrep(brep)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (RhinoScriptSyntax.ToNiceString curveIds)
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (Print.nice curveIds)
         State.Doc.Views.Redraw()
         objectId
 
@@ -265,7 +265,7 @@ module ExtensionsSurface =
                         State.Doc.Views.Redraw()
                         rc
                     else
-                        RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) startSurfaceId
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (Print.nice objectIds) startSurfaceId
 
     ///<summary>Fits a Surface through Curve, point, point cloud, and Mesh objects.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
@@ -313,7 +313,7 @@ module ExtensionsSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (RhinoScriptSyntax.ToNiceString objectIds) uvSpans
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPatch failed for %A and %A" (Print.nice objectIds) uvSpans
 
 
     ///<summary>Creates a single walled Surface with a circular profile around a Curve.</summary>
@@ -353,12 +353,12 @@ module ExtensionsSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (RhinoScriptSyntax.ToNiceString polyline) 
+            if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (Print.nice polyline) 
             let rc =  State.Doc.Objects.AddBrep(breps.[0])
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(polyline:Polyline) failed on  %s" (RhinoScriptSyntax.ToNiceString polyline) 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(polyline:Polyline) failed on  %s" (Print.nice polyline) 
 
     ///<summary>Creates one Surface from one planar Curve.</summary>
     ///<param name="curve">(Curve) one Curve Geometry to use for creating planar Surfaces</param>
@@ -368,12 +368,12 @@ module ExtensionsSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (RhinoScriptSyntax.ToNiceString curve) 
+            if breps.Length <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (Print.nice curve) 
             let rc =  State.Doc.Objects.AddBrep(breps.[0])
             State.Doc.Views.Redraw()
             rc           
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(curve:Curve) failed on %s" (RhinoScriptSyntax.ToNiceString curve) 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(curve:Curve) failed on %s" (Print.nice curve) 
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="curves">(Curve seq) several Curves Geometries to use for creating planar Surfaces</param>
@@ -387,7 +387,7 @@ module ExtensionsSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax. AddPlanarSrf(curves:Curve seq) failed on %s" (RhinoScriptSyntax.ToNiceString curves) 
+            RhinoScriptingException.Raise "RhinoScriptSyntax. AddPlanarSrf(curves:Curve seq) failed on %s" (Print.nice curves) 
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
@@ -402,7 +402,7 @@ module ExtensionsSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(objectIds:Guid seq) failed on %s" (RhinoScriptSyntax.ToNiceString objectIds) 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddPlanarSrf(objectIds:Guid seq) failed on %s" (Print.nice objectIds) 
 
 
 
@@ -459,10 +459,10 @@ module ExtensionsSurface =
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
-        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) start ende loftType rebuild refit closed
-        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) start ende loftType rebuild refit closed
+        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
+        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
         let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
-        if Seq.length(curves)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) start ende loftType rebuild refit closed
+        if Seq.length(curves)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
         let ende  = if ende  = Point3d.Origin  then Point3d.Unset else ende
         let mutable lt = LoftType.Normal
@@ -477,7 +477,7 @@ module ExtensionsSurface =
             breps <- Brep.CreateFromLoftRebuild(curves, start, ende, lt, closed, rebuild)
         elif refit > 0.0 then
             breps <- Brep.CreateFromLoftRefit(curves, start, ende, lt, closed, refit)
-        if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) start ende loftType rebuild refit closed
+        if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
         let idlist = Rarr()
         for brep in breps do
             let objectId = State.Doc.Objects.AddBrep(brep)
@@ -1519,15 +1519,15 @@ module ExtensionsSurface =
     [<Extension>]
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let breps =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        if breps.Count<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) deleteInput
+        if breps.Count<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (Print.nice objectIds) deleteInput
         let tol = State.Doc.ModelAbsoluteTolerance * 2.1
         let joinedbreps = Brep.JoinBreps(breps, tol)
         if joinedbreps|> isNull  then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) deleteInput
+            RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (Print.nice objectIds) deleteInput
         if joinedbreps.Length <> 1 then
             RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
         let rc = State.Doc.Objects.AddBrep(joinedbreps.[0])
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (RhinoScriptSyntax.ToNiceString objectIds) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (Print.nice objectIds) deleteInput
         if  deleteInput then
             for objectId in objectIds do
                 //id = RhinoScriptSyntax.Coerceguid(objectId)

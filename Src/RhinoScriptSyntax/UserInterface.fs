@@ -284,10 +284,9 @@ module ExtensionsUserinterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    RhinoScriptSyntax.Print ("Distance: " + 
-                                             d.ToNiceString + " " + 
-                                             State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false)
-                                             )
+                    RhinoScriptSyntax.PrintfnBlue "Distance: %s %s"d.ToNiceString (
+                                State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false))
+                                             
                     gp2.Dispose()
                     Some d
                 | _ ->
@@ -706,12 +705,12 @@ module ExtensionsUserinterface =
                             if cont && gp.CommandResult() <> Commands.Result.Success then
                                 rc.Clear()
                                 cont <- false
-                                RhinoScriptSyntax.Print "GetPoints no Success"
+                                RhinoScriptSyntax.PrintfnRed "%s" "GetPoints no Success"
                             if cont then
                                 prevPoint <- gp.Point()
                                 rc.Add(prevPoint)
                 if rc.Count>0 then
-                    RhinoScriptSyntax.Print (rc.Count, "Points picked")
+                    RhinoScriptSyntax.PrintfnBlue "%d Points picked" rc.Count
                     Some rc
                 else
                     None

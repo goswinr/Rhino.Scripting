@@ -1,13 +1,13 @@
 namespace Rhino.Scripting
 
 open System
+open System.Collections.Generic
+
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
-open System.Globalization
-open System.Collections.Generic
+
 open FsEx
+open FsEx.UtilMath
 open FsEx.SaveIgnore
 
 

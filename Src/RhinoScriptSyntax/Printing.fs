@@ -1,15 +1,12 @@
 namespace Rhino.Scripting
 
 open System
+open System.Runtime.CompilerServices
+
 open Rhino
-open Rhino.Geometry
-open FsEx.Util
-open FsEx.UtilMath
-open System.Globalization
-open System.Collections.Generic
+
 open FsEx
 open FsEx.SaveIgnore
-open System.Runtime.CompilerServices
 
 
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
@@ -95,7 +92,7 @@ module ExtensionsPrinting =
     static member PrintfRed msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            PrintColor.fColor 220 0 0 "%s" s
+            Printf.red "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
             
     /// Like printfn but in Red if used from Seff Editor. Adds a new line at end.
@@ -104,7 +101,7 @@ module ExtensionsPrinting =
     static member PrintfnRed msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            PrintColor.fnColor 220 0 0 "%s" s
+            Printfn.red "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     /// Like PrintColor.f but in Green if used from Seff Editor. Does not add a new line at end.
@@ -113,7 +110,7 @@ module ExtensionsPrinting =
     static member PrintfGreen msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            PrintColor.fColor 0 180 0 "%s" s
+            Printf.green "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
             
     /// Like printfn but in Green if used from Seff Editor. Adds a new line at end.
@@ -122,7 +119,7 @@ module ExtensionsPrinting =
     static member PrintfnGreen msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            PrintColor.fnColor 0 180 0 "%s" s
+            Printfn.green "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     /// Like printf but in Light Blue if used from Seff Editor. Does not add a new line at end.
@@ -131,7 +128,7 @@ module ExtensionsPrinting =
     static member PrintfLightBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            PrintColor.fColor 173 216 230  "%s" s
+            Printf.lightBlue "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     /// Like printfn but in Light Blue if used from Seff Editor. Adds a new line at end.
@@ -140,7 +137,7 @@ module ExtensionsPrinting =
     static member PrintfnLightBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            PrintColor.fnColor 173 216 230  "%s" s
+            Printfn.lightBlue "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     /// Like printf but in Blue if used from Seff Editor. Does not add a new line at end.
@@ -149,7 +146,7 @@ module ExtensionsPrinting =
     static member PrintfBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            PrintColor.fColor 0 0 220 "%s" s
+            Printf.blue "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
     /// Like printfn but in Blue if used from Seff Editor. Adds a new line at end.
@@ -158,25 +155,25 @@ module ExtensionsPrinting =
     static member PrintfnBlue msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            PrintColor.fnColor 0 0 220 "%s" s
+            Printfn.blue "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printf but in Grey if used from Seff Editor. Does not add a new line at end.
+    /// Like printf but in Gray if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
-    static member PrintfGrey msg =  
+    static member PrintfGray msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            PrintColor.fColor 150 150 150 "%s" s
+            Printf.gray "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
 
-    /// Like printfn but in Grey if used from Seff Editor. Adds a new line at end.
+    /// Like printfn but in Gray if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
     [<Extension>]
-    static member PrintfnGrey msg =  
+    static member PrintfnGray msg =  
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            PrintColor.fnColor 150 150 150 "%s" s
+            Printfn.gray "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
     ///<summary>Like printf but in custom color if used from Seff Editor. Does not add a new line at end.
@@ -190,7 +187,7 @@ module ExtensionsPrinting =
     static member PrintfColor (red:int) (green:int) (blue:int) msg  =
         Printf.kprintf (fun s -> 
             RhinoApp.Write s
-            PrintColor.fColor red green blue"%s" s
+            Printf.color red green blue "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
     
     ///<summary>Like printfn but in costom color if used from Seff Editor. Adds a new line at end.
@@ -204,7 +201,7 @@ module ExtensionsPrinting =
     static member PrintfnColor (red:int) (green:int) (blue:int) msg  =
         Printf.kprintf (fun s -> 
             RhinoApp.WriteLine s
-            PrintColor.fnColor red green blue"%s" s
+            Printfn.color red green blue "%s" s
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
   
   
@@ -235,24 +232,9 @@ module ExtensionsPrinting =
     if Print.doInit then Print.init() 
     printFull x  
 
-    (*
-  /// Prints two values separated by a space using FsEx.NiceString.toNiceString
-  /// Only prints to Console.Out, NOT to Rhino Commandline
-  let print2 x y = 
-    if Print.doInit then Print.init()
-    print2 x y
-  
-  /// Prints three values separated by a space using FsEx.NiceString.toNiceString
-  /// Only prints to Console.Out, NOT to Rhino Commandline
-  let print3 x y z = 
-    if Print.doInit then Print.init()
-    print3 x y z
-  
-  /// Prints four values separated by a space using FsEx.NiceString.toNiceString
-  /// Only prints to Console.Out, NOT to Rhino Commandline
-  let print4 w x y z = 
-    if Print.doInit then Print.init() 
-    print4 w x y z
-    *)
+ 
+  do
+    if Print.doInit then 
+        Print.init() 
 
-
+        // TODO check if Prinf.red works with FsEx.toNiceString on rhino classes or if another init is needed!

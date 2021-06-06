@@ -1,15 +1,15 @@
 namespace Rhino.Scripting
 
 open System
+open System.Runtime.CompilerServices
+
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
+
 open FsEx.UtilMath
-open System.Globalization
-open System.Collections.Generic
 open FsEx
 open FsEx.SaveIgnore
-open System.Runtime.CompilerServices
+
 
 
 /// This module is automatically opened when Rhino.Scripting namespace is opened.

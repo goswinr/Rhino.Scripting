@@ -1,14 +1,15 @@
 namespace Rhino.Scripting
 
 open System
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
+
+open FsEx
 open FsEx.UtilMath
 
 open Microsoft.FSharp.Core.LanguagePrimitives
-open System.IO
-open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
  
  

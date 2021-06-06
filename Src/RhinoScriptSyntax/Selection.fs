@@ -1,12 +1,12 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
 open Rhino
 open Rhino.Geometry
-open FsEx.Util
 
-open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+open FsEx
 open FsEx.SaveIgnore
 
  
@@ -111,7 +111,7 @@ module ExtensionsSelection =
                     if Vis.Contains(ob.Attributes.LayerIndex) then 
                          objectIds.Add(ob.Id)                    
             if printCount then
-                RhinoScriptSyntax.Print ("ShownObjects found " + RhinoScriptSyntax.ObjectDescription(objectIds))                   
+                RhinoScriptSyntax.PrintfnBlue "ShownObjects found %s"  (RhinoScriptSyntax.ObjectDescription(objectIds))                 
             objectIds
 
 
@@ -369,7 +369,7 @@ module ExtensionsSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
+                if printCount then RhinoScriptSyntax.PrintfnBlue "GetObjects got %s" (RhinoScriptSyntax.ObjectDescription(rc))
                 rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
         SyncRhino.DoSyncRedrawHideEditor get
@@ -413,7 +413,7 @@ module ExtensionsSelection =
         try 
             let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
             if printCount then  
-                RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
+                RhinoScriptSyntax.PrintfnBlue "GetObjectsAndRemember remembered %s" (RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds
         with | _ -> 
             let ids = RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) 
@@ -443,7 +443,7 @@ module ExtensionsSelection =
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid =
         try 
             let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
-            //if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
+            //if printCount then  RhinoScriptSyntax.PrintfnBlue ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds.[0]
         with | _ -> 
             let id = RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter, subObjects=false) 
@@ -521,8 +521,8 @@ module ExtensionsSelection =
                     rc 
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> RhinoScriptSyntax.ObjectDescription
-                    |> (+) "GetObjectsEx got " 
-                    |> RhinoScriptSyntax.Print
+                    |> RhinoScriptSyntax.PrintfnBlue "GetObjectsEx got %s"
+                   
 
                 rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
