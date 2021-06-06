@@ -1792,9 +1792,12 @@ module ExtensionsSurface =
     ///<returns>(float) of area.</returns>
     [<Extension>]
     static member SurfaceArea(srf:Surface) : float  =        
-        let amp = AreaMassProperties.Compute(srf, true, false, false, false)
+        let amp = AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)
         if isNull amp then  RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea failed on Surface: %A" srf
         amp.Area
+
+        
+
 
     ///<summary>Calculate the area of a Brep / Polysurface  Geometry. 
     /// The results are based on the current drawing units.</summary>
@@ -1802,7 +1805,7 @@ module ExtensionsSurface =
     ///<returns>(float) of area.</returns>
     [<Extension>]
     static member SurfaceArea(brep:Brep) : float  =        
-        let amp = AreaMassProperties.Compute(brep, true, false, false, false)
+        let amp = AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)
         if isNull amp then  RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea failed on Brep: %A" brep
         amp.Area
 

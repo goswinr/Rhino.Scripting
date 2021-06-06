@@ -24,7 +24,7 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member setLayer (layer:string) (objectId:Guid) : unit =
-        RhinoScriptSyntax.ObjectLayer(objectId,layer,true)
+        RhinoScriptSyntax.ObjectLayer(objectId, layer, createLayerIfMissing=true)
 
     ///<summary>Modifies the layer of several objects, creates layer if not yet existing.</summary>
     ///<param name="layer">(string) Name of layer or empty string for current layer</param>
@@ -32,7 +32,7 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member setLayers (layer:string) (objectIds:seq<Guid>) : unit =
-        RhinoScriptSyntax.ObjectLayer(objectIds,layer,true)
+        RhinoScriptSyntax.ObjectLayer(objectIds,layer, createLayerIfMissing=true)
 
     
     ///<summary>Returns the full layername of an object. 
@@ -257,7 +257,7 @@ module AutoOpenCurried =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member transform (matrix:Transform) (objectId:Guid) : Guid =  
-        RhinoScriptSyntax.TransformObject(objectId,matrix,false)       
+        RhinoScriptSyntax.TransformObject(objectId, matrix, copy=false)       
         // TODO test to ensure GUID is the same ?
 
     ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
@@ -281,7 +281,7 @@ module AutoOpenCurried =
     [<Extension>]
     static member move (translation:Vector3d)  (objectId:Guid): unit = 
         let xf = Transform.Translation(translation)
-        let res = State.Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true) // TODO test to ensure GUID is the same ?
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.move to from objectId:'%s' translation:'%A'" (Print.guid objectId) translation
 
     ///<summary>Moves a single object in X Direction.</summary>
@@ -291,7 +291,7 @@ module AutoOpenCurried =
     [<Extension>]
     static member moveX (translationX:float)  (objectId:Guid): unit = 
         let xf = Transform.Translation(Vector3d(translationX, 0.0, 0.0 ))
-        let res = State.Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true) // TODO test to ensure GUID is the same ?
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.moveX to from objectId:'%s' translation:'%A'" (Print.guid objectId) translationX
 
     ///<summary>Moves a single object in Y Direction.</summary>
@@ -301,7 +301,7 @@ module AutoOpenCurried =
     [<Extension>]
     static member moveY (translationY:float)  (objectId:Guid): unit = 
         let xf = Transform.Translation(Vector3d(0.0, translationY, 0.0))
-        let res = State.Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true) // TODO test to ensure GUID is the same ?
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.moveY to from objectId:'%s' translation:'%A'" (Print.guid objectId) translationY
 
     ///<summary>Moves a single object in Z Direction.</summary>
@@ -311,7 +311,7 @@ module AutoOpenCurried =
     [<Extension>]
     static member moveZ (translationZ:float)  (objectId:Guid): unit = 
         let xf = Transform.Translation(Vector3d(0.0, 0.0, translationZ))
-        let res = State.Doc.Objects.Transform(objectId, xf, true) // TODO test to ensure GUID is the same ?
+        let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true) // TODO test to ensure GUID is the same ?
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.moveZ to from objectId:'%s' translation:'%A'" (Print.guid objectId) translationZ
 
 

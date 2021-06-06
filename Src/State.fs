@@ -59,7 +59,7 @@ type internal State private () = //static class, use these attributes to match C
     
     static let  setupEventsInSync() =         
         try 
-            SyncRhino.DoSync false false (fun () ->               
+            SyncRhino.DoSync (fun () ->               
                 // keep the reference to the active Document (3d file ) updated.  
                 RhinoDoc.EndOpenDocument.Add (fun args -> updateDoc args.Document)
                 //RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too

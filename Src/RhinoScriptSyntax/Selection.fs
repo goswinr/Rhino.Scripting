@@ -13,8 +13,7 @@ open FsEx.SaveIgnore
 [<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
-module ExtensionsSelection =
-  
+module ExtensionsSelection =  
  
   ///A helper function to get a DocObjects.ObjectType Enum form an integer
   let private getFilterEnum(i:int) : DocObjects.ObjectType =
@@ -43,9 +42,6 @@ module ExtensionsSelection =
 
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
-    
-    
-    
 
     ///<summary>Returns identifiers of all objects in the document.</summary>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the objects</param>
@@ -168,7 +164,8 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetCurveObject(message=%A), Interaction result: %A" message res
+            if res <> Input.GetResult.Object then 
+                UserInteractionException.Raise "No Object was selected in rs.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -185,7 +182,7 @@ module ExtensionsSelection =
                 obj.Select(select)  |> ignore
                 (objectId, presel, selmethod, point, curveparameter, viewname)
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompts user to pick, or select, a single object. 
@@ -223,7 +220,8 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObject(message=%A), Interaction result: %A" message res
+            if res <> Input.GetResult.Object then 
+                UserInteractionException.Raise "No Object was selected in rs.GetObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let obj = objref.Object()
@@ -236,7 +234,7 @@ module ExtensionsSelection =
                     State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
                 obj.Id
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
                 
 
     ///<summary>Prompts user to pick, or select a single object.
@@ -285,7 +283,8 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)            
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjectEx(message=%A), Interaction result: %A" message res
+            if res <> Input.GetResult.Object then 
+                UserInteractionException.Raise "No Object was selected in rs.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -301,7 +300,7 @@ module ExtensionsSelection =
                 obj.Select(select) |> ignore
                 (objectId, presel, selmethod, point, viewname)
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompts user to pick or select one or more objects.
@@ -357,7 +356,8 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             let res = go.GetMultiple(minimumCount, maximumCount)
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjects(message=%A), Interaction result: %A" message res
+            if res <> Input.GetResult.Object then 
+                UserInteractionException.Raise "No Object was selected in rs.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     State.Doc.Objects.UnselectAll() |> ignore
@@ -372,7 +372,7 @@ module ExtensionsSelection =
                 if printCount then RhinoScriptSyntax.Print ("GetObjects got " + RhinoScriptSyntax.ObjectDescription(rc))
                 rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Returns the same objects as in the last user interaction with the same prompt message
@@ -412,7 +412,8 @@ module ExtensionsSelection =
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid Rarr =
         try 
             let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
-            if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
+            if printCount then  
+                RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds
         with | _ -> 
             let ids = RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) 
@@ -445,7 +446,7 @@ module ExtensionsSelection =
             //if printCount then  RhinoScriptSyntax.Print ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds.[0]
         with | _ -> 
-            let id = RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter,false) 
+            let id = RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter, subObjects=false) 
             RhinoScriptSyntax.Sticky.[message] <- rarr {id}
             id
 
@@ -498,7 +499,8 @@ module ExtensionsSelection =
             go.GroupSelect <- group
             go.AcceptNothing(true)
             let res = go.GetMultiple(1, 0)
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetObjectsEx(message=%A), Interaction result: %A" message res            
+            if res <> Input.GetResult.Object then 
+                UserInteractionException.Raise "No Object was selected in rs.GetObjectsEx(message=%A), Interaction result: %A" message res            
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     State.Doc.Objects.UnselectAll() |> ignore
@@ -524,7 +526,7 @@ module ExtensionsSelection =
 
                 rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompts the user to select one or more point objects.</summary>
@@ -576,7 +578,8 @@ module ExtensionsSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then UserInteractionException.Raise "No Object was selected in rs.GetSurfaceObject(message=%A), Interaction result: %A" message res
+            if res <> Input.GetResult.Object then 
+                UserInteractionException.Raise "No Object was selected in rs.GetSurfaceObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
@@ -599,7 +602,7 @@ module ExtensionsSelection =
                     State.Doc.Views.Redraw()
                 (objectId, prepicked, selmethod, point, uv, name)
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
@@ -728,9 +731,11 @@ module ExtensionsSelection =
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
         let rhobjs = State.Doc.Objects.GetObjectList(settings)
-        if isNull rhobjs || Seq.isEmpty rhobjs then RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+        if isNull rhobjs || Seq.isEmpty rhobjs then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         let firstobj = Seq.last rhobjs
-        if isNull firstobj then RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+        if isNull firstobj then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
             firstobj.Select(true) |> ignore //TODO make sync ?
             State.Doc.Views.Redraw()
@@ -760,7 +765,7 @@ module ExtensionsSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None ->RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Print.guid objectId)
+            |None -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Print.guid objectId)
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id
@@ -809,7 +814,8 @@ module ExtensionsSelection =
     [<Extension>]
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let groupinstance = State.Doc.Groups.FindName(groupName)
-        if isNull groupinstance  then RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
+        if isNull groupinstance then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in GroupTable" groupName
         let rhinoobjects = State.Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             Rarr()
@@ -1053,8 +1059,7 @@ module ExtensionsSelection =
                 pc.PickStyle <- if inWindow then Input.Custom.PickStyle.WindowPick else Input.Custom.PickStyle.CrossingPick
                 pc.PickGroupsEnabled <- if inWindow then true else false
                 let _, frustumLine = viewport.GetFrustumLine((screen1.X + screen2.X) / 2.0, (screen1.Y + screen2.Y) / 2.0)
-                pc.PickLine <- frustumLine
-            
+                pc.PickLine <- frustumLine            
         
                 let leftX = min screen1.X  screen2.X   |> round |> int
                 let topY =  min screen1.Y screen2.Y    |> round |> int
@@ -1076,6 +1081,6 @@ module ExtensionsSelection =
                     if select then rhobj.Select(true) |> ignore //TODO make sync ?
                 if select then State.Doc.Views.Redraw()
             rc
-        SyncRhino.DoSync true true pick
+        SyncRhino.DoSyncRedrawHideEditor pick
 
 

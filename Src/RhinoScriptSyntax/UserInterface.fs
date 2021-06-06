@@ -40,7 +40,7 @@ module ExtensionsUserinterface =
                 Some(dlg.SelectedPath)
             else
                 None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
         // or use ETO ??
         //let dlg = Eto.Forms.SelectFolderDialog()
         //if notNull folder then
@@ -67,7 +67,7 @@ module ExtensionsUserinterface =
 
         let newcheckstates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
-            SyncRhino.DoSync false false getKeepEditor
+            SyncRhino.DoSync getKeepEditor
 
         if notNull newcheckstates then
             Some (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
@@ -88,7 +88,7 @@ module ExtensionsUserinterface =
             | null -> None
             | :? string as s -> Some s
             | _ -> None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Display dialog prompting the user to enter a string. The
@@ -104,7 +104,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
             if rc then Some text else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Pause for user input of an angle.</summary>
@@ -128,7 +128,7 @@ module ExtensionsUserinterface =
             if rc = Commands.Result.Success then Some(toDegrees(angle))
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
@@ -167,7 +167,7 @@ module ExtensionsUserinterface =
                     Some (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
             if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
             res
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a box.</summary>
@@ -205,7 +205,7 @@ module ExtensionsUserinterface =
             if rc = Commands.Result.Success then Some ((!box).GetCorners())
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
@@ -219,7 +219,7 @@ module ExtensionsUserinterface =
             let rc = UI.Dialogs.ShowColorDialog(col)
             if rc then Some (!col) else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Retrieves the cursor's position.</summary>
@@ -240,7 +240,7 @@ module ExtensionsUserinterface =
             worldpt.Transform(xf)
             if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show() //or skip ?
             worldpt, screenpt, viewport.Id, clientpt
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a distance.</summary>
@@ -284,7 +284,10 @@ module ExtensionsUserinterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    RhinoScriptSyntax.Print ("Distance: " + d.ToNiceString + " " + State.Doc.GetUnitSystemName(true, true, false, false))
+                    RhinoScriptSyntax.Print ("Distance: " + 
+                                             d.ToNiceString + " " + 
+                                             State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false)
+                                             )
                     gp2.Dispose()
                     Some d
                 | _ ->
@@ -292,7 +295,7 @@ module ExtensionsUserinterface =
                     None
             | _ -> None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
@@ -336,7 +339,7 @@ module ExtensionsUserinterface =
                     State.Doc.Views.Redraw()
                 Some r
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a whole number.</summary>
@@ -354,8 +357,8 @@ module ExtensionsUserinterface =
             use gi = new Input.Custom.GetInteger()
             if notNull message then gi.SetCommandPrompt(message)
             if number  <> 2147482999 then gi.SetDefaultInteger(number)
-            if minimum <> 2147482999 then gi.SetLowerLimit(minimum, false)
-            if maximum <> 2147482999 then gi.SetUpperLimit(maximum, false)
+            if minimum <> 2147482999 then gi.SetLowerLimit(minimum, strictlyGreaterThan=false)
+            if maximum <> 2147482999 then gi.SetUpperLimit(maximum, strictlyLessThan=false)
             if gi.Get() <> Input.GetResult.Number then
                 gi.Dispose()
                 None
@@ -364,7 +367,7 @@ module ExtensionsUserinterface =
                 gi.Dispose()
                 Some rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Displays dialog box prompting the user to select a layer.</summary>
@@ -391,7 +394,7 @@ module ExtensionsUserinterface =
             else
                 let layer = State.Doc.Layers.[!layerindex]
                 Some layer.FullPath
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
 
@@ -409,7 +412,7 @@ module ExtensionsUserinterface =
                 Some (rarr { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
             else
                 None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
 
@@ -453,7 +456,7 @@ module ExtensionsUserinterface =
             else
                 None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Displays a dialog box prompting the user to select one linetype.</summary>
@@ -475,7 +478,7 @@ module ExtensionsUserinterface =
                 Some linetype.Name
             with _ ->
                 None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Prompts the user to pick one or more Mesh faces.</summary>
@@ -509,7 +512,7 @@ module ExtensionsUserinterface =
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompts the user to pick one or more Mesh vertices.</summary>
@@ -543,7 +546,7 @@ module ExtensionsUserinterface =
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 Some rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a point.</summary>
@@ -573,7 +576,7 @@ module ExtensionsUserinterface =
                 let pt = gp.Point()
                 Some pt
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
 
@@ -588,7 +591,7 @@ module ExtensionsUserinterface =
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
-            gp.Constrain(curve, false) |> ignore
+            gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore
             gp.Get() |> ignore
             if gp.CommandResult() <> Commands.Result.Success then
                 None
@@ -596,7 +599,7 @@ module ExtensionsUserinterface =
                 let pt = gp.Point()
                 Some pt
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a point constrained to a Mesh object.</summary>
@@ -608,14 +611,14 @@ module ExtensionsUserinterface =
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d option =
         let get () = 
             #if RHINO6
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, false)
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, acceptNothing=false)
             #else
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, false)
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false)
             #endif
             if cmdrc = Commands.Result.Success then Some point
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
@@ -631,10 +634,10 @@ module ExtensionsUserinterface =
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
             | :? Surface as srf ->
-                gp.Constrain(srf, false) |> ignore
+                gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore
 
             | :? Brep as brep ->
-                gp.Constrain(brep, -1, -1, false) |> ignore
+                gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
 
             | _ ->
                 RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (Print.guid surfaceId) message
@@ -646,7 +649,7 @@ module ExtensionsUserinterface =
                 let pt = gp.Point()
                 Some pt
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of one or more points.</summary>
@@ -674,7 +677,7 @@ module ExtensionsUserinterface =
             if inPlane then
                 gp.ConstrainToConstructionPlane(true) |> ignore
                 let plane = State.Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
-                gp.Constrain(plane, false) |> ignore
+                gp.Constrain(plane, allowElevator=false) |> ignore
             let mutable getres = gp.Get()
             if gp.CommandResult() <> Commands.Result.Success then None
             else
@@ -714,7 +717,7 @@ module ExtensionsUserinterface =
                     None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
 
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
 
@@ -757,7 +760,7 @@ module ExtensionsUserinterface =
             if rc = Commands.Result.Success then Some polyline
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a number.</summary>
@@ -776,15 +779,15 @@ module ExtensionsUserinterface =
             let gn = new Input.Custom.GetNumber()
             if notNull message then gn.SetCommandPrompt(message)
             if number <> 7e89 then gn.SetDefaultNumber(number)
-            if minimum <> 7e89 then gn.SetLowerLimit(minimum, false)
-            if maximum <> 7e89 then gn.SetUpperLimit(maximum, false)
+            if minimum <> 7e89 then gn.SetLowerLimit(minimum, strictlyGreaterThan=false)
+            if maximum <> 7e89 then gn.SetUpperLimit(maximum, strictlyLessThan=false)
             if gn.Get() <> Input.GetResult.Number then None
             else
                 let rc = gn.Number()
                 gn.Dispose()
                 Some rc
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a rectangle.</summary>
@@ -819,7 +822,7 @@ module ExtensionsUserinterface =
             if rc = Commands.Result.Success then Some (corners.[0], corners.[1], corners.[2], corners.[3])
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a string value.</summary>
@@ -849,7 +852,7 @@ module ExtensionsUserinterface =
             else
                 Some <| gs.StringResult()
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Display a list of items in a list box dialog.</summary>
@@ -869,7 +872,7 @@ module ExtensionsUserinterface =
             |  :? string as s -> Some s
             | _ -> None
 
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Displays a message box. A message box contains a message and
@@ -942,7 +945,7 @@ module ExtensionsUserinterface =
             elif dlgresult = UI.ShowMessageResult.Yes then    Some 6
             elif dlgresult = UI.ShowMessageResult.No then     Some 7
             else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Displays list of items and their values in a property-style list box dialog.</summary>
@@ -961,7 +964,7 @@ module ExtensionsUserinterface =
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null ->  None
             | s -> Some s
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Displays a list of items in a multiple-selection list box dialog.</summary>
@@ -978,7 +981,7 @@ module ExtensionsUserinterface =
         let getKeepEditor () = 
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             if notNull r then Some r else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Displays file open dialog box allowing the user to enter a file name.
@@ -1006,7 +1009,7 @@ module ExtensionsUserinterface =
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowOpenDialog() then Some fd.FileName
             else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Displays file open dialog box allowing the user to select one or more file names.
@@ -1035,7 +1038,7 @@ module ExtensionsUserinterface =
             fd.MultiSelect <- true
             if fd.ShowOpenDialog() then Some fd.FileNames
             else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Display a context-style popup menu. The popup menu can appear almost
@@ -1066,7 +1069,7 @@ module ExtensionsUserinterface =
                 let point2d = viewport.WorldToClient(point)
                 screenpoint <- viewport.ClientToScreen(point2d)
             UI.Dialogs.ShowContextMenu(items, screenpoint, modes)
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Display a dialog box prompting the user to enter a number.</summary>
@@ -1093,7 +1096,7 @@ module ExtensionsUserinterface =
             if  rc then Some (!defaultValNumber)
             else None
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
     ///<summary>Display a save dialog box allowing the user to enter a file name.
@@ -1120,7 +1123,7 @@ module ExtensionsUserinterface =
             if notNull filename then fd.FileName <- filename
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowSaveDialog() then Some fd.FileName else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Display a dialog box prompting the user to enter a string value.</summary>
@@ -1133,9 +1136,9 @@ module ExtensionsUserinterface =
                                     [<OPT;DEF(null:string)>]defaultValValue:string,
                                     [<OPT;DEF(null:string)>]title:string) : string option =
         let getKeepEditor () = 
-            let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, false)
+            let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, multiline=false)
             if rc then Some text else None
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 
     ///<summary>Display a text dialog box similar to the one used by the _What command.</summary>
@@ -1147,6 +1150,6 @@ module ExtensionsUserinterface =
                           [<OPT;DEF(null:string)>]title:string) : unit =
         let getKeepEditor () = 
             UI.Dialogs.ShowTextDialog(message, title)
-        SyncRhino.DoSync false false getKeepEditor
+        SyncRhino.DoSync getKeepEditor
 
 

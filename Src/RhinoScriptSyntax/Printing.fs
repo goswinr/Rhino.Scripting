@@ -66,7 +66,7 @@ module ExtensionsPrinting =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member PrintFull (x:'T) : unit =
-        RhinoScriptSyntax.ToNiceString(x, false)
+        RhinoScriptSyntax.ToNiceString(x, trim=false)
         |>! RhinoApp.WriteLine 
         |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !

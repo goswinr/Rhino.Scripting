@@ -63,7 +63,7 @@ module ExtensionsGrips =
                 Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
 
             |>! fun _ -> if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
 
@@ -99,7 +99,7 @@ module ExtensionsGrips =
                 if select then State.Doc.Views.Redraw()
             if notNull SyncRhino.SeffWindow then SyncRhino.SeffWindow.Show()
             rc
-        SyncRhino.DoSync true true get
+        SyncRhino.DoSyncRedrawHideEditor get
 
 
 
@@ -115,9 +115,9 @@ module ExtensionsGrips =
                 let grip = grips.[index]
                 let ng =
                     if direction = 0 then
-                        grip.NeighborGrip(i, 0, 0, false)
+                        grip.NeighborGrip(i, 0, 0, wrap=false)
                     else
-                        grip.NeighborGrip(0, i, 0, false)
+                        grip.NeighborGrip(0, i, 0, wrap=false)
                 if notNull ng && enable then
                     ng.Select(true) |> ignore //TODO make sync ?
                     State.Doc.Views.Redraw()

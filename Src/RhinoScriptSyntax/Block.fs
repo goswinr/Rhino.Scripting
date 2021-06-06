@@ -54,7 +54,7 @@ module ExtensionsBlock =
               rc <- State.Doc.InstanceDefinitions.Add(name, "", basePoint, geometry, attrs)
             if rc >= 0 then
                 if deleteInput then
-                    for obj in objects do State.Doc.Objects.Delete(obj, true) |>ignore
+                    for obj in objects do State.Doc.Objects.Delete(obj, quiet=true) |>ignore
                 State.Doc.Views.Redraw()
         name
 
@@ -246,7 +246,7 @@ module ExtensionsBlock =
     static member DeleteBlock(blockName:string) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
-        let  rc = State.Doc.InstanceDefinitions.Delete(idef.Index, true, false)
+        let  rc = State.Doc.InstanceDefinitions.Delete(idef.Index, deleteReferences=true, quiet=false)
         State.Doc.Views.Redraw()
         rc
 
@@ -368,6 +368,6 @@ module ExtensionsBlock =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.%s does not exist in InstanceDefinitionsTable" blockName
         let description = idef.Description
-        State.Doc.InstanceDefinitions.Modify(idef, newName, description, false)
+        State.Doc.InstanceDefinitions.Modify(idef, newName, description, quiet=false)
 
 

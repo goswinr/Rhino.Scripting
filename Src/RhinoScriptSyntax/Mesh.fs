@@ -701,7 +701,7 @@ module ExtensionsMesh =
         let  meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = Rarr()
         if notNull view then
-            let viewport = State.Doc.Views.Find(view, false).MainViewport
+            let viewport = State.Doc.Views.Find(view, compareCase=false).MainViewport
             if isNull viewport then RhinoScriptingException.Raise "RhinoScriptSyntax.Rhino.Scripting.MeshOutline: did not find view named '%A'" view
             else
                 for mesh in meshes do
@@ -765,7 +765,7 @@ module ExtensionsMesh =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let attr = rhobj.Attributes
         let ids =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep, attr) }
-        if deleteInput then State.Doc.Objects.Delete(rhobj, true)|> ignore
+        if deleteInput then State.Doc.Objects.Delete(rhobj, quiet=true)|> ignore
         State.Doc.Views.Redraw()
         ids
 

@@ -386,7 +386,9 @@ module ExtensionsCoerce =
            if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
            elif view = "" then State.Doc.Views.ActiveView
            else 
-               let allviews = State.Doc.Views.GetViewList(true, true) |> Array.filter (fun v-> v.MainViewport.Name = view)
+               let allviews = 
+                    State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true) 
+                    |> Array.filter (fun v-> v.MainViewport.Name = view)
                if allviews.Length = 1 then allviews.[0]
                else  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
        

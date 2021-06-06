@@ -115,7 +115,7 @@ module Line =
         let ok, ta, tb = Intersect.Intersection.LineLine(lnA,lnB)
         if not ok then // paralell
             //RhinoScriptingException.Raise "Rhino.Scripting.Line.intersect failed, paralell ?  on %s and %s" lnA.ToNiceString lnB.ToNiceString
-            let pt = lnA.ClosestPoint(lnB.From,false)
+            let pt = lnA.ClosestPoint(lnB.From, limitToFiniteSegment=false)
             (pt-lnB.From).Length
         else
             let a = lnA.PointAt(ta)
@@ -124,7 +124,7 @@ module Line =
     
     /// Returns the distance between a point and an Infinite Line.
     let distanceToPoint (pt:Point3d) (ln:Line) :float= 
-        let cl = ln.ClosestPoint(pt,false)
+        let cl = ln.ClosestPoint(pt, limitToFiniteSegment=false)
         (cl-pt).Length
 
     /// Returns a new transformed Line

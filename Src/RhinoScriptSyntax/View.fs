@@ -109,7 +109,8 @@ module ExtensionsView =
         let page = RhinoScriptSyntax.CoercePageView(layout)
         if layout = detail then page.SetPageAsActive()
         else
-            if not <| page.SetActiveDetail(detail, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentDetail set failed for %s to %s" layout detail
+            if not <| page.SetActiveDetail(detail, compareCase=false) then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentDetail set failed for %s to %s" layout detail
         State.Doc.Views.Redraw()
 
 
@@ -212,17 +213,20 @@ module ExtensionsView =
     [<Extension>]
     static member IsLayout(layout:string) : bool =
         //layoutid = RhinoScriptSyntax.Coerceguid(layout)
-        if   State.Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then true
-        elif State.Doc.Views.GetViewList(true, false) |> Array.exists ( fun v -> v.MainViewport.Name = layout) then false
-        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
-
+        if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then 
+            true
+        elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
+            false
+        else 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.IsLayout View does not exist at all.  layout:'%A'" layout // or false
+        
 
     ///<summary>Verifies that the specified view exists.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
     [<Extension>]
     static member IsView(view:string) : bool =
-        State.Doc.Views.GetViewList(false, true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
+        State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
 
 
 
@@ -896,9 +900,9 @@ module ExtensionsView =
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let rc = viewo.ActiveViewport.WallpaperFilename
-        if not <| viewo.ActiveViewport.SetWallpaper(filename, false) then RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper failed to set walleper to %s in view %s" filename view
+        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale=false) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper failed to set walleper to %s in view %s" filename view
         viewo.Redraw()
-
 
 
     ///<summary>Returns the grayscale display option of the wallpaper bitmap in a
@@ -919,7 +923,8 @@ module ExtensionsView =
     static member WallpaperGrayScale(view:string, grayscale:bool) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
-        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then RhinoScriptingException.Raise "RhinoScriptSyntax.WallpaperGrayScale failed to set walleper to %s in view %s" filename view
+        if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.WallpaperGrayScale failed to set walleper to %s in view %s" filename view
         viewo.Redraw()
 
 

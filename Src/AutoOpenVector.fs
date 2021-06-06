@@ -50,7 +50,7 @@ module AutoOpenVector =
             let l =RhinoScriptSyntax.AddLine(fromPoint, fromPoint + vector )
             RhinoScriptSyntax.CurveArrows(l, 2)
             if layer<>"" then
-                RhinoScriptSyntax.ObjectLayer(l, layer, true)
+                RhinoScriptSyntax.ObjectLayer(l, layer, createLayerIfMissing=true)
         
         /// Draws a line with a Curve Arrows
         [<Extension>]
@@ -263,13 +263,13 @@ module AutoOpenVector =
                         let pi = searchBack (i-1) Ns
                         let ppt = Pts.[pi]
                         let pln = Line(points.[pi], points.[saveIdx (pi + 1) pointk])                
-                        let pclp = pln.ClosestPoint(ppt, false)
+                        let pclp = pln.ClosestPoint(ppt, limitToFiniteSegment=false)
                         let pv = ppt - pclp
                                                     
                         let ni = searchForward (i + 1) Ns
                         let npt = Pts.[ni]
                         let nln = Line(points.[ni], points.[saveIdx (ni-1) pointk])
-                        let nclp = nln.ClosestPoint(npt, false)
+                        let nclp = nln.ClosestPoint(npt, limitToFiniteSegment=false)
                         let nv = npt - nclp
                         //print (pi,"prev i")
                         //print (i,"is colinear")

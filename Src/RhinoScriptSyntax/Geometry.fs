@@ -34,13 +34,14 @@ module ExtensionsGeometry =
         let viewlist =
             if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
-                let modelviews = State.Doc.Views.GetViewList(true, false)
+                let modelviews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
                 [for view in views do
                     for item in modelviews do
                         if item.ActiveViewport.Name = view then
                             yield item.ActiveViewportID]
         let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
+        if rc = Guid.Empty then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
         State.Doc.Views.Redraw()
         rc
 
@@ -419,7 +420,7 @@ module ExtensionsGeometry =
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
         let rc = rarr { for curve in curves do yield State.Doc.Objects.AddCurve(curve, attr) }
-        if delete then State.Doc.Objects.Delete(rhobj, true) |>ignore
+        if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |>ignore
         State.Doc.Views.Redraw()
         rc
 
@@ -740,10 +741,10 @@ module ExtensionsGeometry =
             DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
             // normally calls will not  go further than FromQuartetProperties(font, false, false)
             // but there are a few rare fonts that don"t have a regular font
-            |? DocObjects.Font.FromQuartetProperties(font, false, false)
-            |? DocObjects.Font.FromQuartetProperties(font, true, false)
-            |? DocObjects.Font.FromQuartetProperties(font, false, true)
-            |? DocObjects.Font.FromQuartetProperties(font, true, true)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
             |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
         annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
@@ -762,10 +763,10 @@ module ExtensionsGeometry =
                 DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
                 // normally calls will not  go further than FromQuartetProperties(font, false, false)
                 // but there are a few rare fonts that don"t have a regular font
-                |? DocObjects.Font.FromQuartetProperties(font, false, false)
-                |? DocObjects.Font.FromQuartetProperties(font, true, false)
-                |? DocObjects.Font.FromQuartetProperties(font, false, true)
-                |? DocObjects.Font.FromQuartetProperties(font, true, true)
+                |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
+                |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
+                |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
+                |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
                 |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
             annotation.Font <- f
             if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
@@ -874,10 +875,10 @@ module ExtensionsGeometry =
         let fontdata = annotation.Font
         let f =
             match style with
-            |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, true)
-            |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
-            |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
-            |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
+            |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
+            |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
+            |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
+            |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
             |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
             |?    (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName)
  
@@ -900,10 +901,10 @@ module ExtensionsGeometry =
             let fontdata = annotation.Font
             let f =
                 match style with
-                |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, true)
-                |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, true)
-                |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, true, false)
-                |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, false, false)
+                |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
+                |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
+                |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
+                |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
                 |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
                 |?   (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName)
      

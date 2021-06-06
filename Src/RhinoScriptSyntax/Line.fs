@@ -34,7 +34,7 @@ module ExtensionsLine =
     ///<returns>(Point3d) The point on the infinite line (ray) that is closest to the test point.</returns>
     [<Extension>]
     static member LineClosestPoint(line:Line, testPoint:Point3d) : Point3d =
-        line.ClosestPoint(testPoint, false)
+        line.ClosestPoint(testPoint, limitToFiniteSegment=false)
 
 
 
