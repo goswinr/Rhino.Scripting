@@ -260,6 +260,20 @@ module AutoOpenCurried =
         RhinoScriptSyntax.TransformObject(objectId,matrix,false)       
         // TODO test to ensure GUID is the same ?
 
+    ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
+    ///<param name="origin">(Point3d) The origin of the scale transformation</param>
+    ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
+    ///<param name="objectId">(Guid) The identifier of an object</param>
+    ///<returns>(unit) void, nothing.</returns>    
+    [<Extension>]
+    static member scale(origin:Point3d) (scale:float) (objectId:Guid) : unit = 
+        let mutable plane = Plane.WorldXY
+        plane.Origin <- origin
+        let xf = Transform.Scale(plane, scale, scale, scale)
+        let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
+        if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.scale failed. objectId:'%s' origin:'%s' scale:'%g'" (Print.guid objectId) origin.ToNiceString scale
+       
+
     ///<summary>Moves a single object.</summary>
     ///<param name="translation">(Vector3d) Vector3d</param>
     ///<param name="objectId">(Guid) The identifier of an object to move</param>
