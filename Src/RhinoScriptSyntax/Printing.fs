@@ -15,25 +15,7 @@ open FsEx.SaveIgnore
 module ExtensionsPrinting =
   
   type RhinoScriptSyntax with    
-    
-    ///<summary>
-    /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
-    /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
-    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    ///   - thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
-    ///   - toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    ///   - toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
-    ///   - maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  </summary>
-    ///<param name="x">('T) the value or object to represent as string</param>
-    ///<param name="trim">(bool) Optional, Default Value: <c>true</c>
-    /// Applicable if the value x is a Seq: If true  the string will only show the first 5 items per seq or nested seq. If false all itemes will be in the string</param>
-    ///<returns>(string) The string.</returns>
-    [<Extension>]
-    static member ToNiceString (x:'T, [<OPT;DEF(true)>]trim:bool) : string = 
-        if Print.doInit then Print.init()
-        if trim then NiceString.toNiceString(x)
-        else         NiceString.toNiceStringFull(x)       
-    
+       
     ///<summary>
     /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
     /// Prints to Console.Out and to Rhino Commandline
@@ -47,7 +29,8 @@ module ExtensionsPrinting =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member Print (x:'T) : unit =
-        RhinoScriptSyntax.ToNiceString(x, true)
+        if Print.doInit then Print.init()
+        NiceString.toNiceString(x)
         |>! RhinoApp.WriteLine 
         |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !
@@ -63,28 +46,12 @@ module ExtensionsPrinting =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member PrintFull (x:'T) : unit =
-        RhinoScriptSyntax.ToNiceString(x, trim=false)
+        if Print.doInit then Print.init()
+        NiceString.toNiceStringFull(x) 
         |>! RhinoApp.WriteLine 
         |>  Console.WriteLine  
         RhinoApp.Wait() // no swith to UI Thread needed !
     
-    (*
-    //<summary>
-    // Prints Sequence of objects or values separated by a space charcter or a custom value.
-    // Prints to Console.Out and to Rhino Commandline.</summary>
-    //<param name="xs">('T) the values or objects to print</param>
-    //<param name="separator">(string) Optional, Default Value: a space character <c>" "</c></param>
-    //<returns>(unit) void, nothing.</returns>
-    [<Extension>]
-    static member PrintSeq (xs:'T seq, [<OPT;DEF(" ")>]separator:string) : unit =
-        xs
-        |>  Seq.map RhinoScriptSyntax.ToNiceString
-        |>  String.concat separator
-        |>! RhinoApp.WriteLine 
-        |>  Console.WriteLine
-        RhinoApp.Wait()
-    *)
-
     
     /// Like printf but in Red if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -205,36 +172,3 @@ module ExtensionsPrinting =
             RhinoApp.Wait())  msg // no swith to UI Thread needed !
   
   
-  //---------------------------------------------------------------------------
-  // Shadowing the built in print and printFull to inculde external formater
-  //---------------------------------------------------------------------------
-
-
-  /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
-  /// Only prints to Console.Out, NOT to Rhino Commandline
-  /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
-  /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-  /// - thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
-  /// - toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-  /// - toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
-  /// - maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  
-  let print x = 
-    if Print.doInit then Print.init() 
-    print x
-  
-  /// Nice formating for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
-  /// Only prints to Console.Out, NOT to Rhino Commandline
-  /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
-  /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-  /// - thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
-  /// - maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.
-  let printFull x = 
-    if Print.doInit then Print.init() 
-    printFull x  
-
- 
-  do
-    if Print.doInit then 
-        Print.init() 
-
-        // TODO check if Prinf.red works with FsEx.toNiceString on rhino classes or if another init is needed!

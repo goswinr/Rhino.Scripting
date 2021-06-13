@@ -11,7 +11,7 @@ open FsEx
 /// This module provides type extensions for pretty printing 
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 module AutoOpenToNiceStringExtensions = 
-      
+    
     type Point3d with          
         ///Like the ToString function but with appropiate precision formating
         member pt.ToNiceString = 
@@ -82,7 +82,7 @@ module internal Print =
     let guid (g:Guid)=
         if g = Guid.Empty then 
             "-Guid.Empty-"
-        elif Runtime.HostUtils.RunningInRhino  then 
+        elif Runtime.HostUtils.RunningInRhino  then // because Rhino.Scripting might be refrenced from ouside of Rhino too
             let o = State.Doc.Objects.FindId(g) 
             if isNull o then sprintf "Guid %O (not in State.Doc.Objects table of this Rhino file)." g
             else
@@ -95,15 +95,7 @@ module internal Print =
             // the Print.guid function gets injected into FsEx.NiceString, below
             // so that using the print function still works on other Guids if Rhino.Scripting is referenced from outside of rhino wher there is no active Doc
             sprintf "Guid %O" g
-
-
-    /// Gets a localized description on Rhino layer and object type (e.g. Curve , point, Surface ....)
-    let any (x:'T) =
-       match box x with 
-       | :? Guid as g -> guid g
-       | _ -> NiceString.toNiceString x      
-    
-
+   
     let formatRhinoObject (o:obj) : NiceStringSettings.Lines option= 
           match o with
           | :? Guid       as x -> Some <| NiceStringSettings.Element (guid x)
@@ -127,8 +119,67 @@ module internal Print =
             RhinoDoc.ActiveDocumentChanged.Add (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
             RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
 
-    
+    /// Abreviation for NiceString.toNiceString
+    /// including special formating of Rhino Guids
     let nice (x:'T) =
         if doInit then init()
+        NiceString.toNiceString x  
+
+
+/// This module shadows the NiceString module from FsEx to include the special formating for Rhino types
+module NiceString  =              
+        
+    /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator and (nested) sequences, first five items are printed out.
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    /// • thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
+    /// • maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    /// • maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// • maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.    
+    let toNiceString (x:'T) :string = 
+        if Print.doInit then Print.init()
         NiceString.toNiceString x
+        
+    /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator, 
+    /// all items of sequences, including nested items, are printed out.
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    /// • thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
+    /// • maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
+    let toNiceStringFull (x:'T) :string =         
+        if Print.doInit then Print.init()
+        NiceString.toNiceString x
+
+
+/// Shadowing the print and printFull  from FsEx to inculde external formater for Rhino
+[<AutoOpen>]
+module AutoOpenPrint =     
+
+    /// Print to standard out including nice formating for Rhino Objects, numbers including thousand Separator and (nested) sequences, first five items are printed out.
+    /// Only prints to Console.Out, NOT to Rhino Commandline
+    /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as ~0.0
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    /// • thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
+    /// • maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    /// • maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// • maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.  
+    let print x = 
+        if Print.doInit then Print.init() 
+        print x
+    
+    /// Print to standard out including nice formating for Rhino Objects, numbers including thousand Separator, all items of sequences, including nested items, are printed out.
+    /// Only prints to Console.Out, NOT to Rhino Commandline
+    /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as ~0.0
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
+    /// • thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
+    /// • maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
+    let printFull x = 
+        if Print.doInit then Print.init() 
+        printFull x 
+
+
+ 
+
+
+                
+        
+
 

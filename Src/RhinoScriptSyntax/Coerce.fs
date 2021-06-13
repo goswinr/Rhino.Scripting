@@ -582,9 +582,9 @@ module ExtensionsCoerce =
                    else
                        let ys = s.Split(',') 
                        Point3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))   
-               |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (Print.any pt)
+               |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (Print.nice pt)
            with _ ->
-               RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (Print.any pt)
+               RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint failed on: %s " (Print.nice pt)
    
    ///<summary>Attempt to get Rhino Point Object.</summary>
    ///<param name="objectId">(Guid) objectId of Point object</param> 
@@ -639,9 +639,9 @@ module ExtensionsCoerce =
                    else
                        let ys = s.Split(',') 
                        Vector3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))   
-               |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dVector failed on: %s " (Print.any vec)
+               |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dVector failed on: %s " (Print.nice vec)
            with _ ->
-               RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dVector failed on: %s " (Print.any vec)
+               RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dVector failed on: %s " (Print.nice vec)
        
            
    //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
@@ -675,7 +675,7 @@ module ExtensionsCoerce =
                pl.Origin <- pt
                pl
            with e -> 
-               RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePlane failed on: %s " (Print.any plane) 
+               RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePlane failed on: %s " (Print.nice plane) 
 
    ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
    ///<param name="xForm">object to convert</param>
@@ -709,7 +709,7 @@ module ExtensionsCoerce =
    static member CoerceLine(line:'T) : Line=
        match RhinoScriptSyntax.TryCoerceLine(line) with
        | Some a -> a
-       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLine failed on: %s " (Print.any line)
+       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLine failed on: %s " (Print.nice line)
        
    ///<summary>Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance.
    /// does not return circles as arcs.</summary>
@@ -719,7 +719,7 @@ module ExtensionsCoerce =
    static member CoerceArc(arc:'T) : Arc=
        match RhinoScriptSyntax.TryCoerceArc(arc) with
        | Some a -> a
-       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceArc failed on: %s " (Print.any arc)
+       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceArc failed on: %s " (Print.nice arc)
 
    ///<summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
    ///<param name="circ">Guid, RhinoObject or Curve </param>
@@ -728,7 +728,7 @@ module ExtensionsCoerce =
    static member CoerceCircle(circ:'T) : Circle=
        match RhinoScriptSyntax.TryCoerceCircle(circ) with
        | Some a -> a
-       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCircle failed on: %s " (Print.any circ)
+       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCircle failed on: %s " (Print.nice circ)
 
    ///<summary>Attempt to get Rhino Ellips Geometry using the current Documents Absolute Tolerance.</summary>
    ///<param name="ellip">Guid, RhinoObject or Curve </param>
@@ -737,7 +737,7 @@ module ExtensionsCoerce =
    static member CoerceEllips(ellip:'T) : Ellipse=
        match RhinoScriptSyntax.TryCoerceEllipse(ellip) with
        | Some a -> a
-       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceEllipse failed on: %s " (Print.any ellip)      
+       | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceEllipse failed on: %s " (Print.nice ellip)      
    
    ///<summary>Attempt to get Polysurface geometry from the document with a given objectId.</summary>
    ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
