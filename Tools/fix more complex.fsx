@@ -22,7 +22,7 @@ for f in files do
             let t = ln.Trim() 
             if t.StartsWith "///" then 
                 
-                let i = t.IndexOf( find ) 
+                let i = t.IndexOf( find, StringComparison.Ordinal ) 
                 let nc = t.[i + find.Length ]
                 if Char.IsLower nc then 
                     printWithHighlight find ln
