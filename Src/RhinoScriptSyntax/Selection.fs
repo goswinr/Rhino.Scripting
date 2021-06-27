@@ -412,8 +412,8 @@ module ExtensionsSelection =
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid Rarr =
         try 
             let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
-            if printCount then  
-                RhinoScriptSyntax.PrintfnBlue "GetObjectsAndRemember remembered %s" (RhinoScriptSyntax.ObjectDescription(objectIds))
+            if printCount then  // this print statement also raises an exception if object does not exist to trigger reselection
+                RhinoScriptSyntax.PrintfnBlue "GetObjectsAndRemember: %s" (RhinoScriptSyntax.ObjectDescription(objectIds))
             objectIds
         with | _ -> 
             let ids = RhinoScriptSyntax.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter) 
@@ -433,6 +433,7 @@ module ExtensionsSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<returns>(Guid) a identifier of the picked object.</returns>
     [<Extension>]
@@ -440,14 +441,16 @@ module ExtensionsSelection =
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]preselect:bool,
                                         [<OPT;DEF(false)>]select:bool,
+                                        [<OPT;DEF(true)>]printCount:bool,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid =
         try 
-            let objectIds = RhinoScriptSyntax.Sticky.[message] :?> Rarr<Guid>
-            //if printCount then  RhinoScriptSyntax.PrintfnBlue ("GetObjectsAndRemember remembered " + RhinoScriptSyntax.ObjectDescription(objectIds))
-            objectIds.[0]
+            let objectId:Guid = RhinoScriptSyntax.Sticky.[message] |> unbox      
+            if printCount then // this print statement also raises an exception if object does not exist to trigger reselection
+                RhinoScriptSyntax.PrintfnBlue "GetObjectAndRemember: %s" (RhinoScriptSyntax.ObjectDescription(objectId))
+            objectId
         with | _ -> 
             let id = RhinoScriptSyntax.GetObject(message, filter,  preselect, select,  customFilter, subObjects=false) 
-            RhinoScriptSyntax.Sticky.[message] <- rarr {id}
+            RhinoScriptSyntax.Sticky.[message] <- box id
             id
 
     ///<summary>Prompts user to pick, or select one or more objects.
