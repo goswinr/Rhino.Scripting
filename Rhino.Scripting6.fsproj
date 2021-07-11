@@ -44,6 +44,7 @@
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="ZXing.Net" Version="0.16.6" />
     
+    <Reference Include="System.Windows" /> <!--for DispatcherSynchronizationContext in sync Rhino--> 
     <Reference Include="WindowsBase" />  
     <Reference Include="PresentationCore" />  
     <Reference Include="PresentationFramework" /> <!--WPF dlls because a refernce to seff editor window is held if available-->

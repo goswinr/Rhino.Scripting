@@ -42,22 +42,26 @@ type internal State private () = //static class, use these attributes to match C
     // -------Events: --------------------
 
 
-    static let  warnAboutFailedEventSetup () =
-        "SyncRhino.syncContext could not be set via reflection.\r\n"+
-        "Rhino.Scripting.dll is not loaded from main thread \r\n"+
-        "it needs to set up callbacks for pressing Esc key and changing the active document. \r\n"+
-        "Setting up these event handlers async can trigger a fatal access violation exception \r\n"+
-        "if its the first time you access the event.\r\n"+
-        "Try to set them up yourself on main thread \r\n"+
-        "or after you have already attached a dummy handler from main thread:\r\n"+
-        "Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"+
-        "RhinoApp.EscapeKeyPressed.Add     ( fun _    ->  \r\n"+
-        "          if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)" 
+    static let warnAboutFailedEventSetup () =
+        [
+        "***"
+        "SyncRhino.syncContext could not be set via reflection."
+        "Rhino.Scripting.dll is not loaded from main thread"
+        "it needs to set up callbacks for pressing Esc key and changing the active document."
+        "Setting up these event handlers async can trigger a fatal access violation exception"
+        "if its the first time you access the event."
+        "Try to set them up yourself on main thread"
+        "or after you have already attached a dummy handler from main thread:"
+        "   Rhino.RhinoDoc.EndOpenDocument.Add (fun args -> Doc <- args.Document)"
+        "   RhinoApp.EscapeKeyPressed.Add ( fun _  -> if not escapePressed  &&  not <| Input.RhinoGet.InGet(Doc) then escapePressed <- true)"
+        "***"
+        ]
+        |> String.concat Environment.NewLine
         |>! RhinoApp.WriteLine 
         |> eprintfn "%s"  
     
     
-    static let  setupEventsInSync() =         
+    static let setupEventsInSync() =         
         try 
             SyncRhino.DoSync (fun () ->               
                 // keep the reference to the active Document (3d file ) updated.  
@@ -76,7 +80,11 @@ type internal State private () = //static class, use these attributes to match C
                 )
         with
             | :? SyncRhinoException -> warnAboutFailedEventSetup()
-            | e -> raise e
+            | e -> 
+                //raise e 
+                sprintf "%A" e
+                |>! RhinoApp.WriteLine 
+                |> eprintfn "%s" 
 
 
     static let initState()=

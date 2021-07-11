@@ -17,33 +17,57 @@ type SyncRhino private () = //static class, use these attributes to match C# sta
     static let mutable seffAssembly : Reflection.Assembly = null //set via reflection belo;w from Seff.Rhino    
     
     static let mutable seffWindow : System.Windows.Window = null //set via reflection below; from Seff.Rhino
-       
-    static let init()=
-        if HostUtils.RunningInRhino && HostUtils.RunningOnWindows then 
-            if isNull syncContext || isNull seffAssembly then
-                try
-                    // some reflection hacks because Rhinocommon does not expose a UI sync context
-                    // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7 
-                    let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831") // the GUID of Seff.Rhino Plugin set in it's AssemblyInfo.fs
-                    let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
-                    seffAssembly <- seffRh.Assembly
-                    seffRhinoSyncModule <- seffAssembly.GetType("Seff.Rhino.Sync") 
-                    syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
-                    if isNull syncContext then 
-                        eprintfn "Seff.Rhino.Sync.syncContext is still -null-, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread!"
-                with ex ->
-                    eprintfn "Failed to get Seff.Rhino.Sync.syncContext via Reflection, Ensure all UI interactions form this assembly like rs.GetObject() are not done from an async thread! \r\nMessage: %A" ex
-                                
+        
+    static let log msg = Printf.kprintf(fun s -> RhinoApp.WriteLine s; eprintfn "%s" s) msg  
+    
+    static let mutable tryInit = true
+
+    static let init() =
+        if tryInit then 
+            if not HostUtils.RunningInRhino || not HostUtils.RunningOnWindows then 
+                log "SyncRhino.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
+            else 
+                if isNull seffAssembly then
+                    try
+                        // some reflection hacks because Rhinocommon does not expose a UI sync context
+                        // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130/7 
+                        let seffId = System.Guid("01dab273-99ae-4760-8695-3f29f4887831") // the GUID of Seff.Rhino Plugin set in it's AssemblyInfo.fs
+                        let seffRh = Rhino.PlugIns.PlugIn.Find(seffId)
+                        seffAssembly <- seffRh.Assembly
+                        seffRhinoSyncModule <- seffAssembly.GetType("Seff.Rhino.Sync")
+                    with e ->
+                        log "Rhino.Scripting.dll did not find Seff Assembly via Reflection, If you are not using the Seff Editor Plugin this is normal."
+                
+                if isNull seffWindow && notNull seffRhinoSyncModule then 
+                    try   
+                        seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
+                        if isNull seffWindow then 
+                            log "**Seff.Rhino.Sync.window is null"
+                        
+                    with e ->
+                        log "**Seff.Rhino.Sync.window failed with: %A" e
+                
+                if isNull syncContext then 
+                    try
+                        Windows.Threading.DispatcherSynchronizationContext(Windows.Application.Current.Dispatcher) |> Threading.SynchronizationContext.SetSynchronizationContext
+                        syncContext <- Threading.SynchronizationContext.Current
+                        if isNull syncContext then 
+                            log "**Threading.SynchronizationContext.Current is null"
+                    with  e -> 
+                        log "**Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %A" e           
+
+                            
+                if isNull syncContext && notNull seffRhinoSyncModule then //its probly already set abouve via DispatcherSynchronizationContext
+                    try
+                        syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
+                        if isNull syncContext then 
+                            log "**Seff.Rhino.Sync.syncContext is null"
+                    with e -> 
+                        log "**Seff.Rhino.Sync.syncContext failed with: %A" e
                     
-            if isNull seffWindow then 
-                try   
-                    seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
-                    if isNull seffWindow then 
-                        eprintfn "Seff.Rhino.SeffPlugin.Instance.Window is still -null-., If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions" 
-                with ex ->
-                    eprintfn "Failed to get Seff.Rhino.SeffPlugin.Instance.Window via Reflection, If you are not using the Seff Editor Plugin this is normal.\r\n If you are using Seff the editor window will not hide on UI interactions: \r\n%A" ex 
-        else
-            eprintfn "SyncRhino.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
+        tryInit <- false               
+                    
+        
     
   
     // ---------------------------------
