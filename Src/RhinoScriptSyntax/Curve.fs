@@ -1269,7 +1269,7 @@ module ExtensionsCurve =
     static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if notNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnotCount failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnotCount failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
         nc.Knots.Count
 
 
@@ -1281,7 +1281,7 @@ module ExtensionsCurve =
     static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Rarr<float> =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
-        if notNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnots failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnots failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
         rarr{ for i = 0 to nc.Knots.Count - 1 do yield nc.Knots.[i] }
 
 
