@@ -99,6 +99,10 @@ module ExtensionsCoerce =
                | :? Brep as b -> 
                    if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
                    else None
+               //| :? Extrusion as e -> // covered by Surface
+               //     let b = e.ToBrep()
+               //     if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
+               //     else None  
                | _ -> None
 
    ///<summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Fails on empty Guid.</summary>

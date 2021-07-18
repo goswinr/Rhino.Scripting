@@ -1251,13 +1251,6 @@ module ExtensionsSurface =
             RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectSpheres failed.  spherePlane0:'%A' sphereRadius0:'%A' spherePlane1:'%A' sphereRadius1:'%A'" spherePlane0 sphereRadius0 spherePlane1 sphereRadius1
 
 
-    ///<summary>Verifies an object is a Brep, or a boundary representation model, object.</summary>
-    ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<returns>(bool) True , otherwise False.</returns>
-    [<Extension>]
-    static member IsBrep(objectId:Guid) : bool =
-        (RhinoScriptSyntax.TryCoerceBrep(objectId)).IsSome
-
 
     ///<summary>Determines if a Surface is a portion of a cone.</summary>
     ///<param name="objectId">(Guid) The Surface object's identifier</param>
@@ -1352,8 +1345,8 @@ module ExtensionsSurface =
         rc
 
 
-    ///<summary>Verifies an object is a Folysurface or Extrusion. Polysurfaces consist of two or more
-    ///    Surfaces joined together. .</summary>
+    
+    ///<summary>Verifies an object is a Polysurface or Extrusion. Polysurfaces consist of two or more Surfaces joined together.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
     [<Extension>]
@@ -1363,6 +1356,28 @@ module ExtensionsSurface =
         | o ->  match o.Geometry with          
                 | :? Brep as b -> b.Faces.Count > 1 
                 | :? Extrusion  -> true   
+                | _ -> false
+    
+    ///<summary>Verifies an object is a or Extrusion. </summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True if successful, otherwise False.</returns>
+    [<Extension>]
+    static member IsExtrusion(objectId:Guid) : bool =
+        match State.Doc.Objects.FindId(objectId) with 
+        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsExtrusion: %A is not an object in State.Doc.Objects table" objectId
+        | o ->  match o.Geometry with
+                | :? Extrusion  -> true   
+                | _ -> false
+
+    ///<summary>Verifies an object is a Brep. That is a trimmed surface or a polysurface but not an extrusion.</summary>
+    ///<param name="objectId">(Guid) The object's identifier</param>
+    ///<returns>(bool) True if successful, otherwise False.</returns>
+    [<Extension>]
+    static member IsBrep(objectId:Guid) : bool =
+        match State.Doc.Objects.FindId(objectId) with 
+        | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsExtrusion: %A is not an object in State.Doc.Objects table" objectId
+        | o ->  match o.Geometry with
+                | :? Brep  -> true   
                 | _ -> false
 
       
@@ -1392,8 +1407,7 @@ module ExtensionsSurface =
 
 
 
-    ///<summary>Verifies an object is a Surface. Brep objects with only one face are
-    ///    also considered Surfaces.</summary>
+    ///<summary>Verifies an object is a Surface, Extrusion or Brep objects with only one face.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
     [<Extension>]
