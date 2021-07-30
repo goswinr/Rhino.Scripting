@@ -20,8 +20,6 @@ module ExtensionsUserinterface =
   //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
     
-
-
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
@@ -612,7 +610,9 @@ module ExtensionsUserinterface =
             #if RHINO6
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, acceptNothing=false)
             #else
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false)
+            //#nowarn "44"
+            //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of Rh7 require this ??
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of rh 7
             #endif
             if cmdrc = Commands.Result.Success then Some point
             else None
