@@ -1,13 +1,5 @@
 <!-- in VS Code press Ctrl+K and then V to see a preview-->
 # Rhino.Scripting
-
-[![Rhino.Scripting for Rhino 7 on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting-7.svg)](https://nuget.org/packages/Rhino.Scripting-7) 
-[![Rhino.Scripting for Rhino 7 on fuget.org](https://www.fuget.org/packages/Rhino.Scripting-7/badge.svg)](https://www.fuget.org/packages/Rhino.Scripting-7)
-[![Rhino.Scripting for Rhino 6 on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting-6.svg)](https://nuget.org/packages/Rhino.Scripting-6) 
-[![Rhino.Scripting for Rhino 6 on fuget.org](https://www.fuget.org/packages/Rhino.Scripting-6/badge.svg)](https://www.fuget.org/packages/Rhino.Scripting-6)
-
-![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Doc/logo128.png)
-
 Rhino.Scripting is an implementation of the **RhinoScript** syntax in and for F# (and C#).  
 It enables the use of RhinoScript in F# and all the great coding experience that come with F#, like: 
 - automatic code completion while typing
@@ -40,7 +32,7 @@ Or even in Grasshopper C# VB.net scripting components.
 First reference the assemblies. 
 In an F# scripting editor do
 ```fsharp
-#r @"C:\Program Files\Rhino 7\System\RhinoCommon.dll"  // adapt path if needed
+#r @"C:\Program Files\Rhino 6\System\RhinoCommon.dll"  // adapt path if needed
 #r @"D:\Git\Rhino.Scripting\src\bin\Debug\net472\Rhino.Scripting.dll"
 ```   
 open modules 
