@@ -318,7 +318,11 @@ module ExtensionsMesh =
     [<Extension>]
     static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
         let joinedmesh = new Mesh()
+        #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
+        for mesh in meshes do joinedmesh.Append(mesh)
+        #else           
         joinedmesh.Append(meshes)
+        #endif
         joinedmesh
 
     ///<summary>Joins two or or more Mesh objects together.</summary>
@@ -330,7 +334,11 @@ module ExtensionsMesh =
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let joinedmesh = new Mesh()
+        #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
+        for mesh in meshes do joinedmesh.Append(mesh)
+        #else           
         joinedmesh.Append(meshes)
+        #endif
         let rc = State.Doc.Objects.AddMesh(joinedmesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.Failed to join Meshes %A" (Print.nice objectIds) 
         if deleteInput then

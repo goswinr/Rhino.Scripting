@@ -1805,7 +1805,12 @@ module ExtensionsSurface =
     ///<returns>(float) of area.</returns>
     [<Extension>]
     static member SurfaceArea(srf:Surface) : float  =        
-        let amp = AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)
+        let amp = 
+            #if RHINO6 // only for Rh6.0, would not be needed for latest releases of Rh6
+            AreaMassProperties.Compute(srf)
+            #else           
+            AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)
+            #endif
         if isNull amp then  RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea failed on Surface: %A" srf
         amp.Area
 
@@ -1818,7 +1823,12 @@ module ExtensionsSurface =
     ///<returns>(float) of area.</returns>
     [<Extension>]
     static member SurfaceArea(brep:Brep) : float  =        
-        let amp = AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)
+        let amp = 
+            #if RHINO6
+            AreaMassProperties.Compute(brep)
+            #else           
+            AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)
+            #endif
         if isNull amp then  RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea failed on Brep: %A" brep
         amp.Area
 

@@ -470,9 +470,18 @@ module ExtensionsUserinterface =
                 let ltnew = State.Doc.Linetypes.FindName(defaultValLinetype)
                 if notNull ltnew  then ltinstance <- ltnew
             try
-                let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
-                let linetype = State.Doc.Linetypes.FindId(objectId)
-                Some linetype.Name
+                #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
+                    let i = ref 0
+                    let ok = Rhino.UI.Dialogs.ShowSelectLinetypeDialog(i, showByLayer)
+                    if not ok then None
+                    else
+                        let linetype = State.Doc.Linetypes.[!i]
+                        Some linetype.Name                    
+                #else           
+                    let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
+                    let linetype = State.Doc.Linetypes.FindId(objectId)
+                    Some linetype.Name
+                #endif
             with _ ->
                 None
         SyncRhino.DoSync getKeepEditor

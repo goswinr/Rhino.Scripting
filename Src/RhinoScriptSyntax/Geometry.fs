@@ -10,6 +10,10 @@ open FsEx.SaveIgnore
 open System.Collections.Generic
 
 
+#if RHINO6   // only for Rh6.0, would not be needed for latest releases of Rh6      
+#nowarn "44" // for using Doc.Fonts.FindOrCreate
+#endif
+
 [<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
@@ -168,8 +172,28 @@ module ExtensionsGeometry =
                             [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid =
 
         if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
-        let bold = (1 = fontStyle || 3 = fontStyle)
+        let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
+        #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
+        let just = 
+            match horizontalAlignment with
+            |0uy -> TextJustification.Left
+            |1uy -> TextJustification.Center
+            |2uy -> TextJustification.Right
+            | x  -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddText horizontalAlignment %duy is invalid." x
+            +
+            match verticalAlignment with 
+            |0uy -> TextJustification.Top                  
+            |1uy -> TextJustification.Top         
+            |2uy -> TextJustification.Top         
+            |3uy -> TextJustification.Middle        
+            |4uy -> TextJustification.Bottom
+            |5uy -> TextJustification.Bottom   
+            |6uy -> TextJustification.Bottom
+            | x  -> RhinoScriptingException.Raise "RhinoScriptSyntax.AddText verticalAlignment %duy is invalid." x
+
+        let objectId = State.Doc.Objects.AddText(text, plane, height, font, bold, italic, just)
+        #else
         let ds = State.Doc.DimStyles.Current
         let qn, quartetBoldProp , quartetItalicProp =
             if isNull font then
@@ -198,7 +222,8 @@ module ExtensionsGeometry =
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
-        let objectId = State.Doc.Objects.Add(te);
+        let objectId = State.Doc.Objects.Add(te)
+        #endif
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         State.Doc.Views.Redraw()
         objectId
@@ -726,10 +751,14 @@ module ExtensionsGeometry =
     ///<returns>(string) The current font face name.</returns>
     [<Extension>]
     static member TextObjectFont(objectId:Guid) : string = //GET
+        #if RHINO6   // only for Rh6.0, would not be needed for latest releases of Rh6
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.FaceName
+        #else
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
+        #endif
 
 
-    ///<summary>Modifies the font used by a text object.</summary>
+    ///<summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="font">(string) The new Font Name</param> 
     ///<returns>(unit) void, nothing.</returns>
@@ -737,6 +766,10 @@ module ExtensionsGeometry =
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET        
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
+        #if RHINO6   // only for Rh6.0, would not be needed for latest releases of Rh6      
+        let index = State.Doc.Fonts.FindOrCreate( font, fontdata.Bold, fontdata.Italic )
+        let f = State.Doc.Fonts.[index]
+        #else
         let f =
             DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
             // normally calls will not  go further than FromQuartetProperties(font, false, false)
@@ -746,32 +779,70 @@ module ExtensionsGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
             |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
+        #endif
         annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the font used by multiple text objects.</summary>
+    ///<summary>Modifies the font used by multiple text objects. Keeps the current state of bold and italic when possible.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="font">(string) The new Font Name</param> 
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
-    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
+    static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET        
         for objectId in objectIds do         
-            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-            let fontdata = annotation.Font
-            let f =
-                DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
-                // normally calls will not  go further than FromQuartetProperties(font, false, false)
-                // but there are a few rare fonts that don"t have a regular font
-                |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
-                |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
-                |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
-                |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-                |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
-            annotation.Font <- f
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
+            RhinoScriptSyntax.TextObjectFont(objectId, font)
+
+    ///<summary>Modifies the font style of a text object.</summary>
+    ///<param name="objectId">(Guid) The identifier of a text object</param>
+    ///<param name="style">(int) The font style. Can be any of the following flags
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
+        let fontdata = annotation.Font
+        #if RHINO6   // only for Rh6.0, would not be needed for latest releases of Rh6
+        let index =
+            match style with
+            |3 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=true , italic=true)
+            |2 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=false, italic=true)
+            |1 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=true , italic=false)
+            |0 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=false, italic=false)
+            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+        if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.FaceName        
+        let f = State.Doc.Fonts.[index]
+        #else
+        let f =          
+            match style with
+            |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
+            |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
+            |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
+            |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
+            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName
+        #endif       
+ 
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
         State.Doc.Views.Redraw()
 
+    ///<summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="style">(int) The font style. Can be any of the following flags
+    ///    0 = Normal
+    ///    1 = Bold
+    ///    2 = Italic
+    ///    3 = Bold and Italic</param>
+    ///<returns>(unit) void, nothing.</returns>
+    [<Extension>]
+    static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
+        for objectId in objectIds do 
+            RhinoScriptSyntax.TextObjectStyle(objectId,style)
+        State.Doc.Views.Redraw()
 
     ///<summary>Returns the height of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
@@ -861,56 +932,7 @@ module ExtensionsGeometry =
         if fontdata.Italic then rc <- 2 + rc
         rc
 
-    ///<summary>Modifies the font style of a text object.</summary>
-    ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="style">(int) The font style. Can be any of the following flags
-    ///    0 = Normal
-    ///    1 = Bold
-    ///    2 = Italic
-    ///    3 = Bold and Italic</param>
-    ///<returns>(unit) void, nothing.</returns>
-    [<Extension>]
-    static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
-        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font
-        let f =
-            match style with
-            |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
-            |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
-            |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
-            |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
-            |?    (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName)
- 
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
-        State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the font style of multiple text objects.</summary>
-    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    ///<param name="style">(int) The font style. Can be any of the following flags
-    ///    0 = Normal
-    ///    1 = Bold
-    ///    2 = Italic
-    ///    3 = Bold and Italic</param>
-    ///<returns>(unit) void, nothing.</returns>
-    [<Extension>]
-    static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
-        for objectId in objectIds do 
-            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-            let fontdata = annotation.Font
-            let f =
-                match style with
-                |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
-                |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
-                |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
-                |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-                |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
-                |?   (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName)
-     
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then 
-                RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
-        State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the text string of a text object.</summary>
