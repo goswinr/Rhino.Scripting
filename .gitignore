@@ -6,6 +6,8 @@
 
 #build results, bin folder:
 [Bb]in/ 
+binRh6/
+binRh7/
 
 # User-specific files
 *.rsuser

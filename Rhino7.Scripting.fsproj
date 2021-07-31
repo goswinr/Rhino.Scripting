@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props-->
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net48</TargetFramework> <!-- net48 needed since RhinoCommon.dll 7.5 --> 
+    <UseWPF>true</UseWPF><!--for DispatcherSynchronizationContext in SyncRhino, and Seff editor Window (if available)-->
+    <UseWindowsForms>true</UseWindowsForms>   <!--to get screen resolution-->
+    <LangVersion>preview</LangVersion>
+    <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
+    
+    <NeutralLanguage>en</NeutralLanguage>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>    <!--to only have the english resources-->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <RootNamespace>Rhino.Scripting</RootNamespace>
+    <AssemblyName>Rhino.Scripting</AssemblyName>
+    <AssemblyTitle>Rhino.Scripting</AssemblyTitle>
+    <Product>Rhino.Scripting for Rhino 7</Product> <!--visible in explorer-->
+    <Title>Rhino.Scripting for Rhino 7</Title>  
+    <PackageId>Rhino7.Scripting</PackageId>  
+
+    <Version>0.9.0.0</Version>
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>0.9.0.0</FileVersion>
+    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    
+    <Authors>GoswinR</Authors>
+    <Copyright>Goswin Rothenthal 2021</Copyright>
+
+    <Description>An complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
+       
+    <Configuration>Release</Configuration>
+    <Platform>x64</Platform>
+    <OutputPath>binRh7</OutputPath>
+
+    <!-- <DefineConstants>RHINO7</DefineConstants> Only done for Rhino 6 -->    
+  </PropertyGroup>
+
+  <PropertyGroup>  
+    <!--https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target-->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>      
+    <IncludeSymbols>true</IncludeSymbols>
+    <!--<SymbolPackageFormat>snupkg</SymbolPackageFormat>-->  <!-- using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791 -->    
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>    
+    <PackageProjectUrl>https://github.com/goswinr/Rhino.Scripting</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/goswinr/Rhino.Scripting</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageIcon>logo128.png</PackageIcon>
+    <PackageReadmeFile>READMEnuget.md</PackageReadmeFile>
+    <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>    
+    <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>    
+  </PropertyGroup>
+  
+  <ItemGroup>      
+    <PackageReference Include="ini-parser" Version="2.5.2" />
+    <PackageReference Include="ZXing.Net" Version="0.16.6" /> <!--for QRcode generation--> 
+
+    <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
+    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
+
+    <!-- <PackageReference Include="FsEx" Version="0.5.0" />   -->
+    <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" /> 
+  
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+      
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" />   
+    <None Include="Doc/READMEnuget.md"  Pack="true" PackagePath="" />
+    <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
+
+    <Compile Include="Src/Exceptions.fs" />
+    <Compile Include="Src/SyncRhino.fs" />
+    <Compile Include="Src/State.fs" />
+    <Compile Include="Src/Util.fs" />
+    <Compile Include="Src/Print.fs" />
+    <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
+    
+    <Compile Include="Src/RhinoScriptSyntax/RhinoScriptSyntax.fs" />    
+   
+    <Compile Include="Src/RhinoScriptSyntax/Printing.fs" />    
+    <Compile Include="Src/RhinoScriptSyntax/Coerce.fs" />    
+    <Compile Include="Src/RhinoScriptSyntax/Layer.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Application.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Block.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Curve.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Dimension.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Document.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Geometry.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Grips.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Group.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Hatch.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Light.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Line.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Linetype.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Material.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Mesh.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Object.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Plane.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/PointVector.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Selection.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Surface.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Toolbar.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Transformation.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/UserData.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/UserInterface.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/Utility.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/View.fs" />
+
+    <Compile Include="Src/AutoOpenCurried.fs" />
+    <Compile Include="Src/Vec.fs" />
+    <Compile Include="Src/Pnt.fs" />
+    <Compile Include="Src/Line.fs" />
+    <Compile Include="Src/Topology.fs" />
+    <Compile Include="Src/Quat.fs" />
+    <Compile Include="Src/AutoOpenVector.fs" />
+    <Compile Include="Src/ExtraCurve.fs" />
+    <Compile Include="Src/ExtrasBrep.fs" />
+    <Compile Include="Src/ExtrasMesh.fs" />
+    <Compile Include="Src/ExtraQRcode.fs" />
+  </ItemGroup> 
+</Project>
