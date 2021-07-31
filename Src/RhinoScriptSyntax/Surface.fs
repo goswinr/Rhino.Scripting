@@ -114,7 +114,7 @@ module ExtensionsSurface =
 
 
     ///<summary>Creates a Surface from 2, 3, or 4 edge Curves.</summary>
-    ///<param name="curveIds">(Guid seq) List or tuple of Curves</param>
+    ///<param name="curveIds">(Guid seq) List of Curves</param>
     ///<returns>(Guid) identifier of new object.</returns>
     [<Extension>]
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
@@ -156,15 +156,14 @@ module ExtensionsSurface =
 
     ///<summary>Adds a NURBS Surface object to the document.</summary>
     ///<param name="pointCount">(int * int) Number of control points in the u and v direction</param>
-    ///<param name="points">(Point3d IList) List or Array of 3D points</param>
-    ///<param name="knotsU">(float IList) List or Array of Knot values for the Surface in the u direction.
+    ///<param name="points">(Point3d IList) List of 3D points</param>
+    ///<param name="knotsU">(float IList) List of Knot values for the Surface in the u direction.
     ///    Must contain pointCount[0]+degree[0]-1 elements</param>
-    ///<param name="knotsV">(float IList) List or Array of Knot values for the Surface in the v direction.
+    ///<param name="knotsV">(float IList) List of Knot values for the Surface in the v direction.
     ///    Must contain pointCount[1]+degree[1]-1 elements</param>
     ///<param name="degree">(int * int) Degree of the Surface in the u and v directions</param>
-    ///<param name="weights">(float IList) Optional, List or Array ofWeight values for the Surface. The number of elements in
-    ///    weights must equal the number of elements in points. Values must be
-    ///    greater than zero</param>
+    ///<param name="weights">(float IList) Optional, List of Weight values for the Surface. The number of elements in
+    ///    weights must equal the number of elements in points. Values must be greater than zero</param>
     ///<returns>(Guid) identifier of new object.</returns>
     [<Extension>]
     static member AddNurbsSurface( pointCount:int * int,

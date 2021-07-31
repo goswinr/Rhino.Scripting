@@ -18,7 +18,7 @@ module ExtensionsTransformation =
   type RhinoScriptSyntax with
 
     ///<summary>Verifies a matrix is the identity matrix.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     [<Extension>]
     static member IsXformIdentity(xForm:Transform) : bool =
@@ -29,7 +29,7 @@ module ExtensionsTransformation =
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
     ///    transformation can be broken into a sequence of dialations, translations,
     ///    rotations, and reflections.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
     [<Extension>]
     static member IsXformSimilarity(xForm:Transform) : bool =
@@ -111,7 +111,7 @@ module ExtensionsTransformation =
     ///<summary>Returns the determinant of a transformation matrix. If the determinant
     ///    of a transformation matrix is 0, the matrix is said to be singular. Singular
     ///    matrices do not have inverses.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant.</returns>
     [<Extension>]
     static member XformDeterminant(xForm:Transform) : float =
@@ -136,7 +136,7 @@ module ExtensionsTransformation =
 
 
     ///<summary>Returns the inverse of a non-singular transformation matrix.</summary>
-    ///<param name="xForm">(Transform) List or Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
+    ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix.</returns>
     [<Extension>]
     static member XformInverse(xForm:Transform) : Transform =
@@ -158,8 +158,8 @@ module ExtensionsTransformation =
 
 
     ///<summary>Multiplies two transformation matrices, where result = xForm1 * xForm2.</summary>
-    ///<param name="xForm1">(Transform) List or Rhino.Geometry.Transform. The first 4x4 transformation matrix to multiply</param>
-    ///<param name="xForm2">(Transform) List or Rhino.Geometry.Transform. The second 4x4 transformation matrix to multiply</param>
+    ///<param name="xForm1">(Transform) Rhino.Geometry.Transform. The first 4x4 transformation matrix to multiply</param>
+    ///<param name="xForm2">(Transform) Rhino.Geometry.Transform. The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation.</returns>
     [<Extension>]
     static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform =

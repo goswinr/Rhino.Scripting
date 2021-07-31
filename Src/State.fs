@@ -9,8 +9,8 @@ open Rhino
 open Rhino
 
 
-[<AbstractClass; Sealed>] 
-type internal State private () = //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f   
+[<AbstractClass; Sealed>] //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f   
+type internal State private () = 
     
     /// Rhino.Runtime.HostUtils.RunningInRhino
     static let mutable isRunningInRhino = false

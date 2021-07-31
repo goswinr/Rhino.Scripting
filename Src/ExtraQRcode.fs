@@ -119,7 +119,7 @@ module QRcode =
 
     type RhinoScriptSyntax with 
         
-        /// Creats a Mesh of a QR code of size 1.0 located at World.Origin
+        /// Creats a Mesh of Quads of a QR code of size 1.0 located at World.Origin
         /// ErrorCorrectionLevel.H = high 30% 
         [<Extension>]
         static member QrCodeAsMesh txt : Mesh = 

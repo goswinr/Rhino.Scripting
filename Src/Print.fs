@@ -75,7 +75,7 @@ module AutoOpenToNiceStringExtensions =
 [<RequireQualifiedAccess>]
 module internal Print =
     
-    let mutable doInit = true // to delay setup of printing till first print call, see Print.fs
+    let mutable doInit = true // to delay setup of printing till first print call
 
     /// Gets a description on Rhino object type (curve , point, Surface ....)
     /// including Layer and object name
@@ -136,7 +136,7 @@ module NiceString  =
     /// • maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
     /// • maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.    
     let toNiceString (x:'T) :string = 
-        if Print.doInit then Print.init()
+        if Print.doInit then Print.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
         
     /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator, 
@@ -145,7 +145,7 @@ module NiceString  =
     /// • thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
     /// • maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
     let toNiceStringFull (x:'T) :string =         
-        if Print.doInit then Print.init()
+        if Print.doInit then Print.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
 
 

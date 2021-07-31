@@ -156,7 +156,7 @@ module ExtensionsUtility =
 
 
     ///<summary>Removes duplicates from an array of numbers.</summary>
-    ///<param name="numbers">(float seq) List or tuple</param>
+    ///<param name="numbers">(float seq) List of Doubles</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
     ///<returns>(float Rarr) numbers with duplicates removed.</returns>
