@@ -9,12 +9,12 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
 
   
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsGrips =
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
 
     ///<summary>Enables or disables an object's grips. For Curves and Surfaces, these are

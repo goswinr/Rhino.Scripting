@@ -204,7 +204,7 @@ module ExtensionsLayer =
       State.Doc.Layers.Add(layer)        
 
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
      
     

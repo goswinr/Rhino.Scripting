@@ -10,9 +10,9 @@ open FsEx
 open FsEx.SaveIgnore
 
  
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsSelection =  
  
   ///A helper function to get a DocObjects.ObjectType Enum form an integer
@@ -40,7 +40,7 @@ module ExtensionsSelection =
       if 0 <> (i &&& 1073741824 ) then e  <- e ||| DocObjects.ObjectType.Extrusion
       e
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
 
     ///<summary>Returns identifiers of all objects in the document.</summary>

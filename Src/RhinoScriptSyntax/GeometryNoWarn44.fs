@@ -16,12 +16,12 @@ open System.Collections.Generic
 #nowarn "44" // for using Doc.Fonts.FindOrCreate
 #endif
     
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsGeometryNoWarn44 =
         
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with     
     
     

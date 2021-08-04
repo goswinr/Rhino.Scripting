@@ -88,7 +88,7 @@ module internal Print =
             else
                 let name = o.Attributes.Name
                 if name <> "" then 
-                    sprintf "Guid %O (a %s on Layer %s named '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
+                    sprintf "Guid %O (a %s on Layer '%s' named '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
                 else 
                     sprintf "Guid %O (an unnamed %s on Layer '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
         else 

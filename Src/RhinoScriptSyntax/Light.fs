@@ -8,12 +8,11 @@ open Rhino.Geometry
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
  
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsLight =
-
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
 
     ///<summary>Adds a new directional light object to the document.</summary>

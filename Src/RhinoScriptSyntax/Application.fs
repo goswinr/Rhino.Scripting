@@ -8,9 +8,9 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open Rhino.ApplicationSettings
 open FsEx.SaveIgnore
 
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsApplication =
 
   type RhinoScriptSyntax with

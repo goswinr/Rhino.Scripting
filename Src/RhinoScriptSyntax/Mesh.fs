@@ -1,21 +1,22 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
-open Rhino
-open Rhino.Geometry
-
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
+open Rhino.Geometry
+open Rhino
+
+open FsEx
 open FsEx.SaveIgnore
 
  
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsMesh =
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
 
     ///<summary>Add a Mesh object to the document.</summary>

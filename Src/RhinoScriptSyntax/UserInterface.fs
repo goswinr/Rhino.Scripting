@@ -12,12 +12,12 @@ open FsEx.SaveIgnore
 
  
 
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsUserinterface =
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
     
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>

@@ -1,22 +1,22 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
-open Rhino
-open Rhino.Geometry
-open FsEx.UtilMath
-
 open System.Collections.Generic
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
+open Rhino
+open Rhino.Geometry
+open FsEx
+open FsEx.UtilMath
 open FsEx.SaveIgnore
 
  
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsPointvector =
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
     ///<summary>Compares two vectors to see if they are parallel within one degree or custom tolerance.</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>

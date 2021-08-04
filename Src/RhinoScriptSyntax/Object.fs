@@ -1,22 +1,23 @@
 namespace Rhino.Scripting
 
-open FsEx
 open System
+open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
+
 open Rhino
 open Rhino.Geometry
+
+open FsEx
 open FsEx.UtilMath
 open FsEx.CompareOperators
-
-open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
 
  
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsObject =
 
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
 
 

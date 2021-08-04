@@ -7,15 +7,12 @@ open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for i
 open FsEx.SaveIgnore
 
  
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
-module ExtensionsGroup =
+[<AutoOpen>]
+module ExtensionsGroup = 
   
-  
-  //[<Extension>] //Error 3246
   type RhinoScriptSyntax with
-
 
     ///<summary>Adds a new empty group to the document.</summary>
     ///<param name="groupName">(string) Optional, Name of the new group. If omitted, Rhino automatically

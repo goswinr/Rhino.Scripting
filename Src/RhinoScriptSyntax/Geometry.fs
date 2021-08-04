@@ -10,12 +10,12 @@ open FsEx.SaveIgnore
 open System.Collections.Generic
 
 
-[<AutoOpen>]
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
+[<AutoOpen>]
 module ExtensionsGeometry =
     
-  //[<Extension>] //Error 3246
+  
   type RhinoScriptSyntax with
 
     ///<summary>Create a clipping Plane for visibly clipping away geometry in a specific view. Clipping Planes are infinite.</summary>
