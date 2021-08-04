@@ -108,17 +108,6 @@
     <Compile Include="Src/RhinoScriptSyntax/UserData.fs" />
     <Compile Include="Src/RhinoScriptSyntax/UserInterface.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Utility.fs" />
-    <Compile Include="Src/RhinoScriptSyntax/View.fs" />
-
-    <Compile Include="Src/AutoOpenCurried.fs" />
-    <Compile Include="Src/Vec.fs" />
-    <Compile Include="Src/Pnt.fs" />
-    <Compile Include="Src/Line.fs" />
-    <Compile Include="Src/Topology.fs" />
-    <Compile Include="Src/Quat.fs" />
-    <Compile Include="Src/AutoOpenVector.fs" />
-    <Compile Include="Src/ExtraCurve.fs" />
-    <Compile Include="Src/ExtrasBrep.fs" />
-    <Compile Include="Src/ExtrasMesh.fs" />    
+    <Compile Include="Src/RhinoScriptSyntax/View.fs" />    
   </ItemGroup> 
 </Project>
