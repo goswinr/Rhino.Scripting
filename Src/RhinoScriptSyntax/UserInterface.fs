@@ -618,8 +618,7 @@ module ExtensionsUserinterface =
         let get () = 
             #if RHINO6
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, acceptNothing=false)
-            #else
-            //#nowarn "44"
+            #else            
             //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of Rh7 require this ??
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of rh 7
             #endif

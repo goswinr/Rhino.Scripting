@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props-->
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
@@ -61,8 +61,7 @@
     <!-- <PackageReference Include="FsEx" Version="0.5.0" />   -->
     <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" /> 
   
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-      
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />      
   </ItemGroup>
 
   <ItemGroup>
@@ -88,6 +87,7 @@
     <Compile Include="Src/RhinoScriptSyntax/Dimension.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Document.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Geometry.fs" />
+    <Compile Include="Src/RhinoScriptSyntax/GeometryNoWarn44.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Grips.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Group.fs" />
     <Compile Include="Src/RhinoScriptSyntax/Hatch.fs" />
