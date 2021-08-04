@@ -7,8 +7,6 @@ open Rhino.Geometry
 open FsEx.UtilMath
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
-open IniParser
-open IniParser.Model
 
 
 [<AutoOpen>]
@@ -212,70 +210,8 @@ module ExtensionsUtility =
         let y = point1.Y - point2.Y        
         let z = point1.Z - point2.Z          
         sqrt (x*x + y*y + z*z)
-
-    ///<summary>Returns section names or keys in one section of an ini file.</summary>
-    ///<param name="filename">(string) Name  and path of the inifile</param>
-    ///<param name="section">(string) Optional, Section to list keys from</param>
-    ///<returns>(string array)
-    ///    If section is NOT specified, a list containing all section names
-    ///    If section is specified, a list containing all entry names for the given section.</returns>
-    [<Extension>]
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =  
-        //https://github.com/rickyah/ini-parser
-        
-        //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
-        let parser = new FileIniDataParser()
-        let data = parser.ReadFile(filename)
-        data.Configuration.ThrowExceptionsOnError <-true
-        if isNull section then 
-            rarr { for s in data.Sections do s.SectionName }
-        else            
-            rarr { for k in data.[section] do k.KeyName}
-
-    ///<summary>Returns string from a specified section and entry in an ini file.</summary>
-    ///<param name="filename">(string) Name  and path of the ini file</param>
-    ///<param name="section">(string) Section containing the entry,for keys without section use empty string</param>
-    ///<param name="entry">(string) Entry whose associated string is to be returned</param>
-    ///<returns>(string) a value for entry.</returns>
-    static member GetSettings(filename:string, section:string, entry:string) : string =
-        let parser = new FileIniDataParser()
-        let data = parser.ReadFile(filename)
-        data.Configuration.ThrowExceptionsOnError <-true
-        let s =
-            if section = "" then 
-                data.Global.[entry]
-            else
-                data.[section].[entry]        
-        if isNull s then RhinoScriptingException.Raise "RhinoScriptSyntax.GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
-        else s
     
-    ///<summary>Saves a specified section and entry in an ini file.</summary>
-    ///<param name="filename">(string) Name and path of the ini file</param>
-    ///<param name="section">(string) Section containing the entry. if empty string key without section will be added</param>
-    ///<param name="entry">(string) Entry whose associated string is to be returned</param>
-    ///<param name="value">(string) The Value of this entry</param>
-    ///<returns>(string) a value for entry.</returns>
-    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit =
-        if IO.File.Exists filename then
-            let parser = new FileIniDataParser()
-            parser.Parser.Configuration.ThrowExceptionsOnError <-true
-            let data = parser.ReadFile(filename)
-            data.Configuration.ThrowExceptionsOnError <-true
-            if section = "" then 
-                data.Global.[entry]<- value
-            else
-                data.Configuration.AllowCreateSectionsOnFly <- true
-                data.[section].[entry] <- value
-            parser.WriteFile(filename,data)
-        else
-            let data = IniData()
-            data.Configuration.ThrowExceptionsOnError <-true
-            if section = "" then 
-                data.Global.[entry]<- value
-            else
-                data.Configuration.AllowCreateSectionsOnFly <- true
-                data.[section].[entry] <- value
-            IO.File.WriteAllText(filename,data.ToString())
+    
 
 
     ///<summary>Returns 3D point that is a specified angle and distance from a 3D point.</summary>
@@ -442,3 +378,79 @@ module ExtensionsUtility =
     [<Extension>]
     static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval =
         Geometry.Interval(start , ende)
+
+
+(*
+
+manipulationg ini files like in original Rhinoscript could be include via
+<PackageReference Include="ini-parser" Version="2.5.2" />
+however for now it is excluded to keep the dependencies at just FsEx.
+If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
+
+open IniParser
+open IniParser.Model
+
+    ///<summary>Returns section names or keys in one section of an ini file.</summary>
+    ///<param name="filename">(string) Name  and path of the inifile</param>
+    ///<param name="section">(string) Optional, Section to list keys from</param>
+    ///<returns>(string array)
+    ///    If section is NOT specified, a list containing all section names
+    ///    If section is specified, a list containing all entry names for the given section.</returns>
+    [<Extension>]
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =  
+        //https://github.com/rickyah/ini-parser
+        
+        //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
+        let parser = new FileIniDataParser()
+        let data = parser.ReadFile(filename)
+        data.Configuration.ThrowExceptionsOnError <-true
+        if isNull section then 
+            rarr { for s in data.Sections do s.SectionName }
+        else            
+            rarr { for k in data.[section] do k.KeyName}
+
+    ///<summary>Returns string from a specified section and entry in an ini file.</summary>
+    ///<param name="filename">(string) Name  and path of the ini file</param>
+    ///<param name="section">(string) Section containing the entry,for keys without section use empty string</param>
+    ///<param name="entry">(string) Entry whose associated string is to be returned</param>
+    ///<returns>(string) a value for entry.</returns>
+    static member GetSettings(filename:string, section:string, entry:string) : string =
+        let parser = new FileIniDataParser()
+        let data = parser.ReadFile(filename)
+        data.Configuration.ThrowExceptionsOnError <-true
+        let s =
+            if section = "" then 
+                data.Global.[entry]
+            else
+                data.[section].[entry]        
+        if isNull s then RhinoScriptingException.Raise "RhinoScriptSyntax.GetSettings entry '%s' in section '%s' not found in file %s" entry section filename
+        else s
+    
+    ///<summary>Saves a specified section and entry in an ini file.</summary>
+    ///<param name="filename">(string) Name and path of the ini file</param>
+    ///<param name="section">(string) Section containing the entry. if empty string key without section will be added</param>
+    ///<param name="entry">(string) Entry whose associated string is to be returned</param>
+    ///<param name="value">(string) The Value of this entry</param>
+    ///<returns>(string) a value for entry.</returns>
+    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit =
+        if IO.File.Exists filename then
+            let parser = new FileIniDataParser()
+            parser.Parser.Configuration.ThrowExceptionsOnError <-true
+            let data = parser.ReadFile(filename)
+            data.Configuration.ThrowExceptionsOnError <-true
+            if section = "" then 
+                data.Global.[entry]<- value
+            else
+                data.Configuration.AllowCreateSectionsOnFly <- true
+                data.[section].[entry] <- value
+            parser.WriteFile(filename,data)
+        else
+            let data = IniData()
+            data.Configuration.ThrowExceptionsOnError <-true
+            if section = "" then 
+                data.Global.[entry]<- value
+            else
+                data.Configuration.AllowCreateSectionsOnFly <- true
+                data.[section].[entry] <- value
+            IO.File.WriteAllText(filename,data.ToString())
+    *)

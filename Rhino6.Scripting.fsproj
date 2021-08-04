@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props-->
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
@@ -28,7 +28,7 @@
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2021</Copyright>
 
-    <Description>An implementaion of the RhinoPython scripting syntax in F#</Description>
+    <Description>An complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
         
     <Configuration>Release</Configuration>
     <Platform>x64</Platform>
@@ -54,10 +54,7 @@
   </PropertyGroup>
 
   
-  <ItemGroup>      
-    <PackageReference Include="ini-parser" Version="2.5.2" />
-    <PackageReference Include="ZXing.Net" Version="0.16.6" /> <!--for QRcode generation--> 
-
+  <ItemGroup>
     <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="6.34.21034.7001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
@@ -122,7 +119,6 @@
     <Compile Include="Src/AutoOpenVector.fs" />
     <Compile Include="Src/ExtraCurve.fs" />
     <Compile Include="Src/ExtrasBrep.fs" />
-    <Compile Include="Src/ExtrasMesh.fs" />
-    <Compile Include="Src/ExtraQRcode.fs" />
+    <Compile Include="Src/ExtrasMesh.fs" />    
   </ItemGroup> 
 </Project>
