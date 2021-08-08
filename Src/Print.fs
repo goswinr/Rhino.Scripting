@@ -67,7 +67,7 @@ module AutoOpenToNiceStringExtensions =
                     let coli = i%4
                     let len = cols.[coli]                
                     yield "| "
-                    yield String.prefixToLength len ' ' s
+                    yield String.padLeftWith len ' ' s
                     if coli = 3 then yield! ""
                 //yield! sprintf "Scale x: %g ; y: %g z: %g" m.M00 m.M11 m.M22
                 }
