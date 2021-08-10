@@ -1,4 +1,4 @@
-<!-- in VS Code press Ctrl+K and then V to see a preview-->
+<!-- in VS Code press Ctrl + Shift + V to see a preview-->
 # Rhino.Scripting
 
 [![Rhino.Scripting for Rhino 7 on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting-7.svg)](https://nuget.org/packages/Rhino.Scripting-7) 
