@@ -496,7 +496,7 @@ module ExtensionsLayer =
         else 0
 
 
-    ///<summary>Returns the immediate child layers of a layer.</summary>
+    ///<summary>Returns the immediate child layers of a layer. ( exluding children of children) </summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
     [<Extension>]
@@ -506,6 +506,23 @@ module ExtensionsLayer =
         if notNull children then rarr {for child in children do child.FullPath }
         else rarr { () } //empty list
 
+    ///<summary>Returns all (immediate and descendent) child and grand child layers of a layer.</summary>
+    ///<param name="layer">(string) The name of an existing layer</param>
+    ///<returns>(string Rarr) List of children layer names.</returns>
+    [<Extension>]
+    static member LayerChildrenAll(layer:string) : string Rarr =        
+        let rec loop (l:Layer) =         
+            seq{
+                let children = l.GetChildren()
+                if notNull children then 
+                    for child in children do 
+                        yield child
+                        yield! loop child } //recurse
+        layer
+        |> RhinoScriptSyntax.CoerceLayer
+        |> loop 
+        |> Seq.map ( fun l -> l.FullPath)
+        |> Rarr.ofSeq
 
     ///<summary>Returns the color of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -855,7 +872,6 @@ module ExtensionsLayer =
             layer.ParentLayerId <- parent.Id
 
 
-
     ///<summary>Removes an existing layer from the document. The layer will be removed
     ///    even if it contains geometry objects. The layer to be removed cannot be the
     ///    current layer
@@ -868,6 +884,44 @@ module ExtensionsLayer =
         let rc = State.Doc.Layers.Purge( layer.Index, quiet=true)
         State.Doc.Views.Redraw()
         rc
+
+    ///<summary>Removes all empty layers from the document. Even if it is current</summary>    
+    ///<param name="keepCurrent">(bool) Optional, Default Value: <c>true</c>
+    ///    'true' to Keep the current Layer even if empty
+    ///    'false' to remove current layer too if its empty. Any other non empty layer might be the new current</param>
+    ///<returns>(unit) void, nothing.</returns>   
+    [<Extension>]
+    static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit =
+        let taken=Hashset()
+        let mutable nonEmptyIndex = -1
+        let rec addLoop(g:Guid)=
+            if g <> Guid.Empty then 
+                taken.Add(g)|> ignore 
+                addLoop (State.Doc.Layers.FindId(g).ParentLayerId) // recurse
+
+        for o in State.Doc.Objects do 
+            if not o.IsDeleted then 
+                let i = o.Attributes.LayerIndex
+                nonEmptyIndex <- i
+                let l = State.Doc.Layers.[i] 
+                addLoop l.Id         
+
+        let c = State.Doc.Layers.CurrentLayer.Id
+        // deal with current layers
+        if keepCurrent then 
+            taken.Add c  |> ignore 
+        elif taken.Count > 0  && taken.DoesNotContain c then 
+            // change current layer to a non empty one:
+            State.Doc.Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore 
+        for i = State.Doc.Layers.Count - 1 downto 0 do
+            let l = State.Doc.Layers.[i] 
+            if not l.IsDeleted then 
+                if taken.DoesNotContain (l.Id) then 
+                    if not <| State.Doc.Layers.Delete(i, quiet=true) then 
+                        RhinoScriptingException.Raise "PurgeAllLayers. Purge layer '%s' failed" l.FullPath
+
+        State.Doc.Views.Redraw()
+        
 
 
     ///<summary>Renames an existing layer.</summary>
