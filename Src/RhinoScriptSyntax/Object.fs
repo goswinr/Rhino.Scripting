@@ -1,6 +1,7 @@
 namespace Rhino.Scripting
 
 open System
+open System.Globalization // for unicode points
 open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 
 open Rhino
@@ -15,8 +16,7 @@ open FsEx.SaveIgnore
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// it only contaions static extension member on RhinoScriptSyntax
 [<AutoOpen>]
-module ExtensionsObject =
-
+module ExtensionsObject = 
   
   type RhinoScriptSyntax with
 
@@ -857,40 +857,109 @@ module ExtensionsObject =
             rhinoobject.Attributes.MaterialSource <- source
             if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
+    
+    
+    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keyas and values.
+    /// A good string may not inculde line returns, tabs, and leading or traling whitespace. 
+    /// Confusing characters that look like ASCII but are some other unicode are also not allowed. </summary>    
+    ///<param name="name">(string) The string to check.</param>
+    ///<param name="allowEmpty">(bool) Optional, Default Value: <c>false</c> , set to true to make empty strings pass. </param>
+    ///<returns>(bool) true if the string is a valid name.</returns>
+    [<Extension>]
+    static member IsGoodStringId( name:string, [<OPT;DEF(false)>]allowEmpty:bool) : bool = 
+        if isNull name then false 
+        elif allowEmpty && name = "" then true
+        else
+            let tr = name.Trim()
+            if tr.Length <> name.Length then false   
+            else
+                let rec loop i = 
+                    if i = name.Length then true
+                    else
+                        let c = name.[i]                        
+                        if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                            loop(i+1) 
+                        else  
+                            let cat = Char.GetUnicodeCategory(c)
+                            match cat with
+                            // always OK :
+                            | UnicodeCategory.UppercaseLetter 
+                            | UnicodeCategory.LowercaseLetter 
+                            | UnicodeCategory.CurrencySymbol -> 
+                                loop(i+1) 
+                            
+                            // sometimes Ok :
+                            | UnicodeCategory.OtherSymbol  // 166:'¦'  167:'§'   169:'©'  174:'®' 176:'°' 182:'¶'                                
+                            | UnicodeCategory.MathSymbol   // 172:'¬' 177:'±' 215:'×' 247:'÷' | exclude char 215 taht looks like x                                
+                            | UnicodeCategory.OtherNumber ->   //178:'²' 179:'³' 185:'¹' 188:'¼' 189:'½' 190:'¾'
+                                if c < '÷' || c <> '×' then loop(i+1) // anything below247 but exclude MathSymbol char 215 that looks like letter x    
+                                else false
+                            
+                            // NOT Ok :
+                            | UnicodeCategory.OpenPunctuation  // only ( [ and { is allowed
+                            | UnicodeCategory.ClosePunctuation // exclude if out of unicode points 32 till 126 
+                            | UnicodeCategory.Control    
+                            | UnicodeCategory.SpaceSeparator         // only regular space  ( that is char 32)     is alowed                           
+                            | UnicodeCategory.ConnectorPunctuation   // only simple underscore  _    is alowed                           
+                            | UnicodeCategory.DashPunctuation        // only minus - is allowed                                
+                            | UnicodeCategory.TitlecaseLetter            
+                            | UnicodeCategory.ModifierLetter             
+                            | UnicodeCategory.NonSpacingMark             
+                            | UnicodeCategory.SpacingCombiningMark       
+                            | UnicodeCategory.EnclosingMark              
+                            | UnicodeCategory.LetterNumber               
+                            | UnicodeCategory.LineSeparator              
+                            | UnicodeCategory.ParagraphSeparator         
+                            | UnicodeCategory.Format 
+                            | UnicodeCategory.OtherNotAssigned 
+                            | UnicodeCategory.ModifierSymbol 
+                            | UnicodeCategory.OtherPunctuation // exclude if out of unicode points 32 till 126 
+                            | UnicodeCategory.DecimalDigitNumber // exclude if out of unicode points 32 till 126                             
+                            | UnicodeCategory.InitialQuotePunctuation 
+                            | UnicodeCategory.FinalQuotePunctuation 
+                            | UnicodeCategory.OtherLetter 
+                            | _ -> false
+                loop 0
+
 
 
     ///<summary>Returns the name of an object or "" if none given.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<returns>(string) The current object name, empty string if no name given .</returns>
+    ///<returns>(string) The current object name, or empty string if no name given .</returns>
     [<Extension>]
     static member ObjectName(objectId:Guid) : string = //GET
-        let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)        
         let n = rhinoobject.Attributes.Name
         if isNull n then ""
-        else n
-        
+        else n   
 
     ///<summary>Modifies the name of an object.</summary>
     ///<param name="objectId">(Guid)Id of object</param>
-    ///<param name="name">(string) The new object name.</param>
+    ///<param name="name">(string) The new object name. Or empty string</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member ObjectName(objectId:Guid, name:string) : unit = //SET
         //id = RhinoScriptSyntax.Coerceguid(objectId)
         let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.Name <- name
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName failed for '%A' and '%A'"  name objectId
+        if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then 
+            rhinoobject.Attributes.Name <- name
+            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName failed for '%s' and '%A'"  name objectId
+        else
+            RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name 
     
     ///<summary>Modifies the name of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq)Id of objects</param>
-    ///<param name="name">(string) The new objects name.</param>
+    ///<param name="name">(string) The new objects name. Or empty string</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member ObjectName(objectIds:Guid seq, name:string) : unit = //MULTISET
-        for objectId in objectIds do
-            let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.Name <- name
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName failed for '%A' and '%A'"  name objectId
+        if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then             
+            for objectId in objectIds do
+                let rhinoobject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+                rhinoobject.Attributes.Name <- name
+                if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName failed for '%s' and '%A'"  name objectId
+        else
+            RhinoScriptingException.Raise "RhinoScriptSyntax.Set ObjectName string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name 
 
 
 

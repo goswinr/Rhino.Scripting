@@ -13,7 +13,6 @@ open FsEx.SaveIgnore
 [<AutoOpen>]
 module ExtensionsUserdata =
 
-  
   type RhinoScriptSyntax with
 
     ///<summary>Removes user data strings from the current document.</summary>
@@ -102,11 +101,9 @@ module ExtensionsUserdata =
     static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s = 
-            if attachedToGeometry then
-                obj.Geometry.GetUserString(key)
-            else
-                obj.Attributes.GetUserString(key)
-        
+            if attachedToGeometry then  obj.Geometry.GetUserString(key)
+            else                        obj.Attributes.GetUserString(key)
+
         if isNull s then             
             let err = 
                 stringBuffer{
@@ -139,18 +136,15 @@ module ExtensionsUserdata =
     static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option=
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s = 
-            if attachedToGeometry then
-                obj.Geometry.GetUserString(key)
-            else
-                obj.Attributes.GetUserString(key)
+            if attachedToGeometry then  obj.Geometry.GetUserString(key)
+            else                        obj.Attributes.GetUserString(key)
         if isNull s then None
         else Some s
 
     ///<summary>Checks if a User Text key is stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
-    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to retrieve the user text</param>
+    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to retrieve the user text</param>
     ///<returns>(bool) if key exist true.</returns>
     [<Extension>]
     static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool =
@@ -198,6 +192,7 @@ module ExtensionsUserdata =
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
+        // TODO verify input strings
         State.Doc.Strings.SetString(section, entry, value) |> ignoreObj
 
 
@@ -206,9 +201,11 @@ module ExtensionsUserdata =
     ///<param name="value">(string) The string value to set. Cannot be empty string. Use rs.DeleteDocumentUserText to delete keys</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
-    static member SetDocumentUserText(key:string, value:string) : unit =
-        if isNull key || isNull value then RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText failed on for null key and/or null value" 
-        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText failed on for key '%s' and value \"\" (empty string)"  key 
+    static member SetDocumentUserText(key:string, value:string) : unit =        
+        if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+        if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=false) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         State.Doc.Strings.SetString(key, value) |> ignoreObj
         
 
@@ -225,43 +222,48 @@ module ExtensionsUserdata =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to store the user text</param>
+    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
-        //TODO add null check for key and value
-        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (Print.guid objectId) key 
+        if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+        if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=false) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)         
         if attachToGeometry then
-            if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
+            if not <| obj.Geometry.SetUserString(key, value) then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
         else
-            if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
+            if not <| obj.Attributes.SetUserString(key, value) then 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
 
     ///<summary>Sets or removes user text stored on multiple objects.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to store the user text</param>
+    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
-        //TODO add null check for key and value
-        if value = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' and value \"\" (empty string)" (Print.nice objectIds) key 
+        if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+        if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=false) then 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
-                if not <| obj.Geometry.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
+                if not <| obj.Geometry.SetUserString(key, value) then 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
             else
-                if not <| obj.Attributes.SetUserString(key, value) then RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
+                if not <| obj.Attributes.SetUserString(key, value) then 
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
 
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to delete</param>    
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to delte the user text from</param>
+    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to delte the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
@@ -273,8 +275,7 @@ module ExtensionsUserdata =
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to delete</param>    
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c>
-    ///    Location on the object to delete the user text from</param>
+    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to delete the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     [<Extension>]
     static member DeleteUserText(objectIds:Guid seq, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL        
