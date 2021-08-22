@@ -31,7 +31,7 @@
     <Description>A complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
         
     <Configuration>Release</Configuration>
-    <Platform>x64</Platform>
+    <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, dont us just 'Platform' tag-->
     <OutputPath>binRh6</OutputPath>
 
     <DefineConstants>RHINO6</DefineConstants>   
@@ -52,17 +52,15 @@
     <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>    
     <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>    
   </PropertyGroup>
-
   
   <ItemGroup>
     <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="6.34.21034.7001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
 
-    <PackageReference Include="FsEx" Version="0.5.1" />  
-    <!-- <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" />  -->
-  
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />      
+    <PackageReference Include="FsEx" Version="0.*" /> <!-- Accepts any 0.x.y version. Will resolve to the highest acceptable stable version.-->
+     
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.*" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />      
   </ItemGroup>
 
   <ItemGroup>

@@ -31,7 +31,7 @@
     <Description>A complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
        
     <Configuration>Release</Configuration>
-    <Platform>x64</Platform>
+    <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, dont us just 'Platform' tag-->
     <OutputPath>binRh7</OutputPath>
 
     <!-- <DefineConstants>RHINO7</DefineConstants> Only done for Rhino 6 -->    
@@ -58,10 +58,9 @@
     <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
 
-    <PackageReference Include="FsEx" Version="0.5.1" />  
-    <!-- <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" />  -->
+    <PackageReference Include="FsEx" Version="0.*" /> <!-- Accepts any 0.x.y version. Will resolve to the highest acceptable stable version.--> 
   
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />      
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.*" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />      
   </ItemGroup>
 
   <ItemGroup>
