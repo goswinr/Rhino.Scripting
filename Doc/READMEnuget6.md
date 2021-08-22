@@ -1,19 +1,11 @@
 <!-- in VS Code press Ctrl + Shift + V to see a preview-->
 # Rhino.Scripting
-
-[![Rhino.Scripting for Rhino 7 on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting-7.svg)](https://nuget.org/packages/Rhino.Scripting-7) 
-[![Rhino.Scripting for Rhino 7 on fuget.org](https://www.fuget.org/packages/Rhino.Scripting-7/badge.svg)](https://www.fuget.org/packages/Rhino.Scripting-7)
-[![Rhino.Scripting for Rhino 6 on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting-6.svg)](https://nuget.org/packages/Rhino.Scripting-6) 
-[![Rhino.Scripting for Rhino 6 on fuget.org](https://www.fuget.org/packages/Rhino.Scripting-6/badge.svg)](https://www.fuget.org/packages/Rhino.Scripting-6)
-
-![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Doc/logo128.png)
-
 Rhino.Scripting is an implementation of the **RhinoScript** syntax in and for F# (and C#).  
 It enables the use of RhinoScript in F# and all the great coding experience that come with F#, like: 
-- Automatic code completion while typing
-- Automatic error checking and highlighting in the background 
-- Type info on mouse over
-- Type certainty even without type annotation (type inference)
+- automatic code completion while typing
+- automatic error checking and highlighting in the background 
+- type info on mouse over
+- type certainty even without type annotation (type inference)
 
 ## What is RhinoScript ?
 
@@ -29,24 +21,23 @@ This allowed the use of a modern, rich and dynamically typed programming languag
 ## What is this repro?
 
 This repro has [all](https://developer.rhino3d.com/api/RhinoScriptSyntax/) RhinoScript functions reimplemented in [F#](https://fsharp.org/)  
-It is literally a translation of the open source Ironpython [rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.  
+It is literally a translation of the open source Ironpython [rhinoscriptsyntax implementation](https://github.com/mcneel/rhinoscriptsyntax) to F#.  
 
 ## Get started 
 
 The recommended scripting use case is via the [Seff.Rhino](https://github.com/goswinr/Seff.Rhino) Editor.   
 However you can use this library just as well in compiled F#, C# or VB.net projects.
-Or even in Grasshopper C# VB.net scripting components.
+Or even in Grasshopper C# or VB.net scripting components.
 
 First reference the assemblies. 
 In an F# scripting editor do
 ```fsharp
-#r @"C:\Program Files\Rhino 7\System\RhinoCommon.dll"  // adapt path if needed
-#r @"D:\Git\Rhino.Scripting\src\bin\Debug\net472\Rhino.Scripting.dll"
+#r @"C:\Program Files\Rhino 7\System\RhinoCommon.dll"  // adapt path as needed
+#r "nuget: Rhino7.Scripting"
 ```   
-then open modules 
+open modules 
 ```fsharp
 open Rhino.Scripting  // to make extension members available 
-
 type rs = RhinoScriptSyntax  // type abbreviation  (alias) for RhinoScriptSyntax
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
