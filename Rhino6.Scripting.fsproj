@@ -58,9 +58,9 @@
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="6.34.21034.7001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
 
-    <PackageReference Include="FsEx" Version="0.*" /> <!-- Accepts any 0.x.y version. Will resolve to the highest acceptable stable version.-->
+    <PackageReference Include="FsEx" Version="0.6.3" />
      
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.*" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />      
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
   <ItemGroup>
