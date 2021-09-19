@@ -23,11 +23,12 @@ type Scripting private () =
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 
     /// A Dictionary to store state between scripting session.
-    /// use Sticky.Clear() to reset it.
+    /// Use Rhino.Scripting.Sticky.Clear() to reset it.
+    /// Similar to scriptingcontext.sticky in Rhino Python.
     static member val Sticky = new Dictionary<string, obj>() with get
 
     /// An Integer Enum of Object types.
-    /// to be use in object selection functions such as rs.GetObjects().
+    /// To be use in object selection functions such as rs.GetObjects().
     static member val Filter = new ObjectFilterEnum ()
 
     /// Tests to see if the user has pressed the escape key.
@@ -7639,8 +7640,7 @@ type Scripting private () =
             if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%A'" (Print.guid objectId) text
         State.Doc.Views.Redraw()
 
-
-///<summary>Modifies the font style of a text object.</summary>
+    ///<summary>Modifies the font style of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="style">(int) The font style. Can be any of the following flags
     ///    0 = Normal
@@ -14620,7 +14620,6 @@ type Scripting private () =
             ()
         notNull newsrf
 
-
     ///<summary>Explodes, or unjoins, one or more Polysurface objects. Polysurfaces
     ///    will be exploded into separate Surfaces.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of Polysurfaces to explode</param>
@@ -14819,6 +14818,7 @@ type Scripting private () =
     ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
     ///<returns>(unit) void, nothing.</returns>
+    
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = Scripting.CoerceBrep(surfaceId)
         if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
@@ -15003,7 +15003,6 @@ type Scripting private () =
         rc
 
 
-
     ///<summary>Verifies an object is a Polysurface or Extrusion. Polysurfaces consist of two or more Surfaces joined together.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
@@ -15106,7 +15105,6 @@ type Scripting private () =
         | _ -> false
 
 
-
     ///<summary>Verifies a Surface object is rational.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
@@ -15117,7 +15115,6 @@ type Scripting private () =
             if ns|> isNull  then false
             else ns.IsRational
         | _ -> false
-
 
 
     ///<summary>Verifies a Surface object is singular in the specified direction.
@@ -15448,8 +15445,6 @@ type Scripting private () =
         amp.Area
 
 
-
-
     ///<summary>Calculate the area of a Brep / Polysurface  Geometry.
     /// The results are based on the current drawing units.</summary>
     ///<param name="brep">(Geometry.Brep) The Polysurface geometry</param>
@@ -15473,9 +15468,6 @@ type Scripting private () =
         | :? Surface as s -> Scripting.SurfaceArea s
         | :? Brep    as b -> Scripting.SurfaceArea b
         | x -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea doesnt work on on %A" (Print.guid  objectId)
-
-
-
 
 
     ///<summary>Calculates the area centroid of a Surface or Polysurface.</summary>
@@ -15704,22 +15696,20 @@ type Scripting private () =
                     }
 
 
-
     ///<summary>A general purpose Surface evaluator.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter to evaluate</param>
     ///<param name="derivative">(int) Number of derivatives to evaluate</param>
-    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2 . The elements are as follows:
-    ///    firts Element of tuple
-    ///    [fst]      The 3-D point.
-    ///    [snd]   Vectors in List:
+    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2 
+    ///    Elements of tuple:
+    ///    [fst] The 3-D point.
+    ///    [snd] List of Vectors:
     ///            [0]      The first derivative.
     ///            [1]      The first derivative.
     ///            [2]      The second derivative.
     ///            [3]      The second derivative.
     ///            [4]      The second derivative.
-    ///            [5]      etc...
-    ///.</returns>
+    ///            [5]      etc...</returns>
     static member SurfaceEvaluate( surfaceId:Guid,
                                    parameter:float * float,
                                    derivative:int) : Point3d * Vector3d Rarr = 
@@ -15982,16 +15972,16 @@ type Scripting private () =
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>((float*float*float) Rarr) List of moments and error bounds in tuple(X, Y, Z) - see help topic
     ///    Index   Description
-    ///    [0]     First Moments.
-    ///    [1]     The absolute (+/-) error bound for the First Moments.
-    ///    [2]     Second Moments.
-    ///    [3]     The absolute (+/-) error bound for the Second Moments.
-    ///    [4]     Product Moments.
-    ///    [5]     The absolute (+/-) error bound for the Product Moments.
-    ///    [6]     Area Moments of Inertia about the World Coordinate Axes.
-    ///    [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
-    ///    [8]     Area Radii of Gyration about the World Coordinate Axes.
-    ///    [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///    [ 0]     First Moments.
+    ///    [ 1]     The absolute (+/-) error bound for the First Moments.
+    ///    [ 2]     Second Moments.
+    ///    [ 3]     The absolute (+/-) error bound for the Second Moments.
+    ///    [ 4]     Product Moments.
+    ///    [ 5]     The absolute (+/-) error bound for the Product Moments.
+    ///    [ 6]     Area Moments of Inertia about the World Coordinate Axes.
+    ///    [ 7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+    ///    [ 8]     Area Radii of Gyration about the World Coordinate Axes.
+    ///    [ 9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
     ///    [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
@@ -18317,9 +18307,6 @@ type Scripting private () =
         let z = point1.Z - point2.Z
         sqrt (x*x + y*y + z*z)
 
-
-
-
     ///<summary>Returns 3D point that is a specified angle and distance from a 3D point.</summary>
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="angleDegrees">(float) Angle in degrees</param>
@@ -18342,10 +18329,12 @@ type Scripting private () =
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float Rarr) A one-dimensional list containing real numbers.</returns>
     static member SimplifyArray(points:Point3d seq) : float Rarr = 
-        rarr { for  p in points do
-                            yield p.X
-                            yield p.Y
-                            yield p.Z }
+        rarr {  
+            for p in points do
+                yield p.X
+                yield p.Y
+                yield p.Z 
+            }
 
 
     ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI.</summary>
@@ -18472,15 +18461,14 @@ type Scripting private () =
         Geometry.Interval(start , ende)
 
 
-(*
-
-manipulationg ini files like in original Rhinoscript could be include via
-<PackageReference Include="ini-parser" Version="2.5.2" />
-however for now it is excluded to keep the dependencies at just FsEx.
-If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
-
-open IniParser
-open IniParser.Model
+    (* 
+    manipulationg ini files like in original Rhinoscript could be include via
+    <PackageReference Include="ini-parser" Version="2.5.2" />
+    however for now it is excluded to keep the dependencies at just FsEx.
+    If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
+    
+    open IniParser
+    open IniParser.Model
 
     ///<summary>Returns section names or keys in one section of an ini file.</summary>
     ///<param name="filename">(string) Name  and path of the inifile</param>
