@@ -1,29 +1,29 @@
-namespace Rhino
+﻿namespace Rhino
 
 open System
 open Rhino
 
 [<AutoOpen>]
-module internal Util =   
+module internal Util = 
 
     /// If first value is 0.0 return second else first
     let inline ifZero1 a b = if a = 0.0 then b else a
-    
+
     /// If second value is 0.0 return first else second
-    let inline ifZero2 a b =  if b = 0.0 then a else b 
+    let inline ifZero2 a b =  if b = 0.0 then a else b
 
     // ------- Abreviations so that declarations are not so long:
-    
+
     /// OptionalAttribute for member parameters
     type internal OPT = Runtime.InteropServices.OptionalAttribute
-    
+
     /// DefaultParameterValueAttribute for member parameters
     type internal DEF =   Runtime.InteropServices.DefaultParameterValueAttribute
-    
-    
+
+
 /// An Integer Enum of Object types to be use in object selection functions.
 /// Don't create an instance, use the instance in Rhino.Scripting.Filter
-[<Sealed>] 
+[<Sealed>]
 type ObjectFilterEnum internal () =  // not a static class, just internal
     /// returns 0
     member _.AllObjects = 0
@@ -64,10 +64,10 @@ type ObjectFilterEnum internal () =  // not a static class, just internal
     /// returns 536870912
     member _.ClippingPlane = 536870912
     /// returns 1073741824
-    member _.Extrusion = 1073741824 
-    
+    member _.Extrusion = 1073741824
+
         ///A helper function to get a DocObjects.ObjectType Enum form an integer
-    static member internal GetFilterEnum(i:int) : DocObjects.ObjectType =
+    static member internal GetFilterEnum(i:int) : DocObjects.ObjectType = 
         let mutable e = DocObjects.ObjectType.None
         if 0 <> (i &&& 1 ) then          e  <- e ||| DocObjects.ObjectType.Point
         if 0 <> (i &&& 16384 ) then      e  <- e ||| DocObjects.ObjectType.Grip

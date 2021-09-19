@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props-->
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net48</TargetFramework> <!-- so it can be used in latest Rhino 7 too,  net48 needed since RhinoCommon.dll 7.5 --> 
+    <TargetFramework>net48</TargetFramework> <!-- so it can be used in latest Rhino 7 too,  net48 needed since RhinoCommon.dll 7.5 -->
     <UseWPF>true</UseWPF><!--for DispatcherSynchronizationContext in RhinoSync, and Seff editor Window (if available)-->
     <UseWindowsForms>true</UseWindowsForms>   <!--to get screen resolution-->
     <LangVersion>preview</LangVersion>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
-    
+
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>    <!--to only have the english resources-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -17,54 +17,54 @@
     <AssemblyName>Rhino.Scripting</AssemblyName>
     <AssemblyTitle>Rhino.Scripting</AssemblyTitle>
     <Product>Rhino.Scripting for Rhino 6</Product> <!--visible in explorer-->
-    <Title>Rhino.Scripting for Rhino 6</Title>  
-    <PackageId>Rhino6.Scripting</PackageId>  
+    <Title>Rhino.Scripting for Rhino 6</Title>
+    <PackageId>Rhino6.Scripting</PackageId>
 
     <Version>0.0.2</Version>
     <AssemblyVersion>0.0.2</AssemblyVersion>
     <FileVersion>0.0.2</FileVersion>
     <PackageReleaseNotes>First release</PackageReleaseNotes>
-    
+
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2021</Copyright>
 
     <Description>A complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
-        
+
     <Configuration>Release</Configuration>
     <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, dont us just 'Platform' tag-->
     <OutputPath>binRh6</OutputPath>
 
-    <DefineConstants>RHINO6</DefineConstants>   
+    <DefineConstants>RHINO6</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup>  
+  <PropertyGroup>
     <!--https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target-->
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>      
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <!-- <SymbolPackageFormat>snupkg</SymbolPackageFormat>   -->
     <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>    
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/goswinr/Rhino.Scripting</PackageProjectUrl>
     <RepositoryUrl>https://github.com/goswinr/Rhino.Scripting</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageIcon>logo128.png</PackageIcon>
-    <PackageReadmeFile>READMEnuget6.md</PackageReadmeFile> <!-- using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791 -->    
-    <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>    
-    <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>    
+    <PackageReadmeFile>READMEnuget6.md</PackageReadmeFile> <!-- using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791 -->
+    <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>
+    <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="6.34.21034.7001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
 
-    <PackageReference Include="FsEx" Version="0.6.4" />
-     
+    <PackageReference Include="FsEx" Version="0.6.5" />
+
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="README.md" />   
+    <None Include="README.md" />
     <None Include="Doc/READMEnuget6.md" Pack="true" PackagePath="" />
     <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
 
@@ -75,8 +75,8 @@
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
-    <Compile Include="Src/NoWarn44.fs" />    
-    <Compile Include="Src/Scripting.fs" />    
-   
-  </ItemGroup> 
+    <Compile Include="Src/NoWarn44.fs" />
+    <Compile Include="Src/Scripting.fs" />
+
+  </ItemGroup>
 </Project>
