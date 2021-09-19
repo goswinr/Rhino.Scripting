@@ -32,14 +32,14 @@ Or even in Grasshopper C# VB.net scripting components.
 First reference the assemblies. 
 In an F# scripting editor do
 ```fsharp
-#r @"C:\Program Files\Rhino 6\System\RhinoCommon.dll"  // adapt path if needed
+#r @"C:\Program Files\Rhino 7\System\RhinoCommon.dll"  // adapt path if needed
 #r @"D:\Git\Rhino.Scripting\src\bin\Debug\net472\Rhino.Scripting.dll"
 ```   
 open modules 
 ```fsharp
-open Rhino.Scripting  // to make extension members available 
 
-type rs = RhinoScriptSyntax  // type abbreviation  (alias) for RhinoScriptSyntax
+
+type rs = Rhino.Scripting  // type abbreviation  (alias) for RhinoScriptSyntax
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
 The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.

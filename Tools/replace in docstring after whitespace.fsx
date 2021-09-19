@@ -1,4 +1,4 @@
-#r @"D:\Git\FsEx\bin\Release\netstandard2.0\FsEx.dll"
+#r "nuget: FsEx"
 
 open System
 open FsEx

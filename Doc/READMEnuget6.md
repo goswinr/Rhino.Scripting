@@ -37,8 +37,8 @@ In an F# scripting editor do
 ```   
 open modules 
 ```fsharp
-open Rhino.Scripting  // to make extension members available 
-type rs = RhinoScriptSyntax  // type abbreviation  (alias) for RhinoScriptSyntax
+
+type rs = Rhino.Scripting  // type abbreviation  (alias) for RhinoScriptSyntax
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
 The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.

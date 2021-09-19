@@ -1,4 +1,4 @@
-#r @"D:\Git\FsEx\bin\Release\netstandard2.0\FsEx.dll"
+#r "nuget: FsEx"
 //#r @"D:\OneDrive\10_Dev\01_Nuget\fparsec.1.1.1\lib\netstandard2.0\FParsecCS.dll"
 //#r @"D:\OneDrive\10_Dev\01_Nuget\fparsec.1.1.1\lib\netstandard2.0\FParsec.dll"
 
