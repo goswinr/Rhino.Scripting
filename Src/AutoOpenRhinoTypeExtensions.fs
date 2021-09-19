@@ -1,22 +1,20 @@
-namespace Rhino.Scripting
+namespace Rhino
 
-open System.Runtime.CompilerServices
 open Rhino.Geometry 
 
 [<AutoOpen>]
 /// This module provides type extensions for Points , Vector,  Lines
 /// Mostly for conversion to other types
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
-module AutoOpenRhinoTypeExtensions =  
-       
+/// These type extensions are only visible in F#.
+module AutoOpenRhinoTypeExtensions =         
     
-    // Extensions for .ToNiceString are in Print Module !!
+    // NOTE: Extensions for .ToNiceString are in Print Module !!
 
     type Point3d with 
 
         /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in Meshes)
-        member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
-     
+        member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)     
 
      
     type Point3f with         
@@ -78,7 +76,7 @@ module AutoOpenRhinoTypeExtensions =
 
     type PolylineCurve with 
         
-        /// Gets a seq (= IEnumerable) of the Points that make up the Polyline.
+        /// Gets a lazy seq (= IEnumerable) of the Points that make up the Polyline.
         member pl.Points = 
             seq { for i = 0 to pl.PointCount - 1 do pl.Point(i) }
     

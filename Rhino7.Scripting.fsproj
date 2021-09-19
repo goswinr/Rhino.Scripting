@@ -58,7 +58,7 @@
     <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
 
-    <PackageReference Include="FsEx" Version="0.6.3" />
+    <PackageReference Include="FsEx" Version="0.6.4" />
   
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
@@ -68,14 +68,14 @@
     <None Include="Doc/READMEnuget7.md"  Pack="true" PackagePath="" />
     <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
 
-    <Compile Include="Src/Exceptions.fs" />
-    <Compile Include="Src/SyncRhino.fs" />
+     <Compile Include="Src/Exceptions.fs" />
+    <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
     <Compile Include="Src/Print.fs" />
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/NoWarn44.fs" />    
-    <Compile Include="Src/RhinoScriptSyntax.fs" />    
+    <Compile Include="Src/Scripting.fs" />   
   </ItemGroup> 
 </Project>

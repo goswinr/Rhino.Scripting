@@ -1,14 +1,8 @@
-namespace Rhino.Scripting
-
-open FsEx
+namespace Rhino
 open System
-open Rhino
 open Rhino.Geometry
-
-open System.Runtime.CompilerServices // [<Extension>] Attribute not needed for intrinsic (same dll) type augmentations ?
 open FsEx.SaveIgnore
-open System.Collections.Generic
-
+open FsEx // for |? op
 
 // *** This file has only functions that require a nowarn for deprecated implementations. Is there a non deprecated implementeation for RhinoCommon 6.0 ??
 
@@ -20,15 +14,15 @@ open System.Collections.Generic
 module internal NoWarnUtil = 
     
     let CoerceGeometry(objectId:Guid) : GeometryBase =
-        if Guid.Empty = objectId then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry failed on empty Guid"
+        if Guid.Empty = objectId then RhinoScriptingException.Raise "Rhino.Scripting..CoerceGeometry failed on empty Guid"
         let o = State.Doc.Objects.FindId(objectId)
-        if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry failed: Guid %A not found in Object table." objectId
+        if isNull o then RhinoScriptingException.Raise "Rhino.Scripting..CoerceGeometry failed: Guid %A not found in Object table." objectId
         o.Geometry
 
     let CoerceTextEntity (objectId:Guid) : TextEntity =
         match CoerceGeometry objectId with
         | :?  TextEntity as a -> a
-        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextEntity failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting..CoerceTextEntity failed on: %s " (Print.guid objectId)
 
 
 
@@ -44,8 +38,8 @@ type internal NoWarnGeometry() =
             |2 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=false, italic=true)
             |1 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=true , italic=false)
             |0 -> State.Doc.Fonts.FindOrCreate(fontdata.FaceName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
-        if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.FaceName
+            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.FaceName
         let f = State.Doc.Fonts.[index]
         #else
         let f =
@@ -54,12 +48,12 @@ type internal NoWarnGeometry() =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
-        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName
+            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName
         #endif
         
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
+            RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
         
 
 
@@ -78,8 +72,8 @@ type internal NoWarnGeometry() =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
+            |? (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)
         #endif
         annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
         State.Doc.Views.Redraw()

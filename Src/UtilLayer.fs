@@ -1,8 +1,7 @@
-namespace Rhino.Scripting
+namespace Rhino
 
 open System
-open System.Globalization
-open Rhino
+open System.Globalization // for UnicodeCategory
 open Rhino.DocObjects
 
 module internal UtilLayer =
@@ -11,35 +10,35 @@ module internal UtilLayer =
   /// it may not contain :: or control characters
   /// set allowSpecialChars to false to only have ASCII
   let internal ensureValidShortLayerName(name:string, allowSpecialChars) : unit= 
-    if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax found an null string as layer name" 
-    if name.Length = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax found an empty string as layer name" 
+    if isNull name then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an null string as layer name" 
+    if name.Length = 0 then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an empty string as layer name" 
    
     let tr = name.Trim()
     if tr.Length <> name.Length then 
-        RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid layer name: '%s'. It has trailing or leading white space" name
+        RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an invalid layer name: '%s'. It has trailing or leading white space" name
    
     if name.Contains "::" then 
-        RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing two colons(::)  '%s'. " name        
+        RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an invalid short layer name containing two colons(::)  '%s'. " name        
    
     match Char.GetUnicodeCategory(name.[0]) with
     | UnicodeCategory.OpenPunctuation | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) dont work at start of layer name
-        RhinoScriptingException.Raise  "RhinoScriptSyntax found an invalid layer name: '%s'. The name may not start with a '%c' " name name.[0]
+        RhinoScriptingException.Raise  "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an invalid layer name: '%s'. The name may not start with a '%c' " name name.[0]
     | _ -> ()      
    
     for c in name do
         let cat = Char.GetUnicodeCategory(c)
         match cat with
         |UnicodeCategory.Control  ->                     
-            RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing UnicodeCategory.Control characters: '%s'. " name       
+            RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an invalid short layer name containing UnicodeCategory.Control characters: '%s'. " name       
         
         |UnicodeCategory.SpaceSeparator when c <> ' ' -> 
-            RhinoScriptingException.Raise "RhinoScriptSyntax found an invalid short layer name containing UnicodeCategory.SpaceSeparator other than regular space in '%s'. If you really want this character add the layer directly via Rhinocommon"  name
+            RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an invalid short layer name containing UnicodeCategory.SpaceSeparator other than regular space in '%s'. If you really want this character add the layer directly via Rhinocommon"  name
         
         |UnicodeCategory.ConnectorPunctuation when c <> '_' -> 
-            RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater '%c' in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" c cat  name
+            RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an not recommended charcater '%c' in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" c cat  name
         
         |UnicodeCategory.DashPunctuation when c <> '-'  ->       // only minus is allowed
-            RhinoScriptingException.Raise "RhinoScriptSyntax found an not recommended charcater '%c' in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" c cat  name
+            RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an not recommended charcater '%c' in short layer name containing %A  in '%s'. If you really want this character add the layer directly via Rhinocommon" c cat  name
         
         |UnicodeCategory.TitlecaseLetter            
         |UnicodeCategory.ModifierLetter             
@@ -53,7 +52,7 @@ module internal UtilLayer =
         |UnicodeCategory.Format 
         |UnicodeCategory.OtherNotAssigned 
         |UnicodeCategory.ModifierSymbol ->
-            RhinoScriptingException.Raise "RhinoScriptSyntax found a probably not supported charcater in short layer name containing %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" cat  name
+            RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found a probably not supported charcater in short layer name containing %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" cat  name
         
         | _ -> ()
 
@@ -63,34 +62,34 @@ module internal UtilLayer =
 
              (*
              |UnicodeCategory.UppercaseLetter when c > 'Z' -> //always allow ?                 
-                RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              
              |UnicodeCategory.LowercaseLetter when c > 'z' -> //always allow ß ä ö ü and similar                 
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              
              |UnicodeCategory.CurrencySymbol when c > '¥' -> //Unicode	U+00A5 ¥ YEN SIGN //always allow ?
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              *)
              
              |UnicodeCategory.OtherPunctuation when c > '\\' -> 
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
             
              |UnicodeCategory.OpenPunctuation when c > '{' -> 
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
 
              |UnicodeCategory.ClosePunctuation when c > '}' -> 
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              
              |UnicodeCategory.MathSymbol when c > '÷' -> //Unicode	U+00F7 ÷ DIVISION SIGN
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              
              |UnicodeCategory.DecimalDigitNumber when c > '9' -> 
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              |UnicodeCategory.OtherSymbol 
              |UnicodeCategory.InitialQuotePunctuation 
              |UnicodeCategory.FinalQuotePunctuation 
              |UnicodeCategory.OtherLetter ->
-                 RhinoScriptingException.Raise "RhinoScriptSyntax found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
+                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.ensureValidShortLayerName found an discouraged charcater '%c' in short layer name of category %A. in '%s'. If you really need this character add the layer directly via Rhinocommon" c cat  name
              
              | _ -> ()
 
@@ -99,7 +98,7 @@ module internal UtilLayer =
           if l.ParentLayerId = Guid.Empty then ps
           else
             let pl = State.Doc.Layers.FindId(l.ParentLayerId)
-            if isNull pl then RhinoScriptingException.Raise "RhinoScriptSyntax let internal getParents: ParentLayerId not found in layers"   
+            if isNull pl then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getParents let internal getParents: ParentLayerId not found in layers"   
             find pl (pl::ps)
       find lay []
   
@@ -141,11 +140,11 @@ module internal UtilLayer =
       match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
       | RhinoMath.UnsetIntIndex -> 
           match name with 
-          | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer from null string" 
-          | "" -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer from empty string"        
+          | null -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from null string" 
+          | "" -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from empty string"        
           | _ -> 
               match name.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with 
-              | [| |] -> RhinoScriptingException.Raise "RhinoScriptSyntax.getOrCreateLayer Cannot get or create layer for name: '%s'" name
+              | [| |] -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer for name: '%s'" name
               | ns -> 
               
                   let rec createLayer(nameList, prevId, prevIdx, root) : int = 

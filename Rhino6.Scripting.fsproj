@@ -4,7 +4,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework> <!-- so it can be used in latest Rhino 7 too,  net48 needed since RhinoCommon.dll 7.5 --> 
-    <UseWPF>true</UseWPF><!--for DispatcherSynchronizationContext in SyncRhino, and Seff editor Window (if available)-->
+    <UseWPF>true</UseWPF><!--for DispatcherSynchronizationContext in RhinoSync, and Seff editor Window (if available)-->
     <UseWindowsForms>true</UseWindowsForms>   <!--to get screen resolution-->
     <LangVersion>preview</LangVersion>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
@@ -58,7 +58,7 @@
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
     <!-- <PackageReference Include="RhinoCommon" Version="6.34.21034.7001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
 
-    <PackageReference Include="FsEx" Version="0.6.3" />
+    <PackageReference Include="FsEx" Version="0.6.4" />
      
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
@@ -68,16 +68,15 @@
     <None Include="Doc/READMEnuget6.md" Pack="true" PackagePath="" />
     <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
 
-
     <Compile Include="Src/Exceptions.fs" />
-    <Compile Include="Src/SyncRhino.fs" />
+    <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
     <Compile Include="Src/Print.fs" />
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/NoWarn44.fs" />    
-    <Compile Include="Src/RhinoScriptSyntax.fs" />    
+    <Compile Include="Src/Scripting.fs" />    
    
   </ItemGroup> 
 </Project>

@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+namespace Rhino
 
 open System
 
@@ -16,15 +16,15 @@ type RhinoScriptingException (s:string) =
 
 
  /// Exception for aborted user interactions, such as cancelling to pick an object
-type UserInteractionException (s:string) =
+type RhinoUserInteractionException (s:string) =
     inherit Exception(s)
     
     static member inline Raise msg = 
-        Printf.kprintf (fun s -> raise (new UserInteractionException(s))) msg 
+        Printf.kprintf (fun s -> raise (new RhinoUserInteractionException(s))) msg 
 
  /// Exception for UI thread synchronisation problems
-type SyncRhinoException (s:string) =
+type RhinoSyncException (s:string) =
     inherit Exception(s)
     
     static member inline Raise msg = 
-        Printf.kprintf (fun s -> raise (new SyncRhinoException(s))) msg 
+        Printf.kprintf (fun s -> raise (new RhinoSyncException(s))) msg 

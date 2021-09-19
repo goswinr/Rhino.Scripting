@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+namespace Rhino
 
 
 open System
@@ -45,7 +45,7 @@ type internal State private () =
     static let warnAboutFailedEventSetup () =
         [
         "***"
-        "SyncRhino.syncContext could not be set via reflection."
+        "RhinoSync.syncContext could not be set via reflection."
         "Rhino.Scripting.dll is not loaded from main thread"
         "it needs to set up callbacks for pressing Esc key and changing the active document."
         "Setting up these event handlers async can trigger a fatal access violation exception"
@@ -63,7 +63,7 @@ type internal State private () =
     
     static let setupEventsInSync() =         
         try 
-            SyncRhino.DoSync (fun () ->               
+            RhinoSync.DoSync (fun () ->               
                 // keep the reference to the active Document (3d file ) updated.  
                 RhinoDoc.EndOpenDocument.Add (fun args -> updateDoc args.Document)
                 //RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too
@@ -79,7 +79,7 @@ type internal State private () =
                     ) 
                 )
         with
-            | :? SyncRhinoException -> warnAboutFailedEventSetup()
+            | :? RhinoSyncException -> warnAboutFailedEventSetup()
             | e -> 
                 //raise e 
                 sprintf "%A" e
@@ -91,7 +91,7 @@ type internal State private () =
         if not  HostUtils.RunningInRhino then
             RhinoScriptingException.Raise "Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? " 
         else
-            SyncRhino.Initialize()
+            RhinoSync.Initialize()
             updateDoc(RhinoDoc.ActiveDoc )  // do first
             setupEventsInSync()             // do after Doc is set up
             isRunningInRhino <- true        // do last 

@@ -1,4 +1,4 @@
-namespace Rhino.Scripting
+namespace Rhino
 
 open System
 open Rhino
@@ -22,7 +22,7 @@ module internal Util =
     
     
 /// An Integer Enum of Object types to be use in object selection functions.
-/// Don't create an instance, use the instance in RhinoScriptSyntax.Filter
+/// Don't create an instance, use the instance in Rhino.Scripting.Filter
 [<Sealed>] 
 type ObjectFilterEnum internal () =  // not a static class, just internal
     /// returns 0

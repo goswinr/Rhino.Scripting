@@ -1,15 +1,13 @@
-namespace Rhino.Scripting
+namespace Rhino
 
 open System
-
-open Rhino
 open Rhino.Geometry
-
 open FsEx  
 
 [<AutoOpen>]
 /// This module provides type extensions for pretty printing 
-/// This module is automatically opened when Rhino.Scripting namespace is opened.
+/// This module is automatically opened when Rhino namespace is opened.
+/// These type extensions are only visible in F#
 module AutoOpenToNiceStringExtensions = 
     
     type Point3d with          
@@ -75,10 +73,10 @@ module AutoOpenToNiceStringExtensions =
 [<RequireQualifiedAccess>]
 module internal Print =
     
-    let mutable doInit = true // to delay setup of printing till first print call
+    let mutable initIsPending = true // to delay setup of printing till first print call
 
-    /// Gets a description on Rhino object type (curve , point, Surface ....)
-    /// including Layer and object name
+    /// Gets a description on Rhino object type (curve , point, Surface ....).
+    /// Including Layer and object name
     let guid (g:Guid)=
         if g = Guid.Empty then 
             "-Guid.Empty-"
@@ -108,7 +106,7 @@ module internal Print =
           | _                  -> None   
 
     let init()=    
-        doInit <- false
+        initIsPending <- false
         NiceStringSettings.externalFormater  <- formatRhinoObject
         if Rhino.Runtime.HostUtils.RunningInRhino then 
             // these below fail if not running inside rhino.exe
@@ -122,30 +120,30 @@ module internal Print =
     /// Abreviation for NiceString.toNiceString
     /// including special formating of Rhino Guids
     let nice (x:'T) =
-        if doInit then init()
+        if initIsPending then init()
         NiceString.toNiceString x  
 
 
-/// This module shadows the NiceString module from FsEx to include the special formating for Rhino types
+/// This module shadows the NiceString module from FsEx to include the special formating for Rhino types.
 module NiceString  =              
         
     /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator and (nested) sequences, first five items are printed out.
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// � thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
-    /// � maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    /// � maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
-    /// � maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.    
+    /// - thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
+    /// - maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    /// - maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// - maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.    
     let toNiceString (x:'T) :string = 
-        if Print.doInit then Print.init() // the shadowing is only done to ensure init() is called once
+        if Print.initIsPending then Print.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
         
     /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator, 
     /// all items of sequences, including nested items, are printed out.
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// � thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
-    /// � maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
+    /// - thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
+    /// - maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
     let toNiceStringFull (x:'T) :string =         
-        if Print.doInit then Print.init() // the shadowing is only done to ensure init() is called once
+        if Print.initIsPending then Print.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
 
 
@@ -157,22 +155,22 @@ module AutoOpenPrint =
     /// Only prints to Console.Out, NOT to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as ~0.0
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// � thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
-    /// � maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    /// � maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
-    /// � maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.  
+    /// - thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
+    /// - maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    /// - maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// - maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.  
     let print x = 
-        if Print.doInit then Print.init() 
+        if Print.initIsPending then Print.init() 
         print x
     
     /// Print to standard out including nice formating for Rhino Objects, numbers including thousand Separator, all items of sequences, including nested items, are printed out.
     /// Only prints to Console.Out, NOT to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as ~0.0
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// � thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
-    /// � maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
+    /// - thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
+    /// - maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
     let printFull x = 
-        if Print.doInit then Print.init() 
+        if Print.initIsPending then Print.init() 
         printFull x 
 
 

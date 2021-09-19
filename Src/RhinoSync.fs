@@ -1,31 +1,31 @@
-namespace Rhino.Scripting
+namespace Rhino
 
 open FsEx
 open System
-open Rhino
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
 /// A static classs to help access the UI thread of Rhino from other threads
-[<AbstractClass; Sealed>] 
-type SyncRhino private () = //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f   
+[<AbstractClass>]
+[<Sealed>] //use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f   
+type RhinoSync private () = 
     
     static let mutable seffRhinoSyncModule:Type = null
 
-    static let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below ;from Seff.Rhino    
+    static let mutable syncContext: Threading.SynchronizationContext  = null //set via reflection below ; from Seff.Rhino    
    
-    static let mutable seffAssembly : Reflection.Assembly = null //set via reflection belo;w from Seff.Rhino    
+    static let mutable seffAssembly : Reflection.Assembly = null //set via reflection below ; from Seff.Rhino    
     
-    static let mutable seffWindow : System.Windows.Window = null //set via reflection below; from Seff.Rhino
+    static let mutable seffWindow : System.Windows.Window = null //set via reflection below ; from Seff.Rhino
         
     static let log msg = Printf.kprintf(fun s -> RhinoApp.WriteLine s; eprintfn "%s" s) msg  
     
-    static let mutable tryInit = true
+    static let mutable initIsPending = true
 
     static let init() =
-        if tryInit then 
+        if initIsPending then 
             if not HostUtils.RunningInRhino || not HostUtils.RunningOnWindows then 
-                log "SyncRhino.init() not done because: HostUtils.RunningInRhino %b && HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
+                log "RhinoSync.init() not done because: HostUtils.RunningInRhino %b or HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
             else 
                 if isNull seffAssembly then
                     try
@@ -65,22 +65,22 @@ type SyncRhino private () = //static class, use these attributes to match C# sta
                     with e -> 
                         log "**Seff.Rhino.Sync.syncContext failed with: %A" e
                     
-        tryInit <- false               
+        initIsPending <- false               
         
   
     // ---------------------------------
     // Public members:
     // ---------------------------------
     
-    /// Test if the current thread is the main UI thread
-    /// just calls RhinoApp.InvokeRequired
-    static member IsCurrrenThreadUIThread =
+    // Test if the current thread is the main UI thread
+    // just calls RhinoApp.InvokeRequired
+    //static member IsCurrrenThreadUIThread =
         // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails ! if not in WPF ??
-        RhinoApp.InvokeRequired
-        //this calls: (via ILSpy)
-        //[DllImport("rhcommon_c", CallingConvention = CallingConvention.Cdecl)]
-        //[return: MarshalAs(UnmanagedType.U1)]
-        //internal static extern bool CRhMainFrame_InvokeRequired();
+        //RhinoApp.InvokeRequired
+        //    this calls: (via ILSpy)
+        //    [DllImport("rhcommon_c", CallingConvention = CallingConvention.Cdecl)]
+        //    [return: MarshalAs(UnmanagedType.U1)]
+        //    internal static extern bool CRhMainFrame_InvokeRequired();
    
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
@@ -101,8 +101,8 @@ type SyncRhino private () = //static class, use these attributes to match C# sta
     /// Evaluates a function on UI Thread.
     static member DoSync (func:unit->'T) : 'T =        
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then SyncRhino.Initialize()
-             if isNull syncContext then SyncRhinoException.Raise "Rhino.SyncRhino.syncContext is still null and not set up. UI code only works when started in sync mode."                
+             if isNull syncContext then RhinoSync.Initialize()
+             if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode."                
              async{
                     do! Async.SwitchToContext syncContext
                     return func()  
@@ -115,8 +115,8 @@ type SyncRhino private () = //static class, use these attributes to match C# sta
     static member DoSyncRedraw (func:unit->'T) : 'T =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then SyncRhino.Initialize()
-             if isNull syncContext then SyncRhinoException.Raise "Rhino.SyncRhino.syncContext is still null and not set up. UI code only works when started in sync mode."                
+             if isNull syncContext then RhinoSync.Initialize()
+             if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode."                
              async{
                     do! Async.SwitchToContext syncContext                    
                     if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                
@@ -137,8 +137,8 @@ type SyncRhino private () = //static class, use these attributes to match C# sta
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         let isWin = if isNull seffWindow then false else seffWindow.Visibility = Windows.Visibility.Visible
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then SyncRhino.Initialize()
-             if isNull syncContext then SyncRhinoException.Raise "Rhino.SyncRhino.syncContext is still null and not set up. UI code only works when started in sync mode."                
+             if isNull syncContext then RhinoSync.Initialize()
+             if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode."                
              async{
                     do! Async.SwitchToContext syncContext
                     if isWin then seffWindow.Hide()

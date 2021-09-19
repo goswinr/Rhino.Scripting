@@ -45,9 +45,9 @@ In an F# scripting editor do
 ```   
 then open modules 
 ```fsharp
-open Rhino.Scripting  // to make extension members available 
+open Rhino  // to make extension members available 
 
-type rs = RhinoScriptSyntax  // type abbreviation  (alias) for RhinoScriptSyntax
+type rs = Rhino.Scripting  // type abbreviation  (alias) for Rhino.Scripting
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
 The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.
@@ -79,7 +79,7 @@ these are implemented with 3 overloads and optional parameters:
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET
-        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        let obj = Scripting.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
         Doc.Layers.[index].FullPath
 
@@ -92,10 +92,10 @@ these are implemented with 3 overloads and optional parameters:
     ///     Set true to create Layer if it does not exist yet.</param>
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
-        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)   
+        let obj = Scripting.CoerceRhinoObject(objectId)   
         let layerIndex =
-            if createLayerIfMissing then  RhinoScriptSyntax.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
-            else                          RhinoScriptSyntax.CoerceLayer(layer).Index                 
+            if createLayerIfMissing then  Scripting.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            else                          Scripting.CoerceLayer(layer).Index                 
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A'"  layer objectId
         Doc.Views.Redraw()
@@ -110,10 +110,10 @@ these are implemented with 3 overloads and optional parameters:
     ///<returns>(unit) void, nothing</returns>
     static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
         let layerIndex =
-            if createLayerIfMissing then  RhinoScriptSyntax.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
-            else                          RhinoScriptSyntax.CoerceLayer(layer).Index   
+            if createLayerIfMissing then  Scripting.getOrCreateLayer(layer, Color.randomColorForRhino, true, false)
+            else                          Scripting.CoerceLayer(layer).Index   
         for objectId in objectIds do
-            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+            let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
             if not <| obj.CommitChanges() then failwithf "Set ObjectLayer failed for '%A' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
         Doc.Views.Redraw()
