@@ -1651,10 +1651,9 @@ type Scripting private () =
             layer.ParentLayerId <- parent.Id
 
 
-    ///<summary>Removes an existing layer from the document. The layer will be removed
-    ///    even if it contains geometry objects. The layer to be removed cannot be the
-    ///    current layer
-    ///    empty.</summary>
+    ///<summary>Removes an existing layer from the document. 
+    /// The layer will be removed even if it contains geometry objects. 
+    /// The layer to be removed cannot be the current layer.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member PurgeLayer(layer:string) : bool = 
@@ -1670,32 +1669,40 @@ type Scripting private () =
     ///<returns>(unit) void, nothing.</returns>
     static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit = 
         let taken=Hashset()
+        let Layers = State.Doc.Layers
         let mutable nonEmptyIndex = -1
         let rec addLoop(g:Guid)= 
             if g <> Guid.Empty then
                 taken.Add(g)|> ignore
-                addLoop (State.Doc.Layers.FindId(g).ParentLayerId) // recurse
+                addLoop (Layers.FindId(g).ParentLayerId) // recurse
 
         for o in State.Doc.Objects do
             if not o.IsDeleted then
                 let i = o.Attributes.LayerIndex
                 nonEmptyIndex <- i
-                let l = State.Doc.Layers.[i]
+                let l = Layers.[i]
                 addLoop l.Id
 
-        let c = State.Doc.Layers.CurrentLayer.Id
+        let c = Layers.CurrentLayer.Id
         // deal with current layers
+        // either keep
         if keepCurrent then
-            taken.Add c  |> ignore
-        elif taken.Count > 0  && taken.DoesNotContain c then
+            addLoop c
+        //or try to set it to another one thats not empty
+        elif taken.Count > 0  && taken.DoesNotContain c && nonEmptyIndex > -1 then
             // change current layer to a non empty one:
-            State.Doc.Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore
-        for i = State.Doc.Layers.Count - 1 downto 0 do
-            let l = State.Doc.Layers.[i]
+            Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore
+        
+        // now delete them all
+        for i = Layers.Count - 1 downto 0 do
+            let l = Layers.[i]
             if not l.IsDeleted then
                 if taken.DoesNotContain (l.Id) then
-                    if not <| State.Doc.Layers.Delete(i, quiet=true) then
-                        RhinoScriptingException.Raise "PurgeAllLayers. Purge layer '%s' failed" l.FullPath
+                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents                    
+                    //if i <> Layers.CurrentLayerIndex then 
+                    //    if not <| Layers.Delete(i, quiet=true) then
+                    //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then 
+                    //        RhinoScriptingException.Raise "Rhino.Scripting.PurgeAllLayers: failed to delete layer '%s' " l.FullPath // the last layer can't be deleted so dont raise exception
         State.Doc.Views.Redraw()
 
 
