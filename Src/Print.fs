@@ -131,10 +131,10 @@ module NiceString  =
         
     /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator and (nested) sequences, first five items are printed out.
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// • thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
-    /// • maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    /// • maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
-    /// • maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.    
+    /// ï¿½ thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
+    /// ï¿½ maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    /// ï¿½ maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// ï¿½ maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.    
     let toNiceString (x:'T) :string = 
         if Print.doInit then Print.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
@@ -142,8 +142,8 @@ module NiceString  =
     /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator, 
     /// all items of sequences, including nested items, are printed out.
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// • thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
-    /// • maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
+    /// ï¿½ thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
+    /// ï¿½ maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
     let toNiceStringFull (x:'T) :string =         
         if Print.doInit then Print.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
@@ -157,10 +157,10 @@ module AutoOpenPrint =
     /// Only prints to Console.Out, NOT to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as ~0.0
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// • thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
-    /// • maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    /// • maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
-    /// • maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.  
+    /// ï¿½ thousandSeparator       = '     ; set this to change the printing of floats and integers larger than 10'000
+    /// ï¿½ maxNestingDepth         = 3     ; set this to change how deep the content of nested seq is printed (printFull ignores this)
+    /// ï¿½ maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
+    /// ï¿½ maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.  
     let print x = 
         if Print.doInit then Print.init() 
         print x
@@ -169,8 +169,8 @@ module AutoOpenPrint =
     /// Only prints to Console.Out, NOT to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as ~0.0
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    /// • thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
-    /// • maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
+    /// ï¿½ thousandSeparator       = '      ; set this to change the printing of floats and integers larger than 10'000   
+    /// ï¿½ maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once. 
     let printFull x = 
         if Print.doInit then Print.init() 
         printFull x 
