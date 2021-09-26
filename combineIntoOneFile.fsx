@@ -80,7 +80,7 @@ module CombineIntoOneFile =
         printfn "" 
         
         IO.File.WriteAllLines("Src/Scripting.fs", lines, Text.Encoding.UTF8) 
-        printfn "--Done combining files into Src/Scripting.fs !"
+        printfn "--Done combining files into Src/Scripting.fs. compiling now .."
         
         
     let runIfOld() = 
