@@ -341,6 +341,7 @@ module AutoOpenCoerce =
     ///<param name="layerId">(Guid) The layer's Guid.</param>
     ///<returns>DocObjectys.Layer</returns>
     static member CoerceLayer (layerId:Guid) : DocObjects.Layer= 
+        if layerId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: input Guid is Guid.Empty" 
         let l = State.Doc.Layers.FindId(layerId)
         if isNull l then
             if notNull (State.Doc.Objects.FindId(layerId)) then
