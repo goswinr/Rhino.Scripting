@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF><!--for DispatcherSynchronizationContext in RhinoSync, and Seff editor Window (if available)-->
+    <UseWindowsForms>true</UseWindowsForms>   <!--to get screen resolution-->
+    <LangVersion>preview</LangVersion>
+    <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="FsEx" Version="0.6.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Src/Exceptions.fs" />
+    <Compile Include="Src/RhinoSync.fs" />
+    <Compile Include="Src/State.fs" />
+    <Compile Include="Src/Print.fs" />
+    <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
+    <Compile Include="Src/Util.fs" />
+    <Compile Include="Src/UtilLayer.fs" />
+    <Compile Include="Src/NoWarn44.fs" />
+
+    <Compile Include="Src/Scripting_Header.fs" />
+    <Compile Include="Src/Scripting_Coerce.fs" />
+    <Compile Include="Src/Scripting_Printing.fs" />
+    <Compile Include="Src/Scripting_Layer.fs" />
+    <Compile Include="Src/Scripting_Application.fs" />
+    <Compile Include="Src/Scripting_Block.fs" />
+    <Compile Include="Src/Scripting_Curve.fs" />
+    <Compile Include="Src/Scripting_Dimension.fs" />
+    <Compile Include="Src/Scripting_Documnet.fs" />
+    <Compile Include="Src/Scripting_Geometry.fs" />
+    <Compile Include="Src/Scripting_Grips.fs" />
+    <Compile Include="Src/Scripting_Group.fs" />
+    <Compile Include="Src/Scripting_Hatch.fs" />
+    <Compile Include="Src/Scripting_Light.fs" />
+    <Compile Include="Src/Scripting_Line.fs" />
+    <Compile Include="Src/Scripting_Linetype.fs" />
+    <Compile Include="Src/Scripting_Material.fs" />
+    <Compile Include="Src/Scripting_Mesh.fs" />
+    <Compile Include="Src/Scripting_Object.fs" />
+    <Compile Include="Src/Scripting_Plane.fs" />
+    <Compile Include="Src/Scripting_PointVector.fs" />
+    <Compile Include="Src/Scripting_Selection.fs" />
+    <Compile Include="Src/Scripting_Surface.fs" />
+    <Compile Include="Src/Scripting_Toolbar.fs" />
+    <Compile Include="Src/Scripting_Transformation.fs" />
+    <Compile Include="Src/Scripting_UserData.fs" />
+    <Compile Include="Src/Scripting_UserInterface.fs" />
+    <Compile Include="Src/Scripting_Utility.fs" />
+    <Compile Include="Src/Scripting_Views.fs" />
+  </ItemGroup>
+
+</Project>
