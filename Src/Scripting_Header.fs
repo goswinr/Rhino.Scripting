@@ -13,17 +13,18 @@ open FsEx.SaveIgnore
 open FsEx.CompareOperators
 open System.Globalization
 
-// YES, all static members in one gigantic file! 
-// Just because F# extension members dont work in C#, and C# extension members via Extension attribute show as instance mebers when useds in F#.
-// This file is for compiling only.
-// Autocomplete does not work well anymore becaue it has 20k lines.
+// This file and all other files with the name Scripting_**.fs will be combined into one large file called Scripting.fs before compiling.
+// This is done via the script combineIntoOneFile.fsx that is invoked as part of the build process.
+// This build process is needed because F# extension members dont work in C#, and C# extension members via Extension attribute show as instance mebers when useds in F#.
+// Autocomplete would not work well if this file has 20k lines while beeing edited.
 
-/// A static class with static members providing functions Identical to RhinoScript in Python or VBscript
+/// A static class with static methods providing functions identical to RhinoScript in Python or VBscript
 [<AbstractClass; Sealed>]
 type Scripting private () = 
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
+    
 
     /// A Dictionary to store state between scripting session.
     /// Use Rhino.Scripting.Sticky.Clear() to reset it.

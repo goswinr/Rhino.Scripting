@@ -40,8 +40,6 @@ module CombineIntoOneFile =
             "Src/Scripting_Views.fs" 
             ]
             
-        printfn "--Pre Build Step:"
-        printfn "--Combine all files of Src/Scripting_****.fs into one:"
         
         
         let addNote file (ln:string)  = 
@@ -67,13 +65,18 @@ module CombineIntoOneFile =
         
         let lines = ResizeArray()   
         
+        // Start merging files:
         lines.AddRange(get head) 
         
-        printf "  --"
-        for file in files do 
+        printfn "--Pre Build Step:"
+        printf  "--Combine all files of Src/Scripting_****.fs into one:"
+        for i, file in files |> Seq.indexed do 
             let n = file.Replace("Src/Scripting_", " ") 
-            printf " %s" n
             lines.AddRange(file|> get |> afterMarker file) 
+            if i%7 =0 then  
+                printf "\r\n  -- %s" n
+            else                
+                printf " %s" n
         printfn "" 
         
         IO.File.WriteAllLines("Src/Scripting.fs", lines, Text.Encoding.UTF8) 
