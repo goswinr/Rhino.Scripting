@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
-    <PackageReference Include="FsEx" Version="0.6.8" />
+    <PackageReference Include="FsEx" Version="0.6.10" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,7 +56,7 @@
     <Compile Include="Src/Scripting_UserInterface.fs" />
     <Compile Include="Src/Scripting_Utility.fs" />
     <Compile Include="Src/Scripting_Views.fs" />
-    
+
     <!-- only for editiong version numbers:-->
     <None Include="ForPublishingRhino6.fsproj" />
     <None Include="ForPublishingRhino7.fsproj" />
