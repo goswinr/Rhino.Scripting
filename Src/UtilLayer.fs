@@ -1,4 +1,4 @@
-﻿namespace Rhino
+namespace Rhino
 
 open System
 open System.Globalization // for UnicodeCategory
@@ -134,6 +134,10 @@ module internal UtilLayer =
 
   type internal LayerState = Off | On | ByParent
 
+    [<Struct>]
+    type internal FoundOrCreatedIndex = 
+        |LayerCreated of createdIdx :int
+        |LayerFound   of foundIdx   :int
   /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
   /// Does not allow ambigous unicode characters in layername.
   /// Returns index

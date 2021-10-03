@@ -1,4 +1,4 @@
-﻿namespace Rhino
+namespace Rhino
 
 open System
 open System.Collections.Generic
@@ -160,15 +160,29 @@ type Scripting private () =
                       ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color    
                       ,  [<OPT;DEF(true)>]checkStrings:bool   
                       ) : Guid = 
-        let layIdx =
+        let layCorF =
             if layer<>""then 
                 if layerColor.IsEmpty then                         
                     UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent)
                 else
                     UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent)
             else
-                State.Doc.Layers.CurrentLayerIndex
-        let g = Scripting.Add( geo, layIdx,objectName,userTextKeysAndValues,checkStrings)  
+                UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
+        
+        // now update the layer color if one is given, even if the layer exists already
+        let layIdx =
+            match layCorF with 
+            |UtilLayer.LayerCreated ci -> ci
+            |UtilLayer.LayerFound fi -> 
+                if layerColor.IsEmpty then 
+                    fi
+                else
+                    let lay = State.Doc.Layers.[fi]                    
+                    if not <| lay.Color.EqualsARGB(layerColor) then 
+                        lay.Color <- layerColor
+                    fi                        
+
+        let g = Scripting.Add( geo, layIdx, objectName, userTextKeysAndValues, checkStrings)  
         g
         
 
