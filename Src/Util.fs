@@ -25,9 +25,10 @@ module internal Util =
     /// A good string may not inculde line returns, tabs, and leading or traling whitespace.
     /// Confusing or ambiguous characters that look like ASCII but are some other unicode are also not allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
-    ///<param name="allowEmpty">(bool) Optional, Default Value: <c>false</c> , set to true to make empty strings pass. </param>
+    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>
+    ///<param name="limitToAscii">(bool) set to true to only allow chars between unicode points 32 till 126 (ASCII) </param>
     ///<returns>(bool) true if the string is a valid name.</returns>
-    let isGoodStringId( name:string, allowEmpty:bool) : bool = 
+    let isGoodStringId( name:string, allowEmpty:bool, limitToAscii:bool ) : bool = 
         if isNull name then false
         elif allowEmpty && name = "" then true
         else
@@ -40,19 +41,21 @@ module internal Util =
                         let c = name.[i]
                         if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
                             loop(i+1)
-                        else
+                        elif limitToAscii then 
+                            false
+                        else                            
                             let cat = Char.GetUnicodeCategory(c)
                             match cat with
                             // always OK :
-                            | UnicodeCategory.UppercaseLetter
+                            | UnicodeCategory.UppercaseLetter //TODO improve via https://github.com/vhf/confusable_homoglyphs or https://github.com/codebox/homoglyph/blob/master/raw_data/chars.txt
                             | UnicodeCategory.LowercaseLetter
                             | UnicodeCategory.CurrencySymbol ->
                                 loop(i+1)
 
                             // sometimes Ok :
-                            | UnicodeCategory.OtherSymbol  // 166:'�'  167:'�'   169:'�'  174:'�' 176:'�' 182:'�'
-                            | UnicodeCategory.MathSymbol   // 172:'�' 177:'�' 215:'�' 247:'�' | exclude char 215 that looks like x
-                            | UnicodeCategory.OtherNumber ->   //178:'�' 179:'�' 185:'�' 188:'�' 189:'�' 190:'�'
+                            | UnicodeCategory.OtherSymbol       // 166:'�'  167:'�'   169:'�'  174:'�' 176:'�' 182:'�'
+                            | UnicodeCategory.MathSymbol        // 172:'�' 177:'�' 215:'�' 247:'�' | exclude char 215 that looks like x
+                            | UnicodeCategory.OtherNumber ->    //178:'�' 179:'�' 185:'�' 188:'�' 189:'�' 190:'�'
                                 if c <= '÷' && c <> '×' then loop(i+1) // anything below char 247 is ok , but exclude MathSymbol char 215 that looks like letter x
                                 else false
 

@@ -1,4 +1,4 @@
-namespace Rhino
+﻿namespace Rhino
 
 open System
 open System.Collections.Generic
@@ -101,7 +101,7 @@ type Scripting private () =
     ///<param name="checkStrings">(bool) Optional, Default: true. Check name and usertext for ambiguous unicoide characters</param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
-                      ,  layerIndex:int // not optional so method overload resolution works 
+                      ,  layerIndex:int // dont make it  optional , so tha  method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
                       ,  [<OPT;DEF(true)>]checkStrings:bool                     
@@ -113,15 +113,15 @@ type Scripting private () =
                 let a = new DocObjects.ObjectAttributes()
                 a.LayerIndex <- layerIndex
                 if objectName <> "" then 
-                    if checkStrings && not <|  Util.isGoodStringId( objectName, false) then
+                    if checkStrings && not <|  Util.isGoodStringId( objectName, false, false) then
                         RhinoScriptingException.Raise "Rhino.Scripting.Add objectName the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
                     for k,v in userTextKeysAndValues do 
                         if checkStrings then 
-                            if not <|  Util.isGoodStringId( k, false) then
+                            if not <|  Util.isGoodStringId( k, false, false) then
                                 RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
-                            if not <|  Util.isGoodStringId( v, false) then
+                            if not <|  Util.isGoodStringId( v, false, false) then
                                 RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
                             RhinoScriptingException.Raise "Rhino.Scripting.Add: failed to set key value pair '%s' and '%s' " k v 
@@ -150,7 +150,7 @@ type Scripting private () =
     ///<param name="layer">(string) Optional, Layername, parent layer separated by '::' </param>
     ///<param name="objectName">(string) Optional, object name</param>
     ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
-    ///<param name="layerColor">(Drawing.Color) Optional, Color for layer to create</param>
+    ///<param name="layerColor">(Drawing.Color) Optional, Color for layer. The layer color will be changed even if the layer exists already</param>
     ///<param name="checkStrings">(bool) Optional, Default: true. Check name and usertext for ambiguous unicoide characters</param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T

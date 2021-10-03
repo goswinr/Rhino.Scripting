@@ -804,9 +804,13 @@ module AutoOpenObject =
     /// Confusing characters that look like ASCII but are some other unicode are also not allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) Optional, Default Value: <c>false</c> , set to true to make empty strings pass. </param>
+    ///<param name="limitToAscii">(bool) Optional, Default Value: <c>false</c> , set to true to only allow chars between unicode points 32 till 126 (ASCII) </param>
     ///<returns>(bool) true if the string is a valid name.</returns>
-    static member IsGoodStringId( name:string, [<OPT;DEF(false)>]allowEmpty:bool) : bool = 
-        Util.isGoodStringId( name, allowEmpty)
+    static member IsGoodStringId    ( name:string
+                                    , [<OPT;DEF(false)>]allowEmpty:bool
+                                    , [<OPT;DEF(false)>]limitToAscii:bool
+                                    ) : bool = 
+        Util.isGoodStringId( name, allowEmpty, limitToAscii)
 
 
 

@@ -26,8 +26,8 @@ module AutoOpenLayer =
 
 
 
-    ///<summary>Add a new layer to the document. If it does not exist yet. Currently anly ASCII characters are allowed.
-    /// If layers or parent layers exist already color, visibility and locking parameters are  ignored.</summary>
+    ///<summary>Add a new layer to the document. If it does not exist yet. Ambiguous Unicode characters are not allowed in layername.
+    /// If layers or parent layers exist already color, visibility and locking parameters are ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
     ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value. If omitted a random (non yellow)  color wil be choosen.</param>
     ///<param name="visible">(int) Optional, Default Value: <c>2</c>
@@ -69,9 +69,9 @@ module AutoOpenLayer =
             UtilLayer.createDefaultLayer(col, true, false)
         else
             let names = if isNull parent then name else parent+ "::" + name
-            let i     = UtilLayer.getOrCreateLayer(names, col, vis, loc)
+            let fOrC  = UtilLayer.getOrCreateLayer(names, col, vis, loc)
             //State.Doc.Layers.[i].FullPath
-            i
+            fOrC.Index
 
 
     ///<summary>Returns the full layername of an object.
@@ -92,7 +92,7 @@ module AutoOpenLayer =
     static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
         let obj = Scripting.CoerceRhinoObject(objectId)
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent)
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (Print.guid objectId)
@@ -106,7 +106,7 @@ module AutoOpenLayer =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent)
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent).Index
             else                          Scripting.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
@@ -124,7 +124,7 @@ module AutoOpenLayer =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
         else
-            UtilLayer.ensureValidShortLayerName (newLayerName, false)
+            UtilLayer.failOnBadShortLayerName (newLayerName, false)
             let lay = State.Doc.Layers.[i]
             let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
             ps.Last <- newLayerName
