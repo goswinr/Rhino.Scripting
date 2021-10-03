@@ -4,6 +4,7 @@ open System
 open System.Globalization // for UnicodeCategory
 open Rhino.DocObjects
 
+
 module internal UtilLayer = 
 
   /// Raise exceptions if short layername is not valid
@@ -134,8 +135,9 @@ module internal UtilLayer =
   type internal LayerState = Off | On | ByParent
 
   /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
-  /// returns index
-  /// empty string returns current layer
+  /// Does not allow ambigous unicode characters in layername.
+  /// Returns index
+  /// Empty string returns current layer index
   let internal getOrCreateLayer(name, color, visible:LayerState, locked:LayerState) : int = 
       match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
       | RhinoMath.UnsetIntIndex ->

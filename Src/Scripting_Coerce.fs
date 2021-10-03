@@ -665,16 +665,16 @@ module AutoOpenCoerce =
                         for r, x in Seq.indexed xs do
                             t.[c, r] <- x
                 with
-                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xForm)
+                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (toNiceString xForm)
                 t
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
                 let mutable t= Transform()
                 try
                     xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
                 with
-                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xForm)
+                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (toNiceString xForm)
                 t
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (NiceString.toNiceString xForm)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (toNiceString xForm)
 
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="line">Line, two points or Guid</param>

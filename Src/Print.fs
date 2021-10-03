@@ -117,7 +117,7 @@ module internal Print =
             RhinoDoc.ActiveDocumentChanged.Add (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
             RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
 
-    /// Abreviation for NiceString.toNiceString
+    /// Abreviation for toNiceString
     /// including special formating of Rhino Guids
     let nice (x:'T) = 
         if initIsPending then init()
@@ -125,6 +125,7 @@ module internal Print =
 
 
 /// This module shadows the NiceString module from FsEx to include the special formating for Rhino types.
+[<AutoOpen>]
 module NiceString  = 
 
     /// Nice formating for Rhino and .Net types, e.g. numbers including thousand Separator and (nested) sequences, first five items are printed out.
@@ -144,7 +145,7 @@ module NiceString  =
     /// - maxCharsInString        = 2000   ; set this to change how many characters of a string might be printed at once.
     let toNiceStringFull (x:'T) :string = 
         if Print.initIsPending then Print.init() // the shadowing is only done to ensure init() is called once
-        NiceString.toNiceString x
+        toNiceString x
 
 
 /// Shadowing the print and printFull  from FsEx to inculde external formater for Rhino

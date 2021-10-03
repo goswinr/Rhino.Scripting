@@ -41,14 +41,15 @@ module AutoOpenLayer =
     ///   1 = explicitly Locked (even if parent is already Locked)
     ///   2 = inherited from parent, or Unlocked default</param>
     ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
-    ///<returns>(string) The full name of the new layer.</returns>
+    ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer. 
+    /// E.g. The function rs.Add can then take this layer index.</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,
                             [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
                             [<OPT;DEF(2)>]visible:int,
                             [<OPT;DEF(2)>]locked:int,
-                            [<OPT;DEF(null:string)>]parent:string) : string = 
+                            [<OPT;DEF(null:string)>]parent:string) : int = 
 
-        let col   = if color.IsEmpty then Color.randomForRhino else (fun () -> color)
+        let col = if color.IsEmpty then Color.randomForRhino else (fun () -> color)
         if notNull parent && isNull name then
             RhinoScriptingException.Raise "Rhino.Scripting.AddLayer if parent name is given (%s) the child name must be given too." parent
 
@@ -64,11 +65,13 @@ module AutoOpenLayer =
                     | _ -> RhinoScriptingException.Raise "Rhino.Scripting.AddLayer Bad value vor Locked: %d, it may be 0, 1 or 2" locked
 
         if isNull name then
-            State.Doc.Layers.[UtilLayer.createDefaultLayer(col, true, false)].FullPath
+            //State.Doc.Layers.[UtilLayer.createDefaultLayer(col, true, false)].FullPath
+            UtilLayer.createDefaultLayer(col, true, false)
         else
             let names = if isNull parent then name else parent+ "::" + name
             let i     = UtilLayer.getOrCreateLayer(names, col, vis, loc)
-            State.Doc.Layers.[i].FullPath
+            //State.Doc.Layers.[i].FullPath
+            i
 
 
     ///<summary>Returns the full layername of an object.

@@ -24,6 +24,7 @@
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
+    <Compile Include="Src/ObjectFilterEnum.fs" />
     <Compile Include="Src/NoWarn44.fs" />
 
     <Compile Include="Src/Scripting_Header.fs" />
@@ -55,6 +56,12 @@
     <Compile Include="Src/Scripting_UserInterface.fs" />
     <Compile Include="Src/Scripting_Utility.fs" />
     <Compile Include="Src/Scripting_Views.fs" />
+    
+    <!-- only for editiong version numbers:-->
+    <None Include="ForPublishingRhino6.fsproj" />
+    <None Include="ForPublishingRhino7.fsproj" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>

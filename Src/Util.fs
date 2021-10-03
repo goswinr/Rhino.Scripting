@@ -2,6 +2,7 @@
 
 open System
 open Rhino
+open System.Globalization
 
 [<AutoOpen>]
 module internal Util = 
@@ -20,73 +21,63 @@ module internal Util =
     /// DefaultParameterValueAttribute for member parameters
     type internal DEF =   Runtime.InteropServices.DefaultParameterValueAttribute
 
+    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
+    /// A good string may not inculde line returns, tabs, and leading or traling whitespace.
+    /// Confusing or ambiguous characters that look like ASCII but are some other unicode are also not allowed. </summary>
+    ///<param name="name">(string) The string to check.</param>
+    ///<param name="allowEmpty">(bool) Optional, Default Value: <c>false</c> , set to true to make empty strings pass. </param>
+    ///<returns>(bool) true if the string is a valid name.</returns>
+    let isGoodStringId( name:string, allowEmpty:bool) : bool = 
+        if isNull name then false
+        elif allowEmpty && name = "" then true
+        else
+            let tr = name.Trim()
+            if tr.Length <> name.Length then false
+            else
+                let rec loop i = 
+                    if i = name.Length then true
+                    else
+                        let c = name.[i]
+                        if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                            loop(i+1)
+                        else
+                            let cat = Char.GetUnicodeCategory(c)
+                            match cat with
+                            // always OK :
+                            | UnicodeCategory.UppercaseLetter
+                            | UnicodeCategory.LowercaseLetter
+                            | UnicodeCategory.CurrencySymbol ->
+                                loop(i+1)
 
-/// An Integer Enum of Object types to be use in object selection functions.
-/// Don't create an instance, use the instance in Rhino.Scripting.Filter
-[<Sealed>]
-type ObjectFilterEnum internal () =  // not a static class, just internal
-    /// returns 0
-    member _.AllObjects = 0
-    /// returns 1
-    member _.Point = 1
-    /// returns 2
-    member _.PointCloud = 2
-    /// returns 4
-    member _.Curve = 4
-    /// returns 8
-    member _.Surface = 8
-    /// returns 16
-    member _.PolySurface = 16
-    /// returns 32
-    member _.Mesh = 32
-    /// returns 256
-    member _.Light = 256
-    /// returns 512, for Text, leaders, and dimension lines
-    member _.Annotation = 512
-    /// returns 4096, for block instances
-    member _.Instance = 4096
-    /// returns 8192
-    member _.Textdot = 8192
-    /// returns 16384
-    member _.Grip = 16384
-    /// returns 32768, for detail view objects
-    member _.Detail = 32768
-    /// returns 65536
-    member _.Hatch = 65536
-    /// returns 131072
-    member _.Morph = 131072
-    /// returns 262144
-    member _.SubD = 262144
-    /// returns 134217728
-    member _.Cage = 134217728
-    /// returns 268435456
-    member _.Phantom = 268435456
-    /// returns 536870912
-    member _.ClippingPlane = 536870912
-    /// returns 1073741824
-    member _.Extrusion = 1073741824
+                            // sometimes Ok :
+                            | UnicodeCategory.OtherSymbol  // 166:'�'  167:'�'   169:'�'  174:'�' 176:'�' 182:'�'
+                            | UnicodeCategory.MathSymbol   // 172:'�' 177:'�' 215:'�' 247:'�' | exclude char 215 that looks like x
+                            | UnicodeCategory.OtherNumber ->   //178:'�' 179:'�' 185:'�' 188:'�' 189:'�' 190:'�'
+                                if c <= '÷' && c <> '×' then loop(i+1) // anything below char 247 is ok , but exclude MathSymbol char 215 that looks like letter x
+                                else false
 
-        ///A helper function to get a DocObjects.ObjectType Enum form an integer
-    static member internal GetFilterEnum(i:int) : DocObjects.ObjectType = 
-        let mutable e = DocObjects.ObjectType.None
-        if 0 <> (i &&& 1 ) then          e  <- e ||| DocObjects.ObjectType.Point
-        if 0 <> (i &&& 16384 ) then      e  <- e ||| DocObjects.ObjectType.Grip
-        if 0 <> (i &&& 2 ) then          e  <- e ||| DocObjects.ObjectType.PointSet
-        if 0 <> (i &&& 4 ) then          e  <- e ||| DocObjects.ObjectType.Curve
-        if 0 <> (i &&& 8 ) then          e  <- e ||| DocObjects.ObjectType.Surface
-        if 0 <> (i &&& 16 ) then         e  <- e ||| DocObjects.ObjectType.Brep
-        if 0 <> (i &&& 32 ) then         e  <- e ||| DocObjects.ObjectType.Mesh
-        if 0 <> (i &&& 512 ) then        e  <- e ||| DocObjects.ObjectType.Annotation
-        if 0 <> (i &&& 256 ) then        e  <- e ||| DocObjects.ObjectType.Light
-        if 0 <> (i &&& 4096 ) then       e  <- e ||| DocObjects.ObjectType.InstanceReference
-        if 0 <> (i &&& 134217728 ) then  e  <- e ||| DocObjects.ObjectType.Cage
-        if 0 <> (i &&& 65536 ) then      e  <- e ||| DocObjects.ObjectType.Hatch
-        if 0 <> (i &&& 131072 ) then     e  <- e ||| DocObjects.ObjectType.MorphControl
-        if 0 <> (i &&& 262144 ) then     e  <- e ||| DocObjects.ObjectType.SubD
-        if 0 <> (i &&& 2097152 ) then    e  <- e ||| DocObjects.ObjectType.PolysrfFilter
-        if 0 <> (i &&& 268435456 ) then  e  <- e ||| DocObjects.ObjectType.Phantom
-        if 0 <> (i &&& 8192 ) then       e  <- e ||| DocObjects.ObjectType.TextDot
-        if 0 <> (i &&& 32768 ) then      e  <- e ||| DocObjects.ObjectType.Detail
-        if 0 <> (i &&& 536870912 ) then  e  <- e ||| DocObjects.ObjectType.ClipPlane
-        if 0 <> (i &&& 1073741824 ) then e  <- e ||| DocObjects.ObjectType.Extrusion
-        e
+                            // NOT Ok :
+                            | UnicodeCategory.OpenPunctuation  // only ( [ and { is allowed
+                            | UnicodeCategory.ClosePunctuation // exclude if out of unicode points 32 till 126
+                            | UnicodeCategory.Control
+                            | UnicodeCategory.SpaceSeparator         // only regular space  ( that is char 32)     is alowed
+                            | UnicodeCategory.ConnectorPunctuation   // only simple underscore  _    is alowed
+                            | UnicodeCategory.DashPunctuation        // only minus - is allowed
+                            | UnicodeCategory.TitlecaseLetter
+                            | UnicodeCategory.ModifierLetter
+                            | UnicodeCategory.NonSpacingMark
+                            | UnicodeCategory.SpacingCombiningMark
+                            | UnicodeCategory.EnclosingMark
+                            | UnicodeCategory.LetterNumber
+                            | UnicodeCategory.LineSeparator
+                            | UnicodeCategory.ParagraphSeparator
+                            | UnicodeCategory.Format
+                            | UnicodeCategory.OtherNotAssigned
+                            | UnicodeCategory.ModifierSymbol
+                            | UnicodeCategory.OtherPunctuation // exclude if out of unicode points 32 till 126
+                            | UnicodeCategory.DecimalDigitNumber // exclude if out of unicode points 32 till 126
+                            | UnicodeCategory.InitialQuotePunctuation
+                            | UnicodeCategory.FinalQuotePunctuation
+                            | UnicodeCategory.OtherLetter
+                            | _ -> false
+                loop 0

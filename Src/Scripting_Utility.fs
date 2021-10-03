@@ -339,18 +339,28 @@ module AutoOpenUtility =
         Scripting.CoerceXform(xForm) // TODO verify row, column order !!
 
 
-    ///<summary>Creats a  RGB color,  red, green and  blue  values.</summary>
+    ///<summary>Creats a RGB color from red, green and  blue  values as Integers. Raise an exception if values are out of range</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<returns>(System.Drawing.Color) a Color.</returns>
     static member CreateColor(red:int, green:int, blue:int) : Drawing.Color = 
-        Drawing.Color.FromArgb( red, green, blue)
+        if red   < 0 || red > 255 then RhinoScriptingException.Raise "Rhino.Scripting.CreateColor red value out of range 0 to 255: %d" red
+        if green < 0 || green > 255 then RhinoScriptingException.Raise "Rhino.Scripting.CreateColor green value out of range 0 to 255: %d" green
+        if blue  < 0 || blue > 255 then RhinoScriptingException.Raise "Rhino.Scripting.CreateColor blue value out of range 0 to 255: %d" blue
+        Drawing.Color.FromArgb(red, green, blue)
 
+    ///<summary>Creats a RGB color from  red, green and  blue  values as Bytes.</summary>
+    ///<param name="red">(byte) Red Value</param>
+    ///<param name="green">(byte) Green value</param>
+    ///<param name="blue">(byte) Blue value</param>
+    ///<returns>(System.Drawing.Color) a Color.</returns>
+    static member CreateColor(red:byte, green:byte, blue:byte) : Drawing.Color =         
+        Drawing.Color.FromArgb(int red, int green, int blue)
 
-    ///<summary>Converts input into a Rhino.Geometry.Interval.</summary>
-    ///<param name="start">(float) The lower bound</param>
-    ///<param name="ende">(float) Uper bound of interval</param>
+    ///<summary>Converts input into a Rhino.Geometry.Interval. This interval can be increasing or decreasing</summary>
+    ///<param name="start">(float) Start of interval</param>
+    ///<param name="ende">(float) End of interval</param>
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///    [0] start of interval
     ///    [1] end of interval.</returns>

@@ -38,7 +38,7 @@ module AutoOpenPrinting =
 
     static member Print (x:'T) : unit = 
         if Print.initIsPending then Print.init()
-        NiceString.toNiceString(x)
+        toNiceString(x)
         |>! RhinoApp.WriteLine
         |>  Console.WriteLine
         RhinoApp.Wait() // no swith to UI Thread needed !
@@ -54,7 +54,7 @@ module AutoOpenPrinting =
     ///<returns>(unit) void, nothing.</returns>
     static member PrintFull (x:'T) : unit = 
         if Print.initIsPending then Print.init()
-        NiceString.toNiceStringFull(x)
+        toNiceStringFull(x)
         |>! RhinoApp.WriteLine
         |>  Console.WriteLine
         RhinoApp.Wait() // no swith to UI Thread needed !

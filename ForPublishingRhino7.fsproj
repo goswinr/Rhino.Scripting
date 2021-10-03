@@ -20,9 +20,9 @@
     <Title>Rhino.Scripting for Rhino 7</Title>
     <PackageId>Rhino7.Scripting</PackageId>
 
-    <Version>0.0.3</Version>
-    <AssemblyVersion>0.0.3</AssemblyVersion>
-    <FileVersion>0.0.3</FileVersion>
+    <Version>0.0.5</Version>
+    <AssemblyVersion>0.0.5</AssemblyVersion>
+    <FileVersion>0.0.5</FileVersion>
     <PackageReleaseNotes>First release</PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
@@ -75,6 +75,7 @@
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
+    <Compile Include="Src/ObjectFilterEnum.fs" />
     <Compile Include="Src/NoWarn44.fs" />
     <!-- <Compile Include="Src/Scripting.fs" /> added in BeforeBuild target -->
   </ItemGroup>

@@ -265,10 +265,17 @@ module AutoOpenGeometry =
     ///<returns>(Guid) The identifier of the new object.</returns>
     static member AddTextDot(text:string, point:Point3d) : Guid = 
         let rc = State.Doc.Objects.AddTextDot(text, point)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddTextDot: Unable to add text dot to document.  text:'%A' point:'%A'" text point
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (toNiceString point)
         State.Doc.Views.Redraw()
         rc
-
+    
+    ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
+    ///<param name="geometry">(GeometryBase) The geometry to use</param>
+    ///<returns>(float) area.</returns>
+    static member Area(geometry:GeometryBase) : float =         
+        let mp = AreaMassProperties.Compute([geometry])
+        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties from geometry:'%s'" (toNiceString geometry)
+        mp.Area
 
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -276,7 +283,7 @@ module AutoOpenGeometry =
     static member Area(objectId:Guid) : float = 
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties.  objectId:'%s'" (Print.guid objectId)
+        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties from objectId:'%s'" (Print.guid objectId)
         mp.Area
 
     ///<summary>Returns a world axis-aligned bounding box of several objects.

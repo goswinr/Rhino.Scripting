@@ -92,28 +92,85 @@ type Scripting private () =
     static member FrangePython (start:float, stop:float, step:float) : float Rarr = 
         Scripting.FxrangePython (start, stop, step) |> Rarr.ofSeq
 
+    ///<summary>Adds any geometry object (stuct or class) to the Rhino document.
+    /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
+    ///<param name="geo">the Geometry</param>
+    ///<param name="layerIndex">(int) LayerIndex</param>
+    ///<param name="objectName">(string) Optional, object name</param>
+    ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
+    ///<param name="checkStrings">(bool) Optional, Default: true. Check name and usertext for ambiguous unicoide characters</param>
+    ///<returns>(Guid) The Guid of the added Object.</returns>
+    static member Add (  geo:'T
+                      ,  layerIndex:int // not optional so method overload resolution works 
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(true)>]checkStrings:bool                     
+                      ) : Guid = 
+        let attr =
+            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then 
+                null
+            else
+                let a = new DocObjects.ObjectAttributes()
+                a.LayerIndex <- layerIndex
+                if objectName <> "" then 
+                    if checkStrings && not <|  Util.isGoodStringId( objectName, false) then
+                        RhinoScriptingException.Raise "Rhino.Scripting.Add objectName the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
+                    a.Name <- objectName
+                if notNull userTextKeysAndValues then
+                    for k,v in userTextKeysAndValues do 
+                        if checkStrings then 
+                            if not <|  Util.isGoodStringId( k, false) then
+                                RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
+                            if not <|  Util.isGoodStringId( v, false) then
+                                RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
+                        if not <| a.SetUserString(k,v) then
+                            RhinoScriptingException.Raise "Rhino.Scripting.Add: failed to set key value pair '%s' and '%s' " k v 
+                a
+                
+        match box geo with
+        | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
+        // now the structs:
+        | :? Point3d     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+        | :? Point3f     as pt->   State.Doc.Objects.AddPoint(pt,attr)
+        | :? Line        as ln->   State.Doc.Objects.AddLine(ln,attr)
+        | :? Arc         as a->    State.Doc.Objects.AddArc(a,attr)
+        | :? Circle      as c->    State.Doc.Objects.AddCircle(c,attr)
+        | :? Ellipse     as e->    State.Doc.Objects.AddEllipse(e,attr)
+        | :? Polyline    as pl ->  State.Doc.Objects.AddPolyline(pl,attr)
+        | :? Box         as b ->   State.Doc.Objects.AddBox(b,attr)
+        | :? BoundingBox as b ->   State.Doc.Objects.AddBox(Box(b),attr)
+        | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
+        | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
+        | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Add: object of type %A not implemented yet" (geo.GetType())
 
     ///<summary>Adds any geometry object (stuct or class) to the Rhino document.
     /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
+    ///<param name="layer">(string) Optional, Layername, parent layer separated by '::' </param>
+    ///<param name="objectName">(string) Optional, object name</param>
+    ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
+    ///<param name="layerColor">(Drawing.Color) Optional, Color for layer to create</param>
+    ///<param name="checkStrings">(bool) Optional, Default: true. Check name and usertext for ambiguous unicoide characters</param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
-    static member Add (geo:'T) : Guid = 
-        match box geo with
-        | :? GeometryBase as g -> State.Doc.Objects.Add(g)
-        // now the structs:
-        | :? Point3d    as pt->   State.Doc.Objects.AddPoint pt
-        | :? Point3f    as pt->   State.Doc.Objects.AddPoint(pt)
-        | :? Line       as ln->   State.Doc.Objects.AddLine(ln)
-        | :? Arc        as a->    State.Doc.Objects.AddArc(a)
-        | :? Circle     as c->    State.Doc.Objects.AddCircle(c)
-        | :? Ellipse    as e->    State.Doc.Objects.AddEllipse(e)
-        | :? Polyline   as pl ->  State.Doc.Objects.AddPolyline(pl)
-        | :? Box        as b ->   State.Doc.Objects.AddBox(b)
-        | :? BoundingBox as b ->  State.Doc.Objects.AddBox(Box(b))
-        | :? Sphere     as b ->   State.Doc.Objects.AddSphere(b)
-        | :? Cylinder   as cl -> State.Doc.Objects.AddSurface (cl.ToNurbsSurface())
-        | :? Cone       as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface())
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Add: object of type %A not implemented yet" (geo.GetType())
+    static member Add (  geo:'T
+                      ,  [<OPT;DEF("")>]layer:string 
+                      ,  [<OPT;DEF("")>]objectName:string
+                      ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color    
+                      ,  [<OPT;DEF(true)>]checkStrings:bool   
+                      ) : Guid = 
+        let layIdx =
+            if layer<>""then 
+                if layerColor.IsEmpty then                         
+                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent)
+                else
+                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent)
+            else
+                State.Doc.Layers.CurrentLayerIndex
+        let g = Scripting.Add( geo, layIdx,objectName,userTextKeysAndValues,checkStrings)  
+        g
+        
 
 
     /// The current active Rhino document (= the file currently open)

@@ -806,59 +806,7 @@ module AutoOpenObject =
     ///<param name="allowEmpty">(bool) Optional, Default Value: <c>false</c> , set to true to make empty strings pass. </param>
     ///<returns>(bool) true if the string is a valid name.</returns>
     static member IsGoodStringId( name:string, [<OPT;DEF(false)>]allowEmpty:bool) : bool = 
-        if isNull name then false
-        elif allowEmpty && name = "" then true
-        else
-            let tr = name.Trim()
-            if tr.Length <> name.Length then false
-            else
-                let rec loop i = 
-                    if i = name.Length then true
-                    else
-                        let c = name.[i]
-                        if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
-                            loop(i+1)
-                        else
-                            let cat = Char.GetUnicodeCategory(c)
-                            match cat with
-                            // always OK :
-                            | UnicodeCategory.UppercaseLetter
-                            | UnicodeCategory.LowercaseLetter
-                            | UnicodeCategory.CurrencySymbol ->
-                                loop(i+1)
-
-                            // sometimes Ok :
-                            | UnicodeCategory.OtherSymbol  // 166:'�'  167:'�'   169:'�'  174:'�' 176:'�' 182:'�'
-                            | UnicodeCategory.MathSymbol   // 172:'�' 177:'�' 215:'�' 247:'�' | exclude char 215 taht looks like x
-                            | UnicodeCategory.OtherNumber ->   //178:'�' 179:'�' 185:'�' 188:'�' 189:'�' 190:'�'
-                                if c < '�' || c <> '�' then loop(i+1) // anything below247 but exclude MathSymbol char 215 that looks like letter x
-                                else false
-
-                            // NOT Ok :
-                            | UnicodeCategory.OpenPunctuation  // only ( [ and { is allowed
-                            | UnicodeCategory.ClosePunctuation // exclude if out of unicode points 32 till 126
-                            | UnicodeCategory.Control
-                            | UnicodeCategory.SpaceSeparator         // only regular space  ( that is char 32)     is alowed
-                            | UnicodeCategory.ConnectorPunctuation   // only simple underscore  _    is alowed
-                            | UnicodeCategory.DashPunctuation        // only minus - is allowed
-                            | UnicodeCategory.TitlecaseLetter
-                            | UnicodeCategory.ModifierLetter
-                            | UnicodeCategory.NonSpacingMark
-                            | UnicodeCategory.SpacingCombiningMark
-                            | UnicodeCategory.EnclosingMark
-                            | UnicodeCategory.LetterNumber
-                            | UnicodeCategory.LineSeparator
-                            | UnicodeCategory.ParagraphSeparator
-                            | UnicodeCategory.Format
-                            | UnicodeCategory.OtherNotAssigned
-                            | UnicodeCategory.ModifierSymbol
-                            | UnicodeCategory.OtherPunctuation // exclude if out of unicode points 32 till 126
-                            | UnicodeCategory.DecimalDigitNumber // exclude if out of unicode points 32 till 126
-                            | UnicodeCategory.InitialQuotePunctuation
-                            | UnicodeCategory.FinalQuotePunctuation
-                            | UnicodeCategory.OtherLetter
-                            | _ -> false
-                loop 0
+        Util.isGoodStringId( name, allowEmpty)
 
 
 
