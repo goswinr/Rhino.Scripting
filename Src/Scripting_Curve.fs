@@ -272,10 +272,40 @@ module AutoOpenCurve =
     ///<returns>(Guid) objectId of the new Curve object.</returns>
     static member AddLine(start:Point3d, ende:Point3d) : Guid = 
         let  rc = State.Doc.Objects.AddLine(start, ende)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddLine: Unable to add line to document.  start:'%A' ende:'%A'" start ende
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddLine: Unable to add line to document. start:%s ende:%s" start.ToNiceString ende.ToNiceString
         State.Doc.Views.Redraw()
         rc
 
+    ///<summary>Adds a line Curve to the current model.</summary>
+    ///<param name="startX">(float) Startpoint of the line: X position</param>
+    ///<param name="startY">(float) Startpoint of the line: Y position</param>
+    ///<param name="startZ">(float) Startpoint of the line: Z position</param>
+    ///<param name="endX">(float) Endpoint of the line: X position</param>
+    ///<param name="endY">(float) Endpoint of the line: Y position</param>
+    ///<param name="endZ">(float) Endpoint of the line:Z position</param>    
+    ///<returns>(Guid) objectId of the new Curve object.</returns>
+    static member AddLine(startX,startY,startZ,endX,endY,endZ:float) : Guid = 
+        let start = Point3d(startX,startY,startZ)
+        let ende = Point3d(endX,endY,endZ)
+        let  rc = State.Doc.Objects.AddLine(start, ende)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddLine: Unable to add line to document. startX:%g ,startY:%g ,startZ:%g and endX:%g ,endY:%g ,endZ:%g" startX startY startZ endX endY endZ
+        State.Doc.Views.Redraw()
+        rc
+    
+    ///<summary>Adds a 2D Line Curve to the current model at z level 0.0</summary>
+    ///<param name="startX">(float) Startpoint of the line: X position</param>
+    ///<param name="startY">(float) Startpoint of the line: Y position</param>
+    ///<param name="endX">(float) Endpoint of the line: X position</param>
+    ///<param name="endY">(float) Endpoint of the line: Y position</param>
+    ///<returns>(Guid) objectId of the new Curve object.</returns>
+    static member AddLine2D(startX,startY,endX,endY:float) : Guid = 
+        let start = Point3d(startX,startY,0.0)
+        let ende = Point3d(endX,endY,0.0)
+        let  rc = State.Doc.Objects.AddLine(start, ende)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddLine2D: Unable to add line to document. startX:%g ,startY:%g  and  endX:%g ,endY:%g," startX startY  endX endY 
+        State.Doc.Views.Redraw()
+        rc
+    
     ///<summary>Creats a NURBS Curve geomety, but does not add or draw it to the document.</summary>
     ///<param name="points">(Point3d seq) A list containing 3D control points</param>
     ///<param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
@@ -337,7 +367,7 @@ module AutoOpenCurve =
         let rc = State.Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
-                let d = State.Doc.Objects.AddTextDot(string i, pt)
+                let d = State.Doc.Objects.AddTextDot(string i, pt) // TODO really draw debug objects ?
                 Scripting.ObjectLayer(d,"ERROR-AddPolyline", createLayerIfMissing=true)
             eprintf "See %d TextDots on layer 'ERROR-AddPolyline'"  (Seq.length points)
             RhinoScriptingException.Raise "Rhino.Scripting.AddPolyline: Unable to add polyline to document form points:\r\n'%A'" (Print.nice points)
@@ -360,7 +390,7 @@ module AutoOpenCurve =
         let rc = State.Doc.Objects.AddPolyline(pl)
         if rc = Guid.Empty then
             for i,pt in Seq.indexed(points) do
-                let d = State.Doc.Objects.AddTextDot(string i, pt)
+                let d = State.Doc.Objects.AddTextDot(string i, pt)  // TODO really draw debug objects ?
                 Scripting.ObjectLayer(d,"ERROR-AddPolylineClosed", createLayerIfMissing=true)
             eprintf "See %d TextDots on layer 'ERROR-AddPolylineClosed'"  (Seq.length points)
             RhinoScriptingException.Raise "Rhino.Scripting.AddPolylineClosed: Unable to add closed polyline to document.  points:'%A'" points

@@ -268,6 +268,19 @@ module AutoOpenGeometry =
         if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (toNiceString point)
         State.Doc.Views.Redraw()
         rc
+
+    ///<summary>Add a text dot to the document.</summary>
+    ///<param name="text">(string) String in dot</param> 
+    ///<param name="x">(float) X position</param>
+    ///<param name="y">(float) Y position</param>
+    ///<param name="z">(float) Z position</param>
+    ///<returns>(Guid) The identifier of the new object.</returns>
+    static member AddTextDot(text:string, x:float,y,z) : Guid = 
+        let rc = State.Doc.Objects.AddTextDot(text, Point3d(x,y,z))
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddTextDot: Unable to add TextDot to document. text:'%s' at x:%g, y:%g, z:%g" text x y z
+        State.Doc.Views.Redraw()
+        rc
+
     
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="geometry">(GeometryBase) The geometry to use</param>

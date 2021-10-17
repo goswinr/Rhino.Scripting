@@ -387,7 +387,7 @@ module AutoOpenSelection =
         try
             let objectIds = Scripting.Sticky.[message] :?> Rarr<Guid>
             if printCount then  // this print statement also raises an exception if object does not exist to trigger reselection
-                Scripting.PrintfnBlue "GetObjectsAndRemember: %s" (Scripting.ObjectDescription(objectIds))
+                Scripting.PrintfnBlue "GetObjectsAndRemember for '%s': %s" message (Scripting.ObjectDescription(objectIds))
             objectIds
         with | _ ->
             let ids = Scripting.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter)
@@ -419,7 +419,7 @@ module AutoOpenSelection =
         try
             let objectId:Guid = Scripting.Sticky.[message] |> unbox
             if printCount then // this print statement also raises an exception if object does not exist to trigger reselection
-                Scripting.PrintfnBlue "GetObjectAndRemember: %s" (Scripting.ObjectDescription(objectId))
+                Scripting.PrintfnBlue "GetObjectAndRemember for '%s': one %s" message (Scripting.ObjectDescription(objectId))
             objectId
         with | _ ->
             let id = Scripting.GetObject(message, filter,  preselect, select,  customFilter, subObjects=false)
