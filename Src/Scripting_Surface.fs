@@ -64,31 +64,50 @@ module AutoOpenSurface =
     ///<param name="startPoint">(Point3d) Start point of line that defines the cutting Plane</param>
     ///<param name="endPoint">(Point3d) End point of line that defines the cutting Plane</param>
     ///<param name="normal">(Vector3d) Optional, Default Value: <c>world Z axis</c>
-    ///    Vector that will be contained in the returned planar
-    ///    Surface.
-    ///    If omitted, the world Z axis is used</param>
+    ///    Vector that will be contained in the returned planar Surface.
+    ///    If omitted, the world Z axis is used (NOT the normal to, or Z axis of, the active view's construction plane as in rhinopython).</param>
     ///<returns>(Guid) identifier of new object.</returns>
     static member AddCutPlane( objectIds:Guid seq,
                                startPoint:Point3d,
-                               endPoint:Point3d,
-                               [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid = //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
+                               endPoint:Point3d, 
+                               [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
+        #if RHINO6 
         let bbox = BoundingBox.Unset
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             let geometry = rhobj.Geometry
-            bbox.Union( geometry.GetBoundingBox(true))
-        //startPoint = Scripting.Coerce3dpoint(startPoint)
-        //endPoint = Scripting.Coerce3dpoint(endPoint)
+            bbox.Union( geometry.GetBoundingBox(true))        
         if not bbox.IsValid then
-            RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
-        let line = Line(startPoint, endPoint)
-        let normal = if normal.IsZero then Vector3d.ZAxis else normal
-        let surface = PlaneSurface.CreateThroughBox(line, normal, bbox)
+            RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal        
+        #else
+        // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955        
+        let bbox = 
+            let objs = objectIds|> Seq.map Scripting.CoerceRhinoObject
+            let mutable ok,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
+            if not bbox0.IsValid then
+                RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Print.nice objectIds) 
+            let mutable bboxMin = bbox0.Min
+            let mutable bboxMax = bbox0.Max
+            for i=0 to 2 do 
+                if (abs(bboxMin.[i] - bboxMax.[i]) < RhinoMath.SqrtEpsilon)then
+                    bboxMin.[i] <- bboxMin.[i] - 1.0
+                    bboxMax.[i] <- bboxMax.[i] + 1.0
+            let mutable v = bboxMax - bboxMin
+            v <- v * 1.1
+            let p = bboxMin + v
+            bboxMin <- bboxMax - v
+            bboxMax <- p
+            Rhino.Geometry.BoundingBox(bboxMin, bboxMax)
+        #endif
+        let line = Geometry.Line(startPoint, endPoint)
+        let normal = if normal.IsZero then Vector3d.ZAxis else normal // original : scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
+        let surface = Rhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, bbox)
         if surface|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
         let objectId = State.Doc.Objects.AddSurface(surface)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
         State.Doc.Views.Redraw()
         objectId
+        
 
 
     ///<summary>Adds a cylinder-shaped Polysurface to the document.</summary>
