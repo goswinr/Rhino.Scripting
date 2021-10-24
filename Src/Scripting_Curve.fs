@@ -1,4 +1,4 @@
-
+﻿
 namespace Rhino
 
 open System
@@ -713,7 +713,7 @@ module AutoOpenCurve =
     static member CurveArrows(curveId:Guid, arrowStyle:int) : unit = //SET
         let rhobj = Scripting.CoerceRhinoObject(curveId)
         let attr = rhobj.Attributes
-        let rc = attr.ObjectDecoration
+        //let rc = attr.ObjectDecoration
         if arrowStyle >= 0 && arrowStyle <= 3 then
             if arrowStyle = 0 then
                 attr.ObjectDecoration <- DocObjects.ObjectDecoration.None
@@ -723,11 +723,11 @@ module AutoOpenCurve =
                 attr.ObjectDecoration <- DocObjects.ObjectDecoration.EndArrowhead
             elif arrowStyle = 3 then
                 attr.ObjectDecoration <- DocObjects.ObjectDecoration.BothArrowhead
-            if State.Doc.Objects.ModifyAttributes(curveId, attr, quiet=true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows ModifyAttributes faile on style %d on %s" arrowStyle  (Print.guid curveId)
+            if not <| State.Doc.Objects.ModifyAttributes(curveId, attr, quiet=true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows ModifyAttributes failed on style %d on %s" arrowStyle  (Print.guid curveId)
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows style %d invalid" arrowStyle
+            RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows style %d is invalid" arrowStyle
 
     ///<summary>Enables or disables multiple Curve objects's annotation arrows.</summary>
     ///<param name="curveIds">(Guid seq) Identifier of multiple Curve</param>
@@ -741,7 +741,7 @@ module AutoOpenCurve =
         for curveId in curveIds do
             let rhobj = Scripting.CoerceRhinoObject(curveId)
             let attr = rhobj.Attributes
-            let rc = attr.ObjectDecoration
+            //let rc = attr.ObjectDecoration
             if arrowStyle >= 0 && arrowStyle <= 3 then
                 if arrowStyle = 0 then
                     attr.ObjectDecoration <- DocObjects.ObjectDecoration.None
@@ -752,9 +752,9 @@ module AutoOpenCurve =
                 elif arrowStyle = 3 then
                     attr.ObjectDecoration <- DocObjects.ObjectDecoration.BothArrowhead
                 if not <| State.Doc.Objects.ModifyAttributes(curveId, attr, quiet=true) then
-                    RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows style %d invalid" arrowStyle
+                    RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows ModifyAttributes failed on style %d on %s" arrowStyle  (Print.guid curveId)
             else
-               RhinoScriptingException.Raise "Rhino.Scripting.Curve Arrow style %d invalid" arrowStyle
+               RhinoScriptingException.Raise "Rhino.Scripting.Curve Arrow style %d is invalid" arrowStyle
         State.Doc.Views.Redraw()
 
     ///<summary>Calculates the difference between two closed, planar Curves and
