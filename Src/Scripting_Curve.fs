@@ -1,4 +1,4 @@
-﻿
+
 namespace Rhino
 
 open System
@@ -90,17 +90,26 @@ module AutoOpenCurve =
 
 
     ///<summary>Adds a circle Curve to the document.</summary>
-    ///<param name="plane">(Plane) Plane on which the circle will lie. If a point is
-    ///    passed, this will be the center of the circle on the active construction Plane</param>
+    ///<param name="plane">(Plane) Plane on which the circle will lie.</param>
     ///<param name="radius">(float) The radius of the circle</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddCircle(plane:Plane, radius:float) : Guid = //(TODO add overload point)
+    static member AddCircle(plane:Plane, radius:float) : Guid = 
         let circle = Circle(plane, radius)
         let rc = State.Doc.Objects.AddCircle(circle)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddCircle: Unable to add circle to document.  planeOrCenter:'%A' radius:'%A'" plane radius
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddCircle: Unable to add circle to document.  plane:'%O' radius:'%s'" plane radius.ToNiceString
         State.Doc.Views.Redraw()
         rc
 
+    ///<summary>Adds a circle Curve to the document.</summary>
+    ///<param name="center">(Point3d) Center of circle will lie. Plane wil be world XY </param>
+    ///<param name="radius">(float) The radius of the circle</param>
+    ///<returns>(Guid) ObjectId of the new Curve object.</returns>
+    static member AddCircle(center:Point3d, radius:float) : Guid =
+        let circle = Circle(center, radius)
+        let rc = State.Doc.Objects.AddCircle(circle)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddCircle: Unable to add circle to document.  center:'%s' radius:'%s'" center.ToNiceString radius.ToNiceString
+        State.Doc.Views.Redraw()
+        rc
 
     ///<summary>Adds a 3-point circle Curve to the document.</summary>
     ///<param name="first">(Point3d) First point on the circle'</param>
