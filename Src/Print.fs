@@ -84,11 +84,11 @@ module internal Print =
             let o = State.Doc.Objects.FindId(g)
             if isNull o then sprintf "Guid %O (not in State.Doc.Objects table of this Rhino file)." g
             else
-                let name = o.Attributes.Name
-                if name <> "" then
-                    sprintf "Guid %O (a %s on Layer '%s' named '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
+                let name = o.Attributes.Name // null if unset
+                if String.IsNullOrWhiteSpace name then
+                    sprintf "Guid %O (a %s on Layer '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
                 else
-                    sprintf "Guid %O (an unnamed %s on Layer '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
+                    sprintf "Guid %O (a %s named '%s' on Layer '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
         else
             // the Print.guid function gets injected into FsEx.NiceString, below
             // so that using the print function still works on other Guids if Rhino.Scripting is referenced from outside of rhino wher there is no active Doc

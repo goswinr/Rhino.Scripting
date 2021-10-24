@@ -89,7 +89,8 @@ module AutoOpenLine =
 
 
     ///<summary>Calculates the intersection of two non-parallel lines. The lines are considered endless.
-    ///    If the two lines do not actually intersect the closest point on each is returned.</summary>
+    /// If the two lines do not actually intersect the closest point on each is returned.
+    /// Fails on paralell or coliniear lines</summary>
     ///<param name="lineA">(Geometry.Line) LineA of lines to intersect</param>
     ///<param name="lineB">(Geometry.Line) LineB of lines to intersect</param>
     ///<returns>(Point3d * Point3d) containing a point on the first line and a point on the second line.</returns>
@@ -114,8 +115,7 @@ module AutoOpenLine =
         line.MaximumDistanceTo(line2)
 
 
-    ///<summary>Finds the shortest distance between a line as a finite chord, and a point
-    ///    or another line.</summary>
+    ///<summary>Finds the shortest distance between a line as a finite chord, and a point or another line.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
@@ -123,8 +123,7 @@ module AutoOpenLine =
     static member LineMinDistanceTo(line:Line, point:Point3d) : float = 
         line.MinimumDistanceTo(point)
 
-    ///<summary>Finds the shortest distance between a line as a finite chord, and a point
-    ///    or another line.</summary>
+    ///<summary>Finds the shortest distance between a line as a finite chord, and a point or another line.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,

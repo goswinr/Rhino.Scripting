@@ -861,7 +861,7 @@ module AutoOpenSurface =
             if curve.IsValid then
                 let rc = State.Doc.Objects.AddCurve(curve)
                 curve.Dispose()
-                if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateEdgeCurves faile on one of the edge curves"
+                if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateEdgeCurves failed on one of the edge curves"
                 curves.Add(rc)
                 if select then
                     let rhobject = Scripting.CoerceRhinoObject(rc)
