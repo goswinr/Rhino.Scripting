@@ -143,6 +143,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
+                if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 RhinoUserInteractionException.Raise "No Object was selected in rs.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -158,8 +159,7 @@ module AutoOpenSelection =
                     State.Doc.Objects.UnselectAll()|> ignore
                     State.Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
-                (objectId, presel, selmethod, point, curveparameter, viewname)
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                (objectId, presel, selmethod, point, curveparameter, viewname)            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -260,6 +260,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
+                if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 RhinoUserInteractionException.Raise "No Object was selected in rs.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -274,8 +275,8 @@ module AutoOpenSelection =
                     State.Doc.Objects.UnselectAll() |> ignore
                     State.Doc.Views.Redraw()
                 obj.Select(select) |> ignore
+                //if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 (objectId, presel, selmethod, point, viewname)
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -300,7 +301,7 @@ module AutoOpenSelection =
     ///    Minimum count of objects allowed to be selected</param>
     ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
+    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window.</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid Rarr) List of identifiers of the picked objects.</returns>
@@ -332,6 +333,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.GetMultiple(minimumCount, maximumCount)
             if res <> Input.GetResult.Object then
+                if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 RhinoUserInteractionException.Raise "No Object was selected in rs.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
@@ -345,8 +347,8 @@ module AutoOpenSelection =
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then Scripting.PrintfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
+                //if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 rc
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -407,19 +409,19 @@ module AutoOpenSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
+    ///<param name="printDescr">(bool) Optional, Default Value: <c>false</c> Print object description to command window</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<returns>(Guid) a identifier of the picked object.</returns>
     static member GetObjectAndRemember( message:string,
                                         [<OPT;DEF(0)>]filter:int,
                                         [<OPT;DEF(true)>]preselect:bool,
                                         [<OPT;DEF(false)>]select:bool,
-                                        [<OPT;DEF(true)>]printCount:bool,
+                                        [<OPT;DEF(false)>]printDescr:bool,
                                         [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Guid = 
         try
-            let objectId:Guid = Scripting.Sticky.[message] |> unbox
-            if printCount then // this print statement also raises an exception if object does not exist to trigger reselection
-                Scripting.PrintfnBlue "GetObjectAndRemember for '%s': one %s" message (Scripting.ObjectDescription(objectId))
+            let objectId:Guid = Scripting.Sticky.[message] |> unbox // this may raises an exception if the key does  not exist, to trigger reselection
+            if printDescr then 
+                Scripting.PrintfnBlue "GetObjectAndRemember for '%s': one %s" message (Scripting.ObjectDescription(objectId)) // this print statement also raises an exception if guid object does not exist, to trigger reselection
             objectId
         with | _ ->
             let id = Scripting.GetObject(message, filter,  preselect, select,  customFilter, subObjects=false)
