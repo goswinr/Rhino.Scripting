@@ -58,21 +58,21 @@ module AutoOpenRhinoTypeExtensions =
 
     type Plane with
 
-         /// WorldXY rotated 180 degrees round Z Axis
-         static member WorldMinusXMinusY= 
-            Plane(Point3d.Origin, -Vector3d.XAxis, -Vector3d.YAxis)
+        /// WorldXY rotated 180 degrees round Z Axis
+        static member WorldMinusXMinusY= 
+           Plane(Point3d.Origin, -Vector3d.XAxis, -Vector3d.YAxis)
 
-         /// WorldXY rotated 90 degrees round Z Axis counter clockwise from top
-         static member WorldYMinusX= 
-            Plane(Point3d.Origin, Vector3d.YAxis, -Vector3d.XAxis)
+        /// WorldXY rotated 90 degrees round Z Axis counter clockwise from top
+        static member WorldYMinusX= 
+           Plane(Point3d.Origin, Vector3d.YAxis, -Vector3d.XAxis)
 
-         /// WorldXY rotated 270 degrees round Z Axis counter clockwise from top
-         static member WorldMinusYX= 
-            Plane(Point3d.Origin, -Vector3d.YAxis, Vector3d.XAxis)
+        /// WorldXY rotated 270 degrees round Z Axis counter clockwise from top
+        static member WorldMinusYX= 
+           Plane(Point3d.Origin, -Vector3d.YAxis, Vector3d.XAxis)
 
-         /// WorldXY rotated 180 degrees round X Axis, Z points down now
-         static member WorldXMinusY= 
-            Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
+        /// WorldXY rotated 180 degrees round X Axis, Z points down now
+        static member WorldXMinusY= 
+           Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
 
     type PolylineCurve with
 
