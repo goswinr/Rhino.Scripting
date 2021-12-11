@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenPointVector =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Compares two vectors to see if they are parallel within one degree or custom tolerance.</summary>
@@ -58,7 +58,7 @@ module AutoOpenPointVector =
 
 
 
-    ///<summary>Verifies that a vector is very short. The X, Y, Z elements are smaler than 1.0e-12.</summary>
+    ///<summary>Verifies that a vector is very short. The X, Y, Z elements are smaller than 1.0e-12.</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is tiny, otherwise False.</returns>
     static member IsVectorTiny(vector:Vector3d) : bool = 
@@ -167,7 +167,7 @@ module AutoOpenPointVector =
                 if distance < t3 closest then
                     closest  <-  objectId, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A ose Point, Pointcloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A  Point, Pointcloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
 
         if t1 closest <> Guid.Empty then closest
         else RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject failed on %A and %A" point objectIds
@@ -195,7 +195,7 @@ module AutoOpenPointVector =
     ///<returns>(Point3d) resulting point.</returns>
     static member PointDivide(point:Point3d, divide:float) : Point3d = 
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "Rhino.Scripting.PointDivide: Cannot devide by Zero or almost Zero %f" divide
+            RhinoScriptingException.Raise "Rhino.Scripting.PointDivide: Cannot divide by Zero or almost Zero %f" divide
         else
             point/divide
 
@@ -360,7 +360,7 @@ module AutoOpenPointVector =
     static member VectorDivide(vector:Vector3d, divide:float) : Vector3d = 
         //vector = Scripting.Coerce3dvector(vector)
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "Rhino.Scripting.VectorDivide: Cannot devide by Zero or almost Zero %f" divide
+            RhinoScriptingException.Raise "Rhino.Scripting.VectorDivide: Cannot divide by Zero or almost Zero %f" divide
         else
             vector/divide
 

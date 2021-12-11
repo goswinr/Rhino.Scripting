@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenMaterial =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
 
@@ -40,7 +40,7 @@ module AutoOpenMaterial =
             materialindex
 
     ///<summary>Adds material to an object and returns the new material's index. If the
-    ///    object already has a material, the the object's current material index is returned.</summary>
+    ///    object already has a material, the object's current material index is returned.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) material index of the object.</returns>
     static member AddMaterialToObject(objectId:Guid) : int = 
@@ -64,7 +64,7 @@ module AutoOpenMaterial =
     ///<param name="destinationIndex">(int) Destination index materials to copy</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool = 
-        if sourceIndex = destinationIndex then true // orignaly false
+        if sourceIndex = destinationIndex then true // originally false
         else
             let source = State.Doc.Materials.[sourceIndex]
             if source|> isNull  then false

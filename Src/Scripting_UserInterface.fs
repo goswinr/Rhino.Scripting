@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenUserInterface =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Display browse-for-folder dialog allowing the user to select a folder.</summary>
@@ -129,7 +129,7 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Pauses for user input of one or more boolean values. Boolean values are
-    ///    displayed as click-able Commandline option toggles.</summary>
+    ///    displayed as click-able Command-line option toggles.</summary>
     ///<param name="message">(string) A prompt</param>
     ///<param name="items">((string*string*string) array) List of options. Each option is a tuple of three strings
     ///    [n][1]    description of the boolean value. Must only consist of letters and numbers. (no characters like space, period, or dash)
@@ -220,7 +220,7 @@ module AutoOpenUserInterface =
     ///<returns>(Point3d * Point2d * Guid * Point2d) a Tuple of containing the following information
     ///    0  Point3d: cursor position in world coordinates
     ///    1  Point2d: cursor position in screen coordinates
-    ///    2  Guid:    objectId of the active viewport
+    ///    2  Guid:    objectId of the active view-port
     ///    3  Point2d: cursor position in client coordinates.</returns>
     static member GetCursorPos() : Point3d * Point2d * Guid * Point2d = 
         let get () =   //or skip ?
@@ -445,11 +445,11 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Displays a dialog box prompting the user to select one linetype.</summary>
-    ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the linetype to select. If omitted, the current linetype will be selected</param>
+    ///<summary>Displays a dialog box prompting the user to select one line-type.</summary>
+    ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
     ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, the "by Layer" linetype will show. Defaults to False</param>
-    ///<returns>(string option) an Option of The names of selected linetype.</returns>
+    ///    If True, the "by Layer" line-type will show. Defaults to False</param>
+    ///<returns>(string option) an Option of The names of selected line-type.</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
                                 [<OPT;DEF(false)>]showByLayer:bool) : string option = 
         let getKeepEditor () = 
@@ -485,7 +485,7 @@ module AutoOpenUserInterface =
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int Rarr) an Option of of Mesh face indices.</returns>
+    ///<returns>(int Rarr) an Option of Mesh face indices.</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
@@ -518,7 +518,7 @@ module AutoOpenUserInterface =
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int Rarr) an Option of of Mesh vertex indices.</returns>
+    ///<returns>(int Rarr) an Option of Mesh vertex indices.</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
@@ -571,7 +571,7 @@ module AutoOpenUserInterface =
 
 
 
-    ///<summary>Pauses for user input of a point constrainted to a Curve object.</summary>
+    ///<summary>Pauses for user input of a point constrained to a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
     ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
@@ -650,7 +650,7 @@ module AutoOpenUserInterface =
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
     ///<param name="maxPoints">(int) Optional, Maximum number of points to pick. If not specified, an
     ///    unlimited number of points can be picked</param>
-    ///<returns>(Point3d array) an Option of of 3d points.</returns>
+    ///<returns>(Point3d array) an Option of 3d points.</returns>
     static member GetPoints(    [<OPT;DEF(false)>]drawLines:bool,
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
@@ -716,7 +716,7 @@ module AutoOpenUserInterface =
     ///    value description
     ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed Polyline will be returned.
     ///    2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed Polyline will be returned.
-    ///    4     Force close. If specified, then the returned Polyline is always closed. If specified, then max must bebet 0 or bigger than 4.
+    ///    4     Force close. If specified, then the returned Polyline is always closed. If specified, then max must be 0 or bigger than 4.
     ///    Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
@@ -935,7 +935,7 @@ module AutoOpenUserInterface =
     ///<param name="values">(string seq) The corresponding values to the items</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>(string array option) an Option of of new values.</returns>
+    ///<returns>(string array option) an Option of new values.</returns>
     static member PropertyListBox(  items:string IList,
                                     values:string seq,
                                     [<OPT;DEF(null:string)>]message:string,
@@ -1000,7 +1000,7 @@ module AutoOpenUserInterface =
     ///<param name="folder">(string) Optional, A default folder</param>
     ///<param name="filename">(string) Optional, A default file name</param>
     ///<param name="extension">(string) Optional, A default file extension</param>
-    ///<returns>(string array option) an Option of of selected file names.</returns>
+    ///<returns>(string array option) an Option of selected file names.</returns>
     static member OpenFileNames(    [<OPT;DEF(null:string)>]title:string,
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,

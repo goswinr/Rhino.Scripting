@@ -17,18 +17,18 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenGeometry =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Create a clipping Plane for visibly clipping away geometry in a specific view. Clipping Planes are infinite.</summary>
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="uMagnitude">(float) U magnitude of the Plane</param>
     ///<param name="vMagnitude">(float) V magnitude of the Plane</param>
-    ///<param name="views">(string seq) Optional, Titles the the view(s) to clip. If omitted, the active
+    ///<param name="views">(string seq) Optional, Titles the view(s) to clip. If omitted, the active
     ///    view is used</param>
     ///<returns>(Guid) object identifier.</returns>
     static member AddClippingPlane( plane:Plane,

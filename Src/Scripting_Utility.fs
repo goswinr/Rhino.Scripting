@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenUtility =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
 
@@ -127,7 +127,7 @@ module AutoOpenUtility =
        int rgb.G
 
 
-    ///<summary>Converts colors from hue-lumanence-saturation to RGB.</summary>
+    ///<summary>Converts colors from hue-luminance-saturation to RGB.</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value.</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color = 
@@ -256,7 +256,7 @@ module AutoOpenUtility =
     ///<summary>Sorts the components of an array of 3D points.</summary>
     ///<param name="points">(Point3d seq) Points to sort</param>
     ///<param name="ascending">(bool) Optional, Default Value: <c>true</c>
-    ///    Ascendeing if omitted (True) or True, descending if False</param>
+    ///    Ascending if omitted (True) or True, descending if False</param>
     ///<param name="order">(int) Optional, Default Value: <c>0</c>
     ///    The component sort order
     ///    Value       Component Sort Order
@@ -339,7 +339,7 @@ module AutoOpenUtility =
         Scripting.CoerceXform(xForm) // TODO verify row, column order !!
 
 
-    ///<summary>Creats a RGB color from red, green and  blue  values as Integers. Raise an exception if values are out of range</summary>
+    ///<summary>Creates a RGB color from red, green and  blue  values as Integers. Raise an exception if values are out of range</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
@@ -350,7 +350,7 @@ module AutoOpenUtility =
         if blue  < 0 || blue > 255 then RhinoScriptingException.Raise "Rhino.Scripting.CreateColor blue value out of range 0 to 255: %d" blue
         Drawing.Color.FromArgb(red, green, blue)
 
-    ///<summary>Creats a RGB color from  red, green and  blue  values as Bytes.</summary>
+    ///<summary>Creates a RGB color from  red, green and  blue  values as Bytes.</summary>
     ///<param name="red">(byte) Red Value</param>
     ///<param name="green">(byte) Green value</param>
     ///<param name="blue">(byte) Blue value</param>
@@ -369,7 +369,7 @@ module AutoOpenUtility =
 
 
     (* 
-    manipulationg ini files like in original Rhinoscript could be include via
+    manipulating ini files like in original Rhinoscript could be include via
     <PackageReference Include="ini-parser" Version="2.5.2" />
     however for now it is excluded to keep the dependencies at just FsEx.
     If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
@@ -378,7 +378,7 @@ module AutoOpenUtility =
     open IniParser.Model
 
     ///<summary>Returns section names or keys in one section of an ini file.</summary>
-    ///<param name="filename">(string) Name  and path of the inifile</param>
+    ///<param name="filename">(string) Name  and path of the ini-file</param>
     ///<param name="section">(string) Optional, Section to list keys from</param>
     ///<returns>(string array)
     ///    If section is NOT specified, a list containing all section names

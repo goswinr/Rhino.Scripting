@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenPlane =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Returns the distance from a 3D point to a Plane.</summary>
@@ -57,7 +57,7 @@ module AutoOpenPlane =
         //plane3 = Scripting.Coerceplane(plane3)
         let rc, point = Intersect.Intersection.PlanePlanePlane(plane1, plane2, plane3)
         if rc then point
-        else RhinoScriptingException.Raise "Rhino.Scripting.IntersectPlanes failed, are they paralell? %A; %A; %A" plane1 plane2 plane3
+        else RhinoScriptingException.Raise "Rhino.Scripting.IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
 
 
     ///<summary>Moves the origin of a Plane.</summary>
@@ -202,15 +202,15 @@ module AutoOpenPlane =
         //normal = Scripting.Coerce3dvector(normal)
         let mutable rc = Plane(origin, normal)
         if not xaxis.IsZero then
-            //xaxis = Scripting.Coerce3dvector(xaxis)
-            let xaxis = Vector3d(xaxis)//prevent original xaxis parameter from being unitized too
+            //x axis = Scripting.Coerce3dvector(x axis)
+            let xaxis = Vector3d(xaxis)//prevent original x axis parameter from being unitized too
             xaxis.Unitize() |> ignore
             let yaxis = Vector3d.CrossProduct(rc.Normal, xaxis)
             rc <- Plane(origin, xaxis, yaxis)
         rc
 
 
-    ///<summary>Creates a Plane from three non-colinear points.</summary>
+    ///<summary>Creates a Plane from three non-collinear points.</summary>
     ///<param name="origin">(Point3d) Origin point of the Plane</param>
     ///<param name="x">(Point3d) X point on the Plane's x  axis</param>
     ///<param name="y">(Point3d) Y point on the Plane's y axis</param>

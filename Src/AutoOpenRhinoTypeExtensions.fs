@@ -26,7 +26,7 @@ module AutoOpenRhinoTypeExtensions =
     type Vector3d with
 
         /// To convert Vector3d (as it is used in most other Rhino Geometries)
-        /// to a Vector3f (as it is used in Mesh noramls)
+        /// to a Vector3f (as it is used in Mesh normals)
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z)
 
         /// Unitizes the vector.
@@ -43,7 +43,7 @@ module AutoOpenRhinoTypeExtensions =
 
     type Vector3f with
 
-        /// To convert a Vector3f (as it is used in Mesh noramls)
+        /// To convert a Vector3f (as it is used in Mesh normals)
         /// to a Vector3d (as it is used in most other Rhino Geometries)
         member v.ToVector3d = Vector3d(v)
 

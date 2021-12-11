@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenTransformation =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Verifies a matrix is the identity matrix.</summary>
@@ -33,7 +33,7 @@ module AutoOpenTransformation =
 
 
     ///<summary>Verifies a matrix is a similarity transformation. A similarity
-    ///    transformation can be broken into a sequence of dialations, translations,
+    ///    transformation can be broken into a sequence of dilatations, translations,
     ///    rotations, and reflections.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
@@ -302,9 +302,9 @@ module AutoOpenTransformation =
 
     ///<summary>Returns a shear transformation matrix.</summary>
     ///<param name="plane">(Plane) Plane.Origin is the fixed point</param>
-    ///<param name="x">(Vector3d) X axis scale vecto</param>
-    ///<param name="y">(Vector3d) Y axis scale vecto</param>
-    ///<param name="z">(Vector3d) Z axis scale vecto</param>
+    ///<param name="x">(Vector3d) X axis scale vector</param>
+    ///<param name="y">(Vector3d) Y axis scale vector</param>
+    ///<param name="z">(Vector3d) Z axis scale vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformShear( plane:Plane,
                               x:Vector3d,

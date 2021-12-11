@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenViews =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
 
@@ -58,7 +58,7 @@ module AutoOpenViews =
     ///<summary>Adds a new page layout view.</summary>
     ///<param name="title">(string) Optional, Title of new layout</param>
     ///<param name="width">(float)  Optional, width  of paper for the new layout</param>
-    ///<param name="height">(floatt) Optional, height of paper for the new layout</param>
+    ///<param name="height">(float) Optional, height of paper for the new layout</param>
     ///<returns>(Guid*string) Id and Name of new layout.</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string,
                             [<OPT;DEF(0.0)>]width:float,
@@ -144,7 +144,7 @@ module AutoOpenViews =
         State.Doc.NamedViews.Delete(name)
 
 
-    ///<summary>Returns the projection locked state of a detail viewport rectangle.</summary>
+    ///<summary>Returns the projection locked state of a detail view-port rectangle.</summary>
     ///<param name="detailId">(Guid) Identifier of a detail rectangle object</param>
     ///<returns>(bool) The current detail projection locked state.</returns>
     static member DetailLock(detailId:Guid) : bool = //GET
@@ -204,7 +204,7 @@ module AutoOpenViews =
     ///<param name="layout">(string) Title of an existing page layout view</param>
     ///<returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
     static member IsLayout(layout:string) : bool = 
-        //layoutid = Scripting.Coerceguid(layout)
+        //layout id = Scripting.Coerceguid(layout)
         if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
             true
         elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
@@ -840,19 +840,19 @@ module AutoOpenViews =
         let viewo = Scripting.CoerceView(view)
         let rc = viewo.ActiveViewport.WallpaperFilename
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.Wallpaper failed to set walleper to %s in view %s" filename view
+            RhinoScriptingException.Raise "Rhino.Scripting.Wallpaper failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()
 
 
-    ///<summary>Returns the grayscale display option of the wallpaper bitmap in a
+    ///<summary>Returns the gray-scale display option of the wallpaper bitmap in a
     /// specified view.</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
-    ///<returns>(bool) The current grayscale display option.</returns>
+    ///<returns>(bool) The current gray-scale display option.</returns>
     static member WallpaperGrayScale(view:string) : bool = //GET
         let view = Scripting.CoerceView(view)
         view.ActiveViewport.WallpaperGrayscale
 
-    ///<summary>Sets the grayscale display option of the wallpaper bitmap in a
+    ///<summary>Sets the gray-scale display option of the wallpaper bitmap in a
     /// specified view.</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<param name="grayscale">(bool) Display the wallpaper in gray(True) or color (False)</param>
@@ -861,7 +861,7 @@ module AutoOpenViews =
         let viewo = Scripting.CoerceView(view)
         let filename = viewo.ActiveViewport.WallpaperFilename
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale) then
-            RhinoScriptingException.Raise "Rhino.Scripting.WallpaperGrayScale failed to set walleper to %s in view %s" filename view
+            RhinoScriptingException.Raise "Rhino.Scripting.WallpaperGrayScale failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()
 
 

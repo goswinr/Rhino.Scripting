@@ -15,14 +15,14 @@ type RhinoScriptingException (s:string) =
         if not b then raise (new RhinoScriptingException(s))
 
 
- /// Exception for aborted user interactions, such as cancelling to pick an object
+ /// Exception for aborted user interactions, such as canceling to pick an object
 type RhinoUserInteractionException (s:string) = 
     inherit Exception(s)
 
     static member inline Raise msg = 
         Printf.kprintf (fun s -> raise (new RhinoUserInteractionException(s))) msg
 
- /// Exception for UI thread synchronisation problems
+ /// Exception for UI thread synchronization problems
 type RhinoSyncException (s:string) = 
     inherit Exception(s)
 

@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenSurface =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Adds a box shaped Polysurface to the document.</summary>
@@ -365,7 +365,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (Print.nice polyline)
+            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Print.nice polyline)
             let rc =  State.Doc.Objects.AddBrep(breps.[0])
             State.Doc.Views.Redraw()
             rc
@@ -379,7 +379,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload insted on the same function on %s" (Print.nice curve)
+            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Print.nice curve)
             let rc =  State.Doc.Objects.AddBrep(breps.[0])
             State.Doc.Views.Redraw()
             rc
@@ -454,7 +454,7 @@ module AutoOpenSurface =
     ///    3 = Tight. The Surface sticks closely to the original Curves. Uses square
     ///      root of chord-length parameterization in the loft direction</param>
     ///<param name="rebuild">(int) Optional, Default Value: <c>0</c>
-    ///    If not 0 then Rebuilds the shape Curves before lofting with this control poin count</param>
+    ///    If not 0 then Rebuilds the shape Curves before lofting with this control point count</param>
     ///<param name="refit">(float) Optional, if given the loft is refitted, the value is the tolerance used to rebuild</param>
     ///<param name="closed">(bool) Optional, Default Value: <c>false</c>
     ///    Close the loft back to the first Curve</param>
@@ -553,7 +553,7 @@ module AutoOpenSurface =
     ///    defined cutting Planes through a Surface or Polysurface. For more
     ///    information, see Rhino help for details on the Contour command.</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
-    ///<param name="startPoint">(Point3d) The startpoint of a center line</param>
+    ///<param name="startPoint">(Point3d) The start point of a center line</param>
     ///<param name="endPoint">(Point3d)   the end point of a center line</param>
     ///<param name="interval">(float) Distance between contour Curves</param>
     ///<returns>(Guid Rarr) ids of new contour Curves .</returns>
@@ -823,7 +823,7 @@ module AutoOpenSurface =
             let idx = (!ci).Index
             !clpt,!s,!t, typ, idx, !n
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.BrepClosestPoint faile for %A and %A" (Print.guid objectId) point
+            RhinoScriptingException.Raise "Rhino.Scripting.BrepClosestPoint failed for %A and %A" (Print.guid objectId) point
 
 
     ///<summary>Caps planar holes in a Surface or Polysurface.</summary>
@@ -883,10 +883,10 @@ module AutoOpenSurface =
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
         let mutable curves = brep.DuplicateNakedEdgeCurves(outer, inner)
-        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' typ:'%d'" (Print.guid surfaceId) typ
+        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Print.guid surfaceId) typ
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
-        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' typ:'%d'" (Print.guid surfaceId) typ
+        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Print.guid surfaceId) typ
         let rc =  rarr { for c in curves do yield State.Doc.Objects.AddCurve(c) }
         State.Doc.Views.Redraw()
         rc
@@ -908,7 +908,7 @@ module AutoOpenSurface =
 
     ///<summary>Lengthens an untrimmed Surface object.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
-    ///<param name="parameter">(float * float) Tuple of two values definfing the U, V parameter to evaluate.
+    ///<param name="parameter">(float * float) Tuple of two values defining the U, V parameter to evaluate.
     ///    The Surface edge closest to the U, V parameter will be the edge that is
     ///    extended</param>
     ///<param name="length">(float) Amount to extend to Surface</param>
@@ -930,7 +930,7 @@ module AutoOpenSurface =
             ()
         notNull newsrf
 
-    ///<summary>Explodes, or unjoins, one or more Polysurface objects. Polysurfaces
+    ///<summary>Explodes, or un-joins, one or more Polysurface objects. Polysurfaces
     ///    will be exploded into separate Surfaces.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of Polysurfaces to explode</param>
     ///<param name="deleteInput">(bool) Optional, Default Value: <c>false</c>
@@ -950,7 +950,7 @@ module AutoOpenSurface =
         ids
 
 
-    ///<summary>Extracts isoparametric Curves from a Surface.</summary>
+    ///<summary>Extracts iso-parametric Curves from a Surface.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface</param>
     ///<param name="parameter">(float * float) U, v parameter of the Surface to evaluate</param>
     ///<param name="direction">(int) Direction to evaluate
@@ -1046,7 +1046,7 @@ module AutoOpenSurface =
     ///<summary>Create Surface by extruding a Curve along two points that define a line.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve to extrude</param>
     ///<param name="startPoint">(Point3d) Start point</param>
-    ///<param name="endPoint">(Point3d) End point, that specifyies distance and direction</param>
+    ///<param name="endPoint">(Point3d) End point, that specifies distance and direction</param>
     ///<returns>(Guid) identifier of new Surface .</returns>
     static member ExtrudeCurveStraight( curveId:Guid,
                                         startPoint:Point3d,
@@ -1346,7 +1346,7 @@ module AutoOpenSurface =
 
 
 
-    ///<summary>Verifies a Guid refers to a closed Polysurface or closed Extrtrusion. If the Polysurface fully encloses
+    ///<summary>Verifies a Guid refers to a closed Polysurface or closed Extrusion. If the Polysurface fully encloses
     ///    a volume, it is considered a solid.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
@@ -1810,11 +1810,11 @@ module AutoOpenSurface =
     ///    [6]     Area Moments of Inertia about the World Coordinate Axes.
     ///    [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
     ///    [8]     Area Radii of Gyration about the World Coordinate Axes.
-    ///    [9]     (Not impemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///    [9]     (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
     ///    [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-    ///    [13]    (Not impemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
+    ///    [13]    (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
     static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) Rarr = 
         surfaceId
         |> Scripting.TryCoerceBrep
@@ -2190,7 +2190,7 @@ module AutoOpenSurface =
 
 
     ///<summary>Converts normalized Surface parameter to a Surface domain specific (regular) parameter.
-    /// or a paranter within the Surface's domain.</summary>
+    /// or a parameter within the Surface's domain.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) The normalized parameter to convert</param>
     ///<returns>(float * float) u and v Surface parameters.</returns>
@@ -2261,7 +2261,7 @@ module AutoOpenSurface =
 
     ///<summary>Calculates volume centroid of a closed Surface or Polysurface.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
-    ///<returns>(Point3d) Volume Centriod.</returns>
+    ///<returns>(Point3d) Volume Centroid.</returns>
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d = 
         objectId
         |> Scripting.TryCoerceBrep
@@ -2479,7 +2479,7 @@ module AutoOpenSurface =
 
 
 
-    ///<summary>Flattens a developable Surface or Polysurface.</summary>
+    ///<summary>Flattens a develop-able Surface or Polysurface.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="explode">(bool) Optional, Default Value: <c>false</c>
     ///    If True, the resulting Surfaces are not joined</param>

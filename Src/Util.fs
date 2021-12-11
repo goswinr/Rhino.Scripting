@@ -13,7 +13,7 @@ module internal Util =
     /// If second value is 0.0 return first else second
     let inline ifZero2 a b =  if b = 0.0 then a else b
 
-    // ------- Abreviations so that declarations are not so long:
+    // ------- Abbreviations so that declarations are not so long:
 
     /// OptionalAttribute for member parameters
     type internal OPT = Runtime.InteropServices.OptionalAttribute
@@ -22,7 +22,7 @@ module internal Util =
     type internal DEF =   Runtime.InteropServices.DefaultParameterValueAttribute
 
     ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
-    /// A good string may not inculde line returns, tabs, and leading or traling whitespace.
+    /// A good string may not include line returns, tabs, and leading or trailing whitespace.
     /// Confusing or ambiguous characters that look like ASCII but are some other unicode are also not allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>
@@ -52,19 +52,19 @@ module internal Util =
                             | UnicodeCategory.CurrencySymbol ->
                                 loop(i+1)
 
-                            // sometimes Ok :
+                            // sometimes OK :
                             | UnicodeCategory.OtherSymbol       // 166:'�'  167:'�'   169:'�'  174:'�' 176:'�' 182:'�'
                             | UnicodeCategory.MathSymbol        // 172:'�' 177:'�' 215:'�' 247:'�' | exclude char 215 that looks like x
                             | UnicodeCategory.OtherNumber ->    //178:'�' 179:'�' 185:'�' 188:'�' 189:'�' 190:'�'
-                                if c <= '÷' && c <> '×' then loop(i+1) // anything below char 247 is ok , but exclude MathSymbol char 215 that looks like letter x
+                                if c <= '÷' && c <> '×' then loop(i+1) // anything below char 247 is OK , but exclude MathSymbol char 215 that looks like letter x
                                 else false
 
-                            // NOT Ok :
+                            // NOT OK :
                             | UnicodeCategory.OpenPunctuation  // only ( [ and { is allowed
                             | UnicodeCategory.ClosePunctuation // exclude if out of unicode points 32 till 126
                             | UnicodeCategory.Control
-                            | UnicodeCategory.SpaceSeparator         // only regular space  ( that is char 32)     is alowed
-                            | UnicodeCategory.ConnectorPunctuation   // only simple underscore  _    is alowed
+                            | UnicodeCategory.SpaceSeparator         // only regular space  ( that is char 32)     is allowed
+                            | UnicodeCategory.ConnectorPunctuation   // only simple underscore  _    is allowed
                             | UnicodeCategory.DashPunctuation        // only minus - is allowed
                             | UnicodeCategory.TitlecaseLetter
                             | UnicodeCategory.ModifierLetter

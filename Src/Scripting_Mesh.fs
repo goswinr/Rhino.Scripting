@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenMesh =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>Add a Mesh object to the document.</summary>
@@ -289,7 +289,7 @@ module AutoOpenMesh =
     ///<summary>Verifies a point is on a Mesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<param name="point">(Point3d) Test point</param>
-    ///<param name="tolerance">(float) Optional, Defalut Value <c>RhinoMath.SqrtEpsilon</c>
+    ///<param name="tolerance">(float) Optional, Default Value <c>RhinoMath.SqrtEpsilon</c>
     ///    The testing tolerance</param>
     ///<returns>(bool) True , otherwise False.</returns>
     static member IsPointOnMesh(    objectId:Guid,
@@ -305,7 +305,7 @@ module AutoOpenMesh =
 
     ///<summary>Joins two or or more Mesh objects together.</summary>
     ///<param name="meshes">(Mesh seq) Mesh objects</param>
-    ///<param name="deleteInput">(bool) Optional, Defalut Value <c>false</c>
+    ///<param name="deleteInput">(bool) Optional, Default Value <c>false</c>
     ///   Delete input objects?</param>
     ///<returns>(Mesh) newly created Mesh.</returns>
     static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh = 
@@ -340,7 +340,7 @@ module AutoOpenMesh =
         rc
 
 
-    ///<summary>Returns approximate area of onemesh object.</summary>
+    ///<summary>Returns approximate area of one mesh object.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh objects</param>
     ///<returns>(float) total area of Mesh.</returns>
     static member MeshArea(objectId:Guid ) : float = 

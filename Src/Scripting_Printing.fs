@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenPrinting =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
     ///<summary>
@@ -41,7 +41,7 @@ module AutoOpenPrinting =
         toNiceString(x)
         |>! RhinoApp.WriteLine
         |>  Console.WriteLine
-        RhinoApp.Wait() // no swith to UI Thread needed !
+        RhinoApp.Wait() // no switch to UI Thread needed !
 
     ///<summary>
     /// Nice formating for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
@@ -57,7 +57,7 @@ module AutoOpenPrinting =
         toNiceStringFull(x)
         |>! RhinoApp.WriteLine
         |>  Console.WriteLine
-        RhinoApp.Wait() // no swith to UI Thread needed !
+        RhinoApp.Wait() // no switch to UI Thread needed !
 
 
     /// Like printf but in Red if used from Seff Editor. Does not add a new line at end.
@@ -66,7 +66,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.Write s
             Printf.red "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printfn but in Red if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -74,7 +74,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
             Printfn.red "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like PrintColor.f but in Green if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -82,7 +82,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.Write s
             Printf.green "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printfn but in Green if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -90,7 +90,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
             Printfn.green "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printf but in Light Blue if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -98,7 +98,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.Write s
             Printf.lightBlue "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printfn but in Light Blue if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -106,7 +106,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
             Printfn.lightBlue "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printf but in Blue if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -114,7 +114,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.Write s
             Printf.blue "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printfn but in Blue if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -122,7 +122,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
             Printfn.blue "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printf but in Gray if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -130,7 +130,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.Write s
             Printf.gray "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     /// Like printfn but in Gray if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
@@ -138,7 +138,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
             Printfn.gray "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
     ///<summary>Like printf but in custom color if used from Seff Editor. Does not add a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.</summary>
@@ -151,9 +151,9 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.Write s
             Printf.color red green blue "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
-    ///<summary>Like printfn but in costom color if used from Seff Editor. Adds a new line at end.
+    ///<summary>Like printfn but in custom color if used from Seff Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.</summary>
     ///<param name="red">(int) Red Value between 0 and 255 </param>
     ///<param name="green">(int) Green value between 0 and 255 </param>
@@ -164,7 +164,7 @@ module AutoOpenPrinting =
         Printf.kprintf (fun s ->
             RhinoApp.WriteLine s
             Printfn.color red green blue "%s" s
-            RhinoApp.Wait())  msg // no swith to UI Thread needed !
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
 
 

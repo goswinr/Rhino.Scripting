@@ -17,11 +17,11 @@ open FsEx.CompareOperators
 [<AutoOpen>]
 module AutoOpenLine =
   type Scripting with  
-    //---The members below are in this file only for developemnt. This brings acceptable tooling performance (e.g. autocomplete) 
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
-    //---End of header marker: don't chnage: {@$%^&*()*&^%$@}
+    //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
 
@@ -90,13 +90,13 @@ module AutoOpenLine =
 
     ///<summary>Calculates the intersection of two non-parallel lines. The lines are considered endless.
     /// If the two lines do not actually intersect the closest point on each is returned.
-    /// Fails on paralell or coliniear lines</summary>
+    /// Fails on parallel or collinear lines</summary>
     ///<param name="lineA">(Geometry.Line) LineA of lines to intersect</param>
     ///<param name="lineB">(Geometry.Line) LineB of lines to intersect</param>
     ///<returns>(Point3d * Point3d) containing a point on the first line and a point on the second line.</returns>
     static member LineLineIntersection(lineA:Line, lineB:Line) : Point3d * Point3d = 
         let rc, a, b = Intersect.Intersection.LineLine(lineA, lineB)
-        if not <| rc then  RhinoScriptingException.Raise "Rhino.Scripting.LineLineIntersection failed on lineA:%A lineB:%A , are they paralell?" lineA lineB
+        if not <| rc then  RhinoScriptingException.Raise "Rhino.Scripting.LineLineIntersection failed on lineA:%A lineB:%A , are they parallel?" lineA lineB
         lineA.PointAt(a), lineB.PointAt(b)
 
     ///<summary>Finds the longest distance between a line as a finite chord, and a point.</summary>
@@ -149,7 +149,7 @@ module AutoOpenLine =
     ///<returns>(Point3d) The 3D point of intersection is successful.</returns>
     static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d = 
         let rc, t = Intersect.Intersection.LinePlane(line, plane)
-        if  not <| rc then  RhinoScriptingException.Raise "Rhino.Scripting.LinePlaneIntersection failed. Paralell? line:'%A' plane:'%A'" line plane
+        if  not <| rc then  RhinoScriptingException.Raise "Rhino.Scripting.LinePlaneIntersection failed. Parallel? line:'%A' plane:'%A'" line plane
         line.PointAt(t)
 
 

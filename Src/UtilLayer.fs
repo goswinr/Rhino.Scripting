@@ -9,14 +9,14 @@ module internal UtilLayer =
     
     let eVSLN = "Rhino.Scripting.UtilLayer.ensureValidShortLayerName"
 
-    /// Raise exceptions if short layername is not valid
+    /// Raise exceptions if short layer-name is not valid
     /// it may not contain :: or control characters
     /// set allowSpecialChars to false to only have ASCII
     let internal failOnBadShortLayerName(name:string, limitToAscii) : unit= 
         if isNull name then RhinoScriptingException.Raise "%s: null string as layer name" eVSLN
 
         if name.Contains "::" then
-            RhinoScriptingException.Raise "%s: Short layer name '%s' shall not contai two colons (::) . " eVSLN name
+            RhinoScriptingException.Raise "%s: Short layer name '%s' shall not contains two colons (::) . " eVSLN name
 
         if not<| Util.isGoodStringId(name, false, limitToAscii) then             
             if limitToAscii then 
@@ -26,7 +26,7 @@ module internal UtilLayer =
         
         match Char.GetUnicodeCategory(name.[0]) with
         | UnicodeCategory.OpenPunctuation 
-        | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) dont work at start of layer name
+        | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) don't work at start of layer name
             RhinoScriptingException.Raise  "%s: Short layer name '%s' may not start with a '%c' " eVSLN name name.[0]
         | _ -> ()
 
@@ -66,7 +66,7 @@ module internal UtilLayer =
             if parentsToo then
                 for l in getParents(lay) do
                     l.SetPersistentLocking(false)
-                lay.SetPersistentLocking(false) // does noy unlock parents
+                lay.SetPersistentLocking(false) // does not unlock parents
 
     type internal LayerState = Off | On | ByParent
 
@@ -82,7 +82,7 @@ module internal UtilLayer =
       
 
     /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
-    /// Does not allow ambigous unicode characters in layername.
+    /// Does not allow ambiguous Unicode characters in layer-name.
     /// Returns index
     /// Empty string returns current layer index
     let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState) : FoundOrCreatedIndex = 
@@ -132,7 +132,7 @@ module internal UtilLayer =
     /// creates layer with default name
     let internal createDefaultLayer(color, visible, locked) = 
         let layer = DocObjects.Layer.GetDefaultLayerProperties()
-        layer.Color <- color() // delay creation of (random) color till actaully neded ( so random colors are not created, in most cases layer exists)
+        layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
         if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "how can a new default layer have a parent ? %A" layer
         layer.IsVisible <- visible
         layer.IsLocked <- locked

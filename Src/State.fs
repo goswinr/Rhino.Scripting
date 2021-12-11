@@ -71,8 +71,8 @@ type internal State private () =
 
                 // listen to Esc Key press.
                 // doing this "Add" in on UI thread is only required if no handler has been added in sync before.
-                // Adding the first handler to this from async thread cause a Access violation exeption that can only be seen with the windows event log.
-                // This his handler does not work on Sync evaluationmode , TODO: test!
+                // Adding the first handler to this from async thread cause a Access violation exception that can only be seen with the windows event log.
+                // This his handler does not work on Sync evaluation-mode , TODO: test!
                 RhinoApp.EscapeKeyPressed.Add( fun _ ->
                     if not escapePressed  &&  not <| Input.RhinoGet.InGet(doc) then
                         escapePressed <- true
