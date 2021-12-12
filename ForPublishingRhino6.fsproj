@@ -54,12 +54,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
-    <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
-    <!-- <PackageReference Include="RhinoCommon" Version="6.34.21034.7001" PrivateAssets="all" ExcludeAssets="runtime" /> -->
-
     <PackageReference Include="FsEx" Version="0.8.0" />
 
+    <PackageReference Update="FSharp.Core" Version="6.0.1" /><!-- because FsEx is build with dotnet SDK 6.0, Update is only neded when building this with dotnet sdk 5.0-->
+
+    <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
+    <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
+    
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
