@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.1" /><!-- because FsEx is build with dotnet SDK 6.0, Update is only needed when building this with dotnet sdk 5.0-->
     <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="FsEx" Version="0.8.0" />
   </ItemGroup>
