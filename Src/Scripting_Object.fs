@@ -514,7 +514,11 @@ module AutoOpenObject =
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(string) A short text description of the object.</returns>
     static member ObjectDescription(objectIds:Guid seq) : string = 
-        let count =  Seq.countBy (fun id -> Scripting.CoerceRhinoObject(id).ShortDescription(true)) objectIds
+        let count =  objectIds|> Seq.countBy (fun id -> 
+                        /// TODO could be optimised by using Objecttype integer intead of string
+                        let o = Scripting.CoerceRhinoObject(id)
+                        o.ShortDescription(true) + if o.IsDeleted then " (deleted !)" else ""
+                        ) 
         let typesk = Seq.length count
         let mutable tx = ""
         if typesk = 0 then

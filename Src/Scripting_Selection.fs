@@ -390,6 +390,8 @@ module AutoOpenSelection =
             let objectIds = Scripting.Sticky.[message] :?> Rarr<Guid>
             if printCount then  // this print statement also raises an exception if object does not exist to trigger reselection
                 Scripting.PrintfnBlue "GetObjectsAndRemember for '%s': %s" message (Scripting.ObjectDescription(objectIds))
+            elif objectIds |> Rarr.exists ( fun g -> let o =  State.Doc.Objects.FindId(g) in isNull o || o.IsDeleted ) then 
+                fail() // to trigger reselection if object does not exist anymore          
             objectIds
         with | _ ->
             let ids = Scripting.GetObjects(message, filter, group, preselect, select, objects, minimumCount, maximumCount, printCount, customFilter)
@@ -422,6 +424,8 @@ module AutoOpenSelection =
             let objectId:Guid = Scripting.Sticky.[message] |> unbox // this may raises an exception if the key does  not exist, to trigger reselection
             if printDescr then 
                 Scripting.PrintfnBlue "GetObjectAndRemember for '%s': one %s" message (Scripting.ObjectDescription(objectId)) // this print statement also raises an exception if guid object does not exist, to trigger reselection
+            elif (let o = State.Doc.Objects.FindId(objectId) in isNull o || o.IsDeleted)  then 
+                fail() // to trigger reselection if object does not exist anymore  
             objectId
         with | _ ->
             let id = Scripting.GetObject(message, filter,  preselect, select,  customFilter, subObjects=false)
