@@ -350,6 +350,18 @@ module AutoOpenGeometry =
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
         bbox
 
+    ///<summary>Returns a world axis-aligned bounding box of several geometry objects.</summary>
+    ///<param name="geos">(GeometryBase seq) The geometries</param>
+    ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
+    ///    To get the eight 3D points that define the bounding box call box.GetCorners()
+    ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
+    static member BoundingBox(geos:seq<#GeometryBase>) : BoundingBox = 
+        let mutable bbox = BoundingBox.Empty
+        for g in geos do            
+            bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
+        bbox
+
+
     ///<summary>Returns a world axis-aligned bounding box of one object.</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).

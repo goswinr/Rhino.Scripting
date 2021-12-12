@@ -823,16 +823,32 @@ module AutoOpenMesh =
 
     ///<summary>Returns the approximate volume of one or more closed Meshes.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
-    ///<returns>(float)  total volume of all Meshes.</returns>
+    ///<returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(objectIds:Guid seq) : float = 
         let mutable totalvolume  = 0.0
         for objectId in objectIds do
+            // TODO add check for mesh beeing closed
             let mesh = Scripting.CoerceMesh(objectId)
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on objectId:'%s'" (Print.guid objectId)
+        totalvolume
+
+
+    ///<summary>Returns the approximate volume of one or more closed Meshes.</summary>
+    ///<param name="meshes">(Geometry.Mesh seq)  Mesh Geometries</param>
+    ///<returns>(float) total volume of all Meshes.</returns>
+    static member MeshVolume(meshes:Mesh seq) : float = 
+        let mutable totalvolume  = 0.0
+        for mesh in meshes do        
+            // TODO add check for mesh beeing closed
+            let mp = VolumeMassProperties.Compute(mesh)
+            if notNull mp then
+                totalvolume <- totalvolume + mp.Volume
+            else
+                RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on mesh:'%s' of %d meshes" (NiceString.toNiceString mesh) (Seq.length meshes)
         totalvolume
 
 
@@ -844,6 +860,14 @@ module AutoOpenMesh =
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
         else RhinoScriptingException.Raise "Rhino.Scripting.MeshVolumeCentroid failed.  objectId:'%s'" (Print.guid objectId)
+
+    ///<summary>Calculates the volume centroid of a Mesh.</summary>
+    ///<param name="mesh">(Geometry.Mesh seq) Mesh Geometry</param>
+    ///<returns>(Point3d) Point3d representing the volume centroid.</returns>
+    static member MeshVolumeCentroid(mesh:Mesh) : Point3d =
+        let mp = VolumeMassProperties.Compute(mesh)
+        if notNull mp then mp.Centroid
+        else RhinoScriptingException.Raise "Rhino.Scripting.MeshVolumeCentroid failed.  mesh:'%s'" (NiceString.toNiceString mesh)
 
 
     ///<summary>Pulls a Curve to a Mesh. The function makes a Polyline approximation of
