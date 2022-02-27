@@ -1,4 +1,4 @@
-﻿
+
 namespace Rhino
 
 open System
@@ -28,14 +28,13 @@ module AutoOpenMesh =
     ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the Mesh</param>
     ///<param name="faceVertices">(int IList seq) List containing lists of 3 or 4 numbers that define the
     ///    vertex indices for each face of the Mesh. If the third a fourth vertex
-    ///      indices of a face are identical, a triangular face will be created</param>
+    ///    indices of a face are identical, a triangular face will be created</param>
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
-    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex
-    ///    normal</param>
+    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
     ///<param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
     ///    vertex, there must be a corresponding texture coordinate</param>
     ///<param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
-    ///    there must be a corresponding vertex color</param>
+    ///    there must be a corresponding vertex color.</param>
     ///<returns>(Guid) Identifier of the new object.</returns>
     static member AddMesh( vertices:Point3d seq, //TODO how to construct Ngon Mesh ???
                            faceVertices:seq<#IList<int>>, // TODO test if nested arrays are accepted
@@ -77,7 +76,7 @@ module AutoOpenMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document. vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         State.Doc.Views.Redraw()
         rc
 
@@ -85,14 +84,13 @@ module AutoOpenMesh =
     ///<param name="vertices">(Point3d seq) List of 3D points defining the vertices of the Mesh</param>
     ///<param name="faceVertices">(int*int*int*int seq) Tuple  of  4 integers that define the
     ///    vertex indices for each face of the Mesh. If the third a fourth vertex
-    ///      indices of a face are identical, a triangular face will be created</param>
+    ///    indices of a face are identical, a triangular face will be created</param>
     ///<param name="vertexNormals">(Vector3f seq) Optional, List of 3D vectors defining the vertex normals of
-    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex
-    ///    normal</param>
+    ///    the Mesh. Note, for every vertex, there must be a corresponding vertex normal</param>
     ///<param name="textureCoordinates">(Point2f seq) Optional, List of 2D texture coordinates. For every
     ///    vertex, there must be a corresponding texture coordinate</param>
     ///<param name="vertexColors">(Drawing.Color seq) Optional, A list of color values. For every vertex,
-    ///    there must be a corresponding vertex color</param>
+    ///    there must be a corresponding vertex color.</param>
     ///<returns>(Guid) Identifier of the new object.</returns>
     static member AddMesh( vertices:Point3d seq, //TODO how to construct Ngon Mesh ???
                            faceVertices:seq<int*int*int*int>,
@@ -627,7 +625,7 @@ module AutoOpenMesh =
     ///<summary>Calculates the intersections of a Mesh object with another Mesh object.</summary>
     ///<param name="mesh1">(Guid) Mesh1</param>
     ///<param name="mesh2">(Guid) Mesh2</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance * MeshIntersectionsTolerancesCoefficient</c>
     ///    The intersection tolerance</param>
     ///<returns>(Polyline array) Array of points that define the vertices of the intersection Curves.</returns>
     static member MeshMeshIntersection( mesh1:Guid,
@@ -635,7 +633,7 @@ module AutoOpenMesh =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array = 
         let mesh1 = Scripting.CoerceMesh(mesh1)
         let mesh2 = Scripting.CoerceMesh(mesh2)
-        let tolerance = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
+        let tolerance = Util.ifZero1 tolerance (RhinoMath.ZeroTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
 
