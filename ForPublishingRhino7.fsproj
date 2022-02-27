@@ -16,17 +16,18 @@
     <RootNamespace>Rhino.Scripting</RootNamespace>
     <AssemblyName>Rhino.Scripting</AssemblyName>
     <AssemblyTitle>Rhino.Scripting</AssemblyTitle>
-    <Product>Rhino.Scripting for Rhino 7</Product> <!--visible in explorer-->
-    <Title>Rhino.Scripting for Rhino 7</Title>
-    <PackageId>Rhino7.Scripting</PackageId>
+    <Product>Rhino.Scripting</Product> <!--visible in explorer-->
+    <Title>Rhino.Scripting</Title>
+    <PackageId>Rhino.Scripting</PackageId>
 
-    <Version>0.0.5</Version>
-    <AssemblyVersion>0.0.5</AssemblyVersion>
-    <FileVersion>0.0.5</FileVersion>
+	<Version>0.1.0</Version>
+	<AssemblyVersion>0.1.0</AssemblyVersion>
+	<FileVersion>0.1.0</FileVersion>
+	  
     <PackageReleaseNotes>First release</PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
-    <Copyright>Goswin Rothenthal 2021</Copyright>
+    <Copyright>Goswin Rothenthal 2022</Copyright>
 
     <Description>A complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
 
@@ -48,7 +49,7 @@
     <RepositoryUrl>https://github.com/goswinr/Rhino.Scripting</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageIcon>logo128.png</PackageIcon>
-    <PackageReadmeFile>READMEnuget7.md</PackageReadmeFile><!--using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791     -->
+    <PackageReadmeFile>READMEnuget.md</PackageReadmeFile><!--using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791     -->
     <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>
     <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>
   </PropertyGroup>
@@ -67,7 +68,7 @@
 
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="Doc/READMEnuget7.md"  Pack="true" PackagePath="" />
+    <None Include="Doc/READMEnuget.md"  Pack="true" PackagePath="" />
     <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
 
      <Compile Include="Src/Exceptions.fs" />

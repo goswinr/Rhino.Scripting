@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <UseWPF>true</UseWPF><!--for DispatcherSynchronizationContext in RhinoSync, and Seff editor Window (if available)-->
+    <UseWPF>true</UseWPF> <!--for DispatcherSynchronizationContext in RhinoSync, and Seff editor Window (if available)-->
     <UseWindowsForms>true</UseWindowsForms>   <!--to get screen resolution-->
     <LangVersion>preview</LangVersion>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="combineIntoOneFile.fsx" />
+	  
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
@@ -56,6 +58,12 @@
     <Compile Include="Src/Scripting_UserInterface.fs" />
     <Compile Include="Src/Scripting_Utility.fs" />
     <Compile Include="Src/Scripting_Views.fs" />
+
+	<!-- included only for editing version numbers:-->
+	<None Include="ForPublishingRhino6.fsproj" />
+	<None Include="ForPublishingRhino7.fsproj" />
   </ItemGroup>
+
+  
 
 </Project>
