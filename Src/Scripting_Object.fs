@@ -1058,11 +1058,7 @@ module AutoOpenObject =
                                 rotationAngle:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid = 
-        let axis = 
-            if not axis.IsZero then
-                Vector3d.ZAxis
-            else
-                axis
+        let axis = if axis.IsZero then Vector3d.ZAxis else axis
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
@@ -1084,11 +1080,7 @@ module AutoOpenObject =
                                  rotationAngle:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
-        let axis = 
-            if not axis.IsZero then
-                Vector3d.ZAxis
-            else
-                axis
+        let axis = if axis.IsZero then Vector3d.ZAxis else axis
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let rc = Rarr()
