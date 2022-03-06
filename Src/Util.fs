@@ -19,16 +19,16 @@ module internal Util =
     type internal OPT = Runtime.InteropServices.OptionalAttribute
 
     /// DefaultParameterValueAttribute for member parameters
-    type internal DEF =   Runtime.InteropServices.DefaultParameterValueAttribute
+    type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 
-    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
-    /// A good string may not include line returns, tabs, and leading or trailing whitespace.
-    /// Confusing or ambiguous characters that look like ASCII but are some other unicode are also not allowed. </summary>
+
+    ///<summary>Checks if a string is a ASCII string for use in Rhino Object Names or User Dictionary keys and values.
+    /// Only allows chars between unicode points 32 till 126 (ASCII) </summary>
+    /// May not include line returns, tabs, and leading or trailing whitespace.
     ///<param name="name">(string) The string to check.</param>
-    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>
-    ///<param name="limitToAscii">(bool) set to true to only allow chars between unicode points 32 till 126 (ASCII) </param>
+    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
     ///<returns>(bool) true if the string is a valid name.</returns>
-    let isGoodStringId( name:string, allowEmpty:bool, limitToAscii:bool ) : bool = 
+    let isASCIIStringId( name:string, allowEmpty:bool) : bool = 
         if isNull name then false
         elif allowEmpty && name = "" then true
         else
@@ -40,9 +40,30 @@ module internal Util =
                     else
                         let c = name.[i]
                         if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
-                            loop(i+1)
-                        elif limitToAscii then 
-                            false
+                            loop(i+1)                        
+                        else                            
+                             false
+                loop 0
+    
+    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
+    /// A good string may not include line returns, tabs, and leading or trailing whitespace.
+    /// Confusing or ambiguous characters that look like ASCII but are some other unicode are also not allowed. </summary>
+    ///<param name="name">(string) The string to check.</param>
+    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>   
+    ///<returns>(bool) true if the string is a valid name.</returns>
+    let isGoodStringId( name:string, allowEmpty:bool) : bool = 
+        if isNull name then false
+        elif allowEmpty && name = "" then true
+        else
+            let tr = name.Trim()
+            if tr.Length <> name.Length then false
+            else
+                let rec loop i = 
+                    if i = name.Length then true
+                    else
+                        let c = name.[i]
+                        if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                            loop(i+1)                        
                         else                            
                             let cat = Char.GetUnicodeCategory(c)
                             match cat with
@@ -53,11 +74,13 @@ module internal Util =
                                 loop(i+1)
 
                             // sometimes OK :
-                            | UnicodeCategory.OtherSymbol       // 166:'�'  167:'�'   169:'�'  174:'�' 176:'�' 182:'�'
-                            | UnicodeCategory.MathSymbol        // 172:'�' 177:'�' 215:'�' 247:'�' | exclude char 215 that looks like x
-                            | UnicodeCategory.OtherNumber ->    //178:'�' 179:'�' 185:'�' 188:'�' 189:'�' 190:'�'
-                                if (c <= '÷' && c <> '×')  || c = '∅' then loop(i+1) // anything below char 247 is OK , but exclude MathSymbol char 215 that looks like letter x, allow diameter symbol 8709 ∅
-                                else false
+                            | UnicodeCategory.OtherSymbol       
+                            | UnicodeCategory.MathSymbol         
+                            | UnicodeCategory.OtherNumber ->    
+                                if (c <= '÷' && c <> '×')  || c = '∅' then // anything below char 247 (÷) is OK , but exclude MathSymbol char 215 that looks like letter x, allow diameter symbol 8709 ∅
+                                    loop(i+1) 
+                                else 
+                                    false
 
                             // NOT OK :
                             | UnicodeCategory.OpenPunctuation  // only ( [ and { is allowed
@@ -84,3 +107,68 @@ module internal Util =
                             | UnicodeCategory.OtherLetter
                             | _ -> false
                 loop 0
+
+
+    ///<summary>Checks if a string is a acceptable string for use in Rhino Object Names or User Dictionary keys and values.
+    /// A acceptable string may not include line returns, tabs, and leading or trailing whitespace.
+    /// Confusing or ambiguous characters that look like ASCII but are allowed. </summary>
+    ///<param name="name">(string) The string to check.</param>
+    ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
+    ///<returns>(bool) true if the string is a valid name.</returns>
+    let isAcceptableStringId(name:string, allowEmpty:bool ) : bool = 
+        if isNull name then false
+        elif allowEmpty && name = "" then true
+        else
+            let tr = name.Trim()
+            if tr.Length <> name.Length then false
+            else
+                let rec loop i = 
+                    if i = name.Length then true
+                    else
+                        let c = name.[i]
+                        if   c < ' ' then false
+                        elif c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                            loop(i+1)
+                        else                            
+                            let cat = Char.GetUnicodeCategory(c)
+                            match cat with
+                            // always OK :
+                            | UnicodeCategory.UppercaseLetter 
+                            | UnicodeCategory.LowercaseLetter
+                            | UnicodeCategory.CurrencySymbol 
+                            | UnicodeCategory.OtherSymbol       
+                            | UnicodeCategory.MathSymbol        
+                            | UnicodeCategory.OtherNumber    
+                            | UnicodeCategory.SpaceSeparator         
+                            | UnicodeCategory.ConnectorPunctuation   
+                            | UnicodeCategory.DashPunctuation        
+                            | UnicodeCategory.TitlecaseLetter
+                            | UnicodeCategory.ModifierLetter
+                            | UnicodeCategory.NonSpacingMark
+                            | UnicodeCategory.SpacingCombiningMark
+                            | UnicodeCategory.EnclosingMark
+                            | UnicodeCategory.LetterNumber
+                            | UnicodeCategory.LineSeparator
+                            | UnicodeCategory.Format
+                            | UnicodeCategory.OtherNotAssigned
+                            | UnicodeCategory.ModifierSymbol
+                            | UnicodeCategory.OtherPunctuation 
+                            | UnicodeCategory.DecimalDigitNumber 
+                            | UnicodeCategory.InitialQuotePunctuation
+                            | UnicodeCategory.FinalQuotePunctuation
+                            | UnicodeCategory.OtherLetter    
+                            | UnicodeCategory.OpenPunctuation  
+                            | UnicodeCategory.ClosePunctuation 
+                                -> loop(i+1)                                
+
+                            // NOT OK :
+                            | UnicodeCategory.ParagraphSeparator
+                            | UnicodeCategory.Control                            
+                            | UnicodeCategory.Surrogate                          
+                            | UnicodeCategory.PrivateUse                          
+                            | _ -> false
+                loop 0
+
+
+
+    

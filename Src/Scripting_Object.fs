@@ -813,7 +813,10 @@ module AutoOpenObject =
                                     , [<OPT;DEF(false)>]allowEmpty:bool
                                     , [<OPT;DEF(false)>]limitToAscii:bool
                                     ) : bool = 
-        Util.isGoodStringId( name, allowEmpty, limitToAscii)
+        if limitToAscii then 
+            Util.isASCIIStringId( name, allowEmpty)
+        else
+            Util.isGoodStringId( name, allowEmpty)
 
 
 

@@ -1,4 +1,4 @@
-
+﻿
 namespace Rhino
 
 open System
@@ -26,7 +26,8 @@ module AutoOpenLayer =
 
 
 
-    ///<summary>Add a new layer to the document. If it does not exist yet. Ambiguous Unicode characters are not allowed in layername.
+    ///<summary>Add a new layer to the document. If it does not exist yet. 
+    /// By default Ambiguous Unicode characters are not allowed in layername. This can be chnaged via optional parameter.
     /// If layers or parent layers exist already color, visibility and locking parameters are ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
     ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value. If omitted a random (non yellow)  color wil be choosen.</param>
@@ -41,13 +42,15 @@ module AutoOpenLayer =
     ///   1 = explicitly Locked (even if parent is already Locked)
     ///   2 = inherited from parent, or Unlocked default</param>
     ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
+    ///<param name="allowUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
     ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer. 
     /// E.g. The function rs.Add can then take this layer index.</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string,
                             [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
                             [<OPT;DEF(2)>]visible:int,
                             [<OPT;DEF(2)>]locked:int,
-                            [<OPT;DEF(null:string)>]parent:string) : int = 
+                            [<OPT;DEF(null:string)>]parent:string,
+                            [<OPT;DEF(false:bool)>]allowUnicode:bool) : int = 
 
         let col = if color.IsEmpty then Color.randomForRhino else (fun () -> color)
         if notNull parent && isNull name then
@@ -69,7 +72,7 @@ module AutoOpenLayer =
             UtilLayer.createDefaultLayer(col, true, false)
         else
             let names = if isNull parent then name else parent+ "::" + name
-            let fOrC  = UtilLayer.getOrCreateLayer(names, col, vis, loc)
+            let fOrC  = UtilLayer.getOrCreateLayer(names, col, vis, loc, allowUnicode)
             //State.Doc.Layers.[i].FullPath
             fOrC.Index
 
@@ -86,13 +89,16 @@ module AutoOpenLayer =
     ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
-    ///     Set true to create Layer if it does not exist yet.</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
+    ///<param name="allowUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectLayer(objectId:Guid, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //SET
+    static member ObjectLayer(objectId:Guid
+                             , layer:string
+                             ,[<OPT;DEF(false)>]createLayerIfMissing:bool
+                             ,[<OPT;DEF(false:bool)>]allowUnicode:bool) : unit = //SET
         let obj = Scripting.CoerceRhinoObject(objectId)
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent).Index
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (Print.guid objectId)
@@ -101,12 +107,15 @@ module AutoOpenLayer =
     ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
-    ///     Set true to create Layer if it does not exist yet.</param>
+    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
+    ///<param name="allowUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectLayer(objectIds:Guid seq, layer:string, [<OPT;DEF(false)>]createLayerIfMissing:bool) : unit = //MULTISET
+    static member ObjectLayer( objectIds:Guid seq
+                             , layer:string
+                             , [<OPT;DEF(false)>]createLayerIfMissing:bool
+                             , [<OPT;DEF(false:bool)>]allowUnicode:bool) : unit = //MULTISET
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent).Index
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode).Index
             else                          Scripting.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
@@ -142,12 +151,15 @@ module AutoOpenLayer =
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed.</summary>
     ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
     ///<param name="newLayerName">(string) The new name</param>
+    ///<param name="allowUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ChangeLayerName(currentLayerName:string, newLayerName:string) : unit = 
+    static member ChangeLayerName( currentLayerName:string
+                                 , newLayerName:string
+                                 , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit = 
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
         else
-            UtilLayer.failOnBadShortLayerName (newLayerName, false)
+            UtilLayer.failOnBadShortLayerName (newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
             let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
             ps.Last <- newLayerName

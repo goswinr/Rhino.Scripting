@@ -113,15 +113,15 @@ type Scripting private () =
                 let a = new DocObjects.ObjectAttributes()
                 a.LayerIndex <- layerIndex
                 if objectName <> "" then 
-                    if checkStrings && not <|  Util.isGoodStringId( objectName, false, false) then
+                    if checkStrings && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
                         RhinoScriptingException.Raise "Rhino.Scripting.Add objectName the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
                     for k,v in userTextKeysAndValues do 
                         if checkStrings then 
-                            if not <|  Util.isGoodStringId( k, false, false) then
+                            if not <|  Util.isAcceptableStringId( k, false) then // TODO or enforce goodStringID ?
                                 RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
-                            if not <|  Util.isGoodStringId( v, false, false) then
+                            if not <|  Util.isAcceptableStringId( v, false) then
                                 RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
                             RhinoScriptingException.Raise "Rhino.Scripting.Add: failed to set key value pair '%s' and '%s' " k v 
@@ -163,9 +163,9 @@ type Scripting private () =
         let layCorF =
             if layer<>""then 
                 if layerColor.IsEmpty then                         
-                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent)
+                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, true) // TODO or disallow all unicode ?
                 else
-                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent)
+                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true)// TODO or disallow all unicode ?
             else
                 UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
         

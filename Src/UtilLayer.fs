@@ -7,22 +7,22 @@ open Rhino.DocObjects
 
 module internal UtilLayer = 
     
-    let eVSLN = "Rhino.Scripting.UtilLayer.ensureValidShortLayerName"
+    let eVSLN = "Rhino.Scripting.UtilLayer.failOnBadShortLayerName"
 
     /// Raise exceptions if short layer-name is not valid
     /// it may not contain :: or control characters
-    /// set allowSpecialChars to false to only have ASCII
-    let internal failOnBadShortLayerName(name:string, limitToAscii) : unit= 
+    let internal failOnBadShortLayerName(name:string, allowAllUnicode) : unit= 
         if isNull name then RhinoScriptingException.Raise "%s: null string as layer name" eVSLN
 
         if name.Contains "::" then
             RhinoScriptingException.Raise "%s: Short layer name '%s' shall not contains two colons (::) . " eVSLN name
-
-        if not<| Util.isGoodStringId(name, false, limitToAscii) then             
-            if limitToAscii then 
-                RhinoScriptingException.Raise "%s: Short layer name '%s' has invalid or not recommended characters. Only Unicode points 32 till 126 are allowed. If you really want this layer name add the layer directly via Rhinocommon" eVSLN  name 
-            else
-                RhinoScriptingException.Raise "%s: Short layer name '%s' has invalid or not recommended characters. If you really want this layer name add the layer directly via Rhinocommon" eVSLN  name 
+        
+        if allowAllUnicode then 
+            if not<| Util.isAcceptableStringId(name, false) then 
+                RhinoScriptingException.Raise "%s: Short layer name '%s' is invalid. It may not include line returns, tabs, and leading or trailing whitespace." eVSLN  name 
+        else
+            if not<| Util.isGoodStringId(name, false) then             
+                RhinoScriptingException.Raise "%s: Short layer name '%s' has invalid or not recommended characters. If you really want this layer name us the 'allowUnicode' optional parameter" eVSLN  name 
         
         match Char.GetUnicodeCategory(name.[0]) with
         | UnicodeCategory.OpenPunctuation 
@@ -85,7 +85,7 @@ module internal UtilLayer =
     /// Does not allow ambiguous Unicode characters in layer-name.
     /// Returns index
     /// Empty string returns current layer index
-    let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState) : FoundOrCreatedIndex = 
+    let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState, allowUnicode:bool) : FoundOrCreatedIndex = 
         match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
         | RhinoMath.UnsetIntIndex ->
             match name with
@@ -102,7 +102,7 @@ module internal UtilLayer =
                             let fullpath = if root="" then branch else root + "::" + branch
                             match State.Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
                             | RhinoMath.UnsetIntIndex -> // actually create layer:
-                                failOnBadShortLayerName (branch, false)   // only check non existing sub layer names
+                                failOnBadShortLayerName (branch, allowUnicode)   // only check non existing sub layer names
                                 let layer = DocObjects.Layer.GetDefaultLayerProperties()
                                 if prevId <> Guid.Empty then layer.ParentLayerId <- prevId
 
