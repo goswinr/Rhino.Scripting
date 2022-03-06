@@ -458,17 +458,17 @@ module AutoOpenUserInterface =
                 let ltnew = State.Doc.Linetypes.FindName(defaultValLinetype)
                 if notNull ltnew  then ltinstance <- ltnew
             try
-                #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
+                #if RHINO7  
+                    let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
+                    let linetype = State.Doc.Linetypes.FindId(objectId)
+                    Some linetype.Name
+                #else // only for Rh6.0, would not be needed for latest releases of Rh6
                     let i = ref 0
                     let ok = Rhino.UI.Dialogs.ShowSelectLinetypeDialog(i, showByLayer)
                     if not ok then None
                     else
                         let linetype = State.Doc.Linetypes.[!i]
                         Some linetype.Name
-                #else
-                    let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
-                    let linetype = State.Doc.Linetypes.FindId(objectId)
-                    Some linetype.Name
                 #endif
             with _ ->
                 None
@@ -598,13 +598,9 @@ module AutoOpenUserInterface =
     ///    A prompt or message</param>
     ///<returns>(Point3d option) an Option of 3d point.</returns>
     static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d option = 
-        let get () = 
-            #if RHINO6
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh(meshId, message, acceptNothing=false)
-            #else
-            //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of Rh7 require this ??
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of rh 7
-            #endif
+        let get () =             
+            //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7            
             if cmdrc = Commands.Result.Success then Some point
             else None
             |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()

@@ -71,15 +71,7 @@ module AutoOpenSurface =
                                startPoint:Point3d,
                                endPoint:Point3d, 
                                [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
-        #if RHINO6 
-        let bbox = BoundingBox.Unset
-        for objectId in objectIds do
-            let rhobj = Scripting.CoerceRhinoObject(objectId)
-            let geometry = rhobj.Geometry
-            bbox.Union( geometry.GetBoundingBox(true))        
-        if not bbox.IsValid then
-            RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal        
-        #else
+        #if RHINO7
         // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955        
         let bbox = 
             let objs = objectIds|> Seq.map Scripting.CoerceRhinoObject
@@ -98,6 +90,14 @@ module AutoOpenSurface =
             bboxMin <- bboxMax - v
             bboxMax <- p
             Rhino.Geometry.BoundingBox(bboxMin, bboxMax)
+        #else
+        let bbox = BoundingBox.Unset
+        for objectId in objectIds do
+            let rhobj = Scripting.CoerceRhinoObject(objectId)
+            let geometry = rhobj.Geometry
+            bbox.Union( geometry.GetBoundingBox(true))        
+        if not bbox.IsValid then
+            RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal        
         #endif
         let line = Geometry.Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal // original : scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
@@ -1746,10 +1746,10 @@ module AutoOpenSurface =
     ///<returns>(float) of area.</returns>
     static member SurfaceArea(srf:Surface) : float  = 
         let amp = 
-            #if RHINO6 // only for Rh6.0, would not be needed for latest releases of Rh6
-            AreaMassProperties.Compute(srf)
-            #else
+            #if RHINO7
             AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)
+            #else// only for Rh6.0, would not be needed for latest releases of Rh6
+            AreaMassProperties.Compute(srf)
             #endif
         if isNull amp then  RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea failed on Surface: %A" srf
         amp.Area
@@ -1761,10 +1761,10 @@ module AutoOpenSurface =
     ///<returns>(float) of area.</returns>
     static member SurfaceArea(brep:Brep) : float  = 
         let amp = 
-            #if RHINO6
-            AreaMassProperties.Compute(brep)
-            #else
+            #if RHINO7
             AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)
+            #else
+            AreaMassProperties.Compute(brep)
             #endif
         if isNull amp then  RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea failed on Brep: %A" brep
         amp.Area

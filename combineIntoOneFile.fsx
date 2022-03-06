@@ -52,17 +52,7 @@ module CombineIntoOneFile =
         "Src/Scripting_UserInterface.fs" 
         "Src/Scripting_Utility.fs" 
         "Src/Scripting_Views.fs" 
-        ]
-        
-    
-    (* 
-    //not needed since file gets deleted anyway after compilation
-    let addNote file (ln:string)  = 
-        if not (ln.Contains "//")  && not (String.IsNullOrWhiteSpace ln)  then  
-            ln + " // don't edit this file directly! Work in "+file+" instead." 
-        else  
-            ln
-    *) 
+        ]      
     
     let getLines(p:string) = 
         if IO.File.Exists p then   
@@ -100,18 +90,7 @@ module CombineIntoOneFile =
         IO.File.WriteAllLines("Src/Scripting.fs", lines, Text.Encoding.UTF8) 
         printfn "--Done combining files into Src/Scripting.fs. compiling now .."
         
-    (*
-    let runIfOld() = 
-        // this case actually does not happen because the file Scripting.fs is deleted after each build
-        if IO.File.Exists "Src/Scripting.fs" then   
-            let t = IO.File.GetLastWriteTime "Src/Scripting.fs" 
-            if DateTime.Now - t < TimeSpan.FromSeconds(30.) then  
-                printfn "----Combining files skiped because Src/Scripting.fs is less than 30 sec old."
-            else 
-                run() 
-        else 
-            run()         
-    *)    
+    
         
 CombineIntoOneFile.run()         
                 

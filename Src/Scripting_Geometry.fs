@@ -168,26 +168,7 @@ module AutoOpenGeometry =
         if isNull text || text = "" then RhinoScriptingException.Raise "Rhino.Scripting.AddText Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)
-        #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
-        let just = 
-            match horizontalAlignment with
-            |0uy -> TextJustification.Left
-            |1uy -> TextJustification.Center
-            |2uy -> TextJustification.Right
-            | x  -> RhinoScriptingException.Raise "Rhino.Scripting.AddText horizontalAlignment %duy is invalid." x
-            +
-            match verticalAlignment with
-            |0uy -> TextJustification.Top
-            |1uy -> TextJustification.Top
-            |2uy -> TextJustification.Top
-            |3uy -> TextJustification.Middle
-            |4uy -> TextJustification.Bottom
-            |5uy -> TextJustification.Bottom
-            |6uy -> TextJustification.Bottom
-            | x  -> RhinoScriptingException.Raise "Rhino.Scripting.AddText verticalAlignment %duy is invalid." x
-
-        let objectId = State.Doc.Objects.AddText(text, plane, height, font, bold, italic, just)
-        #else
+        #if RHINO7  
         let ds = State.Doc.DimStyles.Current
         let qn, quartetBoldProp , quartetItalicProp = 
             if isNull font then
@@ -217,6 +198,25 @@ module AutoOpenGeometry =
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
         let objectId = State.Doc.Objects.Add(te)
+        #else // only for Rh6.0, would not be needed for latest releases of Rh6
+        let just = 
+            match horizontalAlignment with
+            |0uy -> TextJustification.Left
+            |1uy -> TextJustification.Center
+            |2uy -> TextJustification.Right
+            | x  -> RhinoScriptingException.Raise "Rhino.Scripting.AddText horizontalAlignment %duy is invalid." x
+            +
+            match verticalAlignment with
+            |0uy -> TextJustification.Top
+            |1uy -> TextJustification.Top
+            |2uy -> TextJustification.Top
+            |3uy -> TextJustification.Middle
+            |4uy -> TextJustification.Bottom
+            |5uy -> TextJustification.Bottom
+            |6uy -> TextJustification.Bottom
+            | x  -> RhinoScriptingException.Raise "Rhino.Scripting.AddText verticalAlignment %duy is invalid." x
+
+        let objectId = State.Doc.Objects.AddText(text, plane, height, font, bold, italic, just)
         #endif
         if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         State.Doc.Views.Redraw()
@@ -734,13 +734,11 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name.</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET
-        #if RHINO6   // only for Rh6.0, would not be needed for latest releases of Rh6
-        (Scripting.CoerceTextEntity(objectId)).Font.FaceName
-        #else
+        #if RHINO7  
         (Scripting.CoerceTextEntity(objectId)).Font.QuartetName
+        #else// only for Rh6.0, would not be needed for latest releases of Rh6
+        (Scripting.CoerceTextEntity(objectId)).Font.FaceName
         #endif
-
-
 
 
     ///<summary>Returns the height of a text object.</summary>

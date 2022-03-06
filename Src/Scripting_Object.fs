@@ -265,17 +265,16 @@ module AutoOpenObject =
     ///<returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
     static member IsObjectSolid(objectId:Guid) : bool = 
         let rhobj = Scripting.CoerceRhinoObject(objectId)
-        // rhobj.IsSolid //TODO see https://github.com/mcneel/rhinoscriptsyntax/pull/197
+        // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197 
+        // and https://github.com/mcneel/rhinoscriptsyntax/commit/aaa0906fa43003db093c1e6f58bf12c813eddbeb
         let geom = rhobj.Geometry
         match geom with
         | :? Mesh      as m -> m.IsClosed
         | :? Extrusion as s -> s.IsSolid
         | :? Surface   as s -> s.IsSolid
         | :? Brep      as s -> s.IsSolid
-        #if RHINO6
-        //nothing more
-        #else
-        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
+        #if RHINO7
+        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher        
         #endif
         | _                 ->
             RhinoScriptingException.Raise " only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Print.guid objectId)

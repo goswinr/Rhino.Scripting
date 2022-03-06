@@ -308,10 +308,10 @@ module AutoOpenMesh =
     ///<returns>(Mesh) newly created Mesh.</returns>
     static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh = 
         let joinedmesh = new Mesh()
-        #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
-        for mesh in meshes do joinedmesh.Append(mesh)
-        #else
+        #if RHINO7  
         joinedmesh.Append(meshes)
+        #else// only for Rh6.0, would not be needed for latest releases of Rh6
+        for mesh in meshes do joinedmesh.Append(mesh)
         #endif
         joinedmesh
 
@@ -323,11 +323,11 @@ module AutoOpenMesh =
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
         let meshes =  rarr { for objectId in objectIds do yield Scripting.CoerceMesh(objectId) }
         let joinedmesh = new Mesh()
-        #if RHINO6  // only for Rh6.0, would not be needed for latest releases of Rh6
-        for mesh in meshes do joinedmesh.Append(mesh)
-        #else
+        #if RHINO7
         joinedmesh.Append(meshes)
-        #endif
+        #else
+        for mesh in meshes do joinedmesh.Append(mesh)
+        #endif// only for Rh6.0, would not be needed for latest releases of Rh6
         let rc = State.Doc.Objects.AddMesh(joinedmesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Failed to join Meshes %A" (Print.nice objectIds)
         if deleteInput then
@@ -633,7 +633,11 @@ module AutoOpenMesh =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array = 
         let mesh1 = Scripting.CoerceMesh(mesh1)
         let mesh2 = Scripting.CoerceMesh(mesh2)
+        #if RHINO7
         let tolerance = Util.ifZero1 tolerance (RhinoMath.ZeroTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
+        #else        
+        let tolerance = Util.ifZero1 tolerance (RhinoMath.ZeroTolerance) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202        
+        #endif
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
 
