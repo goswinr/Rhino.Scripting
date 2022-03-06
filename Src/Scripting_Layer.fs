@@ -1,4 +1,4 @@
-﻿
+
 namespace Rhino
 
 open System
@@ -114,7 +114,30 @@ module AutoOpenLayer =
             if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
         State.Doc.Views.Redraw()
 
+    ///<summary>Modifies the layer of an object.</summary>
+    ///<param name="objectId">(Guid) The identifier of the object</param>
+    ///<param name="layerIndex">(int) Index of layer in layer table</param>
+    ///<returns>(unit) void, nothing.</returns>
+    static member ObjectLayer(objectId:Guid, layerIndex:int) : unit = //SET
+        let obj = Scripting.CoerceRhinoObject(objectId)
+        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Print.guid objectId)
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Print.guid objectId)
+        obj.Attributes.LayerIndex <- layerIndex
+        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%d' on: %s " layerIndex (Print.guid objectId)
+        State.Doc.Views.Redraw()
 
+    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param> 
+    ///<param name="layerIndex">(int) Index of layer in layer table</param>
+    ///<returns>(unit) void, nothing.</returns>
+    static member ObjectLayer(objectIds:Guid seq, layerIndex:int) : unit = //MULTISET
+        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed. bad index '%d' (max %d) on %d objects " layerIndex State.Doc.Layers.Count (Seq.length objectIds)
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)                                
+        for objectId in objectIds do
+            let obj = Scripting.CoerceRhinoObject(objectId)
+            obj.Attributes.LayerIndex <- layerIndex
+            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%d' on %d objects"  layerIndex (Seq.length objectIds)
+        State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed.</summary>
     ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
