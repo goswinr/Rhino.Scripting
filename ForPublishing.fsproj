@@ -54,7 +54,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsEx" Version="0.9.0" />
+    <PackageReference Include="FsEx" Version="0.9.0" GeneratePathProperty="true"/>
     <PackageReference Update="FSharp.Core" Version="4.5.2" /> <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
 
     <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
@@ -90,4 +90,8 @@
  <!-- Delete Scripting.fs when done-->
   <Target Name="DeleteMergedFile" BeforeTargets="AfterBuild"> <Delete Files="Src/Scripting.fs" TreatErrorsAsWarnings="true" /> </Target>
 
+<!-- needed for intelisense, ?
+<Copy SourceFiles="$(PkgFsEx)/lib/netstandard2.0/FsEx.xml" DestinationFiles="$(TargetDir)FsEx.xml" ContinueOnError="false" />
+-->
+	
 </Project>
