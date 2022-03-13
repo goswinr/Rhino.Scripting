@@ -647,9 +647,9 @@ module AutoOpenLayer =
 
 
 
-    ///<summary>Return the parent layer of a layer or mepty string if no parent present.</summary>
+    ///<summary>Return the parent layer of a layer or empty string if no parent present.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<returns>(string) The name of the current parent layer.</returns>
+    ///<returns>(string) The name of the current parent layer or empty string if no parent present.</returns>
     static member ParentLayer(layer:string) : string = //GET
         let layer = Scripting.CoerceLayer(layer)
         if layer.ParentLayerId = Guid.Empty then ""
