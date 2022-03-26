@@ -819,25 +819,26 @@ module AutoOpenGeometry =
         if fontdata.Italic then rc <- 2 + rc
         rc
 
-    ///<summary>Returns the text string of a text object.</summary>
+    ///<summary>Returns the plain text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value.</returns>
     static member TextObjectText(objectId:Guid) : string = //GET
         let text = Scripting.CoerceTextEntity(objectId)
         text.PlainText
 
-    ///<summary>Modifies the text string of a text object.</summary>
+    ///<summary>Modifies the plain text string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         let annotation = Scripting.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
-
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%A'" (Print.guid objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) text
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the text string of multiple text objects.</summary>
+
+
+    ///<summary>Modifies the plain text string of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -845,8 +846,57 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let annotation = Scripting.CoerceTextEntity(objectId)
             annotation.PlainText <-  text
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%A'" (Print.guid objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) text
         State.Doc.Views.Redraw()
+    
+
+     ///<summary>Returns the RichText formating string of a text object.</summary>
+    ///<param name="objectId">(Guid) The identifier of a text object</param>
+    ///<returns>(string) The current RichText formating string.</returns>
+    static member TextObjectRichText(objectId:Guid) : string = //GET
+        let text = Scripting.CoerceTextEntity(objectId)
+        text.RichText
+
+
+    ///<summary>Modifies the RichText formating string of a text object.</summary>
+    ///<param name="objectId">(Guid) The identifier of a text object</param>
+    ///<param name="rtfString">(string) A new text RichText formating string</param>
+    ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
+    ///<returns>(unit) void, nothing.</returns>
+    static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
+        let annotation = Scripting.CoerceTextEntity(objectId)
+        if style <> "" then
+            let ds = State.Doc.DimStyles.FindName(style)
+            if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText, style not found:'%s'"  style            
+            annotation.SetRichText(rtfString, ds)
+        else 
+            annotation.RichText <-  rtfString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%A'" (Print.guid objectId) rtfString
+        State.Doc.Views.Redraw()
+
+
+
+    ///<summary>Modifies the RichText formating string of multiple text objects.</summary>
+    ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
+    ///<param name="rtfString">(string) A new text RichText formating string</param>
+    ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
+    ///<returns>(unit) void, nothing.</returns>
+    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET        
+        if style <> "" then
+            let ds = State.Doc.DimStyles.FindName(style)
+            if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText, style not found:'%s'"  style    
+            for objectId in objectIds do
+                let annotation = Scripting.CoerceTextEntity(objectId)                
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Print.guid objectId) rtfString style
+                annotation.SetRichText(rtfString, ds)
+        else             
+            for objectId in objectIds do
+                let annotation = Scripting.CoerceTextEntity(objectId)
+                annotation.RichText <-  rtfString
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) rtfString
+        State.Doc.Views.Redraw()
+
+
 
     ///<summary>Modifies the font style of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>

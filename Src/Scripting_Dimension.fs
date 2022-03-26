@@ -30,15 +30,14 @@ module AutoOpenDimension =
     ///<param name="startPoint">(Point3d) First point of dimension</param>
     ///<param name="endPoint">(Point3d) Second point of dimension</param>
     ///<param name="pointOnDimensionLine">(Point3d) Location point of dimension line</param>
-    ///<param name="style">(string) Optional, Default Value: <c>""</c>
-    ///    Name of dimension style</param>
+    ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
     ///<returns>(Guid) identifier of new dimension.</returns>
     static member AddAlignedDimension(  startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF("")>]style:string) : Guid = 
         let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
-        if not plane.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" startPoint endPoint pointOnDimensionLine
+        if not plane.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed to create Plane.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O'" startPoint endPoint pointOnDimensionLine
         let success, s, t = plane.ClosestParameter(startPoint)
         let start2 = Point2d(s, t)
         let success, s, t = plane.ClosestParameter(endPoint)
@@ -46,14 +45,14 @@ module AutoOpenDimension =
         let success, s, t = plane.ClosestParameter(pointOnDimensionLine)
         let onpoint2 = Point2d(s, t)
         let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
-        if isNull ldim then  RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
+        if isNull ldim then  RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed.startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O' style:'%s'" startPoint endPoint pointOnDimensionLine style
         ldim.Aligned <- true
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension, style not found, failed.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
+            if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension, style not found.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O' style:'%s'" startPoint endPoint pointOnDimensionLine style
             ldim.DimensionStyleId <- ds.Id
         let rc = State.Doc.Objects.AddLinearDimension(ldim)
-        if rc = Guid.Empty then  RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension: Unable to add dimension to document.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A' style:'%s'" startPoint endPoint pointOnDimensionLine style
+        if rc = Guid.Empty then  RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension: Unable to add dimension to document. startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O' style:'%s'" startPoint endPoint pointOnDimensionLine style
         State.Doc.Views.Redraw()
         rc
 
@@ -64,8 +63,7 @@ module AutoOpenDimension =
     ///<returns>(unit) void, nothing.</returns>
     static member AddDimStyle(dimStyleName:string) : unit = 
         let index = State.Doc.DimStyles.Add(dimStyleName)
-        if index<0 then  RhinoScriptingException.Raise "Rhino.Scripting.AddDimStyle failed.  dimStyleName:'%A'" dimStyleName
-
+        if index<0 then  RhinoScriptingException.Raise "Rhino.Scripting.AddDimStyle failed. dimStyleName:'%A'" dimStyleName
 
 
 
@@ -76,9 +74,9 @@ module AutoOpenDimension =
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
     ///    If points will be projected to this Plane</param>
     ///<returns>(Guid) identifier of the new leader.</returns>
-    static member AddLeader(    points:Point3d seq,
-                                text:string,
-                                [<OPT;DEF(Plane())>]plane:Plane) : Guid = 
+    static member AddLeader( points:Point3d seq,
+                             text:string,
+                             [<OPT;DEF(Plane())>]plane:Plane) : Guid = 
         let points2d = Rarr()
         let plane0 = 
             if plane.IsValid then plane
