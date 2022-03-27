@@ -120,7 +120,7 @@ module AutoOpenLayer =
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' and '%A' of %d objects"  layer objectId (Seq.length objectIds)
+            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' and '%s' of %d objects"  layer (Print.guid objectId) (Seq.length objectIds)
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -157,7 +157,7 @@ module AutoOpenLayer =
                                  , newLayerName:string
                                  , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit = 
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%A'" currentLayerName
+        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
             UtilLayer.failOnBadShortLayerName (newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
@@ -407,7 +407,7 @@ module AutoOpenLayer =
             index <- -1
         else
             let lt = State.Doc.Linetypes.FindName(linetyp)
-            if lt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.LayerLinetype not found.  layer:'%A' linetyp:'%A'" layer linetyp
+            if lt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.LayerLinetype not found. layer:'%s' linetyp:'%s'" layer.FullPath linetyp
             index <- lt.LinetypeIndex
         layer.LinetypeIndex <- index
         State.Doc.Views.Redraw()

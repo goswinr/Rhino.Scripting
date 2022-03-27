@@ -45,7 +45,7 @@ type RhinoSync private () =
                             log "**Seff.Rhino.Sync.window is null"
 
                     with e ->
-                        log "**Seff.Rhino.Sync.window failed with: %A" e
+                        log "**Seff.Rhino.Sync.window failed with: %O" e
 
                 if isNull syncContext then
                     try
@@ -54,7 +54,7 @@ type RhinoSync private () =
                         if isNull syncContext then
                             log "**Threading.SynchronizationContext.Current is null"
                     with  e ->
-                        log "**Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %A" e
+                        log "**Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %O" e
 
 
                 if isNull syncContext && notNull seffRhinoSyncModule then //its probly already set abouve via DispatcherSynchronizationContext
@@ -63,7 +63,7 @@ type RhinoSync private () =
                         if isNull syncContext then
                             log "**Seff.Rhino.Sync.syncContext is null"
                     with e ->
-                        log "**Seff.Rhino.Sync.syncContext failed with: %A" e
+                        log "**Seff.Rhino.Sync.syncContext failed with: %O" e
 
         initIsPending <- false
 

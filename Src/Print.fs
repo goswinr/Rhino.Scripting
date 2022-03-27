@@ -70,6 +70,19 @@ module AutoOpenToNiceStringExtensions =
                 //yield! sprintf "Scale x: %g ; y: %g z: %g" m.M00 m.M11 m.M22
                 }
 
+    type Plane with
+        /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
+        member p.ToNiceString = 
+            if not p.IsValid then "invalid Rhino.Geometry.Plane"
+            else
+                stringBuffer{
+                    yield! "Rhino.Geometry.Plane:"
+                    yield! sprintf "Origin X=%s Y=%s Z=%s" (NiceFormat.float  p.Origin.X) (NiceFormat.float  p.Origin.Y) (NiceFormat.float  p.Origin.Z)
+                    yield! sprintf "X-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.XAxis.X) (NiceFormat.float  p.XAxis.Y) (NiceFormat.float  p.XAxis.Z)
+                    yield! sprintf "Y-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.YAxis.X) (NiceFormat.float  p.YAxis.Y) (NiceFormat.float  p.YAxis.Z)                
+                    }
+                
+
 [<RequireQualifiedAccess>]
 module internal Print = 
 
