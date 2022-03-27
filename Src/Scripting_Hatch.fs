@@ -52,63 +52,106 @@ module AutoOpenHatch =
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Squares.Name) then
             State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Squares)|> ignore
 
+    
 
-    ///<summary>Creates one or more new Hatch objects a list of closed planar Curves.</summary>
-    ///<param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the
-    ///    boundary of the Hatch objects</param>
-    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.
-    ///    If omitted, the current Hatch pattern will be used</param>
-    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
-    ///    Hatch pattern scale factor</param>
-    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
-    ///    Hatch pattern rotation angle in degrees</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
-    ///    Tolerance for Hatch fills</param>
+    ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
+    ///<param name="curves">(Cureve seq) Geometry of the closed planar Curves that defines the boundary of the Hatch objects</param>
+    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.  If omitted, the current Hatch pattern will be used</param>
+    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>  Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>  Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>  Tolerance for Hatch fills</param>
     ///<returns>(Guid Rarr) identifiers of the newly created Hatch.</returns>
-    static member AddHatches( curveIds:Guid seq,
+    static member AddHatch(   curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
         Scripting.InitHatchPatterns()
-        //id = Scripting.Coerceguid(curveIds)
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patterninstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patterninstance|> isNull then RhinoMath.UnsetIntIndex else patterninstance.Index
-            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed.  curveIds:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" (Print.nice curveIds) hatchPattern scale rotation tolerance
-        let curves =  rarr { for objectId in curveIds do yield Scripting.CoerceCurve(objectId) }
+            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to find hatchPattern:'%s'"  hatchPattern           
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
-        if isNull hatches then RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed.  curveIds:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" (Print.nice curveIds) hatchPattern scale rotation tolerance
+        if isNull hatches then 
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
+                (Seq.length curves) 
+                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
+                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
+                tolerance
         let ids = Rarr()
         for hatch in hatches do
             let objectId = State.Doc.Objects.AddHatch(hatch)
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
-        if ids.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed.  curveIds:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A' tolerance:'%A'" (Print.nice curveIds) hatchPattern scale rotation tolerance
+        if ids.Count = 0 then 
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
+                (Seq.length curves) 
+                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
+                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
+                tolerance
         State.Doc.Views.Redraw()
         ids
-
+    
+    ///<summary>Creates one  Hatch objects from one closed planar Curve.</summary>
+    ///<param name="curve">(Curve) Curve Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
+    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
+    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>   Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
+    ///<returns>(Guid) identifier of the newly created Hatch.</returns>
+    static member AddHatch(   curve:Curve,
+                              [<OPT;DEF(null:string)>]hatchPattern:string,
+                              [<OPT;DEF(1.0)>]scale:float,
+                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]tolerance:float) : Guid  =         
+        try 
+           let rc = Scripting.AddHatch([curve], hatchPattern, scale, rotation,tolerance) 
+           if rc.Count = 1 then rc.[0]
+           else RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to creat exactly on hatch from curve.  It created %d Hatches"  rc.Count 
+        with e->
+            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on one curve \r\nMessage: %s"  e.Message
+            
+        
+    ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
+    ///<param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the   boundary of the Hatch objects</param>
+    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
+    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>   Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
+    ///<returns>(Guid Rarr) identifiers of the newly created Hatch.</returns>
+    static member AddHatch(   curveIds:Guid seq,
+                              [<OPT;DEF(null:string)>]hatchPattern:string,
+                              [<OPT;DEF(1.0)>]scale:float,
+                              [<OPT;DEF(0.0)>]rotation:float,
+                              [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+        let curves =  rarr { for objectId in curveIds do yield Scripting.CoerceCurve(objectId) }
+        try Scripting.AddHatch(curves, hatchPattern, scale, rotation) 
+        with e->
+            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on curveIds:'%s' \r\nMessage: %s" (Print.nice curveIds)  e.Message
+            
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
-    ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the
-    ///    boundary of the Hatch object</param>
-    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch
-    ///    object. If omitted, the current Hatch pattern will be used</param>
-    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>
-    ///    Hatch pattern scale factor</param>
-    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>
-    ///    Hatch pattern rotation angle in degrees</param>
+    ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
+    ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
+    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>  Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
     ///<returns>(Guid) identifier of the newly created Hatch.</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
-                            [<OPT;DEF(0.0)>]rotation:float) : Guid = 
-        let rc = Scripting.AddHatches([curveId], hatchPattern, scale, rotation) //TODO Test ok with null
-        if rc.Count = 1 then rc.[0]
-        else RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed. curveId:'%s' hatchPattern:'%A' scale:'%A' rotation:'%A'" (Print.guid curveId) hatchPattern scale rotation
+                            [<OPT;DEF(0.0)>]rotation:float,
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid = 
+        try Scripting.AddHatch(Scripting.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)             
+        with e->
+            let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on one curve %s\r\nMessage: %s" (Print.nice curveId)  e.Message
+       
 
 
 

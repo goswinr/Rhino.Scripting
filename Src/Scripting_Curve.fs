@@ -904,7 +904,6 @@ module AutoOpenCurve =
         else RhinoScriptingException.Raise "Rhino.Scripting.CurveLineClosestPoint failed  curveId:'%s' Line:'%A'" (Print.guid curveId) line
 
 
-
     ///<summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
@@ -915,8 +914,19 @@ module AutoOpenCurve =
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let t = ref 0.
         let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestParameter failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestParameter failed. curveId:'%s' segmentIndex:'%d'" (Print.guid curveId) segmentIndex
         !t
+
+    ///<summary>Returns parameter of the point on a Curve that is closest to a test point.</summary>
+    ///<param name="curve">(Geometry.Curve) A Curve geometry object</param>
+    ///<param name="point">(Point3d) Sampling point</param>
+    ///<returns>(float) The parameter of the closest point on the Curve.</returns>
+    static member CurveClosestParameter(curve:Curve, point:Point3d) : float =
+        let t = ref 0.
+        let rc = curve.ClosestPoint(point, t)
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestParameter failedon Curve Geometry"
+        !t
+
 
     ///<summary>Returns the point on a Curve that is closest to a test point.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
@@ -927,10 +937,17 @@ module AutoOpenCurve =
     static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let rc, t = curve.ClosestPoint(point)
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestPoint failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestPoint failed. curveId:'%s' segmentIndex:'%d'" (Print.guid curveId) segmentIndex
         curve.PointAt(t)
 
-
+    ///<summary>Returns the point on a Curve that is closest to a test point.</summary>
+    ///<param name="curve">(Geometry.Curve) A Curve geometry object</param>
+    ///<param name="point">(Point3d) Sampling point</param>
+    ///<returns>(Point3d) The closest point on the Curve.</returns>
+    static member CurveClosestPoint(curve:Curve, point:Point3d) : Point3d =         
+        let rc, t = curve.ClosestPoint(point)
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestPoint failed on Curve Geometry" 
+        curve.PointAt(t)
 
 
     ///<summary>Returns the 3D point locations calculated by contouring a Curve object.</summary>
