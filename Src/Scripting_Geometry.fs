@@ -167,8 +167,7 @@ module AutoOpenGeometry =
 
         if isNull text || text = "" then RhinoScriptingException.Raise "Rhino.Scripting.AddText Text invalid.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         let bold   = (1 = fontStyle || 3 = fontStyle)
-        let italic = (2 = fontStyle || 3 = fontStyle)
-        #if RHINO7  
+        let italic = (2 = fontStyle || 3 = fontStyle)         
         let ds = State.Doc.DimStyles.Current
         let qn, quartetBoldProp , quartetItalicProp = 
             if isNull font then
@@ -197,27 +196,7 @@ module AutoOpenGeometry =
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
-        let objectId = State.Doc.Objects.Add(te)
-        #else // only for Rh6.0, would not be needed for latest releases of Rh6
-        let just = 
-            match horizontalAlignment with
-            |0uy -> TextJustification.Left
-            |1uy -> TextJustification.Center
-            |2uy -> TextJustification.Right
-            | x  -> RhinoScriptingException.Raise "Rhino.Scripting.AddText horizontalAlignment %duy is invalid." x
-            +
-            match verticalAlignment with
-            |0uy -> TextJustification.Top
-            |1uy -> TextJustification.Top
-            |2uy -> TextJustification.Top
-            |3uy -> TextJustification.Middle
-            |4uy -> TextJustification.Bottom
-            |5uy -> TextJustification.Bottom
-            |6uy -> TextJustification.Bottom
-            | x  -> RhinoScriptingException.Raise "Rhino.Scripting.AddText verticalAlignment %duy is invalid." x
-
-        let objectId = State.Doc.Objects.AddText(text, plane, height, font, bold, italic, just)
-        #endif
+        let objectId = State.Doc.Objects.Add(te)       
         if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         State.Doc.Views.Redraw()
         objectId
@@ -733,12 +712,9 @@ module AutoOpenGeometry =
     ///<summary>Returns the font used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name.</returns>
-    static member TextObjectFont(objectId:Guid) : string = //GET
-        #if RHINO7  
+    static member TextObjectFont(objectId:Guid) : string = //GET        
         (Scripting.CoerceTextEntity(objectId)).Font.QuartetName
-        #else// only for Rh6.0, would not be needed for latest releases of Rh6
-        (Scripting.CoerceTextEntity(objectId)).Font.FaceName
-        #endif
+
 
 
     ///<summary>Returns the height of a text object.</summary>
@@ -907,7 +883,18 @@ module AutoOpenGeometry =
     ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
-        NoWarnGeometry.TextObjectStyle(objectId, style)
+        let annotation = Scripting.CoerceTextEntity(objectId)
+        let fontdata = annotation.Font          
+        let f = 
+            match style with
+            |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
+            |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
+            |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
+            |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
+            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
+        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName 
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then
+            RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
@@ -919,8 +906,7 @@ module AutoOpenGeometry =
     ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
-        for objectId in objectIds do NoWarnGeometry.TextObjectStyle(objectId, style)
-        State.Doc.Views.Redraw()
+        for objectId in objectIds do Scripting.TextObjectStyle(objectId, style)        
 
 
     ///<summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
@@ -928,7 +914,20 @@ module AutoOpenGeometry =
     ///<param name="font">(string) The new Font Name</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        NoWarnGeometry.TextObjectFont(objectId, font)
+        let annotation = Scripting.CoerceTextEntity(objectId)
+        let fontdata = annotation.Font           
+        let f = 
+            DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
+            // normally calls will not  go further than FromQuartetProperties(font, false, false)
+            // but there are a few rare fonts that don"t have a regular font
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
+            |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
+            |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
+            |? (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)        
+        annotation.Font <- f
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
+        State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font used by multiple text objects. Keeps the current state of bold and italic when possible.</summary>
@@ -936,7 +935,6 @@ module AutoOpenGeometry =
     ///<param name="font">(string) The new Font Name</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
-        for objectId in objectIds do  NoWarnGeometry.TextObjectFont(objectId, font)
+        for objectId in objectIds do  Scripting.TextObjectFont(objectId, font)
         State.Doc.Views.Redraw()
-
 

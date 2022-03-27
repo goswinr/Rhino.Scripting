@@ -71,7 +71,7 @@ module AutoOpenSurface =
                                startPoint:Point3d,
                                endPoint:Point3d, 
                                [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
-        #if RHINO7
+        #if RHINO7 // needs GetTightBoundingBox
         // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955        
         let bbox = 
             let objs = objectIds|> Seq.map Scripting.CoerceRhinoObject
@@ -1745,12 +1745,7 @@ module AutoOpenSurface =
     ///<param name="srf">(Geometry.Surface) The Surface geometry</param>
     ///<returns>(float) of area.</returns>
     static member SurfaceArea(srf:Surface) : float  = 
-        let amp = 
-            #if RHINO7
-            AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)
-            #else// only for Rh6.0, would not be needed for latest releases of Rh6
-            AreaMassProperties.Compute(srf)
-            #endif
+        let amp =AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)            
         if isNull amp then  RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea failed on Surface: %A" srf
         amp.Area
 
@@ -1760,12 +1755,7 @@ module AutoOpenSurface =
     ///<param name="brep">(Geometry.Brep) The Polysurface geometry</param>
     ///<returns>(float) of area.</returns>
     static member SurfaceArea(brep:Brep) : float  = 
-        let amp = 
-            #if RHINO7
-            AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)
-            #else
-            AreaMassProperties.Compute(brep)
-            #endif
+        let amp = AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)           
         if isNull amp then  RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea failed on Brep: %A" brep
         amp.Area
 

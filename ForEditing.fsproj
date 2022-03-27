@@ -12,8 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.5.2" /> <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
-    <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Update="FSharp.Core" Version="4.5.2" /> <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->    
+	<PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" /> <!-- 6.7.18199 supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
     <PackageReference Include="FsEx" Version="0.9.0" />
   </ItemGroup>
 
@@ -28,7 +28,6 @@
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />
-    <Compile Include="Src/NoWarn44.fs" />
 
     <Compile Include="Src/Scripting_Header.fs" />
     <Compile Include="Src/Scripting_Coerce.fs" />

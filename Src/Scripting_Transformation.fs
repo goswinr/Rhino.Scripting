@@ -45,17 +45,9 @@ module AutoOpenTransformation =
     ///<summary>verifies that a matrix is a zero transformation matrix.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsXformZero(xForm:Transform) : bool = 
-        #if RHINO7  
-            xForm.IsZero4x4
-        #else // only for Rh6.0, would not be needed for latest releases of Rh6
-            let mutable isZero = true
-            for i=0 to 3 do
-                for j=0 to 3 do
-                    if xForm.[i,j] <> 0.0 then
-                        isZero <- false
-            isZero
-        #endif
+    static member IsXformZero(xForm:Transform) : bool =          
+        xForm.IsZero4x4
+        
 
 
     ///<summary>Returns a change of basis transformation matrix or None on error.</summary>

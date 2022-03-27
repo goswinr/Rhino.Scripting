@@ -457,19 +457,10 @@ module AutoOpenUserInterface =
             if notNull defaultValLinetype then
                 let ltnew = State.Doc.Linetypes.FindName(defaultValLinetype)
                 if notNull ltnew  then ltinstance <- ltnew
-            try
-                #if RHINO7  
-                    let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
-                    let linetype = State.Doc.Linetypes.FindId(objectId)
-                    Some linetype.Name
-                #else // only for Rh6.0, would not be needed for latest releases of Rh6
-                    let i = ref 0
-                    let ok = Rhino.UI.Dialogs.ShowSelectLinetypeDialog(i, showByLayer)
-                    if not ok then None
-                    else
-                        let linetype = State.Doc.Linetypes.[!i]
-                        Some linetype.Name
-                #endif
+            try                  
+                let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
+                let linetype = State.Doc.Linetypes.FindId(objectId)
+                Some linetype.Name                
             with _ ->
                 None
         RhinoSync.DoSync getKeepEditor
