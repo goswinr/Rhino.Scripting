@@ -1,4 +1,4 @@
-﻿
+
 namespace Rhino
 
 open System
@@ -44,26 +44,22 @@ module AutoOpenCoerce =
         | :? string  as s -> let ok, g = Guid.TryParse s in  if ok then Some g else None
         | _ -> None
 
-    ///<summary>Attempt to get RhinoObject from the document with a given objectId. Fails on empty Guid.</summary>
+    ///<summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>a RhinoObject Option.</returns>
     static member TryCoerceRhinoObject (objectId:Guid) : DocObjects.RhinoObject option = 
-        if Guid.Empty = objectId then RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceRhinoObject failed on empty Guid"
-        else
-            let o = State.Doc.Objects.FindId(objectId)
-            if isNull o then None
-            else Some o
+        match State.Doc.Objects.FindId(objectId) with
+        | null -> None
+        | o    -> Some o        
+     
 
-    //<summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>   // it doe not make sens to have this just use rs.CoerceGeometry none is never returned
-    //<param name="objectId">geometry Identifier (Guid)</param>
-    //<returns>a Rhino.Geometry.GeometryBase Option</returns>
-    //[<Extension>]
-    //static member TryCoerceGeometry (objectId:Guid) :GeometryBase option = 
-    //    if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceGeometry failed on empty Guid"
-    //    else
-    //        match State.Doc.Objects.FindId(objectId) with
-    //        | null -> RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceGeometry: %A is not an object in State.Doc.Objects table" objectId
-    //        | o -> Some o.Geometry
+    ///<summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>   
+    ///<param name="objectId">geometry Identifier (Guid)</param>
+    ///<returns>a Rhino.Geometry.GeometryBase Option</returns>
+    static member TryCoerceGeometry (objectId:Guid) :GeometryBase option = 
+        match State.Doc.Objects.FindId(objectId) with
+        | null -> None
+        | o -> Some o.Geometry
 
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
     ///<param name="objectId">(Guid) light Identifier</param>
@@ -77,10 +73,8 @@ module AutoOpenCoerce =
     ///<param name="objectId">Mesh Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option.</returns>
     static member TryCoerceMesh (objectId:Guid) : Mesh option = 
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceMesh failed on empty Guid"
-        else
-            match State.Doc.Objects.FindId(objectId) with
-            | null -> RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceMesh: %A is not an object in State.Doc.Objects table" objectId
+        match State.Doc.Objects.FindId(objectId) with
+            | null -> None
             | o ->
                 match o.Geometry with
                 | :? Mesh as m -> Some m
@@ -90,30 +84,26 @@ module AutoOpenCoerce =
     ///<param name="objectId">Surface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option.</returns>
     static member TryCoerceSurface (objectId:Guid) : Surface option = 
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceSurface failed on empty Guid"
-        else
-            match State.Doc.Objects.FindId(objectId) with
-            | null -> RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceSurface: %A is not an object in State.Doc.Objects table" objectId
-            | o ->
-                match o.Geometry with          // TODO Extrusion of one curve too ?
-                | :? Surface as c -> Some c
-                | :? Brep as b ->
-                    if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
-                    else None
-                //| :? Extrusion as e -> // covered by Surface
-                //     let b = e.ToBrep()
-                //     if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
-                //     else None
-                | _ -> None
+        match State.Doc.Objects.FindId(objectId) with
+        | null -> None
+        | o ->
+            match o.Geometry with        
+            | :? Surface as c -> Some c
+            | :? Brep as b ->
+                if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
+                else None
+            //| :? Extrusion as e -> // covered by Surface
+            //     let b = e.ToBrep()
+            //     if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
+            //     else None
+            | _ -> None
 
     ///<summary>Attempt to get a Polysurface or Brep class from given Guid. Works on Extrusions too. Fails on empty Guid.</summary>
     ///<param name="objectId">Polysurface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Mesh Option.</returns>
-    static member TryCoerceBrep (objectId:Guid) : Brep option = 
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceBrep failed on empty Guid"
-        else
-            match State.Doc.Objects.FindId(objectId) with
-            | null -> RhinoScriptingException.Raise "Rhino.Scripting.TryCoerceBrep: %A is not an object in State.Doc.Objects table" objectId
+    static member TryCoerceBrep (objectId:Guid) : Brep option =
+        match State.Doc.Objects.FindId(objectId) with
+            | null -> None
             | o ->
                 match o.Geometry with
                 | :? Brep as b ->  Some b
