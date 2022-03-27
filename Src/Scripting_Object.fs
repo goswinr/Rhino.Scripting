@@ -549,6 +549,7 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string option) The object's current page layout view, None if it is in Model Space.</returns>
     static member ObjectLayout(objectId:Guid) : string option= //GET
+        // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
             let pageid = rhobj.Attributes.ViewportId
@@ -566,6 +567,7 @@ module AutoOpenObject =
     ///    from page layout space to model space, just specify None</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayout(objectId:Guid, layout:string option) : unit = //SET
+        // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         let view= 
             if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
@@ -586,7 +588,6 @@ module AutoOpenObject =
                     rhobj.Attributes.ViewportId <- layout.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed, layout is not a Page view for '%A' and '%A'"  layout objectId
-
 
             if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed for '%A' and '%A'"  layout objectId
             State.Doc.Views.Redraw()
@@ -625,8 +626,6 @@ module AutoOpenObject =
                 else
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
-
-
 
                 if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed for '%A' and '%A'"  layout objectId
         State.Doc.Views.Redraw()
