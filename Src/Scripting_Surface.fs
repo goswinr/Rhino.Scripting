@@ -1732,7 +1732,7 @@ module AutoOpenSurface =
         let tol = State.Doc.ModelAbsoluteTolerance
         let pieces = brep.Split(cutter, tol)
         if isNull pieces then RhinoScriptingException.Raise "Rhino.Scripting.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (Print.guid brepId) (Print.guid cutterId) deleteInput
-        if  deleteInput then
+        if deleteInput then
             //brepId = Scripting.Coerceguid(brepId)
             State.Doc.Objects.Delete(brepId, true) |> ignore
         let rc =  rarr { for piece in pieces do yield State.Doc.Objects.AddBrep(piece) }
