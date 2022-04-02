@@ -27,7 +27,6 @@
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />
-    <Compile Include="Src/NoWarn44.fs" />
 
     <Compile Include="Src/Scripting_Header.fs" />
     <Compile Include="Src/Scripting_Coerce.fs" />

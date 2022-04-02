@@ -41,26 +41,36 @@
     <!--https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target-->
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
-    <!-- <SymbolPackageFormat>snupkg</SymbolPackageFormat>   -->
+    <!-- Optional: EmbedUntrackedSources, Embed source files that are not tracked by the source control manager to the PDB . 
+         This is useful if you generate files during the build. (We do for Rhino.Scripting !)
+         https://www.meziantou.net/how-to-debug-nuget-packages-using-sourcelink.htm 
+         https://www.hanselman.com/blog/exploring-net-cores-sourcelink-stepping-into-the-source-code-of-nuget-packages-you-dont-own
+         https://github.com/NuGet/Home/wiki/NuGet-Package-Debugging-&-Symbols-Improvements
+         -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/goswinr/Rhino.Scripting</PackageProjectUrl>
     <RepositoryUrl>https://github.com/goswinr/Rhino.Scripting</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageIcon>logo128.png</PackageIcon>
-    <PackageReadmeFile>READMEnuget.md</PackageReadmeFile> <!-- using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791 -->
+    <!-- <SymbolPackageFormat>snupkg</SymbolPackageFormat>   --><!-- using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791 -->
+    <PackageReadmeFile>READMEnuget.md</PackageReadmeFile> 
     <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>
     <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FsEx" Version="0.9.0" GeneratePathProperty="true"/>
-    <PackageReference Update="FSharp.Core" Version="4.5.2" /> <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
+  <ItemGroup>    
+    <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
+    <PackageReference Update="FSharp.Core" Version="4.5.2" /> 
 
-    <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
-    <PackageReference Include="RhinoCommon" Version="6.0.18016.23451" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- 6.7.18199 supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
+    <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" />
 
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="FsEx" Version="0.9.0" />
+
+    <!--Probaly Not working because the way files a structured on github does not match the way the are compiled from a one big generated file.  
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" /> -->
   </ItemGroup>
 
   <ItemGroup>
@@ -76,7 +86,7 @@
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />
-    <Compile Include="Src/NoWarn44.fs" />
+    
     <!-- <Compile Include="Src/Scripting.fs" /> added in BeforeBuild target -->
 
   </ItemGroup>
@@ -90,7 +100,7 @@
  <!-- Delete Scripting.fs when done-->
   <Target Name="DeleteMergedFile" BeforeTargets="AfterBuild"> <Delete Files="Src/Scripting.fs" TreatErrorsAsWarnings="true" /> </Target>
 
-<!-- needed for intelisense, ?
+<!-- needed for intelisense ? GeneratePathProperty="true"
 <Copy SourceFiles="$(PkgFsEx)/lib/netstandard2.0/FsEx.xml" DestinationFiles="$(TargetDir)FsEx.xml" ContinueOnError="false" />
 -->
 	
