@@ -130,7 +130,7 @@ module internal Print =
             RhinoDoc.ActiveDocumentChanged.Add (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
             RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
 
-    /// Abreviation for toNiceString
+    /// Abreviation for NiceString.toNiceString
     /// including special formating of Rhino Guids
     let nice (x:'T) = 
         if initIsPending then init()

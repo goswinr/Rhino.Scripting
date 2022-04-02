@@ -13,6 +13,8 @@ open FsEx
 open FsEx.UtilMath
 open FsEx.SaveIgnore
 open FsEx.CompareOperators
+open FsEx.NiceString
+
 
 [<AutoOpen>]
 module AutoOpenGeometry =
@@ -45,7 +47,7 @@ module AutoOpenGeometry =
                             yield item.ActiveViewportID]
         let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
         if rc = Guid.Empty then
-            RhinoScriptingException.Raise "Rhino.Scripting.AddClippingPlane: Unable to add clipping plane to document.  plane:'%A' uMagnitude:'%A' vMagnitude:'%A' views:'%A'" plane uMagnitude vMagnitude views
+            RhinoScriptingException.Raise "Rhino.Scripting.AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.ToNiceString uMagnitude vMagnitude (toNiceString views)
         State.Doc.Views.Redraw()
         rc
 
@@ -74,7 +76,8 @@ module AutoOpenGeometry =
                                     [<OPT;DEF(false)>]makeMesh:bool) : Guid = 
         if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "Rhino.Scripting.AddPictureFrame image %s does not exist" filename
         let rc = State.Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPictureFrame: Unable to add picture frame to document.  plane:'%A' filename:'%A' width:'%A' height:'%A' selfIllumination:'%A' embed:'%A' useAlpha:'%A' makeMesh:'%A'" plane filename width height selfIllumination embed useAlpha makeMesh
+        if rc = Guid.Empty 
+            then RhinoScriptingException.Raise "Rhino.Scripting.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.ToNiceString filename width height selfIllumination embed useAlpha makeMesh
         State.Doc.Views.Redraw()
         rc
 
@@ -85,7 +88,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid = 
         let rc = State.Doc.Objects.AddPoint(Point3d(x, y, z))
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPoint: Unable to add point to document.  x:'%A' y:'%A' z:'%A'" x y z
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (NiceFormat.float x) (NiceFormat.float y) (NiceFormat.float z)
         State.Doc.Views.Redraw()
         rc
 
@@ -94,7 +97,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(point:Point3d) : Guid = 
         let rc = State.Doc.Objects.AddPoint(point)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPoint: Unable to add point to document.  point:'%A'" point
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPoint: Unable to add point to document.  point:'%s'" point.ToNiceString
         State.Doc.Views.Redraw()
         rc
 
@@ -110,12 +113,12 @@ module AutoOpenGeometry =
                 let color = Scripting.CoerceColor(colors.[i])
                 pc.Add(points.[i], color)
             let rc = State.Doc.Objects.AddPointCloud(pc)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPointCloud: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
+            if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPointCloud: Unable to add point cloud to document. points:'%A' colors:'%A'" points colors
             State.Doc.Views.Redraw()
             rc
         else
             let rc = State.Doc.Objects.AddPointCloud(points)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPointCloud: Unable to add point cloud to document.  points:'%A' colors:'%A'" points colors
+            if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPointCloud: Unable to add point cloud to document. points:'%A' colors:'%A'" points colors
             State.Doc.Views.Redraw()
             rc
 
