@@ -106,23 +106,23 @@ module AutoOpenUserData =
 
         if isNull s then
             let err = 
-                stringBuffer{
-                yield! sprintf "Rhino.Scripting.GetUserText key: '%s' does not exist on %s" key (Print.guid objectId)
-                let ks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=false)
-                if ks.Count = 0 then
-                    yield!  "This Object does not have any UserText."
-                else
-                    yield!  "Available keys on Object are:"
-                    for k in Scripting.GetUserTextKeys(objectId, attachedToGeometry=false) do
-                        yield "    "
-                        yield! k
-                let gks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=true)
-                if gks.Count > 0 then
-                    yield! "Available keys on Geometry:"
-                    for k in Scripting.GetUserTextKeys(objectId, attachedToGeometry=true) do
-                        yield "    "
-                        yield! k
-            }
+                str{
+                    yield! sprintf "Rhino.Scripting.GetUserText key: '%s' does not exist on %s" key (Print.guid objectId)
+                    let ks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=false)
+                    if ks.Count = 0 then
+                        yield!  "This Object does not have any UserText."
+                    else
+                        yield!  "Available keys on Object are:"
+                        for k in Scripting.GetUserTextKeys(objectId, attachedToGeometry=false) do
+                            yield "    "
+                            yield! k
+                    let gks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=true)
+                    if gks.Count > 0 then
+                        yield! "Available keys on Geometry:"
+                        for k in Scripting.GetUserTextKeys(objectId, attachedToGeometry=true) do
+                            yield "    "
+                            yield! k
+                }
             RhinoScriptingException.Raise "%s" err
         s
 

@@ -59,7 +59,7 @@ module AutoOpenToNiceStringExtensions =
                     |> Array.map String.length
                     |> Array.max
                 |]
-            stringBuffer{
+            str{
                 yield! "Rhino.Geometry.Transform:"
                 for i,s in Seq.indexed vs do
                     let coli = i%4
@@ -75,7 +75,7 @@ module AutoOpenToNiceStringExtensions =
         member p.ToNiceString = 
             if not p.IsValid then "invalid Rhino.Geometry.Plane"
             else
-                stringBuffer{
+                str{
                     yield! "Rhino.Geometry.Plane:"
                     yield! sprintf "Origin X=%s Y=%s Z=%s" (NiceFormat.float  p.Origin.X) (NiceFormat.float  p.Origin.Y) (NiceFormat.float  p.Origin.Z)
                     yield! sprintf "X-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.XAxis.X) (NiceFormat.float  p.XAxis.Y) (NiceFormat.float  p.XAxis.Z)
