@@ -65,10 +65,6 @@ module AutoOpenBlock =
         name
 
 
-
-
-
-
     ///<summary>Returns names of the block definitions that contain a specified block
     ///    definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
@@ -160,7 +156,7 @@ module AutoOpenBlock =
     static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
-        let instances = idef.GetReferences(0)
+        let instances = idef.GetReferences(whereToLook)
         rarr { for item in instances do yield item.Id }
 
 
@@ -327,7 +323,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.IsBlockInUse '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.InUse(whereToLook)
 
 
@@ -336,7 +332,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockReference(blockName:string) : bool = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.IsBlockReference '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.IsReference
 
 
@@ -346,9 +342,25 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.RenameBlock '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = idef.Description
         State.Doc.InstanceDefinitions.Modify(idef, newName, description, quiet=false)
 
 
-
+    ///<summary>Replace the objects inside an existing block definition.</summary>
+    ///<param name="blockName">(string) Name of an existing block definition</param>
+    ///<param name="newObjects">(string) Objects for replacing existing objects, can be partially the same as current objects too</param>
+    ///<param name="deleteInput">(bool) Optional, Default Value: <c>true</c> delete the input objects from document, so that they only exist in the block definition.</param>
+    ///<returns>(bool) True or False indicating success or failure.</returns>
+    static member ReplaceBlockObjects(blockName:string, newObjects:seq<Guid>,[<OPT;DEF(true)>]deleteInput:bool) : bool = 
+        let idef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.ReplaceBlockObjects '%s' does not exist in InstanceDefinitionsTable" blockName
+        let objs  = newObjects |> Seq.map Scripting.CoerceRhinoObject |> Array.ofSeq // just to be sure its not lazy
+        let geos  = objs |> Array.map (fun o-> o.Geometry)
+        let attrs = objs |> Array.map (fun o-> o.Attributes)
+        if deleteInput then 
+            let k = State.Doc.Objects.Delete(newObjects, quiet=true)
+            let l = Seq.length newObjects
+            if k <> l then RhinoScriptingException.Raise "Rhino.Scripting.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Print.nice newObjects)
+        State.Doc.InstanceDefinitions.ModifyGeometry(idef.Index,geos,attrs)
+        
