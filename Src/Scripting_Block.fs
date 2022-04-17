@@ -241,15 +241,14 @@ module AutoOpenBlock =
         rc
 
 
-    ///<summary>Explodes a block instance into it's geometric components. The
-    ///    exploded objects are added to the document.</summary>
+    ///<summary>Explodes a block instance into it's geometric components. The exploded objects are added to the document. The block instance is deleted</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<param name="explodeNestedInstances">(bool) Optional, Default Value: <c>false</c>
     ///    By default nested blocks are not exploded</param>
     ///<returns>(Guid array) identifiers for the newly exploded objects.</returns>
     static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> = 
         let  instance = Scripting.CoerceBlockInstanceObject(objectId)
-        let  guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance= true)
+        let  guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance = true)
         if guids.Length > 0 then State.Doc.Views.Redraw()
         guids
 

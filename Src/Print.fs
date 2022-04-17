@@ -99,9 +99,9 @@ module internal Print =
             else
                 let name = o.Attributes.Name // null if unset
                 if String.IsNullOrWhiteSpace name then
-                    sprintf "Guid %O (a %s on Layer '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
+                    sprintf "Guid %O (a %s%s%s on Layer '%s')" g  (if o.IsDeleted then "deleted " else "") (if o.IsHidden then "hidden " else "")(o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath)
                 else
-                    sprintf "Guid %O (a %s named '%s' on Layer '%s')" g (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
+                    sprintf "Guid %O (a %s%s%s named '%s' on Layer '%s')" g (if o.IsDeleted then "deleted " else "") (if o.IsHidden then "hidden " else "") (o.ShortDescription(false)) (State.Doc.Layers.[o.Attributes.LayerIndex].FullPath) name
         else
             // the Print.guid function gets injected into FsEx.NiceString, below
             // so that using the print function still works on other Guids if Rhino.Scripting is referenced from outside of rhino wher there is no active Doc
