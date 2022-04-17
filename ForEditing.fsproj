@@ -16,9 +16,12 @@
     <PackageReference Update="FSharp.Core" Version="4.5.2" /> 
 	  
     <!-- 6.7.18199 supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
-    <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" /> 
-    
+    <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" />
+
+	  <!--
     <PackageReference Include="FsEx" Version="0.10.1" />
+	  -->
+	  <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" />
   </ItemGroup>
 
   <ItemGroup>
