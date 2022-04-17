@@ -47,7 +47,7 @@ module internal Util =
     
     ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
     /// A good string may not include line returns, tabs, and leading or trailing whitespace.
-    /// Confusing or ambiguous characters that look like ASCII but are some other unicode are also not allowed. </summary>
+    /// Confusing or ambiguous Unicode characters that look like ASCII but are some other unicode are also not allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>   
     ///<returns>(bool) true if the string is a valid name.</returns>
@@ -111,7 +111,7 @@ module internal Util =
 
     ///<summary>Checks if a string is a acceptable string for use in Rhino Object Names or User Dictionary keys and values.
     /// A acceptable string may not include line returns, tabs, and leading or trailing whitespace.
-    /// Confusing or ambiguous characters that look like ASCII but are allowed. </summary>
+    /// Confusing or ambiguous Unicode characters that look like ASCII are allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
     ///<returns>(bool) true if the string is a valid name.</returns>

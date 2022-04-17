@@ -24,7 +24,12 @@ type Scripting private () =
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
-    
+
+    /// The current active Rhino document (= the file currently open)
+    static member Doc = State.Doc
+
+    /// Object Table of the current active Rhino document
+    static member Ot = State.Ot
 
     /// A Dictionary to store state between scripting session.
     /// Use Rhino.Scripting.Sticky.Clear() to reset it.
@@ -98,13 +103,15 @@ type Scripting private () =
     ///<param name="layerIndex">(int) LayerIndex</param>
     ///<param name="objectName">(string) Optional, object name</param>
     ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
-    ///<param name="checkStrings">(bool) Optional, Default: true. Check name and usertext for ambiguous unicoide characters</param>
+    ///<param name="stringSafetyCheck">(bool) Optional, Default: true. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
+    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
-                      ,  layerIndex:int // dont make it  optional , so tha  method overload resolution works for rs.Add(..)
+                      ,  layerIndex:int // dont make it  optional , so that method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(true)>]checkStrings:bool                     
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool 
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
                       ) : Guid = 
         let attr =
             if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then 
@@ -113,12 +120,12 @@ type Scripting private () =
                 let a = new DocObjects.ObjectAttributes()
                 a.LayerIndex <- layerIndex
                 if objectName <> "" then 
-                    if checkStrings && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
+                    if stringSafetyCheck && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
                         RhinoScriptingException.Raise "Rhino.Scripting.Add objectName the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
                     for k,v in userTextKeysAndValues do 
-                        if checkStrings then 
+                        if stringSafetyCheck then 
                             if not <|  Util.isAcceptableStringId( k, false) then // TODO or enforce goodStringID ?
                                 RhinoScriptingException.Raise "Rhino.Scripting.Add SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
                             if not <|  Util.isAcceptableStringId( v, false) then
@@ -145,35 +152,38 @@ type Scripting private () =
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Add: object of type %A not implemented yet" (geo.GetType())
 
     ///<summary>Adds any geometry object (stuct or class) to the Rhino document.
-    /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
+    ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
     ///<param name="layer">(string) Optional, Layername, parent layer separated by '::' </param>
     ///<param name="objectName">(string) Optional, object name</param>
     ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
-    ///<param name="layerColor">(Drawing.Color) Optional, Color for layer. The layer color will be changed even if the layer exists already</param>
-    ///<param name="checkStrings">(bool) Optional, Default: true. Check name and usertext for ambiguous unicoide characters</param>
+    ///<param name="layerColor">(Drawing.Color) Optional, Color for layer. The layer color will NOT be changed even if the layer exists already</param>
+    ///<param name="stringSafetyCheck">(bool) Optional, Default: true. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
+    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
                       ,  [<OPT;DEF("")>]layer:string 
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
                       ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color    
-                      ,  [<OPT;DEF(true)>]checkStrings:bool   
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool                      
+                      ,  [<OPT;DEF(false:bool)>]collapseParents:bool
                       ) : Guid = 
         let layCorF =
             if layer<>""then 
                 if layerColor.IsEmpty then                         
-                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, true) // TODO or disallow all unicode ?
+                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all unicode ?
                 else
-                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true)// TODO or disallow all unicode ?
+                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all unicode ?
             else
                 UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
         
-        // now update the layer color if one is given, even if the layer exists already
         let layIdx =
             match layCorF with 
             |UtilLayer.LayerCreated ci -> ci
-            |UtilLayer.LayerFound fi -> 
+            |UtilLayer.LayerFound fi ->  fi
+                (*
+                // now update the layer color if one is given, even if the layer exists already
                 if layerColor.IsEmpty then 
                     fi
                 else
@@ -181,16 +191,10 @@ type Scripting private () =
                     if not <| lay.Color.EqualsARGB(layerColor) then 
                         lay.Color <- layerColor
                     fi                        
+                *)
 
-        let g = Scripting.Add( geo, layIdx, objectName, userTextKeysAndValues, checkStrings)  
+        let g = Scripting.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)  
         g
-        
 
-
-    /// The current active Rhino document (= the file currently open)
-    static member Doc = State.Doc
-
-    /// Object Table of the current active Rhino document
-    static member Ot = State.Ot
 
 

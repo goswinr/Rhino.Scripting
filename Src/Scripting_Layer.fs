@@ -42,15 +42,17 @@ module AutoOpenLayer =
     ///   1 = explicitly Locked (even if parent is already Locked)
     ///   2 = inherited from parent, or Unlocked default</param>
     ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
-    ///<param name="allowUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
+    ///<param name="allowAllUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
+    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
     ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer. 
     /// E.g. The function rs.Add can then take this layer index.</returns>
-    static member AddLayer( [<OPT;DEF(null:string)>]name:string,
-                            [<OPT;DEF(Drawing.Color())>]color:Drawing.Color,
-                            [<OPT;DEF(2)>]visible:int,
-                            [<OPT;DEF(2)>]locked:int,
-                            [<OPT;DEF(null:string)>]parent:string,
-                            [<OPT;DEF(false:bool)>]allowUnicode:bool) : int = 
+    static member AddLayer( [<OPT;DEF(null:string)>]name:string
+                          , [<OPT;DEF(Drawing.Color())>]color:Drawing.Color
+                          , [<OPT;DEF(2)>]visible:int
+                          , [<OPT;DEF(2)>]locked:int
+                          , [<OPT;DEF(null:string)>]parent:string
+                          , [<OPT;DEF(false:bool)>]allowAllUnicode:bool
+                          , [<OPT;DEF(false:bool)>]collapseParents:bool) : int = 
 
         let col = if color.IsEmpty then Color.randomForRhino else (fun () -> color)
         if notNull parent && isNull name then
@@ -72,7 +74,7 @@ module AutoOpenLayer =
             UtilLayer.createDefaultLayer(col, true, false)
         else
             let names = if isNull parent then name else parent+ "::" + name
-            let fOrC  = UtilLayer.getOrCreateLayer(names, col, vis, loc, allowUnicode)
+            let fOrC  = UtilLayer.getOrCreateLayer(names, col, vis, loc, allowAllUnicode, collapseParents)
             //State.Doc.Layers.[i].FullPath
             fOrC.Index
 
@@ -90,15 +92,17 @@ module AutoOpenLayer =
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
-    ///<param name="allowUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
+    ///<param name="allowAllUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
+    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectLayer(objectId:Guid
+    static member ObjectLayer( objectId:Guid
                              , layer:string
                              ,[<OPT;DEF(false)>]createLayerIfMissing:bool
-                             ,[<OPT;DEF(false:bool)>]allowUnicode:bool) : unit = //SET
+                             ,[<OPT;DEF(false:bool)>]allowAllUnicode:bool
+                             ,[<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //SET
         let obj = Scripting.CoerceRhinoObject(objectId)
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode).Index
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (Print.guid objectId)
@@ -109,13 +113,15 @@ module AutoOpenLayer =
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
     ///<param name="allowUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
+    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer( objectIds:Guid seq
                              , layer:string
                              , [<OPT;DEF(false)>]createLayerIfMissing:bool
-                             , [<OPT;DEF(false:bool)>]allowUnicode:bool) : unit = //MULTISET
+                             , [<OPT;DEF(false:bool)>]allowUnicode:bool
+                             , [<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //MULTISET
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode).Index
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode, collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)

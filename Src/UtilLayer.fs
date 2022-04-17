@@ -82,17 +82,16 @@ module internal UtilLayer =
       
 
     /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
-    /// Does not allow ambiguous Unicode characters in layer-name.
-    /// Returns index
-    /// Empty string returns current layer index
-    let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState, allowUnicode:bool) : FoundOrCreatedIndex = 
+    /// Collapseparents only has an effect if layer is created, not if it exists already  
+    let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState, allowAllUnicode:bool, collapseParents:bool) : FoundOrCreatedIndex = 
+        // TODO trimm off leading and trailing '::' from name string to be more tolerant ?
         match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
         | RhinoMath.UnsetIntIndex ->
             match name with
             | null -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from null string"
-            | "" -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from empty string"
+            | ""   -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from empty string"
             | _ ->
-                match name.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) with
+                match name.Split( [|"::"|], StringSplitOptions.None) with // TODO or use StringSplitOptions.RemoveEmptyEntries ??
                 | [| |] -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer for name: '%s'" name
                 | ns ->
                     let rec createLayer(nameList, prevId, prevIdx, root) : int = 
@@ -102,9 +101,12 @@ module internal UtilLayer =
                             let fullpath = if root="" then branch else root + "::" + branch
                             match State.Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
                             | RhinoMath.UnsetIntIndex -> // actually create layer:
-                                failOnBadShortLayerName (branch, allowUnicode)   // only check non existing sub layer names
+                                failOnBadShortLayerName (branch, allowAllUnicode)   // only check non existing sub layer names
                                 let layer = DocObjects.Layer.GetDefaultLayerProperties()
-                                if prevId <> Guid.Empty then layer.ParentLayerId <- prevId
+                                if prevId <> Guid.Empty then 
+                                    layer.ParentLayerId <- prevId
+                                    if collapseParents then 
+                                        State.Doc.Layers.[prevIdx].IsExpanded <- false
 
                                 match visible with
                                 |ByParent -> ()
@@ -119,7 +121,7 @@ module internal UtilLayer =
                                 layer.Name <- branch
                                 layer.Color <- colorForNewLayers() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
                                 let i = State.Doc.Layers.Add(layer)
-                                let id = State.Doc.Layers.[i].Id //just using layer.Id would be empty guid
+                                let id = State.Doc.Layers.[i].Id // just using layer.Id would be empty guid
                                 createLayer(rest , id , i,  fullpath)
 
                             | i ->
