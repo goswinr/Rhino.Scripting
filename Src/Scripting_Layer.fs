@@ -744,4 +744,18 @@ module AutoOpenLayer =
             let layer = Scripting.CoerceLayer(oldname)
             layer.Name <- newname // TODO test with bad chars in layer string
 
-
+    ///<summary>Collapse a layer in UI if it has children. This is the opposite of rs.ExpandLayer(..) </summary>
+    ///<param name="layerName">(string) full or short layer name</param>   
+    ///<returns>(unit) void, nothing.</returns>
+    static member CollapseLayer(layerName:string) : unit = 
+        let layer = Scripting.CoerceLayer(layerName)
+        if layer.IsExpanded then 
+            layer.IsExpanded <- false
+    
+    ///<summary>Expand a layer in UI if it has children. This is the opposite of rs.CollapseLayer(..) </summary>
+    ///<param name="layerName">(string) full or short layer name</param>   
+    ///<returns>(unit) void, nothing.</returns>
+    static member ExpandLayer(layerName:string) : unit = 
+        let layer = Scripting.CoerceLayer(layerName)
+        if not layer.IsExpanded then 
+            layer.IsExpanded <- true
