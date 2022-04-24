@@ -126,7 +126,7 @@ module internal Util =
                     if i = name.Length then true
                     else
                         let c = name.[i]
-                        if   c < ' ' then false
+                        if   c < ' ' then false // is a control character
                         elif c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
                             loop(i+1)
                         else                            

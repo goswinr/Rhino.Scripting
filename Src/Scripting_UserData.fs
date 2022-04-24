@@ -210,16 +210,16 @@ module AutoOpenUserData =
         let p = State.Doc.Strings.SetString(key, null)
         if isNull p then RhinoScriptingException.Raise "Rhino.Scripting.DeleteDocumentUserText failed,  key '%s' does not exist"  key
 
-    ///<summary>Sets a user text stored on an object.</summary>
+    ///<summary>Sets a user text stored on an object. Key and value must noy contain ambiguous unicode characters.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = 
-        if not <|  Scripting.IsGoodStringId( key, allowEmpty=false) then
+        if not <| Scripting.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
-        if not <|  Scripting.IsGoodStringId( value, allowEmpty=false) then
+        if not <| Scripting.IsGoodStringId( value, allowEmpty=false) then
             RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         let obj = Scripting.CoerceRhinoObject(objectId)
         if attachToGeometry then
@@ -229,7 +229,7 @@ module AutoOpenUserData =
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
 
-    ///<summary>Sets or removes user text stored on multiple objects.</summary>
+    ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
