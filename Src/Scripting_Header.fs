@@ -26,7 +26,7 @@ type Scripting private () =
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 
     /// The current active Rhino document (= the file currently open)
-    static member Doc = State.Doc
+    static member Doc = State.Doc      
 
     /// Object Table of the current active Rhino document
     static member Ot = State.Ot

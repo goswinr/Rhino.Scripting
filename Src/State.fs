@@ -64,10 +64,10 @@ type internal State private () =
     static let setupEventsInSync() = 
         try
             RhinoSync.DoSync (fun () ->
-                // keep the reference to the active Document (3d file ) updated.
-                RhinoDoc.EndOpenDocument.Add (fun args -> updateDoc args.Document)
-                //RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too
-                //RhinoDoc.ActiveDocumentChanged.Add (fun args -> updateDoc args.Document) // seems to not work ??
+                // keep the reference to the active Document (3d file ) updated:
+                RhinoDoc.ActiveDocumentChanged.Add (fun args ->  updateDoc args.Document) 
+                // RhinoDoc.EndOpenDocument.Add  // used here in the past. why ?
+                // RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too
 
                 // listen to Esc Key press.
                 // doing this "Add" in on UI thread is only required if no handler has been added in sync before.
@@ -88,7 +88,7 @@ type internal State private () =
 
 
     static let initState()= 
-        if not  HostUtils.RunningInRhino then
+        if not HostUtils.RunningInRhino then
             RhinoScriptingException.Raise "Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
         else
             RhinoSync.Initialize()
