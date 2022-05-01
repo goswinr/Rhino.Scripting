@@ -11,23 +11,26 @@ module internal UtilLayer =
 
     /// Raise exceptions if short layer-name is not valid
     /// it may not contain :: or control characters
-    let internal failOnBadShortLayerName(name:string, allowAllUnicode) : unit= 
-        if isNull name then RhinoScriptingException.Raise "%s: null string as layer name" eVSLN
+    let internal failOnBadShortLayerName(name:string, fullPath:string, allowAllUnicode) : unit= 
+        if isNull name then RhinoScriptingException.Raise "%s: null string as layer name in '%s'" eVSLN fullPath
 
+        if String.IsNullOrWhiteSpace name then // to cover for StringSplitOptions.None
+            RhinoScriptingException.Raise "%s Empty or just whitespace string as layer name in '%s'" eVSLN fullPath
+        
         if name.Contains "::" then
-            RhinoScriptingException.Raise "%s: Short layer name '%s' shall not contains two colons (::) . " eVSLN name
+            RhinoScriptingException.Raise "%s: Short layer name '%s' shall not contains two colons (::).  in '%s'" eVSLN name fullPath
         
         if allowAllUnicode then 
             if not<| Util.isAcceptableStringId(name, false) then 
-                RhinoScriptingException.Raise "%s: Short layer name '%s' is invalid. It may not include line returns, tabs, and leading or trailing whitespace." eVSLN  name 
+                RhinoScriptingException.Raise "%s: Short layer name '%s' is invalid. It may not include line returns, tabs, and leading or trailing whitespace. in '%s'" eVSLN  name fullPath
         else
             if not<| Util.isGoodStringId(name, false) then             
-                RhinoScriptingException.Raise "%s: Short layer name '%s' has invalid or not recommended characters. If you really want this layer name us the 'allowUnicode' optional parameter" eVSLN  name 
+                RhinoScriptingException.Raise "%s: Short layer name '%s' has invalid or not recommended characters. If you really want this layer name us the 'allowUnicode' optional parameter in '%s'" eVSLN  name fullPath
         
         match Char.GetUnicodeCategory(name.[0]) with
         | UnicodeCategory.OpenPunctuation 
         | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) don't work at start of layer name
-            RhinoScriptingException.Raise  "%s: Short layer name '%s' may not start with a '%c' " eVSLN name name.[0]
+            RhinoScriptingException.Raise  "%s: Short layer name '%s' may not start with a '%c' in '%s'" eVSLN name name.[0] fullPath
         | _ -> ()
 
     let internal getParents(lay:Layer) = 
@@ -88,20 +91,22 @@ module internal UtilLayer =
         match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
         | RhinoMath.UnsetIntIndex ->
             match name with
-            | null -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from null string"
-            | ""   -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer from empty string"
+            | null -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: Cannot get or create layer from null string"
+            | ""   -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: Cannot get or create layer from empty string"
             | _ ->
                 match name.Split( [|"::"|], StringSplitOptions.None) with // TODO or use StringSplitOptions.RemoveEmptyEntries ??
-                | [| |] -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer Cannot get or create layer for name: '%s'" name
+                | [| |] -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: Cannot get or create layer for name: '%s'" name
                 | ns ->
                     let rec createLayer(nameList, prevId, prevIdx, root) : int = 
                         match nameList with
                         | [] -> prevIdx // exit recursion
                         | branch :: rest ->
+                            if String.IsNullOrWhiteSpace branch then // to cover for StringSplitOptions.None
+                                RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: A segment falls into String.IsNullOrWhiteSpace. Cannot get or create layer for name: '%s'" name
                             let fullpath = if root="" then branch else root + "::" + branch
                             match State.Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
                             | RhinoMath.UnsetIntIndex -> // actually create layer:
-                                failOnBadShortLayerName (branch, allowAllUnicode)   // only check non existing sub layer names
+                                failOnBadShortLayerName (branch, name, allowAllUnicode)   // only check non existing sub layer names
                                 let layer = DocObjects.Layer.GetDefaultLayerProperties()
                                 if prevId <> Guid.Empty then 
                                     layer.ParentLayerId <- prevId

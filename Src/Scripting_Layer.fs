@@ -165,7 +165,7 @@ module AutoOpenLayer =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "rs.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
-            UtilLayer.failOnBadShortLayerName (newLayerName, allowUnicode)
+            UtilLayer.failOnBadShortLayerName (newLayerName, newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
             let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
             ps.Last <- newLayerName
