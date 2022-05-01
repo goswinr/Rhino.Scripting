@@ -525,14 +525,15 @@ module AutoOpenCoerce =
             with _ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint: Could not Coerce the 3 values %O, %O and %O to a Point3d" x y z
         let b = box pt
         match b with
-        | :? Point3d    as pt               -> pt
-        | :? Point3f    as pt               -> Point3d(pt)
-        //| :? Vector3d   as v                -> Point3d(v) //dont confuse vectors and points !
-        | :? DocObjects.PointObject as po   -> po.PointGeometry.Location
-        | :? TextDot as td                  -> td.Point
-        | :? (float*float*float) as xyz     -> let x, y, z = xyz in Point3d(x, y, z)
-        | :? (single*single*single) as xyz  -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))
-        | :? (int*int*int) as xyz           -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))
+        | :? Point3d    as pt                 -> pt
+        | :? Point3f    as pt                 -> Point3d(pt)
+        //| :? Vector3d   as v                  -> Point3d(v) //dont confuse vectors and points !
+        | :? DocObjects.PointObject as po     -> po.PointGeometry.Location
+        | :? TextDot as td                    -> td.Point
+        | :? (float*float*float) as xyz       -> let x, y, z = xyz in Point3d(x, y, z)
+        | :? (decimal*decimal*decimal) as xyz -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))
+        | :? (single*single*single) as xyz    -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))
+        | :? (int*int*int) as xyz             -> let x, y, z = xyz in Point3d(float(x), float(y), float(z))
         | _ ->
             try
                 match b with
@@ -581,11 +582,12 @@ module AutoOpenCoerce =
             with _ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector: Could not Coerce %O, %O and %O to Vector3d" x y z
         let b = box vec
         match b with
-        | :? Vector3d   as v                -> v
-        | :? Vector3f   as v                -> Vector3d(v)
-        | :? (float*float*float) as xyz     -> let x, y, z = xyz in Vector3d(x, y, z)
-        | :? (single*single*single) as xyz  -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))
-        | :? (int*int*int) as xyz           -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))
+        | :? Vector3d   as v                  -> v
+        | :? Vector3f   as v                  -> Vector3d(v)
+        | :? (float*float*float) as xyz       -> let x, y, z = xyz in Vector3d(x, y, z)
+        | :? (decimal*decimal*decimal) as xyz -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))
+        | :? (single*single*single) as xyz    -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))
+        | :? (int*int*int) as xyz             -> let x, y, z = xyz in Vector3d(float(x), float(y), float(z))
         | _ ->
             try
                 match b with

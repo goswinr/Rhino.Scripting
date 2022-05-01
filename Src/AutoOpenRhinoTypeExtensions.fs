@@ -16,18 +16,48 @@ module AutoOpenRhinoTypeExtensions =
         /// To convert a Point3d (as it is used in most other Rhino Geometries) to Point3f (as it is used in Meshes)
         member pt.ToPoint3f = Point3f(float32 pt.X, float32 pt.Y, float32 pt.Z)
 
+        /// Take any object that has an X, Y and Z member and try to convert each to a float 
+        static member inline ofXYZmembers pt  = 
+            let x = ( ^T : (member X : _) pt)
+            let y = ( ^T : (member Y : _) pt)
+            let z = ( ^T : (member Z : _) pt)
+            try
+                Point3d(float x, float y, float z) 
+            with e ->
+                RhinoScriptingException.Raise "Point3d.ofXYZmembers: %A could not be converted to a Point3d:\r\n%A" pt e
 
     type Point3f with
 
         /// To convert a Point3f (as it is used in Meshes) to Point3d (as it is used in most other Rhino Geometries)
         member pt.ToPoint3d = Point3d(pt)
-
+        
+        /// Duck typing using SRTP.
+        /// Take any object that has an X, Y and Z member and try to convert each to a float32 
+        static member inline ofXYZmembers pt  = 
+            let x = ( ^T : (member X : _) pt)
+            let y = ( ^T : (member Y : _) pt)
+            let z = ( ^T : (member Z : _) pt)
+            try
+                Point3f(float32 x, float32 y, float32 z) 
+            with e ->
+                RhinoScriptingException.Raise "Point3f.ofXYZmembers: %A could not be converted to a Point3f:\r\n%A" pt e
 
     type Vector3d with
 
         /// To convert Vector3d (as it is used in most other Rhino Geometries)
         /// to a Vector3f (as it is used in Mesh normals)
         member v.ToVector3f = Vector3f(float32 v.X, float32 v.Y, float32 v.Z)
+
+        /// Duck typing using SRTP.
+        /// Take any object that has an X, Y and Z member and try to convert each to a float 
+        static member inline ofXYZmembers pt  = 
+            let x = ( ^T : (member X : _) pt)
+            let y = ( ^T : (member Y : _) pt)
+            let z = ( ^T : (member Z : _) pt)
+            try
+                Vector3d(float x, float y, float z) 
+            with e ->
+                RhinoScriptingException.Raise "Vector3d.ofXYZmembers: %A could not be converted to a Vector3d:\r\n%A" pt e
 
         /// Unitizes the vector.
         /// Checks input length to be longer than  1e-9 units
@@ -47,6 +77,16 @@ module AutoOpenRhinoTypeExtensions =
         /// to a Vector3d (as it is used in most other Rhino Geometries)
         member v.ToVector3d = Vector3d(v)
 
+        /// Duck typing using SRTP.
+        /// Take any object that has an X, Y and Z member and try to convert each to a float 
+        static member inline ofXYZmembers pt  = 
+            let x = ( ^T : (member X : _) pt)
+            let y = ( ^T : (member Y : _) pt)
+            let z = ( ^T : (member Z : _) pt)
+            try
+                Vector3f(float32 x, float32 y, float32 z) 
+            with e ->
+                RhinoScriptingException.Raise "Vector3f.ofXYZmembers: %A could not be converted to a Vector3f:\r\n%A" pt e
 
     type Line with
 
