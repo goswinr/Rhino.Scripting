@@ -680,7 +680,7 @@ module AutoOpenLayer =
             layer.ParentLayerId <- parent.Id
 
 
-    ///<summary>Removes an existing layer from the document. 
+    ///<summary>Removes an existing layer and all its objects from the document. 
     /// The layer will be removed even if it contains geometry objects. 
     /// The layer to be removed cannot be the current layer.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
