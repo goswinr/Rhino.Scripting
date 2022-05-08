@@ -34,7 +34,7 @@ type Scripting private () =
     /// A Dictionary to store state between scripting session.
     /// Use Rhino.Scripting.Sticky.Clear() to reset it.
     /// Similar to scriptingcontext.sticky in Rhino Python.
-    static member val Sticky = new Dictionary<string, obj>() with get
+    static member val Sticky = new Dict<string, obj>() with get
 
     /// An Integer Enum of Object types.
     /// To be use in object selection functions such as rs.GetObjects().
