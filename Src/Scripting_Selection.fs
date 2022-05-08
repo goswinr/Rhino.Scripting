@@ -127,7 +127,8 @@ module AutoOpenSelection =
     ///    [2]  Enum     DocObjects.SelectionMethod
     ///    [3]  point    selection point
     ///    [4]  number   the Curve parameter of the selection point
-    ///    [5]  str      name of the view selection was made.</returns>
+    ///    [5]  str      name of the view selection was made. 
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string = 
@@ -178,7 +179,8 @@ module AutoOpenSelection =
     ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
     ///    If True, subobjects can be selected. When this is the
     ///    case, for tracking  of the subobject go via the Object Ref</param>
-    ///<returns>(Guid) Identifier of the picked object.</returns>
+    ///<returns>(Guid) Identifier of the picked object.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
@@ -237,7 +239,8 @@ module AutoOpenSelection =
     ///         (2) selected by being inside of amouse window.
     ///         (3) selected by intersecting a mousecrossing window.
     ///    [3] selection point
-    ///    [4] name of the view selection was made.</returns>
+    ///    [4] name of the view selection was made.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObjectEx(      [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
@@ -304,7 +307,8 @@ module AutoOpenSelection =
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window.</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) List of identifiers of the picked objects.</returns>
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects. 
+    ///A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -457,7 +461,8 @@ module AutoOpenSelection =
     ///    [n][1]  True if the object was preselected, otherwise False
     ///    [n][2]  selection method (DocObjects.SelectionMethod)
     ///    [n][3]  selection point
-    ///    [n][4]  name of the view selection was made.</returns>
+    ///    [n][4]  name of the view selection was made.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObjectsEx(     [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]group:bool,
@@ -542,7 +547,8 @@ module AutoOpenSelection =
     ///    [2]  selection method ( DocObjects.SelectionMethod )
     ///    [3]  selection point
     ///    [4]  u, v Surface parameter of the selection point
-    ///    [5]  name of the view in which the selection was made.</returns>
+    ///    [5]  name of the view in which the selection was made.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string = 
