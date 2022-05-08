@@ -1116,30 +1116,31 @@ module AutoOpenSurface =
     /// also be found in Rhino's Dir command.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<returns>(bool) The current normal orientation.</returns>
-    static member FlipSurface(surfaceId:Guid) : bool = //GET
+    static member IsSurfaceFliped(surfaceId:Guid) : bool = //GET
         let brep = Scripting.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface Get failed.  surfaceId:'%s'" (Print.guid surfaceId)
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.IsSurfaceFliped failed. surfaceId:'%s'" (Print.guid surfaceId)
         let face = brep.Faces.[0]
-        let oldreverse = face.OrientationIsReversed
-        oldreverse
+        face.OrientationIsReversed
 
     ///<summary>Changes the normal direction of a Surface. This feature can
-    /// also be found in Rhino's Dir command.</summary>
+    /// also be found in Rhino's Dir command.
+    /// Use Rhino.Scripting.IsSurfaceFliped to get State.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
-    ///<returns>(unit) void, nothing.</returns>
-    
+    ///<returns>(unit) void, nothing.</returns>    
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = Scripting.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed. surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
         let face = brep.Faces.[0]
         let oldreverse = face.OrientationIsReversed
         if brep.IsSolid = false && oldreverse <> flip then
             brep.Flip()
             State.Doc.Objects.Replace(surfaceId, brep)|> ignore
             State.Doc.Views.Redraw()
+
     ///<summary>Changes the normal direction of multiple Surface. This feature can
-    /// also be found in Rhino's Dir command.</summary>
+    /// also be found in Rhino's Dir command.
+    /// Use Rhino.Scripting.IsSurfaceFliped to get State.</summary>
     ///<param name="surfaceIds">(Guid seq) Identifiers of multiple Surface objects</param>
     ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
     ///<returns>(unit) void, nothing.</returns>
