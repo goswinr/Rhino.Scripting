@@ -50,21 +50,21 @@ module AutoOpenSelection =
             if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
             objectIds
 
-    ///<summary>Returns identifiers of all objects in the current model or paper space that are not hidden or on turned off layers.</summary>
+    ///<summary>Returns identifiers of all objects in the current model or paper space that are not hidden, not locked nor on turned off layers.</summary>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joinded with '+'</param>
     ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c> Include refrence objects such as work session objects</param>
-    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>true</c> Include locked objects</param>
+    ///<param name="includeLockedObjects">(bool) Optional, Default Value: <c>false</c> Include locked objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects</param>
     ///<returns>(Guid Rarr) Identifiers for all the objects that are not hidden and who's layer is on and visible.</returns>
     static member ShownObjects(     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]printCount:bool,
                                     [<OPT;DEF(false)>]includeReferences:bool,
-                                    [<OPT;DEF(true)>] includeLockedObjects:bool,
+                                    [<OPT;DEF(false)>]includeLockedObjects:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
             let viewId = // only get object from model space if current or current page
@@ -82,7 +82,7 @@ module AutoOpenSelection =
             it.HiddenObjects <- false
             it.ReferenceObjects <- includeReferences
             it.ObjectTypeFilter <- ObjectFilterEnum.GetFilterEnum (filter)
-            it.DeletedObjects <- false
+            it.DeletedObjects <- false            
             //it.VisibleFilter <- true
             let objects = State.Doc.Objects.GetObjectList(it)
             let objectIds = Rarr()
