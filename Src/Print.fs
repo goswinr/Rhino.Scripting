@@ -82,6 +82,19 @@ module AutoOpenToNiceStringExtensions =
                     yield! sprintf "Y-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.YAxis.X) (NiceFormat.float  p.YAxis.Y) (NiceFormat.float  p.YAxis.Z)                
                     }
                 
+    type BoundingBox with
+        /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
+        member b.ToNiceString =            
+            str{ 
+                if   b.IsDegenerate(State.Doc.ModelAbsoluteTolerance) > 0 then yield! "flat Rhino.Geometry.BoundingBox"
+                elif not b.IsValid then yield! "invalid (decreasing?) Rhino.Geometry.BoundingBox"
+                else                    yield! "Rhino.Geometry.BoundingBox:"
+                yield! sprintf "Size X=%s Y=%s Z=%s" (NiceFormat.float b.Diagonal .X) (NiceFormat.float  b.Diagonal .Y) (NiceFormat.float  b.Diagonal .Z)
+                yield! sprintf "from X=%s Y=%s Z=%s" (NiceFormat.float  b.Min.X) (NiceFormat.float  b.Min.Y) (NiceFormat.float  b.Min.Z)
+                yield! sprintf "till X=%s Y=%s Z=%s" (NiceFormat.float  b.Max.X) (NiceFormat.float  b.Max.Y) (NiceFormat.float  b.Max.Z)                
+                }
+
+
 
 [<RequireQualifiedAccess>]
 module internal Print = 
