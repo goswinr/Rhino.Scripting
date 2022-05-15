@@ -400,7 +400,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
-        if amount < 0.0 && not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by %f on %A" amount bbox
+        if not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
         b
 
     ///<summary>Returns a new inflated box with custom x, y and z amounts in their directions.
@@ -415,7 +415,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
-        if (amountX < 0.0 || amountY < 0.0 || amountZ < 0.0 ) && not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %A" amountX amountY amountZ bbox
+        if not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
         b
 
 
