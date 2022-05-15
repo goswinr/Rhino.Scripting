@@ -68,7 +68,8 @@ module AutoOpenDimension =
 
 
     ///<summary>Adds a leader to the document. Leader objects are planar.
-    ///    The 3D points passed will define the Plane if no Plane given.</summary>
+    ///    The 3D points passed will define the Plane if no Plane given.
+    ///    If ther are only two Points the World XY plane is used.</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
@@ -82,15 +83,23 @@ module AutoOpenDimension =
             if plane.IsValid then plane
             else
                 let ps= Rarr(points)
-                let o = ps.GetNeg(-2)
-                let mutable x = ps.GetNeg(-1) - o
-                let mutable y = ps.[0]-ps.[1]
-                if y.Z < 0.0 then y <- -y
-                if y.Y < 0.0 then y <- -y
-                if x.X < 0.0 then x <- -x
-                Plane(o, x, y)
-                |> fun pl->
-                    if not pl.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.AddLeader failed to find plane.  points %A, text:%s" points text
+                if ps.Count<2 then 
+                    RhinoScriptingException.Raise "Rhino.Scripting.AddLeader needs at least two points.  given %A, text:%s" points text
+                elif ps.Count=2 then 
+                    let y =  ps.[1] - ps.[0]
+                    if y.IsTiny(State.Doc.ModelAbsoluteTolerance*100.) then RhinoScriptingException.Raise "Rhino.Scripting.AddLeader two points given are identical %A, text:%s" points text
+                    let pl = Plane(ps.[0], Vector3d.CrossProduct (y, Vector3d.ZAxis), y)
+                    if not pl.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.AddLeader failed to find plane from two points: %A, text:%s"  points text
+                    pl
+                else
+                    let o = ps.GetNeg(-2)
+                    let mutable x = ps.GetNeg(-1) - o
+                    let mutable y = ps.[0]-ps.[1]
+                    if y.Z < 0.0 then y <- -y
+                    if y.Y < 0.0 then y <- -y
+                    if x.X < 0.0 then x <- -x
+                    let pl = Plane(o, x, y)
+                    if not pl.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.AddLeader failed to find plane from %d points: %A, text:%s" ps.Count points text
                     pl
 
         for point in points do
