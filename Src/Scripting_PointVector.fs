@@ -58,7 +58,7 @@ module AutoOpenPointVector =
 
 
 
-    ///<summary>Verifies that a vector is very short. The X, Y, Z elements are smaller than 1.0e-12.</summary>
+    ///<summary>Checks if a vector is very short. The X, Y, Z elements are smaller than 1.0e-12.</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is tiny, otherwise False.</returns>
     static member IsVectorTiny(vector:Vector3d) : bool = 
@@ -66,7 +66,7 @@ module AutoOpenPointVector =
         vector.IsTiny( 1.0e-12 )
 
 
-    ///<summary>Verifies that a vector is zero, or tiny. The X, Y, Z elements are equal to 0.0.</summary>
+    ///<summary>Checks if a vector is zero. The X, Y, Z elements are equal to 0.0.</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is zero, otherwise False.</returns>
     static member IsVectorZero(vector:Vector3d) : bool = 
@@ -200,7 +200,7 @@ module AutoOpenPointVector =
             point/divide
 
 
-    ///<summary>Verifies that a list of 3D points are coplanar.</summary>
+    ///<summary>Checks if a list of 3D points are coplanar.</summary>
     ///<param name="points">(Point3d seq) 3D points to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
     ///    Tolerance to use when verifying</param>

@@ -42,7 +42,7 @@ module AutoOpenTransformation =
         xForm.SimilarityType <> TransformSimilarityType.NotSimilarity
 
 
-    ///<summary>verifies that a matrix is a zero transformation matrix.</summary>
+    ///<summary>Checks if a matrix is a zero transformation matrix.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsXformZero(xForm:Transform) : bool =          

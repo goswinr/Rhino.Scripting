@@ -72,7 +72,7 @@ module AutoOpenToolbar =
            false
 
 
-    ///<summary>Verifies that a tool-bar collection is open.</summary>
+    ///<summary>Checks if a tool-bar collection is open.</summary>
     ///<param name="file">(string) Full path to a tool-bar collection file</param>
     ///<returns>(string) Rhino-assigned name of the tool-bar collection.</returns>
     static member IsToolbarCollection(file:string) : string = 
@@ -81,7 +81,7 @@ module AutoOpenToolbar =
         else ""
 
 
-    ///<summary>Verifies that a tool-bar group in an open tool-bar collection is visible.</summary>
+    ///<summary>Checks if a tool-bar group in an open tool-bar collection is visible.</summary>
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbarGroup">(string) Name of a tool-bar group</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -94,7 +94,7 @@ module AutoOpenToolbar =
         else RhinoScriptingException.Raise "Rhino.Scripting.IsToolbarDocked failed on name '%s'" name
 
 
-    ///<summary>Verifies that a tool-bar group in an open tool-bar collection is visible.</summary>
+    ///<summary>Checks if a tool-bar group in an open tool-bar collection is visible.</summary>
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbarGroup">(string) Name of a tool-bar group</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>

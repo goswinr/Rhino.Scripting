@@ -223,7 +223,7 @@ module AutoOpenGrips =
 
 
 
-    ///<summary>Verifies that an object's grips are turned on.</summary>
+    ///<summary>Checks if an object's grips are turned on.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating Grips state.</returns>
     static member ObjectGripsOn(objectId:Guid) : bool = 
@@ -231,7 +231,7 @@ module AutoOpenGrips =
         rhobj.GripsOn
 
 
-    ///<summary>Verifies that an object's grips are turned on and at least one grip
+    ///<summary>Checks if an object's grips are turned on and at least one grip
     ///    is selected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>

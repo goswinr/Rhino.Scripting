@@ -229,7 +229,7 @@ module AutoOpenLayer =
         i <> RhinoMath.UnsetIntIndex
 
 
-    ///<summary>Verifies that the objects on a layer can be changed (normal).</summary>
+    ///<summary>Checks if the objects on a layer can be changed (normal).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerChangeable(layer:string) : bool = 
@@ -238,7 +238,7 @@ module AutoOpenLayer =
         rc
 
 
-    ///<summary>Verifies that a layer is a child of another layer.</summary>
+    ///<summary>Checks if a layer is a child of another layer.</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
@@ -248,7 +248,7 @@ module AutoOpenLayer =
         test.IsChildOf(layer)
 
 
-    ///<summary>Verifies that a layer is the current layer.</summary>
+    ///<summary>Checks if a layer is the current layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerCurrent(layer:string) : bool = 
@@ -256,7 +256,7 @@ module AutoOpenLayer =
         layer.Index = State.Doc.Layers.CurrentLayerIndex
 
 
-    ///<summary>Verifies that an existing layer is empty, or contains no objects.</summary>
+    ///<summary>Checks if an existing layer is empty, or contains no objects.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerEmpty(layer:string) : bool = 
@@ -265,7 +265,7 @@ module AutoOpenLayer =
         isNull rhobjs || rhobjs.Length = 0
 
 
-    ///<summary>Verifies that a layer is expanded. Expanded layers can be viewed in
+    ///<summary>Checks if a layer is expanded. Expanded layers can be viewed in
     ///    Rhino's layer dialog.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
@@ -274,7 +274,7 @@ module AutoOpenLayer =
         layer.IsExpanded
 
 
-    ///<summary>Verifies that a layer is locked
+    ///<summary>Checks if a layer is locked
     /// persistent or non persitent locking return true
     /// via layer.IsLocked.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
@@ -284,7 +284,7 @@ module AutoOpenLayer =
         layer.IsLocked
 
 
-    ///<summary>Verifies that a layer is on.</summary>
+    ///<summary>Checks if a layer is on.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerOn(layer:string) : bool = 
@@ -292,7 +292,7 @@ module AutoOpenLayer =
         layer.IsVisible
 
 
-    ///<summary>Verifies that an existing layer is selectable (normal and reference).</summary>
+    ///<summary>Checks if an existing layer is selectable (normal and reference).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerSelectable(layer:string) : bool = 
@@ -300,7 +300,7 @@ module AutoOpenLayer =
         layer.IsVisible && not layer.IsLocked
 
 
-    ///<summary>Verifies that a layer is a parent of another layer.</summary>
+    ///<summary>Checks if a layer is a parent of another layer.</summary>
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
@@ -310,7 +310,7 @@ module AutoOpenLayer =
         test.IsParentOf(layer)
 
 
-    ///<summary>Verifies that a layer is from a reference file.</summary>
+    ///<summary>Checks if a layer is from a reference file.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerReference(layer:string) : bool = 
@@ -318,7 +318,7 @@ module AutoOpenLayer =
         layer.IsReference
 
 
-    ///<summary>Verifies that a layer is visible.</summary>
+    ///<summary>Checks if a layer is visible.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayerVisible(layer:string) : bool = 

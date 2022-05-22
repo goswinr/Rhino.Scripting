@@ -440,14 +440,14 @@ module AutoOpenApplication =
         ApplicationSettings.FileSettings.InstallFolder.FullName
 
 
-    ///<summary>Verifies that a command alias exists in Rhino.</summary>
+    ///<summary>Checks if a command alias exists in Rhino.</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
     ///<returns>(bool) True if exists or False if the alias does not exist.</returns>
     static member IsAlias(alias:string) : bool = 
         ApplicationSettings.CommandAliasList.IsAlias(alias)
 
 
-    ///<summary>Verifies that a command exists in Rhino. Useful when scripting commands
+    ///<summary>Checks if a command exists in Rhino. Useful when scripting commands
     ///    found in 3rd party plug-ins.</summary>
     ///<param name="commandName">(string) The command name to test</param>
     ///<returns>(bool) True if the string is a command or False if it is not a command.</returns>
@@ -455,7 +455,7 @@ module AutoOpenApplication =
         Commands.Command.IsCommand(commandName)
 
 
-    ///<summary>Verifies that a plug-in is registered.</summary>
+    ///<summary>Checks if a plug-in is registered.</summary>
     ///<param name="plugin">(string) The unique objectId of the plug-in</param>
     ///<returns>(bool) True if the Guid is registered or False if it is not.</returns>
     static member IsPlugIn(plugin:string) : bool = 

@@ -153,19 +153,19 @@ module AutoOpenUserData =
             notNull <| obj.Attributes.GetUserString(key)
 
 
-    ///<summary>Verifies the current document contains user data.</summary>
+    ///<summary>Checks if the current document contains user data.</summary>
     ///<returns>(bool) True or False indicating the presence of Script user data.</returns>
     static member IsDocumentData() : bool = 
         State.Doc.Strings.Count > 0 //DocumentDataCount > 0
 
 
-    ///<summary>Verifies the current document contains user text.</summary>
+    ///<summary>Checks if the current document contains user text.</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text.</returns>
     static member IsDocumentUserText() : bool = 
         State.Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
 
 
-    ///<summary>Verifies that an object contains user text.</summary>
+    ///<summary>Checks if an object contains user text.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(int) result of test:
     ///    0 = no user text

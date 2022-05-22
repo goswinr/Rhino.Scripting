@@ -444,35 +444,35 @@ module AutoOpenGeometry =
         rc
 
 
-    ///<summary>Verifies that an object is a clipping Plane object.</summary>
+    ///<summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
     static member IsClippingPlane(objectId:Guid) : bool = 
         Scripting.CoerceGeometry objectId :? ClippingPlaneSurface
 
 
-    ///<summary>Verifies an object is a point object.</summary>
+    ///<summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point.</returns>
     static member IsPoint(objectId:Guid) : bool = 
         Scripting.CoerceGeometry objectId :? Point
 
 
-    ///<summary>Verifies an object is a point cloud object.</summary>
+    ///<summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud.</returns>
     static member IsPointCloud(objectId:Guid) : bool = 
         Scripting.CoerceGeometry objectId :? PointCloud
 
 
-    ///<summary>Verifies an object is a text object.</summary>
+    ///<summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object.</returns>
     static member IsText(objectId:Guid) : bool = 
         Scripting.CoerceGeometry objectId :? TextEntity
 
 
-    ///<summary>Verifies an object is a text dot object.</summary>
+    ///<summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object.</returns>
     static member IsTextDot(objectId:Guid) : bool = 
@@ -487,7 +487,7 @@ module AutoOpenGeometry =
         pc.Count
 
 
-    ///<summary>Verifies that a point cloud has hidden points.</summary>
+    ///<summary>Checks if a point cloud has hidden points.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False.</returns>
     static member PointCloudHasHiddenPoints(objectId:Guid) : bool = 
@@ -495,7 +495,7 @@ module AutoOpenGeometry =
         pc.HiddenPointCount>0
 
 
-    ///<summary>Verifies that a point cloud has point colors.</summary>
+    ///<summary>Checks if a point cloud has point colors.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False.</returns>
     static member PointCloudHasPointColors(objectId:Guid) : bool = 

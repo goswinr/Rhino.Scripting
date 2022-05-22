@@ -665,7 +665,7 @@ module AutoOpenDimension =
             RhinoScriptingException.Raise "Rhino.Scripting.DimStyleTextHeight set failed.  dimStyle:'%A' height:'%A'" dimStyle height
 
 
-    ///<summary>Verifies an object is an aligned dimension object.</summary>
+    ///<summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsAlignedDimension(objectId:Guid) : bool = 
@@ -674,7 +674,7 @@ module AutoOpenDimension =
         | _ -> false
 
 
-    ///<summary>Verifies an object is an angular dimension object.</summary>
+    ///<summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsAngularDimension(objectId:Guid) : bool = 
@@ -683,7 +683,7 @@ module AutoOpenDimension =
         | _ -> false
 
 
-    ///<summary>Verifies an object is a diameter dimension object.</summary>
+    ///<summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDiameterDimension(objectId:Guid) : bool = 
@@ -692,7 +692,7 @@ module AutoOpenDimension =
         | _ -> false
 
 
-    ///<summary>Verifies an object is a dimension object.</summary>
+    ///<summary>Checks if  an object is a dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimension(objectId:Guid) : bool = 
@@ -701,7 +701,7 @@ module AutoOpenDimension =
         | _ -> false
 
 
-    ///<summary>Verifies the existance of a dimension style in the document.</summary>
+    ///<summary>Checks if  the existance of a dimension style in the document. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimStyle(dimStyle:string) : bool = 
@@ -709,7 +709,7 @@ module AutoOpenDimension =
         notNull ds
 
 
-    ///<summary>Verifies that an existing dimension style is from a reference file.</summary>
+    ///<summary>Checks if  that an existing dimension style is from a reference file. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimStyleReference(dimStyle:string) : bool = 
@@ -718,7 +718,7 @@ module AutoOpenDimension =
         else ds.IsReference
 
 
-    ///<summary>Verifies an object is a dimension leader object.</summary>
+    ///<summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLeader(objectId:Guid) : bool = 
@@ -727,7 +727,7 @@ module AutoOpenDimension =
             | _ -> false
 
 
-    ///<summary>Verifies an object is a linear dimension object.</summary>
+    ///<summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLinearDimension(objectId:Guid) : bool = 
@@ -736,7 +736,7 @@ module AutoOpenDimension =
             | _ -> false
 
 
-    ///<summary>Verifies an object is an ordinate dimension object.</summary>
+    ///<summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsOrdinateDimension(objectId:Guid) : bool = 
@@ -745,7 +745,7 @@ module AutoOpenDimension =
             | _ -> false
 
 
-    ///<summary>Verifies an object is a radial dimension object.</summary>
+    ///<summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsRadialDimension(objectId:Guid) : bool = 

@@ -124,7 +124,7 @@ module AutoOpenGroup =
         State.Doc.Groups.Find(groupName)>=0
 
 
-    ///<summary>Verifies that an existing group is empty, or contains no object members.</summary>
+    ///<summary>Checks if an existing group is empty, or contains no object members.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(bool) True or False if groupName is empty.</returns>
     static member IsGroupEmpty(groupName:string) : bool = 

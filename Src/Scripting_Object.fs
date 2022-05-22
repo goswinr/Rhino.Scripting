@@ -145,7 +145,7 @@ module AutoOpenObject =
         rc
 
 
-    ///<summary>Verifies that an object is in either page layout space or model space.</summary>
+    ///<summary>Checks if an object is in on a page layout space. (as opposed to model space).</summary>
     ///<param name="objectId">(Guid) Id of an object to test</param>
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space.</returns>
     static member IsLayoutObject(objectId:Guid) : bool = 
@@ -160,7 +160,7 @@ module AutoOpenObject =
         Scripting.TryCoerceRhinoObject(objectId) <> None
 
 
-    ///<summary>Verifies that an object is hidden. Hidden objects are not visible, cannot
+    ///<summary>Checks if an object is hidden. Hidden objects are not visible, cannot
     ///    be snapped to, and cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is hidden, False if the object is not hidden.</returns>
@@ -188,10 +188,9 @@ module AutoOpenObject =
           union.IsValid
 
 
-    ///<summary>Verifies that an object is a member of a group.</summary>
+    ///<summary>Checks if an object is a member of a group.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
-    ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function
-    ///    verifies that the object is a member of any group</param>
+    ///<param name="groupName">(string) Optional, The name of a group. If omitted, the function checks if the object is a member of any group</param>
     ///<returns>(bool) True if the object is a member of the specified group. If a groupName
     ///    was not specified, the object is a member of some group.
     ///    False if the object  is not a member of the specified group.
@@ -210,7 +209,7 @@ module AutoOpenObject =
 
 
 
-    ///<summary>Verifies that an object is locked. Locked objects are visible, and can
+    ///<summary>Checks if an object is locked. Locked objects are visible, and can
     ///    be snapped to, but cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is locked, False if the object is not locked.</returns>
@@ -219,7 +218,7 @@ module AutoOpenObject =
         rhobj.IsLocked
 
 
-    ///<summary>Verifies that an object is normal. Normal objects are visible, can be
+    ///<summary>Checks if an object is normal. Normal objects are visible, can be
     ///    snapped to, and can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is normal, False if the object is not normal.</returns>
@@ -228,7 +227,7 @@ module AutoOpenObject =
         rhobj.IsNormal
 
 
-    ///<summary>Verifies that an object is a reference object. Reference objects are
+    ///<summary>Checks if an object is a reference object. Reference objects are
     ///    objects that are not part of the current document.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is a reference object, False if the object is not a reference object.</returns>
@@ -237,7 +236,7 @@ module AutoOpenObject =
         rhobj.IsReference
 
 
-    ///<summary>Verifies that an object can be selected.</summary>
+    ///<summary>Checks if an object can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True or False.</returns>
     static member IsObjectSelectable(objectId:Guid) : bool = 
@@ -248,7 +247,7 @@ module AutoOpenObject =
                             ignoreLayerVisibility=false )
 
 
-    ///<summary>Verifies that an object is currently selected.</summary>
+    ///<summary>Checks if an object is currently selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(int)
     ///    0, the object is not selected

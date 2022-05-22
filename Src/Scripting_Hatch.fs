@@ -402,7 +402,7 @@ module AutoOpenHatch =
         State.Doc.HatchPatterns.FindName(name) |> notNull
 
 
-    ///<summary>Verifies that a Hatch pattern is the current Hatch pattern.</summary>
+    ///<summary>Checks if a Hatch pattern is the current Hatch pattern.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPatternCurrent(hatchPattern:string) : bool = 
@@ -412,7 +412,7 @@ module AutoOpenHatch =
         patterninstance.Index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
 
 
-    ///<summary>Verifies that a Hatch pattern is from a reference file.</summary>
+    ///<summary>Checks if a Hatch pattern is from a reference file.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPatternReference(hatchPattern:string) : bool = 

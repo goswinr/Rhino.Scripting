@@ -284,7 +284,7 @@ module AutoOpenBlock =
         Scripting.InsertBlock2 (blockName, xForm)
 
 
-    ///<summary>Verifies the existence of a block definition in the document.</summary>
+    ///<summary>Checks if the existence of a block definition in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlock(blockName:string) : bool = 
@@ -292,7 +292,7 @@ module AutoOpenBlock =
         not <| isNull idef
 
 
-    ///<summary>Verifies a block definition is embedded, or linked, from an external file.</summary>
+    ///<summary>Checks if a block definition is embedded, or linked, from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockEmbedded(blockName:string) : bool = 
@@ -304,16 +304,16 @@ module AutoOpenBlock =
         |_-> false
 
 
-    ///<summary>Verifies an object is a block instance.</summary>
+    ///<summary>Checks if an object is a block instance. Returns false for any other rhino object.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockInstance(objectId:Guid) : bool = 
-        match Scripting.CoerceRhinoObject(objectId) with  //Coerce should not be needed
-        | :? DocObjects.InstanceObject as b -> true
+        match Scripting.CoerceRhinoObject(objectId) with  
+        | :? DocObjects.InstanceObject as _ -> true
         | _ -> false
 
 
-    ///<summary>Verifies that a block definition is being used by an inserted instance.</summary>
+    ///<summary>Checks if that a block definition is being used by an inserted instance.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="whereToLook">(int) Optional, Default Value: <c>0</c>
     ///    One of the following values
@@ -327,7 +327,7 @@ module AutoOpenBlock =
         idef.InUse(whereToLook)
 
 
-    ///<summary>Verifies that a block definition is from a reference file.</summary>
+    ///<summary>Checks if that a block definition is from a reference file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockReference(blockName:string) : bool = 

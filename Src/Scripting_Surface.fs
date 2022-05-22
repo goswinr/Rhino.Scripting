@@ -1259,7 +1259,7 @@ module AutoOpenSurface =
         | _ -> false
 
 
-    ///<summary>Verifies that a point is inside a closed Mesh , Surface or Polysurface.</summary>
+    ///<summary>Checks if a point is inside a closed Mesh , Surface or Polysurface.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<param name="strictlyIn">(bool) Optional, Default Value: <c>false</c>
@@ -1292,7 +1292,7 @@ module AutoOpenSurface =
             me.IsPointInside(point, tolerance, strictlyIn)
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.IsPointInSurface does not work  on %s %A" (Scripting.ObjectDescription(objectId)) objectId
 
-    ///<summary>Verifies that a point lies on a Surface.</summary>
+    ///<summary>Checks if a point lies on a Surface.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<returns>(bool) True , otherwise False.</returns>

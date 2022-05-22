@@ -144,7 +144,7 @@ module AutoOpenDocumnet =
         bmp.Save(fileName)
 
 
-    ///<summary>Verifies that the current document has been modified in some way.</summary>
+    ///<summary>Checks if the current document has been modified in some way.</summary>
     ///<returns>(bool) True or False.</returns>
     static member IsDocumentModified() : bool = 
         State.Doc.Modified

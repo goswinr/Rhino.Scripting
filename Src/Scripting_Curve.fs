@@ -1994,7 +1994,7 @@ module AutoOpenCurve =
                 rc
 
 
-    ///<summary>Verifies an object is an open arc Curve.</summary>
+    ///<summary>Checks if an object is an open arc Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    If the Curve is not a circle, then the tolerance used
@@ -2009,7 +2009,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsArc(tol) && not curve.IsClosed
 
 
-    ///<summary>Verifies an object is a circle Curve.</summary>
+    ///<summary>Checks if an object is a circle Curve.  Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
     ///    If the Curve is not a circle, then the tolerance used
@@ -2023,18 +2023,18 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsCircle(tol)
 
 
-    ///<summary>Verifies an object is a Curve.</summary>
+    ///<summary>Checks if an object is a Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
     static member IsCurve(curveId:Guid) : bool = 
         match Scripting.TryCoerceCurve curveId with
         |None -> false
-        |Some curve  -> true
+        |Some _  -> true
 
 
     ///<summary>Decide if it makes sense to close off the Curve by moving the end point
     ///    to the start point based on start-end gap size and length of Curve as
-    ///    approximated by chord defined by 6 points.</summary>
+    ///    approximated by chord defined by 6 points. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Maximum allowable distance between start point and end point.</param>
@@ -2046,7 +2046,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsClosable(tolerance0)
 
 
-    ///<summary>Verifies an object is a closed Curve object.</summary>
+    ///<summary>Checks if an object is a closed Curve object. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<returns>(bool) If Curve is Closed True,  otherwise False.</returns>
     static member IsCurveClosed(curveId:Guid) : bool = 
@@ -2055,7 +2055,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsClosed
 
 
-    ///<summary>Test a Curve to see if it lies in a specific Plane.</summary>
+    ///<summary>Test a Curve to see if it lies in a specific Plane. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="plane">(Plane) Plane to test</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
@@ -2067,7 +2067,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsInPlane(plane, tolerance0)
 
 
-    ///<summary>Verifies an object is a linear Curve.</summary>
+    ///<summary>Checks if an object is a linear Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>    ///
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
@@ -2079,7 +2079,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsLinear(tolerance0)
 
 
-    ///<summary>Verifies an object is a periodic Curve object.</summary>
+    ///<summary>Checks if an object is a periodic Curve object. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional,
     ///    The Curve segment index if `curveId` identifies a polycurve</param>
@@ -2090,7 +2090,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsPeriodic
 
 
-    ///<summary>Verifies an object is a planar Curve.</summary>
+    ///<summary>Checks if an object is a planar Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
@@ -2102,7 +2102,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsPlanar(tol)
 
 
-    ///<summary>Verifies an object is a rational NURBS Curve.</summary>
+    ///<summary>Checks if an object is a rational NURBS Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -2115,7 +2115,7 @@ module AutoOpenCurve =
             |_ -> false
 
 
-    ///<summary>Verifies an object is an elliptical-shaped Curve.</summary>
+    ///<summary>Checks if an object is an elliptical-shaped Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional,
@@ -2128,7 +2128,7 @@ module AutoOpenCurve =
         |Some curve  -> curve.IsEllipse(tol)
 
 
-    ///<summary>Verifies an object is a line Curve.</summary>
+    ///<summary>Checks if an object is a line Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional,
@@ -2149,7 +2149,7 @@ module AutoOpenCurve =
                     else false
 
 
-    ///<summary>Verifies that a point is on a Curve.</summary>
+    ///<summary>Checks if a point is on a Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="point">(Point3d) The test point</param>
     ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.SqrtEpsilon</c></param>
@@ -2162,7 +2162,7 @@ module AutoOpenCurve =
         curve.ClosestPoint(point, t, tol)
 
 
-    ///<summary>Verifies an object is a PolyCurve Curve.</summary>
+    ///<summary>Checks if an object is a PolyCurve Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False.</returns>
@@ -2176,8 +2176,8 @@ module AutoOpenCurve =
             | _             -> false
 
 
-    ///<summary>Verifies an object is a Polyline Curve object or a nurbs cure with degree 1 and moer than 2 points
-    /// Lines return false.</summary>
+    ///<summary>Checks if an object is a Polyline Curve object or a nurbs cure with degree 1 and moer than 2 points
+    /// Lines return false. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False.</returns>

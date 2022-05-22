@@ -189,7 +189,7 @@ module AutoOpenViews =
 
 
 
-    ///<summary>Verifies that a detail view exists on a page layout view.</summary>
+    ///<summary>Checks if a detail view exists on a page layout view.</summary>
     ///<param name="layout">(string) Title of an existing page layout</param>
     ///<param name="detail">(string) Title of an existing detail view</param>
     ///<returns>(bool) True if detail is a detail view, False if detail is not a detail view.</returns>
@@ -200,7 +200,7 @@ module AutoOpenViews =
         |> Array.exists (fun v -> v.Name = det.ActiveViewport.Name) // TODO test
 
 
-    ///<summary>Verifies that a view is a page layout view.</summary>
+    ///<summary>Checks if a view is a page layout view.</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
     ///<returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
     static member IsLayout(layout:string) : bool = 
@@ -213,7 +213,7 @@ module AutoOpenViews =
             RhinoScriptingException.Raise "Rhino.Scripting.IsLayout View does not exist at all.  layout:'%A'" layout // or false
 
 
-    ///<summary>Verifies that the specified view exists.</summary>
+    ///<summary>Checks if the specified view exists.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
     static member IsView(view:string) : bool = 
@@ -221,7 +221,7 @@ module AutoOpenViews =
 
 
 
-    ///<summary>Verifies that the specified view is the current, or active view.</summary>
+    ///<summary>Checks if the specified view is the current, or active view.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
     static member IsViewCurrent(view:string) : bool = 
@@ -229,7 +229,7 @@ module AutoOpenViews =
         view = activeview.MainViewport.Name
 
 
-    ///<summary>Verifies that the specified view is maximized (enlarged so as to fill
+    ///<summary>Checks if the specified view is maximized (enlarged so as to fill
     ///    the entire Rhino window).</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current
     ///    view is used</param>
@@ -239,7 +239,7 @@ module AutoOpenViews =
         view.Maximized
 
 
-    ///<summary>Verifies that the specified view's projection is set to perspective.</summary>
+    ///<summary>Checks if the specified view's projection is set to perspective.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False.</returns>
     static member IsViewPerspective(view:string) : bool = 
@@ -247,7 +247,7 @@ module AutoOpenViews =
         view.MainViewport.IsPerspectiveProjection
 
 
-    ///<summary>Verifies that the specified view's title window is visible.</summary>
+    ///<summary>Checks if the specified view's title window is visible.</summary>
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(bool) True of False.</returns>
@@ -256,7 +256,7 @@ module AutoOpenViews =
         view.TitleVisible
 
 
-    ///<summary>Verifies that the specified view contains a wallpaper image.</summary>
+    ///<summary>Checks if the specified view contains a wallpaper image.</summary>
     ///<param name="view">(string) View to verify</param>
     ///<returns>(bool) True or False.</returns>
     static member IsWallpaper(view:string) : bool = 

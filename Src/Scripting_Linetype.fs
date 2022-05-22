@@ -31,7 +31,7 @@ module AutoOpenLinetype =
         notNull <| State.Doc.Linetypes.FindName(name)
 
 
-    ///<summary>Verifies that an existing line-type is from a reference file.</summary>
+    ///<summary>Checks if an existing line-type is from a reference file.</summary>
     ///<param name="name">(string) The name of an existing line-type</param>
     ///<returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool = 
