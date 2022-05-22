@@ -77,7 +77,7 @@ module internal Util =
                             | UnicodeCategory.OtherSymbol       
                             | UnicodeCategory.MathSymbol         
                             | UnicodeCategory.OtherNumber ->    
-                                if (c <= '÷' && c <> '×')  || c = '∅' then // anything below char 247 (÷) is OK , but exclude MathSymbol char 215 that looks like letter x, allow diameter symbol 8709 ∅
+                                if (c <= '÷' && c <> '×')  || c = '⌀' || c='∅'  then // anything below char 247 (÷) is OK , but exclude MathSymbol char 215 that looks like letter x, ⌀ 8960 DIAMETER SIGN, and ∅ 8709 EMPTY SET (somtimes used as diameter too)"
                                     loop(i+1) 
                                 else 
                                     false
