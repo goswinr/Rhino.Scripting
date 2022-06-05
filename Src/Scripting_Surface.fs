@@ -2072,17 +2072,17 @@ module AutoOpenSurface =
         | :?  DocObjects.BrepObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
-                rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
+                rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
                 State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
-                rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
+                rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
                 State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 let dens = if density<0 then -1 else density
                 rhinoobject.Attributes.WireDensity <- dens
-                rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
+                rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
                 State.Doc.Views.Redraw()
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Print.guid surfaceId) density
 
@@ -2104,15 +2104,15 @@ module AutoOpenSurface =
             | :?  DocObjects.BrepObject as rhinoobject ->
                     let dens = if density<0 then -1 else density
                     rhinoobject.Attributes.WireDensity <- dens
-                    rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
+                    rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
             | :?  DocObjects.SurfaceObject as rhinoobject ->
                     let dens = if density<0 then -1 else density
                     rhinoobject.Attributes.WireDensity <- dens
-                    rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
+                    rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
             | :?  DocObjects.ExtrusionObject as rhinoobject ->
                     let dens = if density<0 then -1 else density
                     rhinoobject.Attributes.WireDensity <- dens
-                    rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "CommitChanges failed"
+                    rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
             | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Print.guid surfaceId) density
         State.Doc.Views.Redraw()
 
