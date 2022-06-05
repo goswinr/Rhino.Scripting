@@ -150,9 +150,10 @@ module AutoOpenDimension =
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentDimStyle(dimStyleName:string) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyleName)
-        if notNull ds  then  RhinoScriptingException.Raise "Rhino.Scripting.SetCurrentDimStyle to '%s' failed. " dimStyleName
-        if not <| State.Doc.DimStyles.SetCurrent(ds.Index, quiet=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetCurrentDimStyle to '%s' failed." dimStyleName
+        if isNull ds  then  RhinoScriptingException.Raise "Rhino.Scripting.SetCurrentDimStyle failed. not found: '%s' . " dimStyleName
+        if State.Doc.DimStyles.CurrentIndex <> ds.Index then // because SetCurrent returns false if it is already current
+            if not <| State.Doc.DimStyles.SetCurrent(ds.Index, quiet=true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetCurrentDimStyle to '%s' failed." dimStyleName
 
 
 
