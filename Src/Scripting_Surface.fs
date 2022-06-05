@@ -185,8 +185,8 @@ module AutoOpenSurface =
     ///<returns>(Guid) identifier of new object.</returns>
     static member AddNurbsSurface( pointCount:int * int,
                                    points:Point3d IList,
-                                   knotsU:float IList,
-                                   knotsV:float IList,
+                                   knotsU:float seq,
+                                   knotsV:float seq,
                                    degree:int * int,
                                    [<OPT;DEF(null:float IList)>]weights:float IList) : Guid = 
         let pu, pv = pointCount
@@ -197,7 +197,6 @@ module AutoOpenSurface =
         //add the points && weights
         let controlpoints = ns.Points
         let mutable index = 0
-
 
         if notNull weights then
             if weights.Count < (pu*pv) then
@@ -213,7 +212,7 @@ module AutoOpenSurface =
                     let cp = ControlPoint(points.[index])
                     controlpoints.SetControlPoint(i, j, cp)|> ignore
                     index <- index + 1
-
+        index <- 0
         for i = 0 to pu - 1 do
             for j = 0 to pv - 1 do
                 if notNull weights then
@@ -225,10 +224,18 @@ module AutoOpenSurface =
                 index <- index + 1
 
         //add the knots
-        for i = 0 to ns.KnotsU.Count - 1 do
-            ns.KnotsU.[i] <-  knotsU.[i]
-        for i = 0 to ns.KnotsV.Count - 1 do
-            ns.KnotsV.[i] <-  knotsV.[i]
+        let mutable i = 0 
+        for ku in knotsU do
+            ns.KnotsU.[i] <-  ku
+            i<-i+1
+        if i<> ns.KnotsU.Count then RhinoScriptingException.Raise "Rhino.Scripting.AddNurbsSurface failed.  knotsU expected %d knots but input had %d" ns.KnotsU.Count i
+        let mutable j = 0 
+        for kv in knotsV do
+            ns.KnotsV.[j] <-  kv
+            j<-j+1
+        if j<> ns.KnotsV.Count then RhinoScriptingException.Raise "Rhino.Scripting.AddNurbsSurface failed.  knotsV expected %d knots but input had %d" ns.KnotsV.Count j
+
+        
         if not ns.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
         let objectId = State.Doc.Objects.AddSurface(ns)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
