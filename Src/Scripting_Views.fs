@@ -668,7 +668,7 @@ module AutoOpenViews =
 
 
     ///<summary>Return the names/titles, of all views in the document.</summary>
-    ///<param name="viewType">(int) Optional, Default: standard model views: <c>0</c>
+    ///<param name="viewType">(int) Optional, Default Value: <c>0</c>. The standard model views.
     ///    The type of view to return
     ///    0 = standard model views
     ///    1 = page layout views

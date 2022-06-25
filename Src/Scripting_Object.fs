@@ -291,7 +291,7 @@ module AutoOpenObject =
 
     ///<summary>Verifies an object is visible in a view.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
-    ///<param name="view">(string) Optional, Default Value: The title of the view. If omitted, the current active view is used</param>
+    ///<param name="view">(string) Optional, Default Value: <c>ActiveView.MainViewport</c> The title of the view. If omitted, the current active view is used</param>
     ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
     static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool = 
         let rhobj = Scripting.CoerceRhinoObject(objectId)

@@ -101,10 +101,10 @@ type Scripting private () =
     /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
     ///<param name="layerIndex">(int) LayerIndex</param>
-    ///<param name="objectName">(string) Optional, object name</param>
-    ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
-    ///<param name="stringSafetyCheck">(bool) Optional, Default: true. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
+    ///<param name="objectName">(string) Default Value: <c>""</c>, object name</param>
+    ///<param name="userTextKeysAndValues">(string*string seq) Default Value: <c>[]</c>, list of key value pairs for user text</param>
+    ///<param name="stringSafetyCheck">(bool) Optional, Default Value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
+    ///<param name="collapseParents">(bool) Optional, Default Value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
                       ,  layerIndex:int // dont make it  optional , so that method overload resolution works for rs.Add(..)
@@ -155,11 +155,11 @@ type Scripting private () =
     ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
     ///<param name="layer">(string) Optional, Layername, parent layer separated by '::' </param>
-    ///<param name="objectName">(string) Optional, object name</param>
-    ///<param name="userTextKeysAndValues">(string*string seq) Optional, list of key value pairs for user text</param>
-    ///<param name="layerColor">(Drawing.Color) Optional, Color for layer. The layer color will NOT be changed even if the layer exists already</param>
-    ///<param name="stringSafetyCheck">(bool) Optional, Default: true. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
+    ///<param name="objectName">(string) Optional, Default Value: <c>""</c>. The object name</param>
+    ///<param name="userTextKeysAndValues">(string*string seq) Optional, Default Value: <c>[]</c>. list of key value pairs for user text</param>
+    ///<param name="layerColor">(Drawing.Color) Optional, Default Value: <c>FsEx.Color.randomForRhino()</c>Color for layer. The layer color will NOT be changed even if the layer exists already</param>
+    ///<param name="stringSafetyCheck">(bool) Optional, Default Value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
+    ///<param name="collapseParents">(bool) Optional, Default Value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
                       ,  [<OPT;DEF("")>]layer:string 
