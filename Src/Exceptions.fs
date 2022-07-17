@@ -2,7 +2,7 @@
 
 open System
 
-// -------------Custom exceptions used across this library including printf formating:
+// -------------Custom exceptions used across this library including printf formatting:
 
 /// Exception for Errors in script execution
 type RhinoScriptingException (s:string) = 

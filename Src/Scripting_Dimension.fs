@@ -453,7 +453,7 @@ module AutoOpenDimension =
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(int) The current display format
     ///     ModelUnits       0  Decimal current model units
-    ///     Millmeters       3  Decimal Millimeters
+    ///     Millimeters      3  Decimal Millimeters
     ///     Centimeters      4  Decimal Centimeters
     ///     Meters           5  Decimal Meters
     ///     Kilometers       6  Decimal Kilometers
@@ -472,7 +472,7 @@ module AutoOpenDimension =
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<param name="format">(int) The new number format
     ///     ModelUnits       0  Decimal current model units
-    ///     Millmeters       3  Decimal Millimeters
+    ///     Millimeters      3  Decimal Millimeters
     ///     Centimeters      4  Decimal Centimeters
     ///     Meters           5  Decimal Meters
     ///     Kilometers       6  Decimal Kilometers
@@ -590,8 +590,8 @@ module AutoOpenDimension =
     ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
     ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
     ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///     Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
-    ///     BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</returns>
+    ///     Bottom                5   Attach to the baseline of the last line. (Independent of glyphs being displayed.)
+    ///     BottomOfBoundingBox   6   Attach to the bottom of the bounding box of the visible glyphs.</returns>
     static member DimStyleTextAlignment(dimStyle:string) : int = //GET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimStyleTextAlignment get failed. dimStyle:'%s'" dimStyle
@@ -605,8 +605,8 @@ module AutoOpenDimension =
     ///     BottomOfTop           2   Attach to baseline of first line. (Independent of glyphs being displayed.)
     ///     Middle                3   Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
     ///     MiddleOfBottom        4   Attach to middle of an 'I' on the last line. (Independent of glyphs being displayed.)
-    ///     Bottom                5   Attach to the basline of the last line. (Independent of glyphs being displayed.)
-    ///     BottomOfBoundingBox   6   Attach to the bottom of the boudning box of the visible glyphs.</param>
+    ///     Bottom                5   Attach to the baseline of the last line. (Independent of glyphs being displayed.)
+    ///     BottomOfBoundingBox   6   Attach to the bottom of the bounding box of the visible glyphs.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DimStyleTextAlignment(dimStyle:string, alignment:int) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
@@ -703,7 +703,7 @@ module AutoOpenDimension =
         | _ -> false
 
 
-    ///<summary>Checks if  the existance of a dimension style in the document. Returns false for any other Rhino object.</summary>
+    ///<summary>Checks if  the existence of a dimension style in the document. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
     static member IsDimStyle(dimStyle:string) : bool = 

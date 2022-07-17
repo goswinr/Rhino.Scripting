@@ -45,7 +45,7 @@ type Scripting private () =
     static member EscapeTest() : unit = // [<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool) : bool = 
         RhinoApp.Wait() //does not need to be on  UI thread
         if State.EscapePressed  then
-            State.EscapePressed <- false //allways reset is needed otherwise in next run of sript will not be reset
+            State.EscapePressed <- false //always reset is needed otherwise in next run of script will not be reset
             raise ( OperationCanceledException("Esc key was pressed and caught via Scripting.EscapeTest()"))
 
 
@@ -65,7 +65,7 @@ type Scripting private () =
     ///<param name="start">(float) first value of range</param>
     ///<param name="stop">(float) end of range (The last value will not be included in range, Python semantics.)</param>
     ///<param name="step">(float) step size between two values</param>
-    ///<returns>(float seq) a lazy seq of loats.</returns>
+    ///<returns>(float seq) a lazy seq of floats.</returns>
     static member FxrangePython (start:float, stop:float, step:float) : float seq = 
         if isNanOrInf start then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf step  then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
@@ -74,7 +74,7 @@ type Scripting private () =
                     |> BitConverter.DoubleToInt64Bits
                     |> (+) 15L // to make sure stop value is included in Range, this will then explicitly be removed below to match python semantics
                     |> BitConverter.Int64BitsToDouble
-        let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semanticsis diffrent from F# semantics on range expressions)
+        let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semantics different from F# semantics on range expressions)
         if isNanOrInf steps then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
 
         if steps < 0.0 then
@@ -97,7 +97,7 @@ type Scripting private () =
     static member FrangePython (start:float, stop:float, step:float) : float Rarr = 
         Scripting.FxrangePython (start, stop, step) |> Rarr.ofSeq
 
-    ///<summary>Adds any geometry object (stuct or class) to the Rhino document.
+    ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
     ///<param name="layerIndex">(int) LayerIndex</param>
@@ -107,7 +107,7 @@ type Scripting private () =
     ///<param name="collapseParents">(bool) Optional, Default Value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
-                      ,  layerIndex:int // dont make it  optional , so that method overload resolution works for rs.Add(..)
+                      ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
                       ,  [<OPT;DEF(true)>]stringSafetyCheck:bool 
@@ -151,10 +151,10 @@ type Scripting private () =
         | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Add: object of type %A not implemented yet" (geo.GetType())
 
-    ///<summary>Adds any geometry object (stuct or class) to the Rhino document.
+    ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
-    ///<param name="layer">(string) Optional, Layername, parent layer separated by '::' </param>
+    ///<param name="layer">(string) Optional, Layer Name, parent layer separated by '::' </param>
     ///<param name="objectName">(string) Optional, Default Value: <c>""</c>. The object name</param>
     ///<param name="userTextKeysAndValues">(string*string seq) Optional, Default Value: <c>[]</c>. list of key value pairs for user text</param>
     ///<param name="layerColor">(Drawing.Color) Optional, Default Value: <c>FsEx.Color.randomForRhino()</c>Color for layer. The layer color will NOT be changed even if the layer exists already</param>
@@ -172,9 +172,9 @@ type Scripting private () =
         let layCorF =
             if layer<>""then 
                 if layerColor.IsEmpty then                         
-                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all unicode ?
+                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all Unicode ?
                 else
-                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all unicode ?
+                    UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all Unicode ?
             else
                 UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
         

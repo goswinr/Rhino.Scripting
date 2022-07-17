@@ -108,7 +108,7 @@ module AutoOpenGrips =
 
 
     /// Internal helper
-    static member private Neighborgrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> = 
+    static member private neighborGrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> = 
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then Result.Error "rhobj.GetGrips() is null"
@@ -139,7 +139,7 @@ module AutoOpenGrips =
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int ,
                                   [<OPT;DEF(true)>]enable:bool) : int = 
-        match Scripting.Neighborgrip(1, objectId, index, direction, enable) with
+        match Scripting.neighborGrip(1, objectId, index, direction, enable) with
         |Ok r -> r.Index
         |Error s -> RhinoScriptingException.Raise "Rhino.Scripting.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
@@ -259,7 +259,7 @@ module AutoOpenGrips =
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int,
                                   [<OPT;DEF(true)>]enable:bool) : int = 
-        match Scripting.Neighborgrip(-1, objectId, index, direction, enable) with
+        match Scripting.neighborGrip(-1, objectId, index, direction, enable) with
         |Ok r -> r.Index
         |Error s -> RhinoScriptingException.Raise "Rhino.Scripting.PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 

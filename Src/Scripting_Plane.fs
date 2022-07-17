@@ -91,7 +91,7 @@ module AutoOpenPlane =
     ///<summary>Returns the point on a Plane that is closest to a test point.</summary>
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
-    ///<returns>(float*float) The u and v paramter on the Plane of the closest point.</returns>
+    ///<returns>(float*float) The u and v parameter on the Plane of the closest point.</returns>
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float = 
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t

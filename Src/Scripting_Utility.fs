@@ -171,7 +171,7 @@ module AutoOpenUtility =
                     if abs(lastOK-n) > tol then
                         yield n
                         lastOK <- n
-               }
+                }
 
 
     ///<summary>Removes duplicates from a list of 3D points.</summary>

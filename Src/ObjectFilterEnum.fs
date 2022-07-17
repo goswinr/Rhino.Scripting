@@ -46,7 +46,7 @@ type ObjectFilterEnum internal () =  // not a static class, just internal, const
     member _.Extrusion = 1073741824
 
     ///A helper function to get a DocObjects.ObjectType Enum form an integer
-    static member GetFilterEnum(i:int) : DocObjects.ObjectType = // not internal becaus also used in Rhino.Scripting.Extension
+    static member GetFilterEnum(i:int) : DocObjects.ObjectType = // not internal because also used in Rhino.Scripting.Extension
         let mutable e = DocObjects.ObjectType.None
         if 0 <> (i &&& 1 ) then          e  <- e ||| DocObjects.ObjectType.Point
         if 0 <> (i &&& 16384 ) then      e  <- e ||| DocObjects.ObjectType.Grip

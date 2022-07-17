@@ -25,8 +25,8 @@ module AutoOpenCoerce =
 
 
 
-    /// TODO all the functions taking a generic paramnter should not be called coerce but rather try convert ?? no ?
-    /// TODO none of the coerce function should take generic paramter, just a few overloads
+    /// TODO all the functions taking a generic parameter should not be called coerce but rather try convert ?? no ?
+    /// TODO none of the coerce function should take generic parameter, just a few overloads
 
 
   //---------------------------------------------------
@@ -71,9 +71,9 @@ module AutoOpenCoerce =
     ///<param name="objectId">(Guid) Object Identifier </param>
     ///<returns>a RhinoObject, Fails on bad input.</returns>
     static member CoerceRhinoObject(objectId:Guid) : DocObjects.RhinoObject = 
-       match Scripting.TryCoerceRhinoObject objectId with 
-       |Some o -> o
-       |None -> 
+        match Scripting.TryCoerceRhinoObject objectId with 
+        |Some o -> o
+        |None -> 
             if Guid.Empty = objectId then    RhinoScriptingException.Raise "Rhino.Scripting.CoerceRhinoObject failed on empty Guid"
             else                             RhinoScriptingException.Raise "Rhino.Scripting.CoerceRhinoObject: The Guid %O was not found in the Current Object table." objectId
 
@@ -335,12 +335,12 @@ module AutoOpenCoerce =
         | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceEllipse failed on: %s " (Print.nice ellip)
 
     //----------------------------------------------------
-    //---------------Coerce only (no TryCoerce) ----------  TODO: add TryCorece ?
+    //---------------Coerce only (no TryCoerce) ----------  TODO: add TryCoerce ?
     //----------------------------------------------------
 
 
 
-    ///<summary>Attempt to get Rhino LayerObject from the document for a given fullame.</summary>
+    ///<summary>Attempt to get Rhino LayerObject from the document for a given fullname.</summary>
     ///<param name="name">(string) The layer's name.</param>
     ///<returns>DocObjectys.Layer </returns>
     static member CoerceLayer (name:string) : DocObjects.Layer = 
@@ -357,13 +357,13 @@ module AutoOpenCoerce =
 
     ///<summary>Attempt to get Rhino LayerObject from the document with a given objectId.</summary>
     ///<param name="layerId">(Guid) The layer's Guid.</param>
-    ///<returns>DocObjectys.Layer</returns>
+    ///<returns>DocObjects.Layer</returns>
     static member CoerceLayer (layerId:Guid) : DocObjects.Layer= 
         if layerId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: input Guid is Guid.Empty" 
         let l = State.Doc.Layers.FindId(layerId)
         if isNull l then
             if notNull (State.Doc.Objects.FindId(layerId)) then
-                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Documnt Object (with Geometry) '%s'" (Print.guid layerId)
+                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Document Object (with Geometry) '%s'" (Print.guid layerId)
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could not find Guid %O in State.Doc.Layer table'" layerId
         l
@@ -380,7 +380,7 @@ module AutoOpenCoerce =
 
     //-------------------views ---------------------
 
-    ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standart or page view.</summary>
+    ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
     ///<param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     ///<returns>a State.Doc.View object) Fails on bad input.</returns>
     static member CoerceView (nameOrId:'T) : Display.RhinoView = 
@@ -527,7 +527,7 @@ module AutoOpenCoerce =
         match b with
         | :? Point3d    as pt                 -> pt
         | :? Point3f    as pt                 -> Point3d(pt)
-        //| :? Vector3d   as v                  -> Point3d(v) //dont confuse vectors and points !
+        //| :? Vector3d   as v                  -> Point3d(v) //don't confuse vectors and points !
         | :? DocObjects.PointObject as po     -> po.PointGeometry.Location
         | :? TextDot as td                    -> td.Point
         | :? (float*float*float) as xyz       -> let x, y, z = xyz in Point3d(x, y, z)
@@ -675,7 +675,7 @@ module AutoOpenCoerce =
         | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointCloud failed on: %s " (Print.guid objectId)
             
     
-    ///<summary>Attempt to get a System.Drawing.Color also works on natrural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
+    ///<summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
     ///<param name="color">string, tuple with  or 3 or 4 items</param>
     ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provIde better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255, 0, 0)) Fails on bad input.</returns>
@@ -691,10 +691,10 @@ module AutoOpenCoerce =
 
         | :? (int*int*int*int) as argb  ->
             let alpha, red , green, blue   = argb
-            if red  <0 || red  >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
-            if green<0 || green>255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
-            if blue <0 || blue >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d aplpha %d" red green blue alpha
-            if alpha<0 || alpha >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green %d aplpha %d" red green blue alpha
+            if red  <0 || red  >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
+            if green<0 || green>255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
+            if blue <0 || blue >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
+            if alpha<0 || alpha >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green %d alpha %d" red green blue alpha
             Drawing.Color.FromArgb(alpha, red, green, blue)
         | :? string  as s ->
             try

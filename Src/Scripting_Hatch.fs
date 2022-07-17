@@ -219,7 +219,7 @@ module AutoOpenHatch =
             | :? Brep as c->
                 let g = State.Doc.Objects.AddBrep(c, attr)
                 if g<>Guid.Empty then rc.Add(g)
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ExplodeHatch: darwing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
         if delete then State.Doc.Objects.Delete(rhobj)|> ignore
         rc
 

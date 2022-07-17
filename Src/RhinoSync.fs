@@ -5,7 +5,7 @@ open System
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
-/// A static classs to help access the UI thread of Rhino from other threads
+/// A static class to help access the UI thread of Rhino from other threads
 [<AbstractClass>]
 [<Sealed>] //use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type RhinoSync private () = 
@@ -57,7 +57,7 @@ type RhinoSync private () =
                         log "**Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %O" e
 
 
-                if isNull syncContext && notNull seffRhinoSyncModule then //its probly already set abouve via DispatcherSynchronizationContext
+                if isNull syncContext && notNull seffRhinoSyncModule then //its probably already set above via DispatcherSynchronizationContext
                     try
                         syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
                         if isNull syncContext then
@@ -101,9 +101,9 @@ type RhinoSync private () =
     /// Evaluates a function on UI Thread.
     static member DoSync (func:unit->'T) : 'T = 
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then init()
-             if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
-             async{
+            if isNull syncContext then init()
+            if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
+            async{
                     do! Async.SwitchToContext syncContext
                     return func()
                     } |> Async.RunSynchronously
@@ -115,9 +115,9 @@ type RhinoSync private () =
     static member DoSyncRedraw (func:unit->'T) : 'T = 
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
-             if isNull syncContext then RhinoSync.Initialize()
-             if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
-             async{
+            if isNull syncContext then RhinoSync.Initialize()
+            if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
+            async{
                     do! Async.SwitchToContext syncContext
                     if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
                     let res = func()
@@ -139,7 +139,7 @@ type RhinoSync private () =
         if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
         let isWinVis = if isNull seffWindow then false else seffWindow.Visibility = Windows.Visibility.Visible
         if RhinoApp.InvokeRequired then
-             async{
+            async{
                     do! Async.SwitchToContext syncContext
                     //eprintfn "Hiding Seff async..isWinVis:%b" isWinVis
                     if isWinVis then seffWindow.Hide()

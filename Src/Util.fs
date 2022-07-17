@@ -23,7 +23,7 @@ module internal Util =
 
 
     ///<summary>Checks if a string is a ASCII string for use in Rhino Object Names or User Dictionary keys and values.
-    /// Only allows chars between unicode points 32 till 126 (ASCII) </summary>
+    /// Only allows chars between Unicode points 32 till 126 (ASCII) </summary>
     /// May not include line returns, tabs, and leading or trailing whitespace.
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>    
@@ -39,15 +39,15 @@ module internal Util =
                     if i = name.Length then true
                     else
                         let c = name.[i]
-                        if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                        if c >= ' ' && c <= '~' then // always OK , Unicode points 32 till 126 ( regular letters numbers and symbols)
                             loop(i+1)                        
                         else                            
-                             false
+                            false
                 loop 0
     
     ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keys and values.
     /// A good string may not include line returns, tabs, and leading or trailing whitespace.
-    /// Confusing or ambiguous Unicode characters that look like ASCII but are some other unicode are also not allowed. </summary>
+    /// Confusing or ambiguous Unicode characters that look like ASCII but are some other Unicode are also not allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) set to true to make empty strings pass. </param>   
     ///<returns>(bool) true if the string is a valid name.</returns>
@@ -62,7 +62,7 @@ module internal Util =
                     if i = name.Length then true
                     else
                         let c = name.[i]
-                        if c >= ' ' && c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                        if c >= ' ' && c <= '~' then // always OK , Unicode points 32 till 126 ( regular letters numbers and symbols)
                             loop(i+1)                        
                         else                            
                             let cat = Char.GetUnicodeCategory(c)
@@ -84,7 +84,7 @@ module internal Util =
 
                             // NOT OK :
                             | UnicodeCategory.OpenPunctuation  // only ( [ and { is allowed
-                            | UnicodeCategory.ClosePunctuation // exclude if out of unicode points 32 till 126
+                            | UnicodeCategory.ClosePunctuation // exclude if out of Unicode points 32 till 126
                             | UnicodeCategory.Control
                             | UnicodeCategory.SpaceSeparator         // only regular space  ( that is char 32)     is allowed
                             | UnicodeCategory.ConnectorPunctuation   // only simple underscore  _    is allowed
@@ -100,8 +100,8 @@ module internal Util =
                             | UnicodeCategory.Format
                             | UnicodeCategory.OtherNotAssigned
                             | UnicodeCategory.ModifierSymbol
-                            | UnicodeCategory.OtherPunctuation // exclude if out of unicode points 32 till 126
-                            | UnicodeCategory.DecimalDigitNumber // exclude if out of unicode points 32 till 126
+                            | UnicodeCategory.OtherPunctuation // exclude if out of Unicode points 32 till 126
+                            | UnicodeCategory.DecimalDigitNumber // exclude if out of Unicode points 32 till 126
                             | UnicodeCategory.InitialQuotePunctuation
                             | UnicodeCategory.FinalQuotePunctuation
                             | UnicodeCategory.OtherLetter
@@ -127,7 +127,7 @@ module internal Util =
                     else
                         let c = name.[i]
                         if   c < ' ' then false // is a control character
-                        elif c <= '~' then // always OK , unicode points 32 till 126 ( regular letters numbers and symbols)
+                        elif c <= '~' then // always OK , Unicode points 32 till 126 ( regular letters numbers and symbols)
                             loop(i+1)
                         else                            
                             let cat = Char.GetUnicodeCategory(c)

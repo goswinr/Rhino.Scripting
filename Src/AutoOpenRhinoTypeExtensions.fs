@@ -62,7 +62,7 @@ module AutoOpenRhinoTypeExtensions =
         /// Unitizes the vector.
         /// Checks input length to be longer than  1e-9 units
         member v.Unitized = 
-            let len = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) // see Vec.unitze too
+            let len = sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z) // see Vec.unitize too
             if len > 1e-9 then v * (1./len)
             else RhinoScriptingException.Raise "Vector3d.Unitized: %s is too small for unitizing, tol: 1e-9" v.ToNiceString
 
@@ -100,19 +100,19 @@ module AutoOpenRhinoTypeExtensions =
 
         /// WorldXY rotated 180 degrees round Z Axis
         static member WorldMinusXMinusY= 
-           Plane(Point3d.Origin, -Vector3d.XAxis, -Vector3d.YAxis)
+            Plane(Point3d.Origin, -Vector3d.XAxis, -Vector3d.YAxis)
 
         /// WorldXY rotated 90 degrees round Z Axis counter clockwise from top
         static member WorldYMinusX= 
-           Plane(Point3d.Origin, Vector3d.YAxis, -Vector3d.XAxis)
+            Plane(Point3d.Origin, Vector3d.YAxis, -Vector3d.XAxis)
 
         /// WorldXY rotated 270 degrees round Z Axis counter clockwise from top
         static member WorldMinusYX= 
-           Plane(Point3d.Origin, -Vector3d.YAxis, Vector3d.XAxis)
+            Plane(Point3d.Origin, -Vector3d.YAxis, Vector3d.XAxis)
 
         /// WorldXY rotated 180 degrees round X Axis, Z points down now
         static member WorldXMinusY= 
-           Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
+            Plane(Point3d.Origin, Vector3d.XAxis, -Vector3d.YAxis)
 
     type PolylineCurve with
 

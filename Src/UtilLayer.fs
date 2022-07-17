@@ -85,7 +85,7 @@ module internal UtilLayer =
       
 
     /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
-    /// Collapseparents only has an effect if layer is created, not if it exists already  
+    /// The collapseParents parameter only has an effect if layer is created, not if it exists already  
     let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState, allowAllUnicode:bool, collapseParents:bool) : FoundOrCreatedIndex = 
         // TODO trimm off leading and trailing '::' from name string to be more tolerant ?
         match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with

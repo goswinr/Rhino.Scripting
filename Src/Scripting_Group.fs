@@ -56,7 +56,7 @@ module AutoOpenGroup =
     ///<returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq) : unit = 
         let index = State.Doc.Groups.Add()
-        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects needes to have more than one objects but has %d" (Seq.length objectIds)
+        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects needs to have more than one objects but has %d" (Seq.length objectIds)
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
@@ -66,8 +66,8 @@ module AutoOpenGroup =
     ///<returns>(unit) void, nothing.</returns>
     static member GroupObjects(objectIds:Guid seq, groupName:string) : unit = 
         let index = State.Doc.Groups.Add( groupName )
-        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects failed to creat group with name '%s' for %d objects" groupName (Seq.length objectIds)
-        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects to '%s' needes to have more than one objects but has %d" groupName (Seq.length objectIds)
+        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects failed to create group with name '%s' for %d objects" groupName (Seq.length objectIds)
+        if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects to '%s' needs to have more than one objects but has %d" groupName (Seq.length objectIds)
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "Rhino.Scripting.GroupObjects failed on %A"  objectIds
         //State.Doc.Groups.GroupName(index)
 
@@ -207,7 +207,7 @@ module AutoOpenGroup =
         State.Doc.Groups.Show(index)
 
 
-    ///<summary>Unlocks a group of previously locked objects. Lockes objects are visible,
+    ///<summary>Unlocks a group of previously locked objects. Locks objects are visible,
     ///    can be snapped to, but cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were unlocked.</returns>

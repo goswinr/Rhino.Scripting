@@ -39,7 +39,7 @@ module AutoOpenBlock =
         let objects = Rarr()
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)  //Coerce should not be needed
-            if obj.IsReference then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannt add Refrence object %s to %s" (Print.guid objectId) name
+            if obj.IsReference then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Reference object %s to %s" (Print.guid objectId) name
             let ot = obj.ObjectType
             if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Light object %s to %s" (Print.guid objectId) name
             elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Grip object %s to %s" (Print.guid objectId) name
@@ -47,7 +47,7 @@ module AutoOpenBlock =
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = Scripting.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
-                if uses then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannt add Instance Ref object %s to %s" (Print.guid objectId) name
+                if uses then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Instance Ref object %s to %s" (Print.guid objectId) name
 
             objects.Add(obj)
         if objects.Count>0 then

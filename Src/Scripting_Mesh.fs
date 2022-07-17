@@ -845,7 +845,7 @@ module AutoOpenMesh =
     static member MeshVolume(meshes:Mesh seq) : float = 
         let mutable totalvolume  = 0.0
         for mesh in meshes do        
-            // TODO add check for mesh beeing closed
+            // TODO add check for mesh being closed
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume

@@ -32,7 +32,7 @@ module AutoOpenSelection =
     ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the objects</param>
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects</param>
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c> Include refrence objects such as work session objects</param>
+    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c> Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) Identifiers for all the objects in the document.</returns>
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
@@ -91,7 +91,7 @@ module AutoOpenSelection =
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string = 
-        let get () =  // TODO Add check if already hidden, then dont even hide and show
+        let get () =  // TODO Add check if already hidden, then don't even hide and show
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -124,7 +124,7 @@ module AutoOpenSelection =
 
 
     ///<summary>Prompts user to pick, or select, a single object.
-    /// Raises a RhinoUserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
+    /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
@@ -176,7 +176,7 @@ module AutoOpenSelection =
 
 
     ///<summary>Prompts user to pick, or select a single object.
-    /// Raises a RhinoUserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
+    /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
@@ -194,9 +194,9 @@ module AutoOpenSelection =
     ///    [1] True if the object was preselected, otherwise False
     ///    [2] selection method Enum DocObjects.SelectionMethod
     ///         (0) selected by non-mouse method (SelAll, etc.).
-    ///         (1) selected by mouse click on theobject.
-    ///         (2) selected by being inside of amouse window.
-    ///         (3) selected by intersecting a mousecrossing window.
+    ///         (1) selected by mouse click on the object.
+    ///         (2) selected by being inside of a mouse window.
+    ///         (3) selected by intersecting a mouse crossing window.
     ///    [3] selection point
     ///    [4] name of the view selection was made.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -243,12 +243,12 @@ module AutoOpenSelection =
 
 
     ///<summary>Prompts user to pick or select one or more objects.
-    /// Raises a RhinoUserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
+    /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
-    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joinded with '+'</param>
+    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joined with '+'</param>
     ///<param name="group">(bool) Optional, Default Value: <c>true</c>
     ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
@@ -317,7 +317,7 @@ module AutoOpenSelection =
 
 
     ///<summary>Prompts user to pick, or select one or more objects.
-    /// Raises a RhinoUserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
+    /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, Default Value: <c>0</c>
@@ -414,7 +414,7 @@ module AutoOpenSelection =
 
 
     ///<summary>Prompts the user to select a single Surface.
-    /// Raises a RhinoUserInteractionException if no object was selcted. For example when Esc key was pressed.</summary>
+    /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, Default Value: <c>"Select Surface"</c>
     ///    Prompt displayed</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
@@ -429,7 +429,7 @@ module AutoOpenSelection =
     ///    [4]  u, v Surface parameter of the selection point
     ///    [5]  name of the view in which the selection was made.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method returmn value.  see help
+    static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method return value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string = 
         let get () = 
@@ -477,7 +477,7 @@ module AutoOpenSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///    Include refrence objects such as work session objects</param>
+    ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers the locked objects.</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
@@ -504,7 +504,7 @@ module AutoOpenSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grip objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///    Include refrence objects such as work session objects</param>
+    ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers of the hidden objects.</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
@@ -529,7 +529,7 @@ module AutoOpenSelection =
     ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///    Include refrence objects such as work session objects</param>
+    ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers of the newly selected objects.</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
@@ -706,7 +706,7 @@ module AutoOpenSelection =
     ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
     ///    Include light objects</param>
     ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
-    ///    Include refrence objects such as work session objects</param>
+    ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers for objects with the specified name.</returns>
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,

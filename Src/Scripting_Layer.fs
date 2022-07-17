@@ -27,10 +27,10 @@ module AutoOpenLayer =
 
 
     ///<summary>Add a new layer to the document. If it does not exist yet. 
-    /// By default Ambiguous Unicode characters are not allowed in layername. This can be chnaged via optional parameter.
+    /// By default Ambiguous Unicode characters are not allowed in layer name. This can be changed via optional parameter.
     /// If layers or parent layers exist already color, visibility and locking parameters are ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
-    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value. If omitted a random (non yellow)  color wil be choosen.</param>
+    ///<param name="color">(Drawing.Color) Optional, A Red-Green-Blue color value. If omitted a random (non yellow)  color wil be chosen.</param>
     ///<param name="visible">(int) Optional, Default Value: <c>2</c>
     ///   Layer visibility:
     ///   0 = explicitly Off (even if parent is already Off)
@@ -79,7 +79,7 @@ module AutoOpenLayer =
             fOrC.Index
 
 
-    ///<summary>Returns the full layername of an object.
+    ///<summary>Returns the full layer name of an object.
     /// parent layers are separated by <c>::</c>.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer.</returns>
@@ -88,7 +88,7 @@ module AutoOpenLayer =
         let index = obj.Attributes.LayerIndex
         State.Doc.Layers.[index].FullPath
 
-    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet.</summary>
+    ///<summary>Modifies the layer of an object , optionally creates layer if it does not exist yet.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
@@ -108,7 +108,7 @@ module AutoOpenLayer =
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (Print.guid objectId)
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
+    ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
@@ -141,7 +141,7 @@ module AutoOpenLayer =
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%d' on: %s " layerIndex (Print.guid objectId)
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet.</summary>
+    ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param> 
     ///<param name="layerIndex">(int) Index of layer in layer table</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -154,7 +154,7 @@ module AutoOpenLayer =
             if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%d' on %d objects"  layerIndex (Seq.length objectIds)
         State.Doc.Views.Redraw()
 
-    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently anly ASCII characters are allowed.</summary>
+    ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>
     ///<param name="currentLayerName">(string) The name an existing layer to rename</param>
     ///<param name="newLayerName">(string) The new name</param>
     ///<param name="allowUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
@@ -221,7 +221,7 @@ module AutoOpenLayer =
 
 
 
-    ///<summary>Verifies the existance of a layer in the document.</summary>
+    ///<summary>Verifies the existence of a layer in the document.</summary>
     ///<param name="layer">(string) The name of a layer to search for</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
     static member IsLayer(layer:string) : bool = 
@@ -275,7 +275,7 @@ module AutoOpenLayer =
 
 
     ///<summary>Checks if a layer is locked
-    /// persistent or non persitent locking return true
+    /// persistent or non persistent locking return true
     /// via layer.IsLocked.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
@@ -336,7 +336,7 @@ module AutoOpenLayer =
         else 0
 
 
-    ///<summary>Returns the immediate child layers of a layer. ( exluding children of children) </summary>
+    ///<summary>Returns the immediate child layers of a layer. ( excluding children of children) </summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
     static member LayerChildren(layer:string) : string Rarr = 
@@ -393,18 +393,18 @@ module AutoOpenLayer =
                             layer.Id }
 
 
-    ///<summary>Returns the linetype of a layer.</summary>
+    ///<summary>Returns the line type of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<returns>(string) Name of the current linetype.</returns>
+    ///<returns>(string) Name of the current line type.</returns>
     static member LayerLinetype(layer:string) : string = //GET
         let layer = Scripting.CoerceLayer(layer)
         let index = layer.LinetypeIndex
         State.Doc.Linetypes.[index].Name
 
 
-    ///<summary>Changes the linetype of a layer.</summary>
+    ///<summary>Changes the line type of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="linetyp">(string) Name of a linetype</param>
+    ///<param name="linetyp">(string) Name of a line type</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerLinetype(layer:string, linetyp:string) : unit = //SET
         let layer = Scripting.CoerceLayer(layer)
@@ -413,14 +413,14 @@ module AutoOpenLayer =
             index <- -1
         else
             let lt = State.Doc.Linetypes.FindName(linetyp)
-            if lt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.LayerLinetype not found. layer:'%s' linetyp:'%s'" layer.FullPath linetyp
+            if lt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath linetyp
             index <- lt.LinetypeIndex
         layer.LinetypeIndex <- index
         State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the visible property of a layer,
-    ///  if layer is on but invisble because of a parent that is off this returns false.</summary>
+    ///  if layer is on but invisible because of a parent that is off this returns false.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility.</returns>
     static member LayerVisible(layer:string) : bool = //GET
@@ -526,7 +526,7 @@ module AutoOpenLayer =
         Scripting.LayerLockedSetTrue(layer, forceLocked=false)
 
     (*
-    ///<summary>Changes the locked mode of a layer, enforces presistent locking.</summary>
+    ///<summary>Changes the locked mode of a layer, enforces persistent locking.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="locked">(bool) New layer locked mode</param>
     ///<returns>(unit) void, nothing.</returns>

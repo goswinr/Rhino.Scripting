@@ -182,10 +182,10 @@ module AutoOpenObject =
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         let objbox = rhobj.Geometry.GetBoundingBox(true)
         if testMode then
-          box.Contains(objbox)
+            box.Contains(objbox)
         else
-          let union = BoundingBox.Intersection(box, objbox)
-          union.IsValid
+            let union = BoundingBox.Intersection(box, objbox)
+            union.IsValid
 
 
     ///<summary>Checks if an object is a member of a group.</summary>
@@ -513,7 +513,7 @@ module AutoOpenObject =
     ///<returns>(string) A short text description of the object.</returns>
     static member ObjectDescription(objectIds:Guid seq) : string = 
         let count =  objectIds|> Seq.countBy (fun id -> 
-                        /// TODO could be optimised by using Objecttype integer intead of string
+                        /// TODO could be optimized by using Objecttype integer instead of string
                         let o = Scripting.CoerceRhinoObject(id)
                         o.ShortDescription(true) + if o.IsDeleted then " (deleted !)" else ""
                         ) 
@@ -800,12 +800,12 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
 
-    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary keyas and values.
-    /// A good string may not inculde line returns, tabs, and leading or traling whitespace.
-    /// Confusing characters that look like ASCII but are some other unicode are also not allowed. </summary>
+    ///<summary>Checks if a string is a good string for use in Rhino Object Names or User Dictionary key as and values.
+    /// A good string may not include line returns, tabs, and leading or trailing whitespace.
+    /// Confusing characters that look like ASCII but are some other Unicode are also not allowed. </summary>
     ///<param name="name">(string) The string to check.</param>
     ///<param name="allowEmpty">(bool) Optional, Default Value: <c>false</c> , set to true to make empty strings pass. </param>
-    ///<param name="limitToAscii">(bool) Optional, Default Value: <c>false</c> , set to true to only allow chars between unicode points 32 till 126 (ASCII) </param>
+    ///<param name="limitToAscii">(bool) Optional, Default Value: <c>false</c> , set to true to only allow chars between Unicode points 32 till 126 (ASCII) </param>
     ///<returns>(bool) true if the string is a valid name.</returns>
     static member IsGoodStringId    ( name:string
                                     , [<OPT;DEF(false)>]allowEmpty:bool
@@ -1041,7 +1041,7 @@ module AutoOpenObject =
         |_ -> int(geom.ObjectType)
 
 
-    // TODO, not implemented use Xform rotaion or scale instead
+    // TODO, not implemented use Xform rotation or scale instead
     //static member OrientObject( objectId:Guid,  reference:Point3d seq,  target:Point3d seq,   [<OPT;DEF(0)>]flags:int) : Guid = 
 
 
@@ -1175,10 +1175,10 @@ module AutoOpenObject =
 
 
     ///<summary>Selects a single object.
-    /// Throws an exception if object can't be selectyed for some reason
+    /// Throws an exception if object can't be selected for some reason
     ///  e.g. when locked , hidden, or on invisible layer .</summary>
     ///<param name="objectId">(Guid) The identifier of the object to select</param>
-    ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hiddden or layers that are off visible and unlocked </param>
+    ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
     ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing.</returns>
     static member SelectObject( objectId:Guid,
@@ -1211,10 +1211,10 @@ module AutoOpenObject =
             )
 
     ///<summary>Selects one or more objects
-    /// Throws an exception if object can't be selectyed for some reason
+    /// Throws an exception if object can't be selected for some reason
     ///  e.g. when locked , hidden, or on invisible layer .</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to select</param>
-    ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hiddden or layers that are off visible and unlocked </param>
+    ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
     ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing.</returns>
     static member SelectObject( objectIds:Guid seq,

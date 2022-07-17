@@ -754,7 +754,7 @@ module AutoOpenCurve =
                 if not <| State.Doc.Objects.ModifyAttributes(curveId, attr, quiet=true) then
                     RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows ModifyAttributes failed on style %d on %s" arrowStyle  (Print.guid curveId)
             else
-               RhinoScriptingException.Raise "Rhino.Scripting.Curve Arrow style %d is invalid" arrowStyle
+                RhinoScriptingException.Raise "Rhino.Scripting.Curve Arrow style %d is invalid" arrowStyle
         State.Doc.Views.Redraw()
 
     ///<summary>Calculates the difference between two closed, planar Curves and
@@ -861,7 +861,7 @@ module AutoOpenCurve =
                 //let rc = State.Doc.Objects.AddPoint(point)
                 //points.Add(rc)
         //State.Doc.Views.Redraw()
-        points, curves //TODO or  Guid as originaly done ??
+        points, curves //TODO or  Guid as originally done ??
 
 
     ///<summary>Returns the 3D point locations on two objects where they are closest to
@@ -924,7 +924,7 @@ module AutoOpenCurve =
     static member CurveClosestParameter(curve:Curve, point:Point3d) : float =
         let t = ref 0.
         let rc = curve.ClosestPoint(point, t)
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestParameter failedon Curve Geometry"
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveClosestParameter failed on Curve Geometry"
         !t
 
 
@@ -1033,7 +1033,7 @@ module AutoOpenCurve =
             rc <- Intersect.Intersection.CurveCurve(curve1, curve2, tolerance0, State.Doc.ModelAbsoluteTolerance)
         else
             rc <- Intersect.Intersection.CurveSelf(curve1, tolerance0)
-        if isNull rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveCurveIntersection faile dor %A; %A tolerance %f" curveB curveA tolerance
+        if isNull rc then RhinoScriptingException.Raise "Rhino.Scripting.CurveCurveIntersection failed on %A; %A tolerance %f" curveB curveA tolerance
         let events = Rarr()
         for i =0 to rc.Count-1 do
             let mutable eventType = 1
@@ -1098,7 +1098,7 @@ module AutoOpenCurve =
         Curve.DoDirectionsMatch(curve0, curve1)
 
 
-    ///<summary>Search for a derivatitive, tangent, or curvature discontinuity in
+    ///<summary>Search for a derivative, tangent, or curvature discontinuity in
     ///    a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of Curve object</param>
     ///<param name="style">(int) The type of continuity to test for. The types of
@@ -1576,7 +1576,7 @@ module AutoOpenCurve =
         if isNull nc then  RhinoScriptingException.Raise "Rhino.Scripting.CurveWeights failed. curveId:'%s' segmentIndex:'%A'" (Print.guid curveId) segmentIndex
         rarr { for pt in nc.Points -> pt.Weight }
 
-    ///<summary>Divides a Curve Geometry into a specified number of segments, inluding start and end point.</summary>
+    ///<summary>Divides a Curve Geometry into a specified number of segments, including start and end point.</summary>
     ///<param name="curve">(Geometry.Curve) Curve geometry</param>
     ///<param name="segments">(int) The number of segments</param>
     ///<returns>(Point3d array) Array containing points at divisions.</returns>
@@ -1586,7 +1586,7 @@ module AutoOpenCurve =
         if isNull rc then  RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveIntoPoints failed. curve:'%A' segments:'%A'" curve segments
         !pts
 
-    ///<summary>Divides a Curve object into a specified number of segments, inluding start and end point.</summary>
+    ///<summary>Divides a Curve object into a specified number of segments, including start and end point.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segments">(int) The number of segments</param>
     ///<returns>(Point3d array) Array containing points at divisions.</returns>
@@ -1646,11 +1646,7 @@ module AutoOpenCurve =
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (Print.guid curveId) distance len
         points
-        //let  tvals = Rarr()
-        //for point in points do
-        //    let mutable rc, t = curve.ClosestPoint(point)
-        //    tvals.Add(t)
-        //tvals
+        
 
     ///<summary>Divides a Curve Geometry into segments of a specified length.
     /// If length is more than Curve length it fails.</summary>
@@ -1779,30 +1775,30 @@ module AutoOpenCurve =
     ///    0 = extend from the start of the Curve
     ///    1 = extend from the end of the Curve
     ///    2 = extend from both the start and the end of the Curve</param>
-    ///<param name="boundarycurveIds">(Guid seq) Curve, Surface, and Polysurface objects to extend to</param>
+    ///<param name="boundaryCurveIds">(Guid seq) Curve, Surface, and Polysurface objects to extend to</param>
     ///<param name="replaceInput">(bool) Optional, Default Value <c>false</c> Replace input or add new?</param>
     ///<returns>(Guid) The identifier of the new object or orignal Curve ( depending on 'replaceInput').</returns>
     static member ExtendCurve(  curveId:Guid,
                                 extensionType:int,
                                 side:int,
-                                boundarycurveIds:Guid seq,
+                                boundaryCurveIds:Guid seq,
                                 [<OPT;DEF(false)>]replaceInput:bool) : Guid = 
         let curve = Scripting.CoerceCurve(curveId)
         let mutable extensionTypet = CurveExtensionStyle.Line
-        if extensionType = 0 then  extensionTypet <- CurveExtensionStyle.Line
+        if extensionType = 0   then extensionTypet <- CurveExtensionStyle.Line
         elif extensionType = 1 then extensionTypet <- CurveExtensionStyle.Arc
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
-        else RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
+        else RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundaryCurveIds)
 
         let sidet = 
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
+            |_  -> RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundaryCurveIds)
 
-        let rhobjs = rarr { for objectId in boundarycurveIds -> Scripting.CoerceRhinoObject(objectId) }
-        if rhobjs.IsEmpty then  RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve BoundarycurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side (Print.nice boundarycurveIds)
+        let rhobjs = rarr { for objectId in boundaryCurveIds -> Scripting.CoerceRhinoObject(objectId) }
+        if rhobjs.IsEmpty then  RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve boundaryCurveIds failed. They must contain at least one item. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Print.guid curveId) extensionType side (Print.nice boundaryCurveIds)
         let geometry = rarr { for obj in rhobjs -> obj.Geometry }
         let newcurve = curve.Extend(sidet, extensionTypet, geometry)
         if notNull newcurve && newcurve.IsValid then
@@ -1811,13 +1807,13 @@ module AutoOpenCurve =
                     State.Doc.Views.Redraw()
                     curveId
                 else
-                    RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
+                    RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundaryCurveIds)
             else
                 let g= State.Doc.Objects.AddCurve(newcurve)
                 State.Doc.Views.Redraw()
                 g
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundarycurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundarycurveIds)
+            RhinoScriptingException.Raise "Rhino.Scripting.ExtendCurve failed. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Print.guid curveId) extensionType side  (Print.nice boundaryCurveIds)
 
 
     ///<summary>Extends a non-closed Curve by a line, arc, or smooth extension for a specified distance.</summary>
@@ -2636,14 +2632,14 @@ module AutoOpenCurve =
             outCurves <- Curve.CreateTweenCurvesWithMatching(curve0, curve1, numberOfCurves, tolerance)
         elif method = 2 then
             outCurves <- Curve.CreateTweenCurvesWithSampling(curve0, curve1, numberOfCurves, sampleNumber, tolerance)
-        else RhinoScriptingException.Raise "Rhino.Scripting.AddTweenCurves Method must be 0, 1, or 2.  fromcurveId:'%s' tocurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (Print.guid fromCurveId) (Print.guid toCurveId) numberOfCurves method sampleNumber
+        else RhinoScriptingException.Raise "Rhino.Scripting.AddTweenCurves Method must be 0, 1, or 2.  fromCurveId:'%s' toCurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'"  (Print.guid fromCurveId) (Print.guid toCurveId) numberOfCurves method sampleNumber
         let curves = Rarr()
         if notNull outCurves then
             for curve in outCurves do
                 if notNull curve && curve.IsValid then
                     let rc = State.Doc.Objects.AddCurve(curve)
                     //curve.Dispose()
-                    if rc = Guid.Empty then  RhinoScriptingException.Raise "Rhino.Scripting.AddTweenCurves: Unable to add curve to document.  fromcurveId:'%s' tocurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" (Print.guid fromCurveId) (Print.guid toCurveId) numberOfCurves method sampleNumber
+                    if rc = Guid.Empty then  RhinoScriptingException.Raise "Rhino.Scripting.AddTweenCurves: Unable to add curve to document.  fromCurveId:'%s' toCurveId:'%s' numberOfCurves:'%A' method:'%A' sampleNumber:'%A'" (Print.guid fromCurveId) (Print.guid toCurveId) numberOfCurves method sampleNumber
                     curves.Add(rc)
             State.Doc.Views.Redraw()
         curves

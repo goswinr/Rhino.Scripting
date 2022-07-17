@@ -157,8 +157,8 @@ module AutoOpenGeometry =
     ///    2uy = BottomOfTop:            Attach to baseline of first line.
     ///    3uy = Middle:                 Attach to middle of text vertical advance.
     ///    4uy = MiddleOfBottom:         Attach to middle of an "I" on the last line.
-    ///    5uy = Bottom:                 Attach to the basline of the last line.
-    ///    6uy = BottomOfBoundingBox:    Attach to the bottom of the boudning box of the visible glyphs.</param>
+    ///    5uy = Bottom:                 Attach to the baseline of the last line.
+    ///    6uy = BottomOfBoundingBox:    Attach to the bottom of the bounding box of the visible glyphs.</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddText(  text:string,
                             plane:Plane,
@@ -228,8 +228,8 @@ module AutoOpenGeometry =
     ///    2uy = BottomOfTop:            Attach to baseline of first line.
     ///    3uy = Middle:                 Attach to middle of text vertical advance.
     ///    4uy = MiddleOfBottom:         Attach to middle of an "I" on the last line.
-    ///    5uy = Bottom:                 Attach to the basline of the last line.
-    ///    6uy = BottomOfBoundingBox:    Attach to the bottom of the boudning box of the visible glyphs.</param>
+    ///    5uy = Bottom:                 Attach to the baseline of the last line.
+    ///    6uy = BottomOfBoundingBox:    Attach to the bottom of the bounding box of the visible glyphs.</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddText(  text:string,
                             pt:Point3d,
@@ -382,7 +382,7 @@ module AutoOpenGeometry =
     ///<param name="object">(Guid) The identifier of the object</param>
     ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
     ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
-    ///    Returns the box as world coordinates or custum Plane coordinates.</param>
+    ///    Returns the box as world coordinates or custom Plane coordinates.</param>
     ///<returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
@@ -400,7 +400,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
-        if not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
         b
 
     ///<summary>Returns a new inflated box with custom x, y and z amounts in their directions.
@@ -830,17 +830,17 @@ module AutoOpenGeometry =
         State.Doc.Views.Redraw()
     
 
-     ///<summary>Returns the RichText formating string of a text object.</summary>
+     ///<summary>Returns the RichText formatting string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<returns>(string) The current RichText formating string.</returns>
+    ///<returns>(string) The current RichText formatting string.</returns>
     static member TextObjectRichText(objectId:Guid) : string = //GET
         let text = Scripting.CoerceTextEntity(objectId)
         text.RichText
 
 
-    ///<summary>Modifies the RichText formating string of a text object.</summary>
+    ///<summary>Modifies the RichText formatting string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
-    ///<param name="rtfString">(string) A new text RichText formating string</param>
+    ///<param name="rtfString">(string) A new text RichText formatting string</param>
     ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
@@ -856,9 +856,9 @@ module AutoOpenGeometry =
 
 
 
-    ///<summary>Modifies the RichText formating string of multiple text objects.</summary>
+    ///<summary>Modifies the RichText formatting string of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
-    ///<param name="rtfString">(string) A new text RichText formating string</param>
+    ///<param name="rtfString">(string) A new text RichText formatting string</param>
     ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET        
@@ -896,7 +896,7 @@ module AutoOpenGeometry =
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
             |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
-        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not availabe for %s" (Print.guid objectId) style fontdata.QuartetName 
+        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Print.guid objectId) style fontdata.QuartetName 
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
             RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
         State.Doc.Views.Redraw()

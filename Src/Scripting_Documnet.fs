@@ -15,7 +15,7 @@ open FsEx.SaveIgnore
 open FsEx.CompareOperators
 
 [<AutoOpen>]
-module AutoOpenDocumnet =
+module AutoOpenDocument =
   type Scripting with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
@@ -598,7 +598,7 @@ module AutoOpenDocumnet =
     ///    3 - Centimeters (1.0e-2 meters)
     ///    4 - Meters
     ///    5 - Kilometers (1.0e + 3 meters)
-    ///    6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
+    ///    6 - MicroInches (2.54e-8 meters, 1.0e-6 inches)
     ///    7 - Mils (2.54e-5 meters, 0.001 inches)
     ///    8 - Inches (0.0254 meters)
     ///    9 - Feet (0.3048 meters, 12 inches)
@@ -630,7 +630,7 @@ module AutoOpenDocumnet =
     ///    3 - Centimeters (1.0e-2 meters)
     ///    4 - Meters
     ///    5 - Kilometers (1.0e + 3 meters)
-    ///    6 - Microinches (2.54e-8 meters, 1.0e-6 inches)
+    ///    6 - MicroInches (2.54e-8 meters, 1.0e-6 inches)
     ///    7 - Mils (2.54e-5 meters, 0.001 inches)
     ///    8 - Inches (0.0254 meters)
     ///    9 - Feet (0.3048 meters, 12 inches)

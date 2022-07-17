@@ -237,7 +237,7 @@ module AutoOpenApplication =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member Command(commandString:string, [<OPT;DEF(true)>]echo:bool) : bool = 
         let getKeepEditor () = 
-            //if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then dont even hide and show
+            //if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then don't even hide and show
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
             let rc = RhinoApp.RunScript(commandString, echo)
             let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber

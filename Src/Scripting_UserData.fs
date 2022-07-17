@@ -229,7 +229,7 @@ module AutoOpenUserData =
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Print.guid objectId) key value
 
-    ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous unicode characters.</summary>
+    ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>

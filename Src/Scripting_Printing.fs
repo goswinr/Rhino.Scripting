@@ -25,7 +25,7 @@ module AutoOpenPrinting =
 
 
     ///<summary>
-    /// Nice formating for numbers including thousand Separator and (nested) sequences, first five items are printed out.
+    /// Nice formatting for numbers including thousand Separator and (nested) sequences, first five items are printed out.
     /// Prints to Console.Out and to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
@@ -44,7 +44,7 @@ module AutoOpenPrinting =
         RhinoApp.Wait() // no switch to UI Thread needed !
 
     ///<summary>
-    /// Nice formating for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
+    /// Nice formatting for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
     /// Prints to Console.Out and to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
     /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
