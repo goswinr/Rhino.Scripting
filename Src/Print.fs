@@ -133,15 +133,20 @@ module internal Print =
 
     let init()= 
         initIsPending <- false
-        NiceStringSettings.externalFormatter  <- formatRhinoObject
-        if Rhino.Runtime.HostUtils.RunningInRhino then
-            // these below fail if not running inside rhino.exe
-            // scripts that reference Rhino.Scripting from outside of rhino is still Ok , but all function that call the C++ API don't work
-            // but accessing the current Doc obviously does not work.
-            NiceStringSettings.roundToZeroBelow                                              <- State.Doc.ModelAbsoluteTolerance  * 0.1 // so that any float smaller than State.Doc.ModelAbsoluteTolerance wil be shown as 0.0
-            RhinoApp.AppSettingsChanged.Add    (fun _ -> NiceStringSettings.roundToZeroBelow <- State.Doc.ModelAbsoluteTolerance  * 0.1 )
-            RhinoDoc.ActiveDocumentChanged.Add (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
-            RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.roundToZeroBelow <- a.Document.ModelAbsoluteTolerance * 0.1 )
+        try
+            NiceStringSettings.externalFormatter  <- formatRhinoObject
+            if Rhino.Runtime.HostUtils.RunningInRhino then
+                // these below fail if not running inside rhino.exe
+                // scripts that reference Rhino.Scripting from outside of rhino is still Ok , but all function that call the C++ API don't work
+                // but accessing the current Doc obviously does not work.
+                NiceStringSettings.userZeroTolerance                                              <- State.Doc.ModelAbsoluteTolerance  * 0.1 // so that any float smaller than State.Doc.ModelAbsoluteTolerance wil be shown as 0.0
+                RhinoApp.AppSettingsChanged.Add    (fun _ -> NiceStringSettings.userZeroTolerance <- State.Doc.ModelAbsoluteTolerance  * 0.1 )
+                RhinoDoc.ActiveDocumentChanged.Add (fun a -> NiceStringSettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
+                RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
+        with e -> 
+            // try to log errors to error stream:
+            eprintfn "Initializing NiceString pretty printing from Rhino.Scripting in FsEx failed with:\r\n%A" e
+            
 
     /// Abbreviation for NiceString.toNiceString
     /// including special formatting of Rhino Guids
