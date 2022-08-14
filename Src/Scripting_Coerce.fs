@@ -677,7 +677,7 @@ module AutoOpenCoerce =
     
     ///<summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
     ///<param name="color">string, tuple with  or 3 or 4 items</param>
-    ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provIde better comparison to other colors.
+    ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provide better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255, 0, 0)) Fails on bad input.</returns>
     static member CoerceColor(color:'T) : Drawing.Color = 
         match box color with
@@ -696,17 +696,19 @@ module AutoOpenCoerce =
             if blue <0 || blue >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
             if alpha<0 || alpha >255 then RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor: cannot create color form red %d, blue %d and green %d alpha %d" red green blue alpha
             Drawing.Color.FromArgb(alpha, red, green, blue)
-        | :? string  as s ->
+        | :? string  as s ->            
             try
-                let c = Drawing.Color.FromName(s)
+                let c = Drawing.ColorTranslator.FromHtml(s)
                 Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
-            with _ ->
-                try
-                    let c = Drawing.ColorTranslator.FromHtml(s)
-                    Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
-                with _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor:: could not Coerce %A to a Color" color
-              //     try Windows.Media.ColorConverter.ConvertFromString(s)
-              //     with _ -> RhinoScriptingException.Raise "Rhino.Scripting.: could not Coerce %A to a Color" c
+            with _ -> 
+                //try
+                //    let c = Drawing.Color.FromName(s) // for invalid names ( a hex string) this stil returns named color black !!
+                //    Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
+                //with _ -> 
+                    RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor:: could not Coerce %A to a Color" color
+
+                //     try Windows.Media.ColorConverter.ConvertFromString(s)
+                //     with _ -> RhinoScriptingException.Raise "Rhino.Scripting.: could not Coerce %A to a Color" c
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor:: could not Coerce %A to a Color" color
 
     //<summary>Attempt to get a Sequence of Guids from input</summary>
