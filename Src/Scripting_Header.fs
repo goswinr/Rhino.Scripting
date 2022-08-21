@@ -172,7 +172,8 @@ type Scripting private () =
         let layCorF =
             if layer<>""then 
                 if layerColor.IsEmpty then                         
-                    UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all Unicode ?
+                    
+                    UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all Unicode ?
                 else
                     UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all Unicode ?
             else

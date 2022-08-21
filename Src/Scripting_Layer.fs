@@ -54,7 +54,7 @@ module AutoOpenLayer =
                           , [<OPT;DEF(false:bool)>]allowAllUnicode:bool
                           , [<OPT;DEF(false:bool)>]collapseParents:bool) : int = 
 
-        let col = if color.IsEmpty then Color.randomForRhino else (fun () -> color)
+        let col = if color.IsEmpty then UtilLayer.randomLayerColor else (fun () -> color)
         if notNull parent && isNull name then
             RhinoScriptingException.Raise "Rhino.Scripting.AddLayer if parent name is given (%s) the child name must be given too." parent
 
@@ -102,7 +102,7 @@ module AutoOpenLayer =
                              ,[<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //SET
         let obj = Scripting.CoerceRhinoObject(objectId)
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
         if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (Print.guid objectId)
@@ -121,7 +121,7 @@ module AutoOpenLayer =
                              , [<OPT;DEF(false:bool)>]allowUnicode:bool
                              , [<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //MULTISET
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, Color.randomForRhino, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode, collapseParents).Index
+            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode, collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
