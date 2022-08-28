@@ -158,7 +158,7 @@ module AutoOpenViews =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail = 
             try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "Rhino.Scripting.Set DetailLock failed. detailId is a %s  lock:'%A'" (Print.guid detailId)  lock
+            with _ ->  RhinoScriptingException.Raise "Rhino.Scripting.Set DetailLock failed. detailId is a %s  lock:'%A'" (toNiceString detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore
@@ -185,7 +185,7 @@ module AutoOpenViews =
             detail.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DetailScale : CommitChanges failed"
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Print.guid detailId) modelLength pageLength
+            RhinoScriptingException.Raise "Rhino.Scripting.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (toNiceString detailId) modelLength pageLength
 
 
 

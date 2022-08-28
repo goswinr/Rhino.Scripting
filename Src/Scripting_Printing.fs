@@ -28,16 +28,17 @@ module AutoOpenPrinting =
     /// Nice formatting for numbers including thousand Separator and (nested) sequences, first five items are printed out.
     /// Prints to Console.Out and to Rhino Commandline
     /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
-    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    ///   - thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
-    ///   - toNiceStringMaxDepth       = 3                                 ; set this to change how deep the content of nested seq is printed (printFull ignores this)
-    ///   - toNiceStringMaxItemsPerSeq = 5                                 ; set this to change how how many items per seq are printed (printFull ignores this)
-    ///   - maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.  </summary>
+    /// Settings are exposed in FsEx.NiceString.NiceStringSettings.defaultNicePrintSettings:
+    /// maxDepth          = 3     : how deep the content of nested seq is printed 
+    /// maxVertItems      = 6     : amount of lines printed.
+    /// maxHorChars       = 120   : maximum amount of characters per line.
+    /// maxCharsInString  = 2000  : after this the characters of a string are trimmed off.
+    /// The function rs.PrintFull does not do this trimming.
+    /// </summary>
     ///<param name="x">('T) the value or object to print</param>
     ///<returns>(unit) void, nothing.</returns>
-
     static member Print (x:'T) : unit = 
-        if Print.initIsPending then Print.init()
+        if PrintSetup.initIsPending then PrintSetup.init()
         toNiceString(x)
         |>! RhinoApp.WriteLine
         |>  Console.WriteLine
@@ -46,14 +47,11 @@ module AutoOpenPrinting =
     ///<summary>
     /// Nice formatting for numbers including thousand Separator, all items of sequences, including nested items, are printed out.
     /// Prints to Console.Out and to Rhino Commandline
-    /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0
-    /// Settings are exposed in FsEx.NiceString.NiceStringSettings:
-    ///   - thousandSeparator          = '\'' (this is just one quote: ')  ; set this to change the printing of floats and integers larger than 10'000
-    ///   - maxCharsInString           = 5000                              ; set this to change how many characters of a string might be printed at once.</summary>
+    /// Shows numbers smaller than State.Doc.ModelAbsoluteTolerance * 0.1 as 0.0</summary>
     ///<param name="x">('T) the value or object to print</param>
     ///<returns>(unit) void, nothing.</returns>
     static member PrintFull (x:'T) : unit = 
-        if Print.initIsPending then Print.init()
+        if PrintSetup.initIsPending then PrintSetup.init()
         toNiceStringFull(x)
         |>! RhinoApp.WriteLine
         |>  Console.WriteLine

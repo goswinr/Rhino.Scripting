@@ -15,8 +15,8 @@ open System.Globalization
 
 // This file and all other files with the name Scripting_**.fs will be combined into one large file called Scripting.fs before compiling.
 // This is done via the script combineIntoOneFile.fsx that is invoked as part of the build process.
-// This build process is needed because F# extension members dont work in C#, and C# extension members via Extension attribute show as instance mebers when useds in F#.
-// Autocomplete would not work well if this file has 20k lines while beeing edited.
+// This build process is needed because F# extension members don't work in C#, and C# extension members via Extension attribute show as instance members when used in F#.
+// Autocomplete would not work well if this file has 20k lines while being edited.
 
 /// A static class with static methods providing functions identical to RhinoScript in Python or VBscript
 [<AbstractClass; Sealed>]

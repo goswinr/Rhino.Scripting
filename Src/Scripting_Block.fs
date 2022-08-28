@@ -39,15 +39,15 @@ module AutoOpenBlock =
         let objects = Rarr()
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)  //Coerce should not be needed
-            if obj.IsReference then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Reference object %s to %s" (Print.guid objectId) name
+            if obj.IsReference then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Reference object %s to %s" (toNiceString objectId) name
             let ot = obj.ObjectType
-            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Light object %s to %s" (Print.guid objectId) name
-            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Grip object %s to %s" (Print.guid objectId) name
-            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Phantom object %s to %s" (Print.guid objectId) name
+            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Light object %s to %s" (toNiceString objectId) name
+            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Grip object %s to %s" (toNiceString objectId) name
+            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Phantom object %s to %s" (toNiceString objectId) name
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = Scripting.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
-                if uses then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Instance Ref object %s to %s" (Print.guid objectId) name
+                if uses then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Instance Ref object %s to %s" (toNiceString objectId) name
 
             objects.Add(obj)
         if objects.Count>0 then
@@ -361,6 +361,6 @@ module AutoOpenBlock =
         if deleteInput then 
             let k = State.Doc.Objects.Delete(newObjects, quiet=true)
             let l = Seq.length newObjects
-            if k <> l then RhinoScriptingException.Raise "Rhino.Scripting.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Print.nice newObjects)
+            if k <> l then RhinoScriptingException.Raise "Rhino.Scripting.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (toNiceString newObjects)
         State.Doc.InstanceDefinitions.ModifyGeometry(idef.Index,geos,attrs)
         

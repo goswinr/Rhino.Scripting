@@ -77,7 +77,7 @@ module AutoOpenSurface =
             let objs = objectIds|> Seq.map Scripting.CoerceRhinoObject
             let mutable ok,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
             if not bbox0.IsValid then
-                RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Print.nice objectIds) 
+                RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (toNiceString objectIds) 
             let mutable bboxMin = bbox0.Min
             let mutable bboxMax = bbox0.Max
             for i=0 to 2 do 
@@ -97,14 +97,14 @@ module AutoOpenSurface =
             let geometry = rhobj.Geometry
             bbox.Union( geometry.GetBoundingBox(true))        
         if not bbox.IsValid then
-            RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal        
+            RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (toNiceString objectIds) startPoint endPoint normal        
         #endif
         let line = Geometry.Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal // original : scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
         let surface = Rhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, bbox)
-        if surface|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
+        if surface|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (toNiceString objectIds) startPoint endPoint normal
         let objectId = State.Doc.Objects.AddSurface(surface)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Print.nice objectIds) startPoint endPoint normal
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (toNiceString objectIds) startPoint endPoint normal
         State.Doc.Views.Redraw()
         objectId
         
@@ -139,9 +139,9 @@ module AutoOpenSurface =
     static member AddEdgeSrf(curveIds:Guid seq) : Guid = 
         let curves =  rarr { for objectId in curveIds do yield Scripting.CoerceCurve(objectId) }
         let brep = Brep.CreateEdgeSurface(curves)
-        if brep|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.AddEdgeSrf failed.  curveIds:'%s'" (Print.nice curveIds)
+        if brep|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.AddEdgeSrf failed.  curveIds:'%s'" (toNiceString curveIds)
         let objectId = State.Doc.Objects.AddBrep(brep)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddEdgeSrf failed.  curveIds:'%s'" (Print.nice curveIds)
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddEdgeSrf failed.  curveIds:'%s'" (toNiceString curveIds)
         State.Doc.Views.Redraw()
         objectId
 
@@ -287,7 +287,7 @@ module AutoOpenSurface =
                         State.Doc.Views.Redraw()
                         rc
                     else
-                        RhinoScriptingException.Raise "Rhino.Scripting.AddPatch failed for %A and %A" (Print.nice objectIds) startSurfaceId
+                        RhinoScriptingException.Raise "Rhino.Scripting.AddPatch failed for %A and %A" (toNiceString objectIds) startSurfaceId
 
     ///<summary>Fits a Surface through Curve, point, point cloud, and Mesh objects.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers that indicate the objects to use for the patch fitting.
@@ -334,7 +334,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.AddPatch failed for %A and %A" (Print.nice objectIds) uvSpans
+            RhinoScriptingException.Raise "Rhino.Scripting.AddPatch failed for %A and %A" (toNiceString objectIds) uvSpans
 
 
     ///<summary>Creates a single walled Surface with a circular profile around a Curve.</summary>
@@ -372,12 +372,12 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Print.nice polyline)
+            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (toNiceString polyline)
             let rc =  State.Doc.Objects.AddBrep(breps.[0])
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(polyline:Polyline) failed on  %s" (Print.nice polyline)
+            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(polyline:Polyline) failed on  %s" (toNiceString polyline)
 
     ///<summary>Creates one Surface from one planar Curve.</summary>
     ///<param name="curve">(Curve) one Curve Geometry to use for creating planar Surfaces</param>
@@ -386,12 +386,12 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
-            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (Print.nice curve)
+            if breps.Length <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf created more then one surface on one input curve, use the seq overload instead on the same function on %s" (toNiceString curve)
             let rc =  State.Doc.Objects.AddBrep(breps.[0])
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(curve:Curve) failed on %s" (Print.nice curve)
+            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(curve:Curve) failed on %s" (toNiceString curve)
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="curves">(Curve seq) several Curves Geometries to use for creating planar Surfaces</param>
@@ -404,7 +404,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting. AddPlanarSrf(curves:Curve seq) failed on %s" (Print.nice curves)
+            RhinoScriptingException.Raise "Rhino.Scripting. AddPlanarSrf(curves:Curve seq) failed on %s" (toNiceString curves)
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
@@ -418,7 +418,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(objectIds:Guid seq) failed on %s" (Print.nice objectIds)
+            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(objectIds:Guid seq) failed on %s" (toNiceString objectIds)
 
 
 
@@ -473,10 +473,10 @@ module AutoOpenSurface =
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Guid Rarr = 
-        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
-        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
+        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (toNiceString objectIds) start ende loftType rebuild refit closed
+        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (toNiceString objectIds) start ende loftType rebuild refit closed
         let curves =  rarr { for objectId in objectIds do yield Scripting.CoerceCurve(objectId) }
-        if Seq.length(curves)<2 then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
+        if Seq.length(curves)<2 then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (toNiceString objectIds) start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
         let ende  = if ende  = Point3d.Origin  then Point3d.Unset else ende
         let mutable lt = LoftType.Normal
@@ -491,7 +491,7 @@ module AutoOpenSurface =
             breps <- Brep.CreateFromLoftRebuild(curves, start, ende, lt, closed, rebuild)
         elif refit > 0.0 then
             breps <- Brep.CreateFromLoftRefit(curves, start, ende, lt, closed, refit)
-        if isNull breps then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Print.nice objectIds) start ende loftType rebuild refit closed
+        if isNull breps then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (toNiceString objectIds) start ende loftType rebuild refit closed
         let idlist = Rarr()
         for brep in breps do
             let objectId = State.Doc.Objects.AddBrep(brep)
@@ -517,9 +517,9 @@ module AutoOpenSurface =
         let startAngle = toRadians(startAngle)
         let endAngle = toRadians(endAngle)
         let srf = RevSurface.Create(curve, axis, startAngle, endAngle)
-        if isNull srf then RhinoScriptingException.Raise "Rhino.Scripting.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Print.guid curveId) axis startAngle endAngle
+        if isNull srf then RhinoScriptingException.Raise "Rhino.Scripting.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (toNiceString curveId) axis startAngle endAngle
         let ns = srf.ToNurbsSurface()
-        if isNull ns then RhinoScriptingException.Raise "Rhino.Scripting.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (Print.guid curveId) axis startAngle endAngle
+        if isNull ns then RhinoScriptingException.Raise "Rhino.Scripting.AddRevSrf failed. curveId:'%s' axis:'%A' startAngle:'%A' endAngle:'%A'" (toNiceString curveId) axis startAngle endAngle
         let rc = State.Doc.Objects.AddSurface(ns)
         State.Doc.Views.Redraw()
         rc
@@ -830,7 +830,7 @@ module AutoOpenSurface =
             let idx = (!ci).Index
             !clpt,!s,!t, typ, idx, !n
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.BrepClosestPoint failed for %A and %A" (Print.guid objectId) point
+            RhinoScriptingException.Raise "Rhino.Scripting.BrepClosestPoint failed for %A and %A" (toNiceString objectId) point
 
 
     ///<summary>Caps planar holes in a Surface or Polysurface.</summary>
@@ -890,10 +890,10 @@ module AutoOpenSurface =
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
         let mutable curves = brep.DuplicateNakedEdgeCurves(outer, inner)
-        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Print.guid surfaceId) typ
+        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (toNiceString surfaceId) typ
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
-        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Print.guid surfaceId) typ
+        if curves|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (toNiceString surfaceId) typ
         let rc =  rarr { for c in curves do yield State.Doc.Objects.AddCurve(c) }
         State.Doc.Views.Redraw()
         rc
@@ -910,7 +910,7 @@ module AutoOpenSurface =
         let surface = Scripting.CoerceSurface(surfaceId)
         let rc = surface.PointAt(u, v)
         if rc.IsValid then rc
-        else RhinoScriptingException.Raise "Rhino.Scripting.EvaluateSurface failed.  surfaceId:'%s' u:'%f' v:'%f'" (Print.guid surfaceId) u v
+        else RhinoScriptingException.Raise "Rhino.Scripting.EvaluateSurface failed.  surfaceId:'%s' u:'%f' v:'%f'" (toNiceString surfaceId) u v
 
 
     ///<summary>Lengthens an untrimmed Surface object.</summary>
@@ -1031,7 +1031,7 @@ module AutoOpenSurface =
         let curve2 = Scripting.CoerceCurve(pathId)
         let srf = SumSurface.Create(curve1, curve2)
         let rc = State.Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeCurve failed. curveId:'%s' pathId:'%s'" (Print.guid curveId) <| Print.guid pathId
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeCurve failed. curveId:'%s' pathId:'%s'" (toNiceString curveId) <| toNiceString pathId
         State.Doc.Views.Redraw()
         rc
 
@@ -1045,7 +1045,7 @@ module AutoOpenSurface =
         //point = Scripting.Coerce3dpoint(point)
         let srf = Surface.CreateExtrusionToPoint(curve, point)
         let rc = State.Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeCurvePoint failed. curveId:'%s' point:'%A'" (Print.guid curveId) point
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeCurvePoint failed. curveId:'%s' point:'%A'" (toNiceString curveId) point
         State.Doc.Views.Redraw()
         rc
 
@@ -1064,7 +1064,7 @@ module AutoOpenSurface =
         let vec = endPoint - startPoint
         let srf = Surface.CreateExtrusion(curve, vec)
         let rc = State.Doc.Objects.AddSurface(srf)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeCurveStraight failed. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid curveId) startPoint endPoint
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeCurveStraight failed. curveId:'%s' startPoint:'%A' endPoint:'%A'" (toNiceString curveId) startPoint endPoint
         State.Doc.Views.Redraw()
         rc
 
@@ -1086,7 +1086,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeSurface failed on Surface: %s and Curve %s" (Print.guid surfaceId)  (Print.guid curveId)
+            RhinoScriptingException.Raise "Rhino.Scripting.ExtrudeSurface failed on Surface: %s and Curve %s" (toNiceString surfaceId)  (toNiceString curveId)
 
 
     ///<summary>Create constant radius rolling ball fillets between two Surfaces. Note,
@@ -1125,7 +1125,7 @@ module AutoOpenSurface =
     ///<returns>(bool) The current normal orientation.</returns>
     static member IsSurfaceFliped(surfaceId:Guid) : bool = //GET
         let brep = Scripting.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.IsSurfaceFliped failed. surfaceId:'%s'" (Print.guid surfaceId)
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.IsSurfaceFliped failed. surfaceId:'%s'" (toNiceString surfaceId)
         let face = brep.Faces.[0]
         face.OrientationIsReversed
 
@@ -1137,7 +1137,7 @@ module AutoOpenSurface =
     ///<returns>(unit) void, nothing.</returns>    
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = Scripting.CoerceBrep(surfaceId)
-        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed. surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
+        if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed. surfaceId:'%s' flip:'%A'" (toNiceString surfaceId) flip
         let face = brep.Faces.[0]
         let oldreverse = face.OrientationIsReversed
         if brep.IsSolid = false && oldreverse <> flip then
@@ -1154,7 +1154,7 @@ module AutoOpenSurface =
     static member FlipSurface(surfaceIds:Guid seq, flip:bool) : unit = //MULTISET
         for surfaceId in surfaceIds do
             let brep = Scripting.CoerceBrep(surfaceId)
-            if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (Print.guid surfaceId) flip
+            if brep.Faces.Count>1 then RhinoScriptingException.Raise "Rhino.Scripting.FlipSurface failed.  surfaceId:'%s' flip:'%A'" (toNiceString surfaceId) flip
             let face = brep.Faces.[0]
             let oldreverse = face.OrientationIsReversed
             if brep.IsSolid = false && oldreverse <> flip then
@@ -1281,7 +1281,7 @@ module AutoOpenSurface =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool = 
         //objectId = Scripting.Coerceguid(objectId)
         //point = Scripting.Coerce3dpoint(point)
-        //if objectId|> isNull  || point|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.IsPointInSurface failed.  objectId:'%s' point:'%A' strictlyIn:'%A' tolerance:'%A'" (Print.guid objectId) point strictlyIn tolerance
+        //if objectId|> isNull  || point|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.IsPointInSurface failed.  objectId:'%s' point:'%A' strictlyIn:'%A' tolerance:'%A'" (toNiceString objectId) point strictlyIn tolerance
         let obj = State.Doc.Objects.FindId(objectId)
         let  tolerance= Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         match obj with
@@ -1317,7 +1317,7 @@ module AutoOpenSurface =
                     rc <- b.Faces.[0].IsPointOnFace(u, v) <> PointFaceRelation.Exterior
                 | _ -> ()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.IsPointOnSurface failed for surf.ClosestPoint on %A %A" (Print.guid objectId) point
+            RhinoScriptingException.Raise "Rhino.Scripting.IsPointOnSurface failed for surf.ClosestPoint on %A %A" (toNiceString objectId) point
         rc
 
 
@@ -1491,15 +1491,15 @@ module AutoOpenSurface =
     ///<returns>(Guid) identifier of newly created object.</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
         let breps =  rarr { for objectId in objectIds do yield Scripting.CoerceBrep(objectId) }
-        if breps.Count<2 then RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (Print.nice objectIds) deleteInput
+        if breps.Count<2 then RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (toNiceString objectIds) deleteInput
         let tol = State.Doc.ModelAbsoluteTolerance * 2.1
         let joinedbreps = Brep.JoinBreps(breps, tol)
         if joinedbreps|> isNull  then
-            RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (Print.nice objectIds) deleteInput
+            RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (toNiceString objectIds) deleteInput
         if joinedbreps.Length <> 1 then
             RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces resulted in more than one object: %d  objectIds:'%A' deleteInput:'%A'" joinedbreps.Length objectIds deleteInput
         let rc = State.Doc.Objects.AddBrep(joinedbreps.[0])
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (Print.nice objectIds) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.JoinSurfaces failed.  objectIds:'%A' deleteInput:'%A'" (toNiceString objectIds) deleteInput
         if  deleteInput then
             for objectId in objectIds do
                 //id = Scripting.Coerceguid(objectId)
@@ -1521,7 +1521,7 @@ module AutoOpenSurface =
                                        [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let newsurf = Surface.CreatePeriodicSurface(surface, direction)
-        if newsurf|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (Print.guid surfaceId) direction deleteInput
+        if newsurf|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (toNiceString surfaceId) direction deleteInput
         //id = Scripting.Coerceguid(surfaceId)
         if deleteInput then
             State.Doc.Objects.Replace(surfaceId, newsurf)|> ignore
@@ -1553,12 +1553,12 @@ module AutoOpenSurface =
         let brep = Scripting.CoerceBrep(surfaceId)
         let mutable face = null
         if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
-        if face|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Print.guid surfaceId) distance tolerance bothSides createSolid
+        if face|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (toNiceString surfaceId) distance tolerance bothSides createSolid
         let tolerance= Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         let newbrep = Brep.CreateFromOffsetFace(face, distance, tolerance, bothSides, createSolid)
-        if newbrep|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Print.guid surfaceId) distance tolerance bothSides createSolid
+        if newbrep|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (toNiceString surfaceId) distance tolerance bothSides createSolid
         let rc = State.Doc.Objects.AddBrep(newbrep)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (Print.guid surfaceId) distance tolerance bothSides createSolid
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.OffsetSurface failed.  surfaceId:'%s' distance:'%A' tolerance:'%A' bothSides:'%A' createSolid:'%A'" (toNiceString surfaceId) distance tolerance bothSides createSolid
         State.Doc.Views.Redraw()
         rc
 
@@ -1645,7 +1645,7 @@ module AutoOpenSurface =
     ///<returns>(unit) void, nothing.</returns>
     static member ReverseSurface(surfaceId:Guid, direction:int) : unit = 
         let brep = Scripting.CoerceBrep(surfaceId)
-        if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (Print.guid surfaceId) direction
+        if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (toNiceString surfaceId) direction
         let face = brep.Faces.[0]
         if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignoreObj
         if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignoreObj
@@ -1691,14 +1691,14 @@ module AutoOpenSurface =
         //end = Scripting.Coerce3dpoint(endPoint)
         let rcstart, ustart, vstart = surface.ClosestPoint(startPoint)
         let rcend, uend, vend = surface.ClosestPoint(endPoint)
-        if not rcstart || not rcend then RhinoScriptingException.Raise "Rhino.Scripting.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid surfaceId) startPoint endPoint
+        if not rcstart || not rcend then RhinoScriptingException.Raise "Rhino.Scripting.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (toNiceString surfaceId) startPoint endPoint
         let start = Point2d(ustart, vstart)
         let ende = Point2d(uend, vend)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let curve = surface.ShortPath(start, ende, tolerance)
-        if curve|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid surfaceId) startPoint endPoint
+        if curve|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (toNiceString surfaceId) startPoint endPoint
         let objectId = State.Doc.Objects.AddCurve(curve)
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (Print.guid surfaceId) startPoint endPoint
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ShortPath failed.  surfaceId:'%s' startPoint:'%A' endPoint:'%A'" (toNiceString surfaceId) startPoint endPoint
         State.Doc.Views.Redraw()
         objectId
 
@@ -1711,7 +1711,7 @@ module AutoOpenSurface =
     ///<returns>(Guid) If createCopy is true the new Guid, else the input Guid.</returns>
     static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid = 
         let brep = Scripting.CoerceBrep(objectId)
-        if brep.Faces.ShrinkFaces() then RhinoScriptingException.Raise "Rhino.Scripting.ShrinkTrimmedSurface failed.  objectId:'%s' createCopy:'%A'" (Print.guid objectId) createCopy
+        if brep.Faces.ShrinkFaces() then RhinoScriptingException.Raise "Rhino.Scripting.ShrinkTrimmedSurface failed.  objectId:'%s' createCopy:'%A'" (toNiceString objectId) createCopy
         if  createCopy then
             let oldobj = State.Doc.Objects.FindId(objectId)
             let attr = oldobj.Attributes
@@ -1739,7 +1739,7 @@ module AutoOpenSurface =
         let cutter = Scripting.CoerceBrep(cutterId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let pieces = brep.Split(cutter, tol)
-        if isNull pieces then RhinoScriptingException.Raise "Rhino.Scripting.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (Print.guid brepId) (Print.guid cutterId) deleteInput
+        if isNull pieces then RhinoScriptingException.Raise "Rhino.Scripting.SplitBrep failed.  brepId:'%s' cutterId:'%s' deleteInput:'%A'" (toNiceString brepId) (toNiceString cutterId) deleteInput
         if deleteInput then
             //brepId = Scripting.Coerceguid(brepId)
             State.Doc.Objects.Delete(brepId, true) |> ignore
@@ -1775,7 +1775,7 @@ module AutoOpenSurface =
         match Scripting.CoerceGeometry objectId with
         | :? Surface as s -> Scripting.SurfaceArea s
         | :? Brep    as b -> Scripting.SurfaceArea b
-        | x -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea doesnt work on on %A" (Print.guid  objectId)
+        | x -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea doesnt work on on %A" (toNiceString  objectId)
 
 
     ///<summary>Calculates the area centroid of a Surface or Polysurface.</summary>
@@ -1790,7 +1790,7 @@ module AutoOpenSurface =
             |> Scripting.TryCoerceSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceAreaCentroid failed.  objectId:'%s'" (Print.guid objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceAreaCentroid failed.  objectId:'%s'" (toNiceString objectId))
         |> fun amp -> amp.Centroid
 
 
@@ -1875,7 +1875,7 @@ module AutoOpenSurface =
     static member SurfaceCone(surfaceId:Guid) : Plane * float * float = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let rc, cone = surface.TryGetCone()
-        if not rc then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceCone failed.  surfaceId:'%s'" (Print.guid surfaceId)
+        if not rc then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceCone failed.  surfaceId:'%s'" (toNiceString surfaceId)
         cone.Plane, cone.Height, cone.Radius
 
 
@@ -1894,9 +1894,9 @@ module AutoOpenSurface =
     ///    [7]   mean curvature.</returns>
     static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float= 
         let surface = Scripting.CoerceSurface(surfaceId)
-        //if Seq.length(parameter)<2 then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
+        //if Seq.length(parameter)<2 then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (toNiceString surfaceId) parameter
         let c = surface.CurvatureAt(parameter|> fst, parameter|> snd)
-        if c|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
+        if c|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (toNiceString surfaceId) parameter
         c.Point, c.Normal, c.Kappa(0), c.Direction(0), c.Kappa(1), c.Direction(1), c.Gaussian, c.Mean
 
 
@@ -1928,7 +1928,7 @@ module AutoOpenSurface =
     ///<param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
     ///<returns>(float * float) containing the domain interval in the specified direction.</returns>
     static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float = 
-        if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceDomain failed.  surfaceId:'%s' direction:'%A'" (Print.guid surfaceId) direction
+        if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceDomain failed.  surfaceId:'%s' direction:'%A'" (toNiceString surfaceId) direction
         let surface = Scripting.CoerceSurface(surfaceId)
         let domain = surface.Domain(direction)
         domain.T0, domain.T1
@@ -1945,7 +1945,7 @@ module AutoOpenSurface =
     static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (Print.guid surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (toNiceString surfaceId) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -1979,7 +1979,7 @@ module AutoOpenSurface =
     static member SurfaceEditPointPrameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEditPointParameterss failed.  surfaceId:'%s'  returnAll:'%A'" (Print.guid surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEditPointParameterss failed.  surfaceId:'%s'  returnAll:'%A'" (toNiceString surfaceId) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0
@@ -2023,7 +2023,7 @@ module AutoOpenSurface =
                                    derivative:int) : Point3d * Vector3d Rarr = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
-        if not success then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (Print.guid surfaceId) parameter derivative
+        if not success then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (toNiceString surfaceId) parameter derivative
         let rc = rarr{()}
         if der.Length > 0 then
           for d in der do rc.Add(d)
@@ -2060,7 +2060,7 @@ module AutoOpenSurface =
                 rhinoobject.Attributes.WireDensity
         | :?  DocObjects.ExtrusionObject as rhinoobject ->
                 rhinoobject.Attributes.WireDensity
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s'" (Print.guid surfaceId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s'" (toNiceString surfaceId)
 
 
     ///<summary>Sets the isocurve density of a Surface or Polysurface object.
@@ -2091,7 +2091,7 @@ module AutoOpenSurface =
                 rhinoobject.Attributes.WireDensity <- dens
                 rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
                 State.Doc.Views.Redraw()
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Print.guid surfaceId) density
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (toNiceString surfaceId) density
 
 
     ///<summary>Sets the isocurve density of multiple Surface or Polysurface objects.
@@ -2120,7 +2120,7 @@ module AutoOpenSurface =
                     let dens = if density<0 then -1 else density
                     rhinoobject.Attributes.WireDensity <- dens
                     rhinoobject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Print.guid surfaceId) density
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (toNiceString surfaceId) density
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the control point count of a Surface
@@ -2143,11 +2143,11 @@ module AutoOpenSurface =
     static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList= 
         let surface = Scripting.CoerceSurface(surfaceId)
         let nurbsurf = surface.ToNurbsSurface()
-        if nurbsurf|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceKnots failed.  surfaceId:'%s'" (Print.guid surfaceId)
+        if nurbsurf|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceKnots failed.  surfaceId:'%s'" (toNiceString surfaceId)
         nurbsurf.KnotsU , nurbsurf.KnotsV
         //let sknots =  rarr { for knot in nurbsurf.KnotsU do yield knot }
         //let tknots =  rarr { for knot in nurbsurf.KnotsV do yield knot }
-        //if isNull sknots || not tknots then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceKnots failed.  surfaceId:'%s'" (Print.guid surfaceId)
+        //if isNull sknots || not tknots then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceKnots failed.  surfaceId:'%s'" (toNiceString surfaceId)
         //sknots, tknots
 
 
@@ -2179,9 +2179,9 @@ module AutoOpenSurface =
         let udomain = surface.Domain(0)
         let vdomain = surface.Domain(1)
         if parameter|> fst<udomain.Min || parameter|> fst>udomain.Max then
-            RhinoScriptingException.Raise "Rhino.Scripting.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
+            RhinoScriptingException.Raise "Rhino.Scripting.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (toNiceString surfaceId) parameter
         if parameter|> snd<vdomain.Min || parameter|> snd>vdomain.Max then
-            RhinoScriptingException.Raise "Rhino.Scripting.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (Print.guid surfaceId) parameter
+            RhinoScriptingException.Raise "Rhino.Scripting.SurfaceNormalizedParameter failed.  surfaceId:'%s' parameter:'%A'" (toNiceString surfaceId) parameter
         let u = udomain.NormalizedParameterAt(parameter|> fst)
         let v = vdomain.NormalizedParameterAt(parameter|> snd)
         u, v
@@ -2219,7 +2219,7 @@ module AutoOpenSurface =
     static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (Print.guid surfaceId) returnAll
+        if ns|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (toNiceString surfaceId) returnAll
         let rc = Rarr()
         for u = 0 to ns.Points.CountU - 1 do
             for v = 0 to ns.Points.CountV - 1 do
@@ -2253,7 +2253,7 @@ module AutoOpenSurface =
             |> Scripting.TryCoerceSurface
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolume failed on %A" (Print.guid objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolume failed on %A" (toNiceString objectId))
         |> fun amp -> amp.Volume
 
 
@@ -2263,15 +2263,15 @@ module AutoOpenSurface =
     static member SurfaceVolumeCentroid(objectId:Guid) : Point3d = 
         objectId
         |> Scripting.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeCentroid failed on  open Brep %A" (Print.guid objectId))
+        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeCentroid failed on  open Brep %A" (toNiceString objectId))
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
             objectId
             |> Scripting.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeCentroid failed on  open Surface %A" (Print.guid objectId))
+            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeCentroid failed on  open Surface %A" (toNiceString objectId))
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeCentroid failed on %A" (Print.guid objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeCentroid failed on %A" (toNiceString objectId))
         |> fun amp -> amp.Centroid
 
 
@@ -2297,15 +2297,15 @@ module AutoOpenSurface =
     static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) Rarr = 
         objectId
         |> Scripting.TryCoerceBrep
-        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeMoments failed on  open Brep %A" (Print.guid objectId))
+        |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeMoments failed on  open Brep %A" (toNiceString objectId))
         |> Option.map VolumeMassProperties.Compute
         |> Option.orElseWith (fun () ->
             objectId
             |> Scripting.TryCoerceSurface
-            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeMoments failed on  open Surface %A" (Print.guid objectId))
+            |> Option.bind (fun s -> if s.IsSolid then Some s else RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeMoments failed on  open Surface %A" (toNiceString objectId))
             |> Option.map VolumeMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeMoments failed on %A" (Print.guid objectId))
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceVolumeMoments failed on %A" (toNiceString objectId))
         |> fun mp ->
             rarr{
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -2334,7 +2334,7 @@ module AutoOpenSurface =
     static member SurfaceWeights(objectId:Guid) : float Rarr = 
         let surface = Scripting.CoerceSurface(objectId)
         let ns = surface.ToNurbsSurface()
-        if ns|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceWeights failed.  objectId:'%s'" (Print.guid objectId)
+        if ns|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceWeights failed.  objectId:'%s'" (toNiceString objectId)
         let rc = Rarr()
         for u = 0 to ns.Points.CountU - 1 do
             for v = 0 to ns.Points.CountV - 1 do
@@ -2507,7 +2507,7 @@ module AutoOpenSurface =
                 | :? Curve as g -> unroll.AddFollowingGeometry(g) //TODO verify order is correct ???
                 | :? Point as g -> unroll.AddFollowingGeometry(g)
                 | :? TextDot as g -> unroll.AddFollowingGeometry(g)
-                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.UnrollSurface: cannot add (a %s) as following Geometry" (Print.guid objectId)
+                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.UnrollSurface: cannot add (a %s) as following Geometry" (toNiceString objectId)
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then RhinoScriptingException.Raise "Rhino.Scripting.UnrollSurface: failed on  %A" surfaceId
@@ -2535,7 +2535,7 @@ module AutoOpenSurface =
         let u, v = degree
         let maxnurbsdegree = 11
         if u < 1 || u > maxnurbsdegree || v < 1 || v > maxnurbsdegree ||  (surface.Degree(0) = u && surface.Degree(1) = v) then
-            RhinoScriptingException.Raise "Rhino.Scripting.ChangeSurfaceDegree failed on %A" (Print.guid objectId)
+            RhinoScriptingException.Raise "Rhino.Scripting.ChangeSurfaceDegree failed on %A" (toNiceString objectId)
         let mutable r = false
         if surface.IncreaseDegreeU(u) then
             if surface.IncreaseDegreeV(v) then

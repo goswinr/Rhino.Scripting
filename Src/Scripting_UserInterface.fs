@@ -637,7 +637,7 @@ module AutoOpenUserInterface =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
 
             | _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (Print.guid surfaceId) message
+                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (toNiceString surfaceId) message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then

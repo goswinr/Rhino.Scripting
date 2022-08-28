@@ -2,14 +2,14 @@
 
 open Rhino.Geometry
 
-[<AutoOpen>]
 /// This module provides type extensions for Points , Vector,  Lines
 /// Mostly for conversion to other types
 /// This module is automatically opened when Rhino.Scripting namespace is opened.
 /// These type extensions are only visible in F#.
+[<AutoOpen>]
 module AutoOpenRhinoTypeExtensions = 
 
-    // NOTE: Extensions for .ToNiceString are in Print Module !!
+    // NOTE: Extensions for .ToNiceString are in ToNiceString module !!
 
     type Point3d with
 

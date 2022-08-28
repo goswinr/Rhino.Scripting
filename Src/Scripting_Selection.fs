@@ -624,7 +624,7 @@ module AutoOpenSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None -> RhinoScriptingException.Raise "Rhino.Scripting.NextObject not found for %A" (Print.guid objectId)
+            |None -> RhinoScriptingException.Raise "Rhino.Scripting.NextObject not found for %A" (toNiceString objectId)
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id

@@ -30,6 +30,7 @@
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
+    <Compile Include="Src\ToNiceStringExtensions.fs" />
     <Compile Include="Src/Print.fs" />
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />

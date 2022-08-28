@@ -25,13 +25,13 @@ module AutoOpenCoerce =
 
 
 
-    /// TODO all the functions taking a generic parameter should not be called coerce but rather try convert ?? no ?
-    /// TODO none of the coerce function should take generic parameter, just a few overloads
+    // TODO all the functions taking a generic parameter should not be called coerce but rather try convert ?? no ?
+    // TODO none of the coerce function should take generic parameter, just a few overloads
 
 
-  //---------------------------------------------------
-  //-----------------Coerce and TryCoerce pairs -------
-  //---------------------------------------------------
+    //---------------------------------------------------
+    //-----------------Coerce and TryCoerce pairs -------
+    //---------------------------------------------------
 
 
 
@@ -108,7 +108,7 @@ module AutoOpenCoerce =
     static member CoerceLight (objectId:Guid) : Light = 
         match Scripting.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
-        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLight failed on: %s " (Print.guid objectId)
+        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLight failed on: %s " (toNiceString objectId)
 
 
     ///<summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
@@ -128,7 +128,7 @@ module AutoOpenCoerce =
     static member CoerceMesh(objectId:Guid) : Mesh = 
         match Scripting.TryCoerceMesh(objectId) with
         | Some m -> m
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceMesh failed on: %s " (Print.guid objectId)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceMesh failed on: %s " (toNiceString objectId)
 
     ///<summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Surface Identifier (Guid)</param>
@@ -177,7 +177,7 @@ module AutoOpenCoerce =
     static member CoerceBrep(objectId:Guid) : Brep  = 
         match Scripting.TryCoerceBrep(objectId) with
         | Some b -> b
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBrep failed on: %s " (Print.guid objectId)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBrep failed on: %s " (toNiceString objectId)
 
     ///<summary>Attempt to get Curve geometry from the document with a given objectId.</summary>
     ///<param name="objectId">objectId (Guid or string) to be Scripting.Coerced into a Curve</param>
@@ -206,15 +206,15 @@ module AutoOpenCoerce =
         if segmentIndex < 0 then
             match Scripting.CoerceGeometry(objectId) with
             | :? Curve as c -> c
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on: %s " (Print.guid objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on: %s " (toNiceString objectId)
         else
             match Scripting.CoerceGeometry(objectId) with
             | :? PolyCurve as c ->
                 let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on segment index %d for %s" segmentIndex  (Print.guid objectId)
+                if isNull crv then RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on segment index %d for %s" segmentIndex  (toNiceString objectId)
                 crv
             | :? Curve as c -> c
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed for %s"  (Print.guid objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed for %s"  (toNiceString objectId)
 
 
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
@@ -242,7 +242,7 @@ module AutoOpenCoerce =
     static member CoerceLine(line:'T) : Line= 
         match Scripting.TryCoerceLine(line) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLine failed on: %s " (Print.nice line)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLine failed on: %s " (toNiceString line)
 
     ///<summary>Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance.
     /// does not return circles as arcs.</summary>
@@ -273,7 +273,7 @@ module AutoOpenCoerce =
     static member CoerceArc(arc:'T) : Arc= 
         match Scripting.TryCoerceArc(arc) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceArc failed on: %s " (Print.nice arc)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceArc failed on: %s " (toNiceString arc)
 
 
     ///<summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
@@ -303,7 +303,7 @@ module AutoOpenCoerce =
     static member CoerceCircle(circ:'T) : Circle= 
         match Scripting.TryCoerceCircle(circ) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCircle failed on: %s " (Print.nice circ)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCircle failed on: %s " (toNiceString circ)
 
     ///<summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="cir">Guid, RhinoObject or Curve </param>
@@ -332,7 +332,7 @@ module AutoOpenCoerce =
     static member CoerceEllips(ellip:'T) : Ellipse= 
         match Scripting.TryCoerceEllipse(ellip) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceEllipse failed on: %s " (Print.nice ellip)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceEllipse failed on: %s " (toNiceString ellip)
 
     //----------------------------------------------------
     //---------------Coerce only (no TryCoerce) ----------  TODO: add TryCoerce ?
@@ -363,7 +363,7 @@ module AutoOpenCoerce =
         let l = State.Doc.Layers.FindId(layerId)
         if isNull l then
             if notNull (State.Doc.Objects.FindId(layerId)) then
-                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Document Object (with Geometry) '%s'" (Print.guid layerId)
+                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Document Object (with Geometry) '%s'" (toNiceString layerId)
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could not find Guid %O in State.Doc.Layer table'" layerId
         l
@@ -374,7 +374,7 @@ module AutoOpenCoerce =
     static member CoerceBlockInstanceObject(objectId:Guid) : DocObjects.InstanceObject = 
         match Scripting.CoerceRhinoObject(objectId) with
         | :? DocObjects.InstanceObject as b -> b
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBlockInstanceObject: unable to coerce Block InstanceObject from '%s'" (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBlockInstanceObject: unable to coerce Block InstanceObject from '%s'" (toNiceString objectId)
 
 
 
@@ -432,7 +432,7 @@ module AutoOpenCoerce =
     static member CoerceDetailView (objectId:Guid) : DetailView = 
         match Scripting.CoerceGeometry objectId with
         | :?  DetailView as a -> a
-        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailView failed on %s"  (Print.guid objectId)
+        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailView failed on %s"  (toNiceString objectId)
 
     ///<summary>Attempt to get Detail view rectangle Object.</summary>
     ///<param name="objectId">(Guid) objectId of Detail object</param>
@@ -440,7 +440,7 @@ module AutoOpenCoerce =
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailViewObject failed on %s"  (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailViewObject failed on %s"  (toNiceString objectId)
 
 
     //-------Annotation ----
@@ -452,7 +452,7 @@ module AutoOpenCoerce =
     static member CoerceTextDot (objectId:Guid) : TextDot = 
         match Scripting.CoerceGeometry objectId with
         | :?  TextDot as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextDot failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextDot failed on: %s " (toNiceString objectId)
 
     ///<summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) .</summary>
     ///<param name="objectId">(Guid) objectId of TextEntity object</param>
@@ -460,7 +460,7 @@ module AutoOpenCoerce =
     static member CoerceTextEntity (objectId:Guid) : TextEntity = 
         match Scripting.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextEntity failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextEntity failed on: %s " (toNiceString objectId)
 
 
     ///<summary>Attempt to get Rhino TextObject Annotation Object.</summary>
@@ -469,7 +469,7 @@ module AutoOpenCoerce =
     static member CoerceTextObject (objectId:Guid) : DocObjects.TextObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.TextObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextObject failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextObject failed on: %s " (toNiceString objectId)
 
     ///<summary>Attempt to get Hatch Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of Hatch object</param>
@@ -477,7 +477,7 @@ module AutoOpenCoerce =
     static member CoerceHatch (objectId:Guid) : Hatch = 
         match Scripting.CoerceGeometry objectId with
         | :?  Hatch as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatch failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatch failed on: %s " (toNiceString objectId)
 
 
     ///<summary>Attempt to get Rhino Hatch Object.</summary>
@@ -486,7 +486,7 @@ module AutoOpenCoerce =
     static member CoerceHatchObject (objectId:Guid) : DocObjects.HatchObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatchObject failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatchObject failed on: %s " (toNiceString objectId)
 
     ///<summary>Attempt to get Rhino Annotation Base Object.</summary>
     ///<param name="objectId">(Guid) objectId of annotation object</param>
@@ -494,7 +494,7 @@ module AutoOpenCoerce =
     static member CoerceAnnotation (objectId:Guid) : DocObjects.AnnotationObjectBase = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceAnnotation failed on: %s " (Print.guid objectId)
+        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceAnnotation failed on: %s " (toNiceString objectId)
 
 
     ///<summary>Attempt to get Rhino Leader Annotation Object.</summary>
@@ -503,7 +503,7 @@ module AutoOpenCoerce =
     static member CoerceLeader (objectId:Guid) : DocObjects.LeaderObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.LeaderObject as a -> a
-        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLeader failed on: %s " (Print.guid objectId)
+        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLeader failed on: %s " (toNiceString objectId)
 
     ///<summary>Attempt to get Rhino LinearDimension Annotation Object.</summary>
     ///<param name="objectId">(Guid) objectId of LinearDimension object</param>
@@ -511,7 +511,7 @@ module AutoOpenCoerce =
     static member CoerceLinearDimension (objectId:Guid) : DocObjects.LinearDimensionObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.LinearDimensionObject as a -> a
-        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLinearDimension failed on: %s " (Print.guid objectId)
+        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLinearDimension failed on: %s " (toNiceString objectId)
 
     //---------Geometry ------------
     
@@ -551,9 +551,9 @@ module AutoOpenCoerce =
                     else
                         let ys = s.Split(',')
                         Point3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))
-                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (Print.nice pt)
+                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (toNiceString pt)
             with _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (Print.nice pt)
+                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (toNiceString pt)
 
     ///<summary>Attempt to get Rhino Point Object.</summary>
     ///<param name="objectId">(Guid) objectId of Point object</param>
@@ -561,7 +561,7 @@ module AutoOpenCoerce =
     static member CoercePointObject (objectId:Guid) : DocObjects.PointObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.PointObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointObject failed on: %s " (Print.guid objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointObject failed on: %s " (toNiceString objectId)
 
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible.</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
@@ -605,9 +605,9 @@ module AutoOpenCoerce =
                     else
                         let ys = s.Split(',')
                         Vector3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))
-                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (Print.nice vec)
+                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (toNiceString vec)
             with _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (Print.nice vec)
+                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (toNiceString vec)
 
 
 
@@ -624,7 +624,7 @@ module AutoOpenCoerce =
                 pl.Origin <- pt
                 pl
             with e ->
-                RhinoScriptingException.Raise "Rhino.Scripting.CoercePlane failed on: %s " (Print.nice plane)
+                RhinoScriptingException.Raise "Rhino.Scripting.CoercePlane failed on: %s " (toNiceString plane)
 
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
     ///<param name="xForm">object to convert</param>
@@ -661,7 +661,7 @@ module AutoOpenCoerce =
         | :? Surface as c -> c.ToNurbsSurface()
         | :? Brep as b ->
             if b.Faces.Count = 1 then (b.Faces.[0] :> Surface).ToNurbsSurface()
-            else RhinoScriptingException.Raise "Rhino.Scripting.CoerceNurbsSurface failed on %s from Brep with %d Faces" (Print.guid objectId)   b.Faces.Count
+            else RhinoScriptingException.Raise "Rhino.Scripting.CoerceNurbsSurface failed on %s from Brep with %d Faces" (toNiceString objectId)   b.Faces.Count
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceNurbsSurface failed on: %O "  objectId
 
 
@@ -672,7 +672,7 @@ module AutoOpenCoerce =
     static member CoercePointCloud (objectId:Guid) : PointCloud = 
         match Scripting.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
-        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointCloud failed on: %s " (Print.guid objectId)
+        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointCloud failed on: %s " (toNiceString objectId)
             
     
     ///<summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>

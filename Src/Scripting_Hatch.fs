@@ -133,7 +133,7 @@ module AutoOpenHatch =
         try Scripting.AddHatch(curves, hatchPattern, scale, rotation) 
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on curveIds:'%s' \r\nMessage: %s" (Print.nice curveIds)  e.Message
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on curveIds:'%s' \r\nMessage: %s" (toNiceString curveIds)  e.Message
             
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -150,7 +150,7 @@ module AutoOpenHatch =
         try Scripting.AddHatch(Scripting.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)             
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on one curve %s\r\nMessage: %s" (Print.nice curveId)  e.Message
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on one curve %s\r\nMessage: %s" (toNiceString curveId)  e.Message
        
 
 
@@ -208,7 +208,7 @@ module AutoOpenHatch =
         let rhobj = Scripting.CoerceRhinoObject(hatchId)
         let geo =  Scripting.CoerceHatch(hatchId)
         let pieces = geo.Explode()
-        if isNull pieces then RhinoScriptingException.Raise "Rhino.Scripting.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Print.guid hatchId) delete
+        if isNull pieces then RhinoScriptingException.Raise "Rhino.Scripting.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (toNiceString hatchId) delete
         let attr = rhobj.Attributes
         let rc = Rarr()
         for piece in pieces do
@@ -242,9 +242,9 @@ module AutoOpenHatch =
         let oldindex = hatchobj.HatchGeometry.PatternIndex
         Scripting.InitHatchPatterns()
         let newpatt = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if newpatt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Print.guid hatchId) hatchPattern
+        if newpatt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (toNiceString hatchId) hatchPattern
         hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
-        if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Print.guid hatchId) hatchPattern
+        if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (toNiceString hatchId) hatchPattern
         State.Doc.Views.Redraw()
 
     ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
@@ -258,9 +258,9 @@ module AutoOpenHatch =
             let hatchobj = Scripting.CoerceHatchObject(hatchId)
             let oldindex = hatchobj.HatchGeometry.PatternIndex
             let newpatt = State.Doc.HatchPatterns.FindName(hatchPattern)
-            if newpatt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Print.guid hatchId) hatchPattern
+            if newpatt|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (toNiceString hatchId) hatchPattern
             hatchobj.HatchGeometry.PatternIndex <- newpatt.Index
-            if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Print.guid hatchId) hatchPattern
+            if not<| hatchobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (toNiceString hatchId) hatchPattern
         State.Doc.Views.Redraw()
 
 

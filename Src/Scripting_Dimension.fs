@@ -188,7 +188,7 @@ module AutoOpenDimension =
     static member DimensionStyle(objectId:Guid, dimStyleName:string) : unit = //SET
         let annotationObject = Scripting.CoerceAnnotation(objectId)
         let ds =  State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Print.guid objectId) dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (toNiceString objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionStyle : CommitChanges failed"
@@ -200,7 +200,7 @@ module AutoOpenDimension =
     ///<returns>(unit) void, nothing.</returns>
     static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
         let ds =  State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Print.nice objectIds) dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (toNiceString objectIds) dimStyleName
         for objectId in objectIds do
             let annotationObject = Scripting.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
@@ -764,7 +764,7 @@ module AutoOpenDimension =
             | :? Leader as g ->
                 let annotationObject = Scripting.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText get failed.  objectId:'%s'" (Print.guid objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText get failed.  objectId:'%s'" (toNiceString objectId)
 
     ///<summary>Modifies the text string of a dimension leader object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -775,10 +775,10 @@ module AutoOpenDimension =
             | :? Leader as g ->
                 let annotationObject = Scripting.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
-                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "Rhino.Scripting.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Print.guid objectId)
+                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "Rhino.Scripting.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (toNiceString objectId)
                 annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.LeaderText : CommitChanges failed"
                 State.Doc.Views.Redraw()
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText set failed for  %s"  (Print.guid objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText set failed for  %s"  (toNiceString objectId)
 
     ///<summary>Modifies the text string of multiple dimension leader objects.</summary>
     ///<param name="objectIds">(Guid seq) The objects's identifiers</param>

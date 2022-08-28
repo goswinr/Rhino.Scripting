@@ -278,7 +278,7 @@ module AutoOpenGeometry =
     static member Area(objectId:Guid) : float = 
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties from objectId:'%s'" (Print.guid objectId)
+        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties from objectId:'%s'" (toNiceString objectId)
         mp.Area
 
     ///<summary>Returns a world axis-aligned bounding box of several objects.
@@ -601,7 +601,7 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
         let pt = Scripting.Coerce3dPoint(objectId)
-        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "Rhino.Scripting.PointCoordinates failed to change object %s to %s" (Print.guid objectId) (toNiceString point)
+        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "Rhino.Scripting.PointCoordinates failed to change object %s to %s" (toNiceString objectId) (toNiceString point)
         State.Doc.Views.Redraw()
 
 
@@ -619,7 +619,7 @@ module AutoOpenGeometry =
     static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
         let textdot = Scripting.CoerceTextDot(objectId)
         textdot.FontFace <-  fontface
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Print.guid objectId) fontface
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (toNiceString objectId) fontface
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font of multiple text dots.</summary>
@@ -630,7 +630,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let textdot = Scripting.CoerceTextDot(objectId)
             textdot.FontFace <-  fontface
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Print.guid objectId) fontface
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (toNiceString objectId) fontface
         State.Doc.Views.Redraw()
 
 
@@ -647,7 +647,7 @@ module AutoOpenGeometry =
     static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
         let textdot = Scripting.CoerceTextDot(objectId)
         textdot.FontHeight <- height
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotHeight failed to change object %s to %d" (Print.guid objectId) height
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotHeight failed to change object %s to %d" (toNiceString objectId) height
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font height of multiple text dots.</summary>
@@ -658,7 +658,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let textdot = Scripting.CoerceTextDot(objectId)
             textdot.FontHeight <- height
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotHeight failed to change object %s to %d" (Print.guid objectId) height
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotHeight failed to change object %s to %d" (toNiceString objectId) height
         State.Doc.Views.Redraw()
 
 
@@ -676,7 +676,7 @@ module AutoOpenGeometry =
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
         let textdot = Scripting.CoerceTextDot(objectId)
         textdot.Point <-  point
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotPoint failed to change object %s to %s" (Print.guid objectId) point.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotPoint failed to change object %s to %s" (toNiceString objectId) point.ToNiceString
         State.Doc.Views.Redraw()
 
 
@@ -697,7 +697,7 @@ module AutoOpenGeometry =
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
         let textdot = Scripting.CoerceTextDot(objectId)
         textdot.Text <-  text
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotText failed to change object %s to '%s'" (Print.guid objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotText failed to change object %s to '%s'" (toNiceString objectId) text
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the text on multiple text dot objects.</summary>
@@ -708,7 +708,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let textdot = Scripting.CoerceTextDot(objectId)
             textdot.Text <-  text
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotText failed to change object %s to '%s'" (Print.guid objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotText failed to change object %s to '%s'" (toNiceString objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -733,7 +733,7 @@ module AutoOpenGeometry =
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = Scripting.CoerceTextEntity(objectId)
         annotation.TextHeight <-  height
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Print.guid objectId) height.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectHeight failed.  objectId:'%s' height:'%s'" (toNiceString objectId) height.ToNiceString
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the height of multiple text objects.</summary>
@@ -744,7 +744,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let annotation = Scripting.CoerceTextEntity(objectId)
             annotation.TextHeight <-  height
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Print.guid objectId) height.ToNiceString
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectHeight failed.  objectId:'%s' height:'%s'" (toNiceString objectId) height.ToNiceString
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
@@ -761,7 +761,7 @@ module AutoOpenGeometry =
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
         let annotation = Scripting.CoerceTextEntity(objectId)
         annotation.Plane <-  plane
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectPlane failed.  objectId:'%s' plane:'%s'" (Print.guid objectId) plane.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectPlane failed.  objectId:'%s' plane:'%s'" (toNiceString objectId) plane.ToNiceString
         State.Doc.Views.Redraw()
 
 
@@ -781,7 +781,7 @@ module AutoOpenGeometry =
         plane.Origin <-  point
         text.Plane <-  plane
 
-        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectPoint failed.  objectId:'%s' point:'%s'" (Print.guid objectId) point.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectPoint failed.  objectId:'%s' point:'%s'" (toNiceString objectId) point.ToNiceString
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the font style of a text object.</summary>
@@ -813,7 +813,7 @@ module AutoOpenGeometry =
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
         let annotation = Scripting.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (toNiceString objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -826,7 +826,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let annotation = Scripting.CoerceTextEntity(objectId)
             annotation.PlainText <-  text
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (toNiceString objectId) text
         State.Doc.Views.Redraw()
     
 
@@ -851,7 +851,7 @@ module AutoOpenGeometry =
             annotation.SetRichText(rtfString, ds)
         else 
             annotation.RichText <-  rtfString
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) rtfString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (toNiceString objectId) rtfString
         State.Doc.Views.Redraw()
 
 
@@ -867,13 +867,13 @@ module AutoOpenGeometry =
             if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText, style not found:'%s'"  style    
             for objectId in objectIds do
                 let annotation = Scripting.CoerceTextEntity(objectId)                
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Print.guid objectId) rtfString style
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (toNiceString objectId) rtfString style
                 annotation.SetRichText(rtfString, ds)
         else             
             for objectId in objectIds do
                 let annotation = Scripting.CoerceTextEntity(objectId)
                 annotation.RichText <-  rtfString
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Print.guid objectId) rtfString
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (toNiceString objectId) rtfString
         State.Doc.Views.Redraw()
 
 
@@ -895,10 +895,10 @@ module AutoOpenGeometry =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style)
-        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Print.guid objectId) style fontdata.QuartetName 
+            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (toNiceString objectId) style)
+        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (toNiceString objectId) style fontdata.QuartetName 
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
-            RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Print.guid objectId) style
+            RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (toNiceString objectId) style
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
@@ -928,9 +928,9 @@ module AutoOpenGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font)        
+            |? (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (toNiceString objectId) font)        
         annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Print.guid objectId) font
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (toNiceString objectId) font
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
