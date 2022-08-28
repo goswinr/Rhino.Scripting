@@ -30,7 +30,7 @@
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
-    <Compile Include="Src\ToNiceStringExtensions.fs" />
+    <Compile Include="Src/ToNiceStringExtensions.fs" />
     <Compile Include="Src/Print.fs" />
     <Compile Include="Src/AutoOpenRhinoTypeExtensions.fs" />
     <Compile Include="Src/Util.fs" />
@@ -39,7 +39,6 @@
 
     <Compile Include="Src/Scripting_Header.fs" />
     <Compile Include="Src/Scripting_Coerce.fs" />
-    <Compile Include="Src/Scripting_Printing.fs" />
     <Compile Include="Src/Scripting_Layer.fs" />
     <Compile Include="Src/Scripting_Application.fs" />
     <Compile Include="Src/Scripting_Block.fs" />

@@ -24,8 +24,7 @@ module CombineIntoOneFile =
     let head = "Src/Scripting_Header.fs"
     
     let files = [ 
-        "Src/Scripting_Coerce.fs" 
-        "Src/Scripting_Printing.fs" 
+        "Src/Scripting_Coerce.fs"         
         "Src/Scripting_Layer.fs" 
         "Src/Scripting_Application.fs" 
         "Src/Scripting_Block.fs" 
@@ -52,13 +51,17 @@ module CombineIntoOneFile =
         "Src/Scripting_UserInterface.fs" 
         "Src/Scripting_Utility.fs" 
         "Src/Scripting_Views.fs" 
-        ]      
+        ]    
+        
+
     
     let getLines(p:string) = 
         if IO.File.Exists p then   
             IO.File.ReadAllLines p
         else 
-            eprintfn "*!*!*!*!*!* File %s not found in CurrentDirectory: %s" p Environment.CurrentDirectory
+            eprintfn "*!*!*!*!*!* ERROR in build script "
+            eprintfn "*!*!*!*!*!* File %s NOT found in CurrentDirectory: %s" p Environment.CurrentDirectory
+            eprintfn "*!*!*!*!*!* ERROR in build script "
             [| |]
             
     let afterMarker file (lns:string []) :seq<string> = 
@@ -67,7 +70,9 @@ module CombineIntoOneFile =
             //lns.[i+1 .. ] // |> Array.map (addNote file) 
             Seq.skip i lns
         |None ->  
-            eprintfn "*!*!*!*!*!* Split marker %s not found in %s !" splitMarker  file 
+            eprintfn "*!*!*!*!*!* ERROR in build script "
+            eprintfn "*!*!*!*!*!* Split marker %s NO found in %s !" splitMarker  file 
+            eprintfn "*!*!*!*!*!* ERROR in build script "
             Seq.empty
                 
     let run() =  

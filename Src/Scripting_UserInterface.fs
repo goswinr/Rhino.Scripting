@@ -285,7 +285,7 @@ module AutoOpenUserInterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    Scripting.PrintfnBlue "Distance: %s %s"d.ToNiceString (
+                    PrintSetup.printfnBlue "Distance: %s %s"d.ToNiceString (
                                 State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false))
 
                     gp2.Dispose()
@@ -703,12 +703,12 @@ module AutoOpenUserInterface =
                             if cont && gp.CommandResult() <> Commands.Result.Success then
                                 rc.Clear()
                                 cont <- false
-                                Scripting.PrintfnRed "%s" "GetPoints no Success"
+                                PrintSetup.printfnRed "%s" "GetPoints had no Success"
                             if cont then
                                 prevPoint <- gp.Point()
                                 rc.Add(prevPoint)
                 if rc.Count>0 then
-                    Scripting.PrintfnBlue "%d Points picked" rc.Count
+                    PrintSetup.printfnBlue "%d Points picked" rc.Count
                     rc
                 else
                     RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoints()"

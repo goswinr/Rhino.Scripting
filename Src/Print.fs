@@ -56,12 +56,24 @@ module PrintSetup =
             // try to log errors to error stream:
             eprintfn "Initializing NiceString pretty printing from Rhino.Scripting in FsEx failed with:\r\n%A" e
             
-
-    /// Abbreviation for NiceString.toNiceString
-    /// including special formatting of Rhino Guids
-    let nice (x:'T) = 
+    
+    /// Like printfn but in Blue if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
+    let printfnBlue msg = 
         if initIsPending then init()
-        NiceString.toNiceString x
+        Printf.kprintf (fun s ->
+            RhinoApp.WriteLine s
+            Printfn.blue "%s" s
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
+
+    /// Like printfn but in Red if used from Seff Editor. Adds a new line at end.
+    /// Prints to Console.Out and to Rhino Commandline.
+    let printfnRed msg = 
+        if initIsPending then init()
+        Printf.kprintf (fun s ->
+            RhinoApp.WriteLine s
+            Printfn.blue "%s" s
+            RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
 
 /// This module shadows the NiceString module from FsEx to include the special formatting for Rhino types.
