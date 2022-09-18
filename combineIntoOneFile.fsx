@@ -71,7 +71,7 @@ module CombineIntoOneFile =
             Seq.skip i lns
         |None ->  
             eprintfn "*!*!*!*!*!* ERROR in build script "
-            eprintfn "*!*!*!*!*!* Split marker %s NO found in %s !" splitMarker  file 
+            eprintfn "*!*!*!*!*!* Split marker %s NOT found in %s !" splitMarker  file 
             eprintfn "*!*!*!*!*!* ERROR in build script "
             Seq.empty
                 
