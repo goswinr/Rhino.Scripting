@@ -165,7 +165,7 @@ module AutoOpenGeometry =
                             [<OPT;DEF(1.0)>]height:float,
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
-                            [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep paramter optional ???
+                            [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
                             [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid = 
 
         if isNull text || text = "" then RhinoScriptingException.Raise "Rhino.Scripting.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
@@ -236,7 +236,7 @@ module AutoOpenGeometry =
                             [<OPT;DEF(1.0)>]height:float,
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
-                            [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep paramter optional ???
+                            [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
                             [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = 
         let pl = Plane(pt,Vector3d.XAxis,Vector3d.YAxis)
         Scripting.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
