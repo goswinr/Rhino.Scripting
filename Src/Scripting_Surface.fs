@@ -37,23 +37,44 @@ module AutoOpenSurface =
         State.Doc.Views.Redraw()
         rc
 
-    ///<summary>Adds a cone shaped Polysurface to the document.</summary>
-    ///<param name="basis">(Plane) 3D origin point of the cone or a Plane with an apex at the origin
-    ///    and normal along the Plane's z-axis</param>
-    ///<param name="height">(float)  height of cone </param>
-    ///<param name="radius">(float) The radius at the basis of the cone</param>
-    ///<param name="cap">(bool) Optional, Default Value: <c>true</c>
-    ///    Cap basis of the cone</param>
+    ///<summary>Adds a cone shaped Polysurface to the document. 
+    /// The cone will have it's tip at the origin of the given plane. And grow along its Z axis. 
+    /// So it will be an upsaid down cone on world XY plane</summary>
+    ///<param name="basis">(Plane) The plane at the tip of the cone. From this tip the cone wil expand along the Z axis. </param>
+    ///<param name="height">(float) The height of cone. </param>
+    ///<param name="radius">(float) The radius at the basis of the cone.</param>
+    ///<param name="cap">(bool) Optional, Default Value: <c>true</c>. Add capping surface at basis of the cone?</param>
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddCone( basis:Plane,
                            height:float,
                            radius:float,
                            [<OPT;DEF(true)>]cap:bool) : Guid = 
         let cone = Cone(basis, height, radius)
-        let brep = Brep.CreateFromCone(cone, cap)// TODO cone is upside down??
+        let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
         let rc = State.Doc.Objects.AddBrep(brep)
         State.Doc.Views.Redraw()
         rc
+
+    ///<summary>Adds a cone shaped Polysurface to the document. 
+    /// The cone will have it's base center at the first point and the tip at the second point</summary>
+    ///<param name="baseCenter">(Point3d) The point in the center of the base.</param>
+    ///<param name="tip">(Point3d) The tip of cone. </param>
+    ///<param name="radius">(float) The radius at the basis of the cone.</param>
+    ///<param name="cap">(bool) Optional, Default Value: <c>true</c>. Add capping surface at basis of the cone?</param>
+    ///<returns>(Guid) identifier of the new object.</returns>
+    static member AddCone( baseCenter:Point3d,
+                           tip:Point3d,
+                           radius:float,
+                           [<OPT;DEF(true)>]cap:bool) : Guid = 
+        let n = baseCenter-tip 
+        let pl = Scripting.PlaneFromNormal(tip,n)
+        let cone = Cone(pl, n.Length, radius)
+        let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
+        let rc = State.Doc.Objects.AddBrep(brep)
+        State.Doc.Views.Redraw()
+        rc
+
+
         //TODO add version with two points
 
 
