@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -422,7 +423,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting. AddPlanarSrf(curves:Curve seq) failed on %s" (Nice.str curves)
+            RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarSrf(curves:Curve seq) failed on %s" (Nice.str curves)
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
@@ -491,8 +492,8 @@ module AutoOpenSurface =
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
                               [<OPT;DEF(false)>]closed:bool) : Guid Rarr = 
-        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
-        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
+        if loftType<0 || loftType>4 then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
+        if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         let curves =  rarr { for objectId in objectIds do yield Scripting.CoerceCurve(objectId) }
         if Seq.length(curves)<2 then RhinoScriptingException.Raise "Rhino.Scripting.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
@@ -1365,7 +1366,7 @@ module AutoOpenSurface =
     ///<returns>(bool) True if successful, otherwise False.</returns>
     static member IsBrep(objectId:Guid) : bool = 
         match State.Doc.Objects.FindId(objectId) with
-        | null -> RhinoScriptingException.Raise "Rhino.Scripting.IsExtrusion: %A is not an object in State.Doc.Objects table" objectId
+        | null -> RhinoScriptingException.Raise "Rhino.Scripting.IsBrep: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with
                 | :? Brep  -> true
                 | _ -> false
@@ -1839,7 +1840,7 @@ module AutoOpenSurface =
             |> Scripting.TryCoerceSurface
             |> Option.map AreaMassProperties.Compute
             )
-        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceArea failed on %A" surfaceId)
+        |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceAreaMoments failed on %A" surfaceId)
         |> fun mp ->
             rarr{
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
@@ -1851,11 +1852,11 @@ module AutoOpenSurface =
                 yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
                 yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
                 yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
-                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                         //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
                 }
 
 
@@ -1865,7 +1866,6 @@ module AutoOpenSurface =
     ///<returns>(Point3d) The closest point on the Surface.</returns>
     static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d = 
         let surface = Scripting.CoerceSurface(surfaceId)
-        //point = Scripting.Coerce3dpoint(testPoint)
         let rc, u, v = surface.ClosestPoint(testPoint)
         if not rc then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceClosestPoint failed on %A and %A" surfaceId testPoint
         surface.PointAt(u, v)
@@ -1876,7 +1876,6 @@ module AutoOpenSurface =
     ///<returns>(float * float) The U, V parameters of the closest point on the Surface.</returns>
     static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float = 
         let surface = Scripting.CoerceSurface(surfaceId)
-        //point = Scripting.Coerce3dpoint(testPoint)
         let rc, u, v = surface.ClosestPoint(testPoint)
         if not rc then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceClosestParameter failed on %A and %A" surfaceId testPoint
         u, v
@@ -1993,10 +1992,10 @@ module AutoOpenSurface =
     ///    the function will return Surface edit points based on whether or not the
     ///    Surface is closed or periodic</param>
     ///<returns>((float*float) Rarr) a list of U and V parameters.</returns>
-    static member SurfaceEditPointPrameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr = 
+    static member SurfaceEditPointParameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr = 
         let surface = Scripting.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
-        if isNull nurb then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEditPointParameterss failed.  surfaceId:'%s'  returnAll:'%A'" (Nice.str surfaceId) returnAll
+        if isNull nurb then RhinoScriptingException.Raise "Rhino.Scripting.SurfaceEditPointParameters failed.  surfaceId:'%s'  returnAll:'%A'" (Nice.str surfaceId) returnAll
         let mutable ufirst = 0
         let mutable ulast = nurb.Points.CountU
         let mutable vfirst = 0

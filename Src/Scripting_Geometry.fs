@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -400,7 +401,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
-        if not b.IsValid then RhinoScriptingException.Raise "Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
         b
 
     ///<summary>Returns a new inflated box with custom x, y and z amounts in their directions.
@@ -415,7 +416,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
-        if not b.IsValid then RhinoScriptingException.Raise "Invalid Boundingbox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
         b
 
 
@@ -549,7 +550,7 @@ module AutoOpenGeometry =
         elif Seq.length(colors) = pc.Count then
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.PointCloudHidePoints length of hidden values does not match pointcloud point count"
+            RhinoScriptingException.Raise "Rhino.Scripting.PointCloudPointColors length of color values does not match PointCloud point count"
         (Scripting.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.PointCloudHidePoints CommitChanges failed"
         State.Doc.Views.Redraw()
 
@@ -566,7 +567,7 @@ module AutoOpenGeometry =
     ///<summary>Returns amount indices of points in a point cloud that are near needlePoints.</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack".
     /// This can also be a list of points</param>
-    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud.
+    ///<param name="needlePoints">(Point3d seq) A list of points to search in the PointCloud.
     /// This can also be specified as a point cloud</param>
     ///<param name="amount">(int) Optional, Default Value: <c>1</c>
     ///    The amount of required closest points. Defaults to 1</param>
@@ -581,7 +582,7 @@ module AutoOpenGeometry =
     ///<summary>Returns a list of lists of point indices in a point cloud that are
     ///    closest to needlePoints. Each inner list references all points within or on the Surface of a sphere of distance radius.</summary>
     ///<param name="ptCloud">(Point3d seq) The point cloud to be searched, or the "hay stack". This can also be a list of points</param>
-    ///<param name="needlePoints">(Point3d seq) A list of points to search in the pointcloud. This can also be specified as a point cloud</param>
+    ///<param name="needlePoints">(Point3d seq) A list of points to search in the PointCloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>
     ///<returns>(int array seq) a seq of arrays with the indices of the found points.</returns>
     static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> = 
@@ -895,10 +896,10 @@ module AutoOpenGeometry =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
-        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName 
+            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
+        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName 
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
-            RhinoScriptingException.Raise "Rhino.Scripting..TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
+            RhinoScriptingException.Raise "Rhino.Scripting.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
@@ -928,9 +929,9 @@ module AutoOpenGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)        
+            |? (RhinoScriptingException.Raise "Rhino.Scripting.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)        
         annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting..TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 

@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -45,14 +46,14 @@ module AutoOpenUserData =
 
 
     ///<summary>Returns a user data item from the current document.</summary>
-    ///<param name="section">(string) Optional, Section name. If omitted, all section names are returned</param>
-    ///<returns>(string array) Array of all section names if section name is omitted,
-    /// else all entry names in this  section.</returns>
-    static member GetDocumentData([<OPT;DEF(null:string)>]section:string) : array<string> = 
-        if notNull section then
+    ///<param name="sectionName">(string) Optional, Section name. If omitted, all section names are returned</param>
+    ///<returns>(string array) Array of all section names if sectionName is omitted,
+    /// else all entry names in this section.</returns>
+    static member GetDocumentData([<OPT;DEF(null:string)>]sectionName:string) : array<string> = 
+        if notNull sectionName then
             State.Doc.Strings.GetSectionNames()
         else
-            State.Doc.Strings.GetEntryNames(section)
+            State.Doc.Strings.GetEntryNames(sectionName)
 
     ///<summary>Returns a user data item  entry from the current document.</summary>
     ///<param name="section">(string) Section name</param>
@@ -210,7 +211,7 @@ module AutoOpenUserData =
         let p = State.Doc.Strings.SetString(key, null)
         if isNull p then RhinoScriptingException.Raise "Rhino.Scripting.DeleteDocumentUserText failed,  key '%s' does not exist"  key
 
-    ///<summary>Sets a user text stored on an object. Key and value must noy contain ambiguous unicode characters.</summary>
+    ///<summary>Sets a user text stored on an object. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set</param>
     ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>

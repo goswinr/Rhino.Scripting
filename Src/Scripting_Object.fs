@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -38,7 +39,7 @@ module AutoOpenObject =
         let rc = Rarr()
         for objId in objectIds do
             let objectId = State.Doc.Objects.Transform(objId, matrix, not copy)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (Nice.str objId) (Nice.str objectId) matrix copy
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.TransformObjects: Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (Nice.str objId) (Nice.str objectId) matrix copy
             rc.Add objectId
         State.Doc.Views.Redraw()
         rc
@@ -54,7 +55,7 @@ module AutoOpenObject =
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid = 
         let res = State.Doc.Objects.Transform(objectId, matrix, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Nice.str objectId) matrix copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Nice.str objectId) matrix copy
         res
 
 
@@ -200,7 +201,7 @@ module AutoOpenObject =
           if isNull groupName then true
           else
             let index = State.Doc.Groups.Find(groupName)
-            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.%s group does not exist" groupName
+            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.IsObjectInGroup: '%s' group does not exist" groupName
             let groupids = rhobj.GetGroupList()
             groupids |> Seq.exists ((=) index )
 
@@ -273,7 +274,7 @@ module AutoOpenObject =
         | :? SubD      as s -> s.IsSolid // only for Rh7 and higher        
         #endif
         | _                 ->
-            RhinoScriptingException.Raise " only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Nice.str objectId)
+            RhinoScriptingException.Raise "Rhino.Scripting.IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Nice.str objectId)
 
 
 
@@ -473,7 +474,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectColorSource failed for '%A' and '%A'" (Nice.str objectId) source
+        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -489,7 +490,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectColorSource failed for '%A' and '%A'" (Nice.str objectId) source
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
 
@@ -579,13 +580,13 @@ module AutoOpenObject =
                 rhobj.Attributes.ViewportId <- Guid.Empty
             else
                 match State.Doc.Views.Find(layout.Value, compareCase=false) with
-                | null -> RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed, layout not found for '%A' and '%A'"  layout objectId
+                | null -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout not found for '%A' and '%A'"  layout objectId
                 | :? Display.RhinoPageView as layout ->
                     rhobj.Attributes.ViewportId <- layout.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
-                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed, layout is not a Page view for '%A' and '%A'"  layout objectId
+                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%A' and '%A'"  layout objectId
 
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed for '%A' and '%A'"  layout objectId
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%A' and '%A'"  layout objectId
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
@@ -599,9 +600,9 @@ module AutoOpenObject =
         let lay = 
             if layout.IsSome then
                 match State.Doc.Views.Find(layout.Value, compareCase=false) with
-                | null -> RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed, layout not found for '%A' and '%A'"  layout objectIds
+                | null -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout not found for '%A' and '%A'"  layout objectIds
                 | :? Display.RhinoPageView as layout -> Some layout
-                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed, layout is not a Page view for '%A' and '%A'"  layout objectIds
+                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%A' and '%A'"  layout objectIds
             else
                 None
 
@@ -623,7 +624,7 @@ module AutoOpenObject =
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayout failed for '%A' and '%A'"  layout objectId
+                if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%A' and '%A'"  layout objectId
         State.Doc.Views.Redraw()
 
 
@@ -642,10 +643,10 @@ module AutoOpenObject =
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         let newIndex = State.Doc.Linetypes.Find(linetype)
-        if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+        if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
@@ -654,12 +655,12 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
         let newIndex = State.Doc.Linetypes.Find(linetype)
-        if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectIds
+        if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectIds
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
             rhinoObject.Attributes.LinetypeIndex <- newIndex
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         State.Doc.Views.Redraw()
 
 
@@ -684,10 +685,10 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoObject.Attributes.LinetypeSource <- source
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -699,12 +700,12 @@ module AutoOpenObject =
     ///      3 = By Parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLinetypeSource(objectIds:Guid seq, source:int) : unit = //MULTISET
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectIds
+        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- source
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
 
@@ -730,11 +731,11 @@ module AutoOpenObject =
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         if 0 <=. materialIndex .< State.Doc.Materials.Count then
-            RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
+            RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
         let attrs = rhinoObject.Attributes
         attrs.MaterialIndex <- materialIndex
         if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, quiet=true) then
-            RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
+            RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
 
     ///<summary>Changes the material index multiple objects. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
@@ -744,13 +745,13 @@ module AutoOpenObject =
     ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectIds:Guid seq, materialIndex:int) : unit = //MULTISET
         if 0 <=. materialIndex .< State.Doc.Materials.Count then
-            RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectIds
+            RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectIds
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             let attrs = rhinoObject.Attributes
             attrs.MaterialIndex <- materialIndex
             if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, quiet=true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
+                RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
 
     ///<summary>Returns the rendering material source of an object.</summary>
     ///<param name="objectId">(Guid) One or more object identifiers</param>
@@ -773,10 +774,10 @@ module AutoOpenObject =
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         let rc = int(rhinoObject.Attributes.MaterialSource)
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -787,13 +788,13 @@ module AutoOpenObject =
     ///    3 = Material from parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectMaterialSource(objectIds:Guid seq, source:int) : unit = //MULTISET
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectIds
+        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             let rc = int(rhinoObject.Attributes.MaterialSource)
             rhinoObject.Attributes.MaterialSource <- source
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
 
@@ -832,9 +833,9 @@ module AutoOpenObject =
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         if Scripting.IsGoodStringId( name, allowEmpty=true) then
             rhinoObject.Attributes.Name <- name
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName failed for '%s' and '%A'"  name objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it failed for '%s' and '%A'"  name objectId
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
+            RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
     ///<summary>Modifies the name of multiple objects.</summary>
     ///<param name="objectIds">(Guid seq)Id of objects</param>
@@ -845,9 +846,9 @@ module AutoOpenObject =
             for objectId in objectIds do
                 let rhinoObject = Scripting.CoerceRhinoObject(objectId)
                 rhinoObject.Attributes.Name <- name
-                if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName failed for '%s' and '%A'"  name objectId
+                if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it failed for '%s' and '%A'"  name objectId
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
+            RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
 
 
@@ -868,7 +869,7 @@ module AutoOpenObject =
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoObject.Attributes.PlotColor <- color
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColor: Setting it failed for '%A' and '%A'"  color objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -880,7 +881,7 @@ module AutoOpenObject =
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
             rhinoObject.Attributes.PlotColor <- color
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColor: Setting it failed for '%A' and '%A'"  color objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -902,11 +903,11 @@ module AutoOpenObject =
     ///    3 = print color by parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintColorSource(objectId:Guid, source:int) : unit = //SET
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectId
+        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'" (Nice.str objectId) source
+        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -917,12 +918,12 @@ module AutoOpenObject =
     ///    3 = print color by parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintColorSource(objectIds:Guid seq, source:int) : unit = //MULTISET
-        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'"  source objectIds
+        if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColorSource: Setting it failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'" (Nice.str objectId) source
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
@@ -944,7 +945,7 @@ module AutoOpenObject =
         let rc = rhinoObject.Attributes.PlotWeight
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidth: Setting it failed for '%A' and '%A'"  width objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -959,7 +960,7 @@ module AutoOpenObject =
             let rc = rhinoObject.Attributes.PlotWeight
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidth: Setting it failed for '%A' and '%A'"  width objectId
         State.Doc.Views.Redraw()
 
 
@@ -984,7 +985,7 @@ module AutoOpenObject =
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidthSource: Setting it failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -998,7 +999,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidthSource: Setting it failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
 
@@ -1291,12 +1292,12 @@ module AutoOpenObject =
                             else RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed on invisible layer %s for object %s out of %d objects" lay.FullPath (Nice.str objectId) (Seq.length objectIds)
                         elif not lay.IsLocked then
                             if forceVisible then redo <- true ; UtilLayer.lockedSetFalse(lay, true)
-                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked layer %s for object %s out of %d objects" lay.FullPath (Nice.str objectId) (Seq.length objectIds)
+                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed on locked layer %s for object %s out of %d objects" lay.FullPath (Nice.str objectId) (Seq.length objectIds)
                         else
-                            RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
+                            RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed on object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
                         if redo then
                             if 0 = rhobj.Select(true) then
-                                RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed despite forceVisible being set to true on object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
+                                RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed despite forceVisible being set to true on object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
             State.Doc.Views.Redraw()
             )
 

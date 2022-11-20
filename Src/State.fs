@@ -8,7 +8,7 @@ open FsEx
 open Rhino
 open Rhino
 
-
+/// An internal static class to hold current state like active Rhino document.
 [<AbstractClass; Sealed>] //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type internal State private () = 
 
@@ -33,9 +33,9 @@ type internal State private () =
 
 
     /// keep the reference to the active Document (3d file ) updated.
-    static let updateDoc (docu:RhinoDoc) = 
-        doc <- docu //Rhino.RhinoDoc.ActiveDoc
-        ot  <- docu.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
+    static let updateDoc (document:RhinoDoc) = 
+        doc <- document //Rhino.RhinoDoc.ActiveDoc
+        ot  <- document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
         commandSerialNumbers <- None
         escapePressed <- false
 
@@ -89,7 +89,7 @@ type internal State private () =
 
     static let initState()= 
         if not HostUtils.RunningInRhino then
-            RhinoScriptingException.Raise "Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
+            RhinoScriptingException.Raise "Rhino.Scripting.State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
         else
             RhinoSync.Initialize()
             updateDoc(RhinoDoc.ActiveDoc )  // do first

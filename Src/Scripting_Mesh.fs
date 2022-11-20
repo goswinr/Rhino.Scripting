@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -76,7 +77,7 @@ module AutoOpenMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document. vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddMesh: Unable to add mesh to document. vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         State.Doc.Views.Redraw()
         rc
 
@@ -130,7 +131,7 @@ module AutoOpenMesh =
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddMesh: Unable to add mesh to document.  vertices:'%A' faceVertices:'%A' vertexNormals:'%A' textureCoordinates:'%A' vertexColors:'%A'" vertices faceVertices vertexNormals textureCoordinates vertexColors
         State.Doc.Views.Redraw()
         rc
 
@@ -166,7 +167,7 @@ module AutoOpenMesh =
           mesh.Vertices.Add(pointC) |> ignore
           mesh.Faces.AddFace(0,1,2) |> ignore
           let rc = State.Doc.Objects.AddMesh(mesh)
-          if rc = Guid.Empty then  RhinoScriptingException.Raise "Rhino.Scripting.AddMeshQuad failed.  points:'%A, %A and %A" pointA pointB pointC
+          if rc = Guid.Empty then  RhinoScriptingException.Raise "Rhino.Scripting.AddMeshTriangle failed.  points:'%A, %A and %A" pointA pointB pointC
           State.Doc.Views.Redraw()
           rc
 
@@ -184,7 +185,7 @@ module AutoOpenMesh =
             let ob = Scripting.CoerceGuid(objectId)
             if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Nice.str objectId) deleteInput
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Nice.str objectId) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarMesh: Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Nice.str objectId) deleteInput
         State.Doc.Views.Redraw()
         rc
 
@@ -329,7 +330,7 @@ module AutoOpenMesh =
         for mesh in meshes do joinedmesh.Append(mesh)
         #endif// only for Rh6.0, would not be needed for latest releases of Rh6
         let rc = State.Doc.Objects.AddMesh(joinedmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Failed to join Meshes %A" (Nice.str objectIds)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.JoinMeshes: Failed to join Meshes %A" (Nice.str objectIds)
         if deleteInput then
             for objectId in objectIds do
                 //guid = Scripting.Coerceguid(objectId)
@@ -372,7 +373,7 @@ module AutoOpenMesh =
                                          [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
         let meshes0 =  rarr { for objectId in input0 do yield Scripting.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield Scripting.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanDifference  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
@@ -397,7 +398,7 @@ module AutoOpenMesh =
                                            [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
         let meshes0 =  rarr { for objectId in input0 do yield Scripting.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield Scripting.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanIntersection  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
@@ -423,7 +424,7 @@ module AutoOpenMesh =
                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
         let meshes0 =  rarr { for objectId in input0 do yield Scripting.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield Scripting.CoerceMesh(objectId) }
-        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
+        if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.MeshBooleanSplit: CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
         let newmeshes = Mesh.CreateBooleanSplit  (meshes0, meshes1)
         let rc = Rarr()
         for mesh in newmeshes do
@@ -431,7 +432,6 @@ module AutoOpenMesh =
             if objectId <> Guid.Empty then rc.Add(objectId)
         if deleteInput then
             for objectId in Seq.append input0 input1 do
-                //id = Scripting.Coerceguid(objectId)
                 State.Doc.Objects.Delete(objectId, true) |> ignore
         State.Doc.Views.Redraw()
         rc
@@ -444,7 +444,7 @@ module AutoOpenMesh =
     ///    Delete the input Meshes</param>
     ///<returns>(Guid Rarr) identifiers of new Meshes.</returns>
     static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
-        if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "Rhino.Scripting.MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
+        if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "Rhino.Scripting.MeshBooleanUnion: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
         let meshes =  rarr { for objectId in meshIds do yield Scripting.CoerceMesh(objectId) }
         let newmeshes = Mesh.CreateBooleanUnion(meshes)
         let rc = Rarr()
@@ -453,7 +453,6 @@ module AutoOpenMesh =
             if objectId <> Guid.Empty then rc.Add(objectId)
         if rc.Count>0 && deleteInput then
             for objectId in meshIds do
-                //id = Scripting.Coerceguid(objectId)
                 State.Doc.Objects.Delete(objectId, true) |> ignore
         State.Doc.Views.Redraw()
         rc
@@ -473,7 +472,6 @@ module AutoOpenMesh =
                                     point:Point3d,
                                     [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int = 
         let mesh = Scripting.CoerceMesh(objectId)
-        //point = Scripting.Coerce3dpoint(point)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
         if face<0 then RhinoScriptingException.Raise "Rhino.Scripting.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Nice.str objectId) point maximumDistance
@@ -666,7 +664,7 @@ module AutoOpenMesh =
         let offsetmesh = mesh.Offset(distance)
         if offsetmesh|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MeshOffset failed.  meshId:'%s' distance:'%A'" (Nice.str meshId) distance
         let rc = State.Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Nice.str meshId) distance
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.MeshOffset: Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Nice.str meshId) distance
         State.Doc.Views.Redraw()
         rc
 
@@ -681,7 +679,7 @@ module AutoOpenMesh =
         let rc = Rarr()
         if notNull view then
             let viewport = State.Doc.Views.Find(view, compareCase=false).MainViewport
-            if isNull viewport then RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.MeshOutline: did not find view named '%A'" view
+            if isNull viewport then RhinoScriptingException.Raise "Rhino.Scripting.MeshOutline: did not find view named '%A'" view
             else
                 for mesh in meshes do
                     let polylines = mesh.GetOutlines(viewport)
@@ -775,7 +773,7 @@ module AutoOpenMesh =
         else
             let colorcount = Seq.length(colors)
             if colorcount <> mesh.Vertices.Count then
-                RhinoScriptingException.Raise "Rhino.Scripting.Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Nice.str meshId) colors
+                RhinoScriptingException.Raise "Rhino.Scripting.MeshVertexColors: Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Nice.str meshId) colors
             mesh.VertexColors.Clear()
             for c in colors do mesh.VertexColors.Add(c) |> ignore
         State.Doc.Objects.Replace(meshId, mesh) |> ignore
@@ -885,7 +883,7 @@ module AutoOpenMesh =
         let polyline = curve.PullToMesh(mesh, tol)
         if isNull polyline then RhinoScriptingException.Raise "Rhino.Scripting.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Nice.str meshId)  (Nice.str curveId)
         let rc = State.Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Nice.str meshId) (Nice.str curveId)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.PullCurveToMesh: Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Nice.str meshId) (Nice.str curveId)
         State.Doc.Views.Redraw()
         rc
 

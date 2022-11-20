@@ -85,7 +85,7 @@
 	<Compile Include="Src/RhinoSync.fs" />
 	<Compile Include="Src/State.fs" />
 	<Compile Include="Src/ToNiceStringExtensions.fs" />
-	<Compile Include="Src/Print.fs" />	
+	<Compile Include="Src/ToNiceStringSetup.fs" />	
 	<Compile Include="Src/Util.fs" />
 	<Compile Include="Src/UtilLayer.fs" />
 	<Compile Include="Src/ObjectFilterEnum.fs" />

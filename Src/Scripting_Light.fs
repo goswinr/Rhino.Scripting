@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -36,7 +37,7 @@ module AutoOpenLight =
         light.Location <- start
         light.Direction <- ende-start
         let index = State.Doc.Lights.Add(light)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add light to LightTable.  startPoint:'%A' endPoint:'%A'" startPoint endPoint
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddDirectionalLight: Unable to add light to LightTable.  startPoint:'%A' endPoint:'%A'" startPoint endPoint
         let rc = State.Doc.Lights.[index].Id
         State.Doc.Views.Redraw()
         rc
@@ -45,14 +46,14 @@ module AutoOpenLight =
     ///<summary>Adds a new linear light object to the document.</summary>
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
-    ///<param name="width">(float) Optional, Width of the light</param>
+    ///<param name="lightWidth">(float) Optional, Width of the light</param>
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
-                                  [<OPT;DEF(0.0)>]width:float) : Guid = 
+                                  [<OPT;DEF(0.0)>]lightWidth:float) : Guid = 
         let start =  startPoint
         let ende =  endPoint
-        let mutable width = width
+        let mutable width = lightWidth
         if width = 0.0  then
             let mutable radius = 0.5
             let units = State.Doc.ModelUnitSystem
@@ -74,7 +75,7 @@ module AutoOpenLight =
         light.Width <- xAxis * ( min width ( v.Length/20.0))
         //light.Location <- start - light.Direction
         let index = State.Doc.Lights.Add(light)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add light to LightTable.  startPoint:'%A' endPoint:'%A' width:'%A'" startPoint endPoint width
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddLinearLight: Unable to add light to LightTable.  startPoint:'%A' endPoint:'%A' width:'%A'" startPoint endPoint lightWidth
         let rc = State.Doc.Lights.[index].Id
         State.Doc.Views.Redraw()
         rc
@@ -88,7 +89,7 @@ module AutoOpenLight =
         light.LightStyle <- LightStyle.WorldPoint
         light.Location <- point
         let index = State.Doc.Lights.Add(light)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add light to LightTable.  point:'%A'" point
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddPointLight: Unable to add light to LightTable.  point:'%A'" point
         let rc = State.Doc.Lights.[index].Id
         State.Doc.Views.Redraw()
         rc
@@ -115,7 +116,7 @@ module AutoOpenLight =
         light.Length <- length
         light.Direction <- normal
         let index = State.Doc.Lights.Add(light)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add light to LightTable.  origin:'%A' widthPoint:'%A' heightPoint:'%A'" origin widthPoint heightPoint
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddRectangularLight: Unable to add light to LightTable.  origin:'%A' widthPoint:'%A' heightPoint:'%A'" origin widthPoint heightPoint
         let rc = State.Doc.Lights.[index].Id
         State.Doc.Views.Redraw()
         rc
@@ -138,7 +139,7 @@ module AutoOpenLight =
         light.SpotAngleRadians <- Math.Atan(radius / (light.Direction.Length))
         light.HotSpot <- 0.50
         let index = State.Doc.Lights.Add(light)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add light to LightTable.  origin:'%A' radius:'%A' apexPoint:'%A'" origin radius apexPoint
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddSpotLight: Unable to add light to LightTable.  origin:'%A' radius:'%A' apexPoint:'%A'" origin radius apexPoint
         let rc = State.Doc.Lights.[index].Id
         State.Doc.Views.Redraw()
         rc
@@ -158,7 +159,6 @@ module AutoOpenLight =
     static member EnableLight(objectId:Guid, enable:bool) : unit = //SET
         let light = Scripting.CoerceLight(objectId)
         light.IsEnabled <- enable
-        //id = Scripting.Coerceguid(objectId)
         if not <| State.Doc.Lights.Modify(objectId, light) then
             RhinoScriptingException.Raise "Rhino.Scripting.EnableLight failed.  objectId:'%s' enable:'%A'" (Nice.str objectId) enable
         State.Doc.Views.Redraw()
@@ -171,7 +171,6 @@ module AutoOpenLight =
         for objectId in objectIds do
             let light = Scripting.CoerceLight(objectId)
             light.IsEnabled <- enable
-            //id = Scripting.Coerceguid(objectId)
             if not <| State.Doc.Lights.Modify(objectId, light) then
                 RhinoScriptingException.Raise "Rhino.Scripting.EnableLight failed.  objectId:'%s' enable:'%A'" (Nice.str objectId) enable
         State.Doc.Views.Redraw()

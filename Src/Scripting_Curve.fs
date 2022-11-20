@@ -1,5 +1,4 @@
-﻿
-namespace Rhino
+﻿namespace Rhino
 
 open System
 open System.Collections.Generic
@@ -8,6 +7,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -469,7 +469,7 @@ module AutoOpenCurve =
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.ArcAngle: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!arc).AngleDegrees
 
 
@@ -481,7 +481,7 @@ module AutoOpenCurve =
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.ArcCenterPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!arc).Center
 
 
@@ -493,7 +493,7 @@ module AutoOpenCurve =
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.ArcMidPoint: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!arc).MidPoint
 
 
@@ -505,32 +505,32 @@ module AutoOpenCurve =
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.ArcRadius: Curve is not an arc. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!arc).Radius
 
 
 
     ///<summary>Returns the center point of a circle Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(Point3d) The 3D center point of the circle.</returns>
     static member CircleCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CircleCenterPoint: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!circle).Center
 
 
     ///<summary>Returns the center Plane of a circle Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(Plane) The 3D Plane at the center point of the circle.</returns>
     static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CircleCenterPlane: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!circle).Plane
 
 
@@ -539,25 +539,25 @@ module AutoOpenCurve =
 
     ///<summary>Returns the circumference of a circle Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(float) The circumference of the circle.</returns>
     static member CircleCircumference(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CircleCircumference: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!circle).Circumference
 
 
     ///<summary>Returns the radius of a circle Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
-    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
+    ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(float) The radius of the circle.</returns>
     static member CircleRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
-        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        if not <| rc then RhinoScriptingException.Raise "Rhino.Scripting.CircleRadius: Curve is not circle. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
         (!circle).Radius
 
 
@@ -754,7 +754,7 @@ module AutoOpenCurve =
                 if not <| State.Doc.Objects.ModifyAttributes(curveId, attr, quiet=true) then
                     RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows ModifyAttributes failed on style %d on %s" arrowStyle  (Nice.str curveId)
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.Curve Arrow style %d is invalid" arrowStyle
+                RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows: Curve Arrow style %d is invalid" arrowStyle
         State.Doc.Views.Redraw()
 
     ///<summary>Calculates the difference between two closed, planar Curves and
@@ -959,7 +959,7 @@ module AutoOpenCurve =
     static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> = 
         let curve = Scripting.CoerceCurve(curveId)
         if startPoint.DistanceTo(endPoint)<RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "Rhino.Scripting.Start && ende point are too close to define a line. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Nice.str curveId) startPoint endPoint
+            RhinoScriptingException.Raise "Rhino.Scripting.CurveContourPoints: Start && ende point are too close to define a line. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Nice.str curveId) startPoint endPoint
         curve.DivideAsContour( startPoint, endPoint, interval)
 
 
@@ -2344,7 +2344,7 @@ module AutoOpenCurve =
         let surface = Scripting.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = curve.OffsetOnSurface(surface, parameter, tol)
-        if isNull curves  then  RhinoScriptingException.Raise "Rhino.Scripting.OffsetCurveOnSurface failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Nice.str curveId) (Nice.str surfaceId) parameter
+        if isNull curves  then  RhinoScriptingException.Raise "Rhino.Scripting.OffsetCurveOnSurfaceUV failed. curveId:'%s' surfaceId:'%s' parameter:'%A'" (Nice.str curveId) (Nice.str surfaceId) parameter
         let rc = rarr { for curve in curves -> State.Doc.Objects.AddCurve(curve) }
         State.Doc.Views.Redraw()
         rc
@@ -2435,8 +2435,8 @@ module AutoOpenCurve =
     static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         match curve with
-        | :? PolyCurve as curve ->  curve.SegmentCount
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CurveId does not reference a polycurve. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        | :? PolyCurve as curve ->  curve.SegmentCount    
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PolyCurveCount: CurveId does not reference a polycurve. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
 
 
     ///<summary>Returns the vertices of a Polyline Curve.</summary>
@@ -2448,7 +2448,7 @@ module AutoOpenCurve =
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
         let rc, polyline = curve.TryGetPolyline()
         if rc then  rarr { for pt in polyline -> pt }
-        else RhinoScriptingException.Raise "Rhino.Scripting.CurveId does not <| reference a polyline. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
+        else RhinoScriptingException.Raise "Rhino.Scripting.PolylineVertices: CurveId does not <| reference a polyline. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
 
 
     ///<summary>Projects one or more Curves onto one or more Surfaces or Meshes.</summary>

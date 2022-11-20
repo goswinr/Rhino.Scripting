@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -161,7 +162,7 @@ module AutoOpenApplication =
             elif item = 11 then AppearanceSettings.CommandPromptTextColor <- color
             elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor <- color
             elif item = 13 then AppearanceSettings.CommandPromptHypertextColor <- color
-            else RhinoScriptingException.Raise "Rhino.Scripting.AppearanceColor: setting item %d is out of range" item
+            else RhinoScriptingException.Raise "Rhino.Scripting.AppearanceColor:: Setting item %d is out of range" item
             State.Doc.Views.Redraw()
             )
 
@@ -610,7 +611,7 @@ module AutoOpenApplication =
     static member PlugInId(plugin:string) : Guid = 
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
-        else RhinoScriptingException.Raise "Rhino.Scripting.Plugin %s not found" plugin
+        else RhinoScriptingException.Raise "Rhino.Scripting.PlugInId: Plugin %s not found" plugin
 
 
     ///<summary>Returns a array of registered Rhino plug-ins.</summary>

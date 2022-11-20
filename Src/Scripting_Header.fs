@@ -6,6 +6,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -181,8 +182,7 @@ type Scripting private () =
                       ) : Guid = 
         let layCorF =
             if layer<>""then 
-                if layerColor.IsEmpty then                         
-                    
+                if layerColor.IsEmpty then 
                     UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all Unicode ?
                 else
                     UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all Unicode ?

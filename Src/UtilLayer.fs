@@ -43,14 +43,14 @@ module internal UtilLayer =
             if l.ParentLayerId = Guid.Empty then ps
             else
             let pl = State.Doc.Layers.FindId(l.ParentLayerId)
-            if isNull pl then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getParents let internal getParents: ParentLayerId not found in layers"
+            if isNull pl then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getParents : ParentLayerId not found in layers"
             find pl (pl::ps)
         find lay []
 
     let internal visibleSetTrue(lay:Layer, forceVisible:bool) : unit = 
         if not lay.IsVisible then
             if forceVisible then
-                if not (State.Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "rs.LayerVisibleSetTrue Failed to turn on sublayers of layer  %s"  lay.FullPath
+                if not (State.Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.visibleSetTrue Failed to turn on sub-layers of layer  %s"  lay.FullPath
             else
                 lay.SetPersistentVisibility(true)
 
@@ -145,7 +145,7 @@ module internal UtilLayer =
     let internal createDefaultLayer(color, visible, locked) = 
         let layer = DocObjects.Layer.GetDefaultLayerProperties()
         layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
-        if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "how can a new default layer have a parent ? %A" layer
+        if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.createDefaultLayer how can a new default layer have a parent ? %A" layer
         layer.IsVisible <- visible
         layer.IsLocked <- locked
         State.Doc.Layers.Add(layer)

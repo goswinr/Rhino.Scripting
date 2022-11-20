@@ -11,12 +11,12 @@ It enables the use of RhinoScript in F# and all the great coding experience that
 
 RhinoScript provides application scripting for the [Rhino3D](https://www.rhino3d.com/) CAD app.  
 RhinoScript has [more than 900 functions](https://developer.rhino3d.com/api/RhinoScriptSyntax/) to control all kind of aspects of automating Rhino3D.  
-It was orignaly implemented in 2002 in VBScript.   
+It was originally implemented in 2002 in VBScript.   
 Extensive Documentation on the original VBScript based version is available [here](https://developer.rhino3d.com/guides/rhinoscript/).
 
 
 In 2010 all functions from [RhinoScript where reimplemented in IronPython](https://developer.rhino3d.com/guides/#rhinopython) (Python running on .NET).  
-This allowed the use of a modern, rich and dynamically typed programming language with a huge standard libray and also access to all function of the underlying .NET Framework as well as the [RhinoCommon SDK](https://developer.rhino3d.com/guides/rhinocommon/).
+This allowed the use of a modern, rich and dynamically typed programming language with a huge standard library and also access to all function of the underlying .NET Framework as well as the [RhinoCommon SDK](https://developer.rhino3d.com/guides/rhinocommon/).
 
 ## What is this repro?
 
@@ -66,7 +66,7 @@ for example `rs.ObjectLayer` can be called in several ways:
 these are implemented with 3 overloads and optional parameters:
 ```fsharp   
     [<Extension>]
-    ///<summary>Returns the full layername of an object. 
+    ///<summary>Returns the full layer name of an object. 
     /// parent layers are separated by <c>::</c></summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer</returns>
@@ -77,7 +77,7 @@ these are implemented with 3 overloads and optional parameters:
 
 
     [<Extension>]
-    ///<summary>Modifies the layer of an object , optionaly creates layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of an object , optionally creates layer if it does not exist yet</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>
@@ -94,7 +94,7 @@ these are implemented with 3 overloads and optional parameters:
        
 
     [<Extension>]
-    ///<summary>Modifies the layer of multiple objects, optionaly creates layer if it does not exist yet</summary>
+    ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
     ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c>

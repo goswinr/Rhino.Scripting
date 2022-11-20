@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -39,15 +40,15 @@ module AutoOpenBlock =
         let objects = Rarr()
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)  //Coerce should not be needed
-            if obj.IsReference then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Reference object %s to %s" (Nice.str objectId) name
+            if obj.IsReference then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Reference object '%s' to '%s'" (Nice.str objectId) name
             let ot = obj.ObjectType
-            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Light object %s to %s" (Nice.str objectId) name
-            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Grip object %s to %s" (Nice.str objectId) name
-            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Phantom object %s to %s" (Nice.str objectId) name
+            if   ot= DocObjects.ObjectType.Light then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Light object '%s' to '%s'" (Nice.str objectId) name
+            elif ot= DocObjects.ObjectType.Grip then  RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Grip object '%s' to '%s'" (Nice.str objectId) name
+            elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Phantom object '%s' to '%s'" (Nice.str objectId) name
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = Scripting.CoerceBlockInstanceObject(objectId) // not obj ?
                 let uses, nesting = bli.UsesDefinition(found.Index)
-                if uses then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Instance Ref object %s to %s" (Nice.str objectId) name
+                if uses then RhinoScriptingException.Raise "Rhino.Scripting.AddBlock: cannot add Instance Ref object '%s' to '%s'" (Nice.str objectId) name
 
             objects.Add(obj)
         if objects.Count>0 then
@@ -71,7 +72,7 @@ module AutoOpenBlock =
     ///<returns>(string Rarr) A list of block definition names.</returns>
     static member BlockContainers(blockName:string) : string Rarr = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockContainers: '%s' does not exist in InstanceDefinitionsTable" blockName
         let containers = idef.GetContainers()
         let rc = Rarr()
         for item in containers do
@@ -97,7 +98,7 @@ module AutoOpenBlock =
     ///<returns>(string) The current description.</returns>
     static member BlockDescription(blockName:string) : string = //GET
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockDescription: '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.Description
 
     ///<summary>Sets the description of a block definition.</summary>
@@ -106,7 +107,7 @@ module AutoOpenBlock =
     ///<returns>(unit) void, nothing.</returns>
     static member BlockDescription(blockName:string, description:string) : unit = //SET
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockDescription:'%s' does not exist in InstanceDefinitionsTable" blockName
         State.Doc.InstanceDefinitions.Modify( idef, idef.Name, description, true ) |>ignore
 
 
@@ -121,7 +122,7 @@ module AutoOpenBlock =
     ///<returns>(int) The number of instances of the block in the document.</returns>
     static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockInstanceCount: '%s' does not exist in InstanceDefinitionsTable" blockName
         let  refs = idef.GetReferences(whereToLook)
         refs.Length
 
@@ -155,7 +156,7 @@ module AutoOpenBlock =
     ///<returns>(Guid Rarr) Ids identifying the instances of a block in the model.</returns>
     static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockInstances: '%s' does not exist in InstanceDefinitionsTable" blockName
         let instances = idef.GetReferences(whereToLook)
         rarr { for item in instances do yield item.Id }
 
@@ -184,7 +185,7 @@ module AutoOpenBlock =
     ///<returns>(int) The number of objects that make up a block definition.</returns>
     static member BlockObjectCount(blockName:string) : int = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockObjectCount:'%s' does not exist in InstanceDefinitionsTable" blockName
         idef.ObjectCount
 
 
@@ -193,7 +194,7 @@ module AutoOpenBlock =
     ///<returns>(Guid Rarr) list of identifiers.</returns>
     static member BlockObjects(blockName:string) : Rarr<Guid> = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockObjects: '%s' does not exist in InstanceDefinitionsTable" blockName
         let  rhobjs = idef.GetObjects()
         rarr { for obj in rhobjs -> obj.Id}
 
@@ -205,7 +206,7 @@ module AutoOpenBlock =
     ///<returns>(string) path to the linked block.</returns>
     static member BlockPath(blockName:string) : string = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.BlockPath: '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.SourceArchive
 
 
@@ -231,7 +232,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteBlock(blockName:string) : bool = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let  rc = State.Doc.InstanceDefinitions.Delete(idef.Index, deleteReferences=true, quiet=false)
         State.Doc.Views.Redraw()
         rc
@@ -256,7 +257,7 @@ module AutoOpenBlock =
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
     static member InsertBlock2(blockName:string, xForm:Transform) : Guid = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.InsertBlock2: '%s' does not exist in InstanceDefinitionsTable" blockName
         let objectId = State.Doc.Objects.AddInstanceObject(idef.Index, xForm )
         if objectId<>System.Guid.Empty then
             State.Doc.Views.Redraw()
@@ -297,7 +298,7 @@ module AutoOpenBlock =
     ///<returns>(bool) True or False.</returns>
     static member IsBlockEmbedded(blockName:string) : bool = 
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in InstanceDefinitionsTable" blockName
+        if isNull idef then  RhinoScriptingException.Raise "Rhino.Scripting.IsBlockEmbedded '%s' does not exist in InstanceDefinitionsTable" blockName
         match int( idef.UpdateType) with
         | 1  -> true //DocObjects.InstanceDefinitionUpdateType.Embedded
         | 2  -> true //DocObjects.InstanceDefinitionUpdateType.LinkedAndEmbedded

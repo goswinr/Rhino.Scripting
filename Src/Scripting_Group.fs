@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -111,7 +112,7 @@ module AutoOpenGroup =
     ///<returns>(int) The number of objects that were hidden.</returns>
     static member HideGroup(groupName:string) : int = 
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Can't HideGroup, group '%s' not found" groupName
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.HideGroup: Can't HideGroup, group '%s' not found" groupName
         State.Doc.Groups.Hide(index);
 
 
@@ -127,7 +128,7 @@ module AutoOpenGroup =
     ///<returns>(bool) True or False if groupName is empty.</returns>
     static member IsGroupEmpty(groupName:string) : bool = 
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Can't check IsGroupEmpty, group '%s' not found" groupName
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.IsGroupEmpty: Can't check IsGroupEmpty, group '%s' not found" groupName
         State.Doc.Groups.GroupObjectCount(index)>0
 
 

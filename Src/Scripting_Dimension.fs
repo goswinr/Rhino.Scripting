@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -119,7 +120,7 @@ module AutoOpenDimension =
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d, // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF(Plane())>] plane:Plane ) : Guid = 
-        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed to create Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" startPoint endPoint pointOnDimensionLine
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail 
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
@@ -150,10 +151,10 @@ module AutoOpenDimension =
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentDimStyle(dimStyleName:string) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds  then  RhinoScriptingException.Raise "Rhino.Scripting.SetCurrentDimStyle failed. not found: '%s' . " dimStyleName
+        if isNull ds  then  RhinoScriptingException.Raise "Rhino.Scripting.CurrentDimStyle setting failed. not found: '%s' . " dimStyleName
         if State.Doc.DimStyles.CurrentIndex <> ds.Index then // because SetCurrent returns false if it is already current
             if not <| State.Doc.DimStyles.SetCurrent(ds.Index, quiet=true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetCurrentDimStyle to '%s' failed." dimStyleName
+                RhinoScriptingException.Raise "Rhino.Scripting.CurrentDimStyle setting '%s' failed." dimStyleName
 
 
 

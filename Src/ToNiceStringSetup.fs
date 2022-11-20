@@ -1,12 +1,14 @@
-﻿namespace Rhino
+﻿namespace Rhino.ScriptingFSharp
 
 open System
 open Rhino.Geometry
 open FsEx
 
-/// Internal module to set up nice printing.(public only for access from Rhino.ScriptingFs)
+
+/// Internal module to set up nice printing.(public only for access from Rhino.ScriptingFSharp)
 [<RequireQualifiedAccess>]
-module InternalNicePrintSetup = 
+module InternalToNiceStringSetup = 
+    open Rhino
 
     let mutable private initIsPending = true // to delay setup of printing till first print call
 
@@ -33,13 +35,15 @@ module InternalNicePrintSetup =
     /// externalFormatter in FsEx.NiceStringSettings. It is set in the init() function.
     let internal formatRhinoObject (o:obj) : NiceStringSettings.Lines option= 
           match o with
-          | :? Guid       as x -> Some <| NiceStringSettings.Element (guid x)
-          | :? Point3d    as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Vector3d   as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Line       as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Point3f    as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Vector3f   as x -> Some <| NiceStringSettings.Element x.ToNiceString
-          | :? Transform  as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Guid        as x -> Some <| NiceStringSettings.Element (guid x)
+          | :? Point3d     as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Vector3d    as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Line        as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Point3f     as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Vector3f    as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Transform   as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? Plane       as x -> Some <| NiceStringSettings.Element x.ToNiceString
+          | :? BoundingBox as x -> Some <| NiceStringSettings.Element x.ToNiceString
           | _                  -> None
 
     let init()= 
@@ -89,7 +93,7 @@ module internal Nice  =
     /// - maxNestingDepth         = 6     ; set this to change how how many items per seq are printed (printFull ignores this)
     /// - maxCharsInString        = 2000  ; set this to change how many characters of a string might be printed at once.
     let str (x:'T) :string = 
-        InternalNicePrintSetup.init() // the shadowing is only done to ensure init() is called once
+        InternalToNiceStringSetup.init() // the shadowing is only done to ensure init() is called once
         NiceString.toNiceString x
 
 

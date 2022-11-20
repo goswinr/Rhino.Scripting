@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -285,7 +286,7 @@ module AutoOpenUserInterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    InternalNicePrintSetup.printfnBlue "Distance: %s %s" d.ToNiceString (
+                    InternalToNiceStringSetup.printfnBlue "Distance: %s %s" d.ToNiceString (
                                 State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false))
 
                     gp2.Dispose()
@@ -637,7 +638,7 @@ module AutoOpenUserInterface =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
 
             | _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (Nice.str surfaceId) message
+                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Nice.str surfaceId) message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then
@@ -703,12 +704,12 @@ module AutoOpenUserInterface =
                             if cont && gp.CommandResult() <> Commands.Result.Success then
                                 rc.Clear()
                                 cont <- false
-                                InternalNicePrintSetup.printfnRed "%s" "GetPoints had no Success"
+                                InternalToNiceStringSetup.printfnRed "%s" "GetPoints had no Success"
                             if cont then
                                 prevPoint <- gp.Point()
                                 rc.Add(prevPoint)
                 if rc.Count>0 then
-                    InternalNicePrintSetup.printfnBlue "%d Points picked" rc.Count
+                    InternalToNiceStringSetup.printfnBlue "%d Points picked" rc.Count
                     rc
                 else
                     RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoints()"
@@ -938,7 +939,7 @@ module AutoOpenUserInterface =
             elif dlgresult = UI.ShowMessageResult.Ignore then  5
             elif dlgresult = UI.ShowMessageResult.Yes then     6
             elif dlgresult = UI.ShowMessageResult.No then      7
-            else RhinoUserInteractionException.Raise "No MessageBox input was given by user in Rhino.Scripting.MessageBox()"
+            else RhinoUserInteractionException.Raise "No MessageBox input was given by user in Rhino.Scripting.MessageBox"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -956,7 +957,7 @@ module AutoOpenUserInterface =
         let getKeepEditor () = 
             let values = rarr { for  v in values do yield v.ToString() }
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
-            | null -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.PropertyListBox()"
+            | null -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.PropertyListBox"
             | s -> s
         RhinoSync.DoSync getKeepEditor
 
@@ -975,7 +976,7 @@ module AutoOpenUserInterface =
         let getKeepEditor () = 
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             if notNull r then r 
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.PropertyListBox()"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.MultiListBox"
         RhinoSync.DoSync getKeepEditor
 
 

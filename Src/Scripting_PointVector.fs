@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -36,8 +37,6 @@ module AutoOpenPointVector =
     static member IsVectorParallelTo(   vector1:Vector3d,
                                         vector2:Vector3d,
                                         [<OPT;DEF(0.0)>]toleranceDegree:float) : int = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         if toleranceDegree = 0.0 then vector1.IsParallelTo(vector2)
         else vector1.IsParallelTo(vector2, toRadians(toleranceDegree))
 
@@ -51,8 +50,6 @@ module AutoOpenPointVector =
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
                                             [<OPT;DEF(0.0)>]toleranceDegree:float) : bool = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         if toleranceDegree = 0.0 then vector1.IsPerpendicularTo(vector2)
         else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegree))
 
@@ -62,7 +59,6 @@ module AutoOpenPointVector =
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is tiny, otherwise False.</returns>
     static member IsVectorTiny(vector:Vector3d) : bool = 
-        //vector = Scripting.Coerce3dvector(vector)
         vector.IsTiny( 1.0e-12 )
 
 
@@ -70,7 +66,6 @@ module AutoOpenPointVector =
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is zero, otherwise False.</returns>
     static member IsVectorZero(vector:Vector3d) : bool = 
-        //vector = Scripting.Coerce3dvector(vector)
         vector.IsZero
 
 
@@ -79,8 +74,6 @@ module AutoOpenPointVector =
     ///<param name="point2">(Point3d) Point2 of the points to add</param>
     ///<returns>(Point3d) The resulting 3D point.</returns>
     static member PointAdd(point1:Point3d, point2:Point3d) : Point3d = 
-        //point1 = Scripting.Coerce3dpoint(point1)
-        //point2 = Scripting.Coerce3dpoint(point2)
         point1 + point2
 
 
@@ -89,8 +82,6 @@ module AutoOpenPointVector =
     ///<param name="testPoint">(Point3d) The point to compare against</param>
     ///<returns>(int) index of the element in the point list that is closest to the test point.</returns>
     static member PointArrayClosestPoint(points:Point3d IList, testPoint:Point3d) : int = 
-        //points = Scripting.Coerce3dpointlist(points)
-        //testPoint = Scripting.Coerce3dpoint(testPoint)
         let index = Rhino.Collections.Point3dList.ClosestIndexInList(points, testPoint)
         if index>=0 then index
         else RhinoScriptingException.Raise "Rhino.Scripting.PointArrayClosestPoint failed on %A, %A" points testPoint
@@ -101,8 +92,6 @@ module AutoOpenPointVector =
     ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Point3d Rarr) transformed points.</returns>
     static member PointArrayTransform(points:Point3d seq, xForm:Transform) : Point3d Rarr = 
-        //points = Scripting.Coerce3dpointlist(points)
-        //xForm = Scripting.CoercexForm(xForm)
         rarr {for point in points do
                 let p = Point3d(point) //copy first !
                 p.Transform(xForm)
@@ -116,8 +105,6 @@ module AutoOpenPointVector =
     ///      [1] the point on object
     ///      [2] the distance.</returns>
     static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float = 
-        //objectIds = Scripting.Coerceguidlist(objectIds)
-        //point = Scripting.Coerce3dpoint(point)
         let mutable closest = Unchecked.defaultof<Guid*Point3d*float>
         let mutable distance = Double.MaxValue
         for objectId in objectIds do
@@ -182,8 +169,6 @@ module AutoOpenPointVector =
     static member PointCompare( point1:Point3d,
                                 point2:Point3d,
                                 [<OPT;DEF(0.0)>]tolerance:float) : bool = 
-        //point1 = Scripting.Coerce3dpoint(point1)
-        //point2 = Scripting.Coerce3dpoint(point2)
         let tolerance = Util.ifZero2 RhinoMath.ZeroTolerance  tolerance
         let vector = point2-point1
         vector.IsTiny(tolerance)
@@ -206,7 +191,6 @@ module AutoOpenPointVector =
     ///    Tolerance to use when verifying</param>
     ///<returns>(bool) True or False.</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
-        //points = Scripting.Coerce3dpointlist(points)
         let tolerance = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
         Point3d.ArePointsCoplanar(points, tolerance)
 
@@ -216,7 +200,6 @@ module AutoOpenPointVector =
     ///<param name="scale">(float) Scale factor to apply</param>
     ///<returns>(Point3d) resulting point.</returns>
     static member PointScale(point:Point3d, scale:float) : Point3d = 
-        //point = Scripting.Coerce3dpoint(point)
         point*scale
 
 
@@ -225,8 +208,6 @@ module AutoOpenPointVector =
     ///<param name="point2">(Point3d) Point2 of the points to subtract</param>
     ///<returns>(Point3d) The resulting 3D point.</returns>
     static member PointSubtract(point1:Point3d, point2:Point3d) : Point3d = 
-        //point1 = Scripting.Coerce3dpoint(point1)
-        //point2 = Scripting.Coerce3dpoint(point2)
         let v = point1-point2
         Point3d(v)
 
@@ -236,8 +217,6 @@ module AutoOpenPointVector =
     ///<param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     ///<returns>(Point3d) transformed Point.</returns>
     static member PointTransform(point:Point3d, xForm:Transform) : Point3d = 
-        //point = Scripting.Coerce3dpoint(point)
-        //xForm = Scripting.CoercexForm(xForm)
         let p = Point3d(point) //copy first !
         p.Transform(xForm)
         p
@@ -277,13 +256,10 @@ module AutoOpenPointVector =
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array = 
-        //id = Scripting.Coerceguid(objectId)
-        //points = Scripting.Coerce3dpointlist(points)
         match Scripting.CoerceGeometry(objectId) with
         | :? Mesh as mesh->
             let points = mesh.PullPointsToMesh(points)
-            points
-        //brep = Scripting.Coercebrep(objectId)
+            points       
         | :? Brep as brep->
             if brep.Faces.Count = 1 then
                 let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -298,8 +274,6 @@ module AutoOpenPointVector =
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to add</param>
     ///<returns>(Vector3d) The resulting 3D vector.</returns>
     static member VectorAdd(vector1:Vector3d, vector2:Vector3d) : Vector3d = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         vector1 + vector2
 
 
@@ -308,12 +282,10 @@ module AutoOpenPointVector =
     ///<param name="vector2">(Vector3d) The second 3-D vector</param>
     ///<returns>(float) The angle in degrees.</returns>
     static member VectorAngle(vector1:Vector3d, vector2:Vector3d) : float = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         let vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
         let vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
-            RhinoScriptingException.Raise "Rhino.Scripting.Rhino.Scripting.VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
+            RhinoScriptingException.Raise "Rhino.Scripting.VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
         let mutable dot = vector1 * vector2
         dot <- Scripting.Clamp(-1.0 , 1.0 , dot)
         let radians = Math.Acos(dot)
@@ -328,8 +300,6 @@ module AutoOpenPointVector =
     ///    0 if vector1 is equal to vector2
     ///    1 if vector1 is greater than vector2.</returns>
     static member VectorCompare(vector1:Vector3d, vector2:Vector3d) : int = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         vector1.CompareTo(vector2)
 
 
@@ -338,8 +308,6 @@ module AutoOpenPointVector =
     ///<param name="toPoint">(Point3d) End point vector</param>
     ///<returns>(Vector3d) The resulting vector.</returns>
     static member VectorCreate( fromPoint:Point3d, toPoint:Point3d) : Vector3d = 
-        //toPoint = Scripting.Coerce3dpoint(toPoint)
-        //fromPoint = Scripting.Coerce3dpoint(fromPoint)
         toPoint-fromPoint
 
 
@@ -348,8 +316,6 @@ module AutoOpenPointVector =
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to perform cross product on</param>
     ///<returns>(Vector3d) The resulting cross product direction.</returns>
     static member VectorCrossProduct(vector1:Vector3d, vector2:Vector3d) : Vector3d = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         Vector3d.CrossProduct( vector1, vector2 )
 
 
@@ -358,7 +324,6 @@ module AutoOpenPointVector =
     ///<param name="divide">(float) A non-zero value to divide</param>
     ///<returns>(Vector3d) resulting vector.</returns>
     static member VectorDivide(vector:Vector3d, divide:float) : Vector3d = 
-        //vector = Scripting.Coerce3dvector(vector)
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
             RhinoScriptingException.Raise "Rhino.Scripting.VectorDivide: Cannot divide by Zero or almost Zero %f" divide
         else
@@ -370,8 +335,6 @@ module AutoOpenPointVector =
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to perform the dot product on</param>
     ///<returns>(float) The resulting dot product.</returns>
     static member VectorDotProduct(vector1:Vector3d, vector2:Vector3d) : float = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         vector1*vector2
 
 
@@ -379,7 +342,6 @@ module AutoOpenPointVector =
     ///<param name="vector">(Vector3d) The 3-D vector</param>
     ///<returns>(float) The length of the vector.</returns>
     static member VectorLength(vector:Vector3d) : float = 
-        //vector = Scripting.Coerce3dvector(vector)
         vector.Length
 
 
@@ -395,7 +357,6 @@ module AutoOpenPointVector =
     ///<param name="vector">(Vector3d) The vector to reverse</param>
     ///<returns>(Vector3d) reversed vector.</returns>
     static member VectorReverse(vector:Vector3d) : Vector3d = 
-        //vector = Scripting.Coerce3dvector(vector)
         Vector3d(-vector.X, -vector.Y, -vector.Z)
 
 
@@ -421,7 +382,6 @@ module AutoOpenPointVector =
     ///<param name="scale">(float) Scale factor to apply</param>
     ///<returns>(Vector3d) resulting vector.</returns>
     static member VectorScale(vector:Vector3d, scale:float) : Vector3d = 
-        //vector = Scripting.Coerce3dvector(vector)
         vector*scale
 
 
@@ -430,8 +390,6 @@ module AutoOpenPointVector =
     ///<param name="vector2">(Vector3d) The vector to subtract</param>
     ///<returns>(Vector3d) The resulting 3D vector.</returns>
     static member VectorSubtract(vector1:Vector3d, vector2:Vector3d) : Vector3d = 
-        //vector1 = Scripting.Coerce3dvector(vector1)
-        //vector2 = Scripting.Coerce3dvector(vector2)
         vector1-vector2
 
 
@@ -439,10 +397,7 @@ module AutoOpenPointVector =
     ///<param name="vector">(Vector3d) The vector to transform</param>
     ///<param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     ///<returns>(Vector3d) transformed vector.</returns>
-    static member VectorTransform(vector:Vector3d, xForm:Transform) : Vector3d = 
-        //vector = Scripting.Coerce3dvector(vector)
-        //xForm = Scripting.CoercexForm(xForm)
-        //xForm*vector
+    static member VectorTransform(vector:Vector3d, xForm:Transform) : Vector3d =         
         let v = Vector3d(vector)
         v.Transform(xForm)
         v
@@ -463,7 +418,7 @@ module AutoOpenPointVector =
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
     ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
     ///    Plane to which the bounding box should be aligned,
-    /// If omitted, a world axis-aligned bounding box
+    ///    If omitted, a world axis-aligned bounding box
     ///    will be calculated</param>
     ///<returns>(Box) A Rhino.Geometry.Box.</returns>
     static member PointArrayBoundingBox( points:Point3d seq, [<OPT;DEF(Plane())>]plane:Plane) : Box = // TODO verify this works the same way as python !!

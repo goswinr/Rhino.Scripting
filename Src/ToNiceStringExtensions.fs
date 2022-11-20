@@ -1,4 +1,5 @@
-﻿namespace Rhino
+﻿// only this file is using this namespace : so that making these F# onl extensions available works with 'open Rhino.ScriptingFSharp'
+namespace Rhino.ScriptingFSharp
 
 open System
 open Rhino.Geometry
@@ -77,7 +78,7 @@ module AutoOpenToNiceStringExtensions =
             else
                 str{
                     yield! "Rhino.Geometry.Plane:"
-                    yield! sprintf "Origin X=%s Y=%s Z=%s" (NiceFormat.float  p.Origin.X) (NiceFormat.float  p.Origin.Y) (NiceFormat.float  p.Origin.Z)
+                    yield! sprintf "Origin X=%s Y=%s Z=%s" (NiceFormat.float  p.Origin.X)(NiceFormat.float  p.Origin.Y) (NiceFormat.float  p.Origin.Z)
                     yield! sprintf "X-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.XAxis.X) (NiceFormat.float  p.XAxis.Y) (NiceFormat.float  p.XAxis.Z)
                     yield! sprintf "Y-Axis X=%s Y=%s Z=%s" (NiceFormat.float  p.YAxis.X) (NiceFormat.float  p.YAxis.Y) (NiceFormat.float  p.YAxis.Z)                
                     }
@@ -86,11 +87,12 @@ module AutoOpenToNiceStringExtensions =
         /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
         member b.ToNiceString =            
             str{ 
-                if   b.IsDegenerate(State.Doc.ModelAbsoluteTolerance) > 0 then yield! "flat Rhino.Geometry.BoundingBox"
+                if   b.IsDegenerate(Rhino.State.Doc.ModelAbsoluteTolerance) > 0 then yield! "flat Rhino.Geometry.BoundingBox"
                 elif not b.IsValid then yield! "invalid (decreasing?) Rhino.Geometry.BoundingBox"
                 else                    yield! "Rhino.Geometry.BoundingBox:"
                 yield! sprintf "Size X=%s Y=%s Z=%s" (NiceFormat.float b.Diagonal .X) (NiceFormat.float  b.Diagonal .Y) (NiceFormat.float  b.Diagonal .Z)
                 yield! sprintf "from X=%s Y=%s Z=%s" (NiceFormat.float  b.Min.X) (NiceFormat.float  b.Min.Y) (NiceFormat.float  b.Min.Z)
                 yield! sprintf "till X=%s Y=%s Z=%s" (NiceFormat.float  b.Max.X) (NiceFormat.float  b.Max.Y) (NiceFormat.float  b.Max.Z)                
                 }
+
 

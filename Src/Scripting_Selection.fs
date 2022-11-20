@@ -2,17 +2,18 @@
 namespace Rhino
 
 open System
-//open System.Collections.Generic
-//open System.Globalization
-//open Microsoft.FSharp.Core.LanguagePrimitives
+open System.Collections.Generic
+open System.Globalization
+open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-//open Rhino.ApplicationSettings
+open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.SaveIgnore
-//open FsEx.UtilMath
-//open FsEx.CompareOperators
+open FsEx.UtilMath
+open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenSelection =
@@ -104,7 +105,7 @@ module AutoOpenSelection =
             let res = go.Get()
             if res <> Input.GetResult.Object then
                 if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
-                RhinoUserInteractionException.Raise "No Object was selected in rs.GetCurveObject(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -136,8 +137,8 @@ module AutoOpenSelection =
     ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
     ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
-    ///    If True, subobjects can be selected. When this is the
-    ///    case, for tracking  of the subobject go via the Object Ref</param>
+    ///    If True, sub-objects can be selected. When this is the
+    ///    case, for tracking  of the sub-object go via the Object Ref</param>
     ///<returns>(Guid) Identifier of the picked object.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObject(        [<OPT;DEF(null:string)>]message:string,
@@ -159,7 +160,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in rs.GetObject(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let obj = objref.Object()
@@ -223,7 +224,7 @@ module AutoOpenSelection =
             let res = go.Get()
             if res <> Input.GetResult.Object then
                 if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
-                RhinoUserInteractionException.Raise "No Object was selected in rs.GetObjectEx(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -297,7 +298,7 @@ module AutoOpenSelection =
             let res = go.GetMultiple(minimumCount, maximumCount)
             if res <> Input.GetResult.Object then
                 if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
-                RhinoUserInteractionException.Raise "No Object was selected in rs.GetObjects(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     State.Doc.Objects.UnselectAll() |> ignore
@@ -309,7 +310,7 @@ module AutoOpenSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then InternalNicePrintSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
+                if printCount then InternalToNiceStringSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
                 //if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
@@ -366,7 +367,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.GetMultiple(1, 0)
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in rs.GetObjectsEx(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjectsEx(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     State.Doc.Objects.UnselectAll() |> ignore
@@ -387,7 +388,7 @@ module AutoOpenSelection =
                     rc
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> Scripting.ObjectDescription
-                    |> InternalNicePrintSetup.printfnBlue "GetObjectsEx got %s"
+                    |> InternalToNiceStringSetup.printfnBlue "GetObjectsEx got %s"
 
 
                 rc
@@ -444,7 +445,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in rs.GetSurfaceObject(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetSurfaceObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
@@ -671,7 +672,7 @@ module AutoOpenSelection =
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
         let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance then
-            RhinoScriptingException.Raise "Rhino.Scripting.%s does not exist in GroupTable" groupName
+            RhinoScriptingException.Raise "Rhino.Scripting.ObjectsByGroup: '%s' does not exist in GroupTable" groupName
         let rhinoobjects = State.Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             Rarr()

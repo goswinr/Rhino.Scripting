@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -71,13 +72,13 @@ module AutoOpenHatch =
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
-            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to find hatchPattern:'%s'"  hatchPattern           
+            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed to find hatchPattern:'%s'"  hatchPattern           
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
         if isNull hatches then 
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
                 (Seq.length curves) 
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
                 (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
@@ -88,7 +89,7 @@ module AutoOpenHatch =
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
         if ids.Count = 0 then 
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
                 (Seq.length curves) 
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
                 (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
@@ -133,7 +134,7 @@ module AutoOpenHatch =
         try Scripting.AddHatches(curves, hatchPattern, scale, rotation) 
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on curveIds:'%s' \r\nMessage: %s" (Nice.str curveIds)  e.Message
+            RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed on curveIds:'%s' \r\nMessage: %s" (Nice.str curveIds)  e.Message
             
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -192,7 +193,7 @@ module AutoOpenHatch =
         let rc = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         Scripting.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.Set CurrentHatchPattern failed. hatchPattern:'%A'" hatchPattern
+        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.CurrentHatchPattern: Setting it failed. hatchPattern:'%A'" hatchPattern
         State.Doc.HatchPatterns.CurrentHatchPatternIndex <- patternInstance.Index
 
 

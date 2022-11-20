@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -418,7 +419,7 @@ module AutoOpenCoerce =
         match box nameOrId with
         | :? Guid as g ->
             let viewo = State.Doc.Views.Find(g)
-            if isNull viewo then RhinoScriptingException.Raise "Rhino.Scripting.CoerceView: could not CoerceView  from '%O'" g
+            if isNull viewo then RhinoScriptingException.Raise "Rhino.Scripting.CoerceView: could not CoerceView from '%O'" g
             else viewo
 
         | :? string as view ->
@@ -431,7 +432,7 @@ module AutoOpenCoerce =
                 if allviews.Length = 1 then allviews.[0]
                 else  RhinoScriptingException.Raise "Rhino.Scripting.CoerceView: could not CoerceView '%s'" view
 
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Cannot get view from %O" nameOrId
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceView: Cannot get view from %A" nameOrId
 
 
     ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
@@ -441,10 +442,10 @@ module AutoOpenCoerce =
         match box nameOrId with
         | :? Guid as g ->
             let viewo = State.Doc.Views.Find(g)
-            if isNull viewo then RhinoScriptingException.Raise "Rhino.Scripting.CoerceView: could not CoerceView  from '%O'" g
+            if isNull viewo then RhinoScriptingException.Raise "Rhino.Scripting.CoercePageView: could not CoerceView  from '%O'" g
             else
                 try viewo :?> Display.RhinoPageView
-                with _  -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceView: the view found '%s' is not a page view" viewo.MainViewport.Name
+                with _  -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePageView: the view found '%s' is not a page view" viewo.MainViewport.Name
 
         | :? string as view ->
             if isNull view then RhinoScriptingException.Raise "Rhino.Scripting.CoercePageView: failed on null for view name input" // or State.Doc.Views.ActiveView
@@ -455,7 +456,7 @@ module AutoOpenCoerce =
                 elif allviews.Length > 1 then RhinoScriptingException.Raise "Rhino.Scripting.CoercePageView: more than one page called '%s'" view
                 else  RhinoScriptingException.Raise "Rhino.Scripting.CoercePageView: Layout called '%s' not found" view
 
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Cannot get view from %O" nameOrId
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePageView: Cannot get view from %O" nameOrId
 
     ///<summary>Attempt to get Detail view rectangle Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of Detail object</param>

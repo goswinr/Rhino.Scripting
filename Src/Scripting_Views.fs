@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -45,9 +46,9 @@ module AutoOpenViews =
                              corner2:Point2d,
                              [<OPT;DEF(null:string)>]title:string,
                              [<OPT;DEF(1)>]projection:int) : Guid = 
-        if projection<1 || projection>7 then RhinoScriptingException.Raise "Rhino.Scripting.Projection must be a value between 1-7.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if projection<1 || projection>7 then RhinoScriptingException.Raise "Rhino.Scripting.AddDetail: Projection must be a value between 1-7.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let layout = Scripting.CoercePageView(layoutName)//TODO test this
-        if isNull layout then RhinoScriptingException.Raise "Rhino.Scripting.No layout found for given layoutId.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
+        if isNull layout then RhinoScriptingException.Raise "Rhino.Scripting.AddDetail: No layout found for given layoutId.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let projection : Display.DefinedViewportProjection = LanguagePrimitives.EnumOfValue  projection
         let detail = layout.AddDetailView(title, corner1, corner2, projection)
         if isNull detail then RhinoScriptingException.Raise "Rhino.Scripting.AddDetail failed.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
@@ -75,7 +76,7 @@ module AutoOpenViews =
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(unit) void, nothing.</returns>
     static member AddNamedCPlane(cPlaneName:string, plane:Plane) : unit = 
-        if isNull cPlaneName then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedCPlane = null.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
+        if isNull cPlaneName then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedCPlane: cPlaneName = null.  plane:'%A'"  plane
         let index = State.Doc.NamedConstructionPlanes.Add(cPlaneName, plane)
         if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedCPlane failed.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
         ()
@@ -88,7 +89,7 @@ module AutoOpenViews =
     ///<returns>(unit) void, nothing.</returns>
     static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit = 
         let view = Scripting.CoerceView(view)
-        if isNull name then RhinoScriptingException.Raise "Rhino.Scripting.Name = empty.  name:'%A' view:'%A'" name view
+        if isNull name then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedView: Name = null.  view:'%A'"  view
         let viewportId = view.MainViewport.Id
         let index = State.Doc.NamedViews.Add(name, viewportId)
         if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedView failed.  name:'%A' view:'%A'" name view
@@ -158,7 +159,7 @@ module AutoOpenViews =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail = 
             try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "Rhino.Scripting.Set DetailLock failed. detailId is a %s  lock:'%A'" (Nice.str detailId)  lock
+            with _ ->  RhinoScriptingException.Raise "Rhino.Scripting.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Nice.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore
@@ -651,8 +652,7 @@ module AutoOpenViews =
     ///<summary>Return name of a display mode given it's id.</summary>
     ///<param name="modeId">(Guid) The identifier of the display mode obtained from the ViewDisplayModes method</param>
     ///<returns>(string) The name of the display mode.</returns>
-    static member ViewDisplayModeName(modeId:Guid) : string = 
-        //modeId = Scripting.Coerceguid(modeId)
+    static member ViewDisplayModeName(modeId:Guid) : string =
         let desc = Display.DisplayModeDescription.GetDisplayMode(modeId)
         if notNull desc then desc.EnglishName
         else

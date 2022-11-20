@@ -8,6 +8,7 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
+open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
@@ -152,16 +153,16 @@ module AutoOpenDocument =
 
     ///<summary>Returns the document's notes. Notes are generally created
     /// using Rhino's Notes command.</summary>
-    ///<returns>(string) if `newnotes` is omitted, the current notes.</returns>
+    ///<returns>(string) The current notes.</returns>
     static member Notes() : string = //GET
         State.Doc.Notes
 
     ///<summary>Sets the document's notes. Notes are generally created
     /// using Rhino's Notes command.</summary>
-    ///<param name="newnotes">(string) New notes to set</param>
+    ///<param name="newNotes">(string) New notes to set</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member Notes(newnotes:string) : unit = //SET
-        State.Doc.Notes <- newnotes
+    static member Notes(newNotes:string) : unit = //SET
+        State.Doc.Notes <- newNotes
 
 
 
@@ -204,7 +205,7 @@ module AutoOpenDocument =
     ///   1 = background color</param>
     ///<returns>(Drawing.Color) The current item color.</returns>
     static member RenderColor(item:int) : Drawing.Color = //GET
-        if item<>0 && item<>1 then  RhinoScriptingException.Raise "Rhino.Scripting.Item must be 0 or 1.  item:'%A'" item
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "Rhino.Scripting.RenderColor Item must be 0 or 1.  item:'%A'" item
         if item = 0 then  State.Doc.RenderSettings.AmbientLight
         else State.Doc.RenderSettings.BackgroundColorTop
 
@@ -215,7 +216,7 @@ module AutoOpenDocument =
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
-        if item<>0 && item<>1 then  RhinoScriptingException.Raise "Rhino.Scripting.Item must be 0 || 1.  item:'%A' color:'%A'" item color
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "Rhino.Scripting.RenderColor Item must be 0 || 1.  item:'%A' color:'%A'" item color
         let settings = State.Doc.RenderSettings
         if item = 0 then  settings.AmbientLight <- color
         else            settings.BackgroundColorTop <- color
