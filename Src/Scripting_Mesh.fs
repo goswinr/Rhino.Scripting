@@ -179,12 +179,12 @@ module AutoOpenMesh =
         let curve = Scripting.CoerceCurve(objectId)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
-        if isNull mesh then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (toNiceString objectId) deleteInput
+        if isNull mesh then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarMesh failed.  objectId:'%s' deleteInput:'%A'" (Nice.str objectId) deleteInput
         if deleteInput then
             let ob = Scripting.CoerceGuid(objectId)
-            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (toNiceString objectId) deleteInput
+            if not<| State.Doc.Objects.Delete(ob, true) then RhinoScriptingException.Raise "Rhino.Scripting.AddPlanarMesh failed to delete input.  objectId:'%s' deleteInput:'%A'" (Nice.str objectId) deleteInput
         let rc = State.Doc.Objects.AddMesh(mesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (toNiceString objectId) deleteInput
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  objectId:'%s' deleteInput:'%A'" (Nice.str objectId) deleteInput
         State.Doc.Views.Redraw()
         rc
 
@@ -202,7 +202,7 @@ module AutoOpenMesh =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let polylinecurve = curve.ToPolyline(0 , 0 , 0.0 , 0.0 , 0.0, tolerance , 0.0 , 0.0 , true)
         let pts, faceids = Intersect.Intersection.MeshPolyline(mesh, polylinecurve)
-        if isNull pts then RhinoScriptingException.Raise "Rhino.Scripting.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (toNiceString curveId) (toNiceString meshId)
+        if isNull pts then RhinoScriptingException.Raise "Rhino.Scripting.CurveMeshIntersection failed. curveId:'%s' meshId:'%s'" (Nice.str curveId) (Nice.str meshId)
         pts, faceids
 
 
@@ -329,7 +329,7 @@ module AutoOpenMesh =
         for mesh in meshes do joinedmesh.Append(mesh)
         #endif// only for Rh6.0, would not be needed for latest releases of Rh6
         let rc = State.Doc.Objects.AddMesh(joinedmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Failed to join Meshes %A" (toNiceString objectIds)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Failed to join Meshes %A" (Nice.str objectIds)
         if deleteInput then
             for objectId in objectIds do
                 //guid = Scripting.Coerceguid(objectId)
@@ -347,7 +347,7 @@ module AutoOpenMesh =
         if notNull mp then
             mp.Area
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.MeshArea failed.  objectId:'%s'" (toNiceString objectId)
+            RhinoScriptingException.Raise "Rhino.Scripting.MeshArea failed.  objectId:'%s'" (Nice.str objectId)
 
 
 
@@ -357,7 +357,7 @@ module AutoOpenMesh =
     static member MeshAreaCentroid(objectId:Guid) : Point3d = 
         let mesh = Scripting.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
-        if mp|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MeshAreaCentroid failed.  objectId:'%s'" (toNiceString objectId)
+        if mp|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MeshAreaCentroid failed.  objectId:'%s'" (Nice.str objectId)
         mp.Centroid
 
 
@@ -476,7 +476,7 @@ module AutoOpenMesh =
         //point = Scripting.Coerce3dpoint(point)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
-        if face<0 then RhinoScriptingException.Raise "Rhino.Scripting.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (toNiceString objectId) point maximumDistance
+        if face<0 then RhinoScriptingException.Raise "Rhino.Scripting.MeshClosestPoint failed.  objectId:'%s' point:'%A' maximumDistance:'%A'" (Nice.str objectId) point maximumDistance
         !pt, face
 
 
@@ -664,9 +664,9 @@ module AutoOpenMesh =
     static member MeshOffset(meshId:Guid, distance:float) : Guid = 
         let mesh = Scripting.CoerceMesh(meshId)
         let offsetmesh = mesh.Offset(distance)
-        if offsetmesh|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MeshOffset failed.  meshId:'%s' distance:'%A'" (toNiceString meshId) distance
+        if offsetmesh|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MeshOffset failed.  meshId:'%s' distance:'%A'" (Nice.str meshId) distance
         let rc = State.Doc.Objects.AddMesh(offsetmesh)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  meshId:'%s' distance:'%A'" (toNiceString meshId) distance
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add mesh to document.  meshId:'%s' distance:'%A'" (Nice.str meshId) distance
         State.Doc.Views.Redraw()
         rc
 
@@ -775,7 +775,7 @@ module AutoOpenMesh =
         else
             let colorcount = Seq.length(colors)
             if colorcount <> mesh.Vertices.Count then
-                RhinoScriptingException.Raise "Rhino.Scripting.Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (toNiceString meshId) colors
+                RhinoScriptingException.Raise "Rhino.Scripting.Length of colors must match vertex count.  meshId:'%s' colors:'%A'" (Nice.str meshId) colors
             mesh.VertexColors.Clear()
             for c in colors do mesh.VertexColors.Add(c) |> ignore
         State.Doc.Objects.Replace(meshId, mesh) |> ignore
@@ -802,7 +802,7 @@ module AutoOpenMesh =
 
     ///<summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
-    ///<returns>(Vector3d Rarr) List of vertex normals, (empty list if no normals exist).</returns>
+    ///<returns>(Vector3d Rarr) List of vertex normals, (empty list if no normals exist).</returns>.ToNiceString
     static member MeshVertexNormals(meshId:Guid) : Vector3d Rarr = 
         let mesh = Scripting.CoerceMesh(meshId)
         let count = mesh.Normals.Count
@@ -835,7 +835,7 @@ module AutoOpenMesh =
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on objectId:'%s'" (toNiceString objectId)
+                RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on objectId:'%s'" (Nice.str objectId)
         totalvolume
 
 
@@ -850,7 +850,7 @@ module AutoOpenMesh =
             if notNull mp then
                 totalvolume <- totalvolume + mp.Volume
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on mesh:'%s' of %d meshes" (NiceString.toNiceString mesh) (Seq.length meshes)
+                RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on mesh:'%s' of %d meshes" (Nice.str mesh) (Seq.length meshes)
         totalvolume
 
 
@@ -861,7 +861,7 @@ module AutoOpenMesh =
         let mesh = Scripting.CoerceMesh(objectId)
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "Rhino.Scripting.MeshVolumeCentroid failed.  objectId:'%s'" (toNiceString objectId)
+        else RhinoScriptingException.Raise "Rhino.Scripting.MeshVolumeCentroid failed.  objectId:'%s'" (Nice.str objectId)
 
     ///<summary>Calculates the volume centroid of a Mesh.</summary>
     ///<param name="mesh">(Geometry.Mesh seq) Mesh Geometry</param>
@@ -869,7 +869,7 @@ module AutoOpenMesh =
     static member MeshVolumeCentroid(mesh:Mesh) : Point3d =
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
-        else RhinoScriptingException.Raise "Rhino.Scripting.MeshVolumeCentroid failed.  mesh:'%s'" (NiceString.toNiceString mesh)
+        else RhinoScriptingException.Raise "Rhino.Scripting.MeshVolumeCentroid failed.  mesh:'%s'" (Nice.str mesh)
 
 
     ///<summary>Pulls a Curve to a Mesh. The function makes a Polyline approximation of
@@ -883,9 +883,9 @@ module AutoOpenMesh =
         let curve = Scripting.CoerceCurve(curveId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let polyline = curve.PullToMesh(mesh, tol)
-        if isNull polyline then RhinoScriptingException.Raise "Rhino.Scripting.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (toNiceString meshId)  (toNiceString curveId)
+        if isNull polyline then RhinoScriptingException.Raise "Rhino.Scripting.PullCurveToMesh failed.  meshId:'%s' curveId:'%s'" (Nice.str meshId)  (Nice.str curveId)
         let rc = State.Doc.Objects.AddCurve(polyline)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (toNiceString meshId) (toNiceString curveId)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Unable to add polyline to document.  meshId:'%s' curveId:'%s'" (Nice.str meshId) (Nice.str curveId)
         State.Doc.Views.Redraw()
         rc
 

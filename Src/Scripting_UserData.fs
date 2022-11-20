@@ -107,7 +107,7 @@ module AutoOpenUserData =
         if isNull s then
             let err = 
                 str{
-                    yield! sprintf "Rhino.Scripting.GetUserText key: '%s' does not exist on %s" key (toNiceString objectId)
+                    yield! sprintf "Rhino.Scripting.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
                     let ks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=false)
                     if ks.Count = 0 then
                         yield!  "This Object does not have any UserText."
@@ -224,10 +224,10 @@ module AutoOpenUserData =
         let obj = Scripting.CoerceRhinoObject(objectId)
         if attachToGeometry then
             if not <| obj.Geometry.SetUserString(key, value) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (toNiceString objectId) key value
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
         else
             if not <| obj.Attributes.SetUserString(key, value) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (toNiceString objectId) key value
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
 
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
@@ -244,10 +244,10 @@ module AutoOpenUserData =
             let obj = Scripting.CoerceRhinoObject(objectId)
             if attachToGeometry then
                 if not <| obj.Geometry.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (toNiceString objectId) key value
+                    RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (toNiceString objectId) key value
+                    RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
 
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>

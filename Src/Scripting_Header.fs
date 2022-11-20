@@ -13,6 +13,16 @@ open FsEx.SaveIgnore
 open FsEx.CompareOperators
 open System.Globalization
 
+
+// ------- Abbreviations so that declarations are not so long:
+
+/// OptionalAttribute for member parameters
+type internal OPT = Runtime.InteropServices.OptionalAttribute
+
+/// DefaultParameterValueAttribute for member parameters
+type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
+
+
 // This file and all other files with the name Scripting_**.fs will be combined into one large file called Scripting.fs before compiling.
 // This is done via the script combineIntoOneFile.fsx that is invoked as part of the build process.
 // This build process is needed because F# extension members don't work in C#, and C# extension members via Extension attribute show as instance members when used in F#.

@@ -25,7 +25,7 @@ module AutoOpenApplication =
 
 
 
-    ///<summary>Add new command alias to Rhino. Command aliases can be added manually by
+    ///<summary>Add new command alias to Rhino Command aliases can be added manually by
     ///    using Rhino's Options command and modifying the contents of the Aliases tab.</summary>
     ///<param name="alias">(string) Name of new command alias. Cannot match command names or existing
     ///    aliases</param>
@@ -235,7 +235,7 @@ module AutoOpenApplication =
     ///<param name="echo">(bool) Optional, Default Value: <c>true</c>
     ///    The command echo mode True will display the commands on the commandline. If omitted, command prompts are echoed (True)</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member Command(commandString:string, [<OPT;DEF(true)>]echo:bool) : bool = 
+    static member Command (commandString:string, [<OPT;DEF(true)>]echo:bool) : bool = 
         let getKeepEditor () = 
             //if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then don't even hide and show
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
@@ -522,7 +522,7 @@ module AutoOpenApplication =
 
     ///<summary>Get status of Rhino's object snap modeling aid.
     ///    Object snaps are tools for specifying points on existing objects.</summary>
-    ///<returns>(bool) The current osnap status.</returns>
+    ///<returns>(bool) The current object snap status.</returns>
     static member Osnap() : bool = //GET
         ModelAidSettings.Osnap
 

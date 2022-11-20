@@ -212,7 +212,7 @@ module AutoOpenSelection =
             use go = new Input.Custom.GetObject()
             if notNull objects then
                 let s = System.Collections.Generic.HashSet(objects)
-                go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
+                go.SetCustomGeometryFilter(fun rhinoObject _ _ -> s.Contains(rhinoObject.Id))
             if notNull message then
                 go.SetCommandPrompt(message)
             if filter>0 then
@@ -285,7 +285,7 @@ module AutoOpenSelection =
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
                 let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
-                go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
+                go.SetCustomGeometryFilter(fun rhinoObject _ _ -> s.Contains(rhinoObject.Id))
             elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
             go.SetCommandPrompt(message )
@@ -309,7 +309,7 @@ module AutoOpenSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then PrintSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
+                if printCount then InternalNicePrintSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
                 //if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
@@ -357,7 +357,7 @@ module AutoOpenSelection =
             use go = new Input.Custom.GetObject()
             if notNull objectsToSelectFrom then
                 let s = System.Collections.Generic.HashSet(objectsToSelectFrom)
-                go.SetCustomGeometryFilter(fun rhinoobject _ _ -> s.Contains(rhinoobject.Id))
+                go.SetCustomGeometryFilter(fun rhinoObject _ _ -> s.Contains(rhinoObject.Id))
             go.SetCommandPrompt(message)
             let geometryfilter = ObjectFilterEnum.GetFilterEnum(filter)
             if filter>0 then go.GeometryFilter <- geometryfilter
@@ -387,7 +387,7 @@ module AutoOpenSelection =
                     rc
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> Scripting.ObjectDescription
-                    |> PrintSetup.printfnBlue "GetObjectsEx got %s"
+                    |> InternalNicePrintSetup.printfnBlue "GetObjectsEx got %s"
 
 
                 rc
@@ -624,7 +624,7 @@ module AutoOpenSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None -> RhinoScriptingException.Raise "Rhino.Scripting.NextObject not found for %A" (toNiceString objectId)
+            |None -> RhinoScriptingException.Raise "Rhino.Scripting.NextObject not found for %A" (Nice.str objectId)
             |Some (t, n) ->
                 if select then n.Select(true) |> ignore //TODO make sync ?
                 n.Id

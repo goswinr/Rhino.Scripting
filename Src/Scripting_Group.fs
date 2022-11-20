@@ -39,15 +39,14 @@ module AutoOpenGroup =
         if rc|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.AddGroup failed.  groupName:'%A'" groupName
         rc
 
-
     ///<summary>Adds one or more objects to an existing group.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddObjectToGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
+    static member AddObjectsToGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = State.Doc.Groups.Find(groupName)
-        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting.Can't add objects to group, group '%s' not found" groupName
-        if Seq.isEmpty objectIds then RhinoScriptingException.Raise "Rhino.Scripting.Can't add empty seq to group %s" groupName
+        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting.AddObjectsToGroup Can't add objects to group, group '%s' not found" groupName
+        if Seq.isEmpty objectIds then RhinoScriptingException.Raise "Rhino.Scripting.AddObjectsToGroup Can't add empty seq to group %s" groupName
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "Rhino.Scripting.AddObjectsToGroup failed '%s' and %A" groupName objectIds
 
 
@@ -77,9 +76,8 @@ module AutoOpenGroup =
     ///<returns>(unit) void, nothing.</returns>
     static member AddObjectToGroup(objectId:Guid, groupName:string) : unit = 
         let index = State.Doc.Groups.Find(groupName)
-        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting.Can't add object to group, group '%s' not found" groupName
+        if index < 0 then RhinoScriptingException.Raise "Rhino.Scripting.AddObjectToGroup Can't add object to group, group '%s' not found" groupName
         if not <|  State.Doc.Groups.AddToGroup(index, objectId) then RhinoScriptingException.Raise "Rhino.Scripting.AddObjectToGroup failed '%s' and %A" groupName objectId
-
 
 
     ///<summary>Removes an existing group from the document. Reference groups cannot be
@@ -88,7 +86,7 @@ module AutoOpenGroup =
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteGroup(groupName:string) : unit = 
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.Can't DeleteGroup, group '%s' not found" groupName
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.DeleteGroup Can't DeleteGroup, group '%s' not found" groupName
         if not <| State.Doc.Groups.Delete(index) then RhinoScriptingException.Raise "Rhino.Scripting.DeleteGroup failed for group '%s' " groupName
 
 
@@ -117,7 +115,7 @@ module AutoOpenGroup =
         State.Doc.Groups.Hide(index);
 
 
-    ///<summary>Verifies the existance of a group.</summary>
+    ///<summary>Verifies the existence of a group.</summary>
     ///<param name="groupName">(string) The name of the group to check for</param>
     ///<returns>(bool) True or False.</returns>
     static member IsGroup(groupName:string) : bool = 
@@ -148,12 +146,12 @@ module AutoOpenGroup =
     ///<param name="objectId">(Guid) The object identifier</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RemoveObjectFromAllGroups(objectId:Guid) : bool = 
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        if rhinoobject.GroupCount<1 then false
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        if rhinoObject.GroupCount<1 then false
         else
-            let attrs = rhinoobject.Attributes
+            let attrs = rhinoObject.Attributes
             attrs.RemoveFromAllGroups()
-            State.Doc.Objects.ModifyAttributes(rhinoobject, attrs, true)
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true)
 
 
     ///<summary>Remove a single object from an existing group.</summary>
@@ -161,28 +159,28 @@ module AutoOpenGroup =
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
     static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit = 
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (toNiceString objectId) groupName
-        let attrs = rhinoobject.Attributes
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
+        let attrs = rhinoObject.Attributes
         attrs.RemoveFromGroup(index)
-        if not <| State.Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then
-            RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (toNiceString objectId) groupName
+        if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true) then
+            RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
 
 
     ///<summary>Removes multiple objects from an existing group.</summary>
     ///<param name="objectIds">(Guid seq) A list of object identifiers</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RemoveObjectFromGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
+    static member RemoveObjectsFromGroup(objectIds:Guid seq, groupName:string) : unit = //PLURAL
         let index = State.Doc.Groups.Find(groupName)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (toNiceString objectIds) groupName
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectsFromGroup failed.  objectIds:'%A' groupName:'%A'" (Nice.str objectIds) groupName
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            let attrs = rhinoobject.Attributes
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            let attrs = rhinoObject.Attributes
             attrs.RemoveFromGroup(index)
-            if not <| State.Doc.Objects.ModifyAttributes(rhinoobject, attrs, true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (toNiceString objectId) groupName
+            if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.RemoveObjectsFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
 
 
 
@@ -223,7 +221,7 @@ module AutoOpenGroup =
     static member ObjectTopGroup(objId:Guid) : string = 
         let obj = Scripting.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
-        if isNull groupIndexes then  RhinoScriptingException.Raise "Rhino.Scripting.ObjectTopGroup objId not part of a group:'%s'" (toNiceString objId)
+        if isNull groupIndexes then  RhinoScriptingException.Raise "Rhino.Scripting.ObjectTopGroup objId not part of a group:'%s'" (Nice.str objId)
         else
             let topGroupIndex = Array.max(groupIndexes) // this is a bad assumption. See RH-49189
             State.Doc.Groups.FindIndex(topGroupIndex).Name

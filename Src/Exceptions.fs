@@ -4,7 +4,8 @@ open System
 
 // -------------Custom exceptions used across this library including printf formatting:
 
-/// Exception for Errors in script execution
+
+/// Rhino.Scripting Exception for Errors in script execution
 type RhinoScriptingException (s:string) = 
     inherit Exception(s)
 
@@ -15,14 +16,14 @@ type RhinoScriptingException (s:string) =
         if not b then raise (new RhinoScriptingException(s))
 
 
- /// Exception for aborted user interactions, such as canceling to pick an object
+/// Rhino.Scripting Exception for aborted user interactions, such as canceling to pick an object
 type RhinoUserInteractionException (s:string) = 
     inherit Exception(s)
 
     static member inline Raise msg = 
         Printf.kprintf (fun s -> raise (new RhinoUserInteractionException(s))) msg
 
- /// Exception for UI thread synchronization problems
+/// Rhino.Scripting Exception for UI thread synchronization problems
 type RhinoSyncException (s:string) = 
     inherit Exception(s)
 

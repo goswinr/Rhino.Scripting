@@ -105,7 +105,7 @@ module AutoOpenLayer =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (toNiceString objectId)
+        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' on: %s " layer (Nice.str objectId)
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -126,7 +126,7 @@ module AutoOpenLayer =
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' and '%s' of %d objects"  layer (toNiceString objectId) (Seq.length objectIds)
+            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%s' and '%s' of %d objects"  layer (Nice.str objectId) (Seq.length objectIds)
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -135,10 +135,10 @@ module AutoOpenLayer =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectId:Guid, layerIndex:int) : unit = //SET
         let obj = Scripting.CoerceRhinoObject(objectId)
-        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (toNiceString objectId)
-        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed.  index '%d' is deleted.  on: %s " layerIndex  (toNiceString objectId)
+        if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Nice.str objectId)
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Nice.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%d' on: %s " layerIndex (toNiceString objectId)
+        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLayer failed for layer '%d' on: %s " layerIndex (Nice.str objectId)
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>

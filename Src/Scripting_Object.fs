@@ -31,14 +31,14 @@ module AutoOpenObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) ids identifying the newly transformed objects.</returns>
-    static member TransformObject( objectIds:Guid seq,
+    static member TransformObjects( objectIds:Guid seq,
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid Rarr =   //PLURAL
         // this is also called by Copy, Scale, Mirror, Move, and Rotate functions defined below
         let rc = Rarr()
         for objId in objectIds do
             let objectId = State.Doc.Objects.Transform(objId, matrix, not copy)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (toNiceString objId) (toNiceString objectId) matrix copy
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (Nice.str objId) (Nice.str objectId) matrix copy
             rc.Add objectId
         State.Doc.Views.Redraw()
         rc
@@ -54,7 +54,7 @@ module AutoOpenObject =
                                     matrix:Transform,
                                     [<OPT;DEF(false)>]copy:bool) : Guid = 
         let res = State.Doc.Objects.Transform(objectId, matrix, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (toNiceString objectId) matrix copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Nice.str objectId) matrix copy
         res
 
 
@@ -69,7 +69,7 @@ module AutoOpenObject =
             else
                 Transform.Identity
         let res = State.Doc.Objects.Transform(objectId, translation, deleteOriginal=false)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.CopyObject failed.  objectId:'%s' translation:'%A'" (toNiceString objectId) translation
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.CopyObject failed.  objectId:'%s' translation:'%A'" (Nice.str objectId) translation
         res
 
 
@@ -78,7 +78,7 @@ module AutoOpenObject =
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
     ///<returns>(Guid Rarr) identifiers for the copies.</returns>
-    static member CopyObject(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
+    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
         let translation = 
             if not translation.IsZero then
                 Transform.Translation(translation)
@@ -87,7 +87,7 @@ module AutoOpenObject =
         let rc = Rarr()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, translation, deleteOriginal=false)
-            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.CopyObjectc failed.  objectId:'%s' translation:'%A'" (toNiceString objectId) translation
+            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.CopyObjects failed.  objectId:'%s' translation:'%A'" (Nice.str objectId) translation
             rc.Add res
         rc
 
@@ -95,9 +95,8 @@ module AutoOpenObject =
     ///<summary>Deletes a single object from the document.</summary>
     ///<param name="objectId">(Guid) Identifier of object to delete</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteObject(objectId:Guid) : unit = 
-        //objectId = Scripting.Coerceguid(objectId)
-        if not <| State.Doc.Objects.Delete(objectId, quiet=true)  then RhinoScriptingException.Raise "Rhino.Scripting.DeleteObject failed on %s" (toNiceString objectId)
+    static member DeleteObject(objectId:Guid) : unit =         
+        if not <| State.Doc.Objects.Delete(objectId, quiet=true)  then RhinoScriptingException.Raise "Rhino.Scripting.DeleteObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
 
@@ -105,10 +104,10 @@ module AutoOpenObject =
     ///<summary>Deletes one or more objects from the document, Fails if not all objects can be deleted.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to delete</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteObject(objectIds:Guid seq) : unit = //PLURAL
+    static member DeleteObjects(objectIds:Guid seq) : unit = //PLURAL
         let k = State.Doc.Objects.Delete(objectIds, quiet=true)
         let l = Seq.length objectIds
-        if k <> l then RhinoScriptingException.Raise "Rhino.Scripting.DeleteObjects failed on %d out of %s" (l-k) (toNiceString objectIds)
+        if k <> l then RhinoScriptingException.Raise "Rhino.Scripting.DeleteObjects failed on %d out of %s" (l-k) (Nice.str objectIds)
         State.Doc.Views.Redraw()
 
 
@@ -135,9 +134,7 @@ module AutoOpenObject =
     ///<summary>Hides one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden.</returns>
-    static member HideObject(objectIds:Guid seq) : int = //PLURAL
-        //objectId = Scripting.Coerceguid(objectId)
-        //if notNull objectId then objectId <- .[objectId]
+    static member HideObjects(objectIds:Guid seq) : int = //PLURAL        
         let mutable rc = 0
         for objectId in objectIds do
             if State.Doc.Objects.Hide(objectId, ignoreLayerMode=false) then rc <- rc + 1
@@ -153,7 +150,7 @@ module AutoOpenObject =
         rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
 
-    ///<summary>Verifies the existence of an objectin the State.Doc.Objects table. Fails on empty Guid.</summary>
+    ///<summary>Verifies the existence of an object in the State.Doc.Objects table. Fails on empty Guid.</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist.</returns>
     static member IsObject(objectId:Guid) : bool = 
@@ -276,7 +273,7 @@ module AutoOpenObject =
         | :? SubD      as s -> s.IsSolid // only for Rh7 and higher        
         #endif
         | _                 ->
-            RhinoScriptingException.Raise " only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (toNiceString objectId)
+            RhinoScriptingException.Raise " only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Nice.str objectId)
 
 
 
@@ -312,7 +309,7 @@ module AutoOpenObject =
     ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids. The identifiers of objects</param>
     ///<returns>(int) number of objects locked.</returns>
-    static member LockObject(objectIds:Guid seq) : int = //PLURAL
+    static member LockObjects(objectIds:Guid seq) : int = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
             if State.Doc.Objects.Lock(objectId, ignoreLayerMode=false) then rc <- rc +   1
@@ -326,7 +323,7 @@ module AutoOpenObject =
     ///    then the default attributes are copied to the targetIds</param>
     ///<returns>(int) number of objects modified.</returns>
     static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int = 
-        let sourceattr = 
+        let sourceAttr = 
             if Guid.Empty <> sourceId then
                 let source = Scripting.CoerceRhinoObject(sourceId)
                 source.Attributes.Duplicate()
@@ -334,7 +331,7 @@ module AutoOpenObject =
                 new DocObjects.ObjectAttributes()
         let mutable rc = 0
         for objectId in targetIds do
-            if State.Doc.Objects.ModifyAttributes(objectId, sourceattr, quiet=true) then
+            if State.Doc.Objects.ModifyAttributes(objectId, sourceAttr, quiet=true) then
                 rc <- rc +  1
         if 0 <> rc then State.Doc.Views.Redraw()
         rc
@@ -352,13 +349,13 @@ module AutoOpenObject =
                                 endPoint:Point3d,
                                 [<OPT;DEF(false)>]copy:bool) : Guid = 
         let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "Rhino.Scripting.Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (toNiceString objectId) startPoint endPoint copy
+        if vec.IsTiny() then RhinoScriptingException.Raise "Rhino.Scripting.MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectId) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (toNiceString objectId) startPoint endPoint copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.MirrorObject Cannot apply MirrorObject transform to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectId) startPoint endPoint copy
         res
 
 
@@ -369,12 +366,12 @@ module AutoOpenObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) List of identifiers of the mirrored objects.</returns>
-    static member MirrorObject(  objectIds:Guid seq,
+    static member MirrorObjects(  objectIds:Guid seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d,
                                  [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
         let vec = endPoint-startPoint
-        if vec.IsTiny() then RhinoScriptingException.Raise "Rhino.Scripting.Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (toNiceString objectIds) startPoint endPoint copy
+        if vec.IsTiny() then RhinoScriptingException.Raise "Rhino.Scripting.MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectIds) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
@@ -382,7 +379,7 @@ module AutoOpenObject =
         let rc = Rarr()
         for objectId in objectIds do
             let objectId = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply MirrorObjects to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (toNiceString objectId) startPoint endPoint copy
+            if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.MirrorObjects Cannot apply MirrorObjects to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectId) startPoint endPoint copy
             rc.Add objectId
         rc
 
@@ -395,19 +392,19 @@ module AutoOpenObject =
     static member MoveObject(objectId:Guid, translation:Vector3d) : unit = //TODO or return unit ??
         let xf = Transform.Translation(translation)
         let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply move to from objectId:'%s' translation:'%A'" (toNiceString objectId) translation
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.MoveObject Cannot apply move to from objectId:'%s' translation:'%A'" (Nice.str objectId) translation
         //if objectId <> res
 
     ///<summary>Moves one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers objects to move</param>
     ///<param name="translation">(Vector3d)Vector3d</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member MoveObject(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL
+    static member MoveObjects(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL
         let xf = Transform.Translation(translation)
         //let rc = Rarr()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
-            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (toNiceString objectId) translation
+            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.MoveObjects Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (Nice.str objectId) translation
             //rc.Add objectId
         //rc
 
@@ -418,8 +415,8 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(Drawing.Color) The current color value.</returns>
     static member ObjectColor(objectId:Guid) : Drawing.Color = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.DrawColor(State.Doc)
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        rhinoObject.Attributes.DrawColor(State.Doc)
 
     ///<summary>Modifies the color of an object. Object colors are represented
     /// as RGB colors. An RGB color specifies the relative intensity of red, green,
@@ -432,7 +429,7 @@ module AutoOpenObject =
         let attr = rhobj.Attributes
         attr.ObjectColor <- color
         attr.ColorSource <- DocObjects.ObjectColorSource.ColorFromObject
-        if not <| State.Doc.Objects.ModifyAttributes( rhobj, attr, quiet=true) then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColor setting failed for %A; %A" (toNiceString objectId) color
+        if not <| State.Doc.Objects.ModifyAttributes( rhobj, attr, quiet=true) then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColor setting failed for %A; %A" (Nice.str objectId) color
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color of multiple objects. Object colors are represented
@@ -447,7 +444,7 @@ module AutoOpenObject =
             let attr = rhobj.Attributes
             attr.ObjectColor <- color
             attr.ColorSource <- DocObjects.ObjectColorSource.ColorFromObject
-            if not <| State.Doc.Objects.ModifyAttributes( rhobj, attr, quiet=true) then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColor setting failed for %A; %A" (toNiceString objectId) color
+            if not <| State.Doc.Objects.ModifyAttributes( rhobj, attr, quiet=true) then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColor setting failed for %A; %A" (Nice.str objectId) color
         State.Doc.Views.Redraw()
 
 
@@ -476,7 +473,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectColorSource failed for '%A' and '%A'" (toNiceString objectId) source
+        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectColorSource failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -492,7 +489,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectColorSource failed for '%A' and '%A'" (toNiceString objectId) source
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectColorSource failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
 
@@ -513,7 +510,7 @@ module AutoOpenObject =
     ///<returns>(string) A short text description of the object.</returns>
     static member ObjectDescription(objectIds:Guid seq) : string = 
         let count =  objectIds|> Seq.countBy (fun id -> 
-                        /// TODO could be optimized by using Objecttype integer instead of string
+                        /// TODO could be optimized by using Object-type integer instead of string
                         let o = Scripting.CoerceRhinoObject(id)
                         o.ShortDescription(true) + if o.IsDeleted then " (deleted !)" else ""
                         ) 
@@ -634,35 +631,35 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(string) The object's current linetype.</returns>
     static member ObjectLinetype(objectId:Guid) : string = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let oldindex = State.Doc.Linetypes.LinetypeIndexForObject(rhinoobject)
-        State.Doc.Linetypes.[oldindex].Name
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let oldIndex = State.Doc.Linetypes.LinetypeIndexForObject(rhinoObject)
+        State.Doc.Linetypes.[oldIndex].Name
 
     ///<summary>Modifies the linetype of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
-    ///<param name="linetype">(string) Name of an existing linetyp</param>
+    ///<param name="linetype">(string) Name of an existing linetype</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectId:Guid, linetype:string) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let newindex = State.Doc.Linetypes.Find(linetype)
-        if newindex <0 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
-        rhinoobject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
-        rhinoobject.Attributes.LinetypeIndex <- newindex
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let newIndex = State.Doc.Linetypes.Find(linetype)
+        if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+        rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
+        rhinoObject.Attributes.LinetypeIndex <- newIndex
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
-    ///<param name="linetype">(string) Name of an existing linetyp</param>
+    ///<param name="linetype">(string) Name of an existing linetype</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLinetype(objectIds:Guid seq, linetype:string) : unit = //MULTISET
-        let newindex = State.Doc.Linetypes.Find(linetype)
-        if newindex <0 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectIds
+        let newIndex = State.Doc.Linetypes.Find(linetype)
+        if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectIds
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
-            rhinoobject.Attributes.LinetypeIndex <- newindex
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
+            rhinoObject.Attributes.LinetypeIndex <- newIndex
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetype failed for '%A' and '%A'"  linetype objectId
         State.Doc.Views.Redraw()
 
 
@@ -673,8 +670,8 @@ module AutoOpenObject =
     ///      1 = By Object
     ///      3 = By Parent.</returns>
     static member ObjectLinetypeSource(objectId:Guid) : int = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let oldsource = rhinoobject.Attributes.LinetypeSource
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let oldsource = rhinoObject.Attributes.LinetypeSource
         int(oldsource)
 
     ///<summary>Modifies the linetype source of an object.</summary>
@@ -686,11 +683,11 @@ module AutoOpenObject =
     ///      3 = By Parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLinetypeSource(objectId:Guid, source:int) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
-        rhinoobject.Attributes.LinetypeSource <- source
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+        rhinoObject.Attributes.LinetypeSource <- source
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -705,9 +702,9 @@ module AutoOpenObject =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectIds
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.LinetypeSource <- source
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            rhinoObject.Attributes.LinetypeSource <- source
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectLinetypeSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
 
@@ -721,8 +718,8 @@ module AutoOpenObject =
     ///    material. A material index of -1 indicates no material has been assigned,
     ///    and that Rhino's internal default material has been assigned to the object.</returns>
     static member ObjectMaterialIndex(objectId:Guid) : int = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.MaterialIndex
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        rhinoObject.Attributes.MaterialIndex
 
     ///<summary>Changes the material index of an object. Rendering materials are stored in
     /// Rhino's rendering material table. The table is conceptually an array. Render
@@ -731,12 +728,12 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         if 0 <=. materialIndex .< State.Doc.Materials.Count then
             RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
-        let attrs = rhinoobject.Attributes
+        let attrs = rhinoObject.Attributes
         attrs.MaterialIndex <- materialIndex
-        if not <| State.Doc.Objects.ModifyAttributes(rhinoobject, attrs, quiet=true) then
+        if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, quiet=true) then
             RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
     ///<summary>Changes the material index multiple objects. Rendering materials are stored in
@@ -749,10 +746,10 @@ module AutoOpenObject =
         if 0 <=. materialIndex .< State.Doc.Materials.Count then
             RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectIds
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            let attrs = rhinoobject.Attributes
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            let attrs = rhinoObject.Attributes
             attrs.MaterialIndex <- materialIndex
-            if not <| State.Doc.Objects.ModifyAttributes(rhinoobject, attrs, quiet=true) then
+            if not <| State.Doc.Objects.ModifyAttributes(rhinoObject, attrs, quiet=true) then
                 RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialIndex failed for '%A' and '%A'"  materialIndex objectId
 
     ///<summary>Returns the rendering material source of an object.</summary>
@@ -762,8 +759,8 @@ module AutoOpenObject =
     ///    1 = Material from object
     ///    3 = Material from parent.</returns>
     static member ObjectMaterialSource(objectId:Guid) : int = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        int(rhinoobject.Attributes.MaterialSource)
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        int(rhinoObject.Attributes.MaterialSource)
 
 
     ///<summary>Modifies the rendering material source of an object.</summary>
@@ -774,12 +771,12 @@ module AutoOpenObject =
     ///    3 = Material from parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let rc = int(rhinoobject.Attributes.MaterialSource)
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let rc = int(rhinoObject.Attributes.MaterialSource)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
-        rhinoobject.Attributes.MaterialSource <- source
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+        rhinoObject.Attributes.MaterialSource <- source
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -793,10 +790,10 @@ module AutoOpenObject =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectIds
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            let rc = int(rhinoobject.Attributes.MaterialSource)
-            rhinoobject.Attributes.MaterialSource <- source
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            let rc = int(rhinoObject.Attributes.MaterialSource)
+            rhinoObject.Attributes.MaterialSource <- source
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectMaterialSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
 
@@ -822,8 +819,8 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid)Id of object</param>
     ///<returns>(string) The current object name, or empty string if no name given .</returns>
     static member ObjectName(objectId:Guid) : string = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let n = rhinoobject.Attributes.Name
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let n = rhinoObject.Attributes.Name
         if isNull n then ""
         else n
 
@@ -831,12 +828,11 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name. Or empty string</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectName(objectId:Guid, name:string) : unit = //SET
-        //id = Scripting.Coerceguid(objectId)
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
+    static member ObjectName(objectId:Guid, name:string) : unit = //SET        
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         if Scripting.IsGoodStringId( name, allowEmpty=true) then
-            rhinoobject.Attributes.Name <- name
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName failed for '%s' and '%A'"  name objectId
+            rhinoObject.Attributes.Name <- name
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName failed for '%s' and '%A'"  name objectId
         else
             RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -847,9 +843,9 @@ module AutoOpenObject =
     static member ObjectName(objectIds:Guid seq, name:string) : unit = //MULTISET
         if Scripting.IsGoodStringId( name, allowEmpty=true) then
             for objectId in objectIds do
-                let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-                rhinoobject.Attributes.Name <- name
-                if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName failed for '%s' and '%A'"  name objectId
+                let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+                rhinoObject.Attributes.Name <- name
+                if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName failed for '%s' and '%A'"  name objectId
         else
             RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectName string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -859,8 +855,8 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(Drawing.Color) The object's current print color.</returns>
     static member ObjectPrintColor(objectId:Guid) : Drawing.Color = //GET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.PlotColor
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        rhinoObject.Attributes.PlotColor
 
 
 
@@ -869,10 +865,10 @@ module AutoOpenObject =
     ///<param name="color">(Drawing.Color) New print color.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintColor(objectId:Guid, color:Drawing.Color) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
-        rhinoobject.Attributes.PlotColor <- color
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
+        rhinoObject.Attributes.PlotColor <- color
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -881,10 +877,10 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintColor(objectIds:Guid seq, color:Drawing.Color) : unit = //MULTISET
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
-            rhinoobject.Attributes.PlotColor <- color
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
+            rhinoObject.Attributes.PlotColor <- color
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColor failed for '%A' and '%A'"  color objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -894,8 +890,8 @@ module AutoOpenObject =
     ///    1 = print color by object
     ///    3 = print color by parent.</returns>
     static member ObjectPrintColorSource(objectId:Guid) : int = //GET
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            int(rhinoobject.Attributes.PlotColorSource)
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            int(rhinoObject.Attributes.PlotColorSource)
 
 
     ///<summary>Modifies the print color source of an object.</summary>
@@ -910,7 +906,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'" (toNiceString objectId) source
+        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -926,15 +922,15 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'" (toNiceString objectId) source
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintColorSource failed for '%A' and '%A'" (Nice.str objectId) source
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
     ///<returns>(float) The object's current print width.</returns>
     static member ObjectPrintWidth(objectId:Guid) : float = //GET
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.PlotWeight
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            rhinoObject.Attributes.PlotWeight
 
 
     ///<summary>Modifies the print width of an object.</summary>
@@ -944,11 +940,11 @@ module AutoOpenObject =
     ///    but does not show on print)</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let rc = rhinoobject.Attributes.PlotWeight
-        rhinoobject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
-        rhinoobject.Attributes.PlotWeight <- width
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let rc = rhinoObject.Attributes.PlotWeight
+        rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
+        rhinoObject.Attributes.PlotWeight <- width
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -959,11 +955,11 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidth(objectIds:Guid seq, width:float) : unit = //MULTISET
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            let rc = rhinoobject.Attributes.PlotWeight
-            rhinoobject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
-            rhinoobject.Attributes.PlotWeight <- width
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            let rc = rhinoObject.Attributes.PlotWeight
+            rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
+            rhinoObject.Attributes.PlotWeight <- width
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidth failed for '%A' and '%A'"  width objectId
         State.Doc.Views.Redraw()
 
 
@@ -974,8 +970,8 @@ module AutoOpenObject =
     ///    1 = print width by object
     ///    3 = print width by parent.</returns>
     static member ObjectPrintWidthSource(objectId:Guid) : int = //GET
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            int(rhinoobject.Attributes.PlotWeightSource)
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            int(rhinoObject.Attributes.PlotWeightSource)
 
 
     ///<summary>Modifies the print width source of an object.</summary>
@@ -986,9 +982,9 @@ module AutoOpenObject =
     ///    3 = print width by parent</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        rhinoobject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
+        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -1000,9 +996,9 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidthSource(objectIds:Guid seq, source:int) : unit = //MULTISET
         for objectId in objectIds do
-            let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-            rhinoobject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            if not <| rhinoobject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
+            let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+            rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
+            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.Set ObjectPrintWidthSource failed for '%A' and '%A'"  source objectId
         State.Doc.Views.Redraw()
 
 
@@ -1041,9 +1037,68 @@ module AutoOpenObject =
         |_ -> int(geom.ObjectType)
 
 
-    // TODO, not implemented use Xform rotation or scale instead
-    //static member OrientObject( objectId:Guid,  reference:Point3d seq,  target:Point3d seq,   [<OPT;DEF(0)>]flags:int) : Guid = 
+    ///<summary>Orients a single object based on input points.
+    /// If two 3-D points are specified, then this method will 
+    /// function similar to Rhino's Orient command.  
+    /// If more than two 3-D points are specified, 
+    /// then the function will orient similar to Rhino's Orient3Pt command.
+    /// </summary>
+    ///<param name="objectId">(Guid) Identifier of object</param>
+    ///<param name="referencePts">(IList of Point3d) list of 3D reference points.</param>
+    ///<param name="targetPts">(IList of Point3d) list of 3D target points.</param>
+    ///<param name="flags">(int) The orient flags values can be added together to specify multiple options.
+    ///    Value   Description
+    ///    1       Copy object.  The default is not to copy the object.
+    ///    2       Scale object.  The default is not to scale the object.  Note, the scale option only applies if both reference and target contain only two 3-D points.
+    ///    3       Scale and copy.
+    ///</param>
+    ///<returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
+    static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid = 
+        if referencePts.Count <> targetPts.Count then 
+            RhinoScriptingException.Raise "Rhino.Scripting.OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
+        if referencePts.Count < 2 then 
+            RhinoScriptingException.Raise "Rhino.Scripting.OrientObject referencePts.Count < 2: %d  " referencePts.Count 
+        if targetPts.Count < 2 then 
+            RhinoScriptingException.Raise "Rhino.Scripting.OrientObject targetPts.Count < 2 : %d"  targetPts.Count
 
+        let copy  = (flags &&& 1) = 1
+        let scale = (flags &&& 2) = 2
+        let xform = 
+            if referencePts.Count > 2 then 
+                //Orient3Pt
+                let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
+                let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
+                if not fromPlane.IsValid || not toPlane.IsValid then 
+                    RhinoScriptingException.Raise "Rhino.Scripting.OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
+                Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
+            else
+                //Orient2Pt
+                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )                 
+                let v0 = referencePts.[1] - referencePts.[0]
+                let v1 = targetPts.[1] - targetPts.[0]
+                let xformScale =
+                    if scale then 
+                        let len0 = v0.Length
+                        let len1 = v1.Length
+                        if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "Rhino.Scripting.OrientObject vector lengths too short"
+                        let scaleF = len1 / len0
+                        if abs(1.0-scaleF) >= 0.000001 then 
+                            let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
+                            Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
+                        else
+                            Rhino.Geometry.Transform.Identity
+                    else
+                        Rhino.Geometry.Transform.Identity
+                v0.Unitize()  |> ignore 
+                v1.Unitize()  |> ignore 
+                let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
+                xformMove * xformScale * xformRotate
+  
+        let rc = Scripting.Ot.Transform(objectId, xform, not copy)
+        if rc=System.Guid.Empty then 
+            RhinoScriptingException.Raise "Rhino.Scripting.OrientObject failed"
+        Scripting.Doc.Views.Redraw()
+        rc
 
 
     ///<summary>Rotates a single object.</summary>
@@ -1063,9 +1118,8 @@ module AutoOpenObject =
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (toNiceString objectId) centerPoint rotationAngle axis copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.RotateObject failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Nice.str objectId) centerPoint rotationAngle axis copy
         res
-
 
 
     ///<summary>Rotates multiple objects.</summary>
@@ -1076,7 +1130,7 @@ module AutoOpenObject =
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the object</param>
     ///<returns>(Guid Rarr) identifiers of the rotated objects.</returns>
-    static member RotateObject( objectIds:Guid seq,
+    static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
                                  rotationAngle:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
@@ -1087,10 +1141,9 @@ module AutoOpenObject =
         let rc = Rarr()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (toNiceString objectId) centerPoint rotationAngle axis copy
+            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Nice.str objectId) centerPoint rotationAngle axis copy
             rc.Add res
         rc
-
 
 
     ///<summary>Scales a single object. Can be used to perform a uniform or non-uniform
@@ -1109,7 +1162,7 @@ module AutoOpenObject =
         let x, y, z = scale
         let xf = Transform.Scale(plane, x, y, z)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (toNiceString objectId) origin scale  copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Nice.str objectId) origin scale  copy
         res
 
     ///<summary>Scales a single object. Uniform scale transformation. Scaling is based on the WorldXY Plane.</summary>
@@ -1126,7 +1179,7 @@ module AutoOpenObject =
         plane.Origin <- origin
         let xf = Transform.Scale(plane, scale, scale, scale)
         let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (toNiceString objectId) origin scale  copy
+        if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObject failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Nice.str objectId) origin scale  copy
         res
 
     ///<summary>Scales one or more objects. Can be used to perform a uniform or non-
@@ -1136,7 +1189,7 @@ module AutoOpenObject =
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>. Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the scaled objects.</returns>
-    static member ScaleObject( objectIds:Guid seq,
+    static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float*float*float,
                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURAL
@@ -1147,7 +1200,7 @@ module AutoOpenObject =
         let rc = Rarr()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObjects failed.  objectId:'%s' origin:'%s' scale:'%A' copy:'%b'" (toNiceString objectId) origin.ToNiceString scale  copy
+            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObjects failed.  objectId:'%s' origin:'%s' scale:'%A' copy:'%b'" (Nice.str objectId) origin.ToNiceString scale  copy
             rc.Add res
         rc
 
@@ -1158,17 +1211,17 @@ module AutoOpenObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the scaled objects.</returns>
-    static member ScaleObject( objectIds:Guid seq,
+    static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURALALT
+                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURAL ALT
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let xf = Transform.Scale(plane, scale, scale, scale)
         let rc = Rarr()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObjects failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (toNiceString objectId) origin scale  copy
+            if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ScaleObjects failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Nice.str objectId) origin scale  copy
             rc.Add res
         rc
 
@@ -1192,21 +1245,21 @@ module AutoOpenObject =
                     let lay = State.Doc.Layers.[rhobj.Attributes.LayerIndex]
                     if rhobj.IsHidden then
                         if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore
-                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on hidden object %s" (toNiceString objectId)
+                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on hidden object %s" (Nice.str objectId)
                     elif rhobj.IsLocked then
                         if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore
-                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked object %s" (toNiceString objectId)
+                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked object %s" (Nice.str objectId)
                     elif not lay.IsVisible then
                         if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
-                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on invisible layer %s for object %s" lay.FullPath (toNiceString objectId)
+                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on invisible layer %s for object %s" lay.FullPath (Nice.str objectId)
                     elif not lay.IsLocked then
                         if forceVisible then redo <- true ; UtilLayer.lockedSetFalse(lay, true)
-                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked layer %s for object %s" lay.FullPath (toNiceString objectId)
+                        else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked layer %s for object %s" lay.FullPath (Nice.str objectId)
                     else
-                        RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on object %s" (toNiceString objectId)
+                        RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on object %s" (Nice.str objectId)
                     if redo then
                         if 0 = rhobj.Select(true) then
-                            RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed dispite forceVisible beeing set to true on object %s" (toNiceString objectId)
+                            RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed despite forceVisible being set to true on object %s" (Nice.str objectId)
             State.Doc.Views.Redraw()
             )
 
@@ -1217,7 +1270,7 @@ module AutoOpenObject =
     ///<param name="forceVisible">(bool) Optional, Default Value: <c>false</c> whether to make objects that a hidden or layers that are off visible and unlocked </param>
     ///<param name="ignoreErrors">(bool) Optional, Default Value: <c>false</c> whether to ignore errors when object can be set visible </param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SelectObject( objectIds:Guid seq,
+    static member SelectObjects( objectIds:Guid seq,
                                 [<OPT;DEF(false)>]forceVisible:bool,
                                 [<OPT;DEF(false)>]ignoreErrors:bool) : unit =  //PLURAL
         RhinoSync.DoSync (fun () ->
@@ -1229,21 +1282,21 @@ module AutoOpenObject =
                         let lay = State.Doc.Layers.[rhobj.Attributes.LayerIndex]
                         if rhobj.IsHidden then
                             if forceVisible then redo <- true ; State.Doc.Objects.Show(rhobj, ignoreLayerMode=true) |> ignore
-                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on hidden object %s out of %d objects" (toNiceString objectId) (Seq.length objectIds)
+                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed on hidden object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
                         elif rhobj.IsLocked then
                             if forceVisible then redo <- true ; State.Doc.Objects.Unlock(rhobj, ignoreLayerMode=true) |> ignore
-                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked object %s out of %d objects" (toNiceString objectId) (Seq.length objectIds)
+                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed on locked object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
                         elif not lay.IsVisible then
                             if forceVisible then redo <- true ; UtilLayer.visibleSetTrue(lay, true)
-                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on invisible layer %s for object %s out of %d objects" lay.FullPath (toNiceString objectId) (Seq.length objectIds)
+                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObjects failed on invisible layer %s for object %s out of %d objects" lay.FullPath (Nice.str objectId) (Seq.length objectIds)
                         elif not lay.IsLocked then
                             if forceVisible then redo <- true ; UtilLayer.lockedSetFalse(lay, true)
-                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked layer %s for object %s out of %d objects" lay.FullPath (toNiceString objectId) (Seq.length objectIds)
+                            else RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on locked layer %s for object %s out of %d objects" lay.FullPath (Nice.str objectId) (Seq.length objectIds)
                         else
-                            RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on object %s out of %d objects" (toNiceString objectId) (Seq.length objectIds)
+                            RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed on object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
                         if redo then
                             if 0 = rhobj.Select(true) then
-                                RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed dispite forceVisible beeing set to true on object %s out of %d objects" (toNiceString objectId) (Seq.length objectIds)
+                                RhinoScriptingException.Raise "Rhino.Scripting.SelectObject failed despite forceVisible being set to true on object %s out of %d objects" (Nice.str objectId) (Seq.length objectIds)
             State.Doc.Views.Redraw()
             )
 
@@ -1266,20 +1319,20 @@ module AutoOpenObject =
        let mutable frame = Plane(plane)
        frame.Origin <- origin
        frame.ZAxis <- plane.Normal
-       let yaxis = referencePoint-origin
-       yaxis.Unitize() |> ignore
-       frame.YAxis <- yaxis
-       let xaxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-       xaxis.Unitize() |> ignore
-       frame.XAxis <- xaxis
-       let worldplane = Plane.WorldXY
-       let cob = Transform.ChangeBasis(worldplane, frame)
+       let yAxis = referencePoint-origin
+       yAxis.Unitize() |> ignore
+       frame.YAxis <- yAxis
+       let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+       xAxis.Unitize() |> ignore
+       frame.XAxis <- xAxis
+       let worldPlane = Plane.WorldXY
+       let cob = Transform.ChangeBasis(worldPlane, frame)
        let mutable shear2d = Transform.Identity
        shear2d.[0, 1] <- tan(toRadians(angleDegrees))
-       let cobinv = Transform.ChangeBasis(frame, worldplane)
+       let cobinv = Transform.ChangeBasis(frame, worldPlane)
        let xf = cobinv * shear2d * cob
        let res = State.Doc.Objects.Transform(objectId, xf, not copy)
-       if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (toNiceString objectId) origin.ToNiceString referencePoint.ToNiceString angleDegrees
+       if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Nice.str objectId) origin.ToNiceString referencePoint.ToNiceString angleDegrees
        res
 
 
@@ -1291,32 +1344,32 @@ module AutoOpenObject =
     ///<param name="copy">(bool) Optional, Default Value: <c>false</c>
     ///    Copy the objects</param>
     ///<returns>(Guid Rarr) identifiers of the sheared objects.</returns>
-    static member ShearObject( objectIds:Guid seq,
+    static member ShearObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 referencePoint:Point3d,
                                 angleDegrees:float,
                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
-        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "Rhino.Scripting.ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.ToNiceString referencePoint.ToNiceString
+        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "Rhino.Scripting.ShearObjects failed because (origin-referencePoint).IsTiny() : %s and %s" origin.ToNiceString referencePoint.ToNiceString
         let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
         let mutable frame = Plane(plane)
         frame.Origin <- origin
         frame.ZAxis <- plane.Normal
-        let yaxis = referencePoint-origin
-        yaxis.Unitize() |> ignore
-        frame.YAxis <- yaxis
-        let xaxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
-        xaxis.Unitize() |> ignore
-        frame.XAxis <- xaxis
-        let worldplane = Plane.WorldXY
-        let cob = Transform.ChangeBasis(worldplane, frame)
+        let yAxis = referencePoint-origin
+        yAxis.Unitize() |> ignore
+        frame.YAxis <- yAxis
+        let xAxis = Vector3d.CrossProduct(frame.ZAxis, frame.YAxis)
+        xAxis.Unitize() |> ignore
+        frame.XAxis <- xAxis
+        let worldPlane = Plane.WorldXY
+        let cob = Transform.ChangeBasis(worldPlane, frame)
         let mutable shear2d = Transform.Identity
         shear2d.[0, 1] <- tan(toRadians(angleDegrees))
-        let cobinv = Transform.ChangeBasis(frame, worldplane)
+        let cobinv = Transform.ChangeBasis(frame, worldPlane)
         let xf = cobinv * shear2d * cob
         rarr{
             for ob in objectIds do
                 let res = State.Doc.Objects.Transform(ob, xf, not copy)
-                if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ShearObject failed for %s, origin %s, ref point  %s and angle in Deg  %f" (toNiceString ob) origin.ToNiceString referencePoint.ToNiceString angleDegrees
+                if res = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.ShearObjects failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Nice.str ob) origin.ToNiceString referencePoint.ToNiceString angleDegrees
                 res  }
 
 
@@ -1325,7 +1378,7 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) Representing id of object to show</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ShowObject(objectId:Guid) : unit = 
-        if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.ShowObject failed on %s" (toNiceString objectId)
+        if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.ShowObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
 
@@ -1333,10 +1386,10 @@ module AutoOpenObject =
     ///    snapped to and cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) Ids of objects to show.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ShowObject(objectIds:Guid seq) : unit = 
+    static member ShowObjects(objectIds:Guid seq) : unit = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
-            if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.ShowObject failed on %s" (toNiceString objectId)
+            if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.ShowObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
 
@@ -1345,36 +1398,35 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(unit) void, nothing.</returns>
     static member UnlockObject(objectId:Guid) : unit = 
-        if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.UnlockObject failed on %s" (toNiceString objectId)
+        if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.UnlockObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
     ///<summary>Unlocks one or more objects. Locked objects are visible, and can be
     ///    snapped to, but they cannot be selected.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnlockObject(objectIds:Guid seq) : unit =  //PLURAL
+    static member UnlockObjects(objectIds:Guid seq) : unit =  //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
-            if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.UnlockObject failed on %s" (toNiceString objectId)
+            if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "Rhino.Scripting.UnlockObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
 
     ///<summary>Unselects a single selected object.</summary>
     ///<param name="objectId">(Guid) Id of object to unselect.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnSelectObject(objectId:Guid) : unit = 
+    static member UnselectObject(objectId:Guid) : unit = 
         let obj = Scripting.CoerceRhinoObject(objectId)
-        if 0 <> obj.Select(false) then RhinoScriptingException.Raise "Rhino.Scripting.UnSelectObject failed on %s" (toNiceString objectId)
+        if 0 <> obj.Select(false) then RhinoScriptingException.Raise "Rhino.Scripting.UnselectObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
 
     ///<summary>Unselects multiple selected objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of the objects to unselect.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnSelectObject(objectIds:Guid seq) : unit = //PLURAL
+    static member UnselectObjects(objectIds:Guid seq) : unit = //PLURAL
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
-            if 0 <> obj.Select(false) then RhinoScriptingException.Raise "Rhino.Scripting.UnSelectObject failed on %s" (toNiceString objectId)
+            if 0 <> obj.Select(false) then RhinoScriptingException.Raise "Rhino.Scripting.UnselectObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
-
 

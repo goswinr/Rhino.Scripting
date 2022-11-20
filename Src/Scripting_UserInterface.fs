@@ -285,7 +285,7 @@ module AutoOpenUserInterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    PrintSetup.printfnBlue "Distance: %s %s"d.ToNiceString (
+                    InternalNicePrintSetup.printfnBlue "Distance: %s %s" d.ToNiceString (
                                 State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false))
 
                     gp2.Dispose()
@@ -501,7 +501,7 @@ module AutoOpenUserInterface =
             State.Doc.Objects.UnselectAll() |> ignore
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
-            go.SetCustomGeometryFilter(fun rhinoobject _ _ -> objectId = rhinoobject.Id)
+            go.SetCustomGeometryFilter(fun rhinoObject _ _ -> objectId = rhinoObject.Id)
             go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.MeshFace
             go.AcceptNothing(true)
@@ -535,7 +535,7 @@ module AutoOpenUserInterface =
             State.Doc.Objects.UnselectAll() |> ignore
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
-            go.SetCustomGeometryFilter(fun rhinoobject _ _ -> objectId = rhinoobject.Id)
+            go.SetCustomGeometryFilter(fun rhinoObject _ _ -> objectId = rhinoObject.Id)
             go.SetCommandPrompt(message)
             go.GeometryFilter <-  DocObjects.ObjectType.MeshVertex
             go.AcceptNothing(true)
@@ -637,7 +637,7 @@ module AutoOpenUserInterface =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
 
             | _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (toNiceString surfaceId) message
+                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or polysurface.  surfaceId:'%s' message:'%A'" (Nice.str surfaceId) message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then
@@ -703,12 +703,12 @@ module AutoOpenUserInterface =
                             if cont && gp.CommandResult() <> Commands.Result.Success then
                                 rc.Clear()
                                 cont <- false
-                                PrintSetup.printfnRed "%s" "GetPoints had no Success"
+                                InternalNicePrintSetup.printfnRed "%s" "GetPoints had no Success"
                             if cont then
                                 prevPoint <- gp.Point()
                                 rc.Add(prevPoint)
                 if rc.Count>0 then
-                    PrintSetup.printfnBlue "%d Points picked" rc.Count
+                    InternalNicePrintSetup.printfnBlue "%d Points picked" rc.Count
                     rc
                 else
                     RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoints()"

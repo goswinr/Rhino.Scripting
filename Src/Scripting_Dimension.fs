@@ -119,7 +119,7 @@ module AutoOpenDimension =
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d, // TODO allow Point3d.Unset an then draw dim in XY plane
                                         [<OPT;DEF(Plane())>] plane:Plane ) : Guid = 
-        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed to creat Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" startPoint endPoint pointOnDimensionLine
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail RhinoScriptingException.Raise "Rhino.Scripting.AddAlignedDimension failed to create Plane.  startPoint:'%A' endPoint:'%A' pointOnDimensionLine:'%A'" startPoint endPoint pointOnDimensionLine
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
@@ -188,7 +188,7 @@ module AutoOpenDimension =
     static member DimensionStyle(objectId:Guid, dimStyleName:string) : unit = //SET
         let annotationObject = Scripting.CoerceAnnotation(objectId)
         let ds =  State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (toNiceString objectId) dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
         annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionStyle : CommitChanges failed"
@@ -200,7 +200,7 @@ module AutoOpenDimension =
     ///<returns>(unit) void, nothing.</returns>
     static member DimensionStyle(objectIds:Guid seq, dimStyleName:string) : unit = //MULTISET
         let ds =  State.Doc.DimStyles.FindName(dimStyleName)
-        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (toNiceString objectIds) dimStyleName
+        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectIds) dimStyleName
         for objectId in objectIds do
             let annotationObject = Scripting.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
@@ -357,8 +357,8 @@ module AutoOpenDimension =
         if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimStyleFont set failed. dimStyle:'%s' font:'%A'" dimStyle font
 
         ds.Font <- DocObjects.Font(font) // TODO check if works OK !
-        // let newindex = State.Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
-        // ds.Font <- State.Doc.Fonts.[newindex]
+        // let newIndex = State.Doc.Fonts.FindOrCreate(font, false, false) // deprecated ??
+        // ds.Font <- State.Doc.Fonts.[newIndex]
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
             RhinoScriptingException.Raise "Rhino.Scripting.DimStyleFont set failed. dimStyle:'%s' font:'%A'" dimStyle font
         State.Doc.Views.Redraw()
@@ -764,7 +764,7 @@ module AutoOpenDimension =
             | :? Leader as g ->
                 let annotationObject = Scripting.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText get failed.  objectId:'%s'" (toNiceString objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText get failed.  objectId:'%s'" (Nice.str objectId)
 
     ///<summary>Modifies the text string of a dimension leader object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -775,10 +775,10 @@ module AutoOpenDimension =
             | :? Leader as g ->
                 let annotationObject = Scripting.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
-                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "Rhino.Scripting.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (toNiceString objectId)
+                if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "Rhino.Scripting.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Nice.str objectId)
                 annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.LeaderText : CommitChanges failed"
                 State.Doc.Views.Redraw()
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText set failed for  %s"  (toNiceString objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText set failed for  %s"  (Nice.str objectId)
 
     ///<summary>Modifies the text string of multiple dimension leader objects.</summary>
     ///<param name="objectIds">(Guid seq) The objects's identifiers</param>
@@ -789,15 +789,15 @@ module AutoOpenDimension =
             Scripting.LeaderText(objectId,text)
 
     ///<summary>Renames an existing dimension style.</summary>
-    ///<param name="oldstyle">(string) The name of an existing dimension style</param>
-    ///<param name="newstyle">(string) The new dimension style name</param>
+    ///<param name="oldStyle">(string) The name of an existing dimension style</param>
+    ///<param name="newStyle">(string) The new dimension style name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameDimStyle(oldstyle:string, newstyle:string) : unit = 
-        let mutable ds = State.Doc.DimStyles.FindName(oldstyle)
-        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
-        ds.Name <- newstyle
+    static member RenameDimStyle(oldStyle:string, newStyle:string) : unit = 
+        let mutable ds = State.Doc.DimStyles.FindName(oldStyle)
+        if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
+        ds.Name <- newStyle
         if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.RenameDimStyle failed.  oldstyle:'%s' newstyle:'%s'" oldstyle newstyle
+            RhinoScriptingException.Raise "Rhino.Scripting.RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
 
 
 

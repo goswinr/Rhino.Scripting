@@ -71,13 +71,13 @@ module AutoOpenViews =
 
 
     ///<summary>Adds new named construction Plane to the document.</summary>
-    ///<param name="cplaneName">(string) The name of the new named construction Plane</param>
+    ///<param name="cPlaneName">(string) The name of the new named construction Plane</param>
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddNamedCPlane(cplaneName:string, plane:Plane) : unit = 
-        if isNull cplaneName then RhinoScriptingException.Raise "Rhino.Scripting.CplaneName = null.  cplaneName:'%A' plane:'%A'" cplaneName plane
-        let index = State.Doc.NamedConstructionPlanes.Add(cplaneName, plane)
-        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedCPlane failed.  cplaneName:'%A' plane:'%A'" cplaneName plane
+    static member AddNamedCPlane(cPlaneName:string, plane:Plane) : unit = 
+        if isNull cPlaneName then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedCPlane = null.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
+        let index = State.Doc.NamedConstructionPlanes.Add(cPlaneName, plane)
+        if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddNamedCPlane failed.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
         ()
 
 
@@ -158,7 +158,7 @@ module AutoOpenViews =
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
         let detail = 
             try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
-            with _ ->  RhinoScriptingException.Raise "Rhino.Scripting.Set DetailLock failed. detailId is a %s  lock:'%A'" (toNiceString detailId)  lock
+            with _ ->  RhinoScriptingException.Raise "Rhino.Scripting.Set DetailLock failed. detailId is a %s  lock:'%A'" (Nice.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
             detail.DetailGeometry.IsProjectionLocked <- lock
             detail.CommitChanges() |> ignore
@@ -185,7 +185,7 @@ module AutoOpenViews =
             detail.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DetailScale : CommitChanges failed"
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (toNiceString detailId) modelLength pageLength
+            RhinoScriptingException.Raise "Rhino.Scripting.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Nice.str detailId) modelLength pageLength
 
 
 
@@ -204,7 +204,6 @@ module AutoOpenViews =
     ///<param name="layout">(string) Title of an existing page layout view</param>
     ///<returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
     static member IsLayout(layout:string) : bool = 
-        //layout id = Scripting.Coerceguid(layout)
         if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
             true
         elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then

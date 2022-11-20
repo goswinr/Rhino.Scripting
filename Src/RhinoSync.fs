@@ -5,7 +5,7 @@ open System
 open Rhino.Runtime
 open FsEx.SaveIgnore
 
-/// A static class to help access the UI thread of Rhino from other threads
+/// A static class in Rhino.Scripting to help access the UI thread of Rhino from other threads
 [<AbstractClass>]
 [<Sealed>] //use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 type RhinoSync private () = 
@@ -18,12 +18,17 @@ type RhinoSync private () =
 
     static let mutable seffWindow : System.Windows.Window = null //set via reflection below ; from Seff.Rhino
 
-    static let log msg = Printf.kprintf(fun s -> RhinoApp.WriteLine s; eprintfn "%s" s) msg
+    static let mutable logErrors = true
+    
+    static let log msg = Printf.kprintf(fun s -> if logErrors then 
+                                                      RhinoApp.WriteLine s 
+                                                      eprintfn "%s" s) msg
 
     static let mutable initIsPending = true
 
     static let init() = 
         if initIsPending then
+            initIsPending <- false
             if not HostUtils.RunningInRhino || not HostUtils.RunningOnWindows then
                 log "RhinoSync.init() not done because: HostUtils.RunningInRhino %b or HostUtils.RunningOnWindows: %b" HostUtils.RunningInRhino  HostUtils.RunningOnWindows
             else
@@ -42,30 +47,30 @@ type RhinoSync private () =
                     try
                         seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
                         if isNull seffWindow then
-                            log "**Seff.Rhino.Sync.window is null"
+                            log "Rhino.Scripting.dll: Seff.Rhino.Sync.window is null"
 
                     with e ->
-                        log "**Seff.Rhino.Sync.window failed with: %O" e
+                        log "Rhino.Scripting.dll: Seff.Rhino.Sync.window failed with: %O" e
 
                 if isNull syncContext then
                     try
                         Windows.Threading.DispatcherSynchronizationContext(Windows.Application.Current.Dispatcher) |> Threading.SynchronizationContext.SetSynchronizationContext
                         syncContext <- Threading.SynchronizationContext.Current
                         if isNull syncContext then
-                            log "**Threading.SynchronizationContext.Current is null"
+                            log "Rhino.Scripting.dll: Threading.SynchronizationContext.Current is null"
                     with  e ->
-                        log "**Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %O" e
+                        log "Rhino.Scripting.dll: Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %O" e
 
 
                 if isNull syncContext && notNull seffRhinoSyncModule then //its probably already set above via DispatcherSynchronizationContext
                     try
                         syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
                         if isNull syncContext then
-                            log "**Seff.Rhino.Sync.syncContext is null"
+                            log "Rhino.Scripting.dll: Seff.Rhino.Sync.syncContext is null"
                     with e ->
-                        log "**Seff.Rhino.Sync.syncContext failed with: %O" e
+                        log "Rhino.Scripting.dll: Seff.Rhino.Sync.syncContext failed with: %O" e
 
-        initIsPending <- false
+        
 
 
     // ---------------------------------
@@ -74,7 +79,7 @@ type RhinoSync private () =
 
     // Test if the current thread is the main UI thread
     // just calls RhinoApp.InvokeRequired
-    //static member IsCurrrenThreadUIThread = 
+    //static member IsCurrrentThreadUIThread = 
         // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails ! if not in WPF ??
         //RhinoApp.InvokeRequired
         //    this calls: (via ILSpy)
@@ -82,6 +87,12 @@ type RhinoSync private () =
         //    [return: MarshalAs(UnmanagedType.U1)]
         //    internal static extern bool CRhMainFrame_InvokeRequired();
 
+    
+    /// Set to false to disable the logging off errors to 
+    /// RhinoApp.WriteLine and the error stream (eprintfn).
+    static member LogErrors 
+        with get() = logErrors
+        and  set v = logErrors <- v
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin
@@ -89,13 +100,15 @@ type RhinoSync private () =
         if isNull syncContext then init()
         syncContext
 
-    /// The WPF Window of currently running Seff Editor
+    /// The WPF Window of currently running Seff Editor.
+    /// or 'null' if not running in Seff Editor.
     static member SeffWindow = seffWindow
 
-    /// The Assembly currently running Seff Editor Window
+    /// The Assembly currently running Seff Editor Window.
+    /// or 'null' if not running in Seff Editor.
     static member SeffRhinoAssembly = seffAssembly
 
-    /// Set up Sync Context and Reference to Seff Window via reflection on Seff Plugin
+    /// Set up WPF Synchronisation Context and Reference to Seff Window via reflection on Seff Plugin
     static member Initialize() = init() // called in ActiveDocument module
 
     /// Evaluates a function on UI Thread.
@@ -111,7 +124,7 @@ type RhinoSync private () =
             func()
 
     /// Evaluates a function on UI Thread.
-    /// Also ensures that redraw is enabled and disabled afterwards again if it was disabled initailly.
+    /// Also ensures that redraw is enabled and disabled afterwards again if it was disabled initially.
     static member DoSyncRedraw (func:unit->'T) : 'T = 
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
@@ -131,7 +144,7 @@ type RhinoSync private () =
             res
 
     /// Evaluates a function on UI Thread.
-    /// Also ensures that redraw is enabled and disabled afterwards again if it was disabled initailly.
+    /// Also ensures that redraw is enabled and disabled afterwards again if it was disabled initially.
     /// Hides Seff editor window if it exists. Shows it afterwards again
     static member DoSyncRedrawHideEditor (func:unit->'T) : 'T = 
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled

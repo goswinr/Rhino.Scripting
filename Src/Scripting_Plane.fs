@@ -193,20 +193,20 @@ module AutoOpenPlane =
     ///<summary>Creates a Plane from an origin point and a normal direction vector.</summary>
     ///<param name="origin">(Point3d) A 3D point identifying the origin of the Plane</param>
     ///<param name="normal">(Vector3d) A 3D vector identifying the normal direction of the Plane</param>
-    ///<param name="xaxis">(Vector3d) Optional, vector defining the Plane's x-axis</param>
+    ///<param name="xAxis">(Vector3d) Optional, vector defining the Plane's x-axis</param>
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
-                                   [<OPT;DEF(Vector3d())>]xaxis:Vector3d) : Plane = 
+                                   [<OPT;DEF(Vector3d())>]xAxis:Vector3d) : Plane = 
         //origin = Scripting.Coerce3dpoint(origin)
         //normal = Scripting.Coerce3dvector(normal)
         let mutable rc = Plane(origin, normal)
-        if not xaxis.IsZero then
+        if not xAxis.IsZero then
             //x axis = Scripting.Coerce3dvector(x axis)
-            let xaxis = Vector3d(xaxis)//prevent original x axis parameter from being unitized too
-            xaxis.Unitize() |> ignore
-            let yaxis = Vector3d.CrossProduct(rc.Normal, xaxis)
-            rc <- Plane(origin, xaxis, yaxis)
+            let xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
+            xAxis.Unitize() |> ignore
+            let yAxis = Vector3d.CrossProduct(rc.Normal, xAxis)
+            rc <- Plane(origin, xAxis, yAxis)
         rc
 
 

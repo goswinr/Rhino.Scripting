@@ -44,18 +44,18 @@ module AutoOpenMaterial =
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(int) material index of the object.</returns>
     static member AddMaterialToObject(objectId:Guid) : int = 
-        let rhinoobject = Scripting.CoerceRhinoObject(objectId)
-        let mutable attr = rhinoobject.Attributes
+        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let mutable attr = rhinoObject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
             attr.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-            State.Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
-            attr <- rhinoobject.Attributes
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore
+            attr <- rhinoObject.Attributes
         let mutable materialindex = attr.MaterialIndex
         if materialindex> -1 then materialindex
         else
             materialindex <- State.Doc.Materials.Add()
             attr.MaterialIndex <- materialindex
-            State.Doc.Objects.ModifyAttributes(rhinoobject, attr, true)|> ignore
+            State.Doc.Objects.ModifyAttributes(rhinoObject, attr, true)|> ignore
             materialindex
 
 

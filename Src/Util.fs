@@ -4,7 +4,7 @@ open System
 open Rhino
 open System.Globalization
 
-[<AutoOpen>]
+
 module internal Util = 
 
     /// If first value is 0.0 return second else first
@@ -12,14 +12,6 @@ module internal Util =
 
     /// If second value is 0.0 return first else second
     let inline ifZero2 a b =  if b = 0.0 then a else b
-
-    // ------- Abbreviations so that declarations are not so long:
-
-    /// OptionalAttribute for member parameters
-    type internal OPT = Runtime.InteropServices.OptionalAttribute
-
-    /// DefaultParameterValueAttribute for member parameters
-    type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 
 
     ///<summary>Checks if a string is a ASCII string for use in Rhino Object Names or User Dictionary keys and values.

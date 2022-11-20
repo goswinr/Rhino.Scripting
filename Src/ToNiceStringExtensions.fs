@@ -6,7 +6,7 @@ open FsEx
 
 /// This module provides type extensions for pretty printing
 /// This module is automatically opened when Rhino namespace is opened.
-/// These type extensions are only visible in F#
+/// These type extensions are only visible in F# (not in C#)
 [<AutoOpen>]
 module AutoOpenToNiceStringExtensions = 
 

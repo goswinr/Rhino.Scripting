@@ -278,8 +278,7 @@ module AutoOpenTransformation =
     ///<returns>(Point3d) The transformedPoint.</returns>
     static member XformScreenToWorld( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
-                                      [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d = 
-        //point = Scripting.Coerce2dpoint(point)
+                                      [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =         
         let view = Scripting.CoerceView(view |? "") // ""to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
@@ -318,8 +317,6 @@ module AutoOpenTransformation =
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(Point3d) 3D point in construction Plane coordinates.</returns>
     static member XformWorldToCPlane(point:Point3d, plane:Plane) : Point3d = 
-        //point = Scripting.Coerce3dpoint(point)
-        //plane = Scripting.Coerceplane(plane)
         let v = point - plane.Origin;
         Point3d(v*plane.XAxis, v*plane.YAxis, v*plane.ZAxis)
 

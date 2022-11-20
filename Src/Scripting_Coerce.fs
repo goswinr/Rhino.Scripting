@@ -36,7 +36,7 @@ module AutoOpenCoerce =
 
 
     ///<summary>Attempt to get a Guids from input.</summary>
-    ///<param name="objectId">objcts , Guid or string</param>
+    ///<param name="objectId">object , Guid or string</param>
     ///<returns>a Guid Option.</returns>
     static member TryCoerceGuid (objectId:'T) : Guid option= 
         match box objectId with
@@ -47,7 +47,7 @@ module AutoOpenCoerce =
         | _ -> None
 
     ///<summary>Attempt to get a Guids from input.</summary>
-    ///<param name="input">objects , Guid or string</param>
+    ///<param name="input">object , Guid or string</param>
     ///<returns>Guid. Raises a RhinoScriptingException if coerce failed.</returns>
     static member CoerceGuid(input:'T) : Guid = 
         match box input with
@@ -108,7 +108,7 @@ module AutoOpenCoerce =
     static member CoerceLight (objectId:Guid) : Light = 
         match Scripting.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
-        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLight failed on: %s " (toNiceString objectId)
+        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLight failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
@@ -128,7 +128,7 @@ module AutoOpenCoerce =
     static member CoerceMesh(objectId:Guid) : Mesh = 
         match Scripting.TryCoerceMesh(objectId) with
         | Some m -> m
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceMesh failed on: %s " (toNiceString objectId)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceMesh failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Surface Identifier (Guid)</param>
@@ -177,7 +177,7 @@ module AutoOpenCoerce =
     static member CoerceBrep(objectId:Guid) : Brep  = 
         match Scripting.TryCoerceBrep(objectId) with
         | Some b -> b
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBrep failed on: %s " (toNiceString objectId)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBrep failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get Curve geometry from the document with a given objectId.</summary>
     ///<param name="objectId">objectId (Guid or string) to be Scripting.Coerced into a Curve</param>
@@ -206,15 +206,15 @@ module AutoOpenCoerce =
         if segmentIndex < 0 then
             match Scripting.CoerceGeometry(objectId) with
             | :? Curve as c -> c
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on: %s " (toNiceString objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on: %s " (Nice.str objectId)
         else
             match Scripting.CoerceGeometry(objectId) with
             | :? PolyCurve as c ->
                 let crv = c.SegmentCurve(segmentIndex)
-                if isNull crv then RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on segment index %d for %s" segmentIndex  (toNiceString objectId)
+                if isNull crv then RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed on segment index %d for %s" segmentIndex  (Nice.str objectId)
                 crv
             | :? Curve as c -> c
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed for %s"  (toNiceString objectId)
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCurve failed for %s"  (Nice.str objectId)
 
 
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
@@ -242,7 +242,7 @@ module AutoOpenCoerce =
     static member CoerceLine(line:'T) : Line= 
         match Scripting.TryCoerceLine(line) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLine failed on: %s " (toNiceString line)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLine failed on: %s " (Nice.str line)
 
     ///<summary>Attempt to get Rhino Arc Geometry using the current Documents Absolute Tolerance.
     /// does not return circles as arcs.</summary>
@@ -273,7 +273,7 @@ module AutoOpenCoerce =
     static member CoerceArc(arc:'T) : Arc= 
         match Scripting.TryCoerceArc(arc) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceArc failed on: %s " (toNiceString arc)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceArc failed on: %s " (Nice.str arc)
 
 
     ///<summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
@@ -303,7 +303,7 @@ module AutoOpenCoerce =
     static member CoerceCircle(circ:'T) : Circle= 
         match Scripting.TryCoerceCircle(circ) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCircle failed on: %s " (toNiceString circ)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceCircle failed on: %s " (Nice.str circ)
 
     ///<summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="cir">Guid, RhinoObject or Curve </param>
@@ -326,13 +326,13 @@ module AutoOpenCoerce =
             | _ -> None
         |_ -> None
 
-    ///<summary>Attempt to get Rhino Ellips Geometry using the current Documents Absolute Tolerance.</summary>
-    ///<param name="ellip">Guid, RhinoObject or Curve </param>
+    ///<summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
+    ///<param name="ellipse">Guid, RhinoObject or Curve </param>
     ///<returns>Geometry.Ellipse, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceEllips(ellip:'T) : Ellipse= 
-        match Scripting.TryCoerceEllipse(ellip) with
+    static member CoerceEllipse(ellipse:'T) : Ellipse= 
+        match Scripting.TryCoerceEllipse(ellipse) with
         | Some a -> a
-        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceEllipse failed on: %s " (toNiceString ellip)
+        | None -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceEllipse failed on: %s " (Nice.str ellipse)
 
     ///<summary>Attempt to get Rhino Polyline Geometry.</summary>
     ///<param name="poly">Guid, RhinoObject or Curve </param>
@@ -361,7 +361,7 @@ module AutoOpenCoerce =
     ///<returns>a Geometry.Polyline Option.</returns>
     static member CoercePolyline(poly:'T) : Polyline = 
         match Scripting.TryCoercePolyline poly with
-        |None -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePolyline failed on: %s " (toNiceString poly)
+        |None -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePolyline failed on: %s " (Nice.str poly)
         |Some pl -> pl
 
 
@@ -371,9 +371,9 @@ module AutoOpenCoerce =
 
 
 
-    ///<summary>Attempt to get Rhino LayerObject from the document for a given fullname.</summary>
+    ///<summary>Attempt to get Rhino LayerObject from the document for a given full name.</summary>
     ///<param name="name">(string) The layer's name.</param>
-    ///<returns>DocObjectys.Layer </returns>
+    ///<returns>DocObjects.Layer </returns>
     static member CoerceLayer (name:string) : DocObjects.Layer = 
         let i = State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then
@@ -394,7 +394,7 @@ module AutoOpenCoerce =
         let l = State.Doc.Layers.FindId(layerId)
         if isNull l then
             if notNull (State.Doc.Objects.FindId(layerId)) then
-                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Document Object (with Geometry) '%s'" (toNiceString layerId)
+                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer works on  Guid of a Layer Object, not the Guid of a Document Object (with Geometry) '%s'" (Nice.str layerId)
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could not find Guid %O in State.Doc.Layer table'" layerId
         l
@@ -405,7 +405,7 @@ module AutoOpenCoerce =
     static member CoerceBlockInstanceObject(objectId:Guid) : DocObjects.InstanceObject = 
         match Scripting.CoerceRhinoObject(objectId) with
         | :? DocObjects.InstanceObject as b -> b
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBlockInstanceObject: unable to coerce Block InstanceObject from '%s'" (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceBlockInstanceObject: unable to coerce Block InstanceObject from '%s'" (Nice.str objectId)
 
 
 
@@ -463,7 +463,7 @@ module AutoOpenCoerce =
     static member CoerceDetailView (objectId:Guid) : DetailView = 
         match Scripting.CoerceGeometry objectId with
         | :?  DetailView as a -> a
-        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailView failed on %s"  (toNiceString objectId)
+        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailView failed on %s"  (Nice.str objectId)
 
     ///<summary>Attempt to get Detail view rectangle Object.</summary>
     ///<param name="objectId">(Guid) objectId of Detail object</param>
@@ -471,7 +471,7 @@ module AutoOpenCoerce =
     static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailViewObject failed on %s"  (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceDetailViewObject failed on %s"  (Nice.str objectId)
 
 
     //-------Annotation ----
@@ -483,7 +483,7 @@ module AutoOpenCoerce =
     static member CoerceTextDot (objectId:Guid) : TextDot = 
         match Scripting.CoerceGeometry objectId with
         | :?  TextDot as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextDot failed on: %s " (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextDot failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) .</summary>
     ///<param name="objectId">(Guid) objectId of TextEntity object</param>
@@ -491,7 +491,7 @@ module AutoOpenCoerce =
     static member CoerceTextEntity (objectId:Guid) : TextEntity = 
         match Scripting.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextEntity failed on: %s " (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextEntity failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get Rhino TextObject Annotation Object.</summary>
@@ -500,7 +500,7 @@ module AutoOpenCoerce =
     static member CoerceTextObject (objectId:Guid) : DocObjects.TextObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.TextObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextObject failed on: %s " (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceTextObject failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get Hatch Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of Hatch object</param>
@@ -508,7 +508,7 @@ module AutoOpenCoerce =
     static member CoerceHatch (objectId:Guid) : Hatch = 
         match Scripting.CoerceGeometry objectId with
         | :?  Hatch as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatch failed on: %s " (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatch failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get Rhino Hatch Object.</summary>
@@ -517,7 +517,7 @@ module AutoOpenCoerce =
     static member CoerceHatchObject (objectId:Guid) : DocObjects.HatchObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatchObject failed on: %s " (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceHatchObject failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get Rhino Annotation Base Object.</summary>
     ///<param name="objectId">(Guid) objectId of annotation object</param>
@@ -525,7 +525,7 @@ module AutoOpenCoerce =
     static member CoerceAnnotation (objectId:Guid) : DocObjects.AnnotationObjectBase = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceAnnotation failed on: %s " (toNiceString objectId)
+        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceAnnotation failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get Rhino Leader Annotation Object.</summary>
@@ -534,7 +534,7 @@ module AutoOpenCoerce =
     static member CoerceLeader (objectId:Guid) : DocObjects.LeaderObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.LeaderObject as a -> a
-        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLeader failed on: %s " (toNiceString objectId)
+        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLeader failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get Rhino LinearDimension Annotation Object.</summary>
     ///<param name="objectId">(Guid) objectId of LinearDimension object</param>
@@ -542,7 +542,7 @@ module AutoOpenCoerce =
     static member CoerceLinearDimension (objectId:Guid) : DocObjects.LinearDimensionObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.LinearDimensionObject as a -> a
-        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLinearDimension failed on: %s " (toNiceString objectId)
+        | o -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceLinearDimension failed on: %s " (Nice.str objectId)
 
     //---------Geometry ------------
     
@@ -582,9 +582,9 @@ module AutoOpenCoerce =
                     else
                         let ys = s.Split(',')
                         Point3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))
-                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (toNiceString pt)
+                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (Nice.str pt)
             with _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (toNiceString pt)
+                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPoint failed on: %s " (Nice.str pt)
 
     ///<summary>Attempt to get Rhino Point Object.</summary>
     ///<param name="objectId">(Guid) objectId of Point object</param>
@@ -592,7 +592,7 @@ module AutoOpenCoerce =
     static member CoercePointObject (objectId:Guid) : DocObjects.PointObject = 
         match Scripting.CoerceRhinoObject objectId with
         | :?  DocObjects.PointObject as a -> a
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointObject failed on: %s " (toNiceString objectId)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointObject failed on: %s " (Nice.str objectId)
 
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible.</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
@@ -636,9 +636,9 @@ module AutoOpenCoerce =
                     else
                         let ys = s.Split(',')
                         Vector3d(parseFloatEnDe(Seq.item 0 ys), parseFloatEnDe(Seq.item 1 ys), parseFloatEnDe(Seq.item 2 ys))
-                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (toNiceString vec)
+                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (Nice.str vec)
             with _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (toNiceString vec)
+                RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dVector failed on: %s " (Nice.str vec)
 
 
 
@@ -655,7 +655,7 @@ module AutoOpenCoerce =
                 pl.Origin <- pt
                 pl
             with e ->
-                RhinoScriptingException.Raise "Rhino.Scripting.CoercePlane failed on: %s " (toNiceString plane)
+                RhinoScriptingException.Raise "Rhino.Scripting.CoercePlane failed on: %s " (Nice.str plane)
 
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
     ///<param name="xForm">object to convert</param>
@@ -670,16 +670,16 @@ module AutoOpenCoerce =
                         for r, x in Seq.indexed xs do
                             t.[c, r] <- x
                 with
-                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (toNiceString xForm)
+                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: seq<seq<float>> %s can not be converted to a Transformation Matrix" (Nice.str xForm)
                 t
         | :? ``[,]``<float>  as xss -> // TODO verify row, column order !!
                 let mutable t= Transform()
                 try
                     xss|> Array2D.iteri (fun i j x -> t.[i, j]<-x)
                 with
-                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (toNiceString xForm)
+                    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (Nice.str xForm)
                 t
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (toNiceString xForm)
+        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (Nice.str xForm)
     
 
 
@@ -692,7 +692,7 @@ module AutoOpenCoerce =
         | :? Surface as c -> c.ToNurbsSurface()
         | :? Brep as b ->
             if b.Faces.Count = 1 then (b.Faces.[0] :> Surface).ToNurbsSurface()
-            else RhinoScriptingException.Raise "Rhino.Scripting.CoerceNurbsSurface failed on %s from Brep with %d Faces" (toNiceString objectId)   b.Faces.Count
+            else RhinoScriptingException.Raise "Rhino.Scripting.CoerceNurbsSurface failed on %s from Brep with %d Faces" (Nice.str objectId)   b.Faces.Count
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceNurbsSurface failed on: %O "  objectId
 
 
@@ -703,7 +703,7 @@ module AutoOpenCoerce =
     static member CoercePointCloud (objectId:Guid) : PointCloud = 
         match Scripting.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
-        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointCloud failed on: %s " (toNiceString objectId)
+        | g -> RhinoScriptingException.Raise "Rhino.Scripting.CoercePointCloud failed on: %s " (Nice.str objectId)
             
     
     ///<summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
@@ -733,7 +733,7 @@ module AutoOpenCoerce =
                 Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
             with _ -> 
                 //try
-                //    let c = Drawing.Color.FromName(s) // for invalid names ( a hex string) this stil returns named color black !!
+                //    let c = Drawing.Color.FromName(s) // for invalid names ( a hex string) this still returns named color black !!
                 //    Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
                 //with _ -> 
                     RhinoScriptingException.Raise "Rhino.Scripting.CoerceColor:: could not Coerce %A to a Color" color
@@ -756,14 +756,14 @@ module AutoOpenCoerce =
     //    | _ -> RhinoScriptingException.Raise "Rhino.Scripting.CoerceGuidList: could not CoerceGuidList: %A can not be converted to a Sequence(IEnumerable) of Guids" Ids
 
         //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
-    //<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
+    //<param name="points">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     //<returns>(Rhino.Geometry.Point3d seq) Fails on bad input</returns>
     //static member Coerce3dPointList(points:'T) : Point3d seq= 
     //    try Seq.map Scripting.Coerce3dPoint points //|> Seq.cache
     //    with _ -> RhinoScriptingException.Raise "Rhino.Scripting.Coerce3dPointList: could not Coerce: Could not convert %A to a list of 3d points"  points
 
     //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
-    //<param name="ponits">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
+    //<param name="points">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     //<returns>(Rhino.Geometry.Point2d seq) Fails on bad input</returns>
     //static member Coerce2dPointList(points:'T) : Point2d seq= 
     //    try Seq.map Scripting.Coerce2dPoint points //|> Seq.cache

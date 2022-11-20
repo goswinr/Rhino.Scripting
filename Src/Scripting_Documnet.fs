@@ -28,16 +28,16 @@ module AutoOpenDocument =
     ///<param name="fileName">(string) Name of the bitmap file to create</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the active view is used</param>
     ///<param name="width">(int) Optional, Default Value: <c>0</c>
-    /// integer that specifies width of the bitmap in pixel. if only width given height will be scaled to kepp screen ratio</param>
+    /// integer that specifies width of the bitmap in pixel. if only width given height will be scaled to keep screen ratio</param>
     ///<param name="height">(int) Optional, Default Value: <c>0</c>
-    /// integer that specifies height of the bitmap in pixel. if only height given width will be scaled to kepp screen ratio</param>
+    /// integer that specifies height of the bitmap in pixel. if only height given width will be scaled to keep screen ratio</param>
     ///<param name="flags">(int) Optional, Default Value: <c>0</c>
     ///    Bitmap creation flags. Can be the combination of:
     ///    1 = honor object highlighting
     ///    2 = draw construction Plane
     ///    4 = use ghosted shading</param>
     ///<param name="wireframe">(bool) Optional, Default Value: <c>false</c>
-    ///    If True then a wireframe preview image. If False,
+    ///    If True then a wire-frame preview image. If False,
     ///    a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member CreatePreviewImage(   fileName:string,
@@ -453,7 +453,7 @@ module AutoOpenDocument =
     ///    0 = none,
     ///    1 = create shadows,
     ///    2 = use lights on layers that are off,
-    ///    4 = render Curves and isocurves,
+    ///    4 = render Curves and iso-curves,
     ///    8 = render dimensions and text.</returns>
     static member RenderSettings() : int = //GET
         let mutable rc = 0
@@ -469,7 +469,7 @@ module AutoOpenDocument =
     ///    0 = none,
     ///    1 = create shadows,
     ///    2 = use lights on layers that are off,
-    ///    4 = render Curves and isocurves,
+    ///    4 = render Curves and iso-curves,
     ///    8 = render dimensions and text</param>
     ///<returns>(unit) void, nothing.</returns>
     static member RenderSettings(settings:int) : unit = //SET
@@ -584,9 +584,9 @@ module AutoOpenDocument =
     ///<param name="fromSystem">(int) The unit system to convert from (see above)</param>
     ///<returns>(float) scale factor for changing between unit systems.</returns>
     static member UnitScale(toSystem:int, fromSystem:int) : float = // https://github.com/mcneel/rhinoscriptsyntax/pull/198/files
-        let toSystemt:UnitSystem   = LanguagePrimitives.EnumOfValue  (byte toSystem)
-        let fromSystemt:UnitSystem  = LanguagePrimitives.EnumOfValue (byte fromSystem)
-        RhinoMath.UnitScale(fromSystemt, toSystemt)
+        let toSystem:UnitSystem   = LanguagePrimitives.EnumOfValue  (byte toSystem)
+        let fromSystem:UnitSystem  = LanguagePrimitives.EnumOfValue (byte fromSystem)
+        RhinoMath.UnitScale(fromSystem, toSystem)
 
 
     ///<summary>Return the document's unit system. See Rhino's DocumentProperties
