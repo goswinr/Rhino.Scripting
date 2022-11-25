@@ -68,9 +68,9 @@
     <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" />
     
     <!--
-      <PackageReference Include="FsEx" Version="0.10.1" />
-    -->
     <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" />
+    -->
+    <PackageReference Include="FsEx" Version="0.12.0" GeneratePathProperty="true"/>
 
     <!--This is probably not working because the way files a structured on github does not match the way the are compiled from a one big generated file.  
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" /> -->
@@ -81,14 +81,14 @@
     <None Include="Doc/READMEnuget.md" Pack="true" PackagePath="" />
     <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
 
-	<Compile Include="Src/Exceptions.fs" />
-	<Compile Include="Src/RhinoSync.fs" />
-	<Compile Include="Src/State.fs" />
-	<Compile Include="Src/ToNiceStringExtensions.fs" />
-	<Compile Include="Src/ToNiceStringSetup.fs" />	
-	<Compile Include="Src/Util.fs" />
-	<Compile Include="Src/UtilLayer.fs" />
-	<Compile Include="Src/ObjectFilterEnum.fs" />
+	  <Compile Include="Src/Exceptions.fs" />
+	  <Compile Include="Src/RhinoSync.fs" />
+	  <Compile Include="Src/State.fs" />
+	  <Compile Include="Src/ToNiceStringExtensions.fs" />
+	  <Compile Include="Src/ToNiceStringSetup.fs" />	
+	  <Compile Include="Src/Util.fs" />
+	  <Compile Include="Src/UtilLayer.fs" />
+	  <Compile Include="Src/ObjectFilterEnum.fs" />
     
     <!-- <Compile Include="Src/Scripting.fs" /> added in BeforeBuild target -->
 
@@ -103,8 +103,5 @@
  <!-- Delete Scripting.fs when done-->
   <Target Name="DeleteMergedFile" BeforeTargets="AfterBuild"> <Delete Files="Src/Scripting.fs" TreatErrorsAsWarnings="true" /> </Target>
 
-<!-- needed for intelisense ? GeneratePathProperty="true"
-<Copy SourceFiles="$(PkgFsEx)/lib/netstandard2.0/FsEx.xml" DestinationFiles="$(TargetDir)FsEx.xml" ContinueOnError="false" />
--->
-	
+
 </Project>
