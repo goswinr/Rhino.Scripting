@@ -85,8 +85,9 @@ module AutoOpenUtility =
         angle, reflexAngle
 
 
-    ///<summary>Returns a text string to the Windows clipboard.</summary>
-    ///<returns>(string) The current text in the clipboard.</returns>
+    ///<summary>Gets the text string in the Windows clipboard.</summary>
+    ///<returns>(string) The current text in the clipboard 
+    /// or an empty string if the content of the clipboard is not a text</returns> 
     static member ClipboardText() : string = //GET
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 

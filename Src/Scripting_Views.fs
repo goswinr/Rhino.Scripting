@@ -98,11 +98,11 @@ module AutoOpenViews =
 
     ///<summary>Returns the current detail view in a page layout view.</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
-    ///<returns>(string option) Option of The name  the current detail view, None if Page is current view.</returns>
-    static member CurrentDetail(layout:string) : string option = //GET
+    ///<returns>(string) The name of the current detail view, or an empty String if the Page view is the current view.</returns>
+    static member CurrentDetail(layout:string) : string = //GET
         let page = Scripting.CoercePageView(layout)
-        if page.MainViewport.Id = page.ActiveViewport.Id then None
-        else  Some  page.ActiveViewport.Name
+        if page.MainViewport.Id = page.ActiveViewport.Id then ""
+        else page.ActiveViewport.Name
 
     ///<summary>Changes the current detail view in a page layout view.</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
@@ -824,11 +824,11 @@ module AutoOpenViews =
     ///<summary>Returns the wallpaper bitmap of the specified view. To remove a
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     /// wallpaper bitmap, pass an empty string "".</summary>
-    ///<returns>(string option) The current wallpaper bitmap filename.</returns>
-    static member Wallpaper(view:string) : string option= //GET
+    ///<returns>(string option) The current wallpaper bitmap filename. Or an empty string if none found.</returns>
+    static member Wallpaper(view:string) : string= //GET
         let view = Scripting.CoerceView(view)
         let f= view.ActiveViewport.WallpaperFilename
-        if isNull f then None else Some f
+        if isNull f then "" else f
 
     ///<summary>Sets the wallpaper bitmap of the specified view. To remove a
     /// wallpaper bitmap, pass an empty string "".</summary>

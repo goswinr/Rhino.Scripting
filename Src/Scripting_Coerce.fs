@@ -62,7 +62,7 @@ module AutoOpenCoerce =
 
     ///<summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
-    ///<returns>a RhinoObject Option.</returns>
+    ///<returns>a RhinoObject Option</returns>
     static member TryCoerceRhinoObject (objectId:Guid) : DocObjects.RhinoObject option = 
         match State.Doc.Objects.FindId(objectId) with
         | null -> None

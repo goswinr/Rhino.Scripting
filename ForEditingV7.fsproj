@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <UseWPF>true</UseWPF> <!--for DispatcherSynchronizationContext in RhinoSync, and Seff editor Window (if available)-->
-    <UseWindowsForms>true</UseWindowsForms>   <!--to get screen resolution-->
+    <UseWPF>false</UseWPF> 
+    <UseWindowsForms>true</UseWindowsForms>  <!--  to get screen resolution and show dialogs-->
     <LangVersion>preview</LangVersion>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
     <DefineConstants>RHINO7</DefineConstants>
@@ -12,11 +12,8 @@
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.2" /> <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
-    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
-    <!--
-	  <Reference Include="FsEx" HintPath="../FsEx/bin/Release/netstandard2.0/FsEx.dll" />
-	  -->
-    <PackageReference Include="FsEx" Version="0.12.0" />
+    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />   
+    <PackageReference Include="FsEx" Version="0.13.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,7 +36,7 @@
     <Compile Include="Src/Scripting_Block.fs" />
     <Compile Include="Src/Scripting_Curve.fs" />
     <Compile Include="Src/Scripting_Dimension.fs" />
-    <Compile Include="Src/Scripting_Documnet.fs" />
+    <Compile Include="Src/Scripting_Document.fs" />
     <Compile Include="Src/Scripting_Geometry.fs" />
     <Compile Include="Src/Scripting_Grips.fs" />
     <Compile Include="Src/Scripting_Group.fs" />
@@ -64,6 +61,7 @@
 	<!-- included only for editing version numbers:-->
 	<None Include="ForPublishing.fsproj" />
 	<None Include="ForPublishingV7.fsproj" />
+	<None Include="ForEditing.fsproj" />
   </ItemGroup>
 
   

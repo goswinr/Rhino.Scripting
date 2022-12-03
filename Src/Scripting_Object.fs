@@ -540,69 +540,69 @@ module AutoOpenObject =
         State.Doc.Layers.[index].Name
 
 
-    //static member ObjectLayer()// all 3 overloads moved to  top of file Scripting.fs
+    //static member ObjectLayer()// all 3 overloads moved to  top of file Scripting_Layer.fs
 
     ///<summary>Returns the layout or model space of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(string option) The object's current page layout view, None if it is in Model Space.</returns>
-    static member ObjectLayout(objectId:Guid) : string option= //GET
+    ///<returns>(string) The object's current page layout view, Empty String if it is in Model Space.</returns>
+    static member ObjectLayout(objectId:Guid) : string = //GET
         // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
             let pageid = rhobj.Attributes.ViewportId
             let pageview = State.Doc.Views.Find(pageid)
-            Some pageview.MainViewport.Name
+            pageview.MainViewport.Name
         else
-            None
+            ""
 
 
     ///<summary>Changes the layout or model space of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<param name="layout">(string option) To change, or move, an object from model space to page
+    ///<param name="layout">(string) To change, or move, an object from model space to page
     ///    layout space, or from one page layout to another, then specify the
     ///    title of an existing page layout view. To move an object
-    ///    from page layout space to model space, just specify None</param>
+    ///    from page layout space to model space, just specify an empty string.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectLayout(objectId:Guid, layout:string option) : unit = //SET
+    static member ObjectLayout(objectId:Guid, layout:string) : unit = //SET
         // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         let view= 
             if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                 let pageid = rhobj.Attributes.ViewportId
                 let pageview = State.Doc.Views.Find(pageid)
-                Some pageview.MainViewport.Name
+                pageview.MainViewport.Name
             else
-                None
+                ""
 
         if view<>layout then
-            if layout.IsNone then //move to model space
+            if layout="" then //move to model space
                 rhobj.Attributes.Space <- DocObjects.ActiveSpace.ModelSpace
                 rhobj.Attributes.ViewportId <- Guid.Empty
             else
-                match State.Doc.Views.Find(layout.Value, compareCase=false) with
-                | null -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout not found for '%A' and '%A'"  layout objectId
+                match State.Doc.Views.Find(layout, compareCase=false) with
+                | null -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout not found for '%s' and '%A'"  layout objectId
                 | :? Display.RhinoPageView as layout ->
                     rhobj.Attributes.ViewportId <- layout.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
-                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%A' and '%A'"  layout objectId
+                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectId
 
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%A' and '%A'"  layout objectId
+            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%s' and '%A'"  layout objectId
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifier of the objects</param>
-    ///<param name="layout">(string option) To change, or move, an objects from model space to page
+    ///<param name="layout">(string) To change, or move, an objects from model space to page
     ///    layout space, or from one page layout to another, then specify the
     ///    title of an existing page layout view. To move an objects
-    ///    from page layout space to model space, just specify None</param>
+    ///    from page layout space to model space, just specify an empty string.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectLayout(objectIds:Guid seq, layout:string option) : unit = //MULTISET
+    static member ObjectLayout(objectIds:Guid seq, layout:string) : unit = //MULTISET
         let lay = 
-            if layout.IsSome then
-                match State.Doc.Views.Find(layout.Value, compareCase=false) with
-                | null -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout not found for '%A' and '%A'"  layout objectIds
+            if layout<>"" then
+                match State.Doc.Views.Find(layout, compareCase=false) with
+                | null -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout not found for '%s' and '%A'"  layout objectIds
                 | :? Display.RhinoPageView as layout -> Some layout
-                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%A' and '%A'"  layout objectIds
+                | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectIds
             else
                 None
 
@@ -612,19 +612,19 @@ module AutoOpenObject =
                 if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                     let pageid = rhobj.Attributes.ViewportId
                     let pageview = State.Doc.Views.Find(pageid)
-                    Some pageview.MainViewport.Name
+                    pageview.MainViewport.Name
                 else
-                    None
+                    ""
 
             if view<>layout then
-                if layout.IsNone then //move to model space
+                if layout="" then //move to model space
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.ModelSpace
                     rhobj.Attributes.ViewportId <- Guid.Empty
                 else
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%A' and '%A'"  layout objectId
+                if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%s' and '%A'"  layout objectId
         State.Doc.Views.Redraw()
 
 

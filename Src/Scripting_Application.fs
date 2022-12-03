@@ -1,5 +1,4 @@
-﻿
-namespace Rhino
+﻿namespace Rhino
 
 open System
 open System.Collections.Generic
@@ -661,11 +660,12 @@ module AutoOpenApplication =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SetCommandPrompt(message))
 
+    
 
     ///<summary>Returns current width and height, of the screen of the primary monitor.</summary>
     ///<returns>(int * int) containing two numbers identifying the width and height in pixels.</returns>
     static member ScreenSize() : int * int = 
-        let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds
+        let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds //  TODO: Windows Forms is supported on Mono Mac??  compile separate Assembly for Windows ???
         sz.Width, sz.Height
 
 

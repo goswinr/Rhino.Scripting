@@ -103,8 +103,7 @@ module AutoOpenSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then
-                if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            if res <> Input.GetResult.Object then                
                 RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -223,7 +222,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                
                 RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -238,7 +237,6 @@ module AutoOpenSelection =
                     State.Doc.Objects.UnselectAll() |> ignore
                     State.Doc.Views.Redraw()
                 obj.Select(select) |> ignore
-                //if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 (objectId, presel, selmethod, point, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -297,7 +295,6 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.GetMultiple(minimumCount, maximumCount)
             if res <> Input.GetResult.Object then
-                if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
@@ -311,7 +308,6 @@ module AutoOpenSelection =
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
                 if printCount then InternalToNiceStringSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
-                //if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -389,10 +385,7 @@ module AutoOpenSelection =
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> Scripting.ObjectDescription
                     |> InternalToNiceStringSetup.printfnBlue "GetObjectsEx got %s"
-
-
-                rc
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                rc            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -467,7 +460,6 @@ module AutoOpenSelection =
                     State.Doc.Objects.UnselectAll() |> ignore
                     State.Doc.Views.Redraw()
                 (objectId, prepicked, selmethod, point, uv, name)
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
         RhinoSync.DoSyncRedrawHideEditor get
 
 

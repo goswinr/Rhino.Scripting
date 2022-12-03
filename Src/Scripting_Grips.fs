@@ -40,19 +40,19 @@ module AutoOpenGrips =
         enable = rhobj.GripsOn
 
 
-    ///<summary>Prompts the user to pick a single object grip.</summary>
+    ///<summary>Prompts the user to pick a single object grip. Fails if selection is empty.</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
     ///    Allow for selection of pre-selected object grip</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
     ///    Select the picked object grip</param>
-    ///<returns>(Guid * int * Point3d) Option of a grip record.
+    ///<returns>(Guid * int * Point3d) of a grip record.
     ///    [0] = identifier of the object that owns the grip
     ///    [1] = index value of the grip
     ///    [2] = location of the grip.</returns>
     static member GetObjectGrip( [<OPT;DEF(null:string)>]message:string,
                                  [<OPT;DEF(false)>]preselect:bool,
-                                 [<OPT;DEF(false)>]select:bool) : option<Guid * int * Point3d> = 
+                                 [<OPT;DEF(false)>]select:bool) : Guid * int * Point3d = 
         let get () = 
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
@@ -61,14 +61,12 @@ module AutoOpenGrips =
             let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
             if rc <> Commands.Result.Success || isNull grip then
-                None
+                RhinoScriptingException.Raise "Rhino.Scripting.GetObjectGrip User failed to select a Grip for : %s " message
             else
                 if select then
                     grip.Select(true, true)|> ignore
                     State.Doc.Views.Redraw()
-                Some (grip.OwnerId, grip.Index, grip.CurrentLocation)
-
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                (grip.OwnerId, grip.Index, grip.CurrentLocation)            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -101,8 +99,7 @@ module AutoOpenGrips =
                     let location = grip.CurrentLocation
                     rc.Add((objectId, index, location))
                     if select then grip.Select(true, true)|>ignore
-                if select then State.Doc.Views.Redraw()
-            if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                if select then State.Doc.Views.Redraw()            
             rc
         RhinoSync.DoSyncRedrawHideEditor get
 

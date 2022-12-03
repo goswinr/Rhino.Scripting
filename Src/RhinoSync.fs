@@ -16,13 +16,17 @@ type RhinoSync private () =
 
     static let mutable seffAssembly : Reflection.Assembly = null //set via reflection below ; from Seff.Rhino
 
-    static let mutable seffWindow : System.Windows.Window = null //set via reflection below ; from Seff.Rhino
+    static let mutable hideEditor : Action = null //set via reflection below ; from Seff.Rhino
+
+    static let mutable showEditor : Action = null //set via reflection below ; from Seff.Rhino
+    
+    static let mutable isEditorVisible : Func<bool> = null //set via reflection below ; from Seff.Rhino
 
     static let mutable logErrors = true
     
     static let log msg = Printf.kprintf(fun s -> if logErrors then 
-                                                      RhinoApp.WriteLine s 
-                                                      eprintfn "%s" s) msg
+                                                        RhinoApp.WriteLine s 
+                                                        eprintfn "%s" s) msg
 
     static let mutable initIsPending = true
 
@@ -42,27 +46,31 @@ type RhinoSync private () =
                         seffRhinoSyncModule <- seffAssembly.GetType("Seff.Rhino.Sync")
                     with e ->
                         log "Rhino.Scripting.dll did not find Seff Assembly via Reflection, If you are not using the Seff Editor Plugin this is normal."
-
-                if isNull seffWindow && notNull seffRhinoSyncModule then
+                
+                if notNull seffRhinoSyncModule then
+                
                     try
-                        seffWindow <- seffRhinoSyncModule.GetProperty("window").GetValue(seffAssembly)  :?> System.Windows.Window
-                        if isNull seffWindow then
-                            log "Rhino.Scripting.dll: Seff.Rhino.Sync.window is null"
-
+                        hideEditor <- seffRhinoSyncModule.GetProperty("hideEditor").GetValue(seffAssembly)  :?> Action
+                        if isNull hideEditor then
+                            log "Rhino.Scripting.dll: Seff.Rhino.Sync.hideEditor is null"
                     with e ->
-                        log "Rhino.Scripting.dll: Seff.Rhino.Sync.window failed with: %O" e
-
-                if isNull syncContext then
+                        log "Rhino.Scripting.dll: Seff.Rhino.Sync.hideEditor failed with: %O" e
+                
+                
                     try
-                        Windows.Threading.DispatcherSynchronizationContext(Windows.Application.Current.Dispatcher) |> Threading.SynchronizationContext.SetSynchronizationContext
-                        syncContext <- Threading.SynchronizationContext.Current
-                        if isNull syncContext then
-                            log "Rhino.Scripting.dll: Threading.SynchronizationContext.Current is null"
-                    with  e ->
-                        log "Rhino.Scripting.dll: Failed to SetSynchronizationContext from DispatcherSynchronizationContext: %O" e
-
-
-                if isNull syncContext && notNull seffRhinoSyncModule then //its probably already set above via DispatcherSynchronizationContext
+                        showEditor <- seffRhinoSyncModule.GetProperty("showEditor").GetValue(seffAssembly) :?> Action
+                        if isNull showEditor then
+                            log "Rhino.Scripting.dll: Seff.Rhino.Sync showEditor is null"
+                    with e ->
+                        log "Rhino.Scripting.dll: Seff.Rhino.Sync showEditor failed with: %O" e
+                    
+                    try
+                        isEditorVisible <- seffRhinoSyncModule.GetProperty("isEditorVisible").GetValue(seffAssembly) :?> Func<bool>
+                        if isNull isEditorVisible then
+                            log "Rhino.Scripting.dll: Seff.Rhino.Sync isEditorVisible is null"
+                    with e ->
+                        log "Rhino.Scripting.dll: Seff.Rhino.Sync isEditorVisible failed with: %O" e
+                
                     try
                         syncContext <- seffRhinoSyncModule.GetProperty("syncContext").GetValue(seffAssembly) :?> Threading.SynchronizationContext
                         if isNull syncContext then
@@ -96,26 +104,33 @@ type RhinoSync private () =
 
     /// The SynchronizationContext of the currently Running Rhino Instance,
     /// This SynchronizationContext is loaded via reflection from the Seff.Rhino plugin
-    static member SyncContext = 
-        if isNull syncContext then init()
-        syncContext
-
-    /// The WPF Window of currently running Seff Editor.
-    /// or 'null' if not running in Seff Editor.
-    static member SeffWindow = seffWindow
+    static member SyncContext  
+        with get() = 
+            if isNull syncContext then init()
+            syncContext
+        and set v = 
+        syncContext <- v
+        
+    /// Hide the WPF Window of currently running Seff Editor.
+    /// Or do nothing if not running in Seff Editor.
+    static member HideEditor() = if notNull hideEditor then hideEditor.Invoke()
+    
+    /// Show the WPF Window of currently running Seff Editor.
+    /// Or do nothing if not running in Seff Editor.
+    static member ShowEditor() = if notNull showEditor then showEditor.Invoke()
 
     /// The Assembly currently running Seff Editor Window.
-    /// or 'null' if not running in Seff Editor.
+    /// Or 'null' if not running in Seff Editor.
     static member SeffRhinoAssembly = seffAssembly
 
-    /// Set up WPF Synchronisation Context and Reference to Seff Window via reflection on Seff Plugin
+    /// Tries to set up WPF Synchronisation Context and Reference to Seff Window via reflection on Seff Plugin
     static member Initialize() = init() // called in ActiveDocument module
 
     /// Evaluates a function on UI Thread.
     static member DoSync (func:unit->'T) : 'T = 
         if RhinoApp.InvokeRequired then
             if isNull syncContext then init()
-            if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
+            if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode. That means on the main thread."
             async{
                     do! Async.SwitchToContext syncContext
                     return func()
@@ -129,7 +144,7 @@ type RhinoSync private () =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if RhinoApp.InvokeRequired then
             if isNull syncContext then RhinoSync.Initialize()
-            if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
+            if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode. That means on the main thread."
             async{
                     do! Async.SwitchToContext syncContext
                     if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
@@ -150,23 +165,23 @@ type RhinoSync private () =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         if isNull syncContext then RhinoSync.Initialize()
         if isNull syncContext then RhinoSyncException.Raise "Rhino.RhinoSync.syncContext is still null and not set up. UI code only works when started in sync mode ( = on main thread)."
-        let isWinVis = if isNull seffWindow then false else seffWindow.Visibility = Windows.Visibility.Visible
+        let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke()
         if RhinoApp.InvokeRequired then
             async{
                     do! Async.SwitchToContext syncContext
                     //eprintfn "Hiding Seff async..isWinVis:%b" isWinVis
-                    if isWinVis then seffWindow.Hide()
+                    if isWinVis && notNull hideEditor then hideEditor.Invoke()
                     if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
                     let res = func()
                     if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                    if isWinVis then seffWindow.Show()
+                    if isWinVis && notNull showEditor then showEditor.Invoke()
                     return res
                     } |> Async.RunSynchronously
         else
             //eprintfn "Hiding Seff sync..isWinVis:%b" isWinVis
-            if isWinVis then seffWindow.Hide()
+            if isWinVis && notNull hideEditor then hideEditor.Invoke()
             if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true            
             let res = func()
             if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-            if isWinVis then seffWindow.Show()
+            if isWinVis && notNull showEditor then showEditor.Invoke()
             res

@@ -119,3 +119,11 @@ these are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 
 ## Contributing
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
+
+## Changelog
+`0.3.0`
+- remove WPF dependency
+- don't return F# options anymore
+
+`0.2.0`
+- first public release

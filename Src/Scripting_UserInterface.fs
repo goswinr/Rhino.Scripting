@@ -129,8 +129,7 @@ module AutoOpenUserInterface =
             let defaultangle = toRadians(defaultValAngleDegrees)
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then toDegrees(angle)
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetAngle()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetAngle()"            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -167,8 +166,7 @@ module AutoOpenUserInterface =
                 if getrc <> Input.GetResult.Nothing then
                     RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetBoolean()"
                 else
-                    (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
-            if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                    (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)            
             res
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -206,8 +204,7 @@ module AutoOpenUserInterface =
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then ((!box).GetCorners())
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetBox()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetBox()"            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -220,8 +217,7 @@ module AutoOpenUserInterface =
             let zero = Drawing.Color()
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
-            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetColor()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetColor()"            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -239,8 +235,7 @@ module AutoOpenUserInterface =
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
-            worldpt.Transform(xf)
-            if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show() //or skip ?
+            worldpt.Transform(xf)            
             worldpt, screenpt, viewport.Id, clientpt
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -294,8 +289,7 @@ module AutoOpenUserInterface =
                 | _ ->
                     gp2.Dispose()
                     RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetDistance()"
-            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetDistance()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetDistance()"           
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -338,8 +332,7 @@ module AutoOpenUserInterface =
                         let rhobj = State.Doc.Objects.FindId(t1 item)
                         rhobj.Select(true)|> ignore //TODO make sync ?
                     State.Doc.Views.Redraw()
-                r
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                r           
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -366,8 +359,7 @@ module AutoOpenUserInterface =
             else
                 let rc = gi.Number()
                 gi.Dispose()
-                rc
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+                rc            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -456,7 +448,7 @@ module AutoOpenUserInterface =
                 line
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetLine()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -512,7 +504,7 @@ module AutoOpenUserInterface =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 rc
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -546,7 +538,7 @@ module AutoOpenUserInterface =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 rc
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -576,7 +568,7 @@ module AutoOpenUserInterface =
             else
                 let pt = gp.Point()
                 pt
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -599,7 +591,7 @@ module AutoOpenUserInterface =
             else
                 let pt = gp.Point()
                 pt
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -615,7 +607,7 @@ module AutoOpenUserInterface =
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7            
             if cmdrc = Commands.Result.Success then point
             else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPointOnMesh()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -646,7 +638,7 @@ module AutoOpenUserInterface =
             else
                 let pt = gp.Point()
                 pt
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -713,7 +705,7 @@ module AutoOpenUserInterface =
                     rc
                 else
                     RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoints()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
 
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -757,7 +749,7 @@ module AutoOpenUserInterface =
             State.Doc.Views.Redraw()
             if rc = Commands.Result.Success then polyline
             else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPolyline()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -785,7 +777,7 @@ module AutoOpenUserInterface =
                 let rc = gn.Number()
                 gn.Dispose()
                 rc
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -818,7 +810,7 @@ module AutoOpenUserInterface =
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then  (corners.[0], corners.[1], corners.[2], corners.[3])
             else RhinoUserInteractionException.Raise "No rectangle was given by user in Rhino.Scripting.GetRectangle()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -847,7 +839,7 @@ module AutoOpenUserInterface =
                 gs.Option().EnglishName
             else
                 gs.StringResult()
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -1090,7 +1082,7 @@ module AutoOpenUserInterface =
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
             if  rc then (!defaultValNumber)
             else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.RealBox()"
-            |>! fun _ -> if notNull RhinoSync.SeffWindow then RhinoSync.SeffWindow.Show()
+            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
