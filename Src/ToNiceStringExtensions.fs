@@ -1,13 +1,15 @@
-﻿// only this file is using this namespace : so that making these F# onl extensions available works with 'open Rhino.ScriptingFSharp'
+﻿// only this file is using this namespace : so that making these F# only extensions available works with 'open Rhino.ScriptingFSharp'
 namespace Rhino.ScriptingFSharp
 
-open System
 open Rhino.Geometry
 open FsEx
 
-/// This module provides type extensions for pretty printing
+/// This module provides type extensions for pretty printing.
+/// It adds a 'rhObj.ToNiceString' property to many Rhino geomnetry objects.
 /// This module is automatically opened when Rhino namespace is opened.
 /// These type extensions are only visible in F# (not in C#)
+/// This module is under the 'Rhino.ScriptingFSharp' namespace so that making these extensions available works 
+/// with 'open Rhino.ScriptingFSharp'. See Rhino.ScriptingFSharp nuget package.
 [<AutoOpen>]
 module AutoOpenToNiceStringExtensions = 
 

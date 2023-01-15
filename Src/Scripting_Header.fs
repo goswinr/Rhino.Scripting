@@ -1,18 +1,21 @@
-﻿namespace Rhino
+namespace Rhino
 
+
+//leave all these open staments here if if they are unused, they are needed when all files are combined into one.
 open System
+open System.Globalization
 open System.Collections.Generic
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
-open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
 open FsEx.SaveIgnore
 open FsEx.CompareOperators
-open System.Globalization
+
+open Rhino.ScriptingFSharp
 
 
 // ------- Abbreviations so that declarations are not so long:

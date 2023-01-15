@@ -3,11 +3,8 @@ namespace Rhino
 
 open System
 open System.Collections.Generic
-open System.Globalization
-open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-open Rhino.ApplicationSettings
 open Rhino.ScriptingFSharp
 
 open FsEx
@@ -672,8 +669,8 @@ module AutoOpenObject =
     ///      3 = By Parent.</returns>
     static member ObjectLinetypeSource(objectId:Guid) : int = //GET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
-        let oldsource = rhinoObject.Attributes.LinetypeSource
-        int(oldsource)
+        let oldSource = rhinoObject.Attributes.LinetypeSource
+        int(oldSource)
 
     ///<summary>Modifies the linetype source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>

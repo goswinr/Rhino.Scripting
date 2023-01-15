@@ -1,18 +1,21 @@
 ﻿namespace Rhino
 
+
+//leave all these open staments here if if they are unused, they are needed when all files are combined into one.
 open System
+open System.Globalization
 open System.Collections.Generic
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
 open Rhino.ApplicationSettings
-open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
 open FsEx.SaveIgnore
 open FsEx.CompareOperators
-open System.Globalization
+
+open Rhino.ScriptingFSharp
 
 
 // ------- Abbreviations so that declarations are not so long:
@@ -3511,11 +3514,11 @@ type Scripting private () =
         let rhobj = Scripting.CoerceRhinoObject(curveId)
         let attr = rhobj.Attributes
         let rc = attr.ObjectDecoration
-        if rc= DocObjects.ObjectDecoration.None then  0
-        elif rc= DocObjects.ObjectDecoration.StartArrowhead then 1
-        elif rc= DocObjects.ObjectDecoration.EndArrowhead then 2
-        elif rc= DocObjects.ObjectDecoration.BothArrowhead then 3
-        else -1
+        if   rc = DocObjects.ObjectDecoration.None then  0
+        elif rc = DocObjects.ObjectDecoration.StartArrowhead then 1
+        elif rc = DocObjects.ObjectDecoration.EndArrowhead then 2
+        elif rc = DocObjects.ObjectDecoration.BothArrowhead then 3
+        else RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows: illegal state %A on curve %A" rc curveId
 
     ///<summary>Enables or disables a Curve object's annotation arrows.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve</param>
@@ -11411,8 +11414,8 @@ type Scripting private () =
     ///      3 = By Parent.</returns>
     static member ObjectLinetypeSource(objectId:Guid) : int = //GET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
-        let oldsource = rhinoObject.Attributes.LinetypeSource
-        int(oldsource)
+        let oldSource = rhinoObject.Attributes.LinetypeSource
+        int(oldSource)
 
     ///<summary>Modifies the linetype source of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
@@ -17034,6 +17037,9 @@ type Scripting private () =
         else
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+        
+        if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed to Commit Changes on %s for key '%s' value '%s'" (Nice.str objectId) key value
 
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
@@ -17054,7 +17060,8 @@ type Scripting private () =
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
                     RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
-
+            if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed to Commit Changes on %s for key '%s' value '%s'" (Nice.str objectId) key value
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -17065,6 +17072,8 @@ type Scripting private () =
         let obj = Scripting.CoerceRhinoObject(objectId)
         if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
         else                     obj.Attributes.SetUserString(key, null) |> ignore
+        if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+            RhinoScriptingException.Raise "Rhino.Scripting.DeleteUserText failed to Commit Changes on %s for key '%s'" (Nice.str objectId) key 
 
 
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
@@ -17077,6 +17086,9 @@ type Scripting private () =
             let obj = Scripting.CoerceRhinoObject(objectId)
             if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
             else                      obj.Attributes.SetUserString(key, null) |> ignore
+            if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+                RhinoScriptingException.Raise "Rhino.Scripting.DeleteUserText failed to Commit Changes on %s for key '%s'" (Nice.str objectId) key 
+
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 

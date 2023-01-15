@@ -1,7 +1,6 @@
 ﻿namespace Rhino
 
 open System
-open Rhino
 open System.Globalization
 
 

@@ -1,14 +1,16 @@
-﻿namespace Rhino.ScriptingFSharp
+﻿namespace Rhino
 
 open System
 open Rhino.Geometry
 open FsEx
 
-
-/// Internal module to set up nice printing.(public only for access from Rhino.ScriptingFSharp)
+/// Part of Rhino.Scripting nuget.
+/// An internal module to set up nice printing of Rhino Objects. 
+/// (It is public only for access from Rhino.ScriptingFSharp project)
 [<RequireQualifiedAccess>]
 module InternalToNiceStringSetup = 
-    open Rhino
+    open Rhino    
+    open Rhino.ScriptingFSharp
 
     let mutable private initIsPending = true // to delay setup of printing till first print call
 
@@ -61,7 +63,7 @@ module InternalToNiceStringSetup =
                     RhinoDoc.EndOpenDocument.Add       (fun a -> NiceStringSettings.userZeroTolerance <- a.Document.ModelAbsoluteTolerance * 0.1 )
             with e -> 
                 // try to log errors to error stream:
-                eprintfn "Initializing NiceString pretty printing from Rhino.Scripting in FsEx failed with:\r\n%A" e
+                eprintfn "Initializing NiceString pretty printing in Rhino.InternalToNiceStringSetup.init() via Rhino.Scripting.dll failed with:\r\n%A" e
             
     
     /// Like printfn but in Blue if used from Seff Editor. Adds a new line at end.

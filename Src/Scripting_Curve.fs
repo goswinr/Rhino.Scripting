@@ -1,18 +1,14 @@
 ﻿namespace Rhino
 
 open System
-open System.Collections.Generic
-open System.Globalization
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-open Rhino.ApplicationSettings
 open Rhino.ScriptingFSharp
 
 open FsEx
 open FsEx.UtilMath
 open FsEx.SaveIgnore
-open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenCurve =
@@ -696,11 +692,11 @@ module AutoOpenCurve =
         let rhobj = Scripting.CoerceRhinoObject(curveId)
         let attr = rhobj.Attributes
         let rc = attr.ObjectDecoration
-        if rc= DocObjects.ObjectDecoration.None then  0
-        elif rc= DocObjects.ObjectDecoration.StartArrowhead then 1
-        elif rc= DocObjects.ObjectDecoration.EndArrowhead then 2
-        elif rc= DocObjects.ObjectDecoration.BothArrowhead then 3
-        else -1
+        if   rc = DocObjects.ObjectDecoration.None then  0
+        elif rc = DocObjects.ObjectDecoration.StartArrowhead then 1
+        elif rc = DocObjects.ObjectDecoration.EndArrowhead then 2
+        elif rc = DocObjects.ObjectDecoration.BothArrowhead then 3
+        else RhinoScriptingException.Raise "Rhino.Scripting.CurveArrows: illegal state %A on curve %A" rc curveId
 
     ///<summary>Enables or disables a Curve object's annotation arrows.</summary>
     ///<param name="curveId">(Guid) Identifier of a Curve</param>

@@ -2,18 +2,12 @@
 namespace Rhino
 
 open System
-open System.Collections.Generic
-open System.Globalization
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-open Rhino.ApplicationSettings
-open Rhino.ScriptingFSharp
-
 open FsEx
 open FsEx.UtilMath
 open FsEx.SaveIgnore
-open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenDocument =
