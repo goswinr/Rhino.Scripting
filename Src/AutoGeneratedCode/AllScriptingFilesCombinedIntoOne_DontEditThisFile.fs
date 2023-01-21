@@ -47,7 +47,7 @@ type Scripting private () =
 
     /// A Dictionary to store state between scripting session.
     /// Use Rhino.Scripting.Sticky.Clear() to reset it.
-    /// Similar to scriptingcontext.sticky in Rhino Python.
+    /// Similar to scriptingcontext.sticky dictionary in Rhino Python.
     static member val Sticky = new Dict<string, obj>() with get
 
     /// An Integer Enum of Object types.
@@ -69,7 +69,7 @@ type Scripting private () =
     ///<param name="value">(float) The value to clamp</param>
     ///<returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float = 
-        if minVal > maxVal then  RhinoScriptingException.Raise "Rhino.Scripting.Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
+        if minVal > maxVal then  RhinoScriptingException.Raise "Rhino.Scripting.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
 
@@ -98,7 +98,7 @@ type Scripting private () =
             let rec floatrange (start, i, steps) = 
                 seq { if i <= steps then
                         yield start + i*step
-                        yield! floatrange (start, (i + 1.0), steps) } // tail recursive ?
+                        yield! floatrange (start, (i + 1.0), steps) } // tail recursive !
             floatrange (start, 0.0, steps)
 
     ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
@@ -1381,8 +1381,8 @@ type Scripting private () =
     ///<summary>Makes a layer invisible.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="persist">(bool) Optional, Default Value: <c>false</c>
-    ///     Turn layer persitently off? even if it is already invisible because of a parent layer that is turned off.
-    ///     By default alreaday invisibe layers are not changed</param>
+    ///     Turn layer persistently off? even if it is already invisible because of a parent layer that is turned off.
+    ///     By default already invisible layers are not changed</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
         let lay = Scripting.CoerceLayer(layer)
@@ -1518,12 +1518,12 @@ type Scripting private () =
 
     ///<summary>Return the name of a layer given it's identifier.</summary>
     ///<param name="layerId">(Guid) Layer identifier</param>
-    ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="fullPath">(bool) Optional, Default Value: <c>true</c>
     ///    Return the full path name `True` or short name `False`</param>
     ///<returns>(string) The layer's name.</returns>
-    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullpath:bool) : string = 
+    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullPath:bool) : string = 
         let layer = Scripting.CoerceLayer(layerId)
-        if fullpath then layer.FullPath
+        if fullPath then layer.FullPath
         else layer.Name
 
 
@@ -3063,8 +3063,8 @@ type Scripting private () =
     ///    if the final point is a duplicate of the initial point, it is
     ///    ignored. The number of control points must be bigger than 'degree' number</param>
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>
-    ///    Periodic Curves must have a degree bigger than 1. For knotstyle = 1 or 2,
-    ///    the degree must be 3. For knotstyle = 4 or 5, the degree must be odd</param>
+    ///    Periodic Curves must have a degree bigger than 1. For knot-style = 1 or 2,
+    ///    the degree must be 3. For knot-style = 4 or 5, the degree must be odd</param>
     ///<param name="knotStyle">(int) Optional, Default Value: <c>0</c>
     ///    0 Uniform knots. Parameter spacing between consecutive knots is 1.0.
     ///    1 Chord length spacing. Requires degree = 3 with arrCV1 and arrCVn1 specified.
@@ -3726,7 +3726,7 @@ type Scripting private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///    Curve segment index if `curveId` identifies a polycurve</param>
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
     ///<returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
@@ -3750,7 +3750,7 @@ type Scripting private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///    Curve segment index if `curveId` identifies a polycurve</param>
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
     ///<returns>(Point3d) The closest point on the Curve.</returns>
     static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
@@ -4479,9 +4479,9 @@ type Scripting private () =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curve:'%A' dived-length:%f, curveLength=%f" curve length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curve:'%A' dived-length:%f, curveLength=%f" curve length len
         rarr{ for r in rc do curve.PointAt(r)}
 
     ///<summary>Divides a Curve object into segments of a specified length.
@@ -4495,9 +4495,9 @@ type Scripting private () =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
         rarr{ for r in rc do curve.PointAt(r)}
 
     ///<summary>Divides a Curve Geometry into segments of a specified length.
@@ -4510,9 +4510,9 @@ type Scripting private () =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curve:'%A' dived-length:%f, curveLength=%f" curve length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curve:'%A' dived-length:%f, curveLength=%f" curve length len
         rc
 
     ///<summary>Divides a Curve object into segments of a specified length.
@@ -4526,9 +4526,9 @@ type Scripting private () =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
         rc
 
 
@@ -5534,7 +5534,7 @@ type Scripting private () =
 
     ///<summary>Adds a leader to the document. Leader objects are planar.
     ///    The 3D points passed will define the Plane if no Plane given.
-    ///    If ther are only two Points the World XY plane is used.</summary>
+    ///    If there are only two Points the World XY plane is used.</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>
@@ -7513,23 +7513,23 @@ type Scripting private () =
 
     ///<summary>Modifies the font of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="fontface">(string) New font face name</param>
+    ///<param name="fontFace">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
+    static member TextDotFont(objectId:Guid, fontFace:string) : unit = //SET
         let textdot = Scripting.CoerceTextDot(objectId)
-        textdot.FontFace <-  fontface
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontface
+        textdot.FontFace <-  fontFace
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font of multiple text dots.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
-    ///<param name="fontface">(string) New font face name</param>
+    ///<param name="fontFace">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member TextDotFont(objectIds:Guid seq, fontface:string) : unit = //MULTISET
+    static member TextDotFont(objectIds:Guid seq, fontFace:string) : unit = //MULTISET
         for objectId in objectIds do
             let textdot = Scripting.CoerceTextDot(objectId)
-            textdot.FontFace <-  fontface
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontface
+            textdot.FontFace <-  fontFace
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
         State.Doc.Views.Redraw()
 
 
@@ -9455,7 +9455,7 @@ type Scripting private () =
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid = 
         
-        // the orignal python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
+        // the original python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
         let line = Scripting.CoerceLine lineId
         let ln = Line(line.From,line.To)
         let success = ln.Transform(xForm)
@@ -10076,7 +10076,7 @@ type Scripting private () =
         rc
 
 
-    ///<summary>Explodes a Mesh object, or Mesh objects int submeshes. A submesh is a
+    ///<summary>Explodes a Mesh object, or Mesh objects int subMeshes. A subMesh is a
     ///    collection of Mesh faces that are contained within a closed loop of
     ///    unwelded Mesh edges. Unwelded Mesh edges are where the Mesh faces that
     ///    share the edge have unique Mesh vertices (not Mesh topology vertices)
@@ -10671,31 +10671,31 @@ type Scripting private () =
     ///<param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
     ///<returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(objectIds:Guid seq) : float = 
-        let mutable totalvolume  = 0.0
+        let mutable totalVolume  = 0.0
         for objectId in objectIds do
-            // TODO add check for mesh beeing closed
+            // TODO add check for mesh being closed
             let mesh = Scripting.CoerceMesh(objectId)
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
-                totalvolume <- totalvolume + mp.Volume
+                totalVolume <- totalVolume + mp.Volume
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on objectId:'%s'" (Nice.str objectId)
-        totalvolume
+        totalVolume
 
 
     ///<summary>Returns the approximate volume of one or more closed Meshes.</summary>
     ///<param name="meshes">(Geometry.Mesh seq)  Mesh Geometries</param>
     ///<returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(meshes:Mesh seq) : float = 
-        let mutable totalvolume  = 0.0
+        let mutable totalVolume  = 0.0
         for mesh in meshes do        
             // TODO add check for mesh being closed
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
-                totalvolume <- totalvolume + mp.Volume
+                totalVolume <- totalVolume + mp.Volume
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on mesh:'%s' of %d meshes" (Nice.str mesh) (Seq.length meshes)
-        totalvolume
+        totalVolume
 
 
     ///<summary>Calculates the volume centroid of a Mesh.</summary>
@@ -11523,7 +11523,7 @@ type Scripting private () =
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) One or more objects identifierss</param>
+    ///<param name="objectIds">(Guid seq) One or more objects identifiers</param>
     ///<param name="source">(int) The new rendering material source.
     ///    0 = Material from layer
     ///    1 = Material from objects
@@ -12597,7 +12597,7 @@ type Scripting private () =
                 if distance < t3 closest then
                     closest  <-  objectId, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A  Point, Pointcloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
 
         if t1 closest <> Guid.Empty then closest
         else RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject failed on %A and %A" point objectIds
@@ -12812,8 +12812,6 @@ type Scripting private () =
     static member VectorRotate( vector:Vector3d,
                                 angleDegrees:float,
                                 axis:Vector3d) : Vector3d = 
-        //vector = Scripting.Coerce3dvector(vector)
-        //axis = Scripting.Coerce3dvector(axis)
         let angleradians = RhinoMath.ToRadians(angleDegrees)
         let rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
@@ -12978,7 +12976,7 @@ type Scripting private () =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
-    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joinded with '+'</param>
+    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joined with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>
@@ -16506,7 +16504,6 @@ type Scripting private () =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsXformIdentity(xForm:Transform) : bool = 
-        //xForm = Scripting.CoercexForm(xForm)
         xForm = Transform.Identity
 
 
@@ -16516,7 +16513,6 @@ type Scripting private () =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
     static member IsXformSimilarity(xForm:Transform) : bool = 
-        //xForm = Scripting.CoercexForm(xForm)
         xForm.SimilarityType <> TransformSimilarityType.NotSimilarity
 
 
@@ -16533,8 +16529,6 @@ type Scripting private () =
     ///<param name="finalPlane">(Plane) The final Plane</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform = 
-        //initialPlane = Scripting.Coerceplane(initialPlane)
-        //finalPlane = Scripting.Coerceplane(finalPlane)
         let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
         if not xForm.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
@@ -16554,12 +16548,6 @@ type Scripting private () =
                                      x1:Vector3d,
                                      y1:Vector3d,
                                      z1:Vector3d) : Transform = 
-        //x0 = Scripting.Coerce3dvector(x0)
-        //y0 = Scripting.Coerce3dvector(y0)
-        //z0 = Scripting.Coerce3dvector(z0)
-        //x1 = Scripting.Coerce3dvector(x1)
-        //y1 = Scripting.Coerce3dvector(y1)
-        //z1 = Scripting.Coerce3dvector(z1)
         let xForm = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
@@ -16572,8 +16560,6 @@ type Scripting private () =
     ///    1 if xForm1 bigger than xForm2
     ///    0 if xForm1 = xForm2.</returns>
     static member XformCompare(xForm1:Transform, xForm2:Transform) : int = 
-        //xForm1 = Scripting.CoercexForm(xForm1)
-        //xForm2 = Scripting.CoercexForm(xForm2)
         xForm1.CompareTo(xForm2)
 
 
@@ -16582,8 +16568,6 @@ type Scripting private () =
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(Point3d) A 3D point in world coordinates.</returns>
     static member XformCPlaneToWorld(point:Point3d, plane:Plane) : Point3d = 
-        //point = Scripting.Coerce3dpoint(point)
-        //plane = Scripting.Coerceplane(plane)
         plane.Origin + point.X*plane.XAxis + point.Y*plane.YAxis + point.Z*plane.ZAxis
 
 
@@ -16593,7 +16577,6 @@ type Scripting private () =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant.</returns>
     static member XformDeterminant(xForm:Transform) : float = 
-        //xForm = Scripting.CoercexForm(xForm)
         xForm.Determinant
 
 
@@ -16615,7 +16598,6 @@ type Scripting private () =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix.</returns>
     static member XformInverse(xForm:Transform) : Transform = 
-        //xForm = Scripting.CoercexForm(xForm)
         let rc, inverse = xForm.TryGetInverse()
         if not rc then RhinoScriptingException.Raise "Rhino.Scripting.XformInverse failed.  xForm:'%A'" xForm
         inverse
@@ -16626,8 +16608,6 @@ type Scripting private () =
     ///<param name="mirrorPlaneNormal">(Vector3d) A 3D vector that is normal to the mirror Plane</param>
     ///<returns>(Transform) mirror Transform matrix.</returns>
     static member XformMirror(mirrorPlanePoint:Point3d, mirrorPlaneNormal:Vector3d) : Transform = 
-        //point = Scripting.Coerce3dpoint(mirrorPlanePoint)
-        //normal = Scripting.Coerce3dvector(mirrorPlaneNormal)
         Transform.Mirror(mirrorPlanePoint, mirrorPlaneNormal)
 
 
@@ -16636,8 +16616,6 @@ type Scripting private () =
     ///<param name="xForm2">(Transform) Rhino.Geometry.Transform. The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation.</returns>
     static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform = 
-        //xForm1 = Scripting.CoercexForm(xForm1)
-        //xForm2 = Scripting.CoercexForm(xForm2)
         xForm1*xForm2
 
 
@@ -16645,7 +16623,6 @@ type Scripting private () =
     ///<param name="plane">(Plane) The Plane to project to</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformPlanarProjection(plane:Plane) : Transform = 
-        //plane = Scripting.Coerceplane(plane)
         Transform.PlanarProjection(plane)
 
 
@@ -16655,8 +16632,6 @@ type Scripting private () =
     ///<param name="finalPlane">(Plane) Plane to rotate to</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform = 
-        //initialPlane = Scripting.Coerceplane(initialPlane)
-        //finalPlane = Scripting.Coerceplane(finalPlane)
         let xForm = Transform.PlaneToPlane(initialPlane, finalPlane)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
@@ -16670,8 +16645,6 @@ type Scripting private () =
     static member XformRotation2( angleDegrees:float,
                                   rotationAxis:Vector3d,
                                   centerPoint:Point3d) : Transform = 
-        //axis = Scripting.Coerce3dvector(rotationAxis)
-        //center = Scripting.Coerce3dpoint(centerPoint)
         let anglerad = toRadians(angleDegrees)
         let xForm = Transform.Rotation(anglerad, rotationAxis, centerPoint)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
@@ -16687,9 +16660,6 @@ type Scripting private () =
     static member XformRotation3( startDirection:Vector3d,
                                   endDirection:Vector3d,
                                   centerPoint:Point3d) : Transform = 
-        //start = Scripting.Coerce3dvector(startDirection)
-        //end = Scripting.Coerce3dvector(endDirection)
-        //center = Scripting.Coerce3dpoint(centerPoint)
         let xForm = Transform.Rotation(startDirection, endDirection, centerPoint)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
         xForm
@@ -16709,12 +16679,6 @@ type Scripting private () =
                                   x1:Vector3d,
                                   y1:Vector3d,
                                   z1:Vector3d) : Transform = 
-        //x0 = Scripting.Coerce3dvector(x0)
-        //y0 = Scripting.Coerce3dvector(y0)
-        //z0 = Scripting.Coerce3dvector(z0)
-        //x1 = Scripting.Coerce3dvector(x1)
-        //y1 = Scripting.Coerce3dvector(y1)
-        //z1 = Scripting.Coerce3dvector(z1)
         let xForm = Transform.Rotation(x0, y0, z0, x1, y1, z1)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
@@ -16786,7 +16750,6 @@ type Scripting private () =
     ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d. A 3-D translation vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix if successful.</returns>
     static member XformTranslation(vector:Vector3d) : Transform = 
-        //vector = Scripting.Coerce3dvector(vector)
         Transform.Translation(vector)
 
 
