@@ -22,7 +22,6 @@ module AutoOpenTransformation =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsXformIdentity(xForm:Transform) : bool = 
-        //xForm = Scripting.CoercexForm(xForm)
         xForm = Transform.Identity
 
 
@@ -32,7 +31,6 @@ module AutoOpenTransformation =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
     static member IsXformSimilarity(xForm:Transform) : bool = 
-        //xForm = Scripting.CoercexForm(xForm)
         xForm.SimilarityType <> TransformSimilarityType.NotSimilarity
 
 
@@ -49,8 +47,6 @@ module AutoOpenTransformation =
     ///<param name="finalPlane">(Plane) The final Plane</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform = 
-        //initialPlane = Scripting.Coerceplane(initialPlane)
-        //finalPlane = Scripting.Coerceplane(finalPlane)
         let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
         if not xForm.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
@@ -70,12 +66,6 @@ module AutoOpenTransformation =
                                      x1:Vector3d,
                                      y1:Vector3d,
                                      z1:Vector3d) : Transform = 
-        //x0 = Scripting.Coerce3dvector(x0)
-        //y0 = Scripting.Coerce3dvector(y0)
-        //z0 = Scripting.Coerce3dvector(z0)
-        //x1 = Scripting.Coerce3dvector(x1)
-        //y1 = Scripting.Coerce3dvector(y1)
-        //z1 = Scripting.Coerce3dvector(z1)
         let xForm = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
@@ -88,8 +78,6 @@ module AutoOpenTransformation =
     ///    1 if xForm1 bigger than xForm2
     ///    0 if xForm1 = xForm2.</returns>
     static member XformCompare(xForm1:Transform, xForm2:Transform) : int = 
-        //xForm1 = Scripting.CoercexForm(xForm1)
-        //xForm2 = Scripting.CoercexForm(xForm2)
         xForm1.CompareTo(xForm2)
 
 
@@ -98,8 +86,6 @@ module AutoOpenTransformation =
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(Point3d) A 3D point in world coordinates.</returns>
     static member XformCPlaneToWorld(point:Point3d, plane:Plane) : Point3d = 
-        //point = Scripting.Coerce3dpoint(point)
-        //plane = Scripting.Coerceplane(plane)
         plane.Origin + point.X*plane.XAxis + point.Y*plane.YAxis + point.Z*plane.ZAxis
 
 
@@ -109,7 +95,6 @@ module AutoOpenTransformation =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant.</returns>
     static member XformDeterminant(xForm:Transform) : float = 
-        //xForm = Scripting.CoercexForm(xForm)
         xForm.Determinant
 
 
@@ -131,7 +116,6 @@ module AutoOpenTransformation =
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix.</returns>
     static member XformInverse(xForm:Transform) : Transform = 
-        //xForm = Scripting.CoercexForm(xForm)
         let rc, inverse = xForm.TryGetInverse()
         if not rc then RhinoScriptingException.Raise "Rhino.Scripting.XformInverse failed.  xForm:'%A'" xForm
         inverse
@@ -142,8 +126,6 @@ module AutoOpenTransformation =
     ///<param name="mirrorPlaneNormal">(Vector3d) A 3D vector that is normal to the mirror Plane</param>
     ///<returns>(Transform) mirror Transform matrix.</returns>
     static member XformMirror(mirrorPlanePoint:Point3d, mirrorPlaneNormal:Vector3d) : Transform = 
-        //point = Scripting.Coerce3dpoint(mirrorPlanePoint)
-        //normal = Scripting.Coerce3dvector(mirrorPlaneNormal)
         Transform.Mirror(mirrorPlanePoint, mirrorPlaneNormal)
 
 
@@ -152,8 +134,6 @@ module AutoOpenTransformation =
     ///<param name="xForm2">(Transform) Rhino.Geometry.Transform. The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation.</returns>
     static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform = 
-        //xForm1 = Scripting.CoercexForm(xForm1)
-        //xForm2 = Scripting.CoercexForm(xForm2)
         xForm1*xForm2
 
 
@@ -161,7 +141,6 @@ module AutoOpenTransformation =
     ///<param name="plane">(Plane) The Plane to project to</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformPlanarProjection(plane:Plane) : Transform = 
-        //plane = Scripting.Coerceplane(plane)
         Transform.PlanarProjection(plane)
 
 
@@ -171,8 +150,6 @@ module AutoOpenTransformation =
     ///<param name="finalPlane">(Plane) Plane to rotate to</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform = 
-        //initialPlane = Scripting.Coerceplane(initialPlane)
-        //finalPlane = Scripting.Coerceplane(finalPlane)
         let xForm = Transform.PlaneToPlane(initialPlane, finalPlane)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
@@ -186,8 +163,6 @@ module AutoOpenTransformation =
     static member XformRotation2( angleDegrees:float,
                                   rotationAxis:Vector3d,
                                   centerPoint:Point3d) : Transform = 
-        //axis = Scripting.Coerce3dvector(rotationAxis)
-        //center = Scripting.Coerce3dpoint(centerPoint)
         let anglerad = toRadians(angleDegrees)
         let xForm = Transform.Rotation(anglerad, rotationAxis, centerPoint)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
@@ -203,9 +178,6 @@ module AutoOpenTransformation =
     static member XformRotation3( startDirection:Vector3d,
                                   endDirection:Vector3d,
                                   centerPoint:Point3d) : Transform = 
-        //start = Scripting.Coerce3dvector(startDirection)
-        //end = Scripting.Coerce3dvector(endDirection)
-        //center = Scripting.Coerce3dpoint(centerPoint)
         let xForm = Transform.Rotation(startDirection, endDirection, centerPoint)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
         xForm
@@ -225,12 +197,6 @@ module AutoOpenTransformation =
                                   x1:Vector3d,
                                   y1:Vector3d,
                                   z1:Vector3d) : Transform = 
-        //x0 = Scripting.Coerce3dvector(x0)
-        //y0 = Scripting.Coerce3dvector(y0)
-        //z0 = Scripting.Coerce3dvector(z0)
-        //x1 = Scripting.Coerce3dvector(x1)
-        //y1 = Scripting.Coerce3dvector(y1)
-        //z1 = Scripting.Coerce3dvector(z1)
         let xForm = Transform.Rotation(x0, y0, z0, x1, y1, z1)
         if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
@@ -302,7 +268,6 @@ module AutoOpenTransformation =
     ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d. A 3-D translation vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix if successful.</returns>
     static member XformTranslation(vector:Vector3d) : Transform = 
-        //vector = Scripting.Coerce3dvector(vector)
         Transform.Translation(vector)
 
 

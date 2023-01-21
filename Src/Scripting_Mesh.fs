@@ -223,7 +223,7 @@ module AutoOpenMesh =
         rc
 
 
-    ///<summary>Explodes a Mesh object, or Mesh objects int submeshes. A submesh is a
+    ///<summary>Explodes a Mesh object, or Mesh objects int subMeshes. A subMesh is a
     ///    collection of Mesh faces that are contained within a closed loop of
     ///    unwelded Mesh edges. Unwelded Mesh edges are where the Mesh faces that
     ///    share the edge have unique Mesh vertices (not Mesh topology vertices)
@@ -818,31 +818,31 @@ module AutoOpenMesh =
     ///<param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
     ///<returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(objectIds:Guid seq) : float = 
-        let mutable totalvolume  = 0.0
+        let mutable totalVolume  = 0.0
         for objectId in objectIds do
-            // TODO add check for mesh beeing closed
+            // TODO add check for mesh being closed
             let mesh = Scripting.CoerceMesh(objectId)
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
-                totalvolume <- totalvolume + mp.Volume
+                totalVolume <- totalVolume + mp.Volume
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on objectId:'%s'" (Nice.str objectId)
-        totalvolume
+        totalVolume
 
 
     ///<summary>Returns the approximate volume of one or more closed Meshes.</summary>
     ///<param name="meshes">(Geometry.Mesh seq)  Mesh Geometries</param>
     ///<returns>(float) total volume of all Meshes.</returns>
     static member MeshVolume(meshes:Mesh seq) : float = 
-        let mutable totalvolume  = 0.0
+        let mutable totalVolume  = 0.0
         for mesh in meshes do        
             // TODO add check for mesh being closed
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
-                totalvolume <- totalvolume + mp.Volume
+                totalVolume <- totalVolume + mp.Volume
             else
                 RhinoScriptingException.Raise "Rhino.Scripting.MeshVolume failed on mesh:'%s' of %d meshes" (Nice.str mesh) (Seq.length meshes)
-        totalvolume
+        totalVolume
 
 
     ///<summary>Calculates the volume centroid of a Mesh.</summary>

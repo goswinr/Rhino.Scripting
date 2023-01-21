@@ -47,7 +47,7 @@ type Scripting private () =
 
     /// A Dictionary to store state between scripting session.
     /// Use Rhino.Scripting.Sticky.Clear() to reset it.
-    /// Similar to scriptingcontext.sticky in Rhino Python.
+    /// Similar to scriptingcontext.sticky dictionary in Rhino Python.
     static member val Sticky = new Dict<string, obj>() with get
 
     /// An Integer Enum of Object types.
@@ -69,7 +69,7 @@ type Scripting private () =
     ///<param name="value">(float) The value to clamp</param>
     ///<returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float = 
-        if minVal > maxVal then  RhinoScriptingException.Raise "Rhino.Scripting.Clamp: lowvalue %A must be less than highvalue %A" minVal maxVal
+        if minVal > maxVal then  RhinoScriptingException.Raise "Rhino.Scripting.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
 
@@ -98,7 +98,7 @@ type Scripting private () =
             let rec floatrange (start, i, steps) = 
                 seq { if i <= steps then
                         yield start + i*step
-                        yield! floatrange (start, (i + 1.0), steps) } // tail recursive ?
+                        yield! floatrange (start, (i + 1.0), steps) } // tail recursive !
             floatrange (start, 0.0, steps)
 
     ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.

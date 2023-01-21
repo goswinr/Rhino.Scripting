@@ -5,7 +5,7 @@ open Rhino.Geometry
 open FsEx
 
 /// This module provides type extensions for pretty printing.
-/// It adds a 'rhObj.ToNiceString' property to many Rhino geomnetry objects.
+/// It adds a 'rhObj.ToNiceString' property to many Rhino geometry objects.
 /// This module is automatically opened when Rhino namespace is opened.
 /// These type extensions are only visible in F# (not in C#)
 /// This module is under the 'Rhino.ScriptingFSharp' namespace so that making these extensions available works 

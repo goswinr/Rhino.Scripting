@@ -63,7 +63,7 @@ module AutoOpenDimension =
 
     ///<summary>Adds a leader to the document. Leader objects are planar.
     ///    The 3D points passed will define the Plane if no Plane given.
-    ///    If ther are only two Points the World XY plane is used.</summary>
+    ///    If there are only two Points the World XY plane is used.</summary>
     ///<param name="points">(Point3d seq) List of (at least 2) 3D points</param>
     ///<param name="text">(string) Leader's text</param>
     ///<param name="plane">(Geometry.Plane) Optional, Default Value: <c>defined by points arg</c>

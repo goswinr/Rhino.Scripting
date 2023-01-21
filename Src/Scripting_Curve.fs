@@ -241,8 +241,8 @@ module AutoOpenCurve =
     ///    if the final point is a duplicate of the initial point, it is
     ///    ignored. The number of control points must be bigger than 'degree' number</param>
     ///<param name="degree">(int) Optional, Default Value: <c>3</c>
-    ///    Periodic Curves must have a degree bigger than 1. For knotstyle = 1 or 2,
-    ///    the degree must be 3. For knotstyle = 4 or 5, the degree must be odd</param>
+    ///    Periodic Curves must have a degree bigger than 1. For knot-style = 1 or 2,
+    ///    the degree must be 3. For knot-style = 4 or 5, the degree must be odd</param>
     ///<param name="knotStyle">(int) Optional, Default Value: <c>0</c>
     ///    0 Uniform knots. Parameter spacing between consecutive knots is 1.0.
     ///    1 Chord length spacing. Requires degree = 3 with arrCV1 and arrCVn1 specified.
@@ -904,7 +904,7 @@ module AutoOpenCurve =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///    Curve segment index if `curveId` identifies a polycurve</param>
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
     ///<returns>(float) The parameter of the closest point on the Curve.</returns>
     static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
@@ -928,7 +928,7 @@ module AutoOpenCurve =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional,
-    ///    Curve segment index if `curveId` identifies a polycurve</param>
+    ///    Curve segment index if `curveId` identifies a Polycurve</param>
     ///<returns>(Point3d) The closest point on the Curve.</returns>
     static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
         let curve = Scripting.CoerceCurve(curveId, segmentIndex)
@@ -1657,9 +1657,9 @@ module AutoOpenCurve =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curve:'%A' dived-length:%f, curveLength=%f" curve length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curve:'%A' dived-length:%f, curveLength=%f" curve length len
         rarr{ for r in rc do curve.PointAt(r)}
 
     ///<summary>Divides a Curve object into segments of a specified length.
@@ -1673,9 +1673,9 @@ module AutoOpenCurve =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLengthIntoPoints failed. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
         rarr{ for r in rc do curve.PointAt(r)}
 
     ///<summary>Divides a Curve Geometry into segments of a specified length.
@@ -1688,9 +1688,9 @@ module AutoOpenCurve =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curve:'%A' dived-length:%f, curveLength=%f" curve length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curve:'%A' divedlength:%f, curveLength=%f" curve length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curve:'%A' dived-length:%f, curveLength=%f" curve length len
         rc
 
     ///<summary>Divides a Curve object into segments of a specified length.
@@ -1704,9 +1704,9 @@ module AutoOpenCurve =
         if isNull rc then
             let len = curve.GetLength()
             if len < length then
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed on too short curve. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curveId:'%s' divedlength:%f, curveLength=%f" (Nice.str curveId) length len
+                RhinoScriptingException.Raise "Rhino.Scripting.DivideCurveLength failed. curveId:'%s' dived-length:%f, curveLength=%f" (Nice.str curveId) length len
         rc
 
 

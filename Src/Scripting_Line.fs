@@ -167,7 +167,7 @@ module AutoOpenLine =
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid = 
         
-        // the orignal python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
+        // the original python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
         let line = Scripting.CoerceLine lineId
         let ln = Line(line.From,line.To)
         let success = ln.Transform(xForm)

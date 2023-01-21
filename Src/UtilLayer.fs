@@ -92,7 +92,7 @@ module internal UtilLayer =
     /// Creates all parent layers too if they are missing, uses same locked state and colors for all new layers.
     /// The collapseParents parameter only has an effect if layer is created, not if it exists already  
     let internal getOrCreateLayer(name, colorForNewLayers, visible:LayerState, locked:LayerState, allowAllUnicode:bool, collapseParents:bool) : FoundOrCreatedIndex = 
-        // TODO trimm off leading and trailing '::' from name string to be more tolerant ?
+        // TODO trim off leading and trailing '::' from name string to be more tolerant ?
         match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
         | RhinoMath.UnsetIntIndex ->
             match name with
@@ -108,8 +108,8 @@ module internal UtilLayer =
                         | branch :: rest ->
                             if String.IsNullOrWhiteSpace branch then // to cover for StringSplitOptions.None
                                 RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: A segment falls into String.IsNullOrWhiteSpace. Cannot get or create layer for name: '%s'" name
-                            let fullpath = if root="" then branch else root + "::" + branch
-                            match State.Doc.Layers.FindByFullPath(fullpath, RhinoMath.UnsetIntIndex) with
+                            let fullPath = if root="" then branch else root + "::" + branch
+                            match State.Doc.Layers.FindByFullPath(fullPath, RhinoMath.UnsetIntIndex) with
                             | RhinoMath.UnsetIntIndex -> // actually create layer:
                                 failOnBadShortLayerName (branch, name, allowAllUnicode)   // only check non existing sub layer names
                                 let layer = DocObjects.Layer.GetDefaultLayerProperties()
@@ -132,10 +132,10 @@ module internal UtilLayer =
                                 layer.Color <- colorForNewLayers() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
                                 let i = State.Doc.Layers.Add(layer)
                                 let id = State.Doc.Layers.[i].Id // just using layer.Id would be empty guid
-                                createLayer(rest , id , i,  fullpath)
+                                createLayer(rest , id , i,  fullPath)
 
                             | i ->
-                                createLayer(rest , State.Doc.Layers.[i].Id , i ,fullpath)
+                                createLayer(rest , State.Doc.Layers.[i].Id , i ,fullPath)
 
                     LayerCreated (createLayer( ns |> List.ofArray, Guid.Empty, 0, ""))
         | i -> LayerFound i

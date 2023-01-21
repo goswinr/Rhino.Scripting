@@ -121,7 +121,7 @@ module AutoOpenSelection =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
-    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joinded with '+'</param>
+    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joined with '+'</param>
     ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
     ///<param name="select">(bool) Optional, Default Value: <c>false</c>

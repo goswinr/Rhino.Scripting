@@ -150,7 +150,7 @@ module AutoOpenPointVector =
                 if distance < t3 closest then
                     closest  <-  objectId, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A  Point, Pointcloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
 
         if t1 closest <> Guid.Empty then closest
         else RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject failed on %A and %A" point objectIds
@@ -365,8 +365,6 @@ module AutoOpenPointVector =
     static member VectorRotate( vector:Vector3d,
                                 angleDegrees:float,
                                 axis:Vector3d) : Vector3d = 
-        //vector = Scripting.Coerce3dvector(vector)
-        //axis = Scripting.Coerce3dvector(axis)
         let angleradians = RhinoMath.ToRadians(angleDegrees)
         let rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc

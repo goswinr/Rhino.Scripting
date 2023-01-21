@@ -778,7 +778,7 @@ module AutoOpenObject =
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
-    ///<param name="objectIds">(Guid seq) One or more objects identifierss</param>
+    ///<param name="objectIds">(Guid seq) One or more objects identifiers</param>
     ///<param name="source">(int) The new rendering material source.
     ///    0 = Material from layer
     ///    1 = Material from objects

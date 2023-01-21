@@ -609,23 +609,23 @@ module AutoOpenGeometry =
 
     ///<summary>Modifies the font of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
-    ///<param name="fontface">(string) New font face name</param>
+    ///<param name="fontFace">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member TextDotFont(objectId:Guid, fontface:string) : unit = //SET
+    static member TextDotFont(objectId:Guid, fontFace:string) : unit = //SET
         let textdot = Scripting.CoerceTextDot(objectId)
-        textdot.FontFace <-  fontface
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontface
+        textdot.FontFace <-  fontFace
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font of multiple text dots.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of multiple text dot objects</param>
-    ///<param name="fontface">(string) New font face name</param>
+    ///<param name="fontFace">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member TextDotFont(objectIds:Guid seq, fontface:string) : unit = //MULTISET
+    static member TextDotFont(objectIds:Guid seq, fontFace:string) : unit = //MULTISET
         for objectId in objectIds do
             let textdot = Scripting.CoerceTextDot(objectId)
-            textdot.FontFace <-  fontface
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontface
+            textdot.FontFace <-  fontFace
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
         State.Doc.Views.Redraw()
 
 

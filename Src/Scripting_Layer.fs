@@ -436,8 +436,8 @@ module AutoOpenLayer =
     ///<summary>Makes a layer invisible.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<param name="persist">(bool) Optional, Default Value: <c>false</c>
-    ///     Turn layer persitently off? even if it is already invisible because of a parent layer that is turned off.
-    ///     By default alreaday invisibe layers are not changed</param>
+    ///     Turn layer persistently off? even if it is already invisible because of a parent layer that is turned off.
+    ///     By default already invisible layers are not changed</param>
     ///<returns>(unit) void, nothing.</returns>
     static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
         let lay = Scripting.CoerceLayer(layer)
@@ -573,12 +573,12 @@ module AutoOpenLayer =
 
     ///<summary>Return the name of a layer given it's identifier.</summary>
     ///<param name="layerId">(Guid) Layer identifier</param>
-    ///<param name="fullpath">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="fullPath">(bool) Optional, Default Value: <c>true</c>
     ///    Return the full path name `True` or short name `False`</param>
     ///<returns>(string) The layer's name.</returns>
-    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullpath:bool) : string = 
+    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullPath:bool) : string = 
         let layer = Scripting.CoerceLayer(layerId)
-        if fullpath then layer.FullPath
+        if fullPath then layer.FullPath
         else layer.Name
 
 
