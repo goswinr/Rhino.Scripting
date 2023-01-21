@@ -20,22 +20,22 @@
     <Title>Rhino.Scripting</Title>
     <PackageId>Rhino.Scripting</PackageId>
 
-	<Version>0.3.0-Rhino7</Version>
-	<AssemblyVersion>0.3.0-Rhino7</AssemblyVersion>
-	<FileVersion>0.3.0-Rhino7</FileVersion>
+	  <Version>0.4.0-Rhino7</Version>
+	  <AssemblyVersion>0.4.0-Rhino7</AssemblyVersion>
+	  <FileVersion>0.4.0-Rhino7</FileVersion>
 	  
     <PackageReleaseNotes>
-    - remove WPF dependency
-    - don't return F# options anymore
+      - fix threading bug in to make it work in RhinoCode
+      - fix typos
     </PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2022</Copyright>
 
-    <Description>A complete reimplementaion of the RhinoPython scripting syntax in F#</Description>
+    <Description>A complete re-implementation of the RhinoPython scripting syntax in F#</Description>
 
     <Configuration>Release</Configuration>
-    <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, dont us just 'Platform' tag-->
+    <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, don't us just 'Platform' tag-->
     <OutputPath>binRhino7</OutputPath>
 
     <DefineConstants>RHINO7</DefineConstants>
@@ -60,7 +60,7 @@
     <PackageIcon>logo128.png</PackageIcon>
     <!-- <SymbolPackageFormat>snupkg</SymbolPackageFormat>  --><!--using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791     -->
     <PackageReadmeFile>READMEnuget.md</PackageReadmeFile>
-    <PackageDescription>An implementaion of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>
+    <PackageDescription>A complete re-implementation of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>
     <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>
   </PropertyGroup>
 
@@ -79,7 +79,7 @@
   <ItemGroup>
     <None Include="README.md" />
     <None Include="Doc/READMEnuget.md"  Pack="true" PackagePath="" />
-    <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file availabe to nuget pack tool-->
+    <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file available to nuget pack tool-->
 
 	  <Compile Include="Src/Exceptions.fs" />
 	  <Compile Include="Src/RhinoSync.fs" />

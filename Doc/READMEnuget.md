@@ -121,6 +121,10 @@ these are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
 
 ## Changelog
+`0.4.0`
+- fix threading bug in to make it work in RhinoCode
+- fix typos
+
 `0.3.0`
 - remove WPF dependency
 - don't return F# options anymore
