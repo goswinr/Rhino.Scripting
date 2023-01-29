@@ -1,5 +1,4 @@
-﻿
-namespace Rhino
+﻿namespace Rhino
 
 open System
 
@@ -17,7 +16,7 @@ module AutoOpenSelection =
     //---This happens as part of the <Targets> in the *.fsproj file. 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
-    // moved to Rhino.Scripting.Extension:
+    // moved to Rhino.ScriptingFSharp project:
     // static member ShownObjects(
     // static member GetObjectsAndRemember(
     // static member GetObjectAndRemember(
@@ -281,8 +280,8 @@ module AutoOpenSelection =
             elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
             go.SetCommandPrompt(message )
-            let geometryfilter = ObjectFilterEnum.GetFilterEnum(filter)
-            if filter>0 then go.GeometryFilter <- geometryfilter
+            let geometryFilter = ObjectFilterEnum.GetFilterEnum(filter)
+            if filter>0 then go.GeometryFilter <- geometryFilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
             go.AcceptNothing(true)

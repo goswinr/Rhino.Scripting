@@ -12872,7 +12872,7 @@ type Scripting private () =
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
-    // moved to Rhino.Scripting.Extension:
+    // moved to Rhino.ScriptingFSharp project:
     // static member ShownObjects(
     // static member GetObjectsAndRemember(
     // static member GetObjectAndRemember(
@@ -13136,8 +13136,8 @@ type Scripting private () =
             elif notNull customFilter then
                 go.SetCustomGeometryFilter(customFilter)
             go.SetCommandPrompt(message )
-            let geometryfilter = ObjectFilterEnum.GetFilterEnum(filter)
-            if filter>0 then go.GeometryFilter <- geometryfilter
+            let geometryFilter = ObjectFilterEnum.GetFilterEnum(filter)
+            if filter>0 then go.GeometryFilter <- geometryFilter
             go.SubObjectSelect <- false
             go.GroupSelect <- group
             go.AcceptNothing(true)
