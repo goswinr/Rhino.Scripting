@@ -1,4 +1,3 @@
-<!-- in VS Code press Ctrl + Shift + V to see a preview-->
 # Rhino.Scripting
 
 ![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Doc/logo400.png)
@@ -42,7 +41,7 @@ First reference the assemblies.
 #r "nuget: Rhino.Scripting, 0.4.0"
 ```   
 The main class of this library is called `Rhino.Scripting` it has all ~900 functions as static methods.
-In F# you can create an alias like this: 
+In C# you can create an alias like this: 
 
 ```csharp
 using rs = Rhino.Scripting;
@@ -145,7 +144,7 @@ these are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 ## Contributing
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
 
-## Changelog
+## Change Log
 `0.4.0`
 - fix threading bug in to make it work in RhinoCode
 - fix typos

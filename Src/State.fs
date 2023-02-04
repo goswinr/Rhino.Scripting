@@ -86,10 +86,10 @@ type internal State private () =
 
 
     static let initState()= 
-        if not HostUtils.RunningInRhino then
+        if not Rhino.Runtime.HostUtils.RunningInRhino then
             RhinoScriptingException.Raise "Rhino.Scripting.State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
         else
-            RhinoSync.Initialize()
+            //RhinoSync.Initialize() // dont do yet, only try to get sync context when actually needed, if on UI thread this might be never.
             updateDoc(RhinoDoc.ActiveDoc )  // do first
             setupEventsInSync()             // do after Doc is set up
             isRunningInRhino <- true        // do last

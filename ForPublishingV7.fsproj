@@ -20,14 +20,13 @@
     <Title>Rhino.Scripting</Title>
     <PackageId>Rhino.Scripting</PackageId>
 
-	  <Version>0.4.0-Rhino7</Version>
-	  <AssemblyVersion>0.4.0-Rhino7</AssemblyVersion>
-	  <FileVersion>0.4.0-Rhino7</FileVersion>
+	  <Version>0.5.0-Rhino7</Version>
+	  <AssemblyVersion>0.5.0-Rhino7</AssemblyVersion>
+	  <FileVersion>0.5.0-Rhino7</FileVersion>
 	  
     <PackageReleaseNotes>
-      - fix threading bug in to make it work in RhinoCode
-      - fix typos
-    </PackageReleaseNotes>
+		- improve finding of SynchronizationContext
+	</PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2022</Copyright>

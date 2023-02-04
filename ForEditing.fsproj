@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
+	<None Include="Readme.md" />
 	  
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />
