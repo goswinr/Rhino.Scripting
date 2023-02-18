@@ -5,7 +5,7 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-open Rhino.ScriptingFSharp
+open Rhino.ScriptingFsharp
 
 open FsEx
 open FsEx.UtilMath

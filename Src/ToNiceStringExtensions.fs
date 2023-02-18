@@ -1,5 +1,5 @@
-﻿// only this file is using this namespace : so that making these F# only extensions available works with 'open Rhino.ScriptingFSharp'
-namespace Rhino.ScriptingFSharp
+﻿// only this file is using this namespace : so that making these F# only extensions available works with 'open Rhino.ScriptingFsharp'
+namespace Rhino.ScriptingFsharp
 
 open Rhino.Geometry
 open FsEx
@@ -8,8 +8,8 @@ open FsEx
 /// It adds a 'rhObj.ToNiceString' property to many Rhino geometry objects.
 /// This module is automatically opened when Rhino namespace is opened.
 /// These type extensions are only visible in F# (not in C#)
-/// This module is under the 'Rhino.ScriptingFSharp' namespace so that making these extensions available works 
-/// with 'open Rhino.ScriptingFSharp'. See Rhino.ScriptingFSharp nuget package.
+/// This module is under the 'Rhino.ScriptingFsharp' namespace so that making these extensions available works 
+/// with 'open Rhino.ScriptingFsharp'. See Rhino.ScriptingFsharp nuget package.
 [<AutoOpen>]
 module AutoOpenToNiceStringExtensions = 
 

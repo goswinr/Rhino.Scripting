@@ -15,7 +15,7 @@ open FsEx.UtilMath
 open FsEx.SaveIgnore
 open FsEx.CompareOperators
 
-open Rhino.ScriptingFSharp
+open Rhino.ScriptingFsharp
 
 
 // ------- Abbreviations so that declarations are not so long:
@@ -12872,7 +12872,7 @@ type Scripting private () =
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
-    // moved to Rhino.ScriptingFSharp project:
+    // moved to Rhino.ScriptingFsharp project:
     // static member ShownObjects(
     // static member GetObjectsAndRemember(
     // static member GetObjectAndRemember(

@@ -15,7 +15,7 @@ open FsEx.UtilMath
 open FsEx.SaveIgnore
 open FsEx.CompareOperators
 
-open Rhino.ScriptingFSharp
+open Rhino.ScriptingFsharp
 
 
 // ------- Abbreviations so that declarations are not so long:

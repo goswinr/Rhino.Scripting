@@ -16,7 +16,7 @@ module AutoOpenSelection =
     //---This happens as part of the <Targets> in the *.fsproj file. 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
-    // moved to Rhino.ScriptingFSharp project:
+    // moved to Rhino.ScriptingFsharp project:
     // static member ShownObjects(
     // static member GetObjectsAndRemember(
     // static member GetObjectAndRemember(

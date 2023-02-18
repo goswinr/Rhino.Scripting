@@ -4,7 +4,7 @@ open System
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-open Rhino.ScriptingFSharp
+open Rhino.ScriptingFsharp
 
 open FsEx
 open FsEx.UtilMath

@@ -6,11 +6,11 @@ open FsEx
 
 /// Part of Rhino.Scripting nuget.
 /// An internal module to set up nice printing of Rhino Objects. 
-/// (It is public only for access from Rhino.ScriptingFSharp project)
+/// (It is public only for access from Rhino.ScriptingFsharp project)
 [<RequireQualifiedAccess>]
 module InternalToNiceStringSetup = 
     open Rhino    
-    open Rhino.ScriptingFSharp
+    open Rhino.ScriptingFsharp
 
     let mutable private initIsPending = true // to delay setup of printing till first print call
 
