@@ -561,7 +561,6 @@ type Scripting private () =
     //----------------------------------------------------
 
 
-
     ///<summary>Attempt to get Rhino LayerObject from the document for a given full name.</summary>
     ///<param name="name">(string) The layer's name.</param>
     ///<returns>DocObjects.Layer </returns>
@@ -570,7 +569,7 @@ type Scripting private () =
         if i = RhinoMath.UnsetIntIndex then
             let lay = State.Doc.Layers.FindName name
             if isNull lay then
-                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could find name '%s'" name
+                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could not find a layer named '%s'" name
             else
                 lay
         else
@@ -1044,7 +1043,7 @@ type Scripting private () =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%s' on: %s " layer (Nice.str objectId)
+        obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -1065,7 +1064,7 @@ type Scripting private () =
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%s' and '%s' of %d objects"  layer (Nice.str objectId) (Seq.length objectIds)
+            obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -1077,7 +1076,7 @@ type Scripting private () =
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Nice.str objectId)
         if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Nice.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%d' on: %s " layerIndex (Nice.str objectId)
+        obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -1090,7 +1089,7 @@ type Scripting private () =
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%d' on %d objects"  layerIndex (Seq.length objectIds)
+            obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>
@@ -5656,7 +5655,7 @@ type Scripting private () =
         if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
-        annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionStyle : CommitChanges failed"
+        annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the dimension style of multiple dimension objects.</summary>
@@ -5670,7 +5669,7 @@ type Scripting private () =
             let annotationObject = Scripting.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
             annotation.DimensionStyleId <- ds.Id
-            annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionStyle : CommitChanges failed"
+            annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the text displayed by a dimension object.</summary>
@@ -5699,7 +5698,7 @@ type Scripting private () =
         let annotationObject = Scripting.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
-        annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionUserText : CommitChanges failed"
+        annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the user text string of multiple dimension objects. The user
@@ -5712,7 +5711,7 @@ type Scripting private () =
             let annotationObject = Scripting.CoerceAnnotation(objectId)
             let geo = annotationObject.Geometry :?> AnnotationBase
             geo.PlainText <- usertext
-            annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionUserText : CommitChanges failed"
+            annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the value of a dimension object.</summary>
@@ -6241,7 +6240,7 @@ type Scripting private () =
                 let annotationObject = Scripting.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
                 if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "Rhino.Scripting.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Nice.str objectId)
-                annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.LeaderText : CommitChanges failed"
+                annotationObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText set failed for  %s"  (Nice.str objectId)
 
@@ -7425,7 +7424,7 @@ type Scripting private () =
         else
             RhinoScriptingException.Raise "Rhino.Scripting.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "PointCloudHidePoints CommitChanges failed"
+        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -7449,7 +7448,7 @@ type Scripting private () =
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "Rhino.Scripting.PointCloudPointColors length of color values does not match PointCloud point count"
-        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.PointCloudHidePoints CommitChanges failed"
+        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -8622,7 +8621,7 @@ type Scripting private () =
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-        if not<| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+        hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
@@ -8638,7 +8637,7 @@ type Scripting private () =
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-            if not<| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+            hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -8707,7 +8706,7 @@ type Scripting private () =
         if rotation <> rc then
             let rotation = RhinoMath.ToRadians(rotation)
             hatchObj.HatchGeometry.PatternRotation <- rotation
-            if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchRotation failed on rotation %f on %A" rotation hatchId
+            hatchObj.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rotation applied to the Hatch pattern when
@@ -8723,7 +8722,7 @@ type Scripting private () =
             if rotation <> rc then
                 let rotation = RhinoMath.ToRadians(rotation)
                 hatchObj.HatchGeometry.PatternRotation <- rotation
-                if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchRotation failed on rotation %f on %A" rotation hatchId
+                hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -8746,7 +8745,7 @@ type Scripting private () =
         let rc = hatchObj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchObj.HatchGeometry.PatternScale <- scale
-            if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchScale failed on scale %f on %A" scale hatchId
+            hatchObj.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
@@ -8760,7 +8759,7 @@ type Scripting private () =
             let rc = hatchObj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchObj.HatchGeometry.PatternScale <- scale
-                if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchScale failed on scale %f on %A" scale hatchId
+                hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -9592,7 +9591,7 @@ type Scripting private () =
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-                rhobj.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MatchMaterial : CommitChanges failed"
+                rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -9628,7 +9627,7 @@ type Scripting private () =
             if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
 
-            mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MaterialBump : CommitChanges failed"
+            mat.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -9651,7 +9650,7 @@ type Scripting private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
-        mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MaterialColor : CommitChanges failed"
+        mat.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -9708,7 +9707,7 @@ type Scripting private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
-        mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MaterialName : CommitChanges failed"
+        mat.CommitChanges() |> ignore 
 
 
 
@@ -11216,7 +11215,7 @@ type Scripting private () =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
+        rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -11232,7 +11231,7 @@ type Scripting private () =
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
+            rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -11328,7 +11327,7 @@ type Scripting private () =
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectId
 
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%s' and '%A'"  layout objectId
+            rhobj.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
@@ -11366,7 +11365,7 @@ type Scripting private () =
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayout: Setting it failed for '%s' and '%A'"  layout objectId
+                rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -11388,7 +11387,7 @@ type Scripting private () =
         if newIndex <0 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
+        rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
@@ -11402,7 +11401,7 @@ type Scripting private () =
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
             rhinoObject.Attributes.LinetypeIndex <- newIndex
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
+            rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -11430,7 +11429,7 @@ type Scripting private () =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoObject.Attributes.LinetypeSource <- source
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
+        rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -11447,7 +11446,7 @@ type Scripting private () =
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- source
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
+            rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -11519,7 +11518,7 @@ type Scripting private () =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
+        rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -11536,7 +11535,7 @@ type Scripting private () =
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             let rc = int(rhinoObject.Attributes.MaterialSource)
             rhinoObject.Attributes.MaterialSource <- source
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
+            rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -11575,7 +11574,7 @@ type Scripting private () =
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         if Scripting.IsGoodStringId( name, allowEmpty=true) then
             rhinoObject.Attributes.Name <- name
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it failed for '%s' and '%A'"  name objectId
+            rhinoObject.CommitChanges() |> ignore 
         else
             RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -11588,7 +11587,7 @@ type Scripting private () =
             for objectId in objectIds do
                 let rhinoObject = Scripting.CoerceRhinoObject(objectId)
                 rhinoObject.Attributes.Name <- name
-                if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it failed for '%s' and '%A'"  name objectId
+                rhinoObject.CommitChanges() |> ignore 
         else
             RhinoScriptingException.Raise "Rhino.Scripting.ObjectName: Setting it string '%s' cannot be used as Name. see Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -11611,7 +11610,7 @@ type Scripting private () =
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoObject.Attributes.PlotColor <- color
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColor: Setting it failed for '%A' and '%A'"  color objectId
+        rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -11623,7 +11622,7 @@ type Scripting private () =
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
             rhinoObject.Attributes.PlotColor <- color
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColor: Setting it failed for '%A' and '%A'"  color objectId
+            rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -11649,7 +11648,7 @@ type Scripting private () =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = Scripting.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
+        rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -11665,7 +11664,7 @@ type Scripting private () =
         for objectId in objectIds do
             let rhobj = Scripting.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            if not <| rhobj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintColorSource: Setting it failed for '%A' and '%A'" (Nice.str objectId) source
+            rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
@@ -11687,7 +11686,7 @@ type Scripting private () =
         let rc = rhinoObject.Attributes.PlotWeight
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidth: Setting it failed for '%A' and '%A'"  width objectId
+        rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -11702,7 +11701,7 @@ type Scripting private () =
             let rc = rhinoObject.Attributes.PlotWeight
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidth: Setting it failed for '%A' and '%A'"  width objectId
+            rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -11727,7 +11726,7 @@ type Scripting private () =
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = Scripting.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidthSource: Setting it failed for '%A' and '%A'"  source objectId
+        rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -11741,7 +11740,7 @@ type Scripting private () =
         for objectId in objectIds do
             let rhinoObject = Scripting.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            if not <| rhinoObject.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectPrintWidthSource: Setting it failed for '%A' and '%A'"  source objectId
+            rhinoObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -15848,17 +15847,17 @@ type Scripting private () =
         | :?  DocObjects.BrepObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                rhinoObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                rhinoObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                rhinoObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Nice.str surfaceId) density
 
@@ -15880,15 +15879,15 @@ type Scripting private () =
             | :?  DocObjects.BrepObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                    rhinoObject.CommitChanges() |> ignore 
             | :?  DocObjects.SurfaceObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                    rhinoObject.CommitChanges() |> ignore 
             | :?  DocObjects.ExtrusionObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                    rhinoObject.CommitChanges() |> ignore 
             | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Nice.str surfaceId) density
         State.Doc.Views.Redraw()
 
@@ -16963,14 +16962,21 @@ type Scripting private () =
 
 
     ///<summary>Sets a user text stored in the document.</summary>
-    ///<param name="key">(string) Key name to set</param>
-    ///<param name="value">(string) The string value to set. Cannot be empty string. Use rs.DeleteDocumentUserText to delete keys</param>
+    ///<param name="key">(string) Key name to set. Cannot be empty string.</param>
+    ///<param name="value">(string) The string value to set. Can be empty string. To delete a key use rs.DeleteDocumentUserText</param>
+    ///<param name="allowAllUnicode">(bool) Optional, Default Value: <c>false</c> , set to true to allow all Unicode characters, 
+    ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SetDocumentUserText(key:string, value:string) : unit = 
+    static member SetDocumentUserText(key:string, value:string, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = 
         if not <|  Scripting.IsGoodStringId( key, allowEmpty=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
-        if not <|  Scripting.IsGoodStringId( value, allowEmpty=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You may be able bypass this restrictions in Rhino.Scripting by using RhinoCommon directly." key
+            
+        if allowAllUnicode then 
+            if not <| Util.isAcceptableStringId( value, true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+        else
+            if not <|  Scripting.IsGoodStringId( value, allowEmpty=true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
         State.Doc.Strings.SetString(key, value) |> ignoreObj
 
 
@@ -16984,15 +16990,22 @@ type Scripting private () =
 
     ///<summary>Sets a user text stored on an object. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
-    ///<param name="key">(string) The key name to set</param>
-    ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
+    ///<param name="key">(string) The key name to set. Cannot be an empty string.</param>
+    ///<param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
+    ///<param name="allowAllUnicode">(bool) Optional, Default Value: <c>false</c> , set to true to allow all Unicode characters, 
+    ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = 
+    static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = 
         if not <| Scripting.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
-        if not <| Scripting.IsGoodStringId( value, allowEmpty=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+        
+        if allowAllUnicode then 
+            if not <| Util.isAcceptableStringId( value, true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+        else
+            if not <|  Scripting.IsGoodStringId( value, allowEmpty=true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
         let obj = Scripting.CoerceRhinoObject(objectId)
         if attachToGeometry then
             if not <| obj.Geometry.SetUserString(key, value) then
@@ -17001,20 +17014,27 @@ type Scripting private () =
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
         
-        if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed to Commit Changes on %s for key '%s' value '%s'" (Nice.str objectId) key value
-
+        obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+               
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
-    ///<param name="key">(string) The key name to set</param>
-    ///<param name="value">(string) The string value to set. Cannot be empty string. use rs.DeleteUserText to delete keys</param>
+    ///<param name="key">(string) The key name to set. Cannot be an empty string.</param>
+    ///<param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
     ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
+    ///<param name="allowAllUnicode">(bool) Optional, Default Value: <c>false</c> , set to true to allow Unicode characters, 
+    ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
+    static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = //PLURAL
         if not <|  Scripting.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
-        if not <|  Scripting.IsGoodStringId( value, allowEmpty=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+        
+        if allowAllUnicode then 
+            if not <| Util.isAcceptableStringId( value, true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+        else
+            if not <|  Scripting.IsGoodStringId( value, allowEmpty=true) then
+                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             if attachToGeometry then
@@ -17023,20 +17043,18 @@ type Scripting private () =
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
                     RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
-            if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed to Commit Changes on %s for key '%s' value '%s'" (Nice.str objectId) key value
+            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to delete</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to delte the user text from</param>
+    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to delete the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = 
         let obj = Scripting.CoerceRhinoObject(objectId)
         if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
         else                     obj.Attributes.SetUserString(key, null) |> ignore
-        if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-            RhinoScriptingException.Raise "Rhino.Scripting.DeleteUserText failed to Commit Changes on %s for key '%s'" (Nice.str objectId) key 
+        obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
@@ -17049,8 +17067,7 @@ type Scripting private () =
             let obj = Scripting.CoerceRhinoObject(objectId)
             if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
             else                      obj.Attributes.SetUserString(key, null) |> ignore
-            if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-                RhinoScriptingException.Raise "Rhino.Scripting.DeleteUserText failed to Commit Changes on %s for key '%s'" (Nice.str objectId) key 
+            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
@@ -18753,7 +18770,7 @@ type Scripting private () =
         let modelunits = State.Doc.ModelUnitSystem
         let pageunits = State.Doc.PageUnitSystem
         if detail.DetailGeometry.SetScale(modelLength, modelunits, pageLength, pageunits) then
-            detail.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DetailScale : CommitChanges failed"
+            detail.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "Rhino.Scripting.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Nice.str detailId) modelLength pageLength

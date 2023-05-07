@@ -86,6 +86,10 @@ Many RhinoScript function have optional parameters. These are also implemented a
 
 ## Change Log
 
+`0.6.0`
+- don't check result of CommitChanges() anymore
+- relax constraints on UserText values
+
 `0.5.1`
 - fix readme
 - improve finding of SynchronizationContext

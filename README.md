@@ -107,12 +107,17 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
         let index = obj.Attributes.LayerIndex
         State.Doc.Layers.[index].FullPath
 
-    ///<summary>Modifies the layer of an object , optionally creates layer if it does not exist yet.</summary>
+    ///<summary>Modifies the layer of an object , 
+    ///     optionally creates layer if it does not exist yet.</summary>
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
-    ///<param name="allowAllUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
-    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
+    ///<param name="createLayerIfMissing">(bool) Optional, 
+    ///     Default Value: <c>false</c> Set true to create Layer 
+    ///     if it does not exist yet.</param>
+    ///<param name="allowAllUnicode">(bool) Optional, 
+    ///     Allow Ambiguous Unicode characters too </param>
+    ///<param name="collapseParents">(bool) Optional, 
+    ///     Collapse parent layers in Layer UI </param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer( objectId:Guid
                              , layer:string
@@ -121,18 +126,27 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
                              ,[<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //SET
         let obj = Scripting.CoerceRhinoObject(objectId)
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
-            else                          Scripting.CoerceLayer(layer).Index
+            if createLayerIfMissing then  
+                UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, 
+                    UtilLayer.ByParent, UtilLayer.ByParent, 
+                    allowAllUnicode,collapseParents).Index
+            else                          
+                Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%s' on: %s " layer (Nice.str objectId)
+        obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
-    ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
+    ///<summary>Modifies the layer of multiple objects, optionally creates 
+    ///     layer if it does not exist yet.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="createLayerIfMissing">(bool) Optional, Default Value: <c>false</c> Set true to create Layer if it does not exist yet.</param>
-    ///<param name="allowUnicode">(bool) Optional, Allow Ambiguous Unicode characters too </param>
-    ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
+    ///<param name="createLayerIfMissing">(bool) Optional, 
+    ///     Default Value: <c>false</c> Set true to create Layer 
+    ///     if it does not exist yet.</param>
+    ///<param name="allowUnicode">(bool) Optional, 
+    ///     Allow Ambiguous Unicode characters too </param>
+    ///<param name="collapseParents">(bool) Optional, 
+    ///     Collapse parent layers in Layer UI </param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer( objectIds:Guid seq
                              , layer:string
@@ -140,12 +154,16 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
                              , [<OPT;DEF(false:bool)>]allowUnicode:bool
                              , [<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //MULTISET
         let layerIndex = 
-            if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode, collapseParents).Index
-            else                          Scripting.CoerceLayer(layer).Index
+            if createLayerIfMissing then  
+                UtilLayer.getOrCreateLayer(layer, 
+                    UtilLayer.randomLayerColor, UtilLayer.ByParent, 
+                    UtilLayer.ByParent, allowUnicode, collapseParents).Index
+            else                          
+                Scripting.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%s' and '%s' of %d objects"  layer (Nice.str objectId) (Seq.length objectIds)
+            obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 ```
 
@@ -154,6 +172,9 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
 
 ## Change Log
+`0.6.0`
+- don't check result of CommitChanges() anymore
+- relax constraints on UserText values
 
 `0.5.1`
 - fix readme

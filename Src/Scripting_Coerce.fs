@@ -366,7 +366,6 @@ module AutoOpenCoerce =
     //----------------------------------------------------
 
 
-
     ///<summary>Attempt to get Rhino LayerObject from the document for a given full name.</summary>
     ///<param name="name">(string) The layer's name.</param>
     ///<returns>DocObjects.Layer </returns>
@@ -375,7 +374,7 @@ module AutoOpenCoerce =
         if i = RhinoMath.UnsetIntIndex then
             let lay = State.Doc.Layers.FindName name
             if isNull lay then
-                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could find name '%s'" name
+                RhinoScriptingException.Raise "Rhino.Scripting.CoerceLayer: could not find a layer named '%s'" name
             else
                 lay
         else
