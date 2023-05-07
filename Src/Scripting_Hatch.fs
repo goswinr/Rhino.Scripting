@@ -238,7 +238,7 @@ module AutoOpenHatch =
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-        if not<| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+        hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
@@ -254,7 +254,7 @@ module AutoOpenHatch =
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-            if not<| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+            hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -323,7 +323,7 @@ module AutoOpenHatch =
         if rotation <> rc then
             let rotation = RhinoMath.ToRadians(rotation)
             hatchObj.HatchGeometry.PatternRotation <- rotation
-            if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchRotation failed on rotation %f on %A" rotation hatchId
+            hatchObj.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rotation applied to the Hatch pattern when
@@ -339,7 +339,7 @@ module AutoOpenHatch =
             if rotation <> rc then
                 let rotation = RhinoMath.ToRadians(rotation)
                 hatchObj.HatchGeometry.PatternRotation <- rotation
-                if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchRotation failed on rotation %f on %A" rotation hatchId
+                hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -362,7 +362,7 @@ module AutoOpenHatch =
         let rc = hatchObj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchObj.HatchGeometry.PatternScale <- scale
-            if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchScale failed on scale %f on %A" scale hatchId
+            hatchObj.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
@@ -376,7 +376,7 @@ module AutoOpenHatch =
             let rc = hatchObj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchObj.HatchGeometry.PatternScale <- scale
-                if not <| hatchObj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.HatchScale failed on scale %f on %A" scale hatchId
+                hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 

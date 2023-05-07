@@ -2090,17 +2090,17 @@ module AutoOpenSurface =
         | :?  DocObjects.BrepObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                rhinoObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                rhinoObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                rhinoObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
         | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Nice.str surfaceId) density
 
@@ -2122,15 +2122,15 @@ module AutoOpenSurface =
             | :?  DocObjects.BrepObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                    rhinoObject.CommitChanges() |> ignore 
             | :?  DocObjects.SurfaceObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                    rhinoObject.CommitChanges() |> ignore 
             | :?  DocObjects.ExtrusionObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.SurfaceIsocurveDensity : CommitChanges failed"
+                    rhinoObject.CommitChanges() |> ignore 
             | _ -> RhinoScriptingException.Raise "Rhino.Scripting.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Nice.str surfaceId) density
         State.Doc.Views.Redraw()
 

@@ -177,7 +177,7 @@ module AutoOpenViews =
         let modelunits = State.Doc.ModelUnitSystem
         let pageunits = State.Doc.PageUnitSystem
         if detail.DetailGeometry.SetScale(modelLength, modelunits, pageLength, pageunits) then
-            detail.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DetailScale : CommitChanges failed"
+            detail.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "Rhino.Scripting.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Nice.str detailId) modelLength pageLength

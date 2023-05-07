@@ -99,7 +99,7 @@ module AutoOpenLayer =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          Scripting.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%s' on: %s " layer (Nice.str objectId)
+        obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -120,7 +120,7 @@ module AutoOpenLayer =
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%s' and '%s' of %d objects"  layer (Nice.str objectId) (Seq.length objectIds)
+            obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -132,7 +132,7 @@ module AutoOpenLayer =
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Nice.str objectId)
         if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Nice.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%d' on: %s " layerIndex (Nice.str objectId)
+        obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -145,7 +145,7 @@ module AutoOpenLayer =
         for objectId in objectIds do
             let obj = Scripting.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            if not <| obj.CommitChanges() then RhinoScriptingException.Raise "Rhino.Scripting.ObjectLayer: Setting it failed for layer '%d' on %d objects"  layerIndex (Seq.length objectIds)
+            obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>

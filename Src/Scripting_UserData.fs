@@ -221,9 +221,8 @@ module AutoOpenUserData =
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
         
-        if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed to Commit Changes on %s for key '%s' value '%s'" (Nice.str objectId) key value
-
+        obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
+               
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set</param>
@@ -243,8 +242,7 @@ module AutoOpenUserData =
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
                     RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
-            if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed to Commit Changes on %s for key '%s' value '%s'" (Nice.str objectId) key value
+            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
@@ -255,8 +253,7 @@ module AutoOpenUserData =
         let obj = Scripting.CoerceRhinoObject(objectId)
         if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
         else                     obj.Attributes.SetUserString(key, null) |> ignore
-        if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-            RhinoScriptingException.Raise "Rhino.Scripting.DeleteUserText failed to Commit Changes on %s for key '%s'" (Nice.str objectId) key 
+        obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
@@ -269,7 +266,6 @@ module AutoOpenUserData =
             let obj = Scripting.CoerceRhinoObject(objectId)
             if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
             else                      obj.Attributes.SetUserString(key, null) |> ignore
-            if not <| obj.CommitChanges() then  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-                RhinoScriptingException.Raise "Rhino.Scripting.DeleteUserText failed to Commit Changes on %s for key '%s'" (Nice.str objectId) key 
+            obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
 

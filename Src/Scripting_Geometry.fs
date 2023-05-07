@@ -521,7 +521,7 @@ module AutoOpenGeometry =
         else
             RhinoScriptingException.Raise "Rhino.Scripting.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "PointCloudHidePoints CommitChanges failed"
+        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -545,7 +545,7 @@ module AutoOpenGeometry =
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "Rhino.Scripting.PointCloudPointColors length of color values does not match PointCloud point count"
-        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.PointCloudHidePoints CommitChanges failed"
+        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 

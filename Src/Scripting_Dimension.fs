@@ -185,7 +185,7 @@ module AutoOpenDimension =
         if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
-        annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionStyle : CommitChanges failed"
+        annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the dimension style of multiple dimension objects.</summary>
@@ -199,7 +199,7 @@ module AutoOpenDimension =
             let annotationObject = Scripting.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
             annotation.DimensionStyleId <- ds.Id
-            annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionStyle : CommitChanges failed"
+            annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the text displayed by a dimension object.</summary>
@@ -228,7 +228,7 @@ module AutoOpenDimension =
         let annotationObject = Scripting.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
-        annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionUserText : CommitChanges failed"
+        annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the user text string of multiple dimension objects. The user
@@ -241,7 +241,7 @@ module AutoOpenDimension =
             let annotationObject = Scripting.CoerceAnnotation(objectId)
             let geo = annotationObject.Geometry :?> AnnotationBase
             geo.PlainText <- usertext
-            annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.DimensionUserText : CommitChanges failed"
+            annotationObject.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the value of a dimension object.</summary>
@@ -770,7 +770,7 @@ module AutoOpenDimension =
                 let annotationObject = Scripting.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
                 if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "Rhino.Scripting.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Nice.str objectId)
-                annotationObject.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.LeaderText : CommitChanges failed"
+                annotationObject.CommitChanges() |> ignore 
                 State.Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "Rhino.Scripting.LeaderText set failed for  %s"  (Nice.str objectId)
 

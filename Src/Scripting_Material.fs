@@ -100,7 +100,7 @@ module AutoOpenMaterial =
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-                rhobj.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MatchMaterial : CommitChanges failed"
+                rhobj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -136,7 +136,7 @@ module AutoOpenMaterial =
             if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
 
-            mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MaterialBump : CommitChanges failed"
+            mat.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -159,7 +159,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
-        mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MaterialColor : CommitChanges failed"
+        mat.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -216,7 +216,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
-        mat.CommitChanges() |> RhinoScriptingException.FailIfFalse "Rhino.Scripting.MaterialName : CommitChanges failed"
+        mat.CommitChanges() |> ignore 
 
 
 
