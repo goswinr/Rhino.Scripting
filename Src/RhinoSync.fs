@@ -184,9 +184,8 @@ type RhinoSync private () =
     /// Hides Seff editor window if it exists. Shows it afterwards again
     static member DoSyncRedrawHideEditor (func:unit->'T) : 'T = 
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
-        let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke()
-        if RhinoApp.InvokeRequired then            
-            if initIsPending then init()
+        
+        if RhinoApp.InvokeRequired then
             if isNull syncContext then 
                 RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
@@ -194,6 +193,8 @@ type RhinoSync private () =
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130           
             async{
                     do! Async.SwitchToContext syncContext
+                    if initIsPending then init() 
+                    let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init                    
                     //eprintfn "Hiding Seff async..isWinVis:%b" isWinVis
                     if isWinVis && notNull hideEditor then hideEditor.Invoke()
                     if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
@@ -203,8 +204,9 @@ type RhinoSync private () =
                     return res
                     } |> Async.RunSynchronously
         else
-            //eprintfn "Hiding Seff sync..isWinVis:%b" isWinVis
-            if initIsPending then init() //when we are in sync we still need to see if the Seff window is present.
+            if initIsPending then init() // because even when we are in sync we still need to see if the Seff window is showing or not.
+            let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init   
+            //eprintfn "Hiding Seff sync..isWinVis:%b" isWinVis            
             if isWinVis && notNull hideEditor then hideEditor.Invoke()
             if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true            
             let res = func()

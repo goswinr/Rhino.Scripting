@@ -299,7 +299,7 @@ module AutoOpenSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then InternalToNiceStringSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
+                if printCount then InternalToNiceStringSetup.printfnBlue "Rhino.Scripting.GetObjects(...) returned %s" (Scripting.ObjectDescription(rc))
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -376,7 +376,7 @@ module AutoOpenSelection =
                     rc
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> Scripting.ObjectDescription
-                    |> InternalToNiceStringSetup.printfnBlue "GetObjectsEx got %s"
+                    |> InternalToNiceStringSetup.printfnBlue "Rhino.Scripting.GetObjectsEx(...) returned %s"
                 rc            
         RhinoSync.DoSyncRedrawHideEditor get
 

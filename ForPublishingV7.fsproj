@@ -20,13 +20,14 @@
     <Title>Rhino.Scripting</Title>
     <PackageId>Rhino.Scripting</PackageId>
 
-	  <Version>0.5.1-Rhino7</Version>
-	  <AssemblyVersion>0.5.1-Rhino7</AssemblyVersion>
-	  <FileVersion>0.5.1-Rhino7</FileVersion>
+	  <Version>0.6.1-Rhino7</Version>
+	  <AssemblyVersion>0.6.1-Rhino7</AssemblyVersion>
+	  <FileVersion>0.6.1-Rhino7</FileVersion>
 	  
     <PackageReleaseNotes>
-		- improve finding of SynchronizationContext
-	</PackageReleaseNotes>
+      - better window sync with Seff Editor
+      - fixes in docs
+	  </PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2022</Copyright>
@@ -69,7 +70,7 @@
     <!-- use PrivateAssets="all" ExcludeAssets="runtime" to exclude these dlls from the output folder https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets -->
     <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
 
-    <PackageReference Include="FsEx" Version="0.13.1" />
+    <PackageReference Include="FsEx" Version="0.14.1" />
 
     <!-- This is probably not working to the editing files because the way files a structured on github does not match the way the are compiled from a one big generated file.-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />

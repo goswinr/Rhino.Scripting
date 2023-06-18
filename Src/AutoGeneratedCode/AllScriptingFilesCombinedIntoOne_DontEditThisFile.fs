@@ -13154,7 +13154,7 @@ type Scripting private () =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then InternalToNiceStringSetup.printfnBlue "GetObjects got %s" (Scripting.ObjectDescription(rc))
+                if printCount then InternalToNiceStringSetup.printfnBlue "Rhino.Scripting.GetObjects(...) returned %s" (Scripting.ObjectDescription(rc))
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -13231,7 +13231,7 @@ type Scripting private () =
                     rc
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> Scripting.ObjectDescription
-                    |> InternalToNiceStringSetup.printfnBlue "GetObjectsEx got %s"
+                    |> InternalToNiceStringSetup.printfnBlue "Rhino.Scripting.GetObjectsEx(...) returned %s"
                 rc            
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -16046,22 +16046,23 @@ type Scripting private () =
     ///<summary>Calculates volume moments of inertia of a Surface or Polysurface object.
     ///    For more information, see Rhino help for "Mass Properties calculation details".</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
-    ///<returns>((float*float*float) Rarr) List of moments and error bounds in tuple(X, Y, Z) - see help topic
+    ///<returns>((float*float*float) Rarr) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
     ///    Index   Description
-    ///    [ 0]     First Moments.
-    ///    [ 1]     The absolute (+/-) error bound for the First Moments.
-    ///    [ 2]     Second Moments.
-    ///    [ 3]     The absolute (+/-) error bound for the Second Moments.
-    ///    [ 4]     Product Moments.
-    ///    [ 5]     The absolute (+/-) error bound for the Product Moments.
-    ///    [ 6]     Area Moments of Inertia about the World Coordinate Axes.
-    ///    [ 7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
-    ///    [ 8]     Area Radii of Gyration about the World Coordinate Axes.
-    ///    [ 9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+    ///    [ 0]    First Moments.
+    ///    [ 1]    The absolute (+/-) error bound for the First Moments.
+    ///    [ 2]    Second Moments.
+    ///    [ 3]    The absolute (+/-) error bound for the Second Moments.
+    ///    [ 4]    Product Moments.
+    ///    [ 5]    The absolute (+/-) error bound for the Product Moments.
+    ///    [ 6]    Area Moments of Inertia about the World Coordinate Axes.
+    ///    [ 7]    The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
+    ///    [ 8]    Area Radii of Gyration about the World Coordinate Axes.
+    ///    [ 9]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
     ///    [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-    ///    [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
+    ///    [13]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
+    /// </returns>
     static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) Rarr = 
         objectId
         |> Scripting.TryCoerceBrep
@@ -16085,11 +16086,11 @@ type Scripting private () =
                 yield (mp.WorldCoordinatesMomentsOfInertia.X, mp.WorldCoordinatesMomentsOfInertia.Y, mp.WorldCoordinatesMomentsOfInertia.Z)                         //  [6]     Area Moments of Inertia about the World Coordinate Axes.
                 yield (mp.WorldCoordinatesMomentsOfInertiaError.X, mp.WorldCoordinatesMomentsOfInertiaError.Y, mp.WorldCoordinatesMomentsOfInertiaError.Z)          //  [7]     The absolute (+/-) error bound for the Area Moments of Inertia about World Coordinate Axes.
                 yield (mp.WorldCoordinatesRadiiOfGyration.X, mp.WorldCoordinatesRadiiOfGyration.Y, mp.WorldCoordinatesRadiiOfGyration.Z)                            //  [8]     Area Radii of Gyration about the World Coordinate Axes.
-                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                           //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
+                yield (0., 0., 0.) // need to add error calc to RhinoCommon                                                                                         //  [9]     The absolute (+/-) error bound for the Area Radii of Gyration about World Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertia.X, mp.CentroidCoordinatesMomentsOfInertia.Y, mp.CentroidCoordinatesMomentsOfInertia.Z)                //  [10]    Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesMomentsOfInertiaError.X, mp.CentroidCoordinatesMomentsOfInertiaError.Y, mp.CentroidCoordinatesMomentsOfInertiaError.Z) //  [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
                 yield (mp.CentroidCoordinatesRadiiOfGyration.X, mp.CentroidCoordinatesRadiiOfGyration.Y, mp.CentroidCoordinatesRadiiOfGyration.Z)                   //  [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
-                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                            //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
+                yield (0., 0., 0.) //need to add error calc to RhinoCommon                                                                                          //  [13]    The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes</returns>
                 }
 
 
