@@ -17,12 +17,12 @@
 	  
     <!-- 6.7.18199 supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
     <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" />	 
-    <PackageReference Include="FsEx" Version="0.13.1" />
+    <PackageReference Include="FsEx" Version="0.14.1" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
-	<None Include="Readme.md" />
+  	<None Include="Readme.md" />
 	  
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />
@@ -64,8 +64,8 @@
 
     <!-- included only for editing version numbers:-->
     <None Include="ForPublishing.fsproj" />
-	<None Include="ForPublishingV7.fsproj" />
-	<None Include="ForEditingV7.fsproj" />
+    <None Include="ForPublishingV7.fsproj" />
+    <None Include="ForEditingV7.fsproj" />
   </ItemGroup>
 
 </Project>

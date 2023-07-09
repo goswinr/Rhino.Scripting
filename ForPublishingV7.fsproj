@@ -20,14 +20,13 @@
     <Title>Rhino.Scripting</Title>
     <PackageId>Rhino.Scripting</PackageId>
 
-	  <Version>0.6.1-Rhino7</Version>
-	  <AssemblyVersion>0.6.1-Rhino7</AssemblyVersion>
-	  <FileVersion>0.6.1-Rhino7</FileVersion>
+	<Version>0.6.2-Rhino7</Version>
+	<AssemblyVersion>0.6.2-Rhino7</AssemblyVersion>
+	<FileVersion>0.6.2-Rhino7</FileVersion>
 	  
     <PackageReleaseNotes>
-      - better window sync with Seff Editor
-      - fixes in docs
-	  </PackageReleaseNotes>
+      - even better window sync with Seff Editor
+	</PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2022</Copyright>
@@ -79,7 +78,7 @@
   <ItemGroup>
     <None Include="README.md" />
     <None Include="Doc/READMEnuget.md"  Pack="true" PackagePath="" />
-    <None Include="Doc/logo128.png" Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file available to nuget pack tool-->
+    <None Include="Doc/logo128.png"     Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file available to nuget pack tool-->
 
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />

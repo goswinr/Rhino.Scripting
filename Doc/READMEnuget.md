@@ -31,7 +31,7 @@ This allowed the use of a modern, rich and dynamically typed programming languag
 
 This repo has [all](https://developer.rhino3d.com/api/RhinoScriptSyntax/) RhinoScript functions reimplemented in [F#](https://fsharp.org/)  
 It is literally a translation of the open source Ironpython [rhinoscriptsyntax](https://github.com/mcneel/rhinoscriptsyntax) implementation to F#.  
-Fuget.org is a good tool to explore the [900 methods in this repo](https://www.fuget.org/packages/Rhino.Scripting/0.6.1/lib/net48/Rhino.Scripting.dll/Rhino/Scripting).
+Fuget.org is a good tool to explore the [900 methods in this repo](https://www.fuget.org/packages/Rhino.Scripting/0.6.2/lib/net48/Rhino.Scripting.dll/Rhino/Scripting).
 
 A few minor bugs from the python implementation are fixed and a few extra methods and optional parameters where added.
 I have been using this library extensively for my own professional scripting needs since 2019.
@@ -45,7 +45,7 @@ First reference the assemblies.
 ```csharp
 #r "nuget: FSharp.Core, 7.0.0"
 #r "nuget: FsEx, 0.14.1"
-#r "nuget: Rhino.Scripting, 0.6.1"
+#r "nuget: Rhino.Scripting, 0.6.2"
 ```   
 The main class of this library is called `Rhino.Scripting` it has all ~900 functions as static methods.
 In C# you can create an alias like this: 
@@ -65,7 +65,7 @@ I will soon publish an F# scripting editor for Rhino. The prototype is working w
 
 First reference the assemblies. 
 ```fsharp
-#r "nuget: Rhino.Scripting, 0.6.1"
+#r "nuget: Rhino.Scripting, 0.6.2"
 ```   
 
 The main class of this library is called `Rhino.Scripting` it has all ~900 functions as static methods.
@@ -85,6 +85,9 @@ Many RhinoScript function take variable types of input parameters. This is imple
 Many RhinoScript function have optional parameters. These are also implemented as optional method parameters.
 
 ## Change Log
+`0.6.2`
+- even better window sync with Seff Editor
+
 `0.6.1`
 - better window sync with Seff Editor
 - fixes in docs

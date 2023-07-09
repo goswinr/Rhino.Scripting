@@ -92,7 +92,9 @@ type RhinoSync private () =
 
                     
     static let initialize = // Dont rename !!!invoked via reflection from Seff.Rhino
-        //should be called via reflection from Seff.Rhino in case Rhino.Scripting is loaded already by another plugin.
+        // should be called via reflection from Seff.Rhino in case Rhino.Scripting is loaded already by another plugin.
+        // Reinitialize Rhino.Scripting just in case it is loaded already in the current AppDomain:
+        // to have showEditor and hideEditor actions setup correctly.
         new Action(init) 
 
     // ---------------------------------
@@ -186,14 +188,14 @@ type RhinoSync private () =
         let redraw = RhinoDoc.ActiveDoc.Views.RedrawEnabled
         
         if RhinoApp.InvokeRequired then
+            if initIsPending then init() // do first
             if isNull syncContext then 
                 RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130           
-            async{
+            async{                    
                     do! Async.SwitchToContext syncContext
-                    if initIsPending then init() 
                     let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init                    
                     //eprintfn "Hiding Seff async..isWinVis:%b" isWinVis
                     if isWinVis && notNull hideEditor then hideEditor.Invoke()
