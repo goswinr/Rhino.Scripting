@@ -1,12 +1,14 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 
 open FsEx
 
 [<AutoOpen>]
 module AutoOpenLinetype =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -26,7 +28,7 @@ module AutoOpenLinetype =
     ///<returns>(bool) True or False.</returns>
     static member IsLinetypeReference(name:string) : bool = 
         let lt = State.Doc.Linetypes.FindName(name)
-        if isNull lt then RhinoScriptingException.Raise "Rhino.Scripting.IsLinetypeReference unable to find '%s' in a line-types" name
+        if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a line-types" name
         lt.IsReference
 
 

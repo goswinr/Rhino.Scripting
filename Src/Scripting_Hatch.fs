@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -10,7 +12,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenHatch =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -51,27 +53,27 @@ module AutoOpenHatch =
     ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
     ///<param name="curves">(Curve seq) Geometry of the closed planar Curves that defines the boundary of the Hatch objects</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object.  If omitted, the current Hatch pattern will be used</param>
-    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>  Hatch pattern scale factor</param>
-    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c>  Hatch pattern rotation angle in degrees</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>  Tolerance for Hatch fills</param>
+    ///<param name="scale">(float) Optional, default value: <c>1.0</c>  Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, default value: <c>0.0</c>  Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>  Tolerance for Hatch fills</param>
     ///<returns>(Guid Rarr) identifiers of the newly created Hatch.</returns>
     static member AddHatches( curves:Curve seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
-            if index<0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed to find hatchPattern:'%s'"  hatchPattern           
+            if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to find hatchPattern:'%s'"  hatchPattern           
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
         if isNull hatches then 
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
                 (Seq.length curves) 
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
                 (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
@@ -82,7 +84,7 @@ module AutoOpenHatch =
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
         if ids.Count = 0 then 
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
                 (Seq.length curves) 
                 (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
                 (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
@@ -93,9 +95,9 @@ module AutoOpenHatch =
     ///<summary>Creates one  Hatch objects from one closed planar Curve.</summary>
     ///<param name="curve">(Curve) Curve Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
-    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>   Hatch pattern scale factor</param>
-    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
+    ///<param name="scale">(float) Optional, default value: <c>1.0</c>   Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, default value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
     ///<returns>(Guid) identifier of the newly created Hatch.</returns>
     static member AddHatch(   curve:Curve,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
@@ -103,48 +105,48 @@ module AutoOpenHatch =
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid  =         
         try 
-           let rc = Scripting.AddHatches([curve], hatchPattern, scale, rotation,tolerance) 
+           let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance) 
            if rc.Count = 1 then rc.[0]
-           else RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed to create exactly on hatch from curve.  It created %d Hatches"  rc.Count 
+           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve.  It created %d Hatches"  rc.Count 
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on one curve \r\nMessage: %s"  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve \r\nMessage: %s"  e.Message
             
         
     ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the   boundary of the Hatch objects</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
-    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>   Hatch pattern scale factor</param>
-    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
+    ///<param name="scale">(float) Optional, default value: <c>1.0</c>   Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, default value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
     ///<returns>(Guid Rarr) identifiers of the newly created Hatch.</returns>
     static member AddHatches(  curveIds:Guid seq,
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
                               [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
-        let curves =  rarr { for objectId in curveIds do yield Scripting.CoerceCurve(objectId) }
-        try Scripting.AddHatches(curves, hatchPattern, scale, rotation) 
+        let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation) 
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatches failed on curveIds:'%s' \r\nMessage: %s" (Nice.str curveIds)  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds:'%s' \r\nMessage: %s" (Nice.str curveIds)  e.Message
             
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
-    ///<param name="scale">(float) Optional, Default Value: <c>1.0</c>  Hatch pattern scale factor</param>
-    ///<param name="rotation">(float) Optional, Default Value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
+    ///<param name="scale">(float) Optional, default value: <c>1.0</c>  Hatch pattern scale factor</param>
+    ///<param name="rotation">(float) Optional, default value: <c>0.0</c> Hatch pattern rotation angle in degrees</param>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c> Tolerance for Hatch fills</param>
     ///<returns>(Guid) identifier of the newly created Hatch.</returns>
     static member AddHatch( curveId:Guid,
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float,
                             [<OPT;DEF(0.0)>]tolerance:float) : Guid = 
-        try Scripting.AddHatch(Scripting.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)             
+        try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)             
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "Rhino.Scripting.AddHatch failed on one curve %s\r\nMessage: %s" (Nice.str curveId)  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve %s\r\nMessage: %s" (Nice.str curveId)  e.Message
        
 
 
@@ -152,21 +154,21 @@ module AutoOpenHatch =
     ///<summary>Adds Hatch patterns to the document by importing Hatch pattern definitions
     ///    from a pattern file.</summary>
     ///<param name="filename">(string) Name of the Hatch pattern file</param>
-    ///<param name="replace">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="replace">(bool) Optional, default value: <c>false</c>
     ///    If Hatch pattern names already in the document match Hatch
     ///    pattern names in the pattern definition file, then the existing Hatch
     ///    patterns will be redefined</param>
     ///<returns>(string Rarr) Names of the newly added Hatch patterns.</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr = 
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
-        if isNull patterns then RhinoScriptingException.Raise "Rhino.Scripting.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         let rc = Rarr()
         for pattern in patterns do
              let index = State.Doc.HatchPatterns.Add(pattern)
              if index>=0 then
                  let pattern = State.Doc.HatchPatterns.[index]
                  rc.Add(pattern.Name)
-        if  rc.Count = 0 then RhinoScriptingException.Raise "Rhino.Scripting.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if  rc.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         rc
 
 
@@ -184,9 +186,9 @@ module AutoOpenHatch =
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentHatchPattern(hatchPattern:string) : unit = //SET
         let rc = State.Doc.HatchPatterns.CurrentHatchPatternIndex
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.CurrentHatchPattern: Setting it failed. hatchPattern:'%A'" hatchPattern
+        if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentHatchPattern: Setting it failed. hatchPattern:'%A'" hatchPattern
         State.Doc.HatchPatterns.CurrentHatchPatternIndex <- patternInstance.Index
 
 
@@ -195,14 +197,14 @@ module AutoOpenHatch =
     ///    then planar face Brep objects will be created. Otherwise, line Curve objects
     ///    will be created.</summary>
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
-    ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the Hatch object</param>
     ///<returns>(Guid Rarr) list of identifiers for the newly created objects.</returns>
     static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid Rarr = 
-        let rhobj = Scripting.CoerceRhinoObject(hatchId)
-        let geo =  Scripting.CoerceHatch(hatchId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
+        let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
         let pieces = geo.Explode()
-        if isNull pieces then RhinoScriptingException.Raise "Rhino.Scripting.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Nice.str hatchId) delete
+        if isNull pieces then RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch failed.  hatchId:'%s' delete:'%A'" (Nice.str hatchId) delete
         let attr = rhobj.Attributes
         let rc = Rarr()
         for piece in pieces do
@@ -213,7 +215,7 @@ module AutoOpenHatch =
             | :? Brep as c->
                 let g = State.Doc.Objects.AddBrep(c, attr)
                 if g<>Guid.Empty then rc.Add(g)
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExplodeHatch: drawing of %A objects after exploding not implemented" piece.ObjectType //TODO test with hatch patterns that have points
         if delete then State.Doc.Objects.Delete(rhobj)|> ignore
         rc
 
@@ -222,7 +224,7 @@ module AutoOpenHatch =
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(string) The current Hatch pattern.</returns>
     static member HatchPattern(hatchId:Guid) : string = //GET
-        let hatchObj = Scripting.CoerceHatchObject(hatchId)
+        let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let oldIndex = hatchObj.HatchGeometry.PatternIndex
         State.Doc.HatchPatterns.[oldIndex].Name
 
@@ -232,11 +234,11 @@ module AutoOpenHatch =
     ///    current Hatch pattern</param>
     ///<returns>(unit) void, nothing.</returns>
     static member HatchPattern(hatchId:Guid, hatchPattern:string) : unit = //SET
-        let hatchObj = Scripting.CoerceHatchObject(hatchId)
+        let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let oldIndex = hatchObj.HatchGeometry.PatternIndex
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if newPattern|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+        if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
         hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
@@ -247,12 +249,12 @@ module AutoOpenHatch =
     ///    current Hatch pattern</param>
     ///<returns>(unit) void, nothing.</returns>
     static member HatchPattern(hatchIds:Guid seq, hatchPattern:string) : unit = //MULTISET
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         for hatchId in hatchIds do
-            let hatchObj = Scripting.CoerceHatchObject(hatchId)
+            let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let oldIndex = hatchObj.HatchGeometry.PatternIndex
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
-            if newPattern|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
+            if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
             hatchObj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
@@ -261,7 +263,7 @@ module AutoOpenHatch =
     ///<summary>Returns the number of Hatch patterns in the document.</summary>
     ///<returns>(int) The number of Hatch patterns in the document.</returns>
     static member HatchPatternCount() : int = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         State.Doc.HatchPatterns.Count
 
 
@@ -270,9 +272,9 @@ module AutoOpenHatch =
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(string) description of the Hatch pattern.</returns>
     static member HatchPatternDescription(hatchPattern:string) : string = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPatternDescription failed.  hatchPattern:'%A'" hatchPattern
+        if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPatternDescription failed.  hatchPattern:'%A'" hatchPattern
         patternInstance.Description
 
 
@@ -283,16 +285,16 @@ module AutoOpenHatch =
     ///    1 = lines, uses pattern file definition
     ///    2 = gradient, uses fill color definition.</returns>
     static member HatchPatternFillType(hatchPattern:string) : int = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.HatchPatternFillType failed.  hatchPattern:'%A'" hatchPattern
+        if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPatternFillType failed.  hatchPattern:'%A'" hatchPattern
         int(patternInstance.FillType)
 
 
     ///<summary>Returns the names of all of the Hatch patterns in the document.</summary>
     ///<returns>(string Rarr) The names of all of the Hatch patterns in the document.</returns>
     static member HatchPatternNames() : string Rarr = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let rc = Rarr()
         for i = 0 to State.Doc.HatchPatterns.Count - 1 do
             let hatchPattern = State.Doc.HatchPatterns.[i]
@@ -306,7 +308,7 @@ module AutoOpenHatch =
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if rotation is not defined, the current rotation angle.</returns>
     static member HatchRotation(hatchId:Guid) : float = //GET
-        let hatchObj = Scripting.CoerceHatchObject(hatchId)
+        let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let rc = hatchObj.HatchGeometry.PatternRotation
         RhinoMath.ToDegrees(rc)
 
@@ -317,7 +319,7 @@ module AutoOpenHatch =
     ///<param name="rotation">(float) Rotation angle in degrees</param>
     ///<returns>(unit) void, nothing.</returns>
     static member HatchRotation(hatchId:Guid, rotation:float) : unit = //SET
-        let hatchObj = Scripting.CoerceHatchObject(hatchId)
+        let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let mutable rc = hatchObj.HatchGeometry.PatternRotation
         rc <- RhinoMath.ToDegrees(rc)
         if rotation <> rc then
@@ -333,7 +335,7 @@ module AutoOpenHatch =
     ///<returns>(unit) void, nothing.</returns>
     static member HatchRotation(hatchIds:Guid seq, rotation:float) : unit = //MULTISET
         for hatchId in hatchIds do
-            let hatchObj = Scripting.CoerceHatchObject(hatchId)
+            let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let mutable rc = hatchObj.HatchGeometry.PatternRotation
             rc <- RhinoMath.ToDegrees(rc)
             if rotation <> rc then
@@ -348,7 +350,7 @@ module AutoOpenHatch =
     ///<param name="hatchId">(Guid) Identifier of a Hatch object</param>
     ///<returns>(float) if scale is not defined, the current scale factor.</returns>
     static member HatchScale(hatchId:Guid) : float = //GET
-        let hatchObj = Scripting.CoerceHatchObject(hatchId)
+        let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         hatchObj.HatchGeometry.PatternScale
 
 
@@ -358,7 +360,7 @@ module AutoOpenHatch =
     ///<param name="scale">(float) Scale factor</param>
     ///<returns>(unit) void, nothing.</returns>
     static member HatchScale(hatchId:Guid, scale:float) : unit = //SET
-        let hatchObj = Scripting.CoerceHatchObject(hatchId)
+        let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
         let rc = hatchObj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchObj.HatchGeometry.PatternScale <- scale
@@ -372,7 +374,7 @@ module AutoOpenHatch =
     ///<returns>(unit) void, nothing.</returns>
     static member HatchScale(hatchIds:Guid seq, scale:float) : unit = //MULTISET
         for hatchId in hatchIds do
-            let hatchObj = Scripting.CoerceHatchObject(hatchId)
+            let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
             let rc = hatchObj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchObj.HatchGeometry.PatternScale <- scale
@@ -384,7 +386,7 @@ module AutoOpenHatch =
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatch(objectId:Guid) : bool = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         match rhobj with :? DocObjects.HatchObject  -> true |_ -> false
 
 
@@ -392,7 +394,7 @@ module AutoOpenHatch =
     ///<param name="name">(string) The name of a Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPattern(name:string) : bool = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         State.Doc.HatchPatterns.FindName(name) |> notNull
 
 
@@ -400,9 +402,9 @@ module AutoOpenHatch =
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPatternCurrent(hatchPattern:string) : bool = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.IsHatchPatternCurrent failed.  hatchPattern:'%A'" hatchPattern
+        if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsHatchPatternCurrent failed.  hatchPattern:'%A'" hatchPattern
         patternInstance.Index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
 
 
@@ -410,9 +412,9 @@ module AutoOpenHatch =
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
     static member IsHatchPatternReference(hatchPattern:string) : bool = 
-        Scripting.InitHatchPatterns()
+        RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
-        if patternInstance|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
+        if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
         patternInstance.IsReference
 
 

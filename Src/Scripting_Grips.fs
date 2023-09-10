@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -10,7 +12,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenGrips =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -21,12 +23,12 @@ module AutoOpenGrips =
     ///<summary>Enables or disables an object's grips. For Curves and Surfaces, these are
     ///    also called control points.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    If True, the specified object's grips will be turned on.
     ///    If False, they will be turned off</param>
     ///<returns>(bool) True on success, False on failure.</returns>
     static member EnableObjectGrips(objectId:Guid, [<OPT;DEF(true)>]enable:bool) : bool = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if enable <> rhobj.GripsOn then
             rhobj.GripsOn <- enable
             State.Doc.Views.Redraw()
@@ -35,9 +37,9 @@ module AutoOpenGrips =
 
     ///<summary>Prompts the user to pick a single object grip. Fails if selection is empty.</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>false</c>
     ///    Allow for selection of pre-selected object grip</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked object grip</param>
     ///<returns>(Guid * int * Point3d) of a grip record.
     ///    [0] = identifier of the object that owns the grip
@@ -54,7 +56,7 @@ module AutoOpenGrips =
             let rc = Input.RhinoGet.GetGrip(grip, message)
             let grip = !grip
             if rc <> Commands.Result.Success || isNull grip then
-                RhinoScriptingException.Raise "Rhino.Scripting.GetObjectGrip User failed to select a Grip for : %s " message
+                RhinoScriptingException.Raise "RhinoScriptSyntax.GetObjectGrip User failed to select a Grip for : %s " message
             else
                 if select then
                     grip.Select(true, true)|> ignore
@@ -66,9 +68,9 @@ module AutoOpenGrips =
 
     ///<summary>Prompts user to pick one or more object grips from one or more objects.</summary>
     ///<param name="message">(string) Optional, Prompt for picking</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>false</c>
     ///    Allow for selection of pre-selected object grips</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked object grips</param>
     ///<returns>((Guid * int * Point3d) Rarr) containing one or more grip records. Each grip record is a tuple
     ///    [n][0] = identifier of the object that owns the grip
@@ -100,7 +102,7 @@ module AutoOpenGrips =
 
     /// Internal helper
     static member private neighborGrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then Result.Error "rhobj.GetGrips() is null"
         else
@@ -113,7 +115,7 @@ module AutoOpenGrips =
                     else
                         grip.NeighborGrip(0, i, 0, wrap=false)
                 if notNull ng && enable then
-                    ng.Select(true) |> ignore //TODO make sync ?
+                    ng.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                     State.Doc.Views.Redraw()
                 Ok ng
 
@@ -121,26 +123,26 @@ module AutoOpenGrips =
     ///<summary>Returns the next grip index from a specified grip index of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the next grip index</param>
-    ///<param name="direction">(int ) Optional, Default Value: <c>0</c>
+    ///<param name="direction">(int ) Optional, default value: <c>0</c>
     ///    Direction to get the next grip index (0 = U, 1 = V)</param>
-    ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    If True, the next grip index found will be selected</param>
     ///<returns>(int) index of the next grip.</returns>
     static member NextObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int ,
                                   [<OPT;DEF(true)>]enable:bool) : int = 
-        match Scripting.neighborGrip(1, objectId, index, direction, enable) with
+        match RhinoScriptSyntax.neighborGrip(1, objectId, index, direction, enable) with
         |Ok r -> r.Index
-        |Error s -> RhinoScriptingException.Raise "Rhino.Scripting.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+        |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
     ///<summary>Returns number of grips owned by an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) number of grips.</returns>
     static member ObjectGripCount(objectId:Guid) : int = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripCount failed.  objectId:'%s'" (Nice.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripCount failed.  objectId:'%s'" (Nice.str objectId)
         grips.Length
 
 
@@ -149,11 +151,11 @@ module AutoOpenGrips =
     ///<param name="index">(int) Index of the grip to either query or modify</param>
     ///<returns>(Point3d) The current location of the grip referenced by index.</returns>
     static member ObjectGripLocation(objectId:Guid, index:int) : Point3d = //GET
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Nice.str objectId) index
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Nice.str objectId) index
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Nice.str objectId) index
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A'" (Nice.str objectId) index
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         rc
@@ -164,11 +166,11 @@ module AutoOpenGrips =
     ///<param name="point">(Point3d) 3D point defining new location of the grip</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectGripLocation(objectId:Guid, index:int, point:Point3d) : unit = //SET
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
         let grips = rhobj.GetGrips()
         if isNull grips || index<0 || index>=grips.Length then
-            RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
         let grip = grips.[index]
         let rc = grip.CurrentLocation
         grip.CurrentLocation <-  point
@@ -185,10 +187,10 @@ module AutoOpenGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(Point3d Rarr) The current location of all grips.</returns>
     static member ObjectGripLocations(objectId:Guid) : Point3d Rarr = //GET
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
         rarr { for grip in grips do yield grip.CurrentLocation }
 
 
@@ -202,10 +204,10 @@ module AutoOpenGrips =
     ///<param name="points">(Point3d seq) List of 3D points identifying the new grip locations</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectGripLocations(objectId:Guid, points:Point3d seq) : unit = //SET
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Nice.str objectId) points
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Nice.str objectId) points
         let grips = rhobj.GetGrips()
-        if grips |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Nice.str objectId) points
+        if grips |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s' points:'%A'" (Nice.str objectId) points
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
@@ -218,7 +220,7 @@ module AutoOpenGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating Grips state.</returns>
     static member ObjectGripsOn(objectId:Guid) : bool = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.GripsOn
 
 
@@ -227,7 +229,7 @@ module AutoOpenGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member ObjectGripsSelected(objectId:Guid) : bool = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
         else
             let grips = rhobj.GetGrips()
@@ -241,25 +243,25 @@ module AutoOpenGrips =
     ///<summary>Returns the previous grip index from a specified grip index of an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Zero based grip index from which to get the previous grip index</param>
-    ///<param name="direction">(int) Optional, Default Value: <c>0</c>
+    ///<param name="direction">(int) Optional, default value: <c>0</c>
     ///    Direction to get the next grip index (0 = U, 1 = V)</param>
-    ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    If True, the next grip index found will be selected</param>
     ///<returns>(int) index of the next grip.</returns>
     static member PrevObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int,
                                   [<OPT;DEF(true)>]enable:bool) : int = 
-        match Scripting.neighborGrip(-1, objectId, index, direction, enable) with
+        match RhinoScriptSyntax.neighborGrip(-1, objectId, index, direction, enable) with
         |Ok r -> r.Index
-        |Error s -> RhinoScriptingException.Raise "Rhino.Scripting.PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
+        |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
 
 
     ///<summary>Returns a list of grip indices identifying an object's selected grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int Rarr) list of indices.</returns>
     static member SelectedObjectGrips(objectId:Guid) : int Rarr = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = Rarr()
         if not rhobj.GripsOn then rc
         else
@@ -277,7 +279,7 @@ module AutoOpenGrips =
     ///<param name="index">(int) Index of the grip to select</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member SelectObjectGrip(objectId:Guid, index:int) : bool = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
         else
             let grips = rhobj.GetGrips()
@@ -298,10 +300,10 @@ module AutoOpenGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips selected.</returns>
     static member SelectObjectGrips(objectId:Guid) : int = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "Rhino.Scripting.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "Rhino.Scripting.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
         let mutable count = 0
         for grip in grips do
             if grip.Select(true, true)>0 then count<- count +  1
@@ -309,7 +311,7 @@ module AutoOpenGrips =
             State.Doc.Views.Redraw()
             count
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
 
 
     ///<summary>Unselects a single grip owned by an object. If the object's grips are
@@ -318,7 +320,7 @@ module AutoOpenGrips =
     ///<param name="index">(int) Index of the grip to unselect</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member UnselectObjectGrip(objectId:Guid, index:int) : bool = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
         else
             let grips = rhobj.GetGrips()
@@ -338,10 +340,10 @@ module AutoOpenGrips =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips unselected.</returns>
     static member UnselectObjectGrips(objectId:Guid) : int = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
-        if not rhobj.GripsOn then RhinoScriptingException.Raise "Rhino.Scripting.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
-        if isNull grips then RhinoScriptingException.Raise "Rhino.Scripting.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
+        if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
         let mutable count = 0
         for grip in grips do
             if grip.Select(false) = 0 then count <- count +   1
@@ -349,7 +351,7 @@ module AutoOpenGrips =
             State.Doc.Views.Redraw()
             count
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
 
 
 

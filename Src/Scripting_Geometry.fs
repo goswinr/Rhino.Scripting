@@ -1,11 +1,13 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-open Rhino.ScriptingFsharp
+
 
 open FsEx
 open FsEx.SaveIgnore
@@ -13,7 +15,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenGeometry =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -42,7 +44,7 @@ module AutoOpenGeometry =
                             yield item.ActiveViewportID]
         let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
         if rc = Guid.Empty then
-            RhinoScriptingException.Raise "Rhino.Scripting.AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.ToNiceString uMagnitude vMagnitude (Nice.str views)
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.ToNiceString uMagnitude vMagnitude (Nice.str views)
         State.Doc.Views.Redraw()
         rc
 
@@ -52,13 +54,13 @@ module AutoOpenGeometry =
     ///<param name="filename">(string) The path to a bitmap or image file</param>
     ///<param name="width">(float) Optional, If both dblWidth and dblHeight are 0.0 or skipped, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
     ///<param name="height">(float) Optional, If both dblWidth and dblHeight are  0.0 or skied, then the width and height of the PictureFrame will be the width and height of the image. If dblWidth = 0 and dblHeight is > 0, or if dblWidth > 0 and dblHeight = 0, then the non-zero value is assumed to be an aspect ratio of the image's width or height, which ever one is = 0. If both dblWidth and dblHeight are > 0, then these are assumed to be the width and height of in the current unit system</param>
-    ///<param name="selfIllumination">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="selfIllumination">(bool) Optional, default value: <c>true</c>
     ///    If True, then the image mapped to the picture frame Plane always displays at full intensity and is not affected by light or shadow</param>
-    ///<param name="embed">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="embed">(bool) Optional, default value: <c>false</c>
     ///    If True, then the function adds the image to Rhino's internal bitmap table, thus making the document self-contained</param>
-    ///<param name="useAlpha">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="useAlpha">(bool) Optional, default value: <c>false</c>
     ///    If False, the picture frame is created without any transparency texture. If True, a transparency texture is created with a "mask texture" set to alpha, and an instance of the diffuse texture in the source texture slot</param>
-    ///<param name="makeMesh">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="makeMesh">(bool) Optional, default value: <c>false</c>
     ///    If True, the function will make a PictureFrame object from a Mesh rather than a Plane Surface</param>
     ///<returns>(Guid) object identifier.</returns>
     static member AddPictureFrame(  plane:Plane,
@@ -69,10 +71,10 @@ module AutoOpenGeometry =
                                     [<OPT;DEF(false)>]embed:bool,
                                     [<OPT;DEF(false)>]useAlpha:bool,
                                     [<OPT;DEF(false)>]makeMesh:bool) : Guid = 
-        if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "Rhino.Scripting.AddPictureFrame image %s does not exist" filename
+        if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame image %s does not exist" filename
         let rc = State.Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
         if rc = Guid.Empty 
-            then RhinoScriptingException.Raise "Rhino.Scripting.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.ToNiceString filename width height selfIllumination embed useAlpha makeMesh
+            then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.ToNiceString filename width height selfIllumination embed useAlpha makeMesh
         State.Doc.Views.Redraw()
         rc
 
@@ -83,7 +85,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(x:float, y:float, z:float) : Guid = 
         let rc = State.Doc.Objects.AddPoint(Point3d(x, y, z))
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (NiceFormat.float x) (NiceFormat.float y) (NiceFormat.float z)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (NiceFormat.float x) (NiceFormat.float y) (NiceFormat.float z)
         State.Doc.Views.Redraw()
         rc
 
@@ -92,7 +94,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
     static member AddPoint(point:Point3d) : Guid = 
         let rc = State.Doc.Objects.AddPoint(point)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPoint: Unable to add point to document.  point:'%s'" point.ToNiceString
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  point:'%s'" point.ToNiceString
         State.Doc.Views.Redraw()
         rc
 
@@ -105,15 +107,15 @@ module AutoOpenGeometry =
         if notNull colors && Seq.length(colors) = Seq.length(points) then
             let pc = new PointCloud()
             for i = 0  to -1 + (Seq.length(points)) do
-                let color = Scripting.CoerceColor(colors.[i])
+                let color = RhinoScriptSyntax.CoerceColor(colors.[i])
                 pc.Add(points.[i], color)
             let rc = State.Doc.Objects.AddPointCloud(pc)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPointCloud: Unable to add point cloud to document. points:'%A' colors:'%A'" points colors
+            if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPointCloud: Unable to add point cloud to document. points:'%A' colors:'%A'" points colors
             State.Doc.Views.Redraw()
             rc
         else
             let rc = State.Doc.Objects.AddPointCloud(points)
-            if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddPointCloud: Unable to add point cloud to document. points:'%A' colors:'%A'" points colors
+            if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPointCloud: Unable to add point cloud to document. points:'%A' colors:'%A'" points colors
             State.Doc.Views.Redraw()
             rc
 
@@ -131,22 +133,22 @@ module AutoOpenGeometry =
     ///<param name="text">(string) The text to display</param>
     ///<param name="plane">(Plane) The Plane on which the text will lie.
     ///    The origin of the Plane will be the origin point of the text</param>
-    ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
+    ///<param name="height">(float) Optional, default value: <c>1.0</c>
     ///    The text height</param>
     ///<param name="font">(string) Optional, The text font</param>
-    ///<param name="fontStyle">(int) Optional, Default Value: <c>0</c>
+    ///<param name="fontStyle">(int) Optional, default value: <c>0</c>
     ///    Any of the following flags
     ///    0 = normal
     ///    1 = bold
     ///    2 = italic
     ///    3 = bold and italic</param>
     ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte.
-    ///    Optional, Default Value: <c>TextHorizontalAlignment.Center = 1uy</c>
+    ///    Optional, default value: <c>TextHorizontalAlignment.Center = 1uy</c>
     ///    0uy = Left
     ///    1uy = Center
     ///    2uy = Right</param>
     ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte.
-    ///    Optional, Default Value: <c>TextVerticalAlignment.Middle = 3uy</c>
+    ///    Optional, default value: <c>TextVerticalAlignment.Middle = 3uy</c>
     ///    0uy = Top:                    Attach to top of an "I" on the first line.
     ///    1uy = MiddleOfTop:            Attach to middle of an "I" on the first line.
     ///    2uy = BottomOfTop:            Attach to baseline of first line.
@@ -163,7 +165,7 @@ module AutoOpenGeometry =
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
                             [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid = 
 
-        if isNull text || text = "" then RhinoScriptingException.Raise "Rhino.Scripting.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+        if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
         let bold   = (1 = fontStyle || 3 = fontStyle)
         let italic = (2 = fontStyle || 3 = fontStyle)         
         let ds = State.Doc.DimStyles.Current
@@ -176,48 +178,48 @@ module AutoOpenGeometry =
         let f = DocObjects.Font.FromQuartetProperties(qn, quartetBoldProp, quartetItalicProp)
 
         if isNull f then
-            RhinoScriptingException.Raise "Rhino.Scripting.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
         let te = TextEntity.Create(text, plane, ds, false, 0.0, 0.0)
         te.TextHeight <- height
         if font |> notNull then
             te.Font <- f
         if bold <> quartetBoldProp then
             if DocObjects.Font.FromQuartetProperties(qn, bold, false) |> isNull then
-                RhinoScriptingException.Raise "Rhino.Scripting.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+                RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
             else
                 te.SetBold(bold)|> ignore
         if italic <> quartetItalicProp then
             if DocObjects.Font.FromQuartetProperties(qn, false, italic) |> isNull then
-                RhinoScriptingException.Raise "Rhino.Scripting.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
+                RhinoScriptingException.Raise "RhinoScriptSyntax.AddText failed. text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
             else
                 te.SetItalic(italic)|> ignore
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
         let objectId = State.Doc.Objects.Add(te)       
-        if objectId = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
+        if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         State.Doc.Views.Redraw()
         objectId
 
     ///<summary>Adds a text string to the document.</summary>
     ///<param name="text">(string) The text to display</param>
     ///<param name="pt">(Point3d) a point where to add text. It will be parallel to XY Plane.</param>
-    ///<param name="height">(float) Optional, Default Value: <c>1.0</c>
+    ///<param name="height">(float) Optional, default value: <c>1.0</c>
     ///    The text height</param>
     ///<param name="font">(string) Optional, The text font</param>
-    ///<param name="fontStyle">(int) Optional, Default Value: <c>0</c>
+    ///<param name="fontStyle">(int) Optional, default value: <c>0</c>
     ///    Any of the following flags
     ///    0 = normal
     ///    1 = bold
     ///    2 = italic
     ///    3 = bold and italic</param>
     ///<param name="horizontalAlignment">(DocObjects.TextHorizontalAlignment) or Byte.
-    ///    Optional, Default Value: <c>TextHorizontalAlignment.Center = 1uy</c>
+    ///    Optional, default value: <c>TextHorizontalAlignment.Center = 1uy</c>
     ///    0uy = Left
     ///    1uy = Center
     ///    2uy = Right</param>
     ///<param name="verticalAlignment">(DocObjects.TextVerticalAlignment) or Byte.
-    ///    Optional, Default Value: <c>TextVerticalAlignment.Middle = 3uy</c>
+    ///    Optional, default value: <c>TextVerticalAlignment.Middle = 3uy</c>
     ///    0uy = Top:                    Attach to top of an "I" on the first line.
     ///    1uy = MiddleOfTop:            Attach to middle of an "I" on the first line.
     ///    2uy = BottomOfTop:            Attach to baseline of first line.
@@ -234,7 +236,7 @@ module AutoOpenGeometry =
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
                             [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = 
         let pl = Plane(pt,Vector3d.XAxis,Vector3d.YAxis)
-        Scripting.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
+        RhinoScriptSyntax.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
 
     ///<summary>Add a text dot to the document.</summary>
     ///<param name="text">(string) String in dot</param>
@@ -242,7 +244,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) The identifier of the new object.</returns>
     static member AddTextDot(text:string, point:Point3d) : Guid = 
         let rc = State.Doc.Objects.AddTextDot(text, point)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (Nice.str point)
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (Nice.str point)
         State.Doc.Views.Redraw()
         rc
 
@@ -254,7 +256,7 @@ module AutoOpenGeometry =
     ///<returns>(Guid) The identifier of the new object.</returns>
     static member AddTextDot(text:string, x:float,y,z) : Guid = 
         let rc = State.Doc.Objects.AddTextDot(text, Point3d(x,y,z))
-        if rc = Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.AddTextDot: Unable to add TextDot to document. text:'%s' at x:%g, y:%g, z:%g" text x y z
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' at x:%g, y:%g, z:%g" text x y z
         State.Doc.Views.Redraw()
         rc
 
@@ -264,16 +266,16 @@ module AutoOpenGeometry =
     ///<returns>(float) area.</returns>
     static member Area(geometry:GeometryBase) : float =         
         let mp = AreaMassProperties.Compute([geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties from geometry:'%s'" (Nice.str geometry)
+        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from geometry:'%s'" (Nice.str geometry)
         mp.Area
 
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area.</returns>
     static member Area(objectId:Guid) : float = 
-        let rhobj = Scripting.CoerceRhinoObject(objectId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
-        if mp |> isNull then RhinoScriptingException.Raise "Rhino.Scripting.Area: Unable to compute area mass properties from objectId:'%s'" (Nice.str objectId)
+        if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from objectId:'%s'" (Nice.str objectId)
         mp.Area
 
     ///<summary>Returns a world axis-aligned bounding box of several objects.
@@ -299,7 +301,7 @@ module AutoOpenGeometry =
     static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox = 
         let mutable bbox = BoundingBox.Empty
         for o in objects do
-            let g =  Scripting.CoerceGeometry o
+            let g =  RhinoScriptSyntax.CoerceGeometry o
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
         bbox
 
@@ -311,7 +313,7 @@ module AutoOpenGeometry =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBoxEstimate(object:Guid) : BoundingBox = 
-        let g =  Scripting.CoerceGeometry object
+        let g =  RhinoScriptSyntax.CoerceGeometry object
         g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
 
@@ -323,7 +325,7 @@ module AutoOpenGeometry =
     static member BoundingBox(objects:Guid seq) : BoundingBox = 
         let mutable bbox = BoundingBox.Empty
         for o in objects do
-            let g =  Scripting.CoerceGeometry o
+            let g =  RhinoScriptSyntax.CoerceGeometry o
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
         bbox
 
@@ -345,13 +347,13 @@ module AutoOpenGeometry =
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(object:Guid) : BoundingBox = 
-        let g =  Scripting.CoerceGeometry object
+        let g =  RhinoScriptSyntax.CoerceGeometry object
         g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
     ///<summary>Returns a custom Plane axis-aligned bounding box of several objects.</summary>
     ///<param name="objects">(Guid seq) The identifiers of the objects</param>
     ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
-    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="inWorldCoords">(bool) Optional, default value: <c>true</c>
     ///    Returns the box as world coordinates or custom Plane coordinates.</param>
     ///<returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
@@ -359,10 +361,10 @@ module AutoOpenGeometry =
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box = 
         let mutable bbox = BoundingBox.Empty
-        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in Rhino.Scripting.BoundingBox of %s" plane.ToNiceString (Nice.str objects)
+        if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.ToNiceString (Nice.str objects)
         let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
         objects
-        |> Seq.map Scripting.CoerceGeometry
+        |> Seq.map RhinoScriptSyntax.CoerceGeometry
         |> Seq.iter (fun g -> bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(worldtoplane)))
 
         if  inWorldCoords then
@@ -376,14 +378,14 @@ module AutoOpenGeometry =
     ///<summary>Returns a custom Plane axis-aligned bounding box of one object.</summary>
     ///<param name="object">(Guid) The identifier of the object</param>
     ///<param name="plane">(Plane) Plane to which the bounding box should be aligned</param>
-    ///<param name="inWorldCoords">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="inWorldCoords">(bool) Optional, default value: <c>true</c>
     ///    Returns the box as world coordinates or custom Plane coordinates.</param>
     ///<returns>(Geometry.Box) The Box ,oriented to the Plane or in Plane coordinates.
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
     static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box = 
-        Scripting.BoundingBox([object],plane,inWorldCoords)
+        RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
     ///<summary>Returns a new inflated the box with equal amounts in all directions.
     ///   Inflating with negative amounts may result in decreasing and invalid boxes.
@@ -395,7 +397,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
-        if not b.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
         b
 
     ///<summary>Returns a new inflated box with custom x, y and z amounts in their directions.
@@ -410,7 +412,7 @@ module AutoOpenGeometry =
     static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox = 
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
-        if not b.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
+        if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
         b
 
 
@@ -419,18 +421,18 @@ module AutoOpenGeometry =
     ///<param name="second">(Guid) The identifier of the second object to compare</param>
     ///<returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
     static member CompareGeometry(first:Guid, second:Guid) : bool = 
-        let firstG = Scripting.CoerceGeometry(first)
-        let secondG = Scripting.CoerceGeometry(second)
+        let firstG = RhinoScriptSyntax.CoerceGeometry(first)
+        let secondG = RhinoScriptSyntax.CoerceGeometry(second)
         GeometryBase.GeometryEquals(firstG, secondG)
 
 
     ///<summary>Creates outline Curves for a given text entity.</summary>
     ///<param name="textId">(Guid) Identifier of Text object to explode</param>
-    ///<param name="delete">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the text object after the Curves have been created</param>
     ///<returns>(Guid array) Array of outline Curves.</returns>
     static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> = 
-        let rhobj = Scripting.CoerceRhinoObject(textId)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
         let rc = rarr { for curve in curves do yield State.Doc.Objects.AddCurve(curve, attr) }
@@ -443,42 +445,42 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
     static member IsClippingPlane(objectId:Guid) : bool = 
-        Scripting.CoerceGeometry objectId :? ClippingPlaneSurface
+        RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
 
 
     ///<summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point.</returns>
     static member IsPoint(objectId:Guid) : bool = 
-        Scripting.CoerceGeometry objectId :? Point
+        RhinoScriptSyntax.CoerceGeometry objectId :? Point
 
 
     ///<summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud.</returns>
     static member IsPointCloud(objectId:Guid) : bool = 
-        Scripting.CoerceGeometry objectId :? PointCloud
+        RhinoScriptSyntax.CoerceGeometry objectId :? PointCloud
 
 
     ///<summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object.</returns>
     static member IsText(objectId:Guid) : bool = 
-        Scripting.CoerceGeometry objectId :? TextEntity
+        RhinoScriptSyntax.CoerceGeometry objectId :? TextEntity
 
 
     ///<summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object.</returns>
     static member IsTextDot(objectId:Guid) : bool = 
-        Scripting.CoerceGeometry objectId :? TextDot
+        RhinoScriptSyntax.CoerceGeometry objectId :? TextDot
 
 
     ///<summary>Returns the point count of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(int) number of points.</returns>
     static member PointCloudCount(objectId:Guid) : int = 
-        let pc = Scripting.CoercePointCloud(objectId)
+        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.Count
 
 
@@ -486,7 +488,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False.</returns>
     static member PointCloudHasHiddenPoints(objectId:Guid) : bool = 
-        let pc = Scripting.CoercePointCloud(objectId)
+        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.HiddenPointCount>0
 
 
@@ -494,7 +496,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False.</returns>
     static member PointCloudHasPointColors(objectId:Guid) : bool = 
-        let pc = Scripting.CoercePointCloud(objectId)
+        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.ContainsColors
 
 
@@ -502,7 +504,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool Rarr) List of point cloud hidden states.</returns>
     static member PointCloudHidePoints(objectId:Guid) : Rarr<bool> = //GET
-        let pc = Scripting.CoercePointCloud(objectId)
+        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         rarr { for item in pc do yield item.Hidden }
 
 
@@ -511,7 +513,7 @@ module AutoOpenGeometry =
     ///<param name="hidden">(bool seq) List of booleans matched to the index of points to be hidden, On empty seq all point wil be shown</param>
     ///<returns>(unit) void, nothing.</returns>
     static member PointCloudHidePoints(objectId:Guid, hidden:bool seq) : unit = //SET
-        let pc = Scripting.CoercePointCloud objectId
+        let pc = RhinoScriptSyntax.CoercePointCloud objectId
         if Seq.isEmpty hidden then
             pc.ClearHiddenFlags()
 
@@ -519,9 +521,9 @@ module AutoOpenGeometry =
                 for i, h in Seq.indexed hidden do
                     pc.[i].Hidden <- h
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.PointCloudHidePoints length of hidden values does not match point cloud point count"
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> ignore 
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -530,7 +532,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Drawing.Color Rarr) List of point cloud colors.</returns>
     static member PointCloudPointColors(objectId:Guid) : Drawing.Color Rarr = //GET
-        let pc = Scripting.CoercePointCloud objectId
+        let pc = RhinoScriptSyntax.CoercePointCloud objectId
         rarr { for item in pc do yield item.Color }
 
     ///<summary>Modifies the point colors of a point cloud object.</summary>
@@ -538,14 +540,14 @@ module AutoOpenGeometry =
     ///<param name="colors">(Drawing.Color seq) List of color values if you want to adjust colors, empty Seq to clear colors</param>
     ///<returns>(unit) void, nothing.</returns>
     static member PointCloudPointColors(objectId:Guid, colors:Drawing.Color seq) : unit = //SET
-        let pc = Scripting.CoercePointCloud objectId
+        let pc = RhinoScriptSyntax.CoercePointCloud objectId
         if colors |> Seq.isEmpty then
             pc.ClearColors()
         elif Seq.length(colors) = pc.Count then
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.PointCloudPointColors length of color values does not match PointCloud point count"
-        (Scripting.CoerceRhinoObject objectId).CommitChanges() |> ignore 
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudPointColors length of color values does not match PointCloud point count"
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
 
 
@@ -554,7 +556,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Point3d array) list of points.</returns>
     static member PointCloudPoints(objectId:Guid) : array<Point3d> = 
-        let pc = Scripting.CoercePointCloud(objectId)
+        let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.GetPoints()
 
 
@@ -563,7 +565,7 @@ module AutoOpenGeometry =
     /// This can also be a list of points</param>
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the PointCloud.
     /// This can also be specified as a point cloud</param>
-    ///<param name="amount">(int) Optional, Default Value: <c>1</c>
+    ///<param name="amount">(int) Optional, default value: <c>1</c>
     ///    The amount of required closest points. Defaults to 1</param>
     ///<returns>(int array seq) nested lists with amount items within a list, with the indices of the found points.</returns>
     static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> = 
@@ -587,7 +589,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a point object</param>
     ///<returns>(Point3d) The current 3-D point location.</returns>
     static member PointCoordinates(objectId:Guid) : Point3d = //GET
-        Scripting.Coerce3dPoint(objectId)
+        RhinoScriptSyntax.Coerce3dPoint(objectId)
 
 
     ///<summary>Modifies the X, Y, and Z coordinates of a point object.</summary>
@@ -595,8 +597,8 @@ module AutoOpenGeometry =
     ///<param name="point">(Point3d) A new 3D point location</param>
     ///<returns>(unit) void, nothing.</returns>
     static member PointCoordinates(objectId:Guid, point:Point3d) : unit = //SET
-        let pt = Scripting.Coerce3dPoint(objectId)
-        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "Rhino.Scripting.PointCoordinates failed to change object %s to %s" (Nice.str objectId) (Nice.str point)
+        let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
+        if not <| State.Doc.Objects.Replace(objectId, pt) then RhinoScriptingException.Raise "RhinoScriptSyntax.PointCoordinates failed to change object %s to %s" (Nice.str objectId) (Nice.str point)
         State.Doc.Views.Redraw()
 
 
@@ -605,16 +607,16 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(string) The current text dot font.</returns>
     static member TextDotFont(objectId:Guid) : string = //GET
-        (Scripting.CoerceTextDot(objectId)).FontFace
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontFace
 
     ///<summary>Modifies the font of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="fontFace">(string) New font face name</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotFont(objectId:Guid, fontFace:string) : unit = //SET
-        let textdot = Scripting.CoerceTextDot(objectId)
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontFace <-  fontFace
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font of multiple text dots.</summary>
@@ -623,9 +625,9 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotFont(objectIds:Guid seq, fontFace:string) : unit = //MULTISET
         for objectId in objectIds do
-            let textdot = Scripting.CoerceTextDot(objectId)
+            let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontFace <-  fontFace
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotFont failed to change object %s to '%s'" (Nice.str objectId) fontFace
         State.Doc.Views.Redraw()
 
 
@@ -633,16 +635,16 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(int) The current text dot height.</returns>
     static member TextDotHeight(objectId:Guid) : int = //GET
-        (Scripting.CoerceTextDot(objectId)).FontHeight
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).FontHeight
 
     ///<summary>Modifies the font height of a text dot.</summary>
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<param name="height">(int) New font height</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotHeight(objectId:Guid, height:int) : unit = //SET
-        let textdot = Scripting.CoerceTextDot(objectId)
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.FontHeight <- height
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotHeight failed to change object %s to %d" (Nice.str objectId) height
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Nice.str objectId) height
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font height of multiple text dots.</summary>
@@ -651,9 +653,9 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotHeight(objectIds:Guid seq, height:int) : unit = //MULTISET
         for objectId in objectIds do
-            let textdot = Scripting.CoerceTextDot(objectId)
+            let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.FontHeight <- height
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotHeight failed to change object %s to %d" (Nice.str objectId) height
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotHeight failed to change object %s to %d" (Nice.str objectId) height
         State.Doc.Views.Redraw()
 
 
@@ -661,7 +663,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) Identifier of a text dot object</param>
     ///<returns>(Point3d) The current 3-D text dot location.</returns>
     static member TextDotPoint(objectId:Guid) : Point3d = //GET
-        (Scripting.CoerceTextDot(objectId)).Point
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).Point
 
 
     ///<summary>Modifies the location, or insertion point, on a text dot object.</summary>
@@ -669,9 +671,9 @@ module AutoOpenGeometry =
     ///<param name="point">(Point3d) A new 3D point location</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotPoint(objectId:Guid, point:Point3d) : unit = //SET
-        let textdot = Scripting.CoerceTextDot(objectId)
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Point <-  point
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotPoint failed to change object %s to %s" (Nice.str objectId) point.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotPoint failed to change object %s to %s" (Nice.str objectId) point.ToNiceString
         State.Doc.Views.Redraw()
 
 
@@ -681,7 +683,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text dot object</param>
     ///<returns>(string) The current text dot text.</returns>
     static member TextDotText(objectId:Guid) : string = //GET
-        (Scripting.CoerceTextDot(objectId)).Text
+        (RhinoScriptSyntax.CoerceTextDot(objectId)).Text
 
 
 
@@ -690,9 +692,9 @@ module AutoOpenGeometry =
     ///<param name="text">(string) A new string for the dot</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotText(objectId:Guid, text:string) : unit = //SET
-        let textdot = Scripting.CoerceTextDot(objectId)
+        let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
         textdot.Text <-  text
-        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotText failed to change object %s to '%s'" (Nice.str objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Nice.str objectId) text
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the text on multiple text dot objects.</summary>
@@ -701,9 +703,9 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextDotText(objectIds:Guid seq, text:string) : unit = //MULTISET
         for objectId in objectIds do
-            let textdot = Scripting.CoerceTextDot(objectId)
+            let textdot = RhinoScriptSyntax.CoerceTextDot(objectId)
             textdot.Text <-  text
-            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "Rhino.Scripting.TextDotText failed to change object %s to '%s'" (Nice.str objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, textdot) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextDotText failed to change object %s to '%s'" (Nice.str objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -711,7 +713,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name.</returns>
     static member TextObjectFont(objectId:Guid) : string = //GET        
-        (Scripting.CoerceTextEntity(objectId)).Font.QuartetName
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
 
 
 
@@ -719,16 +721,16 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(float) The current text height.</returns>
     static member TextObjectHeight(objectId:Guid) : float = //GET
-        (Scripting.CoerceTextEntity(objectId)).TextHeight
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).TextHeight
 
     ///<summary>Modifies the height of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="height">(float) The new text height</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.TextHeight <-  height
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) height.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) height.ToNiceString
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the height of multiple text objects.</summary>
@@ -737,9 +739,9 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectHeight(objectIds:Guid seq, height:float) : unit = //MULTISET
         for objectId in objectIds do
-            let annotation = Scripting.CoerceTextEntity(objectId)
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.TextHeight <-  height
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) height.ToNiceString
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) height.ToNiceString
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
@@ -747,16 +749,16 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Plane) The current Plane.</returns>
     static member TextObjectPlane(objectId:Guid) : Plane = //GET
-        (Scripting.CoerceTextEntity(objectId)).Plane
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane
 
     ///<summary>Modifies the Plane used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="plane">(Plane) The new text object Plane</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectPlane(objectId:Guid, plane:Plane) : unit = //SET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.Plane <-  plane
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectPlane failed.  objectId:'%s' plane:'%s'" (Nice.str objectId) plane.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPlane failed.  objectId:'%s' plane:'%s'" (Nice.str objectId) plane.ToNiceString
         State.Doc.Views.Redraw()
 
 
@@ -764,19 +766,19 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(Point3d) The 3D point identifying the current location.</returns>
     static member TextObjectPoint(objectId:Guid) : Point3d = //GET
-        (Scripting.CoerceTextEntity(objectId)).Plane.Origin
+        (RhinoScriptSyntax.CoerceTextEntity(objectId)).Plane.Origin
 
     ///<summary>Modifies the location of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="point">(Point3d) The new text object location</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectPoint(objectId:Guid, point:Point3d) : unit = //SET
-        let text = Scripting.CoerceTextEntity(objectId)
+        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let mutable plane = text.Plane
         plane.Origin <-  point
         text.Plane <-  plane
 
-        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectPoint failed.  objectId:'%s' point:'%s'" (Nice.str objectId) point.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, text) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectPoint failed.  objectId:'%s' point:'%s'" (Nice.str objectId) point.ToNiceString
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the font style of a text object.</summary>
@@ -787,7 +789,7 @@ module AutoOpenGeometry =
     ///    2 = Italic
     ///    3 = Bold and Italic.</returns>
     static member TextObjectStyle(objectId:Guid) : int = //GET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font
         let mutable rc = 0
         if fontdata.Bold   then rc <- 1 + rc
@@ -798,7 +800,7 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current string value.</returns>
     static member TextObjectText(objectId:Guid) : string = //GET
-        let text = Scripting.CoerceTextEntity(objectId)
+        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
         text.PlainText
 
     ///<summary>Modifies the plain text string of a text object.</summary>
@@ -806,9 +808,9 @@ module AutoOpenGeometry =
     ///<param name="text">(string) A new text string</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectText(objectId:Guid, text:string) : unit = //SET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.PlainText <-  text
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
         State.Doc.Views.Redraw()
 
 
@@ -819,9 +821,9 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectText(objectIds:Guid seq, text:string) : unit = //MULTISET
         for objectId in objectIds do
-            let annotation = Scripting.CoerceTextEntity(objectId)
+            let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.PlainText <-  text
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
         State.Doc.Views.Redraw()
     
 
@@ -829,24 +831,24 @@ module AutoOpenGeometry =
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current RichText formatting string.</returns>
     static member TextObjectRichText(objectId:Guid) : string = //GET
-        let text = Scripting.CoerceTextEntity(objectId)
+        let text = RhinoScriptSyntax.CoerceTextEntity(objectId)
         text.RichText
 
 
     ///<summary>Modifies the RichText formatting string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<param name="rtfString">(string) A new text RichText formatting string</param>
-    ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
+    ///<param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectRichText(objectId:Guid, rtfString:string,[<OPT;DEF("")>]style:string ) : unit = //SET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText, style not found:'%s'"  style            
+            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style            
             annotation.SetRichText(rtfString, ds)
         else 
             annotation.RichText <-  rtfString
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
         State.Doc.Views.Redraw()
 
 
@@ -854,21 +856,21 @@ module AutoOpenGeometry =
     ///<summary>Modifies the RichText formatting string of multiple text objects.</summary>
     ///<param name="objectIds">(Guid seq) The identifiers of multiple text objects</param>
     ///<param name="rtfString">(string) A new text RichText formatting string</param>
-    ///<param name="style">(string) Optional, Default Value: <c>""</c> Name of dimension style</param>
+    ///<param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET        
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText, style not found:'%s'"  style    
+            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style    
             for objectId in objectIds do
-                let annotation = Scripting.CoerceTextEntity(objectId)                
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Nice.str objectId) rtfString style
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)                
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Nice.str objectId) rtfString style
                 annotation.SetRichText(rtfString, ds)
         else             
             for objectId in objectIds do
-                let annotation = Scripting.CoerceTextEntity(objectId)
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
                 annotation.RichText <-  rtfString
-                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
+                if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
         State.Doc.Views.Redraw()
 
 
@@ -882,7 +884,7 @@ module AutoOpenGeometry =
     ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font          
         let f = 
             match style with
@@ -890,10 +892,10 @@ module AutoOpenGeometry =
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
-            |_ -> (RhinoScriptingException.Raise "Rhino.Scripting.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
-        if isNull f then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName 
+            |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
+        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName 
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
-            RhinoScriptingException.Raise "Rhino.Scripting.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
+            RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the font style of multiple text objects. Keeps the font face</summary>
@@ -905,7 +907,7 @@ module AutoOpenGeometry =
     ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
-        for objectId in objectIds do Scripting.TextObjectStyle(objectId, style)        
+        for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)        
 
 
     ///<summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
@@ -913,7 +915,7 @@ module AutoOpenGeometry =
     ///<param name="font">(string) The new Font Name</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
-        let annotation = Scripting.CoerceTextEntity(objectId)
+        let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         let fontdata = annotation.Font           
         let f = 
             DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
@@ -923,9 +925,9 @@ module AutoOpenGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "Rhino.Scripting.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)        
+            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)        
         annotation.Font <- f
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "Rhino.Scripting.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 
@@ -934,6 +936,6 @@ module AutoOpenGeometry =
     ///<param name="font">(string) The new Font Name</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectFont(objectIds:Guid seq, font:string) : unit = //MULTISET
-        for objectId in objectIds do  Scripting.TextObjectFont(objectId, font)
+        for objectId in objectIds do  RhinoScriptSyntax.TextObjectFont(objectId, font)
         State.Doc.Views.Redraw()
 

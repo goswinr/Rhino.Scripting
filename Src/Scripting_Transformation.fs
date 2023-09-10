@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -10,7 +12,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenTransformation =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -48,7 +50,7 @@ module AutoOpenTransformation =
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform = 
         let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
-        if not xForm.IsValid then RhinoScriptingException.Raise "Rhino.Scripting.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        if not xForm.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
 
 
@@ -67,7 +69,7 @@ module AutoOpenTransformation =
                                      y1:Vector3d,
                                      z1:Vector3d) : Transform = 
         let xForm = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
 
 
@@ -117,7 +119,7 @@ module AutoOpenTransformation =
     ///<returns>(Transform) The inverted 4x4 transformation matrix.</returns>
     static member XformInverse(xForm:Transform) : Transform = 
         let rc, inverse = xForm.TryGetInverse()
-        if not rc then RhinoScriptingException.Raise "Rhino.Scripting.XformInverse failed.  xForm:'%A'" xForm
+        if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.XformInverse failed.  xForm:'%A'" xForm
         inverse
 
 
@@ -151,7 +153,7 @@ module AutoOpenTransformation =
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform = 
         let xForm = Transform.PlaneToPlane(initialPlane, finalPlane)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
 
 
@@ -165,7 +167,7 @@ module AutoOpenTransformation =
                                   centerPoint:Point3d) : Transform = 
         let anglerad = toRadians(angleDegrees)
         let xForm = Transform.Rotation(anglerad, rotationAxis, centerPoint)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
         xForm
 
 
@@ -179,7 +181,7 @@ module AutoOpenTransformation =
                                   endDirection:Vector3d,
                                   centerPoint:Point3d) : Transform = 
         let xForm = Transform.Rotation(startDirection, endDirection, centerPoint)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
         xForm
 
 
@@ -198,7 +200,7 @@ module AutoOpenTransformation =
                                   y1:Vector3d,
                                   z1:Vector3d) : Transform = 
         let xForm = Transform.Rotation(x0, y0, z0, x1, y1, z1)
-        if not xForm.IsValid   then RhinoScriptingException.Raise "Rhino.Scripting.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
+        if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
 
 
@@ -232,14 +234,14 @@ module AutoOpenTransformation =
     ///    as a 3-D point.</summary>
     ///<param name="point">(Point3d) 2D point</param>
     ///<param name="view">(string) Optional, Title of a view. If omitted, the active view is used</param>
-    ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="screenCoordinates">(bool) Optional, default value: <c>false</c>
     ///    If False, point is in client-area coordinates. If True,
     ///    point is in screen-area coordinates</param>
     ///<returns>(Point3d) The transformedPoint.</returns>
     static member XformScreenToWorld( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =         
-        let view = Scripting.CoerceView(view |? "") // ""to get active view
+        let view = RhinoScriptSyntax.CoerceView(view |? "") // ""to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
         let mutable point3d = Point3d(point.X, point.Y, 0.0)
@@ -285,14 +287,14 @@ module AutoOpenTransformation =
     ///    as a 2D point.</summary>
     ///<param name="point">(Point3d) 3D point in world coordinates</param>
     ///<param name="view">(string) Optional, Title of a view. If omitted, the active view is used</param>
-    ///<param name="screenCoordinates">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="screenCoordinates">(bool) Optional, default value: <c>false</c>
     ///    If False, the function returns the results as
     ///    client-area coordinates. If True, the result is in screen-area coordinates</param>
     ///<returns>(Point2d) 2D point.</returns>
     static member XformWorldToScreen( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
                                       [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d = 
-        let view = Scripting.CoerceView(view |? "")// to get active view
+        let view = RhinoScriptSyntax.CoerceView(view |? "")// to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
         let mutable point3 = xForm * point

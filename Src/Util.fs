@@ -1,4 +1,6 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open System.Globalization

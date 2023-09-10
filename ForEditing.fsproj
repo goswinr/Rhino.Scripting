@@ -15,7 +15,7 @@
     <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->    
     <PackageReference Update="FSharp.Core" Version="4.5.2" /> 
 	  
-    <!-- 6.7.18199 supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
+    <!-- using version 6.7.18199 because it supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
     <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" />	 
     <PackageReference Include="FsEx" Version="0.14.1" />
   </ItemGroup>
@@ -62,7 +62,7 @@
     <Compile Include="Src/Scripting_Utility.fs" />
     <Compile Include="Src/Scripting_Views.fs" />
 
-    <!-- included only for editing version numbers:-->
+    <!-- included only for editing referenced file names:-->
     <None Include="ForPublishing.fsproj" />
     <None Include="ForPublishingV7.fsproj" />
     <None Include="ForEditingV7.fsproj" />

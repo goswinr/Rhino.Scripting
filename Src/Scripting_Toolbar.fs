@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -8,7 +10,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenToolbar =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -18,7 +20,7 @@ module AutoOpenToolbar =
 
     ///<summary>Closes a currently open tool-bar collection.</summary>
     ///<param name="name">(string) Name of a currently open tool-bar collection</param>
-    ///<param name="prompt">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="prompt">(bool) Optional, default value: <c>false</c>
     ///    If True, user will be prompted to save the collection file
     ///    if it has been modified prior to closing</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -48,7 +50,7 @@ module AutoOpenToolbar =
     ///<summary>Verifies a tool-bar (or tool-bar group) exists in an open collection file.</summary>
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbar">(string) Name of a tool-bar group</param>
-    ///<param name="group">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="group">(bool) Optional, default value: <c>false</c>
     ///    If tool-bar parameter is referring to a tool-bar group</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsToolbar(name:string, toolbar:string, [<OPT;DEF(false)>]group:bool) : bool = 
@@ -82,8 +84,8 @@ module AutoOpenToolbar =
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
             if notNull group then  group.IsDocked
-            else RhinoScriptingException.Raise "Rhino.Scripting.IsToolbarDocked failed on name '%s'" name
-        else RhinoScriptingException.Raise "Rhino.Scripting.IsToolbarDocked failed on name '%s'" name
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarDocked failed on name '%s'" name
 
 
     ///<summary>Checks if a tool-bar group in an open tool-bar collection is visible.</summary>
@@ -95,8 +97,8 @@ module AutoOpenToolbar =
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
             if notNull group then  group.Visible
-            else RhinoScriptingException.Raise "Rhino.Scripting.IsToolbarVisible failed on name '%s'" name
-        else RhinoScriptingException.Raise "Rhino.Scripting.IsToolbarVisible failed on name '%s'" name
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.IsToolbarVisible failed on name '%s'" name
 
 
     ///<summary>Opens a tool-bar collection file.</summary>
@@ -105,7 +107,7 @@ module AutoOpenToolbar =
     static member OpenToolbarCollection(file:string) : string = 
         let tbfile = RhinoApp.ToolbarFiles.Open(file)
         if notNull tbfile then  tbfile.Name
-        else RhinoScriptingException.Raise "Rhino.Scripting.OpenToolbarCollection failed on file '%s'" file
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
 
 
     ///<summary>Saves an open tool-bar collection to disk.</summary>
@@ -167,7 +169,7 @@ module AutoOpenToolbar =
 
     ///<summary>Returns the number of tool-bars or groups in a currently open tool-bar file.</summary>
     ///<param name="name">(string) Name of currently open tool-bar collection</param>
-    ///<param name="groups">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="groups">(bool) Optional, default value: <c>false</c>
     ///    If true, return the number of tool-bar groups in the file</param>
     ///<returns>(int) number of tool-bars.</returns>
     static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int = 
@@ -182,7 +184,7 @@ module AutoOpenToolbar =
     ///<summary>Returns the names of all tool-bars (or tool-bar groups) found in a
     ///    currently open tool-bar file.</summary>
     ///<param name="name">(string) Name of currently open tool-bar collection</param>
-    ///<param name="groups">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="groups">(bool) Optional, default value: <c>false</c>
     ///    If true, return the names of tool-bar groups in the file</param>
     ///<returns>(string Rarr) names of all tool-bars (or tool-bar groups).</returns>
     static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string Rarr = 

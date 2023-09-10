@@ -1,11 +1,13 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open System.Collections.Generic
 
 open Rhino.Geometry
-open Rhino.ScriptingFsharp
+
 
 open FsEx
 open FsEx.UtilMath
@@ -13,7 +15,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenPointVector =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -24,7 +26,7 @@ module AutoOpenPointVector =
     ///<summary>Compares two vectors to see if they are parallel within one degree or custom tolerance.</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
-    ///<param name="toleranceDegree">(float) Optional, Default Value: <c>1.0</c>
+    ///<param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
     ///    Angle Tolerance in degree</param>
     ///<returns>(int) The value represents
     ///     -1 = the vectors are anti-parallel
@@ -40,7 +42,7 @@ module AutoOpenPointVector =
     ///<summary>Compares two vectors to see if they are perpendicular.</summary>
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to compare</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to compare</param>
-    ///<param name="toleranceDegree">(float) Optional, Default Value: <c>1.0</c>
+    ///<param name="toleranceDegree">(float) Optional, default value: <c>1.0</c>
     ///    Angle Tolerance in degree</param>
     ///<returns>(bool) True if vectors are perpendicular, otherwise False.</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
@@ -80,7 +82,7 @@ module AutoOpenPointVector =
     static member PointArrayClosestPoint(points:Point3d IList, testPoint:Point3d) : int = 
         let index = Rhino.Collections.Point3dList.ClosestIndexInList(points, testPoint)
         if index>=0 then index
-        else RhinoScriptingException.Raise "Rhino.Scripting.PointArrayClosestPoint failed on %A, %A" points testPoint
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PointArrayClosestPoint failed on %A, %A" points testPoint
 
 
     ///<summary>Transforms a list of 3D points.</summary>
@@ -104,7 +106,7 @@ module AutoOpenPointVector =
         let mutable closest = Unchecked.defaultof<Guid*Point3d*float>
         let mutable distance = Double.MaxValue
         for objectId in objectIds do
-            let geom = Scripting.CoerceGeometry(objectId)
+            let geom = RhinoScriptSyntax.CoerceGeometry(objectId)
             match geom with
             | :?  Point as pointgeometry ->
                 distance <- point.DistanceTo( pointgeometry.Location )
@@ -150,16 +152,16 @@ module AutoOpenPointVector =
                 if distance < t3 closest then
                     closest  <-  objectId, meshclosest, distance
 
-            | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (Scripting.ObjectDescription(objectId)) objectId
+            | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject: non supported object type %A %A  Point, PointCloud, Curve, Brep or Mesh" (RhinoScriptSyntax.ObjectDescription(objectId)) objectId
 
         if t1 closest <> Guid.Empty then closest
-        else RhinoScriptingException.Raise "Rhino.Scripting.PointClosestObject failed on %A and %A" point objectIds
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PointClosestObject failed on %A and %A" point objectIds
 
 
     ///<summary>Compares two 3D points.</summary>
     ///<param name="point1">(Point3d) Point1 of the points to compare</param>
     ///<param name="point2">(Point3d) Point2 of the points to compare</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>RhinoMath.ZeroTolerance</c>
+    ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
     ///    Tolerance to use for comparison.</param>
     ///<returns>(bool) True or False.</returns>
     static member PointCompare( point1:Point3d,
@@ -176,14 +178,14 @@ module AutoOpenPointVector =
     ///<returns>(Point3d) resulting point.</returns>
     static member PointDivide(point:Point3d, divide:float) : Point3d = 
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "Rhino.Scripting.PointDivide: Cannot divide by Zero or almost Zero %f" divide
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PointDivide: Cannot divide by Zero or almost Zero %f" divide
         else
             point/divide
 
 
     ///<summary>Checks if a list of 3D points are coplanar.</summary>
     ///<param name="points">(Point3d seq) 3D points to test</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
+    ///<param name="tolerance">(float) Optional, default value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
     ///    Tolerance to use when verifying</param>
     ///<returns>(bool) True or False.</returns>
     static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
@@ -227,7 +229,7 @@ module AutoOpenPointVector =
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
                                       direction:Vector3d) : Point3d array = 
-        let meshes =  rarr { for objectId in meshIds do yield Scripting.CoerceMesh(objectId) }
+        let meshes =  rarr { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
 
@@ -241,7 +243,7 @@ module AutoOpenPointVector =
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
                                          direction:Vector3d) : Point3d array = 
-        let breps =  rarr { for objectId in surfaceIds do yield Scripting.CoerceBrep(objectId) }
+        let breps =  rarr { for objectId in surfaceIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
 
@@ -252,7 +254,7 @@ module AutoOpenPointVector =
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
     static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array = 
-        match Scripting.CoerceGeometry(objectId) with
+        match RhinoScriptSyntax.CoerceGeometry(objectId) with
         | :? Mesh as mesh->
             let points = mesh.PullPointsToMesh(points)
             points       
@@ -261,8 +263,8 @@ module AutoOpenPointVector =
                 let tolerance = State.Doc.ModelAbsoluteTolerance
                 brep.Faces.[0].PullPointsToFace(points, tolerance)
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.PullPoints does not support %A" (Scripting.ObjectDescription(objectId))
+                RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints only works on surface and single sided breps not %d sided ones" brep.Faces.Count
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PullPoints does not support %A" (RhinoScriptSyntax.ObjectDescription(objectId))
 
 
     ///<summary>Adds two 3D vectors.</summary>
@@ -281,9 +283,9 @@ module AutoOpenPointVector =
         let vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
         let vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
-            RhinoScriptingException.Raise "Rhino.Scripting.VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
+            RhinoScriptingException.Raise "RhinoScriptSyntax.VectorAngle: Unable to unitize vector.  vector1:'%A' vector2:'%A'" vector1 vector2
         let mutable dot = vector1 * vector2
-        dot <- Scripting.Clamp(-1.0 , 1.0 , dot)
+        dot <- RhinoScriptSyntax.Clamp(-1.0 , 1.0 , dot)
         let radians = Math.Acos(dot)
         toDegrees(radians)
 
@@ -321,7 +323,7 @@ module AutoOpenPointVector =
     ///<returns>(Vector3d) resulting vector.</returns>
     static member VectorDivide(vector:Vector3d, divide:float) : Vector3d = 
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
-            RhinoScriptingException.Raise "Rhino.Scripting.VectorDivide: Cannot divide by Zero or almost Zero %f" divide
+            RhinoScriptingException.Raise "RhinoScriptSyntax.VectorDivide: Cannot divide by Zero or almost Zero %f" divide
         else
             vector/divide
 
@@ -368,7 +370,7 @@ module AutoOpenPointVector =
         let angleradians = RhinoMath.ToRadians(angleDegrees)
         let rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
-        else RhinoScriptingException.Raise "Rhino.Scripting.VectorRotate failed on %A, %A, %A" vector angleDegrees axis
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.VectorRotate failed on %A, %A, %A" vector angleDegrees axis
 
 
     ///<summary>Scales a 3-D vector.</summary>
@@ -402,7 +404,7 @@ module AutoOpenPointVector =
     ///<returns>(Vector3d) unitized vector.</returns>
     static member inline VectorUnitize(vector:Vector3d) : Vector3d = 
         let le = sqrt (vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z)
-        if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "Rhino.Scripting.VectorUnitize failed on zero length or very short Vector %s" vector.ToNiceString
+        if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "RhinoScriptSyntax.VectorUnitize failed on zero length or very short Vector %s" vector.ToNiceString
         let f = 1. / le
         Vector3d(vector.X*f, vector.Y*f, vector.Z*f)
 
@@ -410,7 +412,7 @@ module AutoOpenPointVector =
     ///<summary>Returns either a world axis-aligned or a construction Plane axis-aligned
     ///    bounding box of an array of 3-D point locations.</summary>
     ///<param name="points">(Point3d seq) A list of 3-D points</param>
-    ///<param name="plane">(Plane) Optional, Default Value: <c>Plane.WorldXY</c>
+    ///<param name="plane">(Plane) Optional, default value: <c>Plane.WorldXY</c>
     ///    Plane to which the bounding box should be aligned,
     ///    If omitted, a world axis-aligned bounding box
     ///    will be calculated</param>

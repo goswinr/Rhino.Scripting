@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open System.Collections.Generic
@@ -12,7 +14,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenUserInterface =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -37,7 +39,7 @@ module AutoOpenUserInterface =
             if dlg.ShowDialog() = System.Windows.Forms.DialogResult.OK then
                 dlg.SelectedPath
             else
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.BrowseForFolder()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.BrowseForFolder()"
         RhinoSync.DoSync getKeepEditor
         // or use ETO ??
         //let dlg = Eto.Forms.SelectFolderDialog()
@@ -70,8 +72,8 @@ module AutoOpenUserInterface =
         if notNull newcheckstates then
             (Seq.zip itemstrs newcheckstates |>  Rarr.ofSeq)
         else
-            //RhinoScriptingException.Raise "Rhino.Scripting.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
-            RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.CheckListBox()"
+            //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
+            RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
 
 
     ///<summary>Displays a list of items in a combo-style list box dialog.</summary>
@@ -83,9 +85,9 @@ module AutoOpenUserInterface =
     static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string= 
         let getKeepEditor () = 
             match UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
-            | null -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.ComboListBox()"
+            | null -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.ComboListBox()"
             | :? string as s -> s
-            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.ComboListBox()"
+            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.ComboListBox()"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -101,14 +103,14 @@ module AutoOpenUserInterface =
                             [<OPT;DEF(null:string)>]title:string) : string = 
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
-            if rc then text else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.EditBox()"
+            if rc then text else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.EditBox()"
         RhinoSync.DoSync getKeepEditor
 
 
     ///<summary>Pause for user input of an angle.</summary>
-    ///<param name="point">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
+    ///<param name="point">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    Starting, or base point</param>
-    ///<param name="referencePoint">(Point3d) Optional, Default Value: <c>Point3d.Unset</c>
+    ///<param name="referencePoint">(Point3d) Optional, default value: <c>Point3d.Unset</c>
     ///    If specified, the reference angle is calculated from it and the base point</param>
     ///<param name="defaultValAngleDegrees">(float) Optional, A default angle value specified</param>
     ///<param name="message">(string) Optional, A prompt to display</param>
@@ -124,7 +126,7 @@ module AutoOpenUserInterface =
             let defaultangle = toRadians(defaultValAngleDegrees)
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then toDegrees(angle)
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetAngle()"            
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetAngle()"            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -144,7 +146,7 @@ module AutoOpenUserInterface =
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
-            if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "Rhino.Scripting.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
+            if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
             let toggles = Rarr()
             for i = 0 to count - 1 do
                 let initial = defaultVals.[i]
@@ -159,7 +161,7 @@ module AutoOpenUserInterface =
 
             let res = 
                 if getrc <> Input.GetResult.Nothing then
-                    RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetBoolean()"
+                    RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBoolean()"
                 else
                     (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)            
             res
@@ -167,7 +169,7 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Pauses for user input of a box.</summary>
-    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
+    ///<param name="mode">(int) Optional, default value: <c>0</c>
     ///    The box selection mode.
     ///    0 = All modes
     ///    1 = Corner. The base rectangle is created by picking two corner points
@@ -194,17 +196,17 @@ module AutoOpenUserInterface =
                 |2 -> Input.GetBoxMode.ThreePoint
                 |3 -> Input.GetBoxMode.Vertical
                 |4 -> Input.GetBoxMode.Center
-                |_ -> RhinoScriptingException.Raise "Rhino.Scripting.GetBox:Bad mode %A" mode
+                |_ -> RhinoScriptingException.Raise "RhinoScriptSyntax.GetBox:Bad mode %A" mode
 
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then ((!box).GetCorners())
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetBox()"            
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
     ///<summary>Display the Rhino color picker dialog allowing the user to select an RGB color.</summary>
-    ///<param name="color">(Drawing.Color) Optional, Default Value: <c>Drawing.Color.Black</c></param>
+    ///<param name="color">(Drawing.Color) Optional, default value: <c>Drawing.Color.Black</c></param>
     ///<returns>(Drawing.Color) RGB color.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color = 
@@ -212,7 +214,7 @@ module AutoOpenUserInterface =
             let zero = Drawing.Color()
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
-            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetColor()"            
+            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -238,9 +240,9 @@ module AutoOpenUserInterface =
     ///<summary>Pauses for user input of a distance.</summary>
     ///<param name="firstPt">(Point3d) Optional, First distance point</param>
     ///<param name="distance">(float) Optional, Default distance</param>
-    ///<param name="firstPtMsg">(string) Optional, Default Value: <c>"First distance point"</c>
+    ///<param name="firstPtMsg">(string) Optional, default value: <c>"First distance point"</c>
     ///    Prompt for the first distance point</param>
-    ///<param name="secondPtMsg">(string) Optional, Default Value: <c>"Second distance point"</c>
+    ///<param name="secondPtMsg">(string) Optional, default value: <c>"Second distance point"</c>
     ///    Prompt for the second distance point</param>
     ///<returns>(float) The distance between the two points.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -283,19 +285,19 @@ module AutoOpenUserInterface =
                     d
                 | _ ->
                     gp2.Dispose()
-                    RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetDistance()"
-            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetDistance()"           
+                    RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetDistance()"
+            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetDistance()"           
         RhinoSync.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompt the user to pick one or more Surface or Polysurface edge Curves.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>Select Edges</c>
+    ///<param name="message">(string) Optional, default value: <c>Select Edges</c>
     ///    A prompt or message</param>
-    ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
+    ///<param name="minCount">(int) Optional, default value: <c>1</c>
     ///    Minimum number of edges to select</param>
-    ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
+    ///<param name="maxCount">(int) Optional, default value: <c>0</c>
     ///    Maximum number of edges to select</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the duplicated edge Curves</param>
     ///<returns>((Guid*Guid*Point3d) Rarr) a List of selection prompts (curve objectId, parent objectId, selection point).
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -304,14 +306,14 @@ module AutoOpenUserInterface =
                                     [<OPT;DEF(0)>]maxCount:int,
                                     [<OPT;DEF(false)>]select:bool) : Rarr<Guid*Guid*Point3d> = 
         let get () = 
-            if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "Rhino.Scripting.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
+            if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
             go.GeometryFilter <- DocObjects.ObjectType.Curve
             go.GeometryAttributeFilter <- Input.Custom.GeometryAttributeFilter.EdgeCurve
             go.EnablePreSelect(false, true)
             let rc = go.GetMultiple(minCount, maxCount)
-            if rc <> Input.GetResult.Object then RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetEdgeCurves()"
+            if rc <> Input.GetResult.Object then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetEdgeCurves()"
             else
                 let r = Rarr()
                 for i = 0 to go.ObjectCount - 1 do
@@ -325,7 +327,7 @@ module AutoOpenUserInterface =
                 if  select then
                     for item in r do
                         let rhobj = State.Doc.Objects.FindId(t1 item)
-                        rhobj.Select(true)|> ignore //TODO make sync ?
+                        rhobj.Select(true)|> ignore
                     State.Doc.Views.Redraw()
                 r           
         RhinoSync.DoSyncRedrawHideEditor get
@@ -350,7 +352,7 @@ module AutoOpenUserInterface =
             if maximum <> 2147482999 then gi.SetUpperLimit(maximum, strictlyLessThan=false)
             if gi.Get() <> Input.GetResult.Number then
                 gi.Dispose()
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetInteger()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetInteger()"
             else
                 let rc = gi.Number()
                 gi.Dispose()
@@ -359,12 +361,12 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Displays dialog box prompting the user to select a layer.</summary>
-    ///<param name="title">(string) Optional, Default Value: <c>"Select Layer"</c>
+    ///<param name="title">(string) Optional, default value: <c>"Select Layer"</c>
     ///    Dialog box title</param>
     ///<param name="layer">(string) Optional, Name of a layer to preselect. If omitted, the current layer will be preselected</param>
-    ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="showNewButton">(bool) Optional, default value: <c>false</c>
     ///    Show new button of on the dialog</param>
-    ///<param name="showSetCurrent">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="showSetCurrent">(bool) Optional, default value: <c>false</c>
     ///    Show set current  button on the dialog</param>
     ///<returns>(string) name of selected layer.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -378,7 +380,7 @@ module AutoOpenUserInterface =
                 let layerinstance = State.Doc.Layers.FindName(layer)
                 if notNull layerinstance then layerindex := layerinstance.Index
             let rc = UI.Dialogs.ShowSelectLayerDialog(layerindex, title, showNewButton, showSetCurrent, ref true)
-            if not rc then RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetLayer()"
+            if not rc then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayer()"
             else
                 let layer = State.Doc.Layers.[!layerindex]
                 layer.FullPath
@@ -387,9 +389,9 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Displays a dialog box prompting the user to select one or more layers.</summary>
-    ///<param name="title">(string) Optional, Default Value: <c>"Select Layers"</c>
+    ///<param name="title">(string) Optional, default value: <c>"Select Layers"</c>
     ///    Dialog box title</param>
-    ///<param name="showNewButton">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="showNewButton">(bool) Optional, default value: <c>false</c>
     ///    Optional button to show on the dialog</param>
     ///<returns>(string Rarr) The names of selected layers.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -399,14 +401,14 @@ module AutoOpenUserInterface =
             if rc then
                 (rarr { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
             else
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetLayers()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayers()"
         RhinoSync.DoSync getKeepEditor
 
 
 
 
     ///<summary>Prompts the user to pick points that define a line.</summary>
-    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
+    ///<param name="mode">(int) Optional, default value: <c>0</c>
     ///    Line definition mode.
     ///    0  Default - Show all modes, start in two-point mode
     ///    1  Two-point - Defines a line from two points.
@@ -442,14 +444,14 @@ module AutoOpenUserInterface =
             if rc = Commands.Result.Success then
                 line
             else
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetLine()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLine()"
             
         RhinoSync.DoSyncRedrawHideEditor get
 
 
     ///<summary>Displays a dialog box prompting the user to select one line-type.</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
-    ///<param name="showByLayer">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="showByLayer">(bool) Optional, default value: <c>false</c>
     ///    If True, the "by Layer" line-type will show. Defaults to False</param>
     ///<returns>(string) The names of selected line-type.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -465,17 +467,17 @@ module AutoOpenUserInterface =
                 let linetype = State.Doc.Linetypes.FindId(objectId)
                 linetype.Name                
             with _ ->
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetLinetype()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLinetype()"
         RhinoSync.DoSync getKeepEditor
 
 
     ///<summary>Prompts the user to pick one or more Mesh faces.</summary>
     ///<param name="objectId">(Guid) The Mesh object's identifier</param>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Faces"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Select Mesh Faces"</c>
     ///    A prompt of message</param>
-    ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
+    ///<param name="minCount">(int) Optional, default value: <c>1</c>
     ///    The minimum number of faces to select</param>
-    ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
+    ///<param name="maxCount">(int) Optional, default value: <c>0</c>
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
@@ -494,7 +496,7 @@ module AutoOpenUserInterface =
             go.GeometryFilter <- DocObjects.ObjectType.MeshFace
             go.AcceptNothing(true)
             if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetMeshFaces()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetMeshFaces()"
             else
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
@@ -505,11 +507,11 @@ module AutoOpenUserInterface =
 
     ///<summary>Prompts the user to pick one or more Mesh vertices.</summary>
     ///<param name="objectId">(Guid) The Mesh object's identifier</param>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select Mesh Vertices"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Select Mesh Vertices"</c>
     ///    A prompt of message</param>
-    ///<param name="minCount">(int) Optional, Default Value: <c>1</c>
+    ///<param name="minCount">(int) Optional, default value: <c>1</c>
     ///    The minimum number of vertices to select</param>
-    ///<param name="maxCount">(int) Optional, Default Value: <c>0</c>
+    ///<param name="maxCount">(int) Optional, default value: <c>0</c>
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
@@ -528,7 +530,7 @@ module AutoOpenUserInterface =
             go.GeometryFilter <-  DocObjects.ObjectType.MeshVertex
             go.AcceptNothing(true)
             if go.GetMultiple(minCount, maxCount) <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetMeshVertices()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetMeshVertices()"
             else
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
@@ -541,7 +543,7 @@ module AutoOpenUserInterface =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="basePoint">(Point3d) Optional, Point3d identifying a starting, or base point</param>
     ///<param name="distance">(float) Optional, Constraining distance. If distance is specified, basePoint must also be specified</param>
-    ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="inPlane">(bool) Optional, default value: <c>false</c>
     ///    Constrains the point selections to the active construction Plane</param>
     ///<returns>(Point3d) point3d.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -559,7 +561,7 @@ module AutoOpenUserInterface =
             if inPlane then gp.ConstrainToConstructionPlane(true)|> ignore
             gp.Get() |> ignore
             if gp.CommandResult() <> Commands.Result.Success then
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoint()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoint()"
             else
                 let pt = gp.Point()
                 pt
@@ -570,19 +572,19 @@ module AutoOpenUserInterface =
 
     ///<summary>Pauses for user input of a point constrained to a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve to get a point on</param>
-    ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Curve"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Pick Point On Curve"</c>
     ///    A prompt of message</param>
     ///<returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d = 
         let get () = 
-            let curve = Scripting.CoerceCurve(curveId)
+            let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
             gp.Constrain(curve, allowPickingPointOffObject=false) |> ignore
             gp.Get() |> ignore
             if gp.CommandResult() <> Commands.Result.Success then
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPointOnCurve()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnCurve()"
             else
                 let pt = gp.Point()
                 pt
@@ -592,7 +594,7 @@ module AutoOpenUserInterface =
 
     ///<summary>Pauses for user input of a point constrained to a Mesh object.</summary>
     ///<param name="meshId">(Guid) Identifier of the Mesh to get a point on</param>
-    ///<param name="message">(string) Optional, Default Value: <c>"Pick Point On Mesh"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Pick Point On Mesh"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -601,7 +603,7 @@ module AutoOpenUserInterface =
             //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
             let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7            
             if cmdrc = Commands.Result.Success then point
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPointOnMesh()"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnMesh()"
             
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -609,7 +611,7 @@ module AutoOpenUserInterface =
     ///<summary>Pauses for user input of a point constrained to a Surface or Polysurface
     ///    object.</summary>
     ///<param name="surfaceId">(Guid) Identifier of the Surface to get a point on</param>
-    ///<param name="message">(string) Optional, Default Value: <c>"Pick Point on Surface or Polysurface"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Pick Point on Surface or Polysurface"</c>
     ///    A prompt or message</param>
     ///<returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -617,7 +619,7 @@ module AutoOpenUserInterface =
         let get () = 
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
-            match Scripting.CoerceGeometry surfaceId with
+            match RhinoScriptSyntax.CoerceGeometry surfaceId with
             | :? Surface as srf ->
                 gp.Constrain(srf, allowPickingPointOffObject=false) |> ignore
 
@@ -625,11 +627,11 @@ module AutoOpenUserInterface =
                 gp.Constrain(brep, -1, -1, allowPickingPointOffObject=false) |> ignore
 
             | _ ->
-                RhinoScriptingException.Raise "Rhino.Scripting.GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Nice.str surfaceId) message
+                RhinoScriptingException.Raise "RhinoScriptSyntax.GetPointOnSurface failed input is not surface or Polysurface.  surfaceId:'%s' message:'%A'" (Nice.str surfaceId) message
 
             gp.Get() |>ignore
             if gp.CommandResult() <> Commands.Result.Success then
-                RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPointOnSurface()"
+                RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnSurface()"
             else
                 let pt = gp.Point()
                 pt
@@ -638,9 +640,9 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Pauses for user input of one or more points.</summary>
-    ///<param name="drawLines">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="drawLines">(bool) Optional, default value: <c>false</c>
     ///    Draw lines between points</param>
-    ///<param name="inPlane">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="inPlane">(bool) Optional, default value: <c>false</c>
     ///    Constrain point selection to the active construction Plane</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the next points</param>
@@ -664,7 +666,7 @@ module AutoOpenUserInterface =
                 let plane = State.Doc.Views.ActiveView.ActiveViewport.ConstructionPlane()
                 gp.Constrain(plane, allowElevator=false) |> ignore
             let mutable getres = gp.Get()
-            if gp.CommandResult() <> Commands.Result.Success then RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoints()"
+            if gp.CommandResult() <> Commands.Result.Success then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoints()"
             else
                 let mutable prevPoint = gp.Point()
                 let rc = Rarr([prevPoint])
@@ -699,7 +701,7 @@ module AutoOpenUserInterface =
                     InternalToNiceStringSetup.printfnBlue "%d Points picked" rc.Count
                     rc
                 else
-                    RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPoints()"
+                    RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoints()"
             
 
         RhinoSync.DoSyncRedrawHideEditor get
@@ -708,7 +710,7 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Prompts the user to pick points that define a polyline.</summary>
-    ///<param name="flags">(int) Optional, Default Value: <c>3</c>
+    ///<param name="flags">(int) Optional, default value: <c>3</c>
     ///    The options are bit coded flags. Values can be added together to specify more than one option.
     ///    value description
     ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed Polyline will be returned.
@@ -719,9 +721,9 @@ module AutoOpenUserInterface =
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
     ///<param name="message3">(string) Optional, A prompt or message for the third point</param>
     ///<param name="message4">(string) Optional, A prompt or message for the 'next' point</param>
-    ///<param name="min">(int) Optional, Default Value: <c>2</c>
+    ///<param name="min">(int) Optional, default value: <c>2</c>
     ///    The minimum number of points to require. The default is 2</param>
-    ///<param name="max">(int) Optional, Default Value: <c>0</c>
+    ///<param name="max">(int) Optional, default value: <c>0</c>
     ///    The maximum number of points to require; 0 for no limit.</param>
     ///<returns>(Polyline) a  polyline.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
@@ -743,13 +745,13 @@ module AutoOpenUserInterface =
             let rc, polyline = gpl.Get()
             State.Doc.Views.Redraw()
             if rc = Commands.Result.Success then polyline
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.GetPolyline()"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPolyline()"
             
         RhinoSync.DoSyncRedrawHideEditor get
 
 
     ///<summary>Pauses for user input of a number.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>"Number"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Number"</c>
     ///    A prompt or message</param>
     ///<param name="number">(float) Optional, A default number value</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
@@ -767,7 +769,7 @@ module AutoOpenUserInterface =
             if minimum <> 7e89 then gn.SetLowerLimit(minimum, strictlyGreaterThan=false)
             if maximum <> 7e89 then gn.SetUpperLimit(maximum, strictlyLessThan=false)
             if gn.Get() <> Input.GetResult.Number then 
-                RhinoUserInteractionException.Raise "No number was given in Rhino.Scripting.GetReal()"
+                RhinoUserInteractionException.Raise "No number was given in RhinoScriptSyntax.GetReal()"
             else
                 let rc = gn.Number()
                 gn.Dispose()
@@ -777,7 +779,7 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Pauses for user input of a rectangle.</summary>
-    ///<param name="mode">(int) Optional, Default Value: <c>0</c>
+    ///<param name="mode">(int) Optional, default value: <c>0</c>
     ///    The rectangle selection mode. The modes are as follows
     ///    0 = All modes
     ///    1 = Corner - a rectangle is created by picking two corner points
@@ -804,7 +806,7 @@ module AutoOpenUserInterface =
             if notNull prompt3 then prompts.[2] <- prompt3
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then  (corners.[0], corners.[1], corners.[2], corners.[3])
-            else RhinoUserInteractionException.Raise "No rectangle was given by user in Rhino.Scripting.GetRectangle()"
+            else RhinoUserInteractionException.Raise "No rectangle was given by user in RhinoScriptSyntax.GetRectangle()"
             
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -829,7 +831,7 @@ module AutoOpenUserInterface =
                 for s in strings do gs.AddOption(s) |> ignore
             let result = gs.Get()
             if result = Input.GetResult.Cancel then
-                RhinoUserInteractionException.Raise "No text was given by user in Rhino.Scripting.GetString()"
+                RhinoUserInteractionException.Raise "No text was given by user in RhinoScriptSyntax.GetString()"
             elif( result = Input.GetResult.Option ) then
                 gs.Option().EnglishName
             else
@@ -850,9 +852,9 @@ module AutoOpenUserInterface =
                                         [<OPT;DEF(null:string)>]defaultVal:string) : string = 
         let getKeepEditor () = 
             match UI.Dialogs.ShowListBox(title, message, Array.ofSeq items , defaultVal) with
-            | null ->  RhinoUserInteractionException.Raise "No items was given by user in Rhino.Scripting.ListBox()"
+            | null ->  RhinoUserInteractionException.Raise "No items was given by user in RhinoScriptSyntax.ListBox()"
             |  :? string as s ->  s
-            | _ -> RhinoUserInteractionException.Raise "No items was given by user in Rhino.Scripting.ListBox()"
+            | _ -> RhinoUserInteractionException.Raise "No items was given by user in RhinoScriptSyntax.ListBox()"
 
         RhinoSync.DoSync getKeepEditor
 
@@ -860,7 +862,7 @@ module AutoOpenUserInterface =
     ///<summary>Displays a message box. A message box contains a message and
     ///    title, plus any combination of predefined icons and push buttons.</summary>
     ///<param name="message">(string) A prompt or message</param>
-    ///<param name="buttons">(int) Optional, Default Value: <c>0</c>
+    ///<param name="buttons">(int) Optional, default value: <c>0</c>
     ///    Buttons and icon to display as a bit coded flag. Can be a combination of the
     ///    following flags. If omitted, an OK button and no icon is displayed
     ///    0      Display OK button only.
@@ -881,7 +883,7 @@ module AutoOpenUserInterface =
     ///      before continuing work in the current application.
     ///    4096   System modal. The user must respond to the message box
     ///      before continuing work in any application</param>
-    ///<param name="title">(string) Optional, Default Value: <c>""</c>
+    ///<param name="title">(string) Optional, default value: <c>""</c>
     ///    The dialog box title</param>
     ///<returns>(int) an Int32 of indicating which button was clicked:
     ///    1      OK button was clicked.
@@ -926,7 +928,7 @@ module AutoOpenUserInterface =
             elif dlgresult = UI.ShowMessageResult.Ignore then  5
             elif dlgresult = UI.ShowMessageResult.Yes then     6
             elif dlgresult = UI.ShowMessageResult.No then      7
-            else RhinoUserInteractionException.Raise "No MessageBox input was given by user in Rhino.Scripting.MessageBox"
+            else RhinoUserInteractionException.Raise "No MessageBox input was given by user in RhinoScriptSyntax.MessageBox"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -944,7 +946,7 @@ module AutoOpenUserInterface =
         let getKeepEditor () = 
             let values = rarr { for  v in values do yield v.ToString() }
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
-            | null -> RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.PropertyListBox"
+            | null -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.PropertyListBox"
             | s -> s
         RhinoSync.DoSync getKeepEditor
 
@@ -963,7 +965,7 @@ module AutoOpenUserInterface =
         let getKeepEditor () = 
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
             if notNull r then r 
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.MultiListBox"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.MultiListBox"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -991,7 +993,7 @@ module AutoOpenUserInterface =
             if notNull filename then fd.FileName <- filename
             if notNull extension then fd.DefaultExt <- extension
             if fd.ShowOpenDialog() then fd.FileName
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.OpenFileName()"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.OpenFileName()"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -1020,7 +1022,7 @@ module AutoOpenUserInterface =
             if notNull extension then fd.DefaultExt <- extension
             fd.MultiSelect <- true
             if fd.ShowOpenDialog() then fd.FileNames
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.OpenFileNames()"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.OpenFileNames()"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -1046,7 +1048,7 @@ module AutoOpenUserInterface =
         let getKeepEditor () = 
             let mutable screenpoint = Windows.Forms.Cursor.Position
             if Point3d.Origin <> point then
-                let view = Scripting.CoerceView(view)
+                let view = RhinoScriptSyntax.CoerceView(view)
                 let viewport = view.ActiveViewport
                 let point2d = viewport.WorldToClient(point)
                 screenpoint <- viewport.ClientToScreen(point2d)
@@ -1055,10 +1057,10 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Display a dialog box prompting the user to enter a number.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>""</c>
+    ///<param name="message">(string) Optional, default value: <c>""</c>
     ///    A prompt message</param>
     ///<param name="defaultValNumber">(float) Optional, A default number</param>
-    ///<param name="title">(string) Optional, Default Value: <c>""</c>
+    ///<param name="title">(string) Optional, default value: <c>""</c>
     ///    A dialog box title</param>
     ///<param name="minimum">(float) Optional, A minimum allowable value</param>
     ///<param name="maximum">(float) Optional, A maximum allowable value</param>
@@ -1076,7 +1078,7 @@ module AutoOpenUserInterface =
 
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
             if  rc then (!defaultValNumber)
-            else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.RealBox()"
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
             
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -1104,7 +1106,7 @@ module AutoOpenUserInterface =
             if notNull folder then fd.InitialDirectory <- folder
             if notNull filename then fd.FileName <- filename
             if notNull extension then fd.DefaultExt <- extension
-            if fd.ShowSaveDialog() then fd.FileName else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.SaveFileName()"
+            if fd.ShowSaveDialog() then fd.FileName else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.SaveFileName()"
         RhinoSync.DoSync getKeepEditor
 
 
@@ -1119,7 +1121,7 @@ module AutoOpenUserInterface =
                                     [<OPT;DEF(null:string)>]title:string) : string = 
         let getKeepEditor () = 
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, multiline=false)
-            if rc then text else RhinoUserInteractionException.Raise "User Input was cancelled in Rhino.Scripting.StringBox()"
+            if rc then text else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.StringBox()"
         RhinoSync.DoSync getKeepEditor
 
 

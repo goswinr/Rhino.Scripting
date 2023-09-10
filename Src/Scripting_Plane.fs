@@ -1,5 +1,6 @@
-﻿
-namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -11,7 +12,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenPlane =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -24,8 +25,8 @@ module AutoOpenPlane =
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
     ///<returns>(float) The distance.</returns>
     static member DistanceToPlane(plane:Plane, point:Point3d) : float = 
-        //plane = Scripting.Coerceplane(plane)
-        //point = Scripting.Coerce3dpoint(point)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
+        //point = RhinoScriptSyntax.Coerce3dPoint(point)
         plane.DistanceTo(point)
 
 
@@ -35,7 +36,7 @@ module AutoOpenPlane =
     ///<param name="v">(float) V parameter to evaluate</param>
     ///<returns>(Point3d) Point3d.</returns>
     static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d = 
-        //plane = Scripting.Coerceplane(plane)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
         plane.PointAt(u, v)
 
 
@@ -47,12 +48,12 @@ module AutoOpenPlane =
     static member IntersectPlanes( plane1:Plane,
                                    plane2:Plane,
                                    plane3:Plane) : Point3d = 
-        //plane1 = Scripting.Coerceplane(plane1)
-        //plane2 = Scripting.Coerceplane(plane2)
-        //plane3 = Scripting.Coerceplane(plane3)
+        //plane1 = RhinoScriptSyntax.CoercePlane(plane1)
+        //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
+        //plane3 = RhinoScriptSyntax.CoercePlane(plane3)
         let rc, point = Intersect.Intersection.PlanePlanePlane(plane1, plane2, plane3)
         if rc then point
-        else RhinoScriptingException.Raise "Rhino.Scripting.IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.IntersectPlanes failed, are they parallel? %A; %A; %A" plane1 plane2 plane3
 
 
     ///<summary>Moves the origin of a Plane.</summary>
@@ -60,8 +61,8 @@ module AutoOpenPlane =
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
     ///<returns>(Plane) moved Plane.</returns>
     static member MovePlane(plane:Plane, origin:Point3d) : Plane = 
-        //plane = Scripting.Coerceplane(plane)
-        //origin = Scripting.Coerce3dpoint(origin)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
+        //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         let mutable rc = Plane(plane)
         rc.Origin <- origin
         rc
@@ -90,15 +91,16 @@ module AutoOpenPlane =
     static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float = 
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
-        else RhinoScriptingException.Raise "Rhino.Scripting.PlaneClosestParameter failed for %A; %A" plane point
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter failed for %A; %A" plane point
 
 
     ///<summary>Intersect an infinite Plane and a Curve object.</summary>
     ///<param name="plane">(Plane) The Plane to intersect</param>
     ///<param name="curve">(Guid) The identifier of the Curve object</param>
-    ///<param name="tolerance">(float) Optional, Default Value: <c>State.Doc.ModelAbsoluteTolerance</c>
+    ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The intersection tolerance.</param>
-    ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float) a list of intersection information tuple . The list will contain one or more of the following tuple:
+    ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float)
+    ///A list of intersection information tuple . The list will contain one or more of the following tuple:
     ///    Element Type        Description
     ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
     ///    [1]       Point3d     If the event type is Point (1), then the intersection point on the Curve.
@@ -124,7 +126,7 @@ module AutoOpenPlane =
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
                                           [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > = 
-        let curve = Scripting.CoerceCurve(curve)
+        let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
         if notNull intersections then
@@ -145,7 +147,7 @@ module AutoOpenPlane =
                 rc.Add( (a, b, c, d, e, f, g, h, i, j, k))
             rc
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.PlaneCurveIntersection failed on %A; %A tolerance %A" plane curve tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneCurveIntersection failed on %A; %A tolerance %A" plane curve tolerance
 
 
     ///<summary>Returns the equation of a Plane as a tuple of four numbers. The standard
@@ -153,7 +155,7 @@ module AutoOpenPlane =
     ///<param name="plane">(Plane) The Plane to deconstruct</param>
     ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D).</returns>
     static member PlaneEquation(plane:Plane) : float * float * float * float = 
-        //plane = Scripting.Coerceplane(plane)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
         let rc = plane.GetPlaneEquation()
         rc.[0], rc.[1], rc.[2], rc.[3]
 
@@ -162,10 +164,10 @@ module AutoOpenPlane =
     ///<param name="points">(Point3d seq) An array of 3D points</param>
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFitFromPoints(points:Point3d seq) : Plane = 
-        //points = Scripting.Coerce3dpointlist(points)
+        //points = RhinoScriptSyntax.Coerce3dPointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
         if rc = PlaneFitResult.Success then plane
-        else RhinoScriptingException.Raise "Rhino.Scripting.PlaneFitFromPoints failed for %A" points
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFitFromPoints failed for %A" points
 
 
     ///<summary>Construct a Plane from a point, and two vectors in the Plane.</summary>
@@ -179,9 +181,9 @@ module AutoOpenPlane =
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
                                   yAxis:Vector3d) : Plane = 
-        //origin = Scripting.Coerce3dpoint(origin)
-        //xAxis = Scripting.Coerce3dvector(xAxis)
-        //yAxis = Scripting.Coerce3dvector(yAxis)
+        //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
+        //xAxis = RhinoScriptSyntax.Coerce3dvector(xAxis)
+        //yAxis = RhinoScriptSyntax.Coerce3dvector(yAxis)
         Plane(origin, xAxis, yAxis)
 
 
@@ -193,11 +195,11 @@ module AutoOpenPlane =
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
                                    [<OPT;DEF(Vector3d())>]xAxis:Vector3d) : Plane = 
-        //origin = Scripting.Coerce3dpoint(origin)
-        //normal = Scripting.Coerce3dvector(normal)
+        //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
+        //normal = RhinoScriptSyntax.Coerce3dvector(normal)
         let mutable rc = Plane(origin, normal)
         if not xAxis.IsZero then
-            //x axis = Scripting.Coerce3dvector(x axis)
+            //x axis = RhinoScriptSyntax.Coerce3dvector(x axis)
             let xAxis = Vector3d(xAxis)//prevent original x axis parameter from being unitized too
             xAxis.Unitize() |> ignore
             let yAxis = Vector3d.CrossProduct(rc.Normal, xAxis)
@@ -213,12 +215,12 @@ module AutoOpenPlane =
     static member PlaneFromPoints( origin:Point3d,
                                    x:Point3d,
                                    y:Point3d) : Plane = 
-        //origin = Scripting.Coerce3dpoint(origin)
-        //x = Scripting.Coerce3dpoint(x)
-        //y = Scripting.Coerce3dpoint(y)
+        //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
+        //x = RhinoScriptSyntax.Coerce3dPoint(x)
+        //y = RhinoScriptSyntax.Coerce3dPoint(y)
         let plane = Plane(origin, x, y)
         if plane.IsValid then plane
-        else RhinoScriptingException.Raise "Rhino.Scripting.PlaneFromPoints failed for %A; %A; %A" origin x y
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneFromPoints failed for %A; %A; %A" origin x y
 
 
     ///<summary>Calculates the intersection of two Planes.</summary>
@@ -226,11 +228,11 @@ module AutoOpenPlane =
     ///<param name="plane2">(Plane) The 2nd Plane to intersect</param>
     ///<returns>(Line) a line with two 3d points identifying the starting/ending points of the intersection.</returns>
     static member PlanePlaneIntersection(plane1:Plane, plane2:Plane) : Line = 
-        //plane1 = Scripting.Coerceplane(plane1)
-        //plane2 = Scripting.Coerceplane(plane2)
+        //plane1 = RhinoScriptSyntax.CoercePlane(plane1)
+        //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
         let rc, line = Intersect.Intersection.PlanePlane(plane1, plane2)
         if rc then line
-        else RhinoScriptingException.Raise "Rhino.Scripting.PlanePlaneIntersection failed for %A; %A" plane1 plane2
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlanePlaneIntersection failed for %A; %A" plane1 plane2
 
 
     ///<summary>Calculates the intersection of a Plane and a sphere.</summary>
@@ -247,8 +249,8 @@ module AutoOpenPlane =
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
                                            sphereRadius:float) : int * Plane * float = 
-        //plane = Scripting.Coerceplane(plane)
-        //spherePlane = Scripting.Coerceplane(spherePlane)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
+        //spherePlane = RhinoScriptSyntax.CoercePlane(spherePlane)
         let sphere = Sphere(spherePlane, sphereRadius)
         let rc, circle = Intersect.Intersection.PlaneSphere(plane, sphere)
         if rc = Intersect.PlaneSphereIntersection.Point then
@@ -256,7 +258,7 @@ module AutoOpenPlane =
         elif rc = Intersect.PlaneSphereIntersection.Circle then
             1, circle.Plane, circle.Radius
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.PlaneSphereIntersection failed for %A; %A, %A" plane spherePlane sphereRadius
+            RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneSphereIntersection failed for %A; %A, %A" plane spherePlane sphereRadius
 
 
     ///<summary>Transforms a Plane.</summary>
@@ -264,11 +266,11 @@ module AutoOpenPlane =
     ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Plane) The resulting Plane.</returns>
     static member PlaneTransform(plane:Plane, xForm:Transform) : Plane = 
-        //plane = Scripting.Coerceplane(plane)
-        //xForm = Scripting.CoercexForm(xForm)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
+        //xForm = RhinoScriptSyntax.CoercexForm(xForm)
         let rc = Plane(plane)
         if rc.Transform(xForm) then rc
-        else RhinoScriptingException.Raise "Rhino.Scripting.PlaneTransform failed for %A; %A" plane xForm
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneTransform failed for %A; %A" plane xForm
 
 
     ///<summary>Rotates a Plane.</summary>
@@ -279,12 +281,12 @@ module AutoOpenPlane =
     static member RotatePlane( plane:Plane,
                                angleDegrees:float,
                                axis:Vector3d) : Plane = 
-        //plane = Scripting.Coerceplane(plane)
-        //axis = Scripting.Coerce3dvector(axis)
+        //plane = RhinoScriptSyntax.CoercePlane(plane)
+        //axis = RhinoScriptSyntax.Coerce3dvector(axis)
         let angleradians = toRadians(angleDegrees)
         let rc = Plane(plane)
         if rc.Rotate(angleradians, axis) then rc
-        else RhinoScriptingException.Raise "Rhino.Scripting.RotatePlane failed for %A; %A; %A" plane angleDegrees axis
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.RotatePlane failed for %A; %A; %A" plane angleDegrees axis
 
 
     ///<summary>Returns Rhino's world XY Plane.</summary>

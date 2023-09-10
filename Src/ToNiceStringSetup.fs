@@ -1,4 +1,6 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open Rhino.Geometry
@@ -6,11 +8,9 @@ open FsEx
 
 /// Part of Rhino.Scripting nuget.
 /// An internal module to set up nice printing of Rhino Objects. 
-/// (It is public only for access from Rhino.ScriptingFsharp project)
+/// (It is public only for access from Rhino.Scripting.Fsharp project)
 [<RequireQualifiedAccess>]
 module InternalToNiceStringSetup = 
-    open Rhino    
-    open Rhino.ScriptingFsharp
 
     let mutable private initIsPending = true // to delay setup of printing till first print call
 

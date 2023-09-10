@@ -19,22 +19,22 @@
     <Product>Rhino.Scripting</Product> <!--visible in explorer-->
     <Title>Rhino.Scripting</Title>
     <PackageId>Rhino.Scripting</PackageId>
-
-	<Version>0.6.2-Rhino7</Version>
-	<AssemblyVersion>0.6.2-Rhino7</AssemblyVersion>
-	<FileVersion>0.6.2-Rhino7</FileVersion>
+	
+    <Version>0.7.0-Rhino7</Version>
+	  <AssemblyVersion>0.7.0.7</AssemblyVersion><!--no suffix allowed -->
+    <FileVersion>0.7.0.7</FileVersion>	
 	  
-    <PackageReleaseNotes>
-      - even better window sync with Seff Editor
-	</PackageReleaseNotes>
+    <PackageReleaseNotes>	    
+      - renamned main static class from Rhino.Scripting to Rhino.Scripting.RhinoScriptSyntax !
+    </PackageReleaseNotes>
 
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2022</Copyright>
 
-    <Description>A complete re-implementation of the RhinoPython scripting syntax in F#</Description>
+    <Description>A complete re-implementation of the RhinoPython scripting syntax in F#. For Rhino 7.0 or higher.</Description>
 
     <Configuration>Release</Configuration>
-    <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, don't us just 'Platform' tag-->
+    <PlatformTarget>x64</PlatformTarget><!--  x64 is required e.g by Rhino, don't us just 'Platform' node-->
     <OutputPath>binRhino7</OutputPath>
 
     <DefineConstants>RHINO7</DefineConstants>
@@ -59,7 +59,7 @@
     <PackageIcon>logo128.png</PackageIcon>
     <!-- <SymbolPackageFormat>snupkg</SymbolPackageFormat>  --><!--using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791     -->
     <PackageReadmeFile>READMEnuget.md</PackageReadmeFile>
-    <PackageDescription>A complete re-implementation of the RhinoPython scripting syntax for use with F# and C#</PackageDescription>
+    <PackageDescription>A complete re-implementation of the RhinoPython scripting syntax for use with F# and C#. For Rhino 7.0 or higher.</PackageDescription>
     <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>
   </PropertyGroup>
 

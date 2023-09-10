@@ -1,6 +1,6 @@
-﻿// only this file is using this namespace : so that making these F# only extensions available works with 'open Rhino.ScriptingFsharp'
-namespace Rhino.ScriptingFsharp
+﻿namespace Rhino.Scripting
 
+open Rhino
 open Rhino.Geometry
 open FsEx
 
@@ -8,8 +8,8 @@ open FsEx
 /// It adds a 'rhObj.ToNiceString' property to many Rhino geometry objects.
 /// This module is automatically opened when Rhino namespace is opened.
 /// These type extensions are only visible in F# (not in C#)
-/// This module is under the 'Rhino.ScriptingFsharp' namespace so that making these extensions available works 
-/// with 'open Rhino.ScriptingFsharp'. See Rhino.ScriptingFsharp nuget package.
+/// This auto-open module is under the 'Rhino.Scripting' namespace so that making these extensions available works 
+/// with 'open Rhino.Scripting'. 
 [<AutoOpen>]
 module AutoOpenToNiceStringExtensions = 
 
@@ -89,7 +89,7 @@ module AutoOpenToNiceStringExtensions =
         /// returns a string showing the Transformation Matrix in an aligned 4x4 grid
         member b.ToNiceString =            
             str{ 
-                if   b.IsDegenerate(Rhino.State.Doc.ModelAbsoluteTolerance) > 0 then yield! "flat Rhino.Geometry.BoundingBox"
+                if   b.IsDegenerate(Rhino.Scripting.State.Doc.ModelAbsoluteTolerance) > 0 then yield! "flat Rhino.Geometry.BoundingBox"
                 elif not b.IsValid then yield! "invalid (decreasing?) Rhino.Geometry.BoundingBox"
                 else                    yield! "Rhino.Geometry.BoundingBox:"
                 yield! sprintf "Size X=%s Y=%s Z=%s" (NiceFormat.float b.Diagonal .X) (NiceFormat.float  b.Diagonal .Y) (NiceFormat.float  b.Diagonal .Z)

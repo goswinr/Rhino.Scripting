@@ -1,4 +1,6 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -9,23 +11,23 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenSelection =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
     //---This happens as part of the <Targets> in the *.fsproj file. 
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
-    // moved to Rhino.ScriptingFsharp project:
+    // moved to Rhino.RhinoScriptSyntax.Fsharp project:
     // static member ShownObjects(
     // static member GetObjectsAndRemember(
     // static member GetObjectAndRemember(
 
     ///<summary>Returns identifiers of all objects in the document.</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c> Include reference objects such as work session objects</param>
+    ///<param name="select">(bool) Optional, default value: <c>false</c> Select the objects</param>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c> Include light objects</param>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c> Include grips objects</param>
+    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c> Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) Identifiers for all the objects in the document.</returns>
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
@@ -42,16 +44,16 @@ module AutoOpenSelection =
             let objectIds = Rarr()
             for ob in es do
                 objectIds.Add ob.Id
-                if select then ob.Select(true) |> ignore   //TODO make sync ?
+                if select then ob.Select(true) |> ignore   // TODO needs sync ? apparently not needed!
             if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
             objectIds
 
 
     ///<summary>Returns identifier of the first object in the document. The first
     ///    object is the last object created by the user.</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the object. If omitted, the object is not selected</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c> Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c> Include grips objects. If omitted, grips objects are not returned</param>
+    ///<param name="select">(bool) Optional, default value: <c>false</c> Select the object. If omitted, the object is not selected</param>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c> Include light objects. If omitted, light objects are not returned</param>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c> Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid) The identifier of the object.</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
@@ -60,10 +62,10 @@ module AutoOpenSelection =
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
             let e = State.Doc.Objects.GetObjectList(it).GetEnumerator()
-            if not <| e.MoveNext() then RhinoScriptingException.Raise "Rhino.Scripting.FirstObject not found"
+            if not <| e.MoveNext() then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found"
             let object = e.Current
-            if isNull object then RhinoScriptingException.Raise "Rhino.Scripting.FirstObject not found(null)"
-            if select then object.Select(true) |> ignore //TODO make sync ?
+            if isNull object then RhinoScriptingException.Raise "RhinoScriptSyntax.FirstObject not found(null)"
+            if select then object.Select(true) |> ignore // TODO needs sync ? apparently not needed!
             object.Id
 
 
@@ -71,8 +73,8 @@ module AutoOpenSelection =
 
     ///<summary>Prompts user to pick or select a single Curve object.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c> Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c> Select the picked objects. If False, objects that are picked are not selected</param>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c> Allow for the selection of pre-selected objects</param>
+    ///<param name="select">(bool) Optional, default value: <c>false</c> Select the picked objects. If False, objects that are picked are not selected</param>
     ///<returns>(Guid * bool * int * Point3d * float * string) Tuple containing the following information
     ///    [0]  guid     identifier of the Curve object
     ///    [1]  bool     True if the Curve was preselected, otherwise False
@@ -96,7 +98,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then                
-                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetCurveObject(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -120,14 +122,14 @@ module AutoOpenSelection =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
-    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joined with '+'</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joined with '+'</param>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, A custom filter function</param>
-    ///<param name="subObjects">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="subObjects">(bool) Optional, default value: <c>false</c>
     ///    If True, sub-objects can be selected. When this is the
     ///    case, for tracking  of the sub-object go via the Object Ref</param>
     ///<returns>(Guid) Identifier of the picked object.
@@ -151,7 +153,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObject(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let obj = objref.Object()
@@ -170,13 +172,13 @@ module AutoOpenSelection =
     ///<summary>Prompts user to pick, or select a single object.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
     ///<param name="message">(string) Optional, A prompt or message</param>
-    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
+    ///<param name="filter">(int) Optional, default value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="objects">(Guid seq) Optional, List of object identifiers specifying objects that are
@@ -215,7 +217,7 @@ module AutoOpenSelection =
             let res = go.Get()
             if res <> Input.GetResult.Object then
                 
-                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjectEx(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let objectId = objref.ObjectId
@@ -235,26 +237,26 @@ module AutoOpenSelection =
 
     ///<summary>Prompts user to pick or select one or more objects.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Select objects"</c>
     ///    A prompt or message</param>
     ///<param name="filter">(int) Optional, The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
-    ///    several different kinds of geometry. use the Scripting.Filter enum to get values, they can be joined with '+'</param>
-    ///<param name="group">(bool) Optional, Default Value: <c>true</c>
+    ///    several different kinds of geometry. use the RhinoScriptSyntax.Filter enum to get values, they can be joined with '+'</param>
+    ///<param name="group">(bool) Optional, default value: <c>true</c>
     ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of objects that are allowed to be selected. If set customFilter will be ignored</param>
-    ///<param name="minimumCount">(int) Optional, Default Value: <c>1</c>
+    ///<param name="minimumCount">(int) Optional, default value: <c>1</c>
     ///    Minimum count of objects allowed to be selected</param>
-    ///<param name="maximumCount">(int) Optional, Default Value: <c>0</c>
+    ///<param name="maximumCount">(int) Optional, default value: <c>0</c>
     ///    Maximum count of objects allowed to be selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window.</param>
+    ///<param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window.</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
     ///<returns>(Guid Rarr) List of identifiers of the picked objects. 
@@ -287,7 +289,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.GetMultiple(minimumCount, maximumCount)
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjects(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjects(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     State.Doc.Objects.UnselectAll() |> ignore
@@ -299,7 +301,7 @@ module AutoOpenSelection =
                     rc.Add(objref.ObjectId)
                     let obj = objref.Object()
                     if select && notNull obj then obj.Select(select) |> ignore
-                if printCount then InternalToNiceStringSetup.printfnBlue "Rhino.Scripting.GetObjects(...) returned %s" (Scripting.ObjectDescription(rc))
+                if printCount then InternalToNiceStringSetup.printfnBlue "RhinoScriptSyntax.GetObjects(...) returned %s" (RhinoScriptSyntax.ObjectDescription(rc))
                 rc
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -307,22 +309,22 @@ module AutoOpenSelection =
 
     ///<summary>Prompts user to pick, or select one or more objects.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select objects"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Select objects"</c>
     ///    A prompt or message</param>
-    ///<param name="filter">(int) Optional, Default Value: <c>0</c>
+    ///<param name="filter">(int) Optional, default value: <c>0</c>
     ///    The type(s) of geometry (points, Curves, Surfaces, Meshes,...)
     ///    that can be selected. Object types can be added together to filter
     ///    several different kinds of geometry. use the filter class to get values</param>
-    ///<param name="group">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="group">(bool) Optional, default value: <c>true</c>
     ///    Honor object grouping. If omitted and the user picks a group,
     ///    the entire group will be picked (True). Note, if filter is set to a
     ///    value other than 0 (All objects), then group selection will be disabled</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked objects. If False, the objects that are
     ///    picked are not selected</param>
-    ///<param name="printCount">(bool) Optional, Default Value: <c>true</c> Print object count to command window</param>
+    ///<param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window</param>
     ///<param name="objectsToSelectFrom">(Guid seq) Optional, List of object identifiers specifying objects that are
     ///    allowed to be selected</param>
     ///<returns>((Guid*bool*int*Point3d*string) Rarr) List containing the following information
@@ -355,7 +357,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.GetMultiple(1, 0)
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetObjectsEx(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectsEx(message=%A), Interaction result: %A" message res
             else
                 if not <| select && not <| go.ObjectsWerePreselected then
                     State.Doc.Objects.UnselectAll() |> ignore
@@ -375,24 +377,24 @@ module AutoOpenSelection =
                 if printCount then
                     rc
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
-                    |> Scripting.ObjectDescription
-                    |> InternalToNiceStringSetup.printfnBlue "Rhino.Scripting.GetObjectsEx(...) returned %s"
+                    |> RhinoScriptSyntax.ObjectDescription
+                    |> InternalToNiceStringSetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(...) returned %s"
                 rc            
         RhinoSync.DoSyncRedrawHideEditor get
 
 
     ///<summary>Prompts the user to select one or more point objects.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select Point Objects"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Select Point Objects"</c>
     ///    A prompt message</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for the selection of pre-selected objects. If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d Rarr) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
                                         [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr = 
-        let ids =  Scripting.GetObjects(message, Scripting.Filter.Point, preselect = preselect)
+        let ids =  RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect)
         let rc = Rarr<Point3d>()
         for objectId in ids do
-            let pt = Scripting.Coerce3dPoint(objectId)
+            let pt = RhinoScriptSyntax.Coerce3dPoint(objectId)
             rc.Add(pt)
         rc
 
@@ -401,11 +403,11 @@ module AutoOpenSelection =
 
     ///<summary>Prompts the user to select a single Surface.
     /// Raises a RhinoUserInteractionException if no object was selected. For example when Esc key was pressed.</summary>
-    ///<param name="message">(string) Optional, Default Value: <c>"Select Surface"</c>
+    ///<param name="message">(string) Optional, default value: <c>"Select Surface"</c>
     ///    Prompt displayed</param>
-    ///<param name="preselect">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="preselect">(bool) Optional, default value: <c>true</c>
     ///    Allow for preselected objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked object</param>
     ///<returns>((Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string))
     ///    [0]  identifier of the Surface
@@ -430,7 +432,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                RhinoUserInteractionException.Raise "No Object was selected in Rhino.Scripting.GetSurfaceObject(message=%A), Interaction result: %A" message res
+                RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetSurfaceObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
                 let rhobj = objref.Object()
@@ -457,11 +459,11 @@ module AutoOpenSelection =
 
     ///<summary>Returns identifiers of all locked objects in the document. Locked objects
     ///    cannot be snapped to, and cannot be selected.</summary>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers the locked objects.</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
@@ -484,11 +486,11 @@ module AutoOpenSelection =
 
     ///<summary>Returns identifiers of all hidden objects in the document. Hidden objects
     ///    are not visible, cannot be snapped to, and cannot be selected.</summary>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers of the hidden objects.</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
@@ -509,11 +511,11 @@ module AutoOpenSelection =
 
     ///<summary>Inverts the current object selection. The identifiers of the newly
     ///    selected objects are returned.</summary>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers of the newly selected objects.</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
@@ -529,7 +531,7 @@ module AutoOpenSelection =
         for obj in rhobjs do
             if obj.IsSelected(false) <> 0 && obj.IsSelectable() then
                 rc.Add(obj.Id)
-                obj.Select(true) |> ignore //TODO make sync ?
+                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
             else
                 obj.Select(false) |> ignore
         State.Doc.Views.Redraw()
@@ -540,7 +542,7 @@ module AutoOpenSelection =
     ///    by scripting a Rhino command using the Command function. It is important to
     ///    call this function immediately after calling the Command function as only the
     ///    most recently created or changed object identifiers will be returned.</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object. If omitted, the object is not selected</param>
     ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
     static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr = 
@@ -553,7 +555,7 @@ module AutoOpenSelection =
                 let obj = State.Doc.Objects.Find(serialnumber)
                 if notNull obj && not <| obj.IsDeleted then
                     rc.Add(obj.Id)
-                if select then obj.Select(true) |> ignore //TODO make sync ?
+                if select then obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 serialnumber <- serialnumber + 1u
                 if select && rc.Count > 1 then State.Doc.Views.Redraw()
             rc
@@ -561,11 +563,11 @@ module AutoOpenSelection =
 
     ///<summary>Returns the identifier of the last object in the document. The last object
     ///    in the document is the first object created by the user.</summary>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include lights in the potential set</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips in the potential set</param>
     ///<returns>(Guid) identifier of the object.</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
@@ -577,23 +579,23 @@ module AutoOpenSelection =
         settings.DeletedObjects <- false
         let rhobjs = State.Doc.Objects.GetObjectList(settings)
         if isNull rhobjs || Seq.isEmpty rhobjs then
-            RhinoScriptingException.Raise "Rhino.Scripting.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         let firstobj = Seq.last rhobjs
         if isNull firstobj then
-            RhinoScriptingException.Raise "Rhino.Scripting.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
+            RhinoScriptingException.Raise "RhinoScriptSyntax.LastObject failed.  select:'%A' includeLights:'%A' includeGrips:'%A'" select includeLights includeGrips
         if select then
-            firstobj.Select(true) |> ignore //TODO make sync ?
+            firstobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         firstobj.Id
 
 
     ///<summary>Returns the identifier of the next object in the document.</summary>
     ///<param name="objectId">(Guid) The identifier of the object from which to get the next object</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include lights in the potential set</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips in the potential set</param>
     ///<returns>(Guid) identifier of the object.</returns>
     static member NextObject( objectId:Guid,
@@ -609,17 +611,17 @@ module AutoOpenSelection =
         |> Seq.skipLast // dont loop
         |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
         |>  function
-            |None -> RhinoScriptingException.Raise "Rhino.Scripting.NextObject not found for %A" (Nice.str objectId)
+            |None -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Nice.str objectId)
             |Some (t, n) ->
-                if select then n.Select(true) |> ignore //TODO make sync ?
+                if select then n.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 n.Id
 
 
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
     ///    are visible, can be snapped to, and are independent of selection state.</summary>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects. If omitted, light objects are not returned</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid Rarr) identifier of normal objects.</returns>
     static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
@@ -633,9 +635,9 @@ module AutoOpenSelection =
 
     ///<summary>Returns identifiers of all objects based on color.</summary>
     ///<param name="color">(Drawing.Color) Color to get objects by</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include lights in the set</param>
     ///<returns>(Guid Rarr) identifiers of objects of the selected color.</returns>
     static member ObjectsByColor( color:Drawing.Color,
@@ -643,42 +645,42 @@ module AutoOpenSelection =
                                   [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr = 
         let rhinoobjects = State.Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
-            for obj in rhinoobjects do obj.Select(true)|> ignore //TODO make sync ?
+            for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         rarr {for obj in rhinoobjects do yield obj.Id }
 
 
     ///<summary>Returns identifiers of all objects based on the objects' group name.</summary>
     ///<param name="groupName">(string) Name of the group</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
     ///<returns>(Guid Rarr) identifiers for objects in the group.</returns>
     static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
         let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance then
-            RhinoScriptingException.Raise "Rhino.Scripting.ObjectsByGroup: '%s' does not exist in GroupTable" groupName
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectsByGroup: '%s' does not exist in GroupTable" groupName
         let rhinoobjects = State.Doc.Groups.GroupMembers(groupinstance.Index)
         if isNull rhinoobjects then
             Rarr()
         else
             if select then
-                for obj in rhinoobjects do obj.Select(true) |> ignore //TODO make sync ?
+                for obj in rhinoobjects do obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             rarr { for obj in rhinoobjects do yield obj.Id }
 
 
     ///<summary>Returns identifiers of all objects based on the objects' layer name.</summary>
     ///<param name="layerName">(string) Name of the layer</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
     ///<returns>(Guid Rarr) identifiers for objects in the specified layer.</returns>
     static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
-        let layer = Scripting.CoerceLayer(layerName)
+        let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         let rhinoobjects = State.Doc.Objects.FindByLayer(layer)
         if isNull rhinoobjects then Rarr()
         else
             if select then
-                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore //TODO make sync ?
+                for rhobj in rhinoobjects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 State.Doc.Views.Redraw()
             rarr {for obj in rhinoobjects do yield obj.Id }
 
@@ -686,11 +688,11 @@ module AutoOpenSelection =
 
     ///<summary>Returns identifiers of all objects based on user-assigned name.</summary>
     ///<param name="name">(string) Name of the object or objects</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeReferences">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeReferences">(bool) Optional, default value: <c>false</c>
     ///    Include reference objects such as work session objects</param>
     ///<returns>(Guid Rarr) identifiers for objects with the specified name.</returns>
     static member ObjectsByName( name:string,
@@ -708,7 +710,7 @@ module AutoOpenSelection =
         let objects = State.Doc.Objects.GetObjectList(settings)
         let ids = rarr{ for rhobj in objects do yield rhobj.Id }
         if ids.Count>0 && select then
-            for rhobj in objects do rhobj.Select(true) |> ignore //TODO make sync ?
+            for rhobj in objects do rhobj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
             State.Doc.Views.Redraw()
         ids
 
@@ -737,9 +739,9 @@ module AutoOpenSelection =
     ///        268435456   Phantom
     ///        536870912   Clipping Plane
     ///        1073741824  Extrusion</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="state">(int) Optional, Default Value: <c>0</c>
+    ///<param name="state">(int) Optional, default value: <c>0</c>
     ///    The object state (normal, locked, and hidden). Object states can be
     ///    added together to filter several different states of geometry.
     ///      Value     Description
@@ -784,7 +786,7 @@ module AutoOpenSelection =
             let  mutable bFound = false
             let objecttyp = object.ObjectType
             if objecttyp = DocObjects.ObjectType.Brep && (bSurface || bPolySurface) then
-                let brep = Scripting.CoerceBrep(object.Id)
+                let brep = RhinoScriptSyntax.CoerceBrep(object.Id)
                 if notNull brep then
                     if brep.Faces.Count = 1 then
                         if bSurface then bFound <- true
@@ -801,16 +803,16 @@ module AutoOpenSelection =
             elif objecttyp &&& geometryfilter <> DocObjects.ObjectType.None then
                 bFound <- true
             if bFound then
-                if select then object.Select(true) |> ignore //TODO make sync ?
+                if select then object.Select(true) |> ignore // TODO needs sync ? apparently not needed!
                 objectIds.Add(object.Id)
         if objectIds.Count > 0 && select then State.Doc.Views.Redraw()
         objectIds
 
 
     ///<summary>Returns the identifiers of all objects that are currently selected.</summary>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
     ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
     static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
@@ -830,44 +832,46 @@ module AutoOpenSelection =
     /// This function is the same as rs.VisibleObjects in Rhino Python.
     /// use rs.ShownObjects to get all objects that are not hidden or on turned-off layers. .</summary>
     ///<param name="view">(string) Optional, The view to use. If omitted, the current active view is used</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
-    ///<param name="includeLights">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeLights">(bool) Optional, default value: <c>false</c>
     ///    Include light objects</param>
-    ///<param name="includeGrips">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
     ///<returns>(Guid Rarr) identifiers of the visible objects.</returns>
     static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
                                           [<OPT;DEF(false)>]select:bool,
                                           [<OPT;DEF(false)>]includeLights:bool,
                                           [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
-        let it = DocObjects.ObjectEnumeratorSettings()
-        it.DeletedObjects <- false
-        it.ActiveObjects <- true
-        it.ReferenceObjects <- true
-        it.IncludeLights <- includeLights
-        it.IncludeGrips <- includeGrips
-        it.VisibleFilter <- true
-        let viewport = if notNull view then (Scripting.CoerceView(view)).MainViewport else State.Doc.Views.ActiveView.MainViewport
-        it.ViewportFilter <- viewport
-        let objectIds = Rarr()
-        let e = State.Doc.Objects.GetObjectList(it)
-        for object in e do
-            let bbox = object.Geometry.GetBoundingBox(true)
-            if viewport.IsVisible(bbox) then
-                if select then object.Select(true) |> ignore //TODO make sync ? TEST !!!
-                objectIds.Add(object.Id)
-        if objectIds.Count>0 && select then State.Doc.Views.Redraw()
-        objectIds
+        let get () =
+            let it = DocObjects.ObjectEnumeratorSettings()
+            it.DeletedObjects <- false
+            it.ActiveObjects <- true
+            it.ReferenceObjects <- true
+            it.IncludeLights <- includeLights
+            it.IncludeGrips <- includeGrips
+            it.VisibleFilter <- true
+            let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else State.Doc.Views.ActiveView.MainViewport
+            it.ViewportFilter <- viewport
+            let objectIds = Rarr()
+            let e = State.Doc.Objects.GetObjectList(it)
+            for object in e do
+                let bbox = object.Geometry.GetBoundingBox(true)
+                if viewport.IsVisible(bbox) then
+                    if select then object.Select(true) |> ignore 
+                    objectIds.Add(object.Id)
+            if objectIds.Count>0 && select then State.Doc.Views.Redraw()
+            objectIds
+        RhinoSync.DoSync get
 
 
     ///<summary>Picks objects using either a window or crossing selection.</summary>
     ///<param name="corner1">(Point3d) Corner1 of selection window</param>
     ///<param name="corner2">(Point3d) Corner2 of selection window</param>
     ///<param name="view">(string) Optional, View to perform the selection in</param>
-    ///<param name="select">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select picked objects</param>
-    ///<param name="inWindow">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="inWindow">(bool) Optional, default value: <c>true</c>
     ///    If False, then a crossing window selection is performed</param>
     ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
     static member WindowPick( corner1:Point3d,
@@ -877,7 +881,7 @@ module AutoOpenSelection =
                               [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr = 
 
         let pick () = 
-            let view = if notNull view then Scripting.CoerceView(view) else State.Doc.Views.ActiveView
+            let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else State.Doc.Views.ActiveView
             let viewport = view.MainViewport
             let screen1 = Point2d(corner1)
             let screen2 = Point2d(corner2)
@@ -912,7 +916,7 @@ module AutoOpenSelection =
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)
-                    if select then rhobj.Select(true) |> ignore //TODO make sync ?
+                    if select then rhobj.Select(true) |> ignore 
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor pick

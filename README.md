@@ -47,13 +47,15 @@ First reference the assemblies.
 ```csharp
 #r "nuget: FSharp.Core, 7.0.0"
 #r "nuget: FsEx, 0.14.1"
-#r "nuget: Rhino.Scripting, 0.6.2"
+#r "nuget: Rhino.Scripting, 0.7.0"
 ```   
-The main class of this library is called `Rhino.Scripting` it has all ~900 functions as static methods.
+The main namespace is  `Rhino.Scripting`.
+The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.
 In C# you can create an alias like this: 
 
 ```csharp
-using rs = Rhino.Scripting;
+open Rhino.Scripting; 
+using rs = RhinoScriptSyntax;
 ``` 
 
 then you can use it like the RhinoScriptSyntax in Python:
@@ -67,13 +69,15 @@ I will soon publish an F# scripting editor for Rhino. The prototype is working w
 
 First reference the assemblies. 
 ```fsharp
-#r "nuget: Rhino.Scripting, 0.6.2"
+#r "nuget: Rhino.Scripting, 0.7.0"
 ```   
 
-The main class of this library is called `Rhino.Scripting` it has all ~900 functions as static methods.
+The main namespace is  `Rhino.Scripting`.
+The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.
 In F# you can create an alias like this: 
 ```fsharp
-type rs = Rhino.Scripting  
+open Rhino.Scripting
+type rs = RhinoScriptSyntax  
 ```
 then use any of the RhinoScript functions like you would in Python or VBScript.  
 The `CoerceXXXX` functions will help you create types if you are too lazy to fully specify them.
@@ -103,7 +107,7 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
     ///<param name="objectId">(Guid) The identifier of the object</param>
     ///<returns>(string) The object's current layer.</returns>
     static member ObjectLayer(objectId:Guid) : string = //GET
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = obj.Attributes.LayerIndex
         State.Doc.Layers.[index].FullPath
 
@@ -124,14 +128,14 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
                              ,[<OPT;DEF(false)>]createLayerIfMissing:bool
                              ,[<OPT;DEF(false:bool)>]allowAllUnicode:bool
                              ,[<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //SET
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let layerIndex = 
             if createLayerIfMissing then  
                 UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, 
                     UtilLayer.ByParent, UtilLayer.ByParent, 
                     allowAllUnicode,collapseParents).Index
             else                          
-                Scripting.CoerceLayer(layer).Index
+                RhinoScriptSyntax.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
         obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
@@ -159,9 +163,9 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
                     UtilLayer.randomLayerColor, UtilLayer.ByParent, 
                     UtilLayer.ByParent, allowUnicode, collapseParents).Index
             else                          
-                Scripting.CoerceLayer(layer).Index
+                RhinoScriptSyntax.CoerceLayer(layer).Index
         for objectId in objectIds do
-            let obj = Scripting.CoerceRhinoObject(objectId)
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
             obj.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
@@ -172,6 +176,9 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
 
 ## Change Log
+`0.7.0`
+- renamed main static class from Rhino.Scripting to Rhino.Scripting.RhinoScriptSyntax !
+
 `0.6.2`
 - even better window sync with Seff Editor
 

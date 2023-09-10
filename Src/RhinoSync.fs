@@ -1,4 +1,6 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open FsEx
 open System
@@ -6,7 +8,7 @@ open Rhino.Runtime
 open FsEx.SaveIgnore
 
 
-type internal RunOnUiDelegate = delegate of (unit) -> unit
+type internal RunOnUiDelegate = delegate of unit -> unit
 
 /// All methods in Rhino.Scripting.dll are thread safe and can be called from any thread.
 /// However concurrent writing to Rhino Object Tables might corrupt its state.
@@ -91,27 +93,32 @@ type RhinoSync private () =
                 log "Rhino.Scripting.dll: Seff.Rhino.Sync.syncContext failed to init via Windows.Forms.WindowsFormsSynchronizationContext: %O" e
 
                     
-    static let initialize = // Dont rename !!!invoked via reflection from Seff.Rhino
+    static let initialize = // Don't rename !!!invoked via reflection from Seff.Rhino.
         // should be called via reflection from Seff.Rhino in case Rhino.Scripting is loaded already by another plugin.
         // Reinitialize Rhino.Scripting just in case it is loaded already in the current AppDomain:
         // to have showEditor and hideEditor actions setup correctly.
         new Action(init) 
 
+
+    // An alternative to do! Async.SwitchToContext syncContext    
+    //static let runOnUiThread(func:unit->'T)=
+    //    if RhinoApp.InvokeRequired then     
+    //        let mutable isDone = false
+    //        let mutable result = Unchecked.defaultof<'T>
+    //        let uiDelegate = RunOnUiDelegate (fun () ->  
+    //            result <- func() 
+    //            isDone <- true) 
+    //        RhinoApp.InvokeOnUiThread(uiDelegate, [|  |] ) // does DynamicInvoke on delegate https://stackoverflow.com/questions/12858340/difference-between-invoke-and-dynamicinvoke
+    //        while not isDone do  
+    //            Threading.Thread.Sleep 50
+    //        result
+    //    else
+    //        func()  
+
     // ---------------------------------
     // Public members:
     // ---------------------------------
-
-    // Test if the current thread is the main UI thread
-    // just calls RhinoApp.InvokeRequired
-    //static member IsCurrrentThreadUIThread = 
-        // Threading.Thread.CurrentThread = Windows.Threading.Dispatcher.CurrentDispatcher.Thread // fails ! if not in WPF ??
-        //RhinoApp.InvokeRequired
-        //    this calls: (via ILSpy)
-        //    [DllImport("rhcommon_c", CallingConvention = CallingConvention.Cdecl)]
-        //    [return: MarshalAs(UnmanagedType.U1)]
-        //    internal static extern bool CRhMainFrame_InvokeRequired();
-
-    
+        
     /// Set to false to disable the logging off errors to 
     /// RhinoApp.WriteLine and the error stream (eprintfn).
     static member LogErrors 
@@ -146,14 +153,16 @@ type RhinoSync private () =
         if RhinoApp.InvokeRequired then            
             if initIsPending then init()
             if isNull syncContext then 
-                RhinoSyncException.Raise "This code needs to run on the main UI thread. Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible. You are calling a function of Rhino.Scripting that need the UI thread."
+                RhinoSyncException.Raise "%s\r\n%s\r\n%s" "This code needs to run on the main UI thread." 
+                        "Rhino.RhinoSync.syncContext is still null or not set up. An automatic context switch is not possible."
+                        "You are calling a function of Rhino.Scripting that need the UI thread."
                 // TODO: better would be to call https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_RhinoApp_InvokeOnUiThread.htm and then pass in a continuation function?
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
             async{
-                    do! Async.SwitchToContext syncContext
-                    return func()
-                    } |> Async.RunSynchronously
+                do! Async.SwitchToContext syncContext
+                return func()
+                } |> Async.RunSynchronously
         else
             func()
 
@@ -169,12 +178,12 @@ type RhinoSync private () =
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130
             async{
-                    do! Async.SwitchToContext syncContext
-                    if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
-                    let res = func()
-                    if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                    return res
-                    } |> Async.RunSynchronously
+                do! Async.SwitchToContext syncContext
+                if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
+                let res = func()
+                if  not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+                return res
+                } |> Async.RunSynchronously
         else
             if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true            
             let res = func()
@@ -195,16 +204,17 @@ type RhinoSync private () =
                 // or somehow get the syncContext from RhinoCode or RhinoCommon or the Rhino .NET host via reflection.
                 // https://discourse.mcneel.com/t/use-rhino-ui-dialogs-from-worker-threads/90130           
             async{                    
-                    do! Async.SwitchToContext syncContext
-                    let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init                    
-                    //eprintfn "Hiding Seff async..isWinVis:%b" isWinVis
-                    if isWinVis && notNull hideEditor then hideEditor.Invoke()
-                    if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true                    
-                    let res = func()
-                    if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
-                    if isWinVis && notNull showEditor then showEditor.Invoke()
-                    return res
-                    } |> Async.RunSynchronously
+                do! Async.SwitchToContext syncContext
+                let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init                    
+                //eprintfn "Hiding Seff async..isWinVis:%b" isWinVis
+                if isWinVis && notNull hideEditor then hideEditor.Invoke()
+                if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- true         
+                RhinoApp.SetFocusToMainWindow()
+                let res = func()
+                if not redraw then RhinoDoc.ActiveDoc.Views.RedrawEnabled <- false
+                if isWinVis && notNull showEditor then showEditor.Invoke()
+                return res
+                } |> Async.RunSynchronously
         else
             if initIsPending then init() // because even when we are in sync we still need to see if the Seff window is showing or not.
             let isWinVis = if isNull isEditorVisible then false else isEditorVisible.Invoke() // do after init   

@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -8,7 +10,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenMaterial =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -23,7 +25,7 @@ module AutoOpenMaterial =
     ///<param name="layer">(string) Name of an existing layer.</param>
     ///<returns>(int) Material index of the layer.</returns>
     static member AddMaterialToLayer(layer:string) : int = 
-        let layer = Scripting.CoerceLayer(layer)
+        let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.RenderMaterialIndex> -1 then layer.RenderMaterialIndex
         else
             let materialindex = State.Doc.Materials.Add()
@@ -36,7 +38,7 @@ module AutoOpenMaterial =
     ///<param name="objectId">(Guid) Identifier of an object.</param>
     ///<returns>(int) material index of the object.</returns>
     static member AddMaterialToObject(objectId:Guid) : int = 
-        let rhinoObject = Scripting.CoerceRhinoObject(objectId)
+        let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable attr = rhinoObject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
             attr.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
@@ -90,10 +92,10 @@ module AutoOpenMaterial =
     ///<param name="destination">(Guid seq) Id of the destination object.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member MatchMaterial(source:Guid, destination:Guid seq) : unit = 
-        let rhobj = Scripting.CoerceRhinoObject(source)
+        let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
         let mat = State.Doc.Materials.[source]
-        if isNull mat then RhinoScriptingException.Raise "Rhino.Scripting.MatchMaterial failed.  source:'%A' destination:'%A'" source destination
+        if isNull mat then RhinoScriptingException.Raise "RhinoScriptSyntax.MatchMaterial failed.  source:'%A' destination:'%A'" source destination
 
         for objectId in destination do
             let rhobj = State.Doc.Objects.FindId(objectId)
@@ -111,7 +113,7 @@ module AutoOpenMaterial =
     /// Or an empty string if no Bump texture is present on the Material.</returns>
     static member MaterialBump(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A'" materialIndex
         #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Bump)
         #else
@@ -126,20 +128,20 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialBump(materialIndex:int, filename:string) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
-            if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #else
-            if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
 
             mat.CommitChanges() |> ignore 
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
     ///<summary>Returns a material's diffuse color.</summary>
@@ -147,7 +149,7 @@ module AutoOpenMaterial =
     ///<returns>(Drawing.Color) The current material color.</returns>
     static member MaterialColor(materialIndex:int) : Drawing.Color = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialColor failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.DiffuseColor
         rc
 
@@ -157,7 +159,7 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialColor(materialIndex:int, color:Drawing.Color) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
         mat.CommitChanges() |> ignore 
         State.Doc.Views.Redraw()
@@ -169,7 +171,7 @@ module AutoOpenMaterial =
     /// Or an empty string if no MaterialEnvironmentMap texture is present on the Material.</returns>
     static member MaterialEnvironmentMap(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
         #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Emap)
         #else
@@ -183,19 +185,19 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialEnvironmentMap(materialIndex:int, filename:string) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
-            if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "Rhino.Scripting.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #else
-            if not <| mat.SetEnvironmentTexture(filename) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetEnvironmentTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
 
@@ -204,7 +206,7 @@ module AutoOpenMaterial =
     ///<returns>(string) The current material name.</returns>
     static member MaterialName(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialName failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Name
         rc
 
@@ -214,7 +216,7 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialName(materialIndex:int, name:string) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
         mat.CommitChanges() |> ignore 
 
@@ -225,7 +227,7 @@ module AutoOpenMaterial =
     ///<returns>(Drawing.Color) The current material reflective color.</returns>
     static member MaterialReflectiveColor(materialIndex:int) : Drawing.Color = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialReflectiveColor failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A'" materialIndex
         let rc = mat.ReflectionColor
         rc
 
@@ -235,7 +237,7 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialReflectiveColor(materialIndex:int, color:Drawing.Color) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialReflectiveColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.ReflectionColor <- color
         mat.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
@@ -248,7 +250,7 @@ module AutoOpenMaterial =
     ///    0.0 being matte and 255.0 being glossy.</returns>
     static member MaterialShine(materialIndex:int) : float = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialShine failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Shine
         rc
 
@@ -259,7 +261,7 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialShine(materialIndex:int, shine:float) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialShine failed.  materialIndex:'%A' shine:'%A'" materialIndex shine
         mat.Shine <- shine
         mat.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
@@ -272,7 +274,7 @@ module AutoOpenMaterial =
     /// Or an empty string if no MaterialTexture is present on the Material</returns>
     static member MaterialTexture(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTexture failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A'" materialIndex
         #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Bitmap)
         #else
@@ -286,20 +288,20 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialTexture(materialIndex:int, filename:string) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
-            if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #else
-            if  not <| mat.SetBitmapTexture(filename) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if  not <| mat.SetBitmapTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
 
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
     ///<summary>Returns a material's transparency value.</summary>
@@ -308,7 +310,7 @@ module AutoOpenMaterial =
     ///    0.0 being opaque and 1.0 being transparent.</returns>
     static member MaterialTransparency(materialIndex:int) : float = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparency failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A'" materialIndex
         let rc = mat.Transparency
         rc
 
@@ -319,7 +321,7 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialTransparency(materialIndex:int, transparency:float) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparency failed.  materialIndex:'%A' transparency:'%A'" materialIndex transparency
         mat.Transparency <- transparency
         mat.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
@@ -332,7 +334,7 @@ module AutoOpenMaterial =
     /// Or an empty string if no Bump texture is present on the Material.</returns>
     static member MaterialTransparencyMap(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
         #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Transparency)
         #else
@@ -347,19 +349,19 @@ module AutoOpenMaterial =
     ///<returns>(unit) void, nothing.</returns>
     static member MaterialTransparencyMap(materialIndex:int, filename:string) : unit = //SET
         let mat = State.Doc.Materials.[materialIndex]
-        if mat|> isNull  then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+        if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
             #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
-            if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #else
-            if  not <| mat.SetTransparencyTexture(filename) then RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            if  not <| mat.SetTransparencyTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
+            RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
 
 
 

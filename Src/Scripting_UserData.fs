@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -8,7 +10,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenUserData =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -71,11 +73,11 @@ module AutoOpenUserData =
 
     ///<summary>Returns all user text keys stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
-    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
     ///<returns>(string Rarr) all keys.</returns>
     static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Rarr = 
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             let uss = obj.Geometry.GetUserStrings()
             rarr { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
@@ -87,11 +89,11 @@ module AutoOpenUserData =
     ///<summary>Returns user text stored on an object, fails if non existing.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
-    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value,fails if non existing.</returns>
     static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string = 
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s = 
             if attachedToGeometry then  obj.Geometry.GetUserString(key)
             else                        obj.Attributes.GetUserString(key)
@@ -99,19 +101,19 @@ module AutoOpenUserData =
         if isNull s then
             let err = 
                 str{
-                    yield! sprintf "Rhino.Scripting.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
-                    let ks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=false)
+                    yield! sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
+                    let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
                     if ks.Count = 0 then
                         yield!  "This Object does not have any UserText."
                     else
                         yield!  "Available keys on Object are:"
-                        for k in Scripting.GetUserTextKeys(objectId, attachedToGeometry=false) do
+                        for k in RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false) do
                             yield "    "
                             yield! k
-                    let gks = Scripting.GetUserTextKeys(objectId, attachedToGeometry=true)
+                    let gks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=true)
                     if gks.Count > 0 then
                         yield! "Available keys on Geometry:"
-                        for k in Scripting.GetUserTextKeys(objectId, attachedToGeometry=true) do
+                        for k in RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=true) do
                             yield "    "
                             yield! k
                 }
@@ -121,11 +123,11 @@ module AutoOpenUserData =
     ///<summary>Returns user text stored on an object, returns Option.None if non existing.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
-    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
     ///<returns>(string Option) if key is specified, Some(value) else None .</returns>
     static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option= 
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let s = 
             if attachedToGeometry then  obj.Geometry.GetUserString(key)
             else                        obj.Attributes.GetUserString(key)
@@ -135,10 +137,10 @@ module AutoOpenUserData =
     ///<summary>Checks if a User Text key is stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="key">(string) The key name</param>
-    ///<param name="attachedToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to retrieve the user text</param>
+    ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to retrieve the user text</param>
     ///<returns>(bool) if key exist true.</returns>
     static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool = 
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             notNull <| obj.Geometry.GetUserString(key)
         else
@@ -165,7 +167,7 @@ module AutoOpenUserData =
     ///    2 = geometry user text
     ///    3 = both attribute and geometry user text.</returns>
     static member IsUserText(objectId:Guid) : int = 
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable rc = 0
         if obj.Attributes.UserStringCount > 0 then  rc <- rc ||| 1
         if obj.Geometry.UserStringCount > 0   then  rc <- rc ||| 2
@@ -185,19 +187,19 @@ module AutoOpenUserData =
     ///<summary>Sets a user text stored in the document.</summary>
     ///<param name="key">(string) Key name to set. Cannot be empty string.</param>
     ///<param name="value">(string) The string value to set. Can be empty string. To delete a key use rs.DeleteDocumentUserText</param>
-    ///<param name="allowAllUnicode">(bool) Optional, Default Value: <c>false</c> , set to true to allow all Unicode characters, 
+    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters, 
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetDocumentUserText(key:string, value:string, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = 
-        if not <|  Scripting.IsGoodStringId( key, allowEmpty=false) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You may be able bypass this restrictions in Rhino.Scripting by using RhinoCommon directly." key
+        if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You may be able bypass this restrictions in Rhino.Scripting by using RhinoCommon directly." key
             
         if allowAllUnicode then 
             if not <| Util.isAcceptableStringId( value, true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  Scripting.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
         State.Doc.Strings.SetString(key, value) |> ignoreObj
 
 
@@ -205,35 +207,35 @@ module AutoOpenUserData =
     ///<param name="key">(string) Key name to delete</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteDocumentUserText(key:string) : unit = 
-        if isNull key  then RhinoScriptingException.Raise "Rhino.Scripting.DeleteDocumentUserText failed on for null key"
+        if isNull key  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed on for null key"
         let p = State.Doc.Strings.SetString(key, null)
-        if isNull p then RhinoScriptingException.Raise "Rhino.Scripting.DeleteDocumentUserText failed,  key '%s' does not exist"  key
+        if isNull p then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key
 
     ///<summary>Sets a user text stored on an object. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to set. Cannot be an empty string.</param>
     ///<param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
-    ///<param name="allowAllUnicode">(bool) Optional, Default Value: <c>false</c> , set to true to allow all Unicode characters, 
+    ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to store the user text</param>
+    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters, 
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = 
-        if not <| Scripting.IsGoodStringId( key, allowEmpty=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+        if not <| RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
         
         if allowAllUnicode then 
             if not <| Util.isAcceptableStringId( value, true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  Scripting.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
-        let obj = Scripting.CoerceRhinoObject(objectId)
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then
             if not <| obj.Geometry.SetUserString(key, value) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
         else
             if not <| obj.Attributes.SetUserString(key, value) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
         
         obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
                
@@ -241,38 +243,38 @@ module AutoOpenUserData =
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set. Cannot be an empty string.</param>
     ///<param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to store the user text</param>
-    ///<param name="allowAllUnicode">(bool) Optional, Default Value: <c>false</c> , set to true to allow Unicode characters, 
+    ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to store the user text</param>
+    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow Unicode characters, 
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = //PLURAL
-        if not <|  Scripting.IsGoodStringId( key, allowEmpty=false) then
-            RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
+        if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
         
         if allowAllUnicode then 
             if not <| Util.isAcceptableStringId( value, true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
-            if not <|  Scripting.IsGoodStringId( value, allowEmpty=true) then
-                RhinoScriptingException.Raise "Rhino.Scripting.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
+            if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
+                RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
 
         for objectId in objectIds do
-            let obj = Scripting.CoerceRhinoObject(objectId)
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then
                 if not <| obj.Geometry.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
             else
                 if not <| obj.Attributes.SetUserString(key, value) then
-                    RhinoScriptingException.Raise "Rhino.Scripting.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
+                    RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
             obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
 
     ///<summary>Removes user text stored on an object. If the key exists.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="key">(string) The key name to delete</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to delete the user text from</param>
+    ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to delete the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = 
-        let obj = Scripting.CoerceRhinoObject(objectId)
+        let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
         else                     obj.Attributes.SetUserString(key, null) |> ignore
         obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
@@ -281,11 +283,11 @@ module AutoOpenUserData =
     ///<summary>Removes user text stored on multiple objects.If the key exists.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to delete</param>
-    ///<param name="attachToGeometry">(bool) Optional, Default Value: <c>false</c> Location on the object to delete the user text from</param>
+    ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to delete the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DeleteUserText(objectIds:Guid seq, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = //PLURAL
         for objectId in objectIds do
-            let obj = Scripting.CoerceRhinoObject(objectId)
+            let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if attachToGeometry then  obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
             else                      obj.Attributes.SetUserString(key, null) |> ignore
             obj.CommitChanges() |> ignore  // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536

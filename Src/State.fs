@@ -1,9 +1,7 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
 
-
+open Rhino 
 open System
-open Rhino
-open Rhino.Runtime
 open FsEx
 
 /// An internal static class to hold current state like active Rhino document.
@@ -87,7 +85,7 @@ type internal State private () =
 
     static let initState()= 
         if not Rhino.Runtime.HostUtils.RunningInRhino then
-            RhinoScriptingException.Raise "Rhino.Scripting.State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
+            RhinoScriptingException.Raise "RhinoScriptSyntax.State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
         else
             //RhinoSync.Initialize() // dont do yet, only try to get sync context when actually needed, if on UI thread this might be never.
             updateDoc(RhinoDoc.ActiveDoc )  // do first

@@ -1,5 +1,7 @@
 ﻿
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open Microsoft.FSharp.Core.LanguagePrimitives
@@ -11,7 +13,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenDocument =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -22,16 +24,16 @@ module AutoOpenDocument =
     ///<summary>Create a bitmap preview image of the current model.</summary>
     ///<param name="fileName">(string) Name of the bitmap file to create</param>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the active view is used</param>
-    ///<param name="width">(int) Optional, Default Value: <c>0</c>
+    ///<param name="width">(int) Optional, default value: <c>0</c>
     /// integer that specifies width of the bitmap in pixel. if only width given height will be scaled to keep screen ratio</param>
-    ///<param name="height">(int) Optional, Default Value: <c>0</c>
+    ///<param name="height">(int) Optional, default value: <c>0</c>
     /// integer that specifies height of the bitmap in pixel. if only height given width will be scaled to keep screen ratio</param>
-    ///<param name="flags">(int) Optional, Default Value: <c>0</c>
+    ///<param name="flags">(int) Optional, default value: <c>0</c>
     ///    Bitmap creation flags. Can be the combination of:
     ///    1 = honor object highlighting
     ///    2 = draw construction Plane
     ///    4 = use ghosted shading</param>
-    ///<param name="wireframe">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="wireframe">(bool) Optional, default value: <c>false</c>
     ///    If True then a wire-frame preview image. If False,
     ///    a rendered image will be created</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
@@ -41,7 +43,7 @@ module AutoOpenDocument =
                                         [<OPT;DEF(0)>]height:int,
                                         [<OPT;DEF(0)>]flags:int,
                                         [<OPT;DEF(false)>]wireframe:bool) : bool = 
-        let rhview = Scripting.CoerceView(view)
+        let rhview = RhinoScriptSyntax.CoerceView(view)
         let inline  ( ./. ) (i:int) (j:int) = (float(i)) / (float(j))
         let inline  ( *. ) ( i:int) (f:float) = int(round(float(i) * f))
         let rhsize = 
@@ -106,7 +108,7 @@ module AutoOpenDocument =
     ///  will automatically enable redraw if needed
     ///  and afterwards disable it again if it was disabled before.
     ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
-    ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing.</returns>
     static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit = 
@@ -133,7 +135,7 @@ module AutoOpenDocument =
         let bmp = 
             if notNull modelName  then
                 if notNull State.Doc.Path then RhinoDoc.ExtractPreviewImage(State.Doc.Path) // TODO test this works ok
-                else RhinoScriptingException.Raise "Rhino.Scripting.ExtractPreviewImage failed on unsaved file"
+                else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractPreviewImage failed on unsaved file"
             else
                 RhinoDoc.ExtractPreviewImage(modelName)
         bmp.Save(fileName)
@@ -199,7 +201,7 @@ module AutoOpenDocument =
     ///   1 = background color</param>
     ///<returns>(Drawing.Color) The current item color.</returns>
     static member RenderColor(item:int) : Drawing.Color = //GET
-        if item<>0 && item<>1 then  RhinoScriptingException.Raise "Rhino.Scripting.RenderColor Item must be 0 or 1.  item:'%A'" item
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenderColor Item must be 0 or 1.  item:'%A'" item
         if item = 0 then  State.Doc.RenderSettings.AmbientLight
         else State.Doc.RenderSettings.BackgroundColorTop
 
@@ -210,7 +212,7 @@ module AutoOpenDocument =
     ///<param name="color">(Drawing.Color) The new color value</param>
     ///<returns>(unit) void, nothing.</returns>
     static member RenderColor(item:int, color:Drawing.Color) : unit = //SET
-        if item<>0 && item<>1 then  RhinoScriptingException.Raise "Rhino.Scripting.RenderColor Item must be 0 || 1.  item:'%A' color:'%A'" item color
+        if item<>0 && item<>1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenderColor Item must be 0 || 1.  item:'%A' color:'%A'" item color
         let settings = State.Doc.RenderSettings
         if item = 0 then  settings.AmbientLight <- color
         else            settings.BackgroundColorTop <- color
@@ -492,7 +494,7 @@ module AutoOpenDocument =
         if tolerance > 0.0 then
             State.Doc.ModelAbsoluteTolerance <- tolerance
         else
-            RhinoScriptingException.Raise "Rhino.Scripting.UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
+            RhinoScriptingException.Raise "RhinoScriptSyntax.UnitAbsoluteTolerance failed.  tolerance:'%A'" tolerance
 
 
 
@@ -512,7 +514,7 @@ module AutoOpenDocument =
             if angleToleranceDegrees > 0. then
                 State.Doc.ModelAngleToleranceDegrees <- angleToleranceDegrees
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
+                RhinoScriptingException.Raise "RhinoScriptSyntax.UnitAngleTolerance failed.  angleToleranceDegrees:'%A'" angleToleranceDegrees
 
 
     ///<summary>Return the document's distance display precision.</summary>
@@ -545,7 +547,7 @@ module AutoOpenDocument =
             if relativeTolerance > 0.0 then
                 State.Doc.ModelRelativeTolerance <- relativeTolerance
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
+                RhinoScriptingException.Raise "RhinoScriptSyntax.UnitRelativeTolerance failed.  relativeTolerance:'%A'" relativeTolerance
 
 
     ///<summary>Return the scale factor for changing between unit systems.</summary>
@@ -645,26 +647,26 @@ module AutoOpenDocument =
     ///   23 - Astronomical (1.4959787e + 11)
     ///   24 - Lightyears (9.46073e + 15 meters)
     ///   25 - Parsecs (3.08567758e + 16)</param>
-    ///<param name="scale">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="scale">(bool) Optional, default value: <c>false</c>
     ///    Scale existing geometry based on the new unit system.
     ///    If not specified, any existing geometry is not scaled (False)</param>
     ///<returns>(unit) void, nothing.</returns>
     static member UnitSystem(unitSystem:int, [<OPT;DEF(false)>]scale:bool) : unit = //SET
         if unitSystem < 1 || unitSystem > 25 then
-            RhinoScriptingException.Raise "Rhino.Scripting.UnitSystem value of %d is not  valid" unitSystem
+            RhinoScriptingException.Raise "RhinoScriptSyntax.UnitSystem value of %d is not  valid" unitSystem
             let unitSystem : UnitSystem  = LanguagePrimitives.EnumOfValue (byte unitSystem)
             State.Doc.AdjustPageUnitSystem(unitSystem, scale)
 
 
 
     ///<summary>Returns the name of the current unit system.</summary>
-    ///<param name="capitalize">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="capitalize">(bool) Optional, default value: <c>false</c>
     ///    Capitalize the first character of the units system name (e.g. return "Millimeter" instead of "millimeter"). The default is not to capitalize the first character (false)</param>
-    ///<param name="singular">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="singular">(bool) Optional, default value: <c>true</c>
     ///    Return the singular form of the units system name (e.g. "millimeter" instead of "millimeters"). The default is to return the singular form of the name (true)</param>
-    ///<param name="abbreviate">(bool) Optional, Default Value: <c>false</c>
+    ///<param name="abbreviate">(bool) Optional, default value: <c>false</c>
     ///    Abbreviate the name of the units system (e.g. return "mm" instead of "millimeter"). The default is not to abbreviate the name (false)</param>
-    ///<param name="modelUnits">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="modelUnits">(bool) Optional, default value: <c>true</c>
     ///    Return the document's model units (True) or the document's page units (False). The default is True</param>
     ///<returns>(string) The name of the current units system.</returns>
     static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string = 

@@ -1,4 +1,6 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 
@@ -10,7 +12,7 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenApplication =
-  type Scripting with  
+  type RhinoScriptSyntax with  
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
     //---So that all members are visible in C# and Ironpython too.
@@ -119,7 +121,7 @@ module AutoOpenApplication =
         elif item = 11 then AppearanceSettings.CommandPromptTextColor
         elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor
         elif item = 13 then AppearanceSettings.CommandPromptHypertextColor
-        else RhinoScriptingException.Raise "Rhino.Scripting.AppearanceColor: get item %d is out of range" item
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor: get item %d is out of range" item
 
     ///<summary>Modifies an application interface item's color.</summary>
     ///<param name="item">(int) Item number to either query or modify
@@ -155,7 +157,7 @@ module AutoOpenApplication =
             elif item = 11 then AppearanceSettings.CommandPromptTextColor <- color
             elif item = 12 then AppearanceSettings.CommandPromptBackgroundColor <- color
             elif item = 13 then AppearanceSettings.CommandPromptHypertextColor <- color
-            else RhinoScriptingException.Raise "Rhino.Scripting.AppearanceColor:: Setting item %d is out of range" item
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.AppearanceColor:: Setting item %d is out of range" item
             State.Doc.Views.Redraw()
             )
 
@@ -202,7 +204,7 @@ module AutoOpenApplication =
             RhinoApp.ClearCommandHistoryWindow())
 
 
-    ///<summary>Runs a Rhino command script. All Rhino commands can be used in command
+    ///<summary>Runs a Rhino command macro / script. All Rhino commands can be used in command
     ///    scripts. The command can be a built-in Rhino command or one provided by a
     ///    3rd party plug-in.
     ///    Write command scripts just as you would type the command sequence at the
@@ -223,23 +225,48 @@ module AutoOpenApplication =
     ///        rs.Command("! _Line _Pause _Pause")
     ///      CORRECT:
     ///        rs.Command("_Line _Pause _Pause")
+    ///    In a normal command, when the user enters a command beginning with a '!' , the command exits. 
+    ///    There is no documented way to get this behavior from within a script command.
+    ///
     ///    After the command script has run, you can obtain the identifiers of most
-    ///    recently created or changed object by calling LastCreatedObjects.</summary>
+    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().    
+    ///
+    ///    Warnings:
+    ///    This kind of command can be very dangerous. Please be sure you understand the following:
+    ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript() 
+    ///     from within a RhinoScriptCommand derived command.
+    ///    If you are very familiar with references, then please observe the following rules:
+    ///    If you get a reference or pointer to any part of the Rhino run-time database, this reference or pointer 
+    ///    will not be valid after you call Rhino.RhinoApp.RunScript().
+    ///    If you get a reference or a pointer, then call Rhino.RhinoApp.RunScript(), and then use the reference, 
+    ///    Rhino will probably crash.
+    ///    All pointers and references used by the command should be scoped such that they are only valid for the 
+    ///    time between calls to Rhino.RhinoApp.RunScript().
+    ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database. 
+    ///    The result is that all pointers and references become invalid. 
+    ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.  
+    ///    Never allow references and pointers from one section to be used in another section.</summary>
     ///<param name="commandString">(string) A Rhino command including any arguments</param>
-    ///<param name="echo">(bool) Optional, Default Value: <c>true</c>
-    ///    The command echo mode True will display the commands on the commandline. If omitted, command prompts are echoed (True)</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>
+    ///<param name="echo">(bool) Optional, default value: <c>true</c>
+    ///    The default command echo mode <c>true</c> will display the commands on the commandline. 
+    ///    If the command echo mode is set to <c>false</c> the command prompts will not be printed to the Rhino command line.</param>
+    ///<returns>(bool) True or False indicating success or failure.</returns>    
     static member Command (commandString:string, [<OPT;DEF(true)>]echo:bool) : bool = 
-        let getKeepEditor () = 
-            //if notNull SeffRhinoWindow then SeffRhinoWindow.Hide() // TODO Add check if already hidden, then don't even hide and show
+        RhinoSync.DoSync (fun () ->            
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
+            // RhinoApp.RunScript:
+            // Rhino acts as if each character in the script string had been typed in the command prompt.
+            // When RunScript is called from a "script runner" command, it completely runs the
+            // script before returning. When RunScript is called outside of a command, it returns and the
+            // script is run. This way menus and buttons can use RunScript to execute complicated functions
+            // see warnings from https://developer.rhino3d.com/guides/rhinocommon/run-rhino-command-from-plugin/
             let rc = RhinoApp.RunScript(commandString, echo)
             let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
             State.CommandSerialNumbers <- None
             if start<>ende then  State.CommandSerialNumbers <- Some(start, ende)
-            rc
-        RhinoSync.DoSync getKeepEditor
-
+            rc 
+            )
+        
 
     ///<summary>Returns the contents of Rhino's command history window.</summary>
     ///<returns>(string) The contents of Rhino's command history window.</returns>
@@ -322,11 +349,11 @@ module AutoOpenApplication =
             if mode = 1 || mode = 2 then
                 ApplicationSettings.EdgeAnalysisSettings.ShowEdges <- mode
             else
-                RhinoScriptingException.Raise "Rhino.Scripting.EdgeAnalysisMode bad edge analysisMode %d" mode
+                RhinoScriptingException.Raise "RhinoScriptSyntax.EdgeAnalysisMode bad edge analysisMode %d" mode
             )
 
     ///<summary>Enables or disables Rhino's automatic file saving mechanism.</summary>
-    ///<param name="enable">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    The autosave state. If omitted automatic saving is enabled (True)</param>
     ///<returns>(unit) void, nothing.</returns>
     static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit = 
@@ -342,7 +369,7 @@ module AutoOpenApplication =
             let objectId = PlugIns.PlugIn.IdFromName(plugin)
             let rc, loadSilent = PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then loadSilent
-            else RhinoScriptingException.Raise "Rhino.Scripting.EnablePlugIn: %s GetLoadProtection failed" plugin
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
             )
 
     ///<summary>Enables or disables a Rhino plug-in.</summary>
@@ -354,7 +381,7 @@ module AutoOpenApplication =
             let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
             let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
-            else RhinoScriptingException.Raise "Rhino.Scripting.EnablePlugIn: %s GetLoadProtection failed" plugin
+            else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
             )
 
 
@@ -415,7 +442,7 @@ module AutoOpenApplication =
     ///    method returns the total number of active commands.</summary>
     ///<returns>(int) The number of active commands.</returns>
     static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int = 
-        //<param name="ignoreRunners">(bool) Optional, Default Value: <c>true</c>
+        //<param name="ignoreRunners">(bool) Optional, default value: <c>true</c>
         //If True, script running commands, such as
         //  LoadScript, RunScript, and ReadCommandFile will not counted.
         //  If omitted the default is not to count script running command (True)</param>
@@ -604,11 +631,11 @@ module AutoOpenApplication =
     static member PlugInId(plugin:string) : Guid = 
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
-        else RhinoScriptingException.Raise "Rhino.Scripting.PlugInId: Plugin %s not found" plugin
+        else RhinoScriptingException.Raise "RhinoScriptSyntax.PlugInId: Plugin %s not found" plugin
 
 
     ///<summary>Returns a array of registered Rhino plug-ins.</summary>
-    ///<param name="types">(int) Optional, Default Value: <c>0</c>
+    ///<param name="types">(int) Optional, default value: <c>0</c>
     ///    The type of plug-ins to return.
     ///    0 = all
     ///    1 = render
@@ -617,7 +644,7 @@ module AutoOpenApplication =
     ///    8 = digitizer
     ///    16 = utility.
     ///    If omitted, all are returned</param>
-    ///<param name="status">(int) Optional, Default Value: <c>0</c>
+    ///<param name="status">(int) Optional, default value: <c>0</c>
     /// 0 = both loaded and unloaded,
     /// 1 = loaded,
     /// 2 = unloaded. If omitted both status is returned</param>
@@ -685,7 +712,7 @@ module AutoOpenApplication =
 
     ///<summary>Sends a string of printable characters to Rhino's Commandline.</summary>
     ///<param name="keys">(string) A string of characters to send to the Commandline</param>
-    ///<param name="addReturn">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="addReturn">(bool) Optional, default value: <c>true</c>
     ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit = 
@@ -733,10 +760,10 @@ module AutoOpenApplication =
     ///<param name="label">(string) Short description of the progesss</param>
     ///<param name="lower">(int) Lower limit of the progress meter's range</param>
     ///<param name="upper">(int) Upper limit of the progress meter's range</param>
-    ///<param name="embedLabel">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="embedLabel">(bool) Optional, default value: <c>true</c>
     ///    If true, the label will show inside the meter.
     ///    If false, the label will show to the left of the meter</param>
-    ///<param name="showPercent">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="showPercent">(bool) Optional, default value: <c>true</c>
     ///    Show the percent complete if True</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool = 
@@ -747,7 +774,7 @@ module AutoOpenApplication =
 
     ///<summary>Set the current position of the progress meter.</summary>
     ///<param name="position">(int) The new position in the progress meter</param>
-    ///<param name="absolute">(bool) Optional, Default Value: <c>true</c>
+    ///<param name="absolute">(bool) Optional, default value: <c>true</c>
     ///    The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used</param>
     ///<returns>(unit) void, nothing.</returns>
     static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit = 

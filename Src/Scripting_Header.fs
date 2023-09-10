@@ -1,7 +1,9 @@
-namespace Rhino
+namespace Rhino.Scripting 
+
+open Rhino 
 
 
-//leave all these open staments here if if they are unused, they are needed when all files are combined into one.
+// leave all these open statements here! even if they are unused, they are needed when all files are combined into one during the build.
 open System
 open System.Globalization
 open System.Collections.Generic
@@ -15,7 +17,7 @@ open FsEx.UtilMath
 open FsEx.SaveIgnore
 open FsEx.CompareOperators
 
-open Rhino.ScriptingFsharp
+
 
 
 // ------- Abbreviations so that declarations are not so long:
@@ -34,7 +36,7 @@ type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 
 /// A static class with static methods providing functions identical to RhinoScript in Python or VBscript
 [<AbstractClass; Sealed>]
-type Scripting private () = 
+type RhinoScriptSyntax private () = 
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
@@ -46,7 +48,7 @@ type Scripting private () =
     static member Ot = State.Ot
 
     /// A Dictionary to store state between scripting session.
-    /// Use Rhino.Scripting.Sticky.Clear() to reset it.
+    /// Use RhinoScriptSyntax.Sticky.Clear() to reset it.
     /// Similar to scriptingcontext.sticky dictionary in Rhino Python.
     static member val Sticky = new Dict<string, obj>() with get
 
@@ -60,7 +62,7 @@ type Scripting private () =
         RhinoApp.Wait() //does not need to be on  UI thread
         if State.EscapePressed  then
             State.EscapePressed <- false //always reset is needed otherwise in next run of script will not be reset
-            raise ( OperationCanceledException("Esc key was pressed and caught via Scripting.EscapeTest()"))
+            raise ( OperationCanceledException("Esc key was pressed and caught via RhinoScriptSyntax.EscapeTest()"))
 
 
     ///<summary>Clamps a value between a lower and an upper bound.</summary>
@@ -69,7 +71,7 @@ type Scripting private () =
     ///<param name="value">(float) The value to clamp</param>
     ///<returns>(float) The clamped value.</returns>
     static member Clamp (minVal:float, maxVal:float, value:float) : float = 
-        if minVal > maxVal then  RhinoScriptingException.Raise "Rhino.Scripting.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
+        if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
 
@@ -81,18 +83,18 @@ type Scripting private () =
     ///<param name="step">(float) step size between two values</param>
     ///<returns>(float seq) a lazy seq of floats.</returns>
     static member FxrangePython (start:float, stop:float, step:float) : float seq = 
-        if isNanOrInf start then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        if isNanOrInf step  then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
-        if isNanOrInf stop  then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf step  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
+        if isNanOrInf stop  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         let range = stop - start
                     |> BitConverter.DoubleToInt64Bits
                     |> (+) 15L // to make sure stop value is included in Range, this will then explicitly be removed below to match python semantics
                     |> BitConverter.Int64BitsToDouble
         let steps = range/step - 1.0 // -1 to make sure stop value is not included(python semantics different from F# semantics on range expressions)
-        if isNanOrInf steps then RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
+        if isNanOrInf steps then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython range/step in frange: %f / %f is NaN Infinity, start=%f, stop=%f" range step start stop
 
         if steps < 0.0 then
-            RhinoScriptingException.Raise "Rhino.Scripting.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
+            RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
         else
             // the actual algorithm:
             let rec floatrange (start, i, steps) = 
@@ -109,7 +111,7 @@ type Scripting private () =
     ///<param name="step">(float) step size between two values</param>
     ///<returns>(float Rarr).</returns>
     static member FrangePython (start:float, stop:float, step:float) : float Rarr = 
-        Scripting.FxrangePython (start, stop, step) |> Rarr.ofSeq
+        RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
@@ -117,8 +119,8 @@ type Scripting private () =
     ///<param name="layerIndex">(int) LayerIndex</param>
     ///<param name="objectName">(string) Default Value: <c>""</c>, object name</param>
     ///<param name="userTextKeysAndValues">(string*string seq) Default Value: <c>[]</c>, list of key value pairs for user text</param>
-    ///<param name="stringSafetyCheck">(bool) Optional, Default Value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    ///<param name="collapseParents">(bool) Optional, Default Value: <c>false</c>. Collapse parent layers in Layer UI </param>
+    ///<param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
+    ///<param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
                       ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
@@ -135,17 +137,17 @@ type Scripting private () =
                 a.LayerIndex <- layerIndex
                 if objectName <> "" then 
                     if stringSafetyCheck && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
-                        RhinoScriptingException.Raise "Rhino.Scripting.Add: objectName the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
+                        RhinoScriptingException.Raise "RhinoScriptSyntax.Add: objectName the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
                     for k,v in userTextKeysAndValues do 
                         if stringSafetyCheck then 
                             if not <|  Util.isAcceptableStringId( k, false) then // TODO or enforce goodStringID ?
-                                RhinoScriptingException.Raise "Rhino.Scripting.Add: SetUserText the string '%s' cannot be used as key. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
+                                RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
                             if not <|  Util.isAcceptableStringId( v, false) then
-                                RhinoScriptingException.Raise "Rhino.Scripting.Add: SetUserText the string '%s' cannot be used as value. See Scripting.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
+                                RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
-                            RhinoScriptingException.Raise "Rhino.Scripting.Add: failed to set key value pair '%s' and '%s' " k v 
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v 
                 a
                 
         match box geo with
@@ -163,17 +165,17 @@ type Scripting private () =
         | :? Sphere      as b ->   State.Doc.Objects.AddSphere(b,attr)
         | :? Cylinder    as cl ->  State.Doc.Objects.AddSurface (cl.ToNurbsSurface(),attr)
         | :? Cone        as c ->   State.Doc.Objects.AddSurface (c.ToNurbsSurface(),attr)
-        | _ -> RhinoScriptingException.Raise "Rhino.Scripting.Add: object of type %A not implemented yet" (geo.GetType())
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Add: object of type %A not implemented yet" (geo.GetType())
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     ///   Works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>
     ///<param name="geo">the Geometry</param>
     ///<param name="layer">(string) Optional, Layer Name, parent layer separated by '::' </param>
-    ///<param name="objectName">(string) Optional, Default Value: <c>""</c>. The object name</param>
-    ///<param name="userTextKeysAndValues">(string*string seq) Optional, Default Value: <c>[]</c>. list of key value pairs for user text</param>
-    ///<param name="layerColor">(Drawing.Color) Optional, Default Value: <c>FsEx.Color.randomForRhino()</c>Color for layer. The layer color will NOT be changed even if the layer exists already</param>
-    ///<param name="stringSafetyCheck">(bool) Optional, Default Value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
-    ///<param name="collapseParents">(bool) Optional, Default Value: <c>false</c>. Collapse parent layers in Layer UI </param>
+    ///<param name="objectName">(string) Optional, default value: <c>""</c>. The object name</param>
+    ///<param name="userTextKeysAndValues">(string*string seq) Optional, default value: <c>[]</c>. list of key value pairs for user text</param>
+    ///<param name="layerColor">(Drawing.Color) Optional, default value: <c>FsEx.Color.randomForRhino()</c>Color for layer. The layer color will NOT be changed even if the layer exists already</param>
+    ///<param name="stringSafetyCheck">(bool) Optional, default value: <c>true</c>. Check object name and usertext do not include line returns, tabs, and leading or trailing whitespace.</param>
+    ///<param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
                       ,  [<OPT;DEF("")>]layer:string 
@@ -207,7 +209,7 @@ type Scripting private () =
                     fi                        
                 *)
 
-        let g = Scripting.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)  
+        let g = RhinoScriptSyntax.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)  
         g
 
 

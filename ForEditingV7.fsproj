@@ -64,7 +64,6 @@
     <None Include="ForPublishingV7.fsproj" />
 	  <None Include="ForEditing.fsproj" />
   </ItemGroup>
-
-  
+ 
 
 </Project>

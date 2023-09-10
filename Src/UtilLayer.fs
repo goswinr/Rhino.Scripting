@@ -1,4 +1,6 @@
-﻿namespace Rhino
+﻿namespace Rhino.Scripting 
+
+open Rhino 
 
 open System
 open System.Globalization // for UnicodeCategory
@@ -12,7 +14,7 @@ module internal UtilLayer =
         Drawing.Color.FromArgb(int c.Red, int c.Green, int c.Blue)
 
 
-    let eVSLN = "Rhino.Scripting.UtilLayer.failOnBadShortLayerName"
+    let eVSLN = "RhinoScriptSyntax.UtilLayer.failOnBadShortLayerName"
 
     /// Raise exceptions if short layer-name is not valid
     /// it may not contain :: or control characters
@@ -23,19 +25,24 @@ module internal UtilLayer =
             RhinoScriptingException.Raise "%s Empty or just whitespace string as layer name in '%s'" eVSLN fullPath
         
         if name.Contains "::" then
-            RhinoScriptingException.Raise "%s: Short layer name '%s' shall not contains two colons (::).  in '%s'" eVSLN name fullPath
+            RhinoScriptingException.Raise "%s: The layer name '%s' shall not contains two colons (::).  in '%s'" eVSLN name fullPath
+        
+        let trimmed = name.Trim()
+        
+        if trimmed.Length <> name.Length then 
+            RhinoScriptingException.Raise "The layer name may not start or end with whitespace: '%s'" name
         
         if allowAllUnicode then 
-            if not<| Util.isAcceptableStringId(name, false) then 
-                RhinoScriptingException.Raise "%s: Short layer name '%s' is invalid. It may not include line returns, tabs, and leading or trailing whitespace. in '%s'" eVSLN  name fullPath
+            if not<| Util.isAcceptableStringId(trimmed, false) then 
+                RhinoScriptingException.Raise "%s: The layer name '%s' is invalid. It may not include line returns, tabs, and leading or trailing whitespace. in '%s'" eVSLN  name fullPath
         else
-            if not<| Util.isGoodStringId(name, false) then             
-                RhinoScriptingException.Raise "%s: Short layer name '%s' has invalid or not recommended characters. If you really want this layer name us the 'allowUnicode' optional parameter in '%s'" eVSLN  name fullPath
+            if not<| Util.isGoodStringId(trimmed, false) then             
+                RhinoScriptingException.Raise "%s: The layer name '%s' has invalid or not recommended characters.\r\nYou may be able to use this layer name by setting the optional 'allowUnicode' parameter in '%s' to 'true'" eVSLN  name fullPath
         
-        match Char.GetUnicodeCategory(name.[0]) with
+        match Char.GetUnicodeCategory(trimmed.[0]) with
         | UnicodeCategory.OpenPunctuation 
         | UnicodeCategory.ClosePunctuation ->  // { [ ( } ] ) don't work at start of layer name
-            RhinoScriptingException.Raise  "%s: Short layer name '%s' may not start with a '%c' in '%s'" eVSLN name name.[0] fullPath
+            RhinoScriptingException.Raise  "%s: The layer name '%s' may not start with a '%c' in '%s'" eVSLN name name.[0] fullPath
         | _ -> ()
 
     let internal getParents(lay:Layer) = 
@@ -43,14 +50,14 @@ module internal UtilLayer =
             if l.ParentLayerId = Guid.Empty then ps
             else
             let pl = State.Doc.Layers.FindId(l.ParentLayerId)
-            if isNull pl then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getParents : ParentLayerId not found in layers"
+            if isNull pl then RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getParents : ParentLayerId not found in layers"
             find pl (pl::ps)
         find lay []
 
     let internal visibleSetTrue(lay:Layer, forceVisible:bool) : unit = 
         if not lay.IsVisible then
             if forceVisible then
-                if not (State.Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.visibleSetTrue Failed to turn on sub-layers of layer  %s"  lay.FullPath
+                if not (State.Doc.Layers.ForceLayerVisible(lay.Id)) then RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.visibleSetTrue Failed to turn on sub-layers of layer  %s"  lay.FullPath
             else
                 lay.SetPersistentVisibility(true)
 
@@ -96,18 +103,18 @@ module internal UtilLayer =
         match State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex) with
         | RhinoMath.UnsetIntIndex ->
             match name with
-            | null -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: Cannot get or create layer from null string"
-            | ""   -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: Cannot get or create layer from empty string"
+            | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: Cannot get or create layer from null string"
+            | ""   -> RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: Cannot get or create layer from empty string"
             | _ ->
                 match name.Split( [|"::"|], StringSplitOptions.None) with // TODO or use StringSplitOptions.RemoveEmptyEntries ??
-                | [| |] -> RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: Cannot get or create layer for name: '%s'" name
+                | [| |] -> RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: Cannot get or create layer for name: '%s'" name
                 | ns ->
                     let rec createLayer(nameList, prevId, prevIdx, root) : int = 
                         match nameList with
                         | [] -> prevIdx // exit recursion
                         | branch :: rest ->
                             if String.IsNullOrWhiteSpace branch then // to cover for StringSplitOptions.None
-                                RhinoScriptingException.Raise "Rhino.Scripting.UtilLayer.getOrCreateLayer: A segment falls into String.IsNullOrWhiteSpace. Cannot get or create layer for name: '%s'" name
+                                RhinoScriptingException.Raise "RhinoScriptSyntax.UtilLayer.getOrCreateLayer: A segment falls into String.IsNullOrWhiteSpace. Cannot get or create layer for name: '%s'" name
                             let fullPath = if root="" then branch else root + "::" + branch
                             match State.Doc.Layers.FindByFullPath(fullPath, RhinoMath.UnsetIntIndex) with
                             | RhinoMath.UnsetIntIndex -> // actually create layer:
@@ -145,7 +152,7 @@ module internal UtilLayer =
     let internal createDefaultLayer(color, visible, locked) = 
         let layer = DocObjects.Layer.GetDefaultLayerProperties()
         layer.Color <- color() // delay creation of (random) color till actually needed ( so random colors are not created, in most cases layer exists)
-        if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "Rhino.Scripting.createDefaultLayer how can a new default layer have a parent ? %A" layer
+        if layer.ParentLayerId <> Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.createDefaultLayer how can a new default layer have a parent ? %A" layer
         layer.IsVisible <- visible
         layer.IsLocked <- locked
         State.Doc.Layers.Add(layer)
