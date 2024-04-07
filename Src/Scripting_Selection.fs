@@ -1,6 +1,6 @@
-﻿namespace Rhino.Scripting 
+﻿namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -11,11 +11,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenSelection =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
     // moved to Rhino.RhinoScriptSyntax.Fsharp project:
@@ -32,7 +32,7 @@ module AutoOpenSelection =
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
                                [<OPT;DEF(false)>]includeGrips:bool,
-                               [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                               [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -57,7 +57,7 @@ module AutoOpenSelection =
     ///<returns>(Guid) The identifier of the object.</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
-                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid = 
+                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -81,11 +81,11 @@ module AutoOpenSelection =
     ///    [2]  Enum     DocObjects.SelectionMethod
     ///    [3]  point    selection point
     ///    [4]  number   the Curve parameter of the selection point
-    ///    [5]  str      name of the view selection was made. 
+    ///    [5]  str      name of the view selection was made.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
-                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string = 
+                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
         let get () =  // TODO Add check if already hidden, then don't even hide and show
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
@@ -97,7 +97,7 @@ module AutoOpenSelection =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then                
+            if res <> Input.GetResult.Object then
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -113,7 +113,7 @@ module AutoOpenSelection =
                     State.Doc.Objects.UnselectAll()|> ignore
                     State.Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
-                (objectId, presel, selmethod, point, curveparameter, viewname)            
+                (objectId, presel, selmethod, point, curveparameter, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -139,8 +139,8 @@ module AutoOpenSelection =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
-                                    [<OPT;DEF(false)>]subObjects:bool) : Guid = 
-        let get () = 
+                                    [<OPT;DEF(false)>]subObjects:bool) : Guid =
+        let get () =
             if not  preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -198,8 +198,8 @@ module AutoOpenSelection =
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string = 
-        let get () = 
+                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -216,7 +216,7 @@ module AutoOpenSelection =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                
+
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -259,7 +259,7 @@ module AutoOpenSelection =
     ///<param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window.</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) List of identifiers of the picked objects. 
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects.
     ///A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
@@ -270,8 +270,8 @@ module AutoOpenSelection =
                                     [<OPT;DEF(1)>]minimumCount:int,
                                     [<OPT;DEF(0)>]maximumCount:int,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Rarr<Guid> = 
-        let get () = 
+                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Rarr<Guid> =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -340,8 +340,8 @@ module AutoOpenSelection =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr = 
-        let get () = 
+                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -379,7 +379,7 @@ module AutoOpenSelection =
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> RhinoScriptSyntax.ObjectDescription
                     |> InternalToNiceStringSetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(...) returned %s"
-                rc            
+                rc
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -390,7 +390,7 @@ module AutoOpenSelection =
     ///    Allow for the selection of pre-selected objects. If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d Rarr) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
-                                        [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr = 
+                                        [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr =
         let ids =  RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect)
         let rc = Rarr<Point3d>()
         for objectId in ids do
@@ -419,8 +419,8 @@ module AutoOpenSelection =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method return value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
-                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string = 
-        let get () = 
+                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -468,7 +468,7 @@ module AutoOpenSelection =
     ///<returns>(Guid Rarr) identifiers the locked objects.</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
             let settings = DocObjects.ObjectEnumeratorSettings()
             settings.ActiveObjects <- true
             settings.NormalObjects <- true
@@ -495,7 +495,7 @@ module AutoOpenSelection =
     ///<returns>(Guid Rarr) identifiers of the hidden objects.</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.ActiveObjects <- true
         settings.NormalObjects <- true
@@ -520,7 +520,7 @@ module AutoOpenSelection =
     ///<returns>(Guid Rarr) identifiers of the newly selected objects.</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
-                                        [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                        [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
@@ -545,7 +545,7 @@ module AutoOpenSelection =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object. If omitted, the object is not selected</param>
     ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
-    static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr =
         match State.CommandSerialNumbers with
         |None -> Rarr()
         |Some (serialnum, ende) ->
@@ -572,7 +572,7 @@ module AutoOpenSelection =
     ///<returns>(Guid) identifier of the object.</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
-                              [<OPT;DEF(false)>]includeGrips:bool) : Guid = 
+                              [<OPT;DEF(false)>]includeGrips:bool) : Guid =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
@@ -601,7 +601,7 @@ module AutoOpenSelection =
     static member NextObject( objectId:Guid,
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
-                              [<OPT;DEF(false)>]includeGrips:bool) : Guid = 
+                              [<OPT;DEF(false)>]includeGrips:bool) : Guid =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
@@ -624,7 +624,7 @@ module AutoOpenSelection =
     ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid Rarr) identifier of normal objects.</returns>
-    static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
+    static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true
         iter.LockedObjects <- false
@@ -642,7 +642,7 @@ module AutoOpenSelection =
     ///<returns>(Guid Rarr) identifiers of objects of the selected color.</returns>
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
-                                  [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr = 
+                                  [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr =
         let rhinoobjects = State.Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
@@ -655,7 +655,7 @@ module AutoOpenSelection =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
     ///<returns>(Guid Rarr) identifiers for objects in the group.</returns>
-    static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectsByGroup: '%s' does not exist in GroupTable" groupName
@@ -674,7 +674,7 @@ module AutoOpenSelection =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
     ///<returns>(Guid Rarr) identifiers for objects in the specified layer.</returns>
-    static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         let rhinoobjects = State.Doc.Objects.FindByLayer(layer)
         if isNull rhinoobjects then Rarr()
@@ -698,7 +698,7 @@ module AutoOpenSelection =
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(false)>]includeLights:bool,
-                                 [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                 [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.HiddenObjects <- true
         settings.DeletedObjects <- false
@@ -752,7 +752,7 @@ module AutoOpenSelection =
     ///<returns>(Guid Rarr) identifiers of object that fit the specified type(s).</returns>
     static member ObjectsByType( geometryType:int,
                                  [<OPT;DEF(false)>]select:bool,
-                                 [<OPT;DEF(0)>]state:int) : Guid Rarr = 
+                                 [<OPT;DEF(0)>]state:int) : Guid Rarr =
         let mutable state = state
         if state = 0 then state <- 7
         let mutable bSurface = false
@@ -815,14 +815,14 @@ module AutoOpenSelection =
     ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
     ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
-    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
+    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let selobjects = State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
         rarr {for obj in selobjects do obj.Id }
 
 
     ///<summary>Unselects all objects in the document.</summary>
     ///<returns>(int) The number of objects that were unselected.</returns>
-    static member UnselectAllObjects() : int = 
+    static member UnselectAllObjects() : int =
         let rc = State.Doc.Objects.UnselectAll()
         if rc>0 then State.Doc.Views.Redraw()
         rc
@@ -842,7 +842,7 @@ module AutoOpenSelection =
     static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
                                           [<OPT;DEF(false)>]select:bool,
                                           [<OPT;DEF(false)>]includeLights:bool,
-                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
+                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let get () =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.DeletedObjects <- false
@@ -858,7 +858,7 @@ module AutoOpenSelection =
             for object in e do
                 let bbox = object.Geometry.GetBoundingBox(true)
                 if viewport.IsVisible(bbox) then
-                    if select then object.Select(true) |> ignore 
+                    if select then object.Select(true) |> ignore
                     objectIds.Add(object.Id)
             if objectIds.Count>0 && select then State.Doc.Views.Redraw()
             objectIds
@@ -878,9 +878,9 @@ module AutoOpenSelection =
                               corner2:Point3d,
                               [<OPT;DEF(null:string)>]view:string,
                               [<OPT;DEF(false)>]select:bool,
-                              [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr = 
+                              [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr =
 
-        let pick () = 
+        let pick () =
             let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else State.Doc.Views.ActiveView
             let viewport = view.MainViewport
             let screen1 = Point2d(corner1)
@@ -890,7 +890,7 @@ module AutoOpenSelection =
             screen2.Transform(xf)
 
 
-            let objects = 
+            let objects =
                 // updated from https://github.com/mcneel/rhinoscriptsyntax/pull/185
                 let pc = new Input.Custom.PickContext()
                 pc.View <- view
@@ -916,7 +916,7 @@ module AutoOpenSelection =
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)
-                    if select then rhobj.Select(true) |> ignore 
+                    if select then rhobj.Select(true) |> ignore
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor pick

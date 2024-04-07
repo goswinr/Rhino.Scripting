@@ -1,6 +1,6 @@
-﻿namespace Rhino.Scripting 
+﻿namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 /// An Integer Enum of Object types to be use in object selection functions of Rhino.Scripting.
 /// Don't create an instance, use the instance in Rhino.Scripting.RhinoScriptSyntax.Filter

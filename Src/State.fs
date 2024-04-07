@@ -1,12 +1,12 @@
-﻿namespace Rhino.Scripting 
+﻿ namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 open System
 open FsEx
 
 /// An internal static class to hold current state like active Rhino document.
 [<AbstractClass; Sealed>] //static class, use these attributes to match C# static class and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
-type internal State private () = 
+type internal State private () =
 
     /// Rhino.Runtime.HostUtils.RunningInRhino
     static let mutable isRunningInRhino = false
@@ -29,7 +29,7 @@ type internal State private () =
 
 
     /// keep the reference to the active Document (3d file ) updated.
-    static let updateDoc (document:RhinoDoc) = 
+    static let updateDoc (document:RhinoDoc) =
         doc <- document //Rhino.RhinoDoc.ActiveDoc
         ot  <- document.Objects //Rhino.RhinoDoc.ActiveDoc.Objects
         commandSerialNumbers <- None
@@ -38,7 +38,7 @@ type internal State private () =
     // -------Events: --------------------
 
 
-    static let warnAboutFailedEventSetup () = 
+    static let warnAboutFailedEventSetup () =
         [
         "***"
         "RhinoSync.syncContext could not be set via reflection."
@@ -57,11 +57,11 @@ type internal State private () =
         |> eprintfn "%s"
 
 
-    static let setupEventsInSync() = 
+    static let setupEventsInSync() =
         try
             RhinoSync.DoSync (fun () ->
                 // keep the reference to the active Document (3d file ) updated:
-                RhinoDoc.ActiveDocumentChanged.Add (fun args ->  updateDoc args.Document) 
+                RhinoDoc.ActiveDocumentChanged.Add (fun args ->  updateDoc args.Document)
                 // RhinoDoc.EndOpenDocument.Add  // used here in the past. why ?
                 // RhinoDoc.BeginOpenDocument.Add //Don't use since it is called on temp pasting files too
 
@@ -83,7 +83,7 @@ type internal State private () =
                 |> eprintfn "%s"
 
 
-    static let initState()= 
+    static let initState()=
         if not Rhino.Runtime.HostUtils.RunningInRhino then
             RhinoScriptingException.Raise "RhinoScriptSyntax.State.initState Failed to find the active Rhino document, is this dll running hosted inside the Rhino process? "
         else
@@ -99,28 +99,28 @@ type internal State private () =
 
     /// The current active Rhino document (= the file currently open)
     static member Doc
-        with get()= 
+        with get()=
             if isNull doc then initState()
             doc
 
     /// Object Table of the current active Rhino document
     static member Ot
-        with get()= 
+        with get()=
             if isNull doc then initState()
             doc.Objects
 
     /// Was escape key pressed
     static member EscapePressed
-        with get() = 
+        with get() =
             if isNull doc then initState()
             escapePressed
-        and set v = 
+        and set v =
             escapePressed <- v
 
     /// To store last created object form executing a rs.Command(...)
     static member CommandSerialNumbers
-        with get() = 
+        with get() =
             if isNull doc then initState()
             commandSerialNumbers
-        and set v = 
+        and set v =
             commandSerialNumbers <- v

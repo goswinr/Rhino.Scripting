@@ -1,6 +1,6 @@
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 
 // leave all these open statements here! even if they are unused, they are needed when all files are combined into one during the build.
@@ -36,13 +36,13 @@ type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 
 /// A static class with static methods providing functions identical to RhinoScript in Python or VBscript
 [<AbstractClass; Sealed>]
-type RhinoScriptSyntax private () = 
+type RhinoScriptSyntax private () =
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 
     /// The current active Rhino document (= the file currently open)
-    static member Doc = State.Doc      
+    static member Doc = State.Doc
 
     /// Object Table of the current active Rhino document
     static member Ot = State.Ot
@@ -58,7 +58,7 @@ type RhinoScriptSyntax private () =
 
     /// Tests to see if the user has pressed the escape key.
     /// Raises an OperationCanceledException.
-    static member EscapeTest() : unit = // [<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool) : bool = 
+    static member EscapeTest() : unit = // [<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool) : bool =
         RhinoApp.Wait() //does not need to be on  UI thread
         if State.EscapePressed  then
             State.EscapePressed <- false //always reset is needed otherwise in next run of script will not be reset
@@ -70,7 +70,7 @@ type RhinoScriptSyntax private () =
     ///<param name="maxVal">(float) The upper bound</param>
     ///<param name="value">(float) The value to clamp</param>
     ///<returns>(float) The clamped value.</returns>
-    static member Clamp (minVal:float, maxVal:float, value:float) : float = 
+    static member Clamp (minVal:float, maxVal:float, value:float) : float =
         if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
@@ -82,7 +82,7 @@ type RhinoScriptSyntax private () =
     ///<param name="stop">(float) end of range (The last value will not be included in range, Python semantics.)</param>
     ///<param name="step">(float) step size between two values</param>
     ///<returns>(float seq) a lazy seq of floats.</returns>
-    static member FxrangePython (start:float, stop:float, step:float) : float seq = 
+    static member FxrangePython (start:float, stop:float, step:float) : float seq =
         if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf step  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf stop  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
@@ -97,7 +97,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
         else
             // the actual algorithm:
-            let rec floatrange (start, i, steps) = 
+            let rec floatrange (start, i, steps) =
                 seq { if i <= steps then
                         yield start + i*step
                         yield! floatrange (start, (i + 1.0), steps) } // tail recursive !
@@ -110,7 +110,7 @@ type RhinoScriptSyntax private () =
     ///<param name="stop">(float) end of range( The last value will not be included in range, Python semantics.)</param>
     ///<param name="step">(float) step size between two values</param>
     ///<returns>(float Rarr).</returns>
-    static member FrangePython (start:float, stop:float, step:float) : float Rarr = 
+    static member FrangePython (start:float, stop:float, step:float) : float Rarr =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
@@ -126,30 +126,30 @@ type RhinoScriptSyntax private () =
                       ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool 
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
                       ,  [<OPT;DEF(false:bool)>]collapseParents:bool
-                      ) : Guid = 
+                      ) : Guid =
         let attr =
-            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then 
+            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then
                 null
             else
                 let a = new DocObjects.ObjectAttributes()
                 a.LayerIndex <- layerIndex
-                if objectName <> "" then 
+                if objectName <> "" then
                     if stringSafetyCheck && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
                         RhinoScriptingException.Raise "RhinoScriptSyntax.Add: objectName the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
-                    for k,v in userTextKeysAndValues do 
-                        if stringSafetyCheck then 
+                    for k,v in userTextKeysAndValues do
+                        if stringSafetyCheck then
                             if not <|  Util.isAcceptableStringId( k, false) then // TODO or enforce goodStringID ?
                                 RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
                             if not <|  Util.isAcceptableStringId( v, false) then
                                 RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
-                            RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v 
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v
                 a
-                
+
         match box geo with
         | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
         // now the structs:
@@ -178,38 +178,38 @@ type RhinoScriptSyntax private () =
     ///<param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
-                      ,  [<OPT;DEF("")>]layer:string 
+                      ,  [<OPT;DEF("")>]layer:string
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color    
-                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool                      
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
                       ,  [<OPT;DEF(false:bool)>]collapseParents:bool
-                      ) : Guid = 
+                      ) : Guid =
         let layCorF =
-            if layer<>""then 
-                if layerColor.IsEmpty then 
+            if layer<>""then
+                if layerColor.IsEmpty then
                     UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all Unicode ?
                 else
                     UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all Unicode ?
             else
                 UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
-        
+
         let layIdx =
-            match layCorF with 
+            match layCorF with
             |UtilLayer.LayerCreated ci -> ci
             |UtilLayer.LayerFound fi ->  fi
                 (*
                 // now update the layer color if one is given, even if the layer exists already
-                if layerColor.IsEmpty then 
+                if layerColor.IsEmpty then
                     fi
                 else
-                    let lay = State.Doc.Layers.[fi]                    
-                    if not <| lay.Color.EqualsARGB(layerColor) then 
+                    let lay = State.Doc.Layers.[fi]
+                    if not <| lay.Color.EqualsARGB(layerColor) then
                         lay.Color <- layerColor
-                    fi                        
+                    fi
                 *)
 
-        let g = RhinoScriptSyntax.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)  
+        let g = RhinoScriptSyntax.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)
         g
 
 

@@ -1,6 +1,6 @@
-﻿namespace Rhino.Scripting 
+﻿namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -12,11 +12,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenApplication =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -28,7 +28,7 @@ module AutoOpenApplication =
     ///<param name="macro">(string) The macro to run when the alias is executed</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member AddAlias( alias:string,
-                            macro:string) : bool = 
+                            macro:string) : bool =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.Add(alias, macro))
 
@@ -41,14 +41,14 @@ module AutoOpenApplication =
     ///<returns>(int) The index where the item was inserted.
     ///    -1 on failure.</returns>
     static member AddSearchPath(    folder:string,
-                                    [<OPT;DEF(-1)>]index:int) : int = 
+                                    [<OPT;DEF(-1)>]index:int) : int =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.FileSettings.AddSearchPath(folder, index))
 
 
     ///<summary>Returns number of command aliases in Rhino.</summary>
     ///<returns>(int) The number of command aliases in Rhino.</returns>
-    static member AliasCount() : int = 
+    static member AliasCount() : int =
         ApplicationSettings.CommandAliasList.Count
 
 
@@ -70,7 +70,7 @@ module AutoOpenApplication =
 
     ///<summary>Returns a array of command alias names.</summary>
     ///<returns>(string array) a array of command alias names.</returns>
-    static member AliasNames() : array<string> = 
+    static member AliasNames() : array<string> =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.GetNames())
 
@@ -192,14 +192,14 @@ module AutoOpenApplication =
 
     ///<summary>Returns the build date of Rhino.</summary>
     ///<returns>(DateTime) The build date of Rhino. Will be converted to a string by most functions.</returns>
-    static member BuildDate() : DateTime = 
+    static member BuildDate() : DateTime =
         RhinoApp.BuildDate
 
 
     ///<summary>Clears contents of Rhino's command history window. You can view the
     ///    command history window by using the CommandHistory command in Rhino.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member ClearCommandHistory() : unit = 
+    static member ClearCommandHistory() : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.ClearCommandHistoryWindow())
 
@@ -225,34 +225,34 @@ module AutoOpenApplication =
     ///        rs.Command("! _Line _Pause _Pause")
     ///      CORRECT:
     ///        rs.Command("_Line _Pause _Pause")
-    ///    In a normal command, when the user enters a command beginning with a '!' , the command exits. 
+    ///    In a normal command, when the user enters a command beginning with a '!' , the command exits.
     ///    There is no documented way to get this behavior from within a script command.
     ///
     ///    After the command script has run, you can obtain the identifiers of most
-    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().    
+    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().
     ///
     ///    Warnings:
     ///    This kind of command can be very dangerous. Please be sure you understand the following:
-    ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript() 
+    ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript()
     ///     from within a RhinoScriptCommand derived command.
     ///    If you are very familiar with references, then please observe the following rules:
-    ///    If you get a reference or pointer to any part of the Rhino run-time database, this reference or pointer 
+    ///    If you get a reference or pointer to any part of the Rhino run-time database, this reference or pointer
     ///    will not be valid after you call Rhino.RhinoApp.RunScript().
-    ///    If you get a reference or a pointer, then call Rhino.RhinoApp.RunScript(), and then use the reference, 
+    ///    If you get a reference or a pointer, then call Rhino.RhinoApp.RunScript(), and then use the reference,
     ///    Rhino will probably crash.
-    ///    All pointers and references used by the command should be scoped such that they are only valid for the 
+    ///    All pointers and references used by the command should be scoped such that they are only valid for the
     ///    time between calls to Rhino.RhinoApp.RunScript().
-    ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database. 
-    ///    The result is that all pointers and references become invalid. 
-    ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.  
+    ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database.
+    ///    The result is that all pointers and references become invalid.
+    ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.
     ///    Never allow references and pointers from one section to be used in another section.</summary>
     ///<param name="commandString">(string) A Rhino command including any arguments</param>
     ///<param name="echo">(bool) Optional, default value: <c>true</c>
-    ///    The default command echo mode <c>true</c> will display the commands on the commandline. 
+    ///    The default command echo mode <c>true</c> will display the commands on the commandline.
     ///    If the command echo mode is set to <c>false</c> the command prompts will not be printed to the Rhino command line.</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>    
-    static member Command (commandString:string, [<OPT;DEF(true)>]echo:bool) : bool = 
-        RhinoSync.DoSync (fun () ->            
+    ///<returns>(bool) True or False indicating success or failure.</returns>
+    static member Command (commandString:string, [<OPT;DEF(true)>]echo:bool) : bool =
+        RhinoSync.DoSync (fun () ->
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
             // RhinoApp.RunScript:
             // Rhino acts as if each character in the script string had been typed in the command prompt.
@@ -264,13 +264,13 @@ module AutoOpenApplication =
             let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
             State.CommandSerialNumbers <- None
             if start<>ende then  State.CommandSerialNumbers <- Some(start, ende)
-            rc 
+            rc
             )
-        
+
 
     ///<summary>Returns the contents of Rhino's command history window.</summary>
     ///<returns>(string) The contents of Rhino's command history window.</returns>
-    static member CommandHistory() : string = 
+    static member CommandHistory() : string =
         RhinoSync.DoSync (fun () ->
             RhinoApp.CommandHistoryWindowText)
 
@@ -295,7 +295,7 @@ module AutoOpenApplication =
     ///<summary>Delete an existing alias from Rhino.</summary>
     ///<param name="alias">(string) The name of an existing alias</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteAlias(alias:string) : bool = 
+    static member DeleteAlias(alias:string) : bool =
         ApplicationSettings.CommandAliasList.Delete(alias)
 
 
@@ -304,7 +304,7 @@ module AutoOpenApplication =
     ///    contents of the files tab.</summary>
     ///<param name="folder">(string) A folder to remove</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteSearchPath(folder:string) : bool = 
+    static member DeleteSearchPath(folder:string) : bool =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.FileSettings.DeleteSearchPath(folder))
 
@@ -312,7 +312,7 @@ module AutoOpenApplication =
     ///<summary>Enables/disables OLE Server Busy/Not Responding dialog boxes.</summary>
     ///<param name="enable">(bool) Whether alerts should be visible (True or False)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DisplayOleAlerts(enable:bool) : unit = 
+    static member DisplayOleAlerts(enable:bool) : unit =
         RhinoSync.DoSync (fun () ->
             Rhino.Runtime.HostUtils.DisplayOleAlerts( enable )
             )
@@ -356,7 +356,7 @@ module AutoOpenApplication =
     ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    The autosave state. If omitted automatic saving is enabled (True)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit = 
+    static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.FileSettings.AutoSaveEnabled <- enable)
 
@@ -388,31 +388,31 @@ module AutoOpenApplication =
 
     ///<summary>Returns the full path to Rhino's executable folder.</summary>
     ///<returns>(string) The full path to Rhino's executable folder.</returns>
-    static member ExeFolder() : string = 
+    static member ExeFolder() : string =
         ApplicationSettings.FileSettings.ExecutableFolder
 
 
     ///<summary>Returns the platform of the Rhino executable , calls System.Environment.Is64BitProcess.</summary>
     ///<returns>(int) 1 for 64 bit, 0 for 32 bit.</returns>
-    static member ExePlatform() : int = 
+    static member ExePlatform() : int =
         if System.Environment.Is64BitProcess then  1 else  0
 
 
     ///<summary>Returns the service release number of the Rhino executable.</summary>
     ///<returns>(int) The service release number of the Rhino executable.</returns>
-    static member ExeServiceRelease() : int = 
+    static member ExeServiceRelease() : int =
         RhinoApp.ExeServiceRelease
 
 
     ///<summary>Returns the major version number of the Rhino executable.</summary>
     ///<returns>(int) The major version number of the Rhino executable.</returns>
-    static member ExeVersion() : int = 
+    static member ExeVersion() : int =
         RhinoApp.ExeVersion
 
 
     ///<summary>Closes the Rhino application.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member Exit() : unit = 
+    static member Exit() : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.Exit())
 
@@ -423,7 +423,7 @@ module AutoOpenApplication =
     ///      3. Rhino's System folders.</summary>
     ///<param name="filename">(string) A short file name to search for</param>
     ///<returns>(string) a full path.</returns>
-    static member FindFile(filename:string) : string = 
+    static member FindFile(filename:string) : string =
         ApplicationSettings.FileSettings.FindFile(filename)
 
 
@@ -433,7 +433,7 @@ module AutoOpenApplication =
     ///<param name="plugIn">(string) The name of a registered plug-in that supports scripting.
     ///    If the plug-in is registered but not loaded, it will be loaded</param>
     ///<returns>(object) a scriptable plugin object.</returns>
-    static member GetPlugInObject(plugIn:string) : obj = 
+    static member GetPlugInObject(plugIn:string) : obj =
         RhinoApp.GetPlugInObject(plugIn)
 
 
@@ -441,12 +441,12 @@ module AutoOpenApplication =
     ///    for transparent commands (commands run from inside of other commands), this
     ///    method returns the total number of active commands.</summary>
     ///<returns>(int) The number of active commands.</returns>
-    static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int = 
+    static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int =
         //<param name="ignoreRunners">(bool) Optional, default value: <c>true</c>
         //If True, script running commands, such as
         //  LoadScript, RunScript, and ReadCommandFile will not counted.
         //  If omitted the default is not to count script running command (True)</param>
-        //let inCommand (ignoreRunners:bool) :int = 
+        //let inCommand (ignoreRunners:bool) :int =
         //<param name="ignoreRunners">ignoreRunners If True, script running commands, such as
         //        LoadScript, RunScript, and ReadCommandFile will not counted.
         //        If omitted the default is not to count script running command (True)</param>
@@ -457,14 +457,14 @@ module AutoOpenApplication =
 
     ///<summary>The full path to Rhino's installation folder.</summary>
     ///<returns>(string) The full path to Rhino's installation folder.</returns>
-    static member InstallFolder() : string = 
+    static member InstallFolder() : string =
         ApplicationSettings.FileSettings.InstallFolder.FullName
 
 
     ///<summary>Checks if a command alias exists in Rhino.</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
     ///<returns>(bool) True if exists or False if the alias does not exist.</returns>
-    static member IsAlias(alias:string) : bool = 
+    static member IsAlias(alias:string) : bool =
         ApplicationSettings.CommandAliasList.IsAlias(alias)
 
 
@@ -472,14 +472,14 @@ module AutoOpenApplication =
     ///    found in 3rd party plug-ins.</summary>
     ///<param name="commandName">(string) The command name to test</param>
     ///<returns>(bool) True if the string is a command or False if it is not a command.</returns>
-    static member IsCommand(commandName:string) : bool = 
+    static member IsCommand(commandName:string) : bool =
         Commands.Command.IsCommand(commandName)
 
 
     ///<summary>Checks if a plug-in is registered.</summary>
     ///<param name="plugin">(string) The unique objectId of the plug-in</param>
     ///<returns>(bool) True if the Guid is registered or False if it is not.</returns>
-    static member IsPlugIn(plugin:string) : bool = 
+    static member IsPlugIn(plugin:string) : bool =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId = Guid.Empty then false
         else
@@ -489,13 +489,13 @@ module AutoOpenApplication =
 
     ///<summary>Returns True if this script is being executed on a Windows platform.</summary>
     ///<returns>(bool) True if currently running on the Widows platform. False if it is not Windows.</returns>
-    static member IsRunningOnWindows() : bool = 
+    static member IsRunningOnWindows() : bool =
         Rhino.Runtime.HostUtils.RunningOnWindows
 
 
     ///<summary>Returns the name of the last executed command.</summary>
     ///<returns>(string) The name of the last executed command.</returns>
-    static member LastCommandName() : string = 
+    static member LastCommandName() : string =
         let mutable objectId = Commands.Command.LastCommandId
         Commands.Command.LookupCommandName(objectId, englishName=true)
 
@@ -507,7 +507,7 @@ module AutoOpenApplication =
     ///    2 = nothing (command did nothing, but was not cancelled)
     ///    3 = failure (command failed due to bad input, computational problem...)
     ///    4 = unknown command (the command was not found).</returns>
-    static member LastCommandResult() : int = 
+    static member LastCommandResult() : int =
         RhinoSync.DoSync (fun () ->
             int(Commands.Command.LastCommandResult))
 
@@ -524,7 +524,7 @@ module AutoOpenApplication =
     ///    1041  Japanese
     ///    1042  Korean
     ///    1045  Polish.</returns>
-    static member LocaleID() : int = 
+    static member LocaleID() : int =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
 
 
@@ -628,7 +628,7 @@ module AutoOpenApplication =
     ///<summary>Returns the identifier of a plug-in given the plug-in name.</summary>
     ///<param name="plugin">(string) The name  of the plug-in</param>
     ///<returns>(Guid) The  Unique Guid of the plug-in.</returns>
-    static member PlugInId(plugin:string) : Guid = 
+    static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PlugInId: Plugin %s not found" plugin
@@ -649,7 +649,7 @@ module AutoOpenApplication =
     /// 1 = loaded,
     /// 2 = unloaded. If omitted both status is returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins.</returns>
-    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> = 
+    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
         if types = 1 then  filter <- Rhino.PlugIns.PlugInType.Render
         if types = 2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
@@ -677,36 +677,36 @@ module AutoOpenApplication =
     ///<summary>Change Rhino's command window prompt.</summary>
     ///<param name="message">(string) The new prompt on the commandline</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member Prompt(message:string) : unit = 
+    static member Prompt(message:string) : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SetCommandPrompt(message))
 
-    
+
 
     ///<summary>Returns current width and height, of the screen of the primary monitor.</summary>
     ///<returns>(int * int) containing two numbers identifying the width and height in pixels.</returns>
-    static member ScreenSize() : int * int = 
+    static member ScreenSize() : int * int =
         let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds //  TODO: Windows Forms is supported on Mono Mac??  compile separate Assembly for Windows ???
         sz.Width, sz.Height
 
 
     ///<summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
     ///<returns>(int) The version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
-    static member SdkVersion() : int = 
+    static member SdkVersion() : int =
         RhinoApp.SdkVersion
 
 
     ///<summary>Returns the number of path items in Rhino's search path list.
     ///    See "Options Files settings" in the Rhino help file for more details.</summary>
     ///<returns>(int) The number of path items in Rhino's search path list.</returns>
-    static member SearchPathCount() : int = 
+    static member SearchPathCount() : int =
         ApplicationSettings.FileSettings.SearchPathCount
 
 
     ///<summary>Returns all of the path items in Rhino's search path list.
     ///    See "Options Files settings" in the Rhino help file for more details.</summary>
     ///<returns>(string array) list of search paths.</returns>
-    static member SearchPathList() : array<string> = 
+    static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
 
@@ -715,7 +715,7 @@ module AutoOpenApplication =
     ///<param name="addReturn">(bool) Optional, default value: <c>true</c>
     ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit = 
+    static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SendKeystrokes(keys, addReturn))
 
@@ -735,7 +735,7 @@ module AutoOpenApplication =
     ///<summary>Sets Rhino's status bar distance pane.</summary>
     ///<param name="distance">(float) The distance to set the status bar</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarDistance(distance:float) : unit = 
+    static member StatusBarDistance(distance:float) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetDistancePane(distance))
 
@@ -743,7 +743,7 @@ module AutoOpenApplication =
     ///<summary>Sets Rhino's status bar message pane.</summary>
     ///<param name="message">(string) The message to display</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarMessage(message:string) : unit = 
+    static member StatusBarMessage(message:string) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetMessagePane(message))
 
@@ -751,7 +751,7 @@ module AutoOpenApplication =
     ///<summary>Sets Rhino's status bar point coordinate pane.</summary>
     ///<param name="point">(Point3d) The 3d coordinates of the status bar</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarPoint(point:Point3d) : unit = 
+    static member StatusBarPoint(point:Point3d) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetPointPane(point))
 
@@ -766,7 +766,7 @@ module AutoOpenApplication =
     ///<param name="showPercent">(bool) Optional, default value: <c>true</c>
     ///    Show the percent complete if True</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool = 
+    static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         RhinoSync.DoSync (fun () ->
             let mutable rc = UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
             rc = 1)
@@ -777,7 +777,7 @@ module AutoOpenApplication =
     ///<param name="absolute">(bool) Optional, default value: <c>true</c>
     ///    The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit = 
+    static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.UpdateProgressMeter(position, absolute)
             |> ignore)
@@ -785,7 +785,7 @@ module AutoOpenApplication =
 
     ///<summary>Hide the progress meter.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarProgressMeterHide() : unit = 
+    static member StatusBarProgressMeterHide() : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.HideProgressMeter())
 
@@ -820,7 +820,7 @@ module AutoOpenApplication =
 
     ///<summary>Returns the windows handle of Rhino's main window.</summary>
     ///<returns>(IntPtr) The Window's handle of Rhino's main window. IntPtr is a platform-specific type that is used to represent a pointer or a handle.</returns>
-    static member WindowHandle() : IntPtr = 
+    static member WindowHandle() : IntPtr =
         RhinoApp.MainWindowHandle()
 
 

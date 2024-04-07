@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -12,11 +12,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenDimension =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -31,7 +31,7 @@ module AutoOpenDimension =
     static member AddAlignedDimension(  startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
-                                        [<OPT;DEF("")>]style:string) : Guid = 
+                                        [<OPT;DEF("")>]style:string) : Guid =
         let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
         if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to create Plane.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O'" startPoint endPoint pointOnDimensionLine
         let success, s, t = plane.ClosestParameter(startPoint)
@@ -57,7 +57,7 @@ module AutoOpenDimension =
     ///    be initialized with the current default dimension style properties.</summary>
     ///<param name="dimStyleName">(string) Name of the new dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddDimStyle(dimStyleName:string) : unit = 
+    static member AddDimStyle(dimStyleName:string) : unit =
         let index = State.Doc.DimStyles.Add(dimStyleName)
         if index<0 then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddDimStyle failed. dimStyleName:'%A'" dimStyleName
 
@@ -73,15 +73,15 @@ module AutoOpenDimension =
     ///<returns>(Guid) identifier of the new leader.</returns>
     static member AddLeader( points:Point3d seq,
                              text:string,
-                             [<OPT;DEF(Plane())>]plane:Plane) : Guid = 
+                             [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points2d = Rarr()
-        let plane0 = 
+        let plane0 =
             if plane.IsValid then plane
             else
                 let ps= Rarr(points)
-                if ps.Count<2 then 
+                if ps.Count<2 then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader needs at least two points.  given %A, text:%s" points text
-                elif ps.Count=2 then 
+                elif ps.Count=2 then
                     let y =  ps.[1] - ps.[0]
                     if y.IsTiny(State.Doc.ModelAbsoluteTolerance*100.) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader two points given are identical %A, text:%s" points text
                     let pl = Plane(ps.[0], Vector3d.CrossProduct (y, Vector3d.ZAxis), y)
@@ -114,8 +114,8 @@ module AutoOpenDimension =
     static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d, // TODO allow Point3d.Unset an then draw dim in XY plane
-                                        [<OPT;DEF(Plane())>] plane:Plane ) : Guid = 
-        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail 
+                                        [<OPT;DEF(Plane())>] plane:Plane ) : Guid =
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
@@ -140,7 +140,7 @@ module AutoOpenDimension =
     static member CurrentDimStyle() : string = //GET
         State.Doc.DimStyles.Current.Name
 
-    ///<summary>Changes the current default dimension style. 
+    ///<summary>Changes the current default dimension style.
     ///  Raise a RhinoScriptingException if the style does not exist.</summary>
     ///<param name="dimStyleName">(string) Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -157,7 +157,7 @@ module AutoOpenDimension =
     ///    to be removed cannot be referenced by any dimension objects.</summary>
     ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
     ///<returns>(unit) void, nothing (fails on error).</returns>
-    static member DeleteDimStyle(dimStyleName:string) : unit = 
+    static member DeleteDimStyle(dimStyleName:string) : unit =
         let ds = State.Doc.DimStyles.FindName(dimStyleName)
         if isNull ds then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDimStyle failed. dimStyleName:'%s'" dimStyleName
@@ -187,7 +187,7 @@ module AutoOpenDimension =
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
-        annotationObject.CommitChanges() |> ignore 
+        annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the dimension style of multiple dimension objects.</summary>
@@ -201,13 +201,13 @@ module AutoOpenDimension =
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
             annotation.DimensionStyleId <- ds.Id
-            annotationObject.CommitChanges() |> ignore 
+            annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the text displayed by a dimension object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The text displayed by a dimension object.</returns>
-    static member DimensionText(objectId:Guid) : string = 
+    static member DimensionText(objectId:Guid) : string =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         annotationObject.DisplayText
 
@@ -230,7 +230,7 @@ module AutoOpenDimension =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
-        annotationObject.CommitChanges() |> ignore 
+        annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the user text string of multiple dimension objects. The user
@@ -243,13 +243,13 @@ module AutoOpenDimension =
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let geo = annotationObject.Geometry :?> AnnotationBase
             geo.PlainText <- usertext
-            annotationObject.CommitChanges() |> ignore 
+            annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the value of a dimension object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(float) numeric value of the dimension.</returns>
-    static member DimensionValue(objectId:Guid) : float = 
+    static member DimensionValue(objectId:Guid) : float =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> Dimension
         geo.NumericValue
@@ -305,7 +305,7 @@ module AutoOpenDimension =
 
     ///<summary>Returns the number of dimension styles in the document.</summary>
     ///<returns>(int) The number of dimension styles in the document.</returns>
-    static member DimStyleCount() : int = 
+    static member DimStyleCount() : int =
         State.Doc.DimStyles.Count
 
 
@@ -441,7 +441,7 @@ module AutoOpenDimension =
 
     ///<summary>Returns the names of all dimension styles in the document.</summary>
     ///<returns>(string Rarr) The names of all dimension styles in the document.</returns>
-    static member DimStyleNames() : string Rarr = 
+    static member DimStyleNames() : string Rarr =
         rarr {for  ds in State.Doc.DimStyles -> ds.Name }
 
 
@@ -666,7 +666,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsAlignedDimension(objectId:Guid) : bool = 
+    static member IsAlignedDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? LinearDimension as g -> g.Aligned
         | _ -> false
@@ -675,7 +675,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsAngularDimension(objectId:Guid) : bool = 
+    static member IsAngularDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? AngularDimension -> true
         | _ -> false
@@ -684,7 +684,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDiameterDimension(objectId:Guid) : bool = 
+    static member IsDiameterDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? RadialDimension as g -> g.IsDiameterDimension
         | _ -> false
@@ -693,7 +693,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is a dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimension(objectId:Guid) : bool = 
+    static member IsDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? AnnotationBase  -> true
         | _ -> false
@@ -702,7 +702,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  the existence of a dimension style in the document. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimStyle(dimStyle:string) : bool = 
+    static member IsDimStyle(dimStyle:string) : bool =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         notNull ds
 
@@ -710,7 +710,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  that an existing dimension style is from a reference file. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimStyleReference(dimStyle:string) : bool = 
+    static member IsDimStyleReference(dimStyle:string) : bool =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then false
         else ds.IsReference
@@ -719,7 +719,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLeader(objectId:Guid) : bool = 
+    static member IsLeader(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? Leader  -> true
             | _ -> false
@@ -728,7 +728,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLinearDimension(objectId:Guid) : bool = 
+    static member IsLinearDimension(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? LinearDimension  -> true
             | _ -> false
@@ -737,7 +737,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsOrdinateDimension(objectId:Guid) : bool = 
+    static member IsOrdinateDimension(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? OrdinateDimension  -> true
             | _ -> false
@@ -746,7 +746,7 @@ module AutoOpenDimension =
     ///<summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsRadialDimension(objectId:Guid) : bool = 
+    static member IsRadialDimension(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? RadialDimension  -> true
             | _ -> false
@@ -772,7 +772,7 @@ module AutoOpenDimension =
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
                 if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Nice.str objectId)
-                annotationObject.CommitChanges() |> ignore 
+                annotationObject.CommitChanges() |> ignore
                 State.Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (Nice.str objectId)
 
@@ -788,7 +788,7 @@ module AutoOpenDimension =
     ///<param name="oldStyle">(string) The name of an existing dimension style</param>
     ///<param name="newStyle">(string) The new dimension style name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameDimStyle(oldStyle:string, newStyle:string) : unit = 
+    static member RenameDimStyle(oldStyle:string, newStyle:string) : unit =
         let mutable ds = State.Doc.DimStyles.FindName(oldStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
         ds.Name <- newStyle

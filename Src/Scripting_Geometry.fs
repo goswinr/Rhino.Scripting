@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 open System.Collections.Generic
@@ -15,11 +15,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenGeometry =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -33,8 +33,8 @@ module AutoOpenGeometry =
     static member AddClippingPlane( plane:Plane,
                                     uMagnitude:float,
                                     vMagnitude:float,
-                                    [<OPT;DEF(null:string seq)>]views:string seq) : Guid = 
-        let viewlist = 
+                                    [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
+        let viewlist =
             if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
                 let modelviews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
@@ -70,10 +70,10 @@ module AutoOpenGeometry =
                                     [<OPT;DEF(true)>]selfIllumination:bool,
                                     [<OPT;DEF(false)>]embed:bool,
                                     [<OPT;DEF(false)>]useAlpha:bool,
-                                    [<OPT;DEF(false)>]makeMesh:bool) : Guid = 
+                                    [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame image %s does not exist" filename
         let rc = State.Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
-        if rc = Guid.Empty 
+        if rc = Guid.Empty
             then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.ToNiceString filename width height selfIllumination embed useAlpha makeMesh
         State.Doc.Views.Redraw()
         rc
@@ -83,7 +83,7 @@ module AutoOpenGeometry =
     ///<param name="y">(float) Y location of point to add</param>
     ///<param name="z">(float) Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
-    static member AddPoint(x:float, y:float, z:float) : Guid = 
+    static member AddPoint(x:float, y:float, z:float) : Guid =
         let rc = State.Doc.Objects.AddPoint(Point3d(x, y, z))
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (NiceFormat.float x) (NiceFormat.float y) (NiceFormat.float z)
         State.Doc.Views.Redraw()
@@ -92,7 +92,7 @@ module AutoOpenGeometry =
     ///<summary>Adds point object to the document.</summary>
     ///<param name="point">(Point3d) point to draw</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
-    static member AddPoint(point:Point3d) : Guid = 
+    static member AddPoint(point:Point3d) : Guid =
         let rc = State.Doc.Objects.AddPoint(point)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  point:'%s'" point.ToNiceString
         State.Doc.Views.Redraw()
@@ -103,7 +103,7 @@ module AutoOpenGeometry =
     ///<param name="points">(Point3d array) List of values where every multiple of three represents a point</param>
     ///<param name="colors">(Drawing.Color IList) Optional, List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud.</returns>
-    static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color IList)>]colors:Drawing.Color IList) : Guid = 
+    static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color IList)>]colors:Drawing.Color IList) : Guid =
         if notNull colors && Seq.length(colors) = Seq.length(points) then
             let pc = new PointCloud()
             for i = 0  to -1 + (Seq.length(points)) do
@@ -123,7 +123,7 @@ module AutoOpenGeometry =
     ///<summary>Adds one or more point objects to the document.</summary>
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid Rarr) List of identifiers of the new objects.</returns>
-    static member AddPoints(points:Point3d seq) : Guid Rarr = 
+    static member AddPoints(points:Point3d seq) : Guid Rarr =
         let rc = rarr{ for point in points do yield State.Doc.Objects.AddPoint(point) }
         State.Doc.Views.Redraw()
         rc
@@ -163,13 +163,13 @@ module AutoOpenGeometry =
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
-                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid = 
+                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid =
 
         if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
         let bold   = (1 = fontStyle || 3 = fontStyle)
-        let italic = (2 = fontStyle || 3 = fontStyle)         
+        let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = State.Doc.DimStyles.Current
-        let qn, quartetBoldProp , quartetItalicProp = 
+        let qn, quartetBoldProp , quartetItalicProp =
             if isNull font then
                 ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
             else
@@ -196,7 +196,7 @@ module AutoOpenGeometry =
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
-        let objectId = State.Doc.Objects.Add(te)       
+        let objectId = State.Doc.Objects.Add(te)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         State.Doc.Views.Redraw()
         objectId
@@ -234,7 +234,7 @@ module AutoOpenGeometry =
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
-                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = 
+                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid =
         let pl = Plane(pt,Vector3d.XAxis,Vector3d.YAxis)
         RhinoScriptSyntax.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
 
@@ -242,29 +242,29 @@ module AutoOpenGeometry =
     ///<param name="text">(string) String in dot</param>
     ///<param name="point">(Point3d) A 3D point identifying the origin point</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddTextDot(text:string, point:Point3d) : Guid = 
+    static member AddTextDot(text:string, point:Point3d) : Guid =
         let rc = State.Doc.Objects.AddTextDot(text, point)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (Nice.str point)
         State.Doc.Views.Redraw()
         rc
 
     ///<summary>Add a text dot to the document.</summary>
-    ///<param name="text">(string) String in dot</param> 
+    ///<param name="text">(string) String in dot</param>
     ///<param name="x">(float) X position</param>
     ///<param name="y">(float) Y position</param>
     ///<param name="z">(float) Z position</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddTextDot(text:string, x:float,y,z) : Guid = 
+    static member AddTextDot(text:string, x:float,y,z) : Guid =
         let rc = State.Doc.Objects.AddTextDot(text, Point3d(x,y,z))
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' at x:%g, y:%g, z:%g" text x y z
         State.Doc.Views.Redraw()
         rc
 
-    
+
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="geometry">(GeometryBase) The geometry to use</param>
     ///<returns>(float) area.</returns>
-    static member Area(geometry:GeometryBase) : float =         
+    static member Area(geometry:GeometryBase) : float =
         let mp = AreaMassProperties.Compute([geometry])
         if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from geometry:'%s'" (Nice.str geometry)
         mp.Area
@@ -272,7 +272,7 @@ module AutoOpenGeometry =
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area.</returns>
-    static member Area(objectId:Guid) : float = 
+    static member Area(objectId:Guid) : float =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
         if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from objectId:'%s'" (Nice.str objectId)
@@ -285,7 +285,7 @@ module AutoOpenGeometry =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBoxEstimate(geometries: seq<#GeometryBase>) : BoundingBox = 
+    static member BoundingBoxEstimate(geometries: seq<#GeometryBase>) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
         for g in geometries do
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
@@ -298,7 +298,7 @@ module AutoOpenGeometry =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox = 
+    static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
         for o in objects do
             let g =  RhinoScriptSyntax.CoerceGeometry o
@@ -312,7 +312,7 @@ module AutoOpenGeometry =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBoxEstimate(object:Guid) : BoundingBox = 
+    static member BoundingBoxEstimate(object:Guid) : BoundingBox =
         let g =  RhinoScriptSyntax.CoerceGeometry object
         g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
@@ -322,7 +322,7 @@ module AutoOpenGeometry =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq) : BoundingBox = 
+    static member BoundingBox(objects:Guid seq) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
         for o in objects do
             let g =  RhinoScriptSyntax.CoerceGeometry o
@@ -334,9 +334,9 @@ module AutoOpenGeometry =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(geos:seq<#GeometryBase>) : BoundingBox = 
+    static member BoundingBox(geos:seq<#GeometryBase>) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
-        for g in geos do            
+        for g in geos do
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
         bbox
 
@@ -346,7 +346,7 @@ module AutoOpenGeometry =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(object:Guid) : BoundingBox = 
+    static member BoundingBox(object:Guid) : BoundingBox =
         let g =  RhinoScriptSyntax.CoerceGeometry object
         g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
@@ -359,7 +359,7 @@ module AutoOpenGeometry =
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box = 
+    static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
         if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.ToNiceString (Nice.str objects)
         let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
@@ -384,7 +384,7 @@ module AutoOpenGeometry =
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box = 
+    static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
     ///<summary>Returns a new inflated the box with equal amounts in all directions.
@@ -394,7 +394,7 @@ module AutoOpenGeometry =
     ///<param name="bbox">(BoundingBox) Geometry.BoundingBox</param>
     ///<param name="amount">(float) amount in model units to expand</param>
     ///<returns>(Geometry.BoundingBox) The new Box.</returns>
-    static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox = 
+    static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
         if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
@@ -409,7 +409,7 @@ module AutoOpenGeometry =
     ///<param name="amountY">(float) amount on X Axis in model units to expand</param>
     ///<param name="amountZ">(float) amount on X Axis in model units to expand</param>
     ///<returns>(Geometry.BoundingBox) The new Box.</returns>
-    static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox = 
+    static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
         if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
@@ -420,7 +420,7 @@ module AutoOpenGeometry =
     ///<param name="first">(Guid) The identifier of the first object to compare</param>
     ///<param name="second">(Guid) The identifier of the second object to compare</param>
     ///<returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
-    static member CompareGeometry(first:Guid, second:Guid) : bool = 
+    static member CompareGeometry(first:Guid, second:Guid) : bool =
         let firstG = RhinoScriptSyntax.CoerceGeometry(first)
         let secondG = RhinoScriptSyntax.CoerceGeometry(second)
         GeometryBase.GeometryEquals(firstG, secondG)
@@ -431,7 +431,7 @@ module AutoOpenGeometry =
     ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the text object after the Curves have been created</param>
     ///<returns>(Guid array) Array of outline Curves.</returns>
-    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> = 
+    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
@@ -444,42 +444,42 @@ module AutoOpenGeometry =
     ///<summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
-    static member IsClippingPlane(objectId:Guid) : bool = 
+    static member IsClippingPlane(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
 
 
     ///<summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point.</returns>
-    static member IsPoint(objectId:Guid) : bool = 
+    static member IsPoint(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? Point
 
 
     ///<summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud.</returns>
-    static member IsPointCloud(objectId:Guid) : bool = 
+    static member IsPointCloud(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? PointCloud
 
 
     ///<summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object.</returns>
-    static member IsText(objectId:Guid) : bool = 
+    static member IsText(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? TextEntity
 
 
     ///<summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object.</returns>
-    static member IsTextDot(objectId:Guid) : bool = 
+    static member IsTextDot(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? TextDot
 
 
     ///<summary>Returns the point count of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(int) number of points.</returns>
-    static member PointCloudCount(objectId:Guid) : int = 
+    static member PointCloudCount(objectId:Guid) : int =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.Count
 
@@ -487,7 +487,7 @@ module AutoOpenGeometry =
     ///<summary>Checks if a point cloud has hidden points.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False.</returns>
-    static member PointCloudHasHiddenPoints(objectId:Guid) : bool = 
+    static member PointCloudHasHiddenPoints(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.HiddenPointCount>0
 
@@ -495,7 +495,7 @@ module AutoOpenGeometry =
     ///<summary>Checks if a point cloud has point colors.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False.</returns>
-    static member PointCloudHasPointColors(objectId:Guid) : bool = 
+    static member PointCloudHasPointColors(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.ContainsColors
 
@@ -523,7 +523,7 @@ module AutoOpenGeometry =
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore 
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -547,7 +547,7 @@ module AutoOpenGeometry =
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudPointColors length of color values does not match PointCloud point count"
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore 
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -555,7 +555,7 @@ module AutoOpenGeometry =
     ///<summary>Returns the points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Point3d array) list of points.</returns>
-    static member PointCloudPoints(objectId:Guid) : array<Point3d> = 
+    static member PointCloudPoints(objectId:Guid) : array<Point3d> =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.GetPoints()
 
@@ -568,7 +568,7 @@ module AutoOpenGeometry =
     ///<param name="amount">(int) Optional, default value: <c>1</c>
     ///    The amount of required closest points. Defaults to 1</param>
     ///<returns>(int array seq) nested lists with amount items within a list, with the indices of the found points.</returns>
-    static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> = 
+    static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
         if Seq.length(needlePoints) > 100 then
             RTree.Point3dKNeighbors(ptCloud, needlePoints, amount)
         else
@@ -581,7 +581,7 @@ module AutoOpenGeometry =
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the PointCloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>
     ///<returns>(int array seq) a seq of arrays with the indices of the found points.</returns>
-    static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> = 
+    static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
         RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
 
 
@@ -712,7 +712,7 @@ module AutoOpenGeometry =
     ///<summary>Returns the font used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name.</returns>
-    static member TextObjectFont(objectId:Guid) : string = //GET        
+    static member TextObjectFont(objectId:Guid) : string = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
 
 
@@ -825,7 +825,7 @@ module AutoOpenGeometry =
             annotation.PlainText <-  text
             if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
         State.Doc.Views.Redraw()
-    
+
 
      ///<summary>Returns the RichText formatting string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
@@ -844,9 +844,9 @@ module AutoOpenGeometry =
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style            
+            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style
             annotation.SetRichText(rtfString, ds)
-        else 
+        else
             annotation.RichText <-  rtfString
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
         State.Doc.Views.Redraw()
@@ -858,15 +858,15 @@ module AutoOpenGeometry =
     ///<param name="rtfString">(string) A new text RichText formatting string</param>
     ///<param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET        
+    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style    
+            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style
             for objectId in objectIds do
-                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)                
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
                 if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Nice.str objectId) rtfString style
                 annotation.SetRichText(rtfString, ds)
-        else             
+        else
             for objectId in objectIds do
                 let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
                 annotation.RichText <-  rtfString
@@ -885,15 +885,15 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font          
-        let f = 
+        let fontdata = annotation.Font
+        let f =
             match style with
             |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
             |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
-        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName 
+        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
         State.Doc.Views.Redraw()
@@ -907,7 +907,7 @@ module AutoOpenGeometry =
     ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
-        for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)        
+        for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)
 
 
     ///<summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
@@ -916,8 +916,8 @@ module AutoOpenGeometry =
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font           
-        let f = 
+        let fontdata = annotation.Font
+        let f =
             DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
             // normally calls will not  go further than FromQuartetProperties(font, false, false)
             // but there are a few rare fonts that don"t have a regular font
@@ -925,7 +925,7 @@ module AutoOpenGeometry =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)        
+            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)
         annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
         State.Doc.Views.Redraw()

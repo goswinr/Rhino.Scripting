@@ -1,6 +1,6 @@
-﻿namespace Rhino.Scripting 
+﻿namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -12,11 +12,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenPlane =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -24,7 +24,7 @@ module AutoOpenPlane =
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
     ///<returns>(float) The distance.</returns>
-    static member DistanceToPlane(plane:Plane, point:Point3d) : float = 
+    static member DistanceToPlane(plane:Plane, point:Point3d) : float =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
         plane.DistanceTo(point)
@@ -35,7 +35,7 @@ module AutoOpenPlane =
     ///<param name="u">(float) U parameter to evaluate</param>
     ///<param name="v">(float) V parameter to evaluate</param>
     ///<returns>(Point3d) Point3d.</returns>
-    static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d = 
+    static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         plane.PointAt(u, v)
 
@@ -47,7 +47,7 @@ module AutoOpenPlane =
     ///<returns>(Point3d) The intersection point between the 3 Planes.</returns>
     static member IntersectPlanes( plane1:Plane,
                                    plane2:Plane,
-                                   plane3:Plane) : Point3d = 
+                                   plane3:Plane) : Point3d =
         //plane1 = RhinoScriptSyntax.CoercePlane(plane1)
         //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
         //plane3 = RhinoScriptSyntax.CoercePlane(plane3)
@@ -60,7 +60,7 @@ module AutoOpenPlane =
     ///<param name="plane">(Plane) Plane </param>
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
     ///<returns>(Plane) moved Plane.</returns>
-    static member MovePlane(plane:Plane, origin:Point3d) : Plane = 
+    static member MovePlane(plane:Plane, origin:Point3d) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         let mutable rc = Plane(plane)
@@ -70,7 +70,7 @@ module AutoOpenPlane =
     ///<summary>Flip this Plane by swapping out the X and Y axes and inverting the Z axis.</summary>
     ///<param name="plane">(Plane) Plane </param>
     ///<returns>(Plane) moved Plane.</returns>
-    static member FlipPlane(plane:Plane) : Plane = 
+    static member FlipPlane(plane:Plane) : Plane =
         let pl = Plane(plane)
         pl.Flip()
         pl
@@ -80,7 +80,7 @@ module AutoOpenPlane =
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(Point3d) The 3-D point.</returns>
-    static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d = 
+    static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d =
         plane.ClosestPoint(point)
 
 
@@ -88,7 +88,7 @@ module AutoOpenPlane =
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(float*float) The u and v parameter on the Plane of the closest point.</returns>
-    static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float = 
+    static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter failed for %A; %A" plane point
@@ -125,7 +125,7 @@ module AutoOpenPlane =
     ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6).</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
-                                          [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > = 
+                                          [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
@@ -154,7 +154,7 @@ module AutoOpenPlane =
     ///    equation of a Plane with a non-zero vector is Ax + By + Cz + D = 0.</summary>
     ///<param name="plane">(Plane) The Plane to deconstruct</param>
     ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D).</returns>
-    static member PlaneEquation(plane:Plane) : float * float * float * float = 
+    static member PlaneEquation(plane:Plane) : float * float * float * float =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         let rc = plane.GetPlaneEquation()
         rc.[0], rc.[1], rc.[2], rc.[3]
@@ -163,7 +163,7 @@ module AutoOpenPlane =
     ///<summary>Returns a Plane that was fit through an array of 3D points.</summary>
     ///<param name="points">(Point3d seq) An array of 3D points</param>
     ///<returns>(Plane) The Plane.</returns>
-    static member PlaneFitFromPoints(points:Point3d seq) : Plane = 
+    static member PlaneFitFromPoints(points:Point3d seq) : Plane =
         //points = RhinoScriptSyntax.Coerce3dPointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
         if rc = PlaneFitResult.Success then plane
@@ -180,7 +180,7 @@ module AutoOpenPlane =
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
-                                  yAxis:Vector3d) : Plane = 
+                                  yAxis:Vector3d) : Plane =
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         //xAxis = RhinoScriptSyntax.Coerce3dvector(xAxis)
         //yAxis = RhinoScriptSyntax.Coerce3dvector(yAxis)
@@ -194,7 +194,7 @@ module AutoOpenPlane =
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
-                                   [<OPT;DEF(Vector3d())>]xAxis:Vector3d) : Plane = 
+                                   [<OPT;DEF(Vector3d())>]xAxis:Vector3d) : Plane =
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         //normal = RhinoScriptSyntax.Coerce3dvector(normal)
         let mutable rc = Plane(origin, normal)
@@ -214,7 +214,7 @@ module AutoOpenPlane =
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromPoints( origin:Point3d,
                                    x:Point3d,
-                                   y:Point3d) : Plane = 
+                                   y:Point3d) : Plane =
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         //x = RhinoScriptSyntax.Coerce3dPoint(x)
         //y = RhinoScriptSyntax.Coerce3dPoint(y)
@@ -227,7 +227,7 @@ module AutoOpenPlane =
     ///<param name="plane1">(Plane) The 1st Plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd Plane to intersect</param>
     ///<returns>(Line) a line with two 3d points identifying the starting/ending points of the intersection.</returns>
-    static member PlanePlaneIntersection(plane1:Plane, plane2:Plane) : Line = 
+    static member PlanePlaneIntersection(plane1:Plane, plane2:Plane) : Line =
         //plane1 = RhinoScriptSyntax.CoercePlane(plane1)
         //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
         let rc, line = Intersect.Intersection.PlanePlane(plane1, plane2)
@@ -248,7 +248,7 @@ module AutoOpenPlane =
     ///    [2]      number     If a circle intersection, then the radius of the circle.</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
-                                           sphereRadius:float) : int * Plane * float = 
+                                           sphereRadius:float) : int * Plane * float =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //spherePlane = RhinoScriptSyntax.CoercePlane(spherePlane)
         let sphere = Sphere(spherePlane, sphereRadius)
@@ -265,7 +265,7 @@ module AutoOpenPlane =
     ///<param name="plane">(Plane) Plane to transform</param>
     ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Plane) The resulting Plane.</returns>
-    static member PlaneTransform(plane:Plane, xForm:Transform) : Plane = 
+    static member PlaneTransform(plane:Plane, xForm:Transform) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
         let rc = Plane(plane)
@@ -280,7 +280,7 @@ module AutoOpenPlane =
     ///<returns>(Plane) rotated Plane.</returns>
     static member RotatePlane( plane:Plane,
                                angleDegrees:float,
-                               axis:Vector3d) : Plane = 
+                               axis:Vector3d) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //axis = RhinoScriptSyntax.Coerce3dvector(axis)
         let angleradians = toRadians(angleDegrees)
@@ -291,19 +291,19 @@ module AutoOpenPlane =
 
     ///<summary>Returns Rhino's world XY Plane.</summary>
     ///<returns>(Plane) Rhino's world XY Plane.</returns>
-    static member WorldXYPlane() : Plane = 
+    static member WorldXYPlane() : Plane =
         Plane.WorldXY
 
 
     ///<summary>Returns Rhino's world YZ Plane.</summary>
     ///<returns>(Plane) Rhino's world YZ Plane.</returns>
-    static member WorldYZPlane() : Plane = 
+    static member WorldYZPlane() : Plane =
         Plane.WorldYZ
 
 
     ///<summary>Returns Rhino's world ZX Plane.</summary>
     ///<returns>(Plane) Rhino's world ZX Plane.</returns>
-    static member WorldZXPlane() : Plane = 
+    static member WorldZXPlane() : Plane =
         Plane.WorldZX
 
 

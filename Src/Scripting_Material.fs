@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -10,11 +10,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenMaterial =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -24,7 +24,7 @@ module AutoOpenMaterial =
     ///    returned.</summary>
     ///<param name="layer">(string) Name of an existing layer.</param>
     ///<returns>(int) Material index of the layer.</returns>
-    static member AddMaterialToLayer(layer:string) : int = 
+    static member AddMaterialToLayer(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.RenderMaterialIndex> -1 then layer.RenderMaterialIndex
         else
@@ -37,7 +37,7 @@ module AutoOpenMaterial =
     ///    object already has a material, the object's current material index is returned.</summary>
     ///<param name="objectId">(Guid) Identifier of an object.</param>
     ///<returns>(int) material index of the object.</returns>
-    static member AddMaterialToObject(objectId:Guid) : int = 
+    static member AddMaterialToObject(objectId:Guid) : int =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable attr = rhinoObject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
@@ -57,7 +57,7 @@ module AutoOpenMaterial =
     ///<param name="sourceIndex">(int) Source index of materials to copy.</param>
     ///<param name="destinationIndex">(int) Destination index materials to copy.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool = 
+    static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool =
         if sourceIndex = destinationIndex then true // originally false
         else
             let source = State.Doc.Materials.[sourceIndex]
@@ -73,7 +73,7 @@ module AutoOpenMaterial =
     ///    assigned a material.</summary>
     ///<param name="materialIndex">(int) The zero-based material index.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsMaterialDefault(materialIndex:int) : bool = 
+    static member IsMaterialDefault(materialIndex:int) : bool =
         let mat = State.Doc.Materials.[materialIndex]
         notNull mat && mat.IsDefaultMaterial
 
@@ -81,7 +81,7 @@ module AutoOpenMaterial =
     ///<summary>Verifies a material is referenced from another file.</summary>
     ///<param name="materialIndex">(int) The zero-based material index.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsMaterialReference(materialIndex:int) : bool = 
+    static member IsMaterialReference(materialIndex:int) : bool =
         let mat = State.Doc.Materials.[materialIndex]
         notNull mat && mat.IsReference
 
@@ -91,7 +91,7 @@ module AutoOpenMaterial =
     ///    The object must have a material assigned.</param>
     ///<param name="destination">(Guid seq) Id of the destination object.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member MatchMaterial(source:Guid, destination:Guid seq) : unit = 
+    static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
         let mat = State.Doc.Materials.[source]
@@ -102,14 +102,14 @@ module AutoOpenMaterial =
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-                rhobj.CommitChanges() |> ignore 
+                rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
 
     ///<summary>Returns a material's bump bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index.</param>
-    ///<returns>(string) The current bump bitmap filename. 
+    ///<returns>(string) The current bump bitmap filename.
     /// Or an empty string if no Bump texture is present on the Material.</returns>
     static member MaterialBump(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
@@ -138,7 +138,7 @@ module AutoOpenMaterial =
             if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
             #endif
 
-            mat.CommitChanges() |> ignore 
+            mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -161,7 +161,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
-        mat.CommitChanges() |> ignore 
+        mat.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -218,7 +218,7 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
-        mat.CommitChanges() |> ignore 
+        mat.CommitChanges() |> ignore
 
 
 
@@ -368,7 +368,7 @@ module AutoOpenMaterial =
     ///<summary>Resets a material to Rhino's default material.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member ResetMaterial(materialIndex:int) : bool = 
+    static member ResetMaterial(materialIndex:int) : bool =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then false
         else

@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 open System.Collections.Generic
@@ -16,11 +16,11 @@ open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenObject =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -52,7 +52,7 @@ module AutoOpenObject =
     ///<returns>(Guid) The identifier of the transformed object.</returns>
     static member TransformObject(  objectId:Guid,
                                     matrix:Transform,
-                                    [<OPT;DEF(false)>]copy:bool) : Guid = 
+                                    [<OPT;DEF(false)>]copy:bool) : Guid =
         let res = State.Doc.Objects.Transform(objectId, matrix, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Nice.str objectId) matrix copy
         res
@@ -62,8 +62,8 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) Object to copy</param>
     ///<param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
     ///<returns>(Guid) objectId for the copy.</returns>
-    static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid = 
-        let translation = 
+    static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
+        let translation =
             if not translation.IsZero then
                 Transform.Translation(translation)
             else
@@ -79,7 +79,7 @@ module AutoOpenObject =
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
     ///<returns>(Guid Rarr) identifiers for the copies.</returns>
     static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
-        let translation = 
+        let translation =
             if not translation.IsZero then
                 Transform.Translation(translation)
             else
@@ -95,7 +95,7 @@ module AutoOpenObject =
     ///<summary>Deletes a single object from the document.</summary>
     ///<param name="objectId">(Guid) Identifier of object to delete</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteObject(objectId:Guid) : unit =         
+    static member DeleteObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Delete(objectId, quiet=true)  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
@@ -118,7 +118,7 @@ module AutoOpenObject =
     ///    If True, flash between object color and selection color.
     ///    If False, flash between visible and invisible</param>
     ///<returns>(unit).</returns>
-    static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit = 
+    static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
         let rhobjs = rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.Count>0 then
             State.Doc.Views.FlashObjects(rhobjs, style)
@@ -127,14 +127,14 @@ module AutoOpenObject =
     ///<summary>Hides a single object.</summary>
     ///<param name="objectId">(Guid) Id of object to hide</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member HideObject(objectId:Guid) : bool = 
+    static member HideObject(objectId:Guid) : bool =
         State.Doc.Objects.Hide(objectId, ignoreLayerMode=false)
 
 
     ///<summary>Hides one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden.</returns>
-    static member HideObjects(objectIds:Guid seq) : int = //PLURAL        
+    static member HideObjects(objectIds:Guid seq) : int = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
             if State.Doc.Objects.Hide(objectId, ignoreLayerMode=false) then rc <- rc + 1
@@ -145,7 +145,7 @@ module AutoOpenObject =
     ///<summary>Checks if an object is in on a page layout space. (as opposed to model space).</summary>
     ///<param name="objectId">(Guid) Id of an object to test</param>
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space.</returns>
-    static member IsLayoutObject(objectId:Guid) : bool = 
+    static member IsLayoutObject(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
@@ -153,7 +153,7 @@ module AutoOpenObject =
     ///<summary>Verifies the existence of an object in the State.Doc.Objects table. Fails on empty Guid.</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist.</returns>
-    static member IsObject(objectId:Guid) : bool = 
+    static member IsObject(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceRhinoObject(objectId) <> None
 
 
@@ -161,7 +161,7 @@ module AutoOpenObject =
     ///    be snapped to, and cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is hidden, False if the object is not hidden.</returns>
-    static member IsObjectHidden(objectId:Guid) : bool = 
+    static member IsObjectHidden(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsHidden
 
@@ -175,7 +175,7 @@ module AutoOpenObject =
     ///<returns>(bool) True if object is inside box, False is object is not inside box.</returns>
     static member IsObjectInBox( objectId:Guid,
                                  box:BoundingBox,
-                                 [<OPT;DEF(true)>]testMode:bool) : bool = 
+                                 [<OPT;DEF(true)>]testMode:bool) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let objbox = rhobj.Geometry.GetBoundingBox(true)
         if testMode then
@@ -192,7 +192,7 @@ module AutoOpenObject =
     ///    was not specified, the object is a member of some group.
     ///    False if the object  is not a member of the specified group.
     ///    If a groupName was not specified, the object is not a member of any group.</returns>
-    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool = 
+    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let count = rhobj.GroupCount
         if count<1 then false
@@ -210,7 +210,7 @@ module AutoOpenObject =
     ///    be snapped to, but cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is locked, False if the object is not locked.</returns>
-    static member IsObjectLocked(objectId:Guid) : bool = 
+    static member IsObjectLocked(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsLocked
 
@@ -219,7 +219,7 @@ module AutoOpenObject =
     ///    snapped to, and can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is normal, False if the object is not normal.</returns>
-    static member IsObjectNormal(objectId:Guid) : bool = 
+    static member IsObjectNormal(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsNormal
 
@@ -228,7 +228,7 @@ module AutoOpenObject =
     ///    objects that are not part of the current document.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is a reference object, False if the object is not a reference object.</returns>
-    static member IsObjectReference(objectId:Guid) : bool = 
+    static member IsObjectReference(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsReference
 
@@ -236,7 +236,7 @@ module AutoOpenObject =
     ///<summary>Checks if an object can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsObjectSelectable(objectId:Guid) : bool = 
+    static member IsObjectSelectable(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelectable( ignoreSelectionState=true,
                             ignoreGripsState    =false ,
@@ -251,7 +251,7 @@ module AutoOpenObject =
     ///    1, the object is selected
     ///    2, the object is entirely persistently selected
     ///    3, one or more proper sub-objects are selected.</returns>
-    static member IsObjectSelected(objectId:Guid) : int = 
+    static member IsObjectSelected(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelected(false)
 
@@ -259,9 +259,9 @@ module AutoOpenObject =
     ///<summary>Determines if an object is closed or solid.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
-    static member IsObjectSolid(objectId:Guid) : bool = 
+    static member IsObjectSolid(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197 
+        // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197
         // and https://github.com/mcneel/rhinoscriptsyntax/commit/aaa0906fa43003db093c1e6f58bf12c813eddbeb
         let geom = rhobj.Geometry
         match geom with
@@ -270,7 +270,7 @@ module AutoOpenObject =
         | :? Surface   as s -> s.IsSolid
         | :? Brep      as s -> s.IsSolid
         #if RHINO7
-        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher        
+        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
         #endif
         | _                 ->
             RhinoScriptingException.Raise "RhinoScriptSyntax.IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Nice.str objectId)
@@ -280,7 +280,7 @@ module AutoOpenObject =
     ///<summary>Verifies an object's geometry is valid and without error.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is valid.</returns>
-    static member IsObjectValid(objectId:Guid) : bool = 
+    static member IsObjectValid(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceRhinoObject(objectId) with
         |None -> false
         |Some rhobj ->  rhobj.IsValid
@@ -290,7 +290,7 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<param name="view">(string) Optional, default value: <c>ActiveView.MainViewport</c> The title of the view. If omitted, the current active view is used</param>
     ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
-    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool = 
+    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else State.Doc.Views.ActiveView.MainViewport
         let bbox = rhobj.Geometry.GetBoundingBox(true)
@@ -301,7 +301,7 @@ module AutoOpenObject =
     ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member LockObject(objectId:Guid) : bool = 
+    static member LockObject(objectId:Guid) : bool =
         State.Doc.Objects.Lock(objectId, ignoreLayerMode=false)
 
 
@@ -322,8 +322,8 @@ module AutoOpenObject =
     ///<param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
     ///    then the default attributes are copied to the targetIds</param>
     ///<returns>(int) number of objects modified.</returns>
-    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int = 
-        let sourceAttr = 
+    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int =
+        let sourceAttr =
             if Guid.Empty <> sourceId then
                 let source = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
                 source.Attributes.Duplicate()
@@ -347,7 +347,7 @@ module AutoOpenObject =
     static member MirrorObject( objectId:Guid,
                                 startPoint:Point3d,
                                 endPoint:Point3d,
-                                [<OPT;DEF(false)>]copy:bool) : Guid = 
+                                [<OPT;DEF(false)>]copy:bool) : Guid =
         let vec = endPoint-startPoint
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectId) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
@@ -473,7 +473,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        rhobj.CommitChanges() |> ignore 
+        rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -489,7 +489,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            rhobj.CommitChanges() |> ignore 
+            rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -499,7 +499,7 @@ module AutoOpenObject =
     ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...).</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object.</returns>
-    static member ObjectDescription(objectId:Guid) : string = 
+    static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
 
@@ -508,12 +508,12 @@ module AutoOpenObject =
     ///<summary>Returns the count for each object type in a List of objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(string) A short text description of the object.</returns>
-    static member ObjectDescription(objectIds:Guid seq) : string = 
-        let count =  objectIds|> Seq.countBy (fun id -> 
+    static member ObjectDescription(objectIds:Guid seq) : string =
+        let count =  objectIds|> Seq.countBy (fun id ->
                         /// TODO could be optimized by using Object-type integer instead of string
                         let o = RhinoScriptSyntax.CoerceRhinoObject(id)
                         o.ShortDescription(true) + if o.IsDeleted then " (deleted !)" else ""
-                        ) 
+                        )
         let typesk = Seq.length count
         let mutable tx = ""
         if typesk = 0 then
@@ -565,7 +565,7 @@ module AutoOpenObject =
     static member ObjectLayout(objectId:Guid, layout:string) : unit = //SET
         // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let view= 
+        let view=
             if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                 let pageid = rhobj.Attributes.ViewportId
                 let pageview = State.Doc.Views.Find(pageid)
@@ -585,7 +585,7 @@ module AutoOpenObject =
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectId
 
-            rhobj.CommitChanges() |> ignore 
+            rhobj.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
@@ -596,7 +596,7 @@ module AutoOpenObject =
     ///    from page layout space to model space, just specify an empty string.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayout(objectIds:Guid seq, layout:string) : unit = //MULTISET
-        let lay = 
+        let lay =
             if layout<>"" then
                 match State.Doc.Views.Find(layout, compareCase=false) with
                 | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayout: Setting it failed, layout not found for '%s' and '%A'"  layout objectIds
@@ -607,7 +607,7 @@ module AutoOpenObject =
 
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let view= 
+            let view=
                 if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                     let pageid = rhobj.Attributes.ViewportId
                     let pageview = State.Doc.Views.Find(pageid)
@@ -623,7 +623,7 @@ module AutoOpenObject =
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                rhobj.CommitChanges() |> ignore 
+                rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -645,7 +645,7 @@ module AutoOpenObject =
         if newIndex <0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
@@ -659,7 +659,7 @@ module AutoOpenObject =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
             rhinoObject.Attributes.LinetypeIndex <- newIndex
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -687,7 +687,7 @@ module AutoOpenObject =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoObject.Attributes.LinetypeSource <- source
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -704,7 +704,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- source
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -776,7 +776,7 @@ module AutoOpenObject =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -793,7 +793,7 @@ module AutoOpenObject =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let rc = int(rhinoObject.Attributes.MaterialSource)
             rhinoObject.Attributes.MaterialSource <- source
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -807,8 +807,8 @@ module AutoOpenObject =
     static member IsGoodStringId    ( name:string
                                     , [<OPT;DEF(false)>]allowEmpty:bool
                                     , [<OPT;DEF(false)>]limitToAscii:bool
-                                    ) : bool = 
-        if limitToAscii then 
+                                    ) : bool =
+        if limitToAscii then
             Util.isASCIIStringId( name, allowEmpty)
         else
             Util.isGoodStringId( name, allowEmpty)
@@ -828,11 +828,11 @@ module AutoOpenObject =
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name. Or empty string</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectName(objectId:Guid, name:string) : unit = //SET        
+    static member ObjectName(objectId:Guid, name:string) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then
             rhinoObject.Attributes.Name <- name
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -845,7 +845,7 @@ module AutoOpenObject =
             for objectId in objectIds do
                 let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 rhinoObject.Attributes.Name <- name
-                rhinoObject.CommitChanges() |> ignore 
+                rhinoObject.CommitChanges() |> ignore
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -868,7 +868,7 @@ module AutoOpenObject =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoObject.Attributes.PlotColor <- color
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -880,7 +880,7 @@ module AutoOpenObject =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
             rhinoObject.Attributes.PlotColor <- color
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -906,7 +906,7 @@ module AutoOpenObject =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        rhobj.CommitChanges() |> ignore 
+        rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -922,7 +922,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            rhobj.CommitChanges() |> ignore 
+            rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
@@ -944,7 +944,7 @@ module AutoOpenObject =
         let rc = rhinoObject.Attributes.PlotWeight
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -959,7 +959,7 @@ module AutoOpenObject =
             let rc = rhinoObject.Attributes.PlotWeight
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -984,7 +984,7 @@ module AutoOpenObject =
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -998,7 +998,7 @@ module AutoOpenObject =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -1027,7 +1027,7 @@ module AutoOpenObject =
     ///      268435456   Phantom
     ///      536870912   Clipping Plane
     ///      1073741824  Extrusion.</returns>
-    static member ObjectType(objectId:Guid) : int = 
+    static member ObjectType(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry
         match geom with
@@ -1038,9 +1038,9 @@ module AutoOpenObject =
 
 
     ///<summary>Orients a single object based on input points.
-    /// If two 3-D points are specified, then this method will 
-    /// function similar to Rhino's Orient command.  
-    /// If more than two 3-D points are specified, 
+    /// If two 3-D points are specified, then this method will
+    /// function similar to Rhino's Orient command.
+    /// If more than two 3-D points are specified,
     /// then the function will orient similar to Rhino's Orient3Pt command.
     /// </summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
@@ -1053,49 +1053,49 @@ module AutoOpenObject =
     ///    3       Scale and copy.
     ///</param>
     ///<returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
-    static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid = 
-        if referencePts.Count <> targetPts.Count then 
+    static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid =
+        if referencePts.Count <> targetPts.Count then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
-        if referencePts.Count < 2 then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count < 2: %d  " referencePts.Count 
-        if targetPts.Count < 2 then 
+        if referencePts.Count < 2 then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count < 2: %d  " referencePts.Count
+        if targetPts.Count < 2 then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject targetPts.Count < 2 : %d"  targetPts.Count
 
         let copy  = (flags &&& 1) = 1
         let scale = (flags &&& 2) = 2
-        let xform = 
-            if referencePts.Count > 2 then 
+        let xform =
+            if referencePts.Count > 2 then
                 //Orient3Pt
                 let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
                 let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
-                if not fromPlane.IsValid || not toPlane.IsValid then 
+                if not fromPlane.IsValid || not toPlane.IsValid then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
                 Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
             else
                 //Orient2Pt
-                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )                 
+                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
                 let v0 = referencePts.[1] - referencePts.[0]
                 let v1 = targetPts.[1] - targetPts.[0]
                 let xformScale =
-                    if scale then 
+                    if scale then
                         let len0 = v0.Length
                         let len1 = v1.Length
                         if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject vector lengths too short"
                         let scaleF = len1 / len0
-                        if abs(1.0-scaleF) >= 0.000001 then 
+                        if abs(1.0-scaleF) >= 0.000001 then
                             let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
                             Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
                         else
                             Rhino.Geometry.Transform.Identity
                     else
                         Rhino.Geometry.Transform.Identity
-                v0.Unitize()  |> ignore 
-                v1.Unitize()  |> ignore 
+                v0.Unitize()  |> ignore
+                v1.Unitize()  |> ignore
                 let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
                 xformMove * xformScale * xformRotate
-  
+
         let rc = RhinoScriptSyntax.Ot.Transform(objectId, xform, not copy)
-        if rc=System.Guid.Empty then 
+        if rc=System.Guid.Empty then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject failed"
         RhinoScriptSyntax.Doc.Views.Redraw()
         rc
@@ -1113,7 +1113,7 @@ module AutoOpenObject =
                                 centerPoint:Point3d,
                                 rotationAngle:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d,
-                                [<OPT;DEF(false)>]copy:bool) : Guid = 
+                                [<OPT;DEF(false)>]copy:bool) : Guid =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
@@ -1156,7 +1156,7 @@ module AutoOpenObject =
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
                                scale:float*float*float,
-                               [<OPT;DEF(false)>]copy:bool) : Guid = 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let x, y, z = scale
@@ -1236,7 +1236,7 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member SelectObject( objectId:Guid,
                                 [<OPT;DEF(false)>]forceVisible:bool,
-                                [<OPT;DEF(false)>]ignoreErrors:bool) : unit = 
+                                [<OPT;DEF(false)>]ignoreErrors:bool) : unit =
         RhinoSync.DoSync (fun () ->
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if 0 = rhobj.Select(true) then
@@ -1313,7 +1313,7 @@ module AutoOpenObject =
                                origin:Point3d,
                                referencePoint:Point3d,
                                angleDegrees:float,
-                               [<OPT;DEF(false)>]copy:bool) : Guid = 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.ToNiceString referencePoint.ToNiceString
        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
        let mutable frame = Plane(plane)
@@ -1377,7 +1377,7 @@ module AutoOpenObject =
     ///    be snapped to and cannot be selected.</summary>
     ///<param name="objectId">(Guid) Representing id of object to show</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ShowObject(objectId:Guid) : unit = 
+    static member ShowObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
@@ -1397,7 +1397,7 @@ module AutoOpenObject =
     ///    but they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnlockObject(objectId:Guid) : unit = 
+    static member UnlockObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
@@ -1415,7 +1415,7 @@ module AutoOpenObject =
     ///<summary>Unselects a single selected object.</summary>
     ///<param name="objectId">(Guid) Id of object to unselect.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnselectObject(objectId:Guid) : unit = 
+    static member UnselectObject(objectId:Guid) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()

@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 open Microsoft.FSharp.Core.LanguagePrimitives
@@ -13,11 +13,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenDocument =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -42,11 +42,11 @@ module AutoOpenDocument =
                                         [<OPT;DEF(0)>]width:int,
                                         [<OPT;DEF(0)>]height:int,
                                         [<OPT;DEF(0)>]flags:int,
-                                        [<OPT;DEF(false)>]wireframe:bool) : bool = 
+                                        [<OPT;DEF(false)>]wireframe:bool) : bool =
         let rhview = RhinoScriptSyntax.CoerceView(view)
         let inline  ( ./. ) (i:int) (j:int) = (float(i)) / (float(j))
         let inline  ( *. ) ( i:int) (f:float) = int(round(float(i) * f))
-        let rhsize = 
+        let rhsize =
             match width, height with
             | 0, 0 -> rhview.ClientRectangle.Size
             | x, 0 ->
@@ -86,14 +86,14 @@ module AutoOpenDocument =
 
     ///<summary>Returns the name of the currently loaded Rhino document (3dm file).</summary>
     ///<returns>(string) The name of the currently loaded Rhino document (3dm file).</returns>
-    static member DocumentName() : string = 
+    static member DocumentName() : string =
         State.Doc.Name |? ""
 
 
 
     ///<summary>Returns full path of the currently loaded Rhino document including the file name (3dm file).</summary>
     ///<returns>(string) The path of the currently loaded Rhino document  including the file name(3dm file).</returns>
-    static member DocumentPath() : string = 
+    static member DocumentPath() : string =
         let p = State.Doc.Path
         if isNull p then ""
         else p
@@ -111,7 +111,7 @@ module AutoOpenDocument =
     ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit = 
+    static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
         State.Doc.Views.RedrawEnabled <- enable
 
     ///<summary>Disables screen redrawing.
@@ -120,7 +120,7 @@ module AutoOpenDocument =
     ///  and afterwards disable it again if it was disabled before.
     ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member DisableRedraw() : unit = 
+    static member DisableRedraw() : unit =
         State.Doc.Views.RedrawEnabled <- false
 
 
@@ -131,8 +131,8 @@ module AutoOpenDocument =
     ///<param name="modelName">(string) Optional, The model (.3dm) from which to extract the
     ///    preview image. If omitted, the currently loaded model is used</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit = 
-        let bmp = 
+    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit =
+        let bmp =
             if notNull modelName  then
                 if notNull State.Doc.Path then RhinoDoc.ExtractPreviewImage(State.Doc.Path) // TODO test this works ok
                 else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractPreviewImage failed on unsaved file"
@@ -143,7 +143,7 @@ module AutoOpenDocument =
 
     ///<summary>Checks if the current document has been modified in some way.</summary>
     ///<returns>(bool) True or False.</returns>
-    static member IsDocumentModified() : bool = 
+    static member IsDocumentModified() : bool =
         State.Doc.Modified
 
 
@@ -166,13 +166,13 @@ module AutoOpenDocument =
     ///    determine which version of Rhino last saved the document. Note, this
     ///    function will not return values from referenced or merged files.</summary>
     ///<returns>(int) The file version of the current document.</returns>
-    static member ReadFileVersion() : int = 
+    static member ReadFileVersion() : int =
         State.Doc.ReadFileVersion()
 
 
     ///<summary>Redraws all views.</summary>
     ///<returns>(unit).</returns>
-    static member Redraw() : unit = 
+    static member Redraw() : unit =
         let old = State.Doc.Views.RedrawEnabled
         State.Doc.Views.RedrawEnabled <- true
         State.Doc.Views.Redraw()
@@ -398,7 +398,7 @@ module AutoOpenDocument =
     ///    2: Custom</param>
     ///<returns>(unit) void, nothing.</returns>
     static member RenderMeshQuality(quality:int) : unit = //SET
-        let newValue = 
+        let newValue =
             if quality = 0 then
                 MeshingParameterStyle.Fast
             elif quality = 1 then
@@ -669,7 +669,7 @@ module AutoOpenDocument =
     ///<param name="modelUnits">(bool) Optional, default value: <c>true</c>
     ///    Return the document's model units (True) or the document's page units (False). The default is True</param>
     ///<returns>(string) The name of the current units system.</returns>
-    static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string = 
+    static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string =
         State.Doc.GetUnitSystemName(modelUnits, capitalize, singular, abbreviate)
 
 

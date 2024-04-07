@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -13,24 +13,24 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenUtility =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
 
     ///<summary>Return true if the script is being executed in the context of Rhino(currently always true).</summary>
     ///<returns>(bool) true if the script is being executed in the context of Rhino(currently always true).</returns>
-    static member ContextIsRhino() : bool = 
+    static member ContextIsRhino() : bool =
         true //TODO implement correctly
 
 
     ///<summary>Return true if the script is being executed in a grasshopper component(currently always false).</summary>
     ///<returns>(bool) true if the script is being executed in a grasshopper component(currently always false).</returns>
-    static member ContextIsGrasshopper() : bool = 
+    static member ContextIsGrasshopper() : bool =
         false //TODO implement correctly
 
 
@@ -45,7 +45,7 @@ module AutoOpenUtility =
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
     ///    element 4 = delta in the Z direction.</returns>
-    static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  = 
+    static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
         let plane = if plane.IsValid then plane else Plane.WorldXY
         let vector = point2 - point1
         let mutable x = vector.X
@@ -68,7 +68,7 @@ module AutoOpenUtility =
     ///<returns>(float * float) containing the following elements .
     ///    0 The angle in degrees.
     ///    1 The reflex angle in degrees.</returns>
-    static member Angle2(line1:Line, line2:Line) : float * float = 
+    static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
         if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "RhinoScriptSyntax.Angle2 two failed on %A and %A" line1 line2
@@ -82,8 +82,8 @@ module AutoOpenUtility =
 
 
     ///<summary>Gets the text string in the Windows clipboard.</summary>
-    ///<returns>(string) The current text in the clipboard 
-    /// or an empty string if the content of the clipboard is not a text</returns> 
+    ///<returns>(string) The current text in the clipboard
+    /// or an empty string if the content of the clipboard is not a text</returns>
     static member ClipboardText() : string = //GET
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 
@@ -103,7 +103,7 @@ module AutoOpenUtility =
     ///    If True, luma specifies how much to increment or decrement the
     ///    current luminance. If False, luma specified the absolute luminance</param>
     ///<returns>(Drawing.Color) modified rgb value.</returns>
-    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color = 
+    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
         let mutable luma = luma / 1000.0
         if isScaleRelative then luma <- hsl.L + luma
@@ -114,21 +114,21 @@ module AutoOpenUtility =
     ///<summary>Retrieves intensity value for the blue component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The blue component.</returns>
-    static member ColorBlueValue(rgb:Drawing.Color) : int = 
+    static member ColorBlueValue(rgb:Drawing.Color) : int =
        int rgb.B
 
 
     ///<summary>Retrieves intensity value for the green component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The green component.</returns>
-    static member ColorGreenValue(rgb:Drawing.Color) : int = 
+    static member ColorGreenValue(rgb:Drawing.Color) : int =
        int rgb.G
 
 
     ///<summary>Converts colors from hue-luminance-saturation to RGB.</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value.</returns>
-    static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color = 
+    static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
         let hls = Display.ColorHSL(hls.A.ToFloat/240.0, hls.R.ToFloat/240.0, hls.G.ToFloat/240.0, hls.B.ToFloat/240.0) // TODO test if correct with reverse function
         hls.ToArgbColor()
 
@@ -136,14 +136,14 @@ module AutoOpenUtility =
     ///<summary>Retrieves intensity value for the red component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The red color value.</returns>
-    static member ColorRedValue(rgb:Drawing.Color) : int = 
+    static member ColorRedValue(rgb:Drawing.Color) : int =
         int rgb.R
 
 
     ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance).</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(Display.ColorHSL) The HLS color value.</returns>
-    static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL = 
+    static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
         let hsl = Display.ColorHSL(rgb)
         hsl
 
@@ -153,7 +153,7 @@ module AutoOpenUtility =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
     ///<returns>(float Rarr) numbers with duplicates removed.</returns>
-    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr = 
+    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
         if Seq.length numbers < 2 then Rarr(numbers )
         else
             let tol = Util.ifZero1 tolerance  RhinoMath.ZeroTolerance // or State.Doc.ModelAbsoluteTolerance
@@ -177,7 +177,7 @@ module AutoOpenUtility =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
     ///<returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
-    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array = 
+    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
@@ -186,7 +186,7 @@ module AutoOpenUtility =
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The square distance.</returns>
-    static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float = 
+    static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float =
         let x = point1.X - point2.X
         let y = point1.Y - point2.Y
         let z = point1.Z - point2.Z
@@ -196,7 +196,7 @@ module AutoOpenUtility =
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The distance.</returns>
-    static member inline Distance(point1:Point3d, point2:Point3d) : float = 
+    static member inline Distance(point1:Point3d, point2:Point3d) : float =
         let x = point1.X - point2.X
         let y = point1.Y - point2.Y
         let z = point1.Z - point2.Z
@@ -209,7 +209,7 @@ module AutoOpenUtility =
     ///<param name="plane">(Plane) Optional, Plane to base the transformation. If omitted, the world
     ///    x-y Plane is used</param>
     ///<returns>(Point3d) resulting point is successful.</returns>
-    static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d = 
+    static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore
@@ -223,19 +223,19 @@ module AutoOpenUtility =
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float Rarr) A one-dimensional list containing real numbers.</returns>
-    static member SimplifyArray(points:Point3d seq) : float Rarr = 
-        rarr {  
+    static member SimplifyArray(points:Point3d seq) : float Rarr =
+        rarr {
             for p in points do
                 yield p.X
                 yield p.Y
-                yield p.Z 
+                yield p.Z
             }
 
 
     ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI.</summary>
     ///<param name="milliseconds">(int) Thousands of a second</param>
     ///<returns>(unit).</returns>
-    static member Sleep(milliseconds:int) : unit = 
+    static member Sleep(milliseconds:int) : unit =
         Threading.Thread.Sleep(milliseconds)
         RhinoApp.Wait()
 
@@ -246,7 +246,7 @@ module AutoOpenUtility =
     ///    Minimum distance between points. Points that fall within this tolerance
     ///    will be discarded.</param>
     ///<returns>(Point3d array) Array of sorted 3D points.</returns>
-    static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array = 
+    static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         Point3d.SortAndCullPointList(points, tol)
 
@@ -265,8 +265,8 @@ module AutoOpenUtility =
     ///    4           Z, X, Y
     ///    5           Z, Y, X</param>
     ///<returns>(Point3d seq) sorted 3-D points.</returns>
-    static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq = 
-        let f = 
+    static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq =
+        let f =
             match order with
             |0 -> fun (p:Point3d) -> p.X, p.Y, p.Z
             |1 -> fun (p:Point3d) -> p.X, p.Z, p.Y
@@ -282,14 +282,14 @@ module AutoOpenUtility =
     ///<summary>convert a formatted string value into a 3D point value.</summary>
     ///<param name="point">(string) A string that contains a delimited point like "1, 2, 3"</param>
     ///<returns>(Point3d) Point structure from the input string.</returns>
-    static member Str2Pt(point:string) : Point3d = 
+    static member Str2Pt(point:string) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
 
     ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="point">('T) any value that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
-    static member CreatePoint(point:'T ) : Point3d = 
+    static member CreatePoint(point:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
     ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible.</summary>
@@ -297,21 +297,21 @@ module AutoOpenUtility =
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
-    static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d = 
+    static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint ((x, y, z))
 
 
     ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="vector">('T) any value that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
-    static member CreateVector(vector:'T ) : Vector3d = 
+    static member CreateVector(vector:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
     ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
-    static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d = 
+    static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector ((x, y, z))
 
 
@@ -323,7 +323,7 @@ module AutoOpenUtility =
     ///<param name="yAxis">(Vector3d) Optional, default value: <c>Vector3d.YAxis</c>
     ///    Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane.</returns>
-    static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane = 
+    static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
         if xAxis.IsZero || yAxis.IsZero then
             Plane(origin, Vector3d.XAxis, Vector3d.YAxis)
         else
@@ -333,7 +333,7 @@ module AutoOpenUtility =
     ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
     ///<param name="xForm">(float seq seq) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column.</returns>
-    static member CreateXform(xForm:seq<seq<float>>) : Transform = 
+    static member CreateXform(xForm:seq<seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xForm) // TODO verify row, column order !!
 
 
@@ -342,7 +342,7 @@ module AutoOpenUtility =
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<returns>(System.Drawing.Color) a Color.</returns>
-    static member CreateColor(red:int, green:int, blue:int) : Drawing.Color = 
+    static member CreateColor(red:int, green:int, blue:int) : Drawing.Color =
         if red   < 0 || red > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor red value out of range 0 to 255: %d" red
         if green < 0 || green > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor green value out of range 0 to 255: %d" green
         if blue  < 0 || blue > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor blue value out of range 0 to 255: %d" blue
@@ -353,7 +353,7 @@ module AutoOpenUtility =
     ///<param name="green">(byte) Green value</param>
     ///<param name="blue">(byte) Blue value</param>
     ///<returns>(System.Drawing.Color) a Color.</returns>
-    static member CreateColor(red:byte, green:byte, blue:byte) : Drawing.Color =         
+    static member CreateColor(red:byte, green:byte, blue:byte) : Drawing.Color =
         Drawing.Color.FromArgb(int red, int green, int blue)
 
     ///<summary>Converts input into a Rhino.Geometry.Interval. This interval can be increasing or decreasing</summary>
@@ -362,16 +362,16 @@ module AutoOpenUtility =
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///    [0] start of interval
     ///    [1] end of interval.</returns>
-    static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval = 
+    static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval =
         Geometry.Interval(start , ende)
 
 
-    (* 
+    (*
     manipulating ini files like in original Rhinoscript could be include via
     <PackageReference Include="ini-parser" Version="2.5.2" />
     however for now it is excluded to keep the dependencies at just FsEx.
     If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
-    
+
     open IniParser
     open IniParser.Model
 
@@ -381,7 +381,7 @@ module AutoOpenUtility =
     ///<returns>(string array)
     ///    If section is NOT specified, a list containing all section names
     ///    If section is specified, a list containing all entry names for the given section.</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr = 
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =
         //https://github.com/rickyah/ini-parser
 
         //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
@@ -398,11 +398,11 @@ module AutoOpenUtility =
     ///<param name="section">(string) Section containing the entry,for keys without section use empty string</param>
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
     ///<returns>(string) a value for entry.</returns>
-    static member GetSettings(filename:string, section:string, entry:string) : string = 
+    static member GetSettings(filename:string, section:string, entry:string) : string =
         let parser = new FileIniDataParser()
         let data = parser.ReadFile(filename)
         data.Configuration.ThrowExceptionsOnError <-true
-        let s = 
+        let s =
             if section = "" then
                 data.Global.[entry]
             else
@@ -416,7 +416,7 @@ module AutoOpenUtility =
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
     ///<param name="value">(string) The Value of this entry</param>
     ///<returns>(string) a value for entry.</returns>
-    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit = 
+    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit =
         if IO.File.Exists filename then
             let parser = new FileIniDataParser()
             parser.Parser.Configuration.ThrowExceptionsOnError <-true

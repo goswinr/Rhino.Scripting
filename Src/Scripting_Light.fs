@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -12,11 +12,11 @@ open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenLight =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -24,7 +24,7 @@ module AutoOpenLight =
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
     ///<returns>(Guid) identifier of the new object.</returns>
-    static member AddDirectionalLight(startPoint:Point3d, endPoint:Point3d) : Guid = 
+    static member AddDirectionalLight(startPoint:Point3d, endPoint:Point3d) : Guid =
         let start =  startPoint
         let ende =  endPoint
         let light = new Light()
@@ -45,7 +45,7 @@ module AutoOpenLight =
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
-                                  [<OPT;DEF(0.0)>]lightWidth:float) : Guid = 
+                                  [<OPT;DEF(0.0)>]lightWidth:float) : Guid =
         let start =  startPoint
         let ende =  endPoint
         let mutable width = lightWidth
@@ -79,7 +79,7 @@ module AutoOpenLight =
     ///<summary>Adds a new point light object to the document.</summary>
     ///<param name="point">(Point3d) The 3d location of the point</param>
     ///<returns>(Guid) identifier of the new object.</returns>
-    static member AddPointLight(point:Point3d) : Guid = 
+    static member AddPointLight(point:Point3d) : Guid =
         let light = new Light()
         light.LightStyle <- LightStyle.WorldPoint
         light.Location <- point
@@ -97,7 +97,7 @@ module AutoOpenLight =
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddRectangularLight( origin:Point3d,
                                        widthPoint:Point3d,
-                                       heightPoint:Point3d) : Guid = 
+                                       heightPoint:Point3d) : Guid =
         let ptx =  widthPoint
         let pty =  heightPoint
         let length = pty-origin
@@ -124,7 +124,7 @@ module AutoOpenLight =
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddSpotLight( origin:Point3d,
                                 radius:float,
-                                apexPoint:Point3d) : Guid = 
+                                apexPoint:Point3d) : Guid =
         let mutable radius = radius
         if radius<0.0 then radius<-1.0
         let light = new Light()
@@ -174,7 +174,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is a directional light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDirectionalLight(objectId:Guid) : bool = 
+    static member IsDirectionalLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsDirectionalLight
 
@@ -182,7 +182,7 @@ module AutoOpenLight =
     ///<summary>Verifies an object is a light object.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLight(objectId:Guid) : bool = 
+    static member IsLight(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceLight(objectId)
         |> Option.isSome
 
@@ -190,7 +190,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is enabled.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLightEnabled(objectId:Guid) : bool = 
+    static member IsLightEnabled(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsEnabled
 
@@ -198,7 +198,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is referenced from another file.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLightReference(objectId:Guid) : bool = 
+    static member IsLightReference(objectId:Guid) : bool =
         let light = State.Doc.Lights.FindId(objectId)
         if isNull light then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLightReference light (a %s) not found" (Nice.str objectId)
         light.IsReference
@@ -207,7 +207,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is a linear light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLinearLight(objectId:Guid) : bool = 
+    static member IsLinearLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsLinearLight
 
@@ -215,7 +215,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is a point light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsPointLight(objectId:Guid) : bool = 
+    static member IsPointLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsPointLight
 
@@ -223,7 +223,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is a rectangular light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsRectangularLight(objectId:Guid) : bool = 
+    static member IsRectangularLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsRectangularLight
 
@@ -231,7 +231,7 @@ module AutoOpenLight =
     ///<summary>Verifies a light object is a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSpotLight(objectId:Guid) : bool = 
+    static member IsSpotLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsSpotLight
 
@@ -270,7 +270,7 @@ module AutoOpenLight =
 
     ///<summary>Returns the number of light objects in the document.</summary>
     ///<returns>(int) The number of light objects in the document.</returns>
-    static member LightCount() : int = 
+    static member LightCount() : int =
         State.Doc.Lights.Count
 
 
@@ -371,7 +371,7 @@ module AutoOpenLight =
 
     ///<summary>Returns list of identifiers of light objects in the document.</summary>
     ///<returns>(Guid Rarr) The list of identifiers of light objects in the document.</returns>
-    static member LightObjects() : Guid Rarr = 
+    static member LightObjects() : Guid Rarr =
         let count = State.Doc.Lights.Count
         let rc = Rarr()
         for i = 0 to count - 1 do
@@ -383,7 +383,7 @@ module AutoOpenLight =
     ///<summary>Returns the Plane of a rectangular light object.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Plane*float*float) The Plane, X and Y length.</returns>
-    static member RectangularLightPlane(objectId:Guid) : Plane*float*float = 
+    static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldRectangular then
             RhinoScriptingException.Raise "RhinoScriptSyntax.RectangularLightPlane failed.  objectId:'%s'" (Nice.str objectId)

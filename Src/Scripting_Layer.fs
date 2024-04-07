@@ -1,7 +1,7 @@
 ﻿
-namespace Rhino.Scripting 
+namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 open System
 
@@ -12,17 +12,17 @@ open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenLayer =
-  type RhinoScriptSyntax with  
-    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete) 
-    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file. 
+  type RhinoScriptSyntax with
+    //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
+    //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
     //---So that all members are visible in C# and Ironpython too.
-    //---This happens as part of the <Targets> in the *.fsproj file. 
+    //---This happens as part of the <Targets> in the *.fsproj file.
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
 
 
-    ///<summary>Add a new layer to the document. If it does not exist yet. 
+    ///<summary>Add a new layer to the document. If it does not exist yet.
     /// By default Ambiguous Unicode characters are not allowed in layer name. This can be changed via optional parameter.
     /// If layers or parent layers exist already color, visibility and locking parameters are ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
@@ -40,7 +40,7 @@ module AutoOpenLayer =
     ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
     ///<param name="allowAllUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
     ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
-    ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer. 
+    ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer.
     /// E.g. The function rs.Add can then take this layer index.</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string
                           , [<OPT;DEF(Drawing.Color())>]color:Drawing.Color
@@ -48,7 +48,7 @@ module AutoOpenLayer =
                           , [<OPT;DEF(2)>]locked:int
                           , [<OPT;DEF(null:string)>]parent:string
                           , [<OPT;DEF(false:bool)>]allowAllUnicode:bool
-                          , [<OPT;DEF(false:bool)>]collapseParents:bool) : int = 
+                          , [<OPT;DEF(false:bool)>]collapseParents:bool) : int =
 
         let col = if color.IsEmpty then UtilLayer.randomLayerColor else (fun () -> color)
         if notNull parent && isNull name then
@@ -97,11 +97,11 @@ module AutoOpenLayer =
                              ,[<OPT;DEF(false:bool)>]allowAllUnicode:bool
                              ,[<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let layerIndex = 
+        let layerIndex =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore 
+        obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -116,13 +116,13 @@ module AutoOpenLayer =
                              , [<OPT;DEF(false)>]createLayerIfMissing:bool
                              , [<OPT;DEF(false:bool)>]allowUnicode:bool
                              , [<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //MULTISET
-        let layerIndex = 
+        let layerIndex =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode, collapseParents).Index
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore 
+            obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -134,20 +134,20 @@ module AutoOpenLayer =
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Nice.str objectId)
         if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Nice.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore 
+        obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
-    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param> 
+    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layerIndex">(int) Index of layer in layer table</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectIds:Guid seq, layerIndex:int) : unit = //MULTISET
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on %d objects " layerIndex State.Doc.Layers.Count (Seq.length objectIds)
-        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)                                
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore 
+            obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>
@@ -157,7 +157,7 @@ module AutoOpenLayer =
     ///<returns>(unit) void, nothing.</returns>
     static member ChangeLayerName( currentLayerName:string
                                  , newLayerName:string
-                                 , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit = 
+                                 , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
@@ -197,7 +197,7 @@ module AutoOpenLayer =
     ///    empty.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteLayer(layer:string) : bool = 
+    static member DeleteLayer(layer:string) : bool =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
         State.Doc.Layers.Delete(i, quiet=true)
@@ -208,7 +208,7 @@ module AutoOpenLayer =
     ///<param name="layer">(string) Name of the layer to expand</param>
     ///<param name="expand">(bool) True to expand, False to collapse</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ExpandLayer(layer:string, expand:bool) : unit = 
+    static member ExpandLayer(layer:string, expand:bool) : unit =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
         let layer = State.Doc.Layers.[i]
@@ -220,7 +220,7 @@ module AutoOpenLayer =
     ///<summary>Verifies the existence of a layer in the document.</summary>
     ///<param name="layer">(string) The name of a layer to search for</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayer(layer:string) : bool = 
+    static member IsLayer(layer:string) : bool =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         i <> RhinoMath.UnsetIntIndex
 
@@ -228,7 +228,7 @@ module AutoOpenLayer =
     ///<summary>Checks if the objects on a layer can be changed (normal).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerChangeable(layer:string) : bool = 
+    static member IsLayerChangeable(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsVisible && not layer.IsLocked
         rc
@@ -238,7 +238,7 @@ module AutoOpenLayer =
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerChildOf(layer:string, test:string) : bool = 
+    static member IsLayerChildOf(layer:string, test:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let test = RhinoScriptSyntax.CoerceLayer(test)
         test.IsChildOf(layer)
@@ -247,7 +247,7 @@ module AutoOpenLayer =
     ///<summary>Checks if a layer is the current layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerCurrent(layer:string) : bool = 
+    static member IsLayerCurrent(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Index = State.Doc.Layers.CurrentLayerIndex
 
@@ -255,7 +255,7 @@ module AutoOpenLayer =
     ///<summary>Checks if an existing layer is empty, or contains no objects.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerEmpty(layer:string) : bool = 
+    static member IsLayerEmpty(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rhobjs = State.Doc.Objects.FindByLayer(layer)
         isNull rhobjs || rhobjs.Length = 0
@@ -265,7 +265,7 @@ module AutoOpenLayer =
     ///    Rhino's layer dialog.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerExpanded(layer:string) : bool = 
+    static member IsLayerExpanded(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsExpanded
 
@@ -275,7 +275,7 @@ module AutoOpenLayer =
     /// via layer.IsLocked.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerLocked(layer:string) : bool = 
+    static member IsLayerLocked(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsLocked
 
@@ -283,7 +283,7 @@ module AutoOpenLayer =
     ///<summary>Checks if a layer is on.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerOn(layer:string) : bool = 
+    static member IsLayerOn(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible
 
@@ -291,7 +291,7 @@ module AutoOpenLayer =
     ///<summary>Checks if an existing layer is selectable (normal and reference).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerSelectable(layer:string) : bool = 
+    static member IsLayerSelectable(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible && not layer.IsLocked
 
@@ -300,7 +300,7 @@ module AutoOpenLayer =
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerParentOf(layer:string, test:string) : bool = 
+    static member IsLayerParentOf(layer:string, test:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let test = RhinoScriptSyntax.CoerceLayer(test)
         test.IsParentOf(layer)
@@ -309,7 +309,7 @@ module AutoOpenLayer =
     ///<summary>Checks if a layer is from a reference file.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerReference(layer:string) : bool = 
+    static member IsLayerReference(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsReference
 
@@ -317,7 +317,7 @@ module AutoOpenLayer =
     ///<summary>Checks if a layer is visible.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerVisible(layer:string) : bool = 
+    static member IsLayerVisible(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible
 
@@ -325,7 +325,7 @@ module AutoOpenLayer =
     ///<summary>Returns the number of immediate child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(int) The number of immediate child layers.</returns>
-    static member LayerChildCount(layer:string) : int = 
+    static member LayerChildCount(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
         if notNull children then children.Length
@@ -335,7 +335,7 @@ module AutoOpenLayer =
     ///<summary>Returns the immediate child layers of a layer. ( excluding children of children) </summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
-    static member LayerChildren(layer:string) : string Rarr = 
+    static member LayerChildren(layer:string) : string Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
         if notNull children then rarr {for child in children do child.FullPath }
@@ -344,8 +344,8 @@ module AutoOpenLayer =
     ///<summary>Returns all (immediate and descendent) child and grand child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
-    static member LayerChildrenAll(layer:string) : string Rarr = 
-        let rec loop (l:DocObjects.Layer) = 
+    static member LayerChildrenAll(layer:string) : string Rarr =
+        let rec loop (l:DocObjects.Layer) =
             seq{
                 let children = l.GetChildren()
                 if notNull children then
@@ -377,13 +377,13 @@ module AutoOpenLayer =
 
     ///<summary>Returns the number of layers in the document.</summary>
     ///<returns>(int) The number of layers in the document.</returns>
-    static member LayerCount() : int = 
+    static member LayerCount() : int =
         State.Doc.Layers.ActiveCount
 
 
     ///<summary>Return identifiers of all layers in the document.</summary>
     ///<returns>(Guid Rarr) The identifiers of all layers in the document.</returns>
-    static member LayerIds() : Guid Rarr = 
+    static member LayerIds() : Guid Rarr =
         rarr {for layer in State.Doc.Layers do
                         if not layer.IsDeleted then
                             layer.Id }
@@ -430,7 +430,7 @@ module AutoOpenLayer =
     ///<param name="forceVisible">(bool) Optional, default value: <c>true</c>
     ///     Turn on parent layers too if needed. True by default</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit = 
+    static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.visibleSetTrue(lay,forceVisible)
         State.Doc.Views.Redraw()
@@ -441,7 +441,7 @@ module AutoOpenLayer =
     ///     Turn layer persistently off? even if it is already invisible because of a parent layer that is turned off.
     ///     By default already invisible layers are not changed</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
+    static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.visibleSetFalse(lay,persist)
         State.Doc.Views.Redraw()
@@ -470,7 +470,7 @@ module AutoOpenLayer =
     ///<summary>Turn a layer off if visible, does nothing if parent layer is already invisible. .</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerOff(layer:string) : unit = 
+    static member LayerOff(layer:string) : unit =
         RhinoScriptSyntax.LayerVisibleSetFalse(layer, persist=false)
 
     ///<summary>Turn a layer on if not  visible , enforces visibility  of parents.</summary>
@@ -483,7 +483,7 @@ module AutoOpenLayer =
     ///  if layer is unlocked but parent layer is locked this still returns true.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility.</returns>
-    static member LayerLocked(layer:string) : bool = 
+    static member LayerLocked(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsLocked //not same as // https://github.com/mcneel/rhinoscriptsyntax/pull/193 // TODO ??
         rc
@@ -493,7 +493,7 @@ module AutoOpenLayer =
     ///<param name="forceLocked">(bool) Optional, default value: <c>false</c>
     ///     Lock layer even if it is already locked via a parent layer</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit = 
+    static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.lockedSetTrue(lay,forceLocked)
         State.Doc.Views.Redraw()
@@ -503,7 +503,7 @@ module AutoOpenLayer =
     ///<param name="parentsToo">(bool) Optional, default value: <c>true</c>
     ///     Unlock parent layers to if needed</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit = 
+    static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.lockedSetFalse(lay,parentsToo)
         State.Doc.Views.Redraw()
@@ -512,7 +512,7 @@ module AutoOpenLayer =
     ///<summary>Unlocks a layer and all parents if needed .</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerUnlock(layer:string) : unit = 
+    static member LayerUnlock(layer:string) : unit =
         RhinoScriptSyntax.LayerLockedSetFalse(layer, parentsToo=true)
 
     ///<summary>Locks a layer if it is not already locked via a parent.</summary>
@@ -566,7 +566,7 @@ module AutoOpenLayer =
     ///<summary>Returns the identifier of a layer given the layer's name.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Guid) The layer's identifier.</returns>
-    static member LayerId(layer:string) : Guid = 
+    static member LayerId(layer:string) : Guid =
         let idx = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if idx = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerId not found for name %s" layer
         State.Doc.Layers.[idx].Id
@@ -578,7 +578,7 @@ module AutoOpenLayer =
     ///<param name="fullPath">(bool) Optional, default value: <c>true</c>
     ///    Return the full path name `True` or short name `False`</param>
     ///<returns>(string) The layer's name.</returns>
-    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullPath:bool) : string = 
+    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullPath:bool) : string =
         let layer = RhinoScriptSyntax.CoerceLayer(layerId)
         if fullPath then layer.FullPath
         else layer.Name
@@ -586,7 +586,7 @@ module AutoOpenLayer =
 
     ///<summary>Returns the names of all layers in the document.</summary>
     ///<returns>(string Rarr) list of layer names.</returns>
-    static member LayerNames() : string Rarr = 
+    static member LayerNames() : string Rarr =
         let rc = Rarr()
         for layer in State.Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
@@ -598,7 +598,7 @@ module AutoOpenLayer =
     ///    layer dialog filter does not allow the layer to appear in the layer list.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(int) zero based index of layer.</returns>
-    static member LayerOrder(layer:string) : int = 
+    static member LayerOrder(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.SortIndex
 
@@ -676,12 +676,12 @@ module AutoOpenLayer =
             layer.ParentLayerId <- parent.Id
 
 
-    ///<summary>Removes an existing layer and all its objects from the document. 
-    /// The layer will be removed even if it contains geometry objects. 
+    ///<summary>Removes an existing layer and all its objects from the document.
+    /// The layer will be removed even if it contains geometry objects.
     /// The layer to be removed cannot be the current layer.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member PurgeLayer(layer:string) : bool = 
+    static member PurgeLayer(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = State.Doc.Layers.Purge( layer.Index, quiet=true)
         State.Doc.Views.Redraw()
@@ -692,11 +692,11 @@ module AutoOpenLayer =
     ///    'true' to keep the current Layer even if empty
     ///    'false' to remove current layer too if its empty. Any other non empty layer might be the new current</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit = 
+    static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit =
         let taken=Hashset()
         let Layers = State.Doc.Layers
         let mutable nonEmptyIndex = -1
-        let rec addLoop(g:Guid)= 
+        let rec addLoop(g:Guid)=
             if g <> Guid.Empty then
                 taken.Add(g)|> ignore
                 addLoop (Layers.FindId(g).ParentLayerId) // recurse
@@ -717,16 +717,16 @@ module AutoOpenLayer =
         elif taken.Count > 0  && taken.DoesNotContain c && nonEmptyIndex > -1 then
             // change current layer to a non empty one:
             Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore
-        
+
         // now delete them all
         for i = Layers.Count - 1 downto 0 do
             let l = Layers.[i]
             if not l.IsDeleted then
                 if taken.DoesNotContain (l.Id) then
-                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents                    
-                    //if i <> Layers.CurrentLayerIndex then 
+                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents
+                    //if i <> Layers.CurrentLayerIndex then
                     //    if not <| Layers.Delete(i, quiet=true) then
-                    //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then 
+                    //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then
                     //        RhinoScriptingException.Raise "RhinoScriptSyntax.PurgeEmptyLayers: failed to delete layer '%s' " l.FullPath // the last layer can't be deleted so don't raise exception
         State.Doc.Views.Redraw()
 
@@ -735,7 +735,7 @@ module AutoOpenLayer =
     ///<param name="oldname">(string) Original layer name</param>
     ///<param name="newname">(string) New layer name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameLayer(oldname:string, newname:string) : unit = 
+    static member RenameLayer(oldname:string, newname:string) : unit =
         if oldname <> newname then
             let layer = RhinoScriptSyntax.CoerceLayer(oldname)
             layer.Name <- newname // TODO test with bad chars in layer string
@@ -744,52 +744,51 @@ module AutoOpenLayer =
     ///<param name="layerName">(string) full or short layer name</param>
     ///<param name="childrenToo">(bool) Optional, default value: <c>false</c>
     ///    'true' to collapse any child layers too.
-    ///    'false' to not change the parents layers collapse state.(default)</param>   
+    ///    'false' to not change the parents layers collapse state.(default)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member CollapseLayer(layerName:string, [<OPT;DEF(false)>]childrenToo:bool) : unit = 
+    static member CollapseLayer(layerName:string, [<OPT;DEF(false)>]childrenToo:bool) : unit =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if childrenToo then
-            let rec collapse (l:DocObjects.Layer) = 
-                if l.IsExpanded then 
+            let rec collapse (l:DocObjects.Layer) =
+                if l.IsExpanded then
                     l.IsExpanded <- false
                 for child in l.GetChildren() do
                     collapse child
             collapse layer
         else
-            if layer.IsExpanded then 
+            if layer.IsExpanded then
                 layer.IsExpanded <- false
-    
+
     ///<summary>Expand a layer in UI if it has children. This is the opposite of rs.CollapseLayer(..) </summary>
-    ///<param name="layerName">(string) full or short layer name</param>   
+    ///<param name="layerName">(string) full or short layer name</param>
     ///<param name="childrenToo">(bool) Optional, default value: <c>false</c>
     ///    'true' to expand any child layers too.
-    ///    'false' to not change the child layers collapse state.(default)</param>  
+    ///    'false' to not change the child layers collapse state.(default)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnCollapseLayer(layerName:string,[<OPT;DEF(false)>]childrenToo:bool) : unit = 
+    static member UnCollapseLayer(layerName:string,[<OPT;DEF(false)>]childrenToo:bool) : unit =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if childrenToo then
-            let rec expand (l:DocObjects.Layer) = 
-                if not l.IsExpanded then 
+            let rec expand (l:DocObjects.Layer) =
+                if not l.IsExpanded then
                     l.IsExpanded <- true
                 for child in l.GetChildren() do
-                    expand child                   
+                    expand child
             expand layer
         else
-            if layer.IsExpanded then 
+            if layer.IsExpanded then
                 layer.IsExpanded <- false
-    
+
     ///<summary>Expand all parent layers in UI if this layer is hidden by a collapsed parent layer.</summary>
-    ///<param name="layerName">(string) full or short layer name</param>  
+    ///<param name="layerName">(string) full or short layer name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ShowLayer(layerName:string) : unit =         
-        let rec expand (l:DocObjects.Layer) = 
-            if not l.IsExpanded then 
+    static member ShowLayer(layerName:string) : unit =
+        let rec expand (l:DocObjects.Layer) =
+            if not l.IsExpanded then
                 l.IsExpanded <- true
             if l.ParentLayerId <> Guid.Empty then
-                expand <| State.Doc.Layers.FindId(l.ParentLayerId)                    
-        
-        let layer = RhinoScriptSyntax.CoerceLayer(layerName) 
+                expand <| State.Doc.Layers.FindId(l.ParentLayerId)
+
+        let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if layer.ParentLayerId <> Guid.Empty then
-            expand <| State.Doc.Layers.FindId(layer.ParentLayerId)         
-        
-        
+            expand <| State.Doc.Layers.FindId(layer.ParentLayerId)
+
