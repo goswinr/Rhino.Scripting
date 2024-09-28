@@ -87,7 +87,6 @@ module AutoOpenSurface =
                                startPoint:Point3d,
                                endPoint:Point3d,
                                [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
-        #if RHINO7 // needs GetTightBoundingBox
         // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955
         let bbox =
             let objs = objectIds|> Seq.map RhinoScriptSyntax.CoerceRhinoObject
@@ -106,15 +105,15 @@ module AutoOpenSurface =
             bboxMin <- bboxMax - v
             bboxMax <- p
             Rhino.Geometry.BoundingBox(bboxMin, bboxMax)
-        #else
-        let bbox = BoundingBox.Unset
-        for objectId in objectIds do
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let geometry = rhobj.Geometry
-            bbox.Union( geometry.GetBoundingBox(true))
-        if not bbox.IsValid then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Nice.str objectIds) startPoint endPoint normal
-        #endif
+        // #else RH6
+        // let bbox = BoundingBox.Unset
+        // for objectId in objectIds do
+        //     let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        //     let geometry = rhobj.Geometry
+        //     bbox.Union( geometry.GetBoundingBox(true))
+        // if not bbox.IsValid then
+        //     RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Nice.str objectIds) startPoint endPoint normal
+        // #endif
         let line = Geometry.Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal // TODO or use original ?? : scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
         let surface = Rhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, bbox)

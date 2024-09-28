@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <UseWPF>false</UseWPF> 
+    <UseWPF>false</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>  <!--  to get screen resolution and show dialogs-->
     <LangVersion>preview</LangVersion>
     <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
@@ -12,23 +12,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->    
-    <PackageReference Update="FSharp.Core" Version="4.5.2" /> 
-	  
-    <!-- using version 6.7.18199 because it supports Font.FromQuartetProperties and AreaMassProperties.Compute(Surface surface, bool , bool, bool) -->
-    <PackageReference Include="RhinoCommon" Version="6.7.18199.22081" PrivateAssets="all" ExcludeAssets="runtime" />	 
-    <PackageReference Include="FsEx" Version="0.14.1" />
+    <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
+    <PackageReference Update="FSharp.Core" Version="6.0.7" />
+    <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="FsEx" Version="0.15.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
   	<None Include="Readme.md" />
-	  
+
     <Compile Include="Src/Exceptions.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
     <Compile Include="Src/ToNiceStringExtensions.fs" />
-    <Compile Include="Src/ToNiceStringSetup.fs" />    
+    <Compile Include="Src/ToNiceStringSetup.fs" />
     <Compile Include="Src/Util.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />

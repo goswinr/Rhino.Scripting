@@ -269,9 +269,7 @@ module AutoOpenObject =
         | :? Extrusion as s -> s.IsSolid
         | :? Surface   as s -> s.IsSolid
         | :? Brep      as s -> s.IsSolid
-        #if RHINO7
         | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
-        #endif
         | _                 ->
             RhinoScriptingException.Raise "RhinoScriptSyntax.IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Nice.str objectId)
 

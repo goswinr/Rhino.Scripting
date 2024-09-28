@@ -1,6 +1,6 @@
-﻿namespace Rhino.Scripting 
+﻿namespace Rhino.Scripting
 
-open Rhino 
+open Rhino
 
 
 // leave all these open statements here! even if they are unused, they are needed when all files are combined into one during the build.
@@ -36,13 +36,13 @@ type internal DEF =  Runtime.InteropServices.DefaultParameterValueAttribute
 
 /// A static class with static methods providing functions identical to RhinoScript in Python or VBscript
 [<AbstractClass; Sealed>]
-type RhinoScriptSyntax private () = 
+type RhinoScriptSyntax private () =
 
     // static class, use these attributes [<AbstractClass; Sealed>] to match C# static class
     // and make in visible in C# // https://stackoverflow.com/questions/13101995/defining-static-classes-in-f
 
     /// The current active Rhino document (= the file currently open)
-    static member Doc = State.Doc      
+    static member Doc = State.Doc
 
     /// Object Table of the current active Rhino document
     static member Ot = State.Ot
@@ -58,7 +58,7 @@ type RhinoScriptSyntax private () =
 
     /// Tests to see if the user has pressed the escape key.
     /// Raises an OperationCanceledException.
-    static member EscapeTest() : unit = // [<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool) : bool = 
+    static member EscapeTest() : unit = // [<OPT;DEF(true)>]throwException:bool, [<OPT;DEF(false)>]reset:bool) : bool =
         RhinoApp.Wait() //does not need to be on  UI thread
         if State.EscapePressed  then
             State.EscapePressed <- false //always reset is needed otherwise in next run of script will not be reset
@@ -70,7 +70,7 @@ type RhinoScriptSyntax private () =
     ///<param name="maxVal">(float) The upper bound</param>
     ///<param name="value">(float) The value to clamp</param>
     ///<returns>(float) The clamped value.</returns>
-    static member Clamp (minVal:float, maxVal:float, value:float) : float = 
+    static member Clamp (minVal:float, maxVal:float, value:float) : float =
         if minVal > maxVal then  RhinoScriptingException.Raise "RhinoScriptSyntax.Clamp: minValue %A must be less than maxValue %A" minVal maxVal
         max minVal (min maxVal value)
 
@@ -82,7 +82,7 @@ type RhinoScriptSyntax private () =
     ///<param name="stop">(float) end of range (The last value will not be included in range, Python semantics.)</param>
     ///<param name="step">(float) step size between two values</param>
     ///<returns>(float seq) a lazy seq of floats.</returns>
-    static member FxrangePython (start:float, stop:float, step:float) : float seq = 
+    static member FxrangePython (start:float, stop:float, step:float) : float seq =
         if isNanOrInf start then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf step  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
         if isNanOrInf stop  then RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: NaN or Infinity, start=%f, step=%f, stop=%f" start step stop
@@ -97,7 +97,7 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
         else
             // the actual algorithm:
-            let rec floatrange (start, i, steps) = 
+            let rec floatrange (start, i, steps) =
                 seq { if i <= steps then
                         yield start + i*step
                         yield! floatrange (start, (i + 1.0), steps) } // tail recursive !
@@ -110,7 +110,7 @@ type RhinoScriptSyntax private () =
     ///<param name="stop">(float) end of range( The last value will not be included in range, Python semantics.)</param>
     ///<param name="step">(float) step size between two values</param>
     ///<returns>(float Rarr).</returns>
-    static member FrangePython (start:float, stop:float, step:float) : float Rarr = 
+    static member FrangePython (start:float, stop:float, step:float) : float Rarr =
         RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
@@ -126,30 +126,30 @@ type RhinoScriptSyntax private () =
                       ,  layerIndex:int // don't make it  optional , so that method overload resolution works for rs.Add(..)
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool 
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
                       ,  [<OPT;DEF(false:bool)>]collapseParents:bool
-                      ) : Guid = 
+                      ) : Guid =
         let attr =
-            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then 
+            if layerIndex = -1 && objectName="" && isNull userTextKeysAndValues  then
                 null
             else
                 let a = new DocObjects.ObjectAttributes()
                 a.LayerIndex <- layerIndex
-                if objectName <> "" then 
+                if objectName <> "" then
                     if stringSafetyCheck && not <|  Util.isAcceptableStringId( objectName, false) then // TODO or enforce goodStringID ?
                         RhinoScriptingException.Raise "RhinoScriptSyntax.Add: objectName the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." objectName
                     a.Name <- objectName
                 if notNull userTextKeysAndValues then
-                    for k,v in userTextKeysAndValues do 
-                        if stringSafetyCheck then 
+                    for k,v in userTextKeysAndValues do
+                        if stringSafetyCheck then
                             if not <|  Util.isAcceptableStringId( k, false) then // TODO or enforce goodStringID ?
                                 RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." k
                             if not <|  Util.isAcceptableStringId( v, false) then
                                 RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
-                            RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v 
+                            RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v
                 a
-                
+
         match box geo with
         | :? GeometryBase as g ->  State.Doc.Objects.Add(g,attr)
         // now the structs:
@@ -178,38 +178,38 @@ type RhinoScriptSyntax private () =
     ///<param name="collapseParents">(bool) Optional, default value: <c>false</c>. Collapse parent layers in Layer UI </param>
     ///<returns>(Guid) The Guid of the added Object.</returns>
     static member Add (  geo:'T
-                      ,  [<OPT;DEF("")>]layer:string 
+                      ,  [<OPT;DEF("")>]layer:string
                       ,  [<OPT;DEF("")>]objectName:string
                       ,  [<OPT;DEF(null:seq<string*string>)>]userTextKeysAndValues:seq<string*string>
-                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color    
-                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool                      
+                      ,  [<OPT;DEF(Drawing.Color():Drawing.Color)>]layerColor:Drawing.Color
+                      ,  [<OPT;DEF(true)>]stringSafetyCheck:bool
                       ,  [<OPT;DEF(false:bool)>]collapseParents:bool
-                      ) : Guid = 
+                      ) : Guid =
         let layCorF =
-            if layer<>""then 
-                if layerColor.IsEmpty then 
+            if layer<>""then
+                if layerColor.IsEmpty then
                     UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents) // TODO or disallow all Unicode ?
                 else
                     UtilLayer.getOrCreateLayer(layer, (fun () -> layerColor), UtilLayer.ByParent, UtilLayer.ByParent, true, collapseParents)// TODO or disallow all Unicode ?
             else
                 UtilLayer.LayerFound State.Doc.Layers.CurrentLayerIndex
-        
+
         let layIdx =
-            match layCorF with 
+            match layCorF with
             |UtilLayer.LayerCreated ci -> ci
             |UtilLayer.LayerFound fi ->  fi
                 (*
                 // now update the layer color if one is given, even if the layer exists already
-                if layerColor.IsEmpty then 
+                if layerColor.IsEmpty then
                     fi
                 else
-                    let lay = State.Doc.Layers.[fi]                    
-                    if not <| lay.Color.EqualsARGB(layerColor) then 
+                    let lay = State.Doc.Layers.[fi]
+                    if not <| lay.Color.EqualsARGB(layerColor) then
                         lay.Color <- layerColor
-                    fi                        
+                    fi
                 *)
 
-        let g = RhinoScriptSyntax.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)  
+        let g = RhinoScriptSyntax.Add( geo, layIdx, objectName, userTextKeysAndValues, stringSafetyCheck)
         g
 
 
@@ -231,7 +231,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get a Guids from input.</summary>
     ///<param name="objectId">object , Guid or string</param>
     ///<returns>a Guid Option.</returns>
-    static member TryCoerceGuid (objectId:'T) : Guid option= 
+    static member TryCoerceGuid (objectId:'T) : Guid option=
         match box objectId with
         | :? Guid  as g -> if Guid.Empty = g then None else Some g
         | :? DocObjects.RhinoObject as o -> Some o.Id
@@ -242,7 +242,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get a Guids from input.</summary>
     ///<param name="input">object , Guid or string</param>
     ///<returns>Guid. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceGuid(input:'T) : Guid = 
+    static member CoerceGuid(input:'T) : Guid =
         match box input with
         | :? Guid  as g -> if Guid.Empty = g then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: Guid is Empty"  else g
         | :? Option<Guid>  as go -> if go.IsNone || Guid.Empty = go.Value then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGuid: Guid is Empty or None: %A" input else go.Value //from UI functions
@@ -255,33 +255,33 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>a RhinoObject Option</returns>
-    static member TryCoerceRhinoObject (objectId:Guid) : DocObjects.RhinoObject option = 
+    static member TryCoerceRhinoObject (objectId:Guid) : DocObjects.RhinoObject option =
         match State.Doc.Objects.FindId(objectId) with
         | null -> None
-        | o    -> Some o        
-    
+        | o    -> Some o
+
     ///<summary>Attempt to get RhinoObject from the document with a given objectId.</summary>
     ///<param name="objectId">(Guid) Object Identifier </param>
     ///<returns>a RhinoObject, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceRhinoObject(objectId:Guid) : DocObjects.RhinoObject = 
-        match RhinoScriptSyntax.TryCoerceRhinoObject objectId with 
+    static member CoerceRhinoObject(objectId:Guid) : DocObjects.RhinoObject =
+        match RhinoScriptSyntax.TryCoerceRhinoObject objectId with
         |Some o -> o
-        |None -> 
+        |None ->
             if Guid.Empty = objectId then    RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject failed on empty Guid"
             else                             RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceRhinoObject: The Guid %O was not found in the Current Object table." objectId
 
-    ///<summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>   
+    ///<summary>Attempt to get GeometryBase class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">geometry Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.GeometryBase Option</returns>
-    static member TryCoerceGeometry (objectId:Guid) :GeometryBase option = 
+    static member TryCoerceGeometry (objectId:Guid) :GeometryBase option =
         match State.Doc.Objects.FindId(objectId) with
         | null -> None
         | o -> Some o.Geometry
-    
+
     ///<summary>Attempt to get GeometryBase class from given input.</summary>
     ///<param name="objectId">(Guid) geometry Identifier </param>
     ///<returns>(Rhino.Geometry.GeometryBase. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceGeometry(objectId:Guid) : GeometryBase =         
+    static member CoerceGeometry(objectId:Guid) : GeometryBase =
         if Guid.Empty = objectId then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry failed on empty Guid"
         let o = State.Doc.Objects.FindId(objectId)
         if isNull o then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceGeometry failed: Guid %O not found in Object table." objectId
@@ -290,7 +290,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
     ///<param name="objectId">(Guid) light Identifier</param>
     ///<returns>a Rhino.Geometry.Light. Option.</returns>
-    static member TryCoerceLight (objectId:Guid) : Light option = 
+    static member TryCoerceLight (objectId:Guid) : Light option =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> Some l
         | _ -> None
@@ -298,7 +298,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino LightObject from the document with a given objectId.</summary>
     ///<param name="objectId">(Guid) light Identifier</param>
     ///<returns>a  Rhino.Geometry.Light. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceLight (objectId:Guid) : Light = 
+    static member CoerceLight (objectId:Guid) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
         | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLight failed on: %s " (Nice.str objectId)
@@ -307,7 +307,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Mesh Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option.</returns>
-    static member TryCoerceMesh (objectId:Guid) : Mesh option = 
+    static member TryCoerceMesh (objectId:Guid) : Mesh option =
         match State.Doc.Objects.FindId(objectId) with
             | null -> None
             | o ->
@@ -318,7 +318,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Mesh geometry from the document with a given objectId.</summary>
     ///<param name="objectId">object Identifier (Guid or string)</param>
     ///<returns>(Rhino.Geometry.Mesh. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceMesh(objectId:Guid) : Mesh = 
+    static member CoerceMesh(objectId:Guid) : Mesh =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
         | Some m -> m
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceMesh failed on: %s " (Nice.str objectId)
@@ -326,11 +326,11 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Surface class from given Guid. Fails on empty Guid.</summary>
     ///<param name="objectId">Surface Identifier (Guid)</param>
     ///<returns>a Rhino.Geometry.Surface Option.</returns>
-    static member TryCoerceSurface (objectId:Guid) : Surface option = 
+    static member TryCoerceSurface (objectId:Guid) : Surface option =
         match State.Doc.Objects.FindId(objectId) with
         | null -> None
         | o ->
-            match o.Geometry with        
+            match o.Geometry with
             | :? Surface as c -> Some c
             | :? Brep as b ->
                 if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
@@ -340,11 +340,11 @@ type RhinoScriptSyntax private () =
             //     if b.Faces.Count = 1 then Some (b.Faces.[0] :> Surface)
             //     else None
             | _ -> None
-    
+
     ///<summary>Attempt to get Surface geometry from the document with a given objectId.</summary>
     ///<param name="objectId">the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceSurface(objectId:Guid) : Surface = 
+    static member CoerceSurface(objectId:Guid) : Surface =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with
         | :? Surface as c -> c
         | :? Brep as b ->
@@ -363,11 +363,11 @@ type RhinoScriptSyntax private () =
                 | :? Brep as b ->  Some b
                 | :? Extrusion as b -> Some (b.ToBrep(true))
                 | _ -> None
-                
+
     ///<summary>Attempt to get Polysurface geometry from the document with a given objectId.</summary>
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a brep</param>
     ///<returns>(Rhino.Geometry.Brep. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceBrep(objectId:Guid) : Brep  = 
+    static member CoerceBrep(objectId:Guid) : Brep  =
         match RhinoScriptSyntax.TryCoerceBrep(objectId) with
         | Some b -> b
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceBrep failed on: %s " (Nice.str objectId)
@@ -376,7 +376,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>a Rhino.Geometry.Curve Option.</returns>
-    static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option = 
+    static member TryCoerceCurve(objectId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Curve option =
         let geo = RhinoScriptSyntax.CoerceGeometry objectId
         if segmentIndex < 0 then
             match geo with
@@ -395,7 +395,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">objectId (Guid or string) to be RhinoScriptSyntax.Coerced into a Curve</param>
     ///<param name="segmentIndex">(int) Optional, index of segment to retrieve. To ignore segmentIndex give -1 as argument</param>
     ///<returns>(Rhino.Geometry.Curve. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceCurve(objectId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Curve = 
+    static member CoerceCurve(objectId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Curve =
         if segmentIndex < 0 then
             match RhinoScriptSyntax.CoerceGeometry(objectId) with
             | :? Curve as c -> c
@@ -413,7 +413,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="line">Line, two points or Guid</param>
     ///<returns>Geometry.Line. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member TryCoerceLine(line:'T) : Line option = 
+    static member TryCoerceLine(line:'T) : Line option =
         match box line with
         | :? Line as l -> Some l
         | :? Curve as crv ->
@@ -428,11 +428,11 @@ type RhinoScriptSyntax private () =
             | _ -> None
         | :? (Point3d*Point3d) as ab -> let a, b = ab in Some <| Line(a, b)
         |_ -> None
-    
+
     ///<summary>Attempt to get Rhino Line Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="line">Line, two points or Guid</param>
     ///<returns>Geometry.Line, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceLine(line:'T) : Line= 
+    static member CoerceLine(line:'T) : Line=
         match RhinoScriptSyntax.TryCoerceLine(line) with
         | Some a -> a
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLine failed on: %s " (Nice.str line)
@@ -441,7 +441,7 @@ type RhinoScriptSyntax private () =
     /// does not return circles as arcs.</summary>
     ///<param name="arc">Guid, RhinoObject or Curve </param>
     ///<returns>a Geometry.Arc Option.</returns>
-    static member TryCoerceArc(arc:'T) : Arc option= 
+    static member TryCoerceArc(arc:'T) : Arc option=
         match box arc with
         | :? Arc as a -> Some(a)
         | :? Curve as crv ->
@@ -463,7 +463,7 @@ type RhinoScriptSyntax private () =
     /// does not return circles as arcs.</summary>
     ///<param name="arc">Guid, RhinoObject or Curve </param>
     ///<returns>Geometry.Arc, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceArc(arc:'T) : Arc= 
+    static member CoerceArc(arc:'T) : Arc=
         match RhinoScriptSyntax.TryCoerceArc(arc) with
         | Some a -> a
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceArc failed on: %s " (Nice.str arc)
@@ -472,7 +472,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="cir">Guid, RhinoObject or Curve </param>
     ///<returns>a Geometry.Circle Option.</returns>
-    static member TryCoerceCircle(cir:'T) : Circle option= 
+    static member TryCoerceCircle(cir:'T) : Circle option=
         match box cir with
         | :? Circle as a -> Some(a)
         | :? Curve as crv ->
@@ -493,7 +493,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Circle Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="circ">Guid, RhinoObject or Curve </param>
     ///<returns>Geometry.Circle, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceCircle(circ:'T) : Circle= 
+    static member CoerceCircle(circ:'T) : Circle=
         match RhinoScriptSyntax.TryCoerceCircle(circ) with
         | Some a -> a
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceCircle failed on: %s " (Nice.str circ)
@@ -501,7 +501,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="cir">Guid, RhinoObject or Curve </param>
     ///<returns>a Geometry.Ellipse Option.</returns>
-    static member TryCoerceEllipse(cir:'T) : Ellipse option= 
+    static member TryCoerceEllipse(cir:'T) : Ellipse option=
         match box cir with
         | :? Ellipse as a -> Some(a)
         | :? Curve as crv ->
@@ -522,7 +522,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Ellipse Geometry using the current Documents Absolute Tolerance.</summary>
     ///<param name="ellipse">Guid, RhinoObject or Curve </param>
     ///<returns>Geometry.Ellipse, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceEllipse(ellipse:'T) : Ellipse= 
+    static member CoerceEllipse(ellipse:'T) : Ellipse=
         match RhinoScriptSyntax.TryCoerceEllipse(ellipse) with
         | Some a -> a
         | None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceEllipse failed on: %s " (Nice.str ellipse)
@@ -530,15 +530,15 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Polyline Geometry.</summary>
     ///<param name="poly">Guid, RhinoObject or Curve </param>
     ///<returns>a Geometry.Polyline Option.</returns>
-    static member TryCoercePolyline(poly:'T) : Polyline option= 
+    static member TryCoercePolyline(poly:'T) : Polyline option=
         match box poly with
         | :? Polyline as a -> Some(a)
         | :? PolylineCurve as crv -> Some <| crv.ToPolyline()
-        | :? Curve as crv ->                 
+        | :? Curve as crv ->
                 let a : ref<Polyline> = ref null
                 let ok = crv.TryGetPolyline(a)
                 if ok then Some( !a )
-                else None            
+                else None
         | :? Guid as g ->
             match State.Doc.Objects.FindId(g).Geometry with
             | :? Curve as crv ->
@@ -552,7 +552,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Polyline Geometry.</summary>
     ///<param name="poly">Guid, RhinoObject or Curve </param>
     ///<returns>a Geometry.Polyline Option.</returns>
-    static member CoercePolyline(poly:'T) : Polyline = 
+    static member CoercePolyline(poly:'T) : Polyline =
         match RhinoScriptSyntax.TryCoercePolyline poly with
         |None -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePolyline failed on: %s " (Nice.str poly)
         |Some pl -> pl
@@ -566,7 +566,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino LayerObject from the document for a given full name.</summary>
     ///<param name="name">(string) The layer's name.</param>
     ///<returns>DocObjects.Layer </returns>
-    static member CoerceLayer (name:string) : DocObjects.Layer = 
+    static member CoerceLayer (name:string) : DocObjects.Layer =
         let i = State.Doc.Layers.FindByFullPath(name, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then
             let lay = State.Doc.Layers.FindName name
@@ -581,8 +581,8 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino LayerObject from the document with a given objectId.</summary>
     ///<param name="layerId">(Guid) The layer's Guid.</param>
     ///<returns>DocObjects.Layer</returns>
-    static member CoerceLayer (layerId:Guid) : DocObjects.Layer= 
-        if layerId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: input Guid is Guid.Empty" 
+    static member CoerceLayer (layerId:Guid) : DocObjects.Layer=
+        if layerId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLayer: input Guid is Guid.Empty"
         let l = State.Doc.Layers.FindId(layerId)
         if isNull l then
             if notNull (State.Doc.Objects.FindId(layerId)) then
@@ -594,7 +594,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the Rhino Block instance object for a given Id.</summary>
     ///<param name="objectId">(Guid) Id of block instance</param>
     ///<returns>(DocObjects.InstanceObject) block instance object.</returns>
-    static member CoerceBlockInstanceObject(objectId:Guid) : DocObjects.InstanceObject = 
+    static member CoerceBlockInstanceObject(objectId:Guid) : DocObjects.InstanceObject =
         match RhinoScriptSyntax.CoerceRhinoObject(objectId) with
         | :? DocObjects.InstanceObject as b -> b
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceBlockInstanceObject: unable to coerce Block InstanceObject from '%s'" (Nice.str objectId)
@@ -606,7 +606,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino View Object from the name of the view, can be a standard or page view.</summary>
     ///<param name="nameOrId">(string or Guid) Name or Guid the view, empty string will return the Active view</param>
     ///<returns>a State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceView (nameOrId:'T) : Display.RhinoView = 
+    static member CoerceView (nameOrId:'T) : Display.RhinoView =
         match box nameOrId with
         | :? Guid as g ->
             let viewo = State.Doc.Views.Find(g)
@@ -617,7 +617,7 @@ type RhinoScriptSyntax private () =
             if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
             elif view = "" then State.Doc.Views.ActiveView
             else
-                let allviews = 
+                let allviews =
                     State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
                     |> Array.filter (fun v-> v.MainViewport.Name = view)
                 if allviews.Length = 1 then allviews.[0]
@@ -629,7 +629,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Page (or Layout) View Object from the name of the Layout.</summary>
     ///<param name="nameOrId">(string) Name of the Layout</param>
     ///<returns>a State.Doc.View object. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoercePageView (nameOrId:'T) : Display.RhinoPageView = 
+    static member CoercePageView (nameOrId:'T) : Display.RhinoPageView =
         match box nameOrId with
         | :? Guid as g ->
             let viewo = State.Doc.Views.Find(g)
@@ -652,7 +652,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Detail view rectangle Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of Detail object</param>
     ///<returns>a Geometry.DetailView. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceDetailView (objectId:Guid) : DetailView = 
+    static member CoerceDetailView (objectId:Guid) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  DetailView as a -> a
         | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %s"  (Nice.str objectId)
@@ -660,7 +660,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Detail view rectangle Object.</summary>
     ///<param name="objectId">(Guid) objectId of Detail object</param>
     ///<returns>a DocObjects.DetailViewObject. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject = 
+    static member CoerceDetailViewObject (objectId:Guid) : DocObjects.DetailViewObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.DetailViewObject as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailViewObject failed on %s"  (Nice.str objectId)
@@ -672,7 +672,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get TextDot Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of TextDot object</param>
     ///<returns>a Geometry.TextDot. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceTextDot (objectId:Guid) : TextDot = 
+    static member CoerceTextDot (objectId:Guid) : TextDot =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextDot as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextDot failed on: %s " (Nice.str objectId)
@@ -680,7 +680,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get TextEntity Geometry (for the text Object use rs.CoerceTextObject) .</summary>
     ///<param name="objectId">(Guid) objectId of TextEntity object</param>
     ///<returns>a Geometry.TextEntity. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceTextEntity (objectId:Guid) : TextEntity = 
+    static member CoerceTextEntity (objectId:Guid) : TextEntity =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  TextEntity as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextEntity failed on: %s " (Nice.str objectId)
@@ -689,7 +689,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino TextObject Annotation Object.</summary>
     ///<param name="objectId">(Guid) objectId of TextObject</param>
     ///<returns>(DocObjects.TextObject. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceTextObject (objectId:Guid) : DocObjects.TextObject = 
+    static member CoerceTextObject (objectId:Guid) : DocObjects.TextObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.TextObject as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceTextObject failed on: %s " (Nice.str objectId)
@@ -697,7 +697,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Hatch Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of Hatch object</param>
     ///<returns>a Geometry.CoerceHatch. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceHatch (objectId:Guid) : Hatch = 
+    static member CoerceHatch (objectId:Guid) : Hatch =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  Hatch as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatch failed on: %s " (Nice.str objectId)
@@ -706,7 +706,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Hatch Object.</summary>
     ///<param name="objectId">(Guid) objectId of Hatch object</param>
     ///<returns>(DocObjects.HatchObject. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceHatchObject (objectId:Guid) : DocObjects.HatchObject = 
+    static member CoerceHatchObject (objectId:Guid) : DocObjects.HatchObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.HatchObject as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceHatchObject failed on: %s " (Nice.str objectId)
@@ -714,7 +714,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Annotation Base Object.</summary>
     ///<param name="objectId">(Guid) objectId of annotation object</param>
     ///<returns>(DocObjects.AnnotationObjectBase. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceAnnotation (objectId:Guid) : DocObjects.AnnotationObjectBase = 
+    static member CoerceAnnotation (objectId:Guid) : DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (Nice.str objectId)
@@ -723,7 +723,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Leader Annotation Object.</summary>
     ///<param name="objectId">(Guid) objectId of Leader object</param>
     ///<returns>(DocObjects.LeaderObject. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceLeader (objectId:Guid) : DocObjects.LeaderObject = 
+    static member CoerceLeader (objectId:Guid) : DocObjects.LeaderObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LeaderObject as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (Nice.str objectId)
@@ -731,19 +731,19 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino LinearDimension Annotation Object.</summary>
     ///<param name="objectId">(Guid) objectId of LinearDimension object</param>
     ///<returns>(DocObjects.LinearDimensionObject. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceLinearDimension (objectId:Guid) : DocObjects.LinearDimensionObject = 
+    static member CoerceLinearDimension (objectId:Guid) : DocObjects.LinearDimensionObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LinearDimensionObject as a -> a
         | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (Nice.str objectId)
 
     //---------Geometry ------------
-    
+
 
     ///<summary>Converts input into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="pt">Input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     ///<returns>a Rhino.Geometry.Point3d, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member Coerce3dPoint(pt:'T) : Point3d = 
-        let inline  point3dOf3(x:^x, y:^y, z:^z) = 
+    static member Coerce3dPoint(pt:'T) : Point3d =
+        let inline  point3dOf3(x:^x, y:^y, z:^z) =
             try Point3d(float (x), float(y), float(z))
             with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPoint: Could not Coerce the 3 values %O, %O and %O to a Point3d" x y z
         let b = box pt
@@ -781,7 +781,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino Point Object.</summary>
     ///<param name="objectId">(Guid) objectId of Point object</param>
     ///<returns>a DocObjects.PointObject, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoercePointObject (objectId:Guid) : DocObjects.PointObject = 
+    static member CoercePointObject (objectId:Guid) : DocObjects.PointObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.PointObject as a -> a
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePointObject failed on: %s " (Nice.str objectId)
@@ -789,7 +789,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Convert input into a Rhino.Geometry.Point2d if possible.</summary>
     ///<param name="point">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     ///<returns>a Rhino.Geometry.Point2d, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member Coerce2dPoint(point:'T) : Point2d = 
+    static member Coerce2dPoint(point:'T) : Point2d =
         match box point with
         | :? Point2d    as point -> point
         | :? Point3d    as point -> Point2d(point.X, point.Y)
@@ -799,8 +799,8 @@ type RhinoScriptSyntax private () =
     ///<summary>Convert input into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="vec">input to convert, Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     ///<returns> a Rhino.Geometry.Vector3d, Raises a RhinoScriptingException if coerce failed.</returns>
-    static member Coerce3dVector(vec:'T) : Vector3d = 
-        let inline vecOf3(x:^x, y:^y, z:^z) = 
+    static member Coerce3dVector(vec:'T) : Vector3d =
+        let inline vecOf3(x:^x, y:^y, z:^z) =
             try Vector3d(float (x), float(y), float(z))
             with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dVector: Could not Coerce %O, %O and %O to Vector3d" x y z
         let b = box vec
@@ -837,7 +837,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Convert input into a Rhino.Geometry.Plane if possible.</summary>
     ///<param name="plane">Plane, point, list, tuple</param>
     ///<returns>(Rhino.Geometry.Plane. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoercePlane(plane:'T) : Plane = 
+    static member CoercePlane(plane:'T) : Plane =
         match box plane with
         | :? Plane  as plane -> plane
         | _ ->
@@ -852,7 +852,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
     ///<param name="xForm">object to convert</param>
     ///<returns>(Rhino.Geometry.Transform. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceXform(xForm:'T) : Transform = 
+    static member CoerceXform(xForm:'T) : Transform =
         match box xForm with
         | :? Transform  as xForm -> xForm
         | :? seq<seq<float>>  as xss -> // TODO verify row, column order !!
@@ -872,13 +872,13 @@ type RhinoScriptSyntax private () =
                     | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: Array2D %s can not be converted to a Transformation Matrix" (Nice.str xForm)
                 t
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceXform: could not CoerceXform %s can not be converted to a Transformation Matrix" (Nice.str xForm)
-    
+
 
 
     ///<summary>Attempt to get Surface geometry from the document with a given objectId.</summary>
     ///<param name="objectId">the object's Identifier</param>
     ///<returns>(Rhino.Geometry.Surface. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceNurbsSurface(objectId:Guid) : NurbsSurface = 
+    static member CoerceNurbsSurface(objectId:Guid) : NurbsSurface =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with
         | :? NurbsSurface as s -> s
         | :? Surface as c -> c.ToNurbsSurface()
@@ -892,17 +892,17 @@ type RhinoScriptSyntax private () =
     ///<summary>Attempt to get Rhino PointCloud Geometry.</summary>
     ///<param name="objectId">(Guid) objectId of PointCloud object</param>
     ///<returns>a Geometry.PointCloud. Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoercePointCloud (objectId:Guid) : PointCloud = 
+    static member CoercePointCloud (objectId:Guid) : PointCloud =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
         | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePointCloud failed on: %s " (Nice.str objectId)
-            
-    
+
+
     ///<summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
     ///<param name="color">string, tuple with  or 3 or 4 items</param>
     ///<returns>System.Drawing.Color in ARGB form (not as named color) this will provide better comparison to other colors.
     /// For example the named color Red is not equal to fromRGB(255, 0, 0). Raises a RhinoScriptingException if coerce failed.</returns>
-    static member CoerceColor(color:'T) : Drawing.Color = 
+    static member CoerceColor(color:'T) : Drawing.Color =
         match box color with
         | :? Drawing.Color  as c -> Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B) //https://stackoverflow.com/questions/20994753/compare-two-color-objects
         | :? (int*int*int) as rgb       ->
@@ -919,15 +919,15 @@ type RhinoScriptSyntax private () =
             if blue <0 || blue >255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green  %d alpha %d" red green blue alpha
             if alpha<0 || alpha >255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceColor: cannot create color form red %d, blue %d and green %d alpha %d" red green blue alpha
             Drawing.Color.FromArgb(alpha, red, green, blue)
-        | :? string  as s ->            
+        | :? string  as s ->
             try
                 let c = Drawing.ColorTranslator.FromHtml(s)
                 Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
-            with _ -> 
+            with _ ->
                 //try
                 //    let c = Drawing.Color.FromName(s) // for invalid names ( a hex string) this still returns named color black !!
                 //    Drawing.Color.FromArgb(int c.A, int c.R, int c.G, int c.B)// convert to unnamed color
-                //with _ -> 
+                //with _ ->
                     RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceColor:: could not Coerce %A to a Color" color
 
                 //     try Windows.Media.ColorConverter.ConvertFromString(s)
@@ -937,7 +937,7 @@ type RhinoScriptSyntax private () =
     //<summary>Attempt to get a Sequence of Guids from input</summary>
     //<param name="Ids">list of Guids</param>
     //<returns>Guid seq) Fails on bad input</returns>
-    //static member CoerceGuidList(Ids:'T) : seq<Guid> = 
+    //static member CoerceGuidList(Ids:'T) : seq<Guid> =
     //    match box Ids with
     //    | :? Guid  as g -> if Guid.Empty = g then fail() else [|g|] :> seq<Guid>
     //    | :? seq<obj> as gs ->
@@ -950,14 +950,14 @@ type RhinoScriptSyntax private () =
         //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
     //<param name="points">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     //<returns>(Rhino.Geometry.Point3d seq) Fails on bad input</returns>
-    //static member Coerce3dPointList(points:'T) : Point3d seq= 
+    //static member Coerce3dPointList(points:'T) : Point3d seq=
     //    try Seq.map RhinoScriptSyntax.Coerce3dPoint points //|> Seq.cache
     //    with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce3dPointList: could not Coerce: Could not convert %A to a list of 3d points"  points
 
     //<summary>Convert input into a Rhino.Geometry.Point3d sequence if possible</summary>
     //<param name="points">input to convert, list of , Point3d, Vector3d, Point3f, Vector3f, str, Guid, or seq</param>
     //<returns>(Rhino.Geometry.Point2d seq) Fails on bad input</returns>
-    //static member Coerce2dPointList(points:'T) : Point2d seq= 
+    //static member Coerce2dPointList(points:'T) : Point2d seq=
     //    try Seq.map RhinoScriptSyntax.Coerce2dPoint points //|> Seq.cache
     //    with _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.Coerce2dPointList: could not Coerce: Could not convert %A to a list of 2d points"  points
 
@@ -966,7 +966,7 @@ type RhinoScriptSyntax private () =
 
 
 
-    ///<summary>Add a new layer to the document. If it does not exist yet. 
+    ///<summary>Add a new layer to the document. If it does not exist yet.
     /// By default Ambiguous Unicode characters are not allowed in layer name. This can be changed via optional parameter.
     /// If layers or parent layers exist already color, visibility and locking parameters are ignored.</summary>
     ///<param name="name">(string) Optional, The name of the new layer. If omitted, Rhino automatically  generates the layer name.</param>
@@ -984,7 +984,7 @@ type RhinoScriptSyntax private () =
     ///<param name="parent">(string) Optional, Name of existing or non existing parent layer. </param>
     ///<param name="allowAllUnicode">(bool) Optional, Allow ambiguous Unicode characters too </param>
     ///<param name="collapseParents">(bool) Optional, Collapse parent layers in Layer UI </param>
-    ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer. 
+    ///<returns>(int) The index in the layer table. Do Doc.Layers.[i].FullPath to get the full name of the new layer.
     /// E.g. The function rs.Add can then take this layer index.</returns>
     static member AddLayer( [<OPT;DEF(null:string)>]name:string
                           , [<OPT;DEF(Drawing.Color())>]color:Drawing.Color
@@ -992,7 +992,7 @@ type RhinoScriptSyntax private () =
                           , [<OPT;DEF(2)>]locked:int
                           , [<OPT;DEF(null:string)>]parent:string
                           , [<OPT;DEF(false:bool)>]allowAllUnicode:bool
-                          , [<OPT;DEF(false:bool)>]collapseParents:bool) : int = 
+                          , [<OPT;DEF(false:bool)>]collapseParents:bool) : int =
 
         let col = if color.IsEmpty then UtilLayer.randomLayerColor else (fun () -> color)
         if notNull parent && isNull name then
@@ -1041,11 +1041,11 @@ type RhinoScriptSyntax private () =
                              ,[<OPT;DEF(false:bool)>]allowAllUnicode:bool
                              ,[<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //SET
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let layerIndex = 
+        let layerIndex =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowAllUnicode,collapseParents).Index
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore 
+        obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
@@ -1060,13 +1060,13 @@ type RhinoScriptSyntax private () =
                              , [<OPT;DEF(false)>]createLayerIfMissing:bool
                              , [<OPT;DEF(false:bool)>]allowUnicode:bool
                              , [<OPT;DEF(false:bool)>]collapseParents:bool) : unit = //MULTISET
-        let layerIndex = 
+        let layerIndex =
             if createLayerIfMissing then  UtilLayer.getOrCreateLayer(layer, UtilLayer.randomLayerColor, UtilLayer.ByParent, UtilLayer.ByParent, allowUnicode, collapseParents).Index
             else                          RhinoScriptSyntax.CoerceLayer(layer).Index
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore 
+            obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of an object.</summary>
@@ -1078,20 +1078,20 @@ type RhinoScriptSyntax private () =
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on: %s " layerIndex State.Doc.Layers.Count (Nice.str objectId)
         if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on: %s " layerIndex  (Nice.str objectId)
         obj.Attributes.LayerIndex <- layerIndex
-        obj.CommitChanges() |> ignore 
+        obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the layer of multiple objects, optionally creates layer if it does not exist yet.</summary>
-    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param> 
+    ///<param name="objectIds">(Guid seq) The identifiers of the objects</param>
     ///<param name="layerIndex">(int) Index of layer in layer table</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayer(objectIds:Guid seq, layerIndex:int) : unit = //MULTISET
         if layerIndex < 0 || layerIndex >= State.Doc.Layers.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed. bad index '%d' (max %d) on %d objects " layerIndex State.Doc.Layers.Count (Seq.length objectIds)
-        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)                                
+        if State.Doc.Layers.[layerIndex].IsDeleted then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayer: Setting it via index failed.  index '%d' is deleted.  on %d objects" layerIndex  (Seq.length objectIds)
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             obj.Attributes.LayerIndex <- layerIndex
-            obj.CommitChanges() |> ignore 
+            obj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Changes the Name of a layer if than name is yet non existing. Fails if layer exists already. Currently only ASCII characters are allowed.</summary>
@@ -1101,7 +1101,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member ChangeLayerName( currentLayerName:string
                                  , newLayerName:string
-                                 , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit = 
+                                 , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
@@ -1141,7 +1141,7 @@ type RhinoScriptSyntax private () =
     ///    empty.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteLayer(layer:string) : bool = 
+    static member DeleteLayer(layer:string) : bool =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteLayer: could not FindByFullPath Layer from name'%s'" layer
         State.Doc.Layers.Delete(i, quiet=true)
@@ -1152,7 +1152,7 @@ type RhinoScriptSyntax private () =
     ///<param name="layer">(string) Name of the layer to expand</param>
     ///<param name="expand">(bool) True to expand, False to collapse</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ExpandLayer(layer:string, expand:bool) : unit = 
+    static member ExpandLayer(layer:string, expand:bool) : unit =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ExpandLayer: could not FindByFullPath Layer from name'%s'" layer
         let layer = State.Doc.Layers.[i]
@@ -1164,7 +1164,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies the existence of a layer in the document.</summary>
     ///<param name="layer">(string) The name of a layer to search for</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayer(layer:string) : bool = 
+    static member IsLayer(layer:string) : bool =
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         i <> RhinoMath.UnsetIntIndex
 
@@ -1172,7 +1172,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if the objects on a layer can be changed (normal).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerChangeable(layer:string) : bool = 
+    static member IsLayerChangeable(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsVisible && not layer.IsLocked
         rc
@@ -1182,7 +1182,7 @@ type RhinoScriptSyntax private () =
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerChildOf(layer:string, test:string) : bool = 
+    static member IsLayerChildOf(layer:string, test:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let test = RhinoScriptSyntax.CoerceLayer(test)
         test.IsChildOf(layer)
@@ -1191,7 +1191,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a layer is the current layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerCurrent(layer:string) : bool = 
+    static member IsLayerCurrent(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.Index = State.Doc.Layers.CurrentLayerIndex
 
@@ -1199,7 +1199,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an existing layer is empty, or contains no objects.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerEmpty(layer:string) : bool = 
+    static member IsLayerEmpty(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rhobjs = State.Doc.Objects.FindByLayer(layer)
         isNull rhobjs || rhobjs.Length = 0
@@ -1209,7 +1209,7 @@ type RhinoScriptSyntax private () =
     ///    Rhino's layer dialog.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerExpanded(layer:string) : bool = 
+    static member IsLayerExpanded(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsExpanded
 
@@ -1219,7 +1219,7 @@ type RhinoScriptSyntax private () =
     /// via layer.IsLocked.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerLocked(layer:string) : bool = 
+    static member IsLayerLocked(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsLocked
 
@@ -1227,7 +1227,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a layer is on.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerOn(layer:string) : bool = 
+    static member IsLayerOn(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible
 
@@ -1235,7 +1235,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an existing layer is selectable (normal and reference).</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerSelectable(layer:string) : bool = 
+    static member IsLayerSelectable(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible && not layer.IsLocked
 
@@ -1244,7 +1244,7 @@ type RhinoScriptSyntax private () =
     ///<param name="layer">(string) The name of the layer to test against</param>
     ///<param name="test">(string) The name to the layer to test</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerParentOf(layer:string, test:string) : bool = 
+    static member IsLayerParentOf(layer:string, test:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let test = RhinoScriptSyntax.CoerceLayer(test)
         test.IsParentOf(layer)
@@ -1253,7 +1253,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a layer is from a reference file.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerReference(layer:string) : bool = 
+    static member IsLayerReference(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsReference
 
@@ -1261,7 +1261,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a layer is visible.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(bool) True on success, otherwise False.</returns>
-    static member IsLayerVisible(layer:string) : bool = 
+    static member IsLayerVisible(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.IsVisible
 
@@ -1269,7 +1269,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the number of immediate child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(int) The number of immediate child layers.</returns>
-    static member LayerChildCount(layer:string) : int = 
+    static member LayerChildCount(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
         if notNull children then children.Length
@@ -1279,7 +1279,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the immediate child layers of a layer. ( excluding children of children) </summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
-    static member LayerChildren(layer:string) : string Rarr = 
+    static member LayerChildren(layer:string) : string Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
         if notNull children then rarr {for child in children do child.FullPath }
@@ -1288,8 +1288,8 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns all (immediate and descendent) child and grand child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
     ///<returns>(string Rarr) List of children layer names.</returns>
-    static member LayerChildrenAll(layer:string) : string Rarr = 
-        let rec loop (l:DocObjects.Layer) = 
+    static member LayerChildrenAll(layer:string) : string Rarr =
+        let rec loop (l:DocObjects.Layer) =
             seq{
                 let children = l.GetChildren()
                 if notNull children then
@@ -1321,13 +1321,13 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the number of layers in the document.</summary>
     ///<returns>(int) The number of layers in the document.</returns>
-    static member LayerCount() : int = 
+    static member LayerCount() : int =
         State.Doc.Layers.ActiveCount
 
 
     ///<summary>Return identifiers of all layers in the document.</summary>
     ///<returns>(Guid Rarr) The identifiers of all layers in the document.</returns>
-    static member LayerIds() : Guid Rarr = 
+    static member LayerIds() : Guid Rarr =
         rarr {for layer in State.Doc.Layers do
                         if not layer.IsDeleted then
                             layer.Id }
@@ -1374,7 +1374,7 @@ type RhinoScriptSyntax private () =
     ///<param name="forceVisible">(bool) Optional, default value: <c>true</c>
     ///     Turn on parent layers too if needed. True by default</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit = 
+    static member LayerVisibleSetTrue(layer:string, [<OPT;DEF(true)>]forceVisible:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.visibleSetTrue(lay,forceVisible)
         State.Doc.Views.Redraw()
@@ -1385,7 +1385,7 @@ type RhinoScriptSyntax private () =
     ///     Turn layer persistently off? even if it is already invisible because of a parent layer that is turned off.
     ///     By default already invisible layers are not changed</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit = 
+    static member LayerVisibleSetFalse(layer:string,  [<OPT;DEF(false)>]persist:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.visibleSetFalse(lay,persist)
         State.Doc.Views.Redraw()
@@ -1414,7 +1414,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Turn a layer off if visible, does nothing if parent layer is already invisible. .</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerOff(layer:string) : unit = 
+    static member LayerOff(layer:string) : unit =
         RhinoScriptSyntax.LayerVisibleSetFalse(layer, persist=false)
 
     ///<summary>Turn a layer on if not  visible , enforces visibility  of parents.</summary>
@@ -1427,7 +1427,7 @@ type RhinoScriptSyntax private () =
     ///  if layer is unlocked but parent layer is locked this still returns true.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(bool) The current layer visibility.</returns>
-    static member LayerLocked(layer:string) : bool = 
+    static member LayerLocked(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = layer.IsLocked //not same as // https://github.com/mcneel/rhinoscriptsyntax/pull/193 // TODO ??
         rc
@@ -1437,7 +1437,7 @@ type RhinoScriptSyntax private () =
     ///<param name="forceLocked">(bool) Optional, default value: <c>false</c>
     ///     Lock layer even if it is already locked via a parent layer</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit = 
+    static member LayerLockedSetTrue(layer:string, [<OPT;DEF(false)>]forceLocked:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.lockedSetTrue(lay,forceLocked)
         State.Doc.Views.Redraw()
@@ -1447,7 +1447,7 @@ type RhinoScriptSyntax private () =
     ///<param name="parentsToo">(bool) Optional, default value: <c>true</c>
     ///     Unlock parent layers to if needed</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit = 
+    static member LayerLockedSetFalse(layer:string,  [<OPT;DEF(true)>]parentsToo:bool) : unit =
         let lay = RhinoScriptSyntax.CoerceLayer(layer)
         UtilLayer.lockedSetFalse(lay,parentsToo)
         State.Doc.Views.Redraw()
@@ -1456,7 +1456,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Unlocks a layer and all parents if needed .</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerUnlock(layer:string) : unit = 
+    static member LayerUnlock(layer:string) : unit =
         RhinoScriptSyntax.LayerLockedSetFalse(layer, parentsToo=true)
 
     ///<summary>Locks a layer if it is not already locked via a parent.</summary>
@@ -1510,7 +1510,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the identifier of a layer given the layer's name.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(Guid) The layer's identifier.</returns>
-    static member LayerId(layer:string) : Guid = 
+    static member LayerId(layer:string) : Guid =
         let idx = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if idx = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerId not found for name %s" layer
         State.Doc.Layers.[idx].Id
@@ -1522,7 +1522,7 @@ type RhinoScriptSyntax private () =
     ///<param name="fullPath">(bool) Optional, default value: <c>true</c>
     ///    Return the full path name `True` or short name `False`</param>
     ///<returns>(string) The layer's name.</returns>
-    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullPath:bool) : string = 
+    static member LayerName(layerId:Guid, [<OPT;DEF(true)>]fullPath:bool) : string =
         let layer = RhinoScriptSyntax.CoerceLayer(layerId)
         if fullPath then layer.FullPath
         else layer.Name
@@ -1530,7 +1530,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the names of all layers in the document.</summary>
     ///<returns>(string Rarr) list of layer names.</returns>
-    static member LayerNames() : string Rarr = 
+    static member LayerNames() : string Rarr =
         let rc = Rarr()
         for layer in State.Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
@@ -1542,7 +1542,7 @@ type RhinoScriptSyntax private () =
     ///    layer dialog filter does not allow the layer to appear in the layer list.</summary>
     ///<param name="layer">(string) Name of existing layer</param>
     ///<returns>(int) zero based index of layer.</returns>
-    static member LayerOrder(layer:string) : int = 
+    static member LayerOrder(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         layer.SortIndex
 
@@ -1620,12 +1620,12 @@ type RhinoScriptSyntax private () =
             layer.ParentLayerId <- parent.Id
 
 
-    ///<summary>Removes an existing layer and all its objects from the document. 
-    /// The layer will be removed even if it contains geometry objects. 
+    ///<summary>Removes an existing layer and all its objects from the document.
+    /// The layer will be removed even if it contains geometry objects.
     /// The layer to be removed cannot be the current layer.</summary>
     ///<param name="layer">(string) The name of an existing empty layer</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member PurgeLayer(layer:string) : bool = 
+    static member PurgeLayer(layer:string) : bool =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let rc = State.Doc.Layers.Purge( layer.Index, quiet=true)
         State.Doc.Views.Redraw()
@@ -1636,11 +1636,11 @@ type RhinoScriptSyntax private () =
     ///    'true' to keep the current Layer even if empty
     ///    'false' to remove current layer too if its empty. Any other non empty layer might be the new current</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit = 
+    static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit =
         let taken=Hashset()
         let Layers = State.Doc.Layers
         let mutable nonEmptyIndex = -1
-        let rec addLoop(g:Guid)= 
+        let rec addLoop(g:Guid)=
             if g <> Guid.Empty then
                 taken.Add(g)|> ignore
                 addLoop (Layers.FindId(g).ParentLayerId) // recurse
@@ -1661,16 +1661,16 @@ type RhinoScriptSyntax private () =
         elif taken.Count > 0  && taken.DoesNotContain c && nonEmptyIndex > -1 then
             // change current layer to a non empty one:
             Layers.SetCurrentLayerIndex(nonEmptyIndex, quiet=true ) |> ignore
-        
+
         // now delete them all
         for i = Layers.Count - 1 downto 0 do
             let l = Layers.[i]
             if not l.IsDeleted then
                 if taken.DoesNotContain (l.Id) then
-                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents                    
-                    //if i <> Layers.CurrentLayerIndex then 
+                    Layers.Delete(i, quiet=true) |> ignore // more than one layer might fail to delete if current layer is nested in parents
+                    //if i <> Layers.CurrentLayerIndex then
                     //    if not <| Layers.Delete(i, quiet=true) then
-                    //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then 
+                    //        //if Layers |> Seq.filter ( fun l -> not l.IsDeleted) |> Seq.length > 1 then
                     //        RhinoScriptingException.Raise "RhinoScriptSyntax.PurgeEmptyLayers: failed to delete layer '%s' " l.FullPath // the last layer can't be deleted so don't raise exception
         State.Doc.Views.Redraw()
 
@@ -1679,7 +1679,7 @@ type RhinoScriptSyntax private () =
     ///<param name="oldname">(string) Original layer name</param>
     ///<param name="newname">(string) New layer name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameLayer(oldname:string, newname:string) : unit = 
+    static member RenameLayer(oldname:string, newname:string) : unit =
         if oldname <> newname then
             let layer = RhinoScriptSyntax.CoerceLayer(oldname)
             layer.Name <- newname // TODO test with bad chars in layer string
@@ -1688,55 +1688,54 @@ type RhinoScriptSyntax private () =
     ///<param name="layerName">(string) full or short layer name</param>
     ///<param name="childrenToo">(bool) Optional, default value: <c>false</c>
     ///    'true' to collapse any child layers too.
-    ///    'false' to not change the parents layers collapse state.(default)</param>   
+    ///    'false' to not change the parents layers collapse state.(default)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member CollapseLayer(layerName:string, [<OPT;DEF(false)>]childrenToo:bool) : unit = 
+    static member CollapseLayer(layerName:string, [<OPT;DEF(false)>]childrenToo:bool) : unit =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if childrenToo then
-            let rec collapse (l:DocObjects.Layer) = 
-                if l.IsExpanded then 
+            let rec collapse (l:DocObjects.Layer) =
+                if l.IsExpanded then
                     l.IsExpanded <- false
                 for child in l.GetChildren() do
                     collapse child
             collapse layer
         else
-            if layer.IsExpanded then 
+            if layer.IsExpanded then
                 layer.IsExpanded <- false
-    
+
     ///<summary>Expand a layer in UI if it has children. This is the opposite of rs.CollapseLayer(..) </summary>
-    ///<param name="layerName">(string) full or short layer name</param>   
+    ///<param name="layerName">(string) full or short layer name</param>
     ///<param name="childrenToo">(bool) Optional, default value: <c>false</c>
     ///    'true' to expand any child layers too.
-    ///    'false' to not change the child layers collapse state.(default)</param>  
+    ///    'false' to not change the child layers collapse state.(default)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnCollapseLayer(layerName:string,[<OPT;DEF(false)>]childrenToo:bool) : unit = 
+    static member UnCollapseLayer(layerName:string,[<OPT;DEF(false)>]childrenToo:bool) : unit =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if childrenToo then
-            let rec expand (l:DocObjects.Layer) = 
-                if not l.IsExpanded then 
+            let rec expand (l:DocObjects.Layer) =
+                if not l.IsExpanded then
                     l.IsExpanded <- true
                 for child in l.GetChildren() do
-                    expand child                   
+                    expand child
             expand layer
         else
-            if layer.IsExpanded then 
+            if layer.IsExpanded then
                 layer.IsExpanded <- false
-    
+
     ///<summary>Expand all parent layers in UI if this layer is hidden by a collapsed parent layer.</summary>
-    ///<param name="layerName">(string) full or short layer name</param>  
+    ///<param name="layerName">(string) full or short layer name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ShowLayer(layerName:string) : unit =         
-        let rec expand (l:DocObjects.Layer) = 
-            if not l.IsExpanded then 
+    static member ShowLayer(layerName:string) : unit =
+        let rec expand (l:DocObjects.Layer) =
+            if not l.IsExpanded then
                 l.IsExpanded <- true
             if l.ParentLayerId <> Guid.Empty then
-                expand <| State.Doc.Layers.FindId(l.ParentLayerId)                    
-        
-        let layer = RhinoScriptSyntax.CoerceLayer(layerName) 
+                expand <| State.Doc.Layers.FindId(l.ParentLayerId)
+
+        let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         if layer.ParentLayerId <> Guid.Empty then
-            expand <| State.Doc.Layers.FindId(layer.ParentLayerId)         
-        
-        
+            expand <| State.Doc.Layers.FindId(layer.ParentLayerId)
+
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -1748,7 +1747,7 @@ type RhinoScriptSyntax private () =
     ///<param name="macro">(string) The macro to run when the alias is executed</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member AddAlias( alias:string,
-                            macro:string) : bool = 
+                            macro:string) : bool =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.Add(alias, macro))
 
@@ -1761,14 +1760,14 @@ type RhinoScriptSyntax private () =
     ///<returns>(int) The index where the item was inserted.
     ///    -1 on failure.</returns>
     static member AddSearchPath(    folder:string,
-                                    [<OPT;DEF(-1)>]index:int) : int = 
+                                    [<OPT;DEF(-1)>]index:int) : int =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.FileSettings.AddSearchPath(folder, index))
 
 
     ///<summary>Returns number of command aliases in Rhino.</summary>
     ///<returns>(int) The number of command aliases in Rhino.</returns>
-    static member AliasCount() : int = 
+    static member AliasCount() : int =
         ApplicationSettings.CommandAliasList.Count
 
 
@@ -1790,7 +1789,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns a array of command alias names.</summary>
     ///<returns>(string array) a array of command alias names.</returns>
-    static member AliasNames() : array<string> = 
+    static member AliasNames() : array<string> =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.CommandAliasList.GetNames())
 
@@ -1912,14 +1911,14 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the build date of Rhino.</summary>
     ///<returns>(DateTime) The build date of Rhino. Will be converted to a string by most functions.</returns>
-    static member BuildDate() : DateTime = 
+    static member BuildDate() : DateTime =
         RhinoApp.BuildDate
 
 
     ///<summary>Clears contents of Rhino's command history window. You can view the
     ///    command history window by using the CommandHistory command in Rhino.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member ClearCommandHistory() : unit = 
+    static member ClearCommandHistory() : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.ClearCommandHistoryWindow())
 
@@ -1945,34 +1944,34 @@ type RhinoScriptSyntax private () =
     ///        rs.Command("! _Line _Pause _Pause")
     ///      CORRECT:
     ///        rs.Command("_Line _Pause _Pause")
-    ///    In a normal command, when the user enters a command beginning with a '!' , the command exits. 
+    ///    In a normal command, when the user enters a command beginning with a '!' , the command exits.
     ///    There is no documented way to get this behavior from within a script command.
     ///
     ///    After the command script has run, you can obtain the identifiers of most
-    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().    
+    ///    recently created or changed object by calling RhinoScriptSyntax.LastCreatedObjects().
     ///
     ///    Warnings:
     ///    This kind of command can be very dangerous. Please be sure you understand the following:
-    ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript() 
+    ///    If you are not very familiar with how references work, you should only call Rhino.RhinoApp.RunScript()
     ///     from within a RhinoScriptCommand derived command.
     ///    If you are very familiar with references, then please observe the following rules:
-    ///    If you get a reference or pointer to any part of the Rhino run-time database, this reference or pointer 
+    ///    If you get a reference or pointer to any part of the Rhino run-time database, this reference or pointer
     ///    will not be valid after you call Rhino.RhinoApp.RunScript().
-    ///    If you get a reference or a pointer, then call Rhino.RhinoApp.RunScript(), and then use the reference, 
+    ///    If you get a reference or a pointer, then call Rhino.RhinoApp.RunScript(), and then use the reference,
     ///    Rhino will probably crash.
-    ///    All pointers and references used by the command should be scoped such that they are only valid for the 
+    ///    All pointers and references used by the command should be scoped such that they are only valid for the
     ///    time between calls to Rhino.RhinoApp.RunScript().
-    ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database. 
-    ///    The result is that all pointers and references become invalid. 
-    ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.  
+    ///    This is because Rhino.RhinoApp.RunScript() can change the dynamic arrays in the run-time database.
+    ///    The result is that all pointers and references become invalid.
+    ///    Be sure to scope your variables between Rhino.RhinoApp.RunScript() calls.
     ///    Never allow references and pointers from one section to be used in another section.</summary>
     ///<param name="commandString">(string) A Rhino command including any arguments</param>
     ///<param name="echo">(bool) Optional, default value: <c>true</c>
-    ///    The default command echo mode <c>true</c> will display the commands on the commandline. 
+    ///    The default command echo mode <c>true</c> will display the commands on the commandline.
     ///    If the command echo mode is set to <c>false</c> the command prompts will not be printed to the Rhino command line.</param>
-    ///<returns>(bool) True or False indicating success or failure.</returns>    
-    static member Command (commandString:string, [<OPT;DEF(true)>]echo:bool) : bool = 
-        RhinoSync.DoSync (fun () ->            
+    ///<returns>(bool) True or False indicating success or failure.</returns>
+    static member Command (commandString:string, [<OPT;DEF(true)>]echo:bool) : bool =
+        RhinoSync.DoSync (fun () ->
             let start = DocObjects.RhinoObject.NextRuntimeSerialNumber
             // RhinoApp.RunScript:
             // Rhino acts as if each character in the script string had been typed in the command prompt.
@@ -1984,13 +1983,13 @@ type RhinoScriptSyntax private () =
             let ende = DocObjects.RhinoObject.NextRuntimeSerialNumber
             State.CommandSerialNumbers <- None
             if start<>ende then  State.CommandSerialNumbers <- Some(start, ende)
-            rc 
+            rc
             )
-        
+
 
     ///<summary>Returns the contents of Rhino's command history window.</summary>
     ///<returns>(string) The contents of Rhino's command history window.</returns>
-    static member CommandHistory() : string = 
+    static member CommandHistory() : string =
         RhinoSync.DoSync (fun () ->
             RhinoApp.CommandHistoryWindowText)
 
@@ -2015,7 +2014,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Delete an existing alias from Rhino.</summary>
     ///<param name="alias">(string) The name of an existing alias</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteAlias(alias:string) : bool = 
+    static member DeleteAlias(alias:string) : bool =
         ApplicationSettings.CommandAliasList.Delete(alias)
 
 
@@ -2024,7 +2023,7 @@ type RhinoScriptSyntax private () =
     ///    contents of the files tab.</summary>
     ///<param name="folder">(string) A folder to remove</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteSearchPath(folder:string) : bool = 
+    static member DeleteSearchPath(folder:string) : bool =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.FileSettings.DeleteSearchPath(folder))
 
@@ -2032,7 +2031,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Enables/disables OLE Server Busy/Not Responding dialog boxes.</summary>
     ///<param name="enable">(bool) Whether alerts should be visible (True or False)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DisplayOleAlerts(enable:bool) : unit = 
+    static member DisplayOleAlerts(enable:bool) : unit =
         RhinoSync.DoSync (fun () ->
             Rhino.Runtime.HostUtils.DisplayOleAlerts( enable )
             )
@@ -2076,7 +2075,7 @@ type RhinoScriptSyntax private () =
     ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    The autosave state. If omitted automatic saving is enabled (True)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit = 
+    static member EnableAutosave([<OPT;DEF(true)>]enable:bool) : unit =
         RhinoSync.DoSync (fun () ->
             ApplicationSettings.FileSettings.AutoSaveEnabled <- enable)
 
@@ -2108,31 +2107,31 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the full path to Rhino's executable folder.</summary>
     ///<returns>(string) The full path to Rhino's executable folder.</returns>
-    static member ExeFolder() : string = 
+    static member ExeFolder() : string =
         ApplicationSettings.FileSettings.ExecutableFolder
 
 
     ///<summary>Returns the platform of the Rhino executable , calls System.Environment.Is64BitProcess.</summary>
     ///<returns>(int) 1 for 64 bit, 0 for 32 bit.</returns>
-    static member ExePlatform() : int = 
+    static member ExePlatform() : int =
         if System.Environment.Is64BitProcess then  1 else  0
 
 
     ///<summary>Returns the service release number of the Rhino executable.</summary>
     ///<returns>(int) The service release number of the Rhino executable.</returns>
-    static member ExeServiceRelease() : int = 
+    static member ExeServiceRelease() : int =
         RhinoApp.ExeServiceRelease
 
 
     ///<summary>Returns the major version number of the Rhino executable.</summary>
     ///<returns>(int) The major version number of the Rhino executable.</returns>
-    static member ExeVersion() : int = 
+    static member ExeVersion() : int =
         RhinoApp.ExeVersion
 
 
     ///<summary>Closes the Rhino application.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member Exit() : unit = 
+    static member Exit() : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.Exit())
 
@@ -2143,7 +2142,7 @@ type RhinoScriptSyntax private () =
     ///      3. Rhino's System folders.</summary>
     ///<param name="filename">(string) A short file name to search for</param>
     ///<returns>(string) a full path.</returns>
-    static member FindFile(filename:string) : string = 
+    static member FindFile(filename:string) : string =
         ApplicationSettings.FileSettings.FindFile(filename)
 
 
@@ -2153,7 +2152,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plugIn">(string) The name of a registered plug-in that supports scripting.
     ///    If the plug-in is registered but not loaded, it will be loaded</param>
     ///<returns>(object) a scriptable plugin object.</returns>
-    static member GetPlugInObject(plugIn:string) : obj = 
+    static member GetPlugInObject(plugIn:string) : obj =
         RhinoApp.GetPlugInObject(plugIn)
 
 
@@ -2161,12 +2160,12 @@ type RhinoScriptSyntax private () =
     ///    for transparent commands (commands run from inside of other commands), this
     ///    method returns the total number of active commands.</summary>
     ///<returns>(int) The number of active commands.</returns>
-    static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int = 
+    static member InCommand() : int = // [<OPT;DEF(true)>]ignoreRunners:bool) : int =
         //<param name="ignoreRunners">(bool) Optional, default value: <c>true</c>
         //If True, script running commands, such as
         //  LoadScript, RunScript, and ReadCommandFile will not counted.
         //  If omitted the default is not to count script running command (True)</param>
-        //let inCommand (ignoreRunners:bool) :int = 
+        //let inCommand (ignoreRunners:bool) :int =
         //<param name="ignoreRunners">ignoreRunners If True, script running commands, such as
         //        LoadScript, RunScript, and ReadCommandFile will not counted.
         //        If omitted the default is not to count script running command (True)</param>
@@ -2177,14 +2176,14 @@ type RhinoScriptSyntax private () =
 
     ///<summary>The full path to Rhino's installation folder.</summary>
     ///<returns>(string) The full path to Rhino's installation folder.</returns>
-    static member InstallFolder() : string = 
+    static member InstallFolder() : string =
         ApplicationSettings.FileSettings.InstallFolder.FullName
 
 
     ///<summary>Checks if a command alias exists in Rhino.</summary>
     ///<param name="alias">(string) The name of an existing command alias</param>
     ///<returns>(bool) True if exists or False if the alias does not exist.</returns>
-    static member IsAlias(alias:string) : bool = 
+    static member IsAlias(alias:string) : bool =
         ApplicationSettings.CommandAliasList.IsAlias(alias)
 
 
@@ -2192,14 +2191,14 @@ type RhinoScriptSyntax private () =
     ///    found in 3rd party plug-ins.</summary>
     ///<param name="commandName">(string) The command name to test</param>
     ///<returns>(bool) True if the string is a command or False if it is not a command.</returns>
-    static member IsCommand(commandName:string) : bool = 
+    static member IsCommand(commandName:string) : bool =
         Commands.Command.IsCommand(commandName)
 
 
     ///<summary>Checks if a plug-in is registered.</summary>
     ///<param name="plugin">(string) The unique objectId of the plug-in</param>
     ///<returns>(bool) True if the Guid is registered or False if it is not.</returns>
-    static member IsPlugIn(plugin:string) : bool = 
+    static member IsPlugIn(plugin:string) : bool =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId = Guid.Empty then false
         else
@@ -2209,13 +2208,13 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns True if this script is being executed on a Windows platform.</summary>
     ///<returns>(bool) True if currently running on the Widows platform. False if it is not Windows.</returns>
-    static member IsRunningOnWindows() : bool = 
+    static member IsRunningOnWindows() : bool =
         Rhino.Runtime.HostUtils.RunningOnWindows
 
 
     ///<summary>Returns the name of the last executed command.</summary>
     ///<returns>(string) The name of the last executed command.</returns>
-    static member LastCommandName() : string = 
+    static member LastCommandName() : string =
         let mutable objectId = Commands.Command.LastCommandId
         Commands.Command.LookupCommandName(objectId, englishName=true)
 
@@ -2227,7 +2226,7 @@ type RhinoScriptSyntax private () =
     ///    2 = nothing (command did nothing, but was not cancelled)
     ///    3 = failure (command failed due to bad input, computational problem...)
     ///    4 = unknown command (the command was not found).</returns>
-    static member LastCommandResult() : int = 
+    static member LastCommandResult() : int =
         RhinoSync.DoSync (fun () ->
             int(Commands.Command.LastCommandResult))
 
@@ -2244,7 +2243,7 @@ type RhinoScriptSyntax private () =
     ///    1041  Japanese
     ///    1042  Korean
     ///    1045  Polish.</returns>
-    static member LocaleID() : int = 
+    static member LocaleID() : int =
         ApplicationSettings.AppearanceSettings.LanguageIdentifier
 
 
@@ -2348,7 +2347,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the identifier of a plug-in given the plug-in name.</summary>
     ///<param name="plugin">(string) The name  of the plug-in</param>
     ///<returns>(Guid) The  Unique Guid of the plug-in.</returns>
-    static member PlugInId(plugin:string) : Guid = 
+    static member PlugInId(plugin:string) : Guid =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId<>Guid.Empty then  objectId
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PlugInId: Plugin %s not found" plugin
@@ -2369,7 +2368,7 @@ type RhinoScriptSyntax private () =
     /// 1 = loaded,
     /// 2 = unloaded. If omitted both status is returned</param>
     ///<returns>(string array) array of registered Rhino plug-ins.</returns>
-    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> = 
+    static member PlugIns([<OPT;DEF(0)>]types:int, [<OPT;DEF(0)>]status:int) : array<string> =
         let mutable filter = Rhino.PlugIns.PlugInType.Any
         if types = 1 then  filter <- Rhino.PlugIns.PlugInType.Render
         if types = 2 then  filter <- Rhino.PlugIns.PlugInType.FileExport
@@ -2397,36 +2396,36 @@ type RhinoScriptSyntax private () =
     ///<summary>Change Rhino's command window prompt.</summary>
     ///<param name="message">(string) The new prompt on the commandline</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member Prompt(message:string) : unit = 
+    static member Prompt(message:string) : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SetCommandPrompt(message))
 
-    
+
 
     ///<summary>Returns current width and height, of the screen of the primary monitor.</summary>
     ///<returns>(int * int) containing two numbers identifying the width and height in pixels.</returns>
-    static member ScreenSize() : int * int = 
+    static member ScreenSize() : int * int =
         let sz = System.Windows.Forms.Screen.PrimaryScreen.Bounds //  TODO: Windows Forms is supported on Mono Mac??  compile separate Assembly for Windows ???
         sz.Width, sz.Height
 
 
     ///<summary>Returns version of the Rhino SDK supported by the executing Rhino.</summary>
     ///<returns>(int) The version of the Rhino SDK supported by the executing Rhino. Rhino SDK versions are 9 digit numbers in the form of YYYYMMDDn.</returns>
-    static member SdkVersion() : int = 
+    static member SdkVersion() : int =
         RhinoApp.SdkVersion
 
 
     ///<summary>Returns the number of path items in Rhino's search path list.
     ///    See "Options Files settings" in the Rhino help file for more details.</summary>
     ///<returns>(int) The number of path items in Rhino's search path list.</returns>
-    static member SearchPathCount() : int = 
+    static member SearchPathCount() : int =
         ApplicationSettings.FileSettings.SearchPathCount
 
 
     ///<summary>Returns all of the path items in Rhino's search path list.
     ///    See "Options Files settings" in the Rhino help file for more details.</summary>
     ///<returns>(string array) list of search paths.</returns>
-    static member SearchPathList() : array<string> = 
+    static member SearchPathList() : array<string> =
         ApplicationSettings.FileSettings.GetSearchPaths()
 
 
@@ -2435,7 +2434,7 @@ type RhinoScriptSyntax private () =
     ///<param name="addReturn">(bool) Optional, default value: <c>true</c>
     ///    Append a return character to the end of the string. If omitted an return character will be added (True)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit = 
+    static member SendKeystrokes(keys:string, [<OPT;DEF(true)>]addReturn:bool) : unit =
         RhinoSync.DoSync (fun () ->
             RhinoApp.SendKeystrokes(keys, addReturn))
 
@@ -2455,7 +2454,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Sets Rhino's status bar distance pane.</summary>
     ///<param name="distance">(float) The distance to set the status bar</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarDistance(distance:float) : unit = 
+    static member StatusBarDistance(distance:float) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetDistancePane(distance))
 
@@ -2463,7 +2462,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Sets Rhino's status bar message pane.</summary>
     ///<param name="message">(string) The message to display</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarMessage(message:string) : unit = 
+    static member StatusBarMessage(message:string) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetMessagePane(message))
 
@@ -2471,7 +2470,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Sets Rhino's status bar point coordinate pane.</summary>
     ///<param name="point">(Point3d) The 3d coordinates of the status bar</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarPoint(point:Point3d) : unit = 
+    static member StatusBarPoint(point:Point3d) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.SetPointPane(point))
 
@@ -2486,7 +2485,7 @@ type RhinoScriptSyntax private () =
     ///<param name="showPercent">(bool) Optional, default value: <c>true</c>
     ///    Show the percent complete if True</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool = 
+    static member StatusBarProgressMeterShow(label:string, lower:int, upper:int, [<OPT;DEF(true)>]embedLabel:bool, [<OPT;DEF(true)>]showPercent:bool) : bool =
         RhinoSync.DoSync (fun () ->
             let mutable rc = UI.StatusBar.ShowProgressMeter(lower, upper, label, embedLabel, showPercent)
             rc = 1)
@@ -2497,7 +2496,7 @@ type RhinoScriptSyntax private () =
     ///<param name="absolute">(bool) Optional, default value: <c>true</c>
     ///    The position is set absolute (True) or relative (False) to its current position. If omitted the absolute (True) is used</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit = 
+    static member StatusBarProgressMeterUpdate(position:int, [<OPT;DEF(true)>]absolute:bool) : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.UpdateProgressMeter(position, absolute)
             |> ignore)
@@ -2505,7 +2504,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Hide the progress meter.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member StatusBarProgressMeterHide() : unit = 
+    static member StatusBarProgressMeterHide() : unit =
         RhinoSync.DoSync (fun () ->
             UI.StatusBar.HideProgressMeter())
 
@@ -2540,7 +2539,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the windows handle of Rhino's main window.</summary>
     ///<returns>(IntPtr) The Window's handle of Rhino's main window. IntPtr is a platform-specific type that is used to represent a pointer or a handle.</returns>
-    static member WindowHandle() : IntPtr = 
+    static member WindowHandle() : IntPtr =
         RhinoApp.MainWindowHandle()
 
 
@@ -2572,7 +2571,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    If True, the objectIds will be deleted</param>
     ///<returns>(string) name of new block definition.</returns>
-    static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string = 
+    static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
         let name = if name="" then State.Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = State.Doc.InstanceDefinitions.Find(name)
         let objects = Rarr()
@@ -2608,7 +2607,7 @@ type RhinoScriptSyntax private () =
     ///    definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string Rarr) A list of block definition names.</returns>
-    static member BlockContainers(blockName:string) : string Rarr = 
+    static member BlockContainers(blockName:string) : string Rarr =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockContainers: '%s' does not exist in InstanceDefinitionsTable" blockName
         let containers = idef.GetContainers()
@@ -2621,13 +2620,13 @@ type RhinoScriptSyntax private () =
     ///    block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(int) The number of block definitions that contain a specified block definition.</returns>
-    static member BlockContainerCount(blockName:string) : int = 
+    static member BlockContainerCount(blockName:string) : int =
         (RhinoScriptSyntax.BlockContainers(blockName)).Count
 
 
     ///<summary>Returns the number of block definitions in the document.</summary>
     ///<returns>(int) The number of block definitions in the document.</returns>
-    static member BlockCount() : int = 
+    static member BlockCount() : int =
         State.Doc.InstanceDefinitions.ActiveCount
 
 
@@ -2658,7 +2657,7 @@ type RhinoScriptSyntax private () =
     ///      If a block is nested more than once within another block it will be counted only once.
     ///    2 = check for references from other instance definitions, counts every instance of nested block</param>
     ///<returns>(int) The number of instances of the block in the document.</returns>
-    static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int = 
+    static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockInstanceCount: '%s' does not exist in InstanceDefinitionsTable" blockName
         let  refs = idef.GetReferences(whereToLook)
@@ -2668,7 +2667,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the insertion point of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Point3d) The insertion 3D point.</returns>
-    static member BlockInstanceInsertPoint(objectId:Guid) : Point3d = 
+    static member BlockInstanceInsertPoint(objectId:Guid) : Point3d =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  xf = instance.InstanceXform
         let  pt = Point3d(0. , 0. , 0.)
@@ -2679,7 +2678,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the block name of a block instance.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(string) The block name of a block instance.</returns>
-    static member BlockInstanceName(objectId:Guid) : string = 
+    static member BlockInstanceName(objectId:Guid) : string =
         let mutable instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let mutable idef = instance.InstanceDefinition
         idef.Name
@@ -2692,7 +2691,7 @@ type RhinoScriptSyntax private () =
     ///    1 = get top level and nested references in active document.
     ///    2 = check for references from other instance definitions</param>
     ///<returns>(Guid Rarr) Ids identifying the instances of a block in the model.</returns>
-    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> = 
+    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockInstances: '%s' does not exist in InstanceDefinitionsTable" blockName
         let instances = idef.GetReferences(whereToLook)
@@ -2705,14 +2704,14 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(Transform) The location, as a transform matrix, of a block instance relative to the world coordinate
     ///    system origin.</returns>
-    static member BlockInstanceXform(objectId:Guid) : Transform = 
+    static member BlockInstanceXform(objectId:Guid) : Transform =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         instance.InstanceXform
 
 
     ///<summary>Returns the names of all block definitions in the document.</summary>
     ///<returns>(string Rarr) The names of all block definitions in the document.</returns>
-    static member BlockNames() : string Rarr = 
+    static member BlockNames() : string Rarr =
         let  ideflist = State.Doc.InstanceDefinitions.GetList(true)
         rarr { for item in ideflist do yield item.Name}
 
@@ -2721,7 +2720,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns number of objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(int) The number of objects that make up a block definition.</returns>
-    static member BlockObjectCount(blockName:string) : int = 
+    static member BlockObjectCount(blockName:string) : int =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount:'%s' does not exist in InstanceDefinitionsTable" blockName
         idef.ObjectCount
@@ -2730,7 +2729,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns identifiers of the objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(Guid Rarr) list of identifiers.</returns>
-    static member BlockObjects(blockName:string) : Rarr<Guid> = 
+    static member BlockObjects(blockName:string) : Rarr<Guid> =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjects: '%s' does not exist in InstanceDefinitionsTable" blockName
         let  rhobjs = idef.GetObjects()
@@ -2742,7 +2741,7 @@ type RhinoScriptSyntax private () =
     ///    inserted from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block.</returns>
-    static member BlockPath(blockName:string) : string = 
+    static member BlockPath(blockName:string) : string =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockPath: '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.SourceArchive
@@ -2759,7 +2758,7 @@ type RhinoScriptSyntax private () =
     ///      1    The linked block definition's file is newer than definition.
     ///      2    The linked block definition's file is older than definition.
     ///      3    The linked block definition's file is different than definition.</returns>
-    static member BlockStatus(blockName:string) : int = 
+    static member BlockStatus(blockName:string) : int =
         let  idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  -3
         else int(idef.ArchiveFileStatus)
@@ -2768,7 +2767,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Deletes a block definition and all of it's inserted instances.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteBlock(blockName:string) : bool = 
+    static member DeleteBlock(blockName:string) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
         let  rc = State.Doc.InstanceDefinitions.Delete(idef.Index, deleteReferences=true, quiet=false)
@@ -2781,7 +2780,7 @@ type RhinoScriptSyntax private () =
     ///<param name="explodeNestedInstances">(bool) Optional, default value: <c>false</c>
     ///    By default nested blocks are not exploded</param>
     ///<returns>(Guid array) identifiers for the newly exploded objects.</returns>
-    static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> = 
+    static member ExplodeBlockInstance(objectId:Guid, [<OPT;DEF(false)>]explodeNestedInstances:bool) : array<Guid> =
         let  instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
         let  guids = State.Doc.Objects.AddExplodedInstancePieces(instance, explodeNestedInstances, deleteInstance = true)
         if guids.Length > 0 then State.Doc.Views.Redraw()
@@ -2793,7 +2792,7 @@ type RhinoScriptSyntax private () =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="xForm">(Transform) 4x4 transformation matrix to apply</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
-    static member InsertBlock2(blockName:string, xForm:Transform) : Guid = 
+    static member InsertBlock2(blockName:string, xForm:Transform) : Guid =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.InsertBlock2: '%s' does not exist in InstanceDefinitionsTable" blockName
         let objectId = State.Doc.Objects.AddInstanceObject(idef.Index, xForm )
@@ -2812,7 +2811,7 @@ type RhinoScriptSyntax private () =
     ///<param name="rotationNormal">(Vector3d) Optional, default value: <c> Vector3d.ZAxis</c>
     ///    The axis of rotation</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
-    static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid = 
+    static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
         let angleRadians = UtilMath.toRadians(angleDegrees)
         let sc= if scale.IsZero then Vector3d(1. , 1. , 1.) else scale
         let rotationNormal0 = if rotationNormal.IsZero then Vector3d.ZAxis else rotationNormal
@@ -2826,7 +2825,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if the existence of a block definition in the document.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsBlock(blockName:string) : bool = 
+    static member IsBlock(blockName:string) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         not <| isNull idef
 
@@ -2834,7 +2833,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a block definition is embedded, or linked, from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsBlockEmbedded(blockName:string) : bool = 
+    static member IsBlockEmbedded(blockName:string) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded '%s' does not exist in InstanceDefinitionsTable" blockName
         match int( idef.UpdateType) with
@@ -2846,8 +2845,8 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an object is a block instance. Returns false for any other rhino object.</summary>
     ///<param name="objectId">(Guid) The identifier of an existing block insertion object</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsBlockInstance(objectId:Guid) : bool = 
-        match RhinoScriptSyntax.CoerceRhinoObject(objectId) with  
+    static member IsBlockInstance(objectId:Guid) : bool =
+        match RhinoScriptSyntax.CoerceRhinoObject(objectId) with
         | :? DocObjects.InstanceObject as _ -> true
         | _ -> false
 
@@ -2860,7 +2859,7 @@ type RhinoScriptSyntax private () =
     ///    1 = Check for top level and nested references in active document
     ///    2 = Check for references in other instance definitions</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool = 
+    static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.InUse(whereToLook)
@@ -2869,7 +2868,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if that a block definition is from a reference file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsBlockReference(blockName:string) : bool = 
+    static member IsBlockReference(blockName:string) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference '%s' does not exist in InstanceDefinitionsTable" blockName
         idef.IsReference
@@ -2879,7 +2878,7 @@ type RhinoScriptSyntax private () =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<param name="newName">(string) Name to change to</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member RenameBlock(blockName:string, newName:string) : bool = 
+    static member RenameBlock(blockName:string, newName:string) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock '%s' does not exist in InstanceDefinitionsTable" blockName
         let description = idef.Description
@@ -2891,18 +2890,18 @@ type RhinoScriptSyntax private () =
     ///<param name="newObjects">(string) Objects for replacing existing objects, can be partially the same as current objects too</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c> delete the input objects from document, so that they only exist in the block definition.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member ReplaceBlockObjects(blockName:string, newObjects:seq<Guid>,[<OPT;DEF(true)>]deleteInput:bool) : bool = 
+    static member ReplaceBlockObjects(blockName:string, newObjects:seq<Guid>,[<OPT;DEF(true)>]deleteInput:bool) : bool =
         let idef = State.Doc.InstanceDefinitions.Find(blockName)
         if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects '%s' does not exist in InstanceDefinitionsTable" blockName
         let objs  = newObjects |> Seq.map RhinoScriptSyntax.CoerceRhinoObject |> Array.ofSeq // just to be sure its not lazy
         let geos  = objs |> Array.map (fun o-> o.Geometry)
         let attrs = objs |> Array.map (fun o-> o.Attributes)
-        if deleteInput then 
+        if deleteInput then
             let k = State.Doc.Objects.Delete(newObjects, quiet=true)
             let l = Seq.length newObjects
             if k <> l then RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Nice.str newObjects)
         State.Doc.InstanceDefinitions.ModifyGeometry(idef.Index,geos,attrs)
-        
+
     //---End of header marker: don't change: {@$%^&*()*&^%$@}
 
 
@@ -2914,7 +2913,7 @@ type RhinoScriptSyntax private () =
     ///<param name="radius">(float) Radius of the arc</param>
     ///<param name="angleDegrees">(float) Interval of arc in degrees</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddArc(plane:Plane, radius:float, angleDegrees:float) : Guid = 
+    static member AddArc(plane:Plane, radius:float, angleDegrees:float) : Guid =
         let radians = toRadians(angleDegrees)
         let arc = Arc(plane, radius, radians)
         let rc = State.Doc.Objects.AddArc(arc)
@@ -2928,7 +2927,7 @@ type RhinoScriptSyntax private () =
     ///<param name="ende">(Point3d) Endpoint of the arc</param>
     ///<param name="pointOnArc">(Point3d) A point on the arc</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddArc3Pt(start:Point3d, ende:Point3d, pointOnArc:Point3d) : Guid = 
+    static member AddArc3Pt(start:Point3d, ende:Point3d, pointOnArc:Point3d) : Guid =
         let arc = Arc(start, pointOnArc, ende)
         let rc = State.Doc.Objects.AddArc(arc)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddArc3Pt: Unable to add arc to document.  start:'%A' ende:'%A' pointOnArc:'%A'" start ende pointOnArc
@@ -2942,7 +2941,7 @@ type RhinoScriptSyntax private () =
     ///<param name="direction">(Vector3d) The arc direction at start</param>
     ///<param name="ende">(Point3d) The ending point of the arc</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddArcPtTanPt(start:Point3d, direction:Vector3d, ende:Point3d) : Guid = 
+    static member AddArcPtTanPt(start:Point3d, direction:Vector3d, ende:Point3d) : Guid =
         let arc = Arc(start, direction, ende)
         let rc = State.Doc.Objects.AddArc(arc)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddArcPtTanPt: Unable to add arc to document.  start:'%A' direction:'%A' ende:'%A'" start direction ende
@@ -2959,7 +2958,7 @@ type RhinoScriptSyntax private () =
     ///    1 = tangency
     ///    2 = curvature</param>
     ///<returns>(Guid) identifier of new Curve.</returns>
-    static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid = 
+    static member AddBlendCurve(curves:Guid * Guid, parameters:float * float, reverses:bool * bool, continuities:int * int) : Guid =
         let crv0 = RhinoScriptSyntax.CoerceCurve (fst curves)
         let crv1 = RhinoScriptSyntax.CoerceCurve (snd curves)
         let c0:BlendContinuity = EnumOfValue(fst continuities)
@@ -2975,7 +2974,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) Plane on which the circle will lie.</param>
     ///<param name="radius">(float) The radius of the circle</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddCircle(plane:Plane, radius:float) : Guid = 
+    static member AddCircle(plane:Plane, radius:float) : Guid =
         let circle = Circle(plane, radius)
         let rc = State.Doc.Objects.AddCircle(circle)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCircle: Unable to add circle to document.  plane:'%O' radius:'%s'" plane radius.ToNiceString
@@ -2998,7 +2997,7 @@ type RhinoScriptSyntax private () =
     ///<param name="second">(Point3d) Second point on the circle'</param>
     ///<param name="third">(Point3d) Third point on the circle'</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddCircle3Pt(first:Point3d, second:Point3d, third:Point3d) : Guid = 
+    static member AddCircle3Pt(first:Point3d, second:Point3d, third:Point3d) : Guid =
         let circle = Circle(first, second, third)
         let rc = State.Doc.Objects.AddCircle(circle)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCircle3Pt: Unable to add circle to document.  first:'%A' second:'%A' third:'%A'" first second third
@@ -3011,7 +3010,7 @@ type RhinoScriptSyntax private () =
     ///<param name="degree">(int) Optional, default value: <c>3</c>
     ///    Degree of the Curve</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int) : Guid = 
+    static member AddCurve(points:Point3d seq, [<OPT;DEF(3)>]degree:int) : Guid =
         let  curve = Curve.CreateControlPointCurve(points, degree)
         if isNull curve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCurve: Unable to create control point curve from given points.  points:'%A' degree:'%A'" points degree
         let  rc = State.Doc.Objects.AddCurve(curve)
@@ -3026,7 +3025,7 @@ type RhinoScriptSyntax private () =
     ///<param name="radiusX">(float) radius in the X axis direction</param>
     ///<param name="radiusY">(float) radius in the Y axis direction</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddEllipse(plane:Plane, radiusX:float, radiusY:float) : Guid = 
+    static member AddEllipse(plane:Plane, radiusX:float, radiusY:float) : Guid =
         let ellipse = Ellipse(plane, radiusX, radiusY)
         let rc = State.Doc.Objects.AddEllipse(ellipse)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEllipse: Unable to add curve to document. plane:'%A' radiusX:'%A' radiusY:'%A'" plane radiusX radiusY
@@ -3039,7 +3038,7 @@ type RhinoScriptSyntax private () =
     ///<param name="second">(Point3d) End point of the x axis</param>
     ///<param name="third">(Point3d) End point of the y axis</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddEllipse3Pt(center:Point3d, second:Point3d, third:Point3d) : Guid = 
+    static member AddEllipse3Pt(center:Point3d, second:Point3d, third:Point3d) : Guid =
         let  ellipse = Ellipse(center, second, third)
         let  rc = State.Doc.Objects.AddEllipse(ellipse)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEllipse3Pt: Unable to add curve to document.  center:'%A' second:'%A' third:'%A'" center second third
@@ -3057,7 +3056,7 @@ type RhinoScriptSyntax private () =
     ///<param name="basePointB">(Point3d) Optional, Base point of the second Curve. If omitted,
     ///    starting point of the Curve is used</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid = 
+    static member AddFilletCurve(curveA:Guid, curveB:Guid, [<OPT;DEF(1.0)>]radius:float, [<OPT;DEF(Point3d())>]basePointA:Point3d, [<OPT;DEF(Point3d())>]basePointB:Point3d) : Guid =
         //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
         let basePointA = if basePointA = Point3d.Origin then Point3d.Unset else basePointA
         let basePointB = if basePointB = Point3d.Origin then Point3d.Unset else basePointB
@@ -3091,7 +3090,7 @@ type RhinoScriptSyntax private () =
     ///<param name="points">(Point3d seq) List of 3D points that lie on the specified Surface.
     ///    The list must contain at least 2 points</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid = 
+    static member AddInterpCrvOnSrf(surfaceId:Guid, points:Point3d seq) : Guid =
         let  surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let  tolerance = State.Doc.ModelAbsoluteTolerance
         let  curve = surface.InterpolatedCurveOnSurface(points, tolerance)
@@ -3109,7 +3108,7 @@ type RhinoScriptSyntax private () =
     ///<param name="points">(Point2d seq) A list of 2D Surface parameters. The list must contain
     ///    at least 2 sets of parameters</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid = 
+    static member AddInterpCrvOnSrfUV(surfaceId:Guid, points:Point2d seq) : Guid =
         let mutable surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable tolerance = State.Doc.ModelAbsoluteTolerance
         let mutable curve = surface.InterpolatedCurveOnSurfaceUV(points, tolerance)
@@ -3145,7 +3144,7 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(3)>]degree:int,
                                     [<OPT;DEF(0)>]knotStyle:int,
                                     [<OPT;DEF(Vector3d())>]startTangent:Vector3d,  //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
-                                    [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid = 
+                                    [<OPT;DEF(Vector3d())>]endTangent:Vector3d) : Guid =
         let endTangent   = if endTangent.IsZero then Vector3d.Unset else endTangent
         let startTangent = if startTangent.IsZero then Vector3d.Unset else startTangent
         let knotstyle : CurveKnotStyle = EnumOfValue knotStyle
@@ -3161,7 +3160,7 @@ type RhinoScriptSyntax private () =
     ///<param name="start">(Point3d) Startpoint of the line</param>
     ///<param name="ende">(Point3d) Endpoint of the line</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddLine(start:Point3d, ende:Point3d) : Guid = 
+    static member AddLine(start:Point3d, ende:Point3d) : Guid =
         let  rc = State.Doc.Objects.AddLine(start, ende)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLine: Unable to add line to document. start:%s ende:%s" start.ToNiceString ende.ToNiceString
         State.Doc.Views.Redraw()
@@ -3173,30 +3172,30 @@ type RhinoScriptSyntax private () =
     ///<param name="startZ">(float) Startpoint of the line: Z position</param>
     ///<param name="endX">(float) Endpoint of the line: X position</param>
     ///<param name="endY">(float) Endpoint of the line: Y position</param>
-    ///<param name="endZ">(float) Endpoint of the line:Z position</param>    
+    ///<param name="endZ">(float) Endpoint of the line:Z position</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddLine(startX,startY,startZ,endX,endY,endZ:float) : Guid = 
+    static member AddLine(startX,startY,startZ,endX,endY,endZ:float) : Guid =
         let start = Point3d(startX,startY,startZ)
         let ende = Point3d(endX,endY,endZ)
         let  rc = State.Doc.Objects.AddLine(start, ende)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLine: Unable to add line to document. startX:%g ,startY:%g ,startZ:%g and endX:%g ,endY:%g ,endZ:%g" startX startY startZ endX endY endZ
         State.Doc.Views.Redraw()
         rc
-    
+
     ///<summary>Adds a 2D Line Curve to the current model at z level 0.0</summary>
     ///<param name="startX">(float) Startpoint of the line: X position</param>
     ///<param name="startY">(float) Startpoint of the line: Y position</param>
     ///<param name="endX">(float) Endpoint of the line: X position</param>
     ///<param name="endY">(float) Endpoint of the line: Y position</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddLine2D(startX,startY,endX,endY:float) : Guid = 
+    static member AddLine2D(startX,startY,endX,endY:float) : Guid =
         let start = Point3d(startX,startY,0.0)
         let ende = Point3d(endX,endY,0.0)
         let  rc = State.Doc.Objects.AddLine(start, ende)
-        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLine2D: Unable to add line to document. startX:%g ,startY:%g  and  endX:%g ,endY:%g," startX startY  endX endY 
+        if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLine2D: Unable to add line to document. startX:%g ,startY:%g  and  endX:%g ,endY:%g," startX startY  endX endY
         State.Doc.Views.Redraw()
         rc
-    
+
     ///<summary>Creates a NURBS Curve geometry, but does not add or draw it to the document.</summary>
     ///<param name="points">(Point3d seq) A list containing 3D control points</param>
     ///<param name="knots">(float seq) Knot values for the Curve. The number of elements in knots must
@@ -3205,12 +3204,12 @@ type RhinoScriptSyntax private () =
     ///<param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
     ///    equal the number of elements in points. Values must be greater than 0</param>
     ///<returns>(NurbsCurve) a NurbsCurve geometry.</returns>
-    static member CreateNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : NurbsCurve = 
+    static member CreateNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : NurbsCurve =
         let cvcount = Seq.length(points)
         let knotcount = cvcount + degree - 1
         if Seq.length(knots)<>knotcount then
             RhinoScriptingException.Raise "RhinoScriptSyntax.CreateNurbsCurve:Number of elements in knots must equal the number of elements in points plus degree minus 1.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
-        let rational = 
+        let rational =
             if notNull weights then
                 if Seq.length(weights)<>cvcount then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.CreateNurbsCurve:Number of elements in weights should equal the number of elements in points.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
@@ -3239,7 +3238,7 @@ type RhinoScriptSyntax private () =
     ///<param name="weights">(float seq) Optional, Weight values for the Curve. Number of elements should
     ///    equal the number of elements in points. Values must be greater than 0</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : Guid = 
+    static member AddNurbsCurve(points:Point3d seq, knots:float seq, degree:int, [<OPT;DEF(null: float seq)>]weights:float seq) : Guid =
         let nc = RhinoScriptSyntax.CreateNurbsCurve(points, knots, degree, weights)
         let rc = State.Doc.Objects.AddCurve(nc)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsCurve: Unable to add curve to document.  points:'%A' knots:'%A' degree:'%A' weights:'%A'" points knots degree weights
@@ -3252,7 +3251,7 @@ type RhinoScriptSyntax private () =
     ///    list contains less than four points, then the first point and
     ///    last point must be different</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddPolyline(points:Point3d seq) : Guid = 
+    static member AddPolyline(points:Point3d seq) : Guid =
         let pl = Polyline(points)
         //pl.DeleteShortSegments(State.Doc.ModelAbsoluteTolerance) |>ignore
         let rc = State.Doc.Objects.AddPolyline(pl)
@@ -3270,7 +3269,7 @@ type RhinoScriptSyntax private () =
     ///    else an additional point will be added with the same position as start.</summary>
     ///<param name="points">(Point3d seq) List of 3D points. The list must contain at least three points.</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddPolylineClosed(points:Point3d seq) : Guid = 
+    static member AddPolylineClosed(points:Point3d seq) : Guid =
         let pl = Polyline(points)
         if pl.Count < 3 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPolylineClosed: Unable to add closed polyline to document from points:\r\n'%A'" (Nice.str points)
         if (pl.First-pl.Last).Length <= State.Doc.ModelAbsoluteTolerance then
@@ -3295,7 +3294,7 @@ type RhinoScriptSyntax private () =
     ///<param name="height">(float) Height of rectangle as measured along the Plane's
     ///    x and y axes</param>
     ///<returns>(Guid) objectId of new rectangle.</returns>
-    static member AddRectangle(plane:Plane, width:float, height:float) : Guid = 
+    static member AddRectangle(plane:Plane, width:float, height:float) : Guid =
         let rect = Rectangle3d(plane, width, height)
         let poly = rect.ToPolyline()
         let rc = State.Doc.Objects.AddPolyline(poly)
@@ -3313,7 +3312,7 @@ type RhinoScriptSyntax private () =
     ///<param name="radius0">(float) Starting radius of spiral</param>
     ///<param name="radius1">(float) Optional, Ending radius of spiral. If omitted, the starting radius is used for the complete spiral</param>
     ///<returns>(Guid) objectId of new Curve.</returns>
-    static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid = 
+    static member AddSpiral(point0:Point3d, point1:Point3d, pitch:float, turns:float, radius0:float, [<OPT;DEF(0.0)>]radius1:float) : Guid =
         let dir = point1 - point0
         let plane = Plane(point0, dir)
         let point2 = point0 + plane.XAxis
@@ -3332,7 +3331,7 @@ type RhinoScriptSyntax private () =
     ///<param name="param0">(float) First parameters on the source Curve</param>
     ///<param name="param1">(float) Second parameters on the source Curve</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid = 
+    static member AddSubCrv(curveId:Guid, param0:float, param1:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId)
         let trimcurve = curve.Trim(param0, param1)
         if isNull trimcurve then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSubCrv: Unable to trim curve. curveId:'%s' param0:'%A' param1:'%A'" (Nice.str curveId) param0 param1
@@ -3347,7 +3346,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    Identifies the Curve segment if CurveId identifies a poly-curve</param>
     ///<returns>(float) The angle in degrees.</returns>
-    static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
+    static member ArcAngle(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
@@ -3359,7 +3358,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(Point3d) The 3D center point of the arc.</returns>
-    static member ArcCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member ArcCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
@@ -3371,7 +3370,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(Point3d) The 3D mid point of the arc.</returns>
-    static member ArcMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member ArcMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
@@ -3383,7 +3382,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(float) The radius of the arc.</returns>
-    static member ArcRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
+    static member ArcRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let arc = ref Arc.Unset
         let rc = curve.TryGetArc( arc, RhinoMath.ZeroTolerance )
@@ -3396,7 +3395,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(Point3d) The 3D center point of the circle.</returns>
-    static member CircleCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member CircleCenterPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
@@ -3408,7 +3407,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(Plane) The 3D Plane at the center point of the circle.</returns>
-    static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane = 
+    static member CircleCenterPlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
@@ -3423,7 +3422,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(float) The circumference of the circle.</returns>
-    static member CircleCircumference(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
+    static member CircleCircumference(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
@@ -3435,7 +3434,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a poly-curve</param>
     ///<returns>(float) The radius of the circle.</returns>
-    static member CircleRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
+    static member CircleRadius(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let circle = ref Circle.Unset
         let rc = curve.TryGetCircle(circle, RhinoMath.ZeroTolerance )
@@ -3449,7 +3448,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Maximum allowable distance between start and end point</param>
     ///<returns>(Guid) objectId of the new Curve object.</returns>
-    static member CloseCurve(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid = 
+    static member CloseCurve(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.IsClosed then  curveId
         else
@@ -3494,7 +3493,7 @@ type RhinoScriptSyntax private () =
                                             [<OPT;DEF(0.0)>]tolerance:float,
                                             [<OPT;DEF(false)>]deleteInput:bool,
                                             [<OPT;DEF(0.0)>]minEdgeLength:float,
-                                            [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid = 
+                                            [<OPT;DEF(0.0)>]maxEdgeLength:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let angleTolerance0 = toRadians (Util.ifZero1 angleTolerance 0.5 )
         let tolerance0 = Util.ifZero1 tolerance 0.01
@@ -3522,7 +3521,7 @@ type RhinoScriptSyntax private () =
     ///    calculated from the start of the Curve. If False, the arc length
     ///    point is calculated from the end of the Curve</param>
     ///<returns>(Point3d) on Curve.</returns>
-    static member CurveArcLengthPoint(curveId:Guid, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d = 
+    static member CurveArcLengthPoint(curveId:Guid, length:float, [<OPT;DEF(true)>]fromStart:bool) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let curveLength = curve.GetLength()
         if curveLength >= length then
@@ -3547,7 +3546,7 @@ type RhinoScriptSyntax private () =
     ///    current drawing units.</summary>
     ///<param name="curveId">(Guid) The identifier of a closed, planar Curve object</param>
     ///<returns>(float) The area.</returns>
-    static member CurveArea(curveId:Guid) : float = 
+    static member CurveArea(curveId:Guid) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let mp = AreaMassProperties.Compute(curve, tol)
@@ -3559,7 +3558,7 @@ type RhinoScriptSyntax private () =
     ///    on the current drawing units.</summary>
     ///<param name="curveId">(Guid) The identifier of a closed, planar Curve object</param>
     ///<returns>(Point3d ) The 3d centroid point.</returns>
-    static member CurveAreaCentroid(curveId:Guid) : Point3d = 
+    static member CurveAreaCentroid(curveId:Guid) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let mp = AreaMassProperties.Compute(curve, tol)
@@ -3646,7 +3645,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    A positive tolerance value, or None for the doc default</param>
     ///<returns>(Guid Rarr) The identifiers of the new objects.</returns>
-    static member CurveBooleanDifference(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+    static member CurveBooleanDifference(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
@@ -3672,7 +3671,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    A positive tolerance value, or None for the doc default</param>
     ///<returns>(Guid Rarr) The identifiers of the new objects.</returns>
-    static member CurveBooleanIntersection(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+    static member CurveBooleanIntersection(curveA:Guid, curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
@@ -3697,7 +3696,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    A positive tolerance value, or None for the doc default</param>
     ///<returns>(Guid Rarr) The identifiers of the new objects.</returns>
-    static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+    static member CurveBooleanUnion(curveIds:Guid seq, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let inCurves = rarr { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         if inCurves.Count < 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveBooleanUnion:curveIds must have at least 2 curves %A" curveIds
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
@@ -3721,7 +3720,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Distance tolerance at segment midpoints.</param>
     ///<returns>(Point3d Rarr * Curve Rarr) List of points and List of Curves.</returns>
-    static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Point3d Rarr * Curve Rarr= 
+    static member CurveBrepIntersect(curveId:Guid, brepId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Point3d Rarr * Curve Rarr=
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
@@ -3757,7 +3756,7 @@ type RhinoScriptSyntax private () =
     ///      [0]    The identifier of the closest object.
     ///      [1]    The 3-D point that is closest to the closest object.
     ///      [2]    The 3-D point that is closest to the test Curve.</returns>
-    static member CurveClosestObject(curveId:Guid, objectIds:Guid seq) : Guid * Point3d * Point3d = 
+    static member CurveClosestObject(curveId:Guid, objectIds:Guid seq) : Guid * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let geometry = Rarr()
         for curveId in objectIds do
@@ -3777,7 +3776,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object to test</param>
     ///<param name="line">(Line) a Line Geometry</param>
     ///<returns>(Point3d * Point3d) first point on Curve, second point on Line.</returns>
-    static member CurveLineClosestPoint(curveId:Guid, line:Line) : Point3d * Point3d = 
+    static member CurveLineClosestPoint(curveId:Guid, line:Line) : Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let curvePoint = ref Point3d.Unset
         let linePoint  = ref Point3d.Unset
@@ -3792,7 +3791,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    Curve segment index if `curveId` identifies a Polycurve</param>
     ///<returns>(float) The parameter of the closest point on the Curve.</returns>
-    static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
+    static member CurveClosestParameter(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let t = ref 0.
         let rc = curve.ClosestPoint(point, t)
@@ -3816,7 +3815,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    Curve segment index if `curveId` identifies a Polycurve</param>
     ///<returns>(Point3d) The closest point on the Curve.</returns>
-    static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member CurveClosestPoint(curveId:Guid, point:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let rc, t = curve.ClosestPoint(point)
         if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestPoint failed. curveId:'%s' segmentIndex:'%d'" (Nice.str curveId) segmentIndex
@@ -3826,9 +3825,9 @@ type RhinoScriptSyntax private () =
     ///<param name="curve">(Geometry.Curve) A Curve geometry object</param>
     ///<param name="point">(Point3d) Sampling point</param>
     ///<returns>(Point3d) The closest point on the Curve.</returns>
-    static member CurveClosestPoint(curve:Curve, point:Point3d) : Point3d =         
+    static member CurveClosestPoint(curve:Curve, point:Point3d) : Point3d =
         let rc, t = curve.ClosestPoint(point)
-        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestPoint failed on Curve Geometry" 
+        if not <| rc then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveClosestPoint failed on Curve Geometry"
         curve.PointAt(t)
 
 
@@ -3838,7 +3837,7 @@ type RhinoScriptSyntax private () =
     ///<param name="endPoint">(Point3d) 3D ending point of a center line</param>
     ///<param name="interval">(float) The distance between contour Curves</param>
     ///<returns>(Point3d array) A list of 3D points, one for each contour.</returns>
-    static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> = 
+    static member CurveContourPoints(curveId:Guid, startPoint:Point3d, endPoint:Point3d, interval:float) : array<Point3d> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if startPoint.DistanceTo(endPoint)<RhinoMath.ZeroTolerance then
             RhinoScriptingException.Raise "RhinoScriptSyntax.CurveContourPoints: Start && ende point are too close to define a line. curveId:'%s' startPoint:'%A' endPoint:'%A'" (Nice.str curveId) startPoint endPoint
@@ -3855,7 +3854,7 @@ type RhinoScriptSyntax private () =
     ///    [2] = center of radius of curvature
     ///    [3] = radius of curvature
     ///    [4] = curvature vector.</returns>
-    static member CurveCurvature(curveId:Guid, parameter:float) : Point3d * Vector3d * Point3d * float * Vector3d = 
+    static member CurveCurvature(curveId:Guid, parameter:float) : Point3d * Vector3d * Point3d * float * Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let point = curve.PointAt(parameter)
         let tangent = curve.TangentAt(parameter)
@@ -3906,7 +3905,7 @@ type RhinoScriptSyntax private () =
     ///      [n][8]  Number   If the event type is Point (1), then the second Curve parameter.
     ///        If the event type is Overlap (2), then the end value of the
     ///        second Curve parameter range.</returns>
-    static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) Rarr = 
+    static member CurveCurveIntersection(curveA:Guid, [<OPT;DEF(Guid())>]curveB:Guid, [<OPT;DEF(0.0)>]tolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float) Rarr =
         let curve1 = RhinoScriptSyntax.CoerceCurve curveA
         let curve2 = if curveB= Guid.Empty then curve1 else RhinoScriptSyntax.CoerceCurve curveB
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
@@ -3932,7 +3931,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of a Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(int) The degree of the Curve.</returns>
-    static member CurveDegree(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int = 
+    static member CurveDegree(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.Degree
 
@@ -3947,7 +3946,7 @@ type RhinoScriptSyntax private () =
     ///    [3] = CurveA parameter at minimum overlap distance point
     ///    [4] = CurveB parameter at minimum overlap distance point
     ///    [5] = minimum distance between Curves.</returns>
-    static member CurveDeviation(curveA:Guid, curveB:Guid) : float * float * float * float * float * float = 
+    static member CurveDeviation(curveA:Guid, curveB:Guid) : float * float * float * float * float * float =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
         let curveB = RhinoScriptSyntax.CoerceCurve curveB
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -3962,7 +3961,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    The Curve segment if CurveId identifies a polycurve</param>
     ///<returns>(int) The dimension of the Curve .</returns>
-    static member CurveDim(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int = 
+    static member CurveDim(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.Dimension
 
@@ -3974,7 +3973,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveA">(Guid) Identifier of first Curve object</param>
     ///<param name="curveB">(Guid) Identifier of second Curve object</param>
     ///<returns>(bool) True if the Curve directions match, otherwise False.</returns>
-    static member CurveDirectionsMatch(curveA:Guid, curveB:Guid) : bool = 
+    static member CurveDirectionsMatch(curveA:Guid, curveB:Guid) : bool =
         let curve0 = RhinoScriptSyntax.CoerceCurve curveA
         let curve1 = RhinoScriptSyntax.CoerceCurve curveB
         Curve.DoDirectionsMatch(curve0, curve1)
@@ -3992,7 +3991,7 @@ type RhinoScriptSyntax private () =
     ///    4        G1 - Continuous unit tangent
     ///    5        G2 - Continuous unit tangent and curvature</param>
     ///<returns>(Point3d Rarr) 3D points where the Curve is discontinuous.</returns>
-    static member CurveDiscontinuity(curveId:Guid, style:int) : Point3d Rarr = 
+    static member CurveDiscontinuity(curveId:Guid, style:int) : Point3d Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let dom = curve.Domain
         let mutable t0 = dom.Min
@@ -4014,7 +4013,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Interval) The domain of the Curve.</returns>
-    static member CurveDomain(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Interval = 
+    static member CurveDomain(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Interval =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.Domain
 
@@ -4027,7 +4026,7 @@ type RhinoScriptSyntax private () =
     ///    If False, return as a list of 3d points</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a polycurve</param>
     ///<returns>(Collections.Point3dList) Curve edit points.</returns>
-    static member CurveEditPoints(curveId:Guid, [<OPT;DEF(false)>]returnParameters:bool, [<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList = 
+    static member CurveEditPoints(curveId:Guid, [<OPT;DEF(false)>]returnParameters:bool, [<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let nc = curve.ToNurbsCurve()
         if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditPoints faile for %A" curveId
@@ -4038,7 +4037,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Point3d) The 3d endpoint of the Curve.</returns>
-    static member CurveEndPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member CurveEndPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.PointAtEnd
 
@@ -4047,7 +4046,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Vector3d) The tangent, same as Curve.TangentAtEnd property .</returns>
-    static member CurveEndTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d = 
+    static member CurveEndTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.TangentAtEnd
 
@@ -4056,7 +4055,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Vector3d) The tangent, same as Curve.TangentAtStart property .</returns>
-    static member CurveStartTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d = 
+    static member CurveStartTangent(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.TangentAtStart
 
@@ -4096,7 +4095,7 @@ type RhinoScriptSyntax private () =
 
         let inline distance  (a:Point3d)(b:Point3d) = (a-b).Length
 
-        let t0Base = 
+        let t0Base =
             if basePointA <> Point3d.Unset then
                 let ok, t = curve0.ClosestPoint(basePointA)
                 if not ok then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveFilletPoints failed 1 curveA:'%A' curveB:'%A' radius:'%A' basePointA: %A basePointB: %A" curveA curveB radius basePointA basePointB
@@ -4106,7 +4105,7 @@ type RhinoScriptSyntax private () =
                 let distStart = min  (distance curve1.PointAtStart curve0.PointAtStart) (distance curve1.PointAtEnd curve0.PointAtStart)
                 if distStart < distEnde then curve0.Domain.Min else curve0.Domain.Max
 
-        let t1Base = 
+        let t1Base =
             if basePointB <> Point3d.Unset then
                 let ok, t = curve1.ClosestPoint(basePointB)
                 if not ok then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveFilletPoints failed 2 curveA:'%A' curveB:'%A' radius:'%A' basePointA: %A basePointB: %A" curveA curveB radius basePointA basePointB
@@ -4127,7 +4126,7 @@ type RhinoScriptSyntax private () =
     ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Plane) The Plane at the specified parameter.</returns>
-    static member CurveFrame(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane = 
+    static member CurveFrame(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let mutable para = parameter
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let  domain = curve.Domain
@@ -4148,7 +4147,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a polycurve</param>
     ///<returns>(int) The number of knots.</returns>
-    static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int = 
+    static member CurveKnotCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
         if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnotCount failed. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
@@ -4159,7 +4158,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(float Rarr) knot values.</returns>
-    static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Rarr<float> = 
+    static member CurveKnots(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Rarr<float> =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  nc = curve.ToNurbsCurve()
         if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveKnots failed. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
@@ -4175,7 +4174,7 @@ type RhinoScriptSyntax private () =
     ///    (sub-domain) must be non-decreasing. If omitted, the length of the
     ///    entire Curve is returned</param>
     ///<returns>(float) The length of the Curve.</returns>
-    static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float = 
+    static member CurveLength(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int, [<OPT;DEF(Interval())>]subDomain:Interval) : float =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         if subDomain.T0 = 0.0 && subDomain.T1 = 0.0 then curve.GetLength()
         else curve.GetLength(subDomain)
@@ -4187,13 +4186,13 @@ type RhinoScriptSyntax private () =
     ///<param name="allowNonLinear">(bool) Optional, allow non linear Curves, Default Value <c>False</c> </param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Vector3d) The direction of the Curve.</returns>
-    static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d = 
+    static member CurveDirection(curveId:Guid, [<OPT;DEF(false)>]allowNonLinear:bool,[<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         if allowNonLinear || curve.IsLinear(RhinoMath.ZeroTolerance) then
             if curve.IsClosed || curve.IsClosable(State.Doc.ModelAbsoluteTolerance) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveDirection failed on closed or closable curve. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Nice.str curveId) allowNonLinear segmentIndex
             let v = curve.PointAtEnd - curve.PointAtStart
             if v.Unitize() then v
-            else 
+            else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CurveDirection failed. start and end are the same point. curveId:'%s' allowNonLinear '%A' segmentIndex:'%A'" (Nice.str curveId) allowNonLinear segmentIndex
 
         else
@@ -4204,7 +4203,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Point3d) The 3D midpoint of the Curve.</returns>
-    static member CurveMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member CurveMidPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let  rc, t = curve.NormalizedLengthParameter(0.5)
         if rc then  curve.PointAt(t)
@@ -4215,7 +4214,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a polycurve</param>
     ///<returns>(Vector3d) The 3D normal vector.</returns>
-    static member CurveNormal(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d = 
+    static member CurveNormal(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
         let plane = ref Plane.WorldXY
@@ -4229,7 +4228,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) The Curve parameter to convert</param>
     ///<returns>(float) normalized Curve parameter.</returns>
-    static member CurveNormalizedParameter(curveId:Guid, parameter:float) : float = 
+    static member CurveNormalizedParameter(curveId:Guid, parameter:float) : float =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         curve.Domain.NormalizedParameterAt(parameter)
 
@@ -4239,7 +4238,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) The normalized Curve parameter to convert</param>
     ///<returns>(float) Curve parameter.</returns>
-    static member CurveParameter(curveId:Guid, parameter:float) : float = 
+    static member CurveParameter(curveId:Guid, parameter:float) : float =
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         curve.Domain.ParameterAt(parameter)
 
@@ -4249,7 +4248,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<returns>(Plane) Plane.</returns>
-    static member CurvePerpFrame(curveId:Guid, parameter:float) : Plane = 
+    static member CurvePerpFrame(curveId:Guid, parameter:float) : Plane =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let  rc, plane = curve.PerpendicularFrameAt(parameter)
         if rc then  plane else RhinoScriptingException.Raise "RhinoScriptSyntax.CurvePerpFrame failed. curveId:'%s' parameter:'%f'"  (Nice.str curveId) parameter
@@ -4260,7 +4259,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Plane) The Plane in which the Curve lies.</returns>
-    static member CurvePlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane = 
+    static member CurvePlane(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Plane =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let tol = State.Doc.ModelAbsoluteTolerance
         let plane = ref Plane.WorldXY
@@ -4273,7 +4272,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a polycurve</param>
     ///<returns>(int) Number of control points.</returns>
-    static member CurvePointCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int = 
+    static member CurvePointCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable nc = curve.ToNurbsCurve()
         if notNull nc then  nc.Points.Count
@@ -4284,7 +4283,7 @@ type RhinoScriptSyntax private () =
     ///    are returned.</summary>
     ///<param name="curve">(Curve) The Curve Geometry</param>
     ///<returns>(Point3d Rarr) The control points, or control vertices, of a Curve object.</returns>
-    static member CurvePoints(curve:Curve) : Point3d Rarr = 
+    static member CurvePoints(curve:Curve) : Point3d Rarr =
         match curve with
         | :? PolylineCurve as pl ->
             rarr { for i = 0 to pl.PointCount - 1 do pl.Point(i)}
@@ -4301,7 +4300,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment if `curveId` identifies a polycurve</param>
     ///<returns>(Point3d Rarr) The control points, or control vertices, of a Curve object.</returns>
-    static member CurvePoints(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d Rarr = 
+    static member CurvePoints(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d Rarr =
         let  curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         match curve with
         | :? PolylineCurve as pl ->
@@ -4319,7 +4318,7 @@ type RhinoScriptSyntax private () =
     ///<param name="testPoint">(Point3d) Sampling point</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment if CurveId identifies a polycurve</param>
     ///<returns>(float) The radius of curvature at the point on the Curve.</returns>
-    static member CurveRadius(curveId:Guid, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float = 
+    static member CurveRadius(curveId:Guid, testPoint:Point3d, [<OPT;DEF(-1)>]segmentIndex:int) : float =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable rc, t = curve.ClosestPoint(testPoint)//, 0.0)
         if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveRadius failed. curveId:'%s' testPoint:'%A' segmentIndex:'%A'" (Nice.str curveId) testPoint segmentIndex
@@ -4335,7 +4334,7 @@ type RhinoScriptSyntax private () =
     ///    Note, if successful, the resulting Curve's
     ///    domain will start at `parameter`</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member CurveSeam(curveId:Guid, parameter:float) : bool = 
+    static member CurveSeam(curveId:Guid, parameter:float) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if (not <| curve.IsClosed || not <| curve.Domain.IncludesParameter(parameter)) then
             false
@@ -4354,7 +4353,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Point3d) The 3D starting point of the Curve.</returns>
-    static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member CurveStartPoint(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.PointAtStart
 
@@ -4362,7 +4361,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="point">(Point3d) New start point</param>
     ///<returns>(unit).</returns>
-    static member CurveStartPoint(curveId:Guid, point:Point3d) : unit = 
+    static member CurveStartPoint(curveId:Guid, point:Point3d) : unit =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <|curve.SetStartPoint(point) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurveStartPoint failed on '%A' and '%A'" point curveId
         State.Doc.Objects.Replace(curveId, curve) |> ignore
@@ -4415,7 +4414,7 @@ type RhinoScriptSyntax private () =
     ///      [n][10] Number   If the event type is Point(1), then the V Surface parameter.
     ///        If the event type is Overlap(2), then the V Surface parameter
     ///        for Curve at (n, 6).</returns>
-    static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) Rarr = 
+    static member CurveSurfaceIntersection(curveId:Guid, surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(0.0)>]angleTolerance:float) : (int*Point3d*Point3d*Point3d*Point3d*float*float*float*float*float*float) Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let surface = RhinoScriptSyntax.CoerceSurface surfaceId
         let tolerance0 = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
@@ -4440,7 +4439,7 @@ type RhinoScriptSyntax private () =
     ///<param name="parameter">(float) Parameter to evaluate</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Vector3d) A 3D vector.</returns>
-    static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d = 
+    static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
         let mutable rc = Point3d.Unset
         if curve.Domain.IncludesParameter(parameter) then
@@ -4453,8 +4452,8 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(float Rarr) The weight values of the Curve.</returns>
-    static member CurveWeights(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) :  float Rarr = 
-        let nc = 
+    static member CurveWeights(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) :  float Rarr =
+        let nc =
             match RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex) with
             | :? NurbsCurve as nc -> nc
             | c -> c.ToNurbsCurve()
@@ -4465,7 +4464,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curve">(Geometry.Curve) Curve geometry</param>
     ///<param name="segments">(int) The number of segments</param>
     ///<returns>(Point3d array) Array containing points at divisions.</returns>
-    static member DivideCurveIntoPoints(curve:Curve, segments:int) : Point3d array = 
+    static member DivideCurveIntoPoints(curve:Curve, segments:int) : Point3d array =
         let pts = ref (Array.zeroCreate (segments + 1))
         let rc = curve.DivideByCount(segments, includeEnds=true, points=pts)
         if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveIntoPoints failed. curve:'%A' segments:'%A'" curve segments
@@ -4475,7 +4474,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segments">(int) The number of segments</param>
     ///<returns>(Point3d array) Array containing points at divisions.</returns>
-    static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array = 
+    static member DivideCurveIntoPoints(curveId:Guid, segments:int) : Point3d array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let pts = ref (Array.zeroCreate (segments + 1))
         let rc = curve.DivideByCount(segments, includeEnds=true, points=pts)
@@ -4486,7 +4485,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curve">(Geometry.Curve) Curve geometry</param>
     ///<param name="segments">(int) The number of segments</param>
     ///<returns>( float array ) array containing 3D division parameters.</returns>
-    static member DivideCurve(curve:Curve, segments:int) :  float array = 
+    static member DivideCurve(curve:Curve, segments:int) :  float array =
         let rc = curve.DivideByCount(segments, includeEnds=true)
         if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed. curve:'%A' segments:'%A'" curve segments
         rc
@@ -4495,7 +4494,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segments">(int) The number of segments</param>
     ///<returns>( float array ) array containing 3D division parameters.</returns>
-    static member DivideCurve(curveId:Guid, segments:int) :  float array = 
+    static member DivideCurve(curveId:Guid, segments:int) :  float array =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let rc = curve.DivideByCount(segments, includeEnds=true)
         if isNull rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurve failed. curveId:'%s' segments:'%A'" (Nice.str curveId) segments
@@ -4506,7 +4505,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curve">(Geometry.Curve) Curve geometry</param>
     ///<param name="distance">(float) Linear distance between division points</param>
     ///<returns>(Point3d array) array containing 3D division points.</returns>
-    static member DivideCurveEquidistant(curve:Curve, distance:float) : array<Point3d> = 
+    static member DivideCurveEquidistant(curve:Curve, distance:float) : array<Point3d> =
         let  points = curve.DivideEquidistant(distance)
         if isNull points then
             let len = curve.GetLength()
@@ -4521,7 +4520,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="distance">(float) Linear distance between division points</param>
     ///<returns>(Point3d array) array containing 3D division points.</returns>
-    static member DivideCurveEquidistant(curveId:Guid, distance:float) : array<Point3d> = 
+    static member DivideCurveEquidistant(curveId:Guid, distance:float) : array<Point3d> =
         let  curve = RhinoScriptSyntax.CoerceCurve curveId
         let  points = curve.DivideEquidistant(distance)
         if isNull points then
@@ -4531,14 +4530,14 @@ type RhinoScriptSyntax private () =
             else
                 RhinoScriptingException.Raise "RhinoScriptSyntax.DivideCurveEquidistant failed. curveId:'%s' distance:%f, curveLength=%f" (Nice.str curveId) distance len
         points
-        
+
 
     ///<summary>Divides a Curve Geometry into segments of a specified length.
     /// If length is more than Curve length it fails.</summary>
     ///<param name="curve">(Geometry.Curve) Curve geometry</param>
     ///<param name="length">(float) The length of each segment</param>
     ///<returns>(Point3d Rarr) a list containing division points.</returns>
-    static member DivideCurveLengthIntoPoints(curve:Curve, length:float) : Point3d Rarr = 
+    static member DivideCurveLengthIntoPoints(curve:Curve, length:float) : Point3d Rarr =
         let rc = curve.DivideByLength(length, includeEnds=true)
         if isNull rc then
             let len = curve.GetLength()
@@ -4553,7 +4552,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="length">(float) The length of each segment</param>
     ///<returns>(Point3d Rarr) a list containing division points.</returns>
-    static member DivideCurveLengthIntoPoints(curveId:Guid, length:float) : Point3d Rarr = 
+    static member DivideCurveLengthIntoPoints(curveId:Guid, length:float) : Point3d Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, includeEnds=true)
         if isNull rc then
@@ -4569,7 +4568,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curve">(Geometry.Curve) Curve geometry</param>
     ///<param name="length">(float) The length of each segment</param>
     ///<returns>( float array) a list containing division parameters.</returns>
-    static member DivideCurveLength(curve:Curve, length:float) :  float [] = 
+    static member DivideCurveLength(curve:Curve, length:float) :  float [] =
         let rc = curve.DivideByLength(length, includeEnds=true)
         if isNull rc then
             let len = curve.GetLength()
@@ -4584,7 +4583,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="length">(float) The length of each segment</param>
     ///<returns>( float array) a list containing division parameters.</returns>
-    static member DivideCurveLength(curveId:Guid, length:float) :  float [] = 
+    static member DivideCurveLength(curveId:Guid, length:float) :  float [] =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc = curve.DivideByLength(length, includeEnds=true)
         if isNull rc then
@@ -4599,7 +4598,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the center point of an elliptical-shaped Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<returns>(Point3d) The 3D center point of the ellipse.</returns>
-    static member EllipseCenterPoint(curveId:Guid) : Point3d = 
+    static member EllipseCenterPoint(curveId:Guid) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc, ellipse = curve.TryGetEllipse()
         if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.EllipseCenterPoint: Curve is not an ellipse. curveId:'%s'" (Nice.str curveId)
@@ -4609,7 +4608,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the quadrant points of an elliptical-shaped Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four points identifying the quadrants of the ellipse.</returns>
-    static member EllipseQuadPoints(curveId:Guid) : Point3d * Point3d * Point3d * Point3d = 
+    static member EllipseQuadPoints(curveId:Guid) : Point3d * Point3d * Point3d * Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let rc, ellipse = curve.TryGetEllipse()
         if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.EllipseQuadPoints: Curve is not an ellipse. curveId:'%s'" (Nice.str curveId)
@@ -4624,7 +4623,7 @@ type RhinoScriptSyntax private () =
     ///<param name="t">(float) The parameter to evaluate</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(Point3d) a 3-D point.</returns>
-    static member EvaluateCurve(curveId:Guid, t:float, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d = 
+    static member EvaluateCurve(curveId:Guid, t:float, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         curve.PointAt(t)
 
@@ -4636,7 +4635,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete input objects after exploding if True</param>
     ///<returns>(Guid Rarr) identifying the newly created Curve objects.</returns>
-    static member ExplodeCurve(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+    static member ExplodeCurve(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let rc = Rarr()
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let pieces = curve.DuplicateSegments()
@@ -4655,9 +4654,9 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete input objects after exploding if True</param>
     ///<returns>(Guid Rarr) identifying the newly created Curve objects.</returns>
-    static member ExplodeCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+    static member ExplodeCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let rc = Rarr()
-        for curveId in curveIds do                
+        for curveId in curveIds do
             let curve = RhinoScriptSyntax.CoerceCurve curveId
             let pieces = curve.DuplicateSegments()
             if notNull pieces then
@@ -4666,7 +4665,7 @@ type RhinoScriptSyntax private () =
                 if deleteInput then
                     State.Doc.Objects.Delete(curveId, quiet=true) |>ignore
         if rc.Count>0 then  State.Doc.Views.Redraw()
-        rc        
+        rc
 
 
     ///<summary>Extends a non-closed Curve object by a line, arc, or smooth extension
@@ -4687,7 +4686,7 @@ type RhinoScriptSyntax private () =
                                 extensionType:int,
                                 side:int,
                                 boundaryCurveIds:Guid seq,
-                                [<OPT;DEF(false)>]replaceInput:bool) : Guid = 
+                                [<OPT;DEF(false)>]replaceInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mutable extensionTypet = CurveExtensionStyle.Line
         if extensionType = 0   then extensionTypet <- CurveExtensionStyle.Line
@@ -4695,7 +4694,7 @@ type RhinoScriptSyntax private () =
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
         else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurve ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' boundaryCurveIds:'%s'" (Nice.str curveId) extensionType side  (Nice.str boundaryCurveIds)
 
-        let sidet = 
+        let sidet =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
@@ -4736,7 +4735,7 @@ type RhinoScriptSyntax private () =
     static member ExtendCurveLength(    curveId:Guid,
                                         extensionType:int,
                                         side:int,
-                                        length:float) : Guid = 
+                                        length:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mutable extensionTypet = CurveExtensionStyle.Line
         if extensionType   = 0 then extensionTypet <- CurveExtensionStyle.Line
@@ -4744,14 +4743,14 @@ type RhinoScriptSyntax private () =
         elif extensionType = 2 then extensionTypet <- CurveExtensionStyle.Smooth
         else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength ExtensionType must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Nice.str curveId) extensionType side length
 
-        let sideT = 
+        let sideT =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
             |2  -> CurveEnd.Both
             |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurveLength Side must be 0, 1, or 2. curveId:'%s' extensionType:'%A' side:'%A' length:'%A'" (Nice.str curveId) extensionType side length
 
-        let newcurve = 
+        let newcurve =
             if length<0. then curve.Trim(sideT, -length)
             else curve.Extend(sideT, length, extensionTypet)
 
@@ -4778,9 +4777,9 @@ type RhinoScriptSyntax private () =
     static member ExtendCurvePoint( curveId:Guid,
                                     side:int,
                                     point:Point3d,
-                                    [<OPT;DEF(-1)>]extensionType:int) : Guid = 
+                                    [<OPT;DEF(-1)>]extensionType:int) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let extensionTypet = 
+        let extensionTypet =
             match extensionType with
             | -1 ->  CurveExtensionStyle.Smooth
             |  0 ->  CurveExtensionStyle.Line
@@ -4788,7 +4787,7 @@ type RhinoScriptSyntax private () =
             |  2 ->  CurveExtensionStyle.Smooth
             |  x ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
 
-        let sidet = 
+        let sidet =
             match side with
             |0  -> CurveEnd.Start
             |1  -> CurveEnd.End
@@ -4811,7 +4810,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Curve to fair</param>
     ///<param name="tolerance">(float) Fairing tolerance</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member FairCurve(curveId:Guid, tolerance:float) : bool = 
+    static member FairCurve(curveId:Guid, tolerance:float) : bool =
         let mutable curve = RhinoScriptSyntax.CoerceCurve curveId
         let angleTol = 0.0
         let mutable clamp = 0
@@ -4847,7 +4846,7 @@ type RhinoScriptSyntax private () =
     static member FitCurve( curveId:Guid,
                             [<OPT;DEF(3)>]degree:int,
                             [<OPT;DEF(0.0)>]distanceTolerance:float,
-                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Guid = 
+                            [<OPT;DEF(-1.0)>]angleTolerance:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let distanceTolerance0 = Util.ifZero1 distanceTolerance State.Doc.ModelAbsoluteTolerance
         let angleTolerance0 = if  angleTolerance < 0.0 then  State.Doc.ModelAngleToleranceRadians else toRadians angleTolerance
@@ -4873,7 +4872,7 @@ type RhinoScriptSyntax private () =
     ///    If True, then knots are added on both sides of
     ///    the center of the Curve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member InsertCurveKnot(curveId:Guid, parameter:float, [<OPT;DEF(false)>]symmetrical:bool) : bool = 
+    static member InsertCurveKnot(curveId:Guid, parameter:float, [<OPT;DEF(false)>]symmetrical:bool) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <| curve.Domain.IncludesParameter(parameter) then  false
         else
@@ -4903,7 +4902,7 @@ type RhinoScriptSyntax private () =
     ///    properties of a arc.</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsArc(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None -> false
@@ -4917,7 +4916,7 @@ type RhinoScriptSyntax private () =
     ///    to determine whether or not the NURBS form of the Curve has the
     ///    properties of a circle.</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsCircle(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+    static member IsCircle(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
@@ -4927,7 +4926,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an object is a Curve. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsCurve(curveId:Guid) : bool = 
+    static member IsCurve(curveId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
         |Some _  -> true
@@ -4940,7 +4939,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Maximum allowable distance between start point and end point.</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsCurveClosable(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+    static member IsCurveClosable(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
@@ -4950,7 +4949,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an object is a closed Curve object. Returns false for any other Rhino object.</summary>
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<returns>(bool) If Curve is Closed True,  otherwise False.</returns>
-    static member IsCurveClosed(curveId:Guid) : bool = 
+    static member IsCurveClosed(curveId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
         |Some curve  -> curve.IsClosed
@@ -4961,7 +4960,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) Plane to test</param>
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<returns>(bool) True or False.</returns>
-    static member IsCurveInPlane(curveId:Guid, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+    static member IsCurveInPlane(curveId:Guid, plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance0 = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
@@ -4973,7 +4972,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsCurveLinear(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tolerance0 = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match  RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None -> false
@@ -4985,7 +4984,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsCurvePeriodic(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsCurvePeriodic(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsPeriodic
@@ -4996,7 +4995,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c></param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsCurvePlanar(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None -> false
@@ -5007,7 +5006,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsCurveRational(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsCurveRational(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None -> false
         |Some c  ->
@@ -5022,7 +5021,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve curveId with
         |None -> false
@@ -5035,7 +5034,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsLine(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsLine(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None -> false
@@ -5056,7 +5055,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.SqrtEpsilon</c></param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsPointOnCurve(curveId:Guid, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsPointOnCurve(curveId:Guid, point:Point3d, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.SqrtEpsilon tolerance
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let t = ref 0.0
@@ -5067,7 +5066,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsPolyCurve(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsPolyCurve(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         // TODO can a polycurve be nested in a polycurve ?
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None               -> false
@@ -5082,7 +5081,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index if `curveId` identifies a polycurve</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsPolyline(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool = 
+    static member IsPolyline(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         match RhinoScriptSyntax.TryCoerceCurve(curveId, segmentIndex) with
         |None               -> false
         |Some c  ->
@@ -5101,7 +5100,7 @@ type RhinoScriptSyntax private () =
     ///    Join tolerance. If omitted, 2.1 * document absolute
     ///    tolerance is used</param>
     ///<returns>(Guid Rarr) Object objectId representing the new Curves.</returns>
-    static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+    static member JoinCurves(curveIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool, [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         if Seq.hasMaximumItems 1 curveIds then
             RhinoScriptingException.Raise "RhinoScriptSyntax.JoinCurves: curveIds must contain at least two items.  curveIds:'%s' deleteInput:'%A' tolerance:'%A'" (Nice.str curveIds) deleteInput tolerance
 
@@ -5123,7 +5122,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns a line that was fit through an array of 3D points.</summary>
     ///<param name="points">(Point3d seq) A list of at least two 3D points</param>
     ///<returns>(Line) line.</returns>
-    static member LineFitFromPoints(points:Point3d seq) : Line = 
+    static member LineFitFromPoints(points:Point3d seq) : Line =
         let rc, line = Line.TryFitLineToPoints(points)
         if rc then  line
         else RhinoScriptingException.Raise "RhinoScriptSyntax.LineFitFromPoints failed.  points:'%A'" points
@@ -5135,7 +5134,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete the input Curve. If omitted, the input Curve will not be deleted</param>
     ///<returns>(Guid) objectId of the new or modified Curve.</returns>
-    static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+    static member MakeCurveNonPeriodic(curveId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if not <| curve.IsPeriodic then  RhinoScriptingException.Raise "RhinoScriptSyntax.MakeCurveNonPeriodic failed.1  curveId:'%s' deleteInput:'%A'" (Nice.str curveId) deleteInput
         let nc = curve.ToNurbsCurve()
@@ -5160,7 +5159,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Angle tolerance used to match kinks between Curves</param>
     ///<returns>(Guid) objectId of the new or modified Curve.</returns>
-    static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid = 
+    static member MeanCurve(curve0:Guid, curve1:Guid, [<OPT;DEF(0.0)>]tolerance:float) : Guid =
         let curve0 = RhinoScriptSyntax.CoerceCurve curve0
         let curve1 = RhinoScriptSyntax.CoerceCurve curve1
         let  tolerance = if tolerance = 0.0 then RhinoMath.UnsetValue else abs (tolerance)
@@ -5177,7 +5176,7 @@ type RhinoScriptSyntax private () =
     ///    The created Mesh object is added to the document.</summary>
     ///<param name="polylineId">(Guid) Identifier of the Polyline Curve object</param>
     ///<returns>(Guid) identifier of the new Mesh object.</returns>
-    static member MeshPolyline(polylineId:Guid) : Guid = 
+    static member MeshPolyline(polylineId:Guid) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve polylineId
         let ispolyline, polyline = curve.TryGetPolyline()
         if not <| ispolyline then  RhinoScriptingException.Raise "RhinoScriptSyntax.MeshPolyline failed.  polylineId:'%s'" (Nice.str polylineId)
@@ -5221,7 +5220,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) Surface identifiers</param>
     ///<param name="parameter">(Point2d))  U, V parameter that the Curve will be offset through</param>
     ///<returns>(Guid Rarr) identifiers of the new Curves.</returns>
-    static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid Rarr = 
+    static member OffsetCurveOnSurfaceUV(curveId:Guid, surfaceId:Guid, parameter:Point2d) : Guid Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -5238,7 +5237,7 @@ type RhinoScriptSyntax private () =
     ///<param name="distance">(float)) The distance of the offset. Based on the Curve's direction, a positive value
     ///    will offset to the left and a negative value will offset to the right</param>
     ///<returns>(Guid Rarr) identifiers of the new Curves.</returns>
-    static member OffsetCurveOnSurface(curveId:Guid, surfaceId:Guid, distance:float) : Guid Rarr = 
+    static member OffsetCurveOnSurface(curveId:Guid, surfaceId:Guid, distance:float) : Guid Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -5262,7 +5261,7 @@ type RhinoScriptSyntax private () =
     ///    1 = the two Curves intersect
     ///    2 = the region bounded by CurveA is inside of CurveB
     ///    3 = the region bounded by CurveB is inside of CurveA.</returns>
-    static member PlanarClosedCurveContainment(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int = 
+    static member PlanarClosedCurveContainment(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
         let curveB = RhinoScriptSyntax.CoerceCurve curveB
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
@@ -5278,7 +5277,7 @@ type RhinoScriptSyntax private () =
     ///    Test Plane. If omitted, the Plane.WorldXY Plane is used</param>
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
     ///<returns>(bool) True if the Curves intersect; otherwise False.</returns>
-    static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+    static member PlanarCurveCollision(curveA:Guid, curveB:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let curveA = RhinoScriptSyntax.CoerceCurve curveA
         let curveB = RhinoScriptSyntax.CoerceCurve curveB
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
@@ -5297,7 +5296,7 @@ type RhinoScriptSyntax private () =
     ///    0 = point is outside of the Curve
     ///    1 = point is inside of the Curve
     ///    2 = point is on the Curve.</returns>
-    static member PointInPlanarClosedCurve(point:Point3d, curve:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int = 
+    static member PointInPlanarClosedCurve(point:Point3d, curve:Guid, [<OPT;DEF(Plane())>]plane:Plane, [<OPT;DEF(0.0)>]tolerance:float) : int =
         let curve = RhinoScriptSyntax.CoerceCurve curve
         let tolerance0 = Util.ifZero2 State.Doc.ModelAbsoluteTolerance tolerance
         let plane0 = if plane.IsValid then plane else Plane.WorldXY
@@ -5314,10 +5313,10 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    If `curveId` identifies a PolyCurve object, then `segmentIndex` identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(int) The number of Curve segments in a polycurve.</returns>
-    static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int = 
+    static member PolyCurveCount(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : int =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         match curve with
-        | :? PolyCurve as curve ->  curve.SegmentCount    
+        | :? PolyCurve as curve ->  curve.SegmentCount
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.PolyCurveCount: CurveId does not reference a polycurve. curveId:'%s' segmentIndex:'%A'" (Nice.str curveId) segmentIndex
 
 
@@ -5326,7 +5325,7 @@ type RhinoScriptSyntax private () =
     ///<param name="segmentIndex">(int) Optional,
     ///    If CurveId identifies a PolyCurve object, then segmentIndex identifies the Curve segment of the PolyCurve to query</param>
     ///<returns>(Point3d Rarr) an list of Point3d vertex points.</returns>
-    static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d Rarr = 
+    static member PolylineVertices(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : Point3d Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let rc, polyline = curve.TryGetPolyline()
         if rc then  rarr { for pt in polyline -> pt }
@@ -5338,7 +5337,7 @@ type RhinoScriptSyntax private () =
     ///<param name="meshIds">(Guid seq) Identifiers of Meshes to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid Rarr) list of identifiers for the resulting Curves.</returns>
-    static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid Rarr = 
+    static member ProjectCurveToMesh(curveIds:Guid seq, meshIds:Guid seq, direction:Vector3d) : Guid Rarr =
         let curves = rarr { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         let meshes = rarr { for objectId in meshIds -> RhinoScriptSyntax.CoerceMesh(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -5353,7 +5352,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceIds">(Guid seq) Identifiers of Surfaces to project onto</param>
     ///<param name="direction">(Vector3d) Projection direction</param>
     ///<returns>(Guid Rarr) list of identifiers.</returns>
-    static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid Rarr = 
+    static member ProjectCurveToSurface(curveIds:Guid seq, surfaceIds:Guid seq, direction:Vector3d) : Guid Rarr =
         let curves = rarr { for objectId in curveIds -> RhinoScriptSyntax.CoerceCurve objectId }
         let breps = rarr { for objectId in surfaceIds -> RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -5369,7 +5368,7 @@ type RhinoScriptSyntax private () =
     ///<param name="degree">(int) New degree (must be greater than 0)</param>
     ///<param name="pointCount">(int) New point count, which must be bigger than degree</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member RebuildCurve(curveId:Guid, degree:int, pointCount:int) : bool = 
+    static member RebuildCurve(curveId:Guid, degree:int, pointCount:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if degree<1 then  RhinoScriptingException.Raise "RhinoScriptSyntax.RebuildCurve: Degree must be greater than 0. curveId:'%s' degree:'%A' pointCount:'%A'" (Nice.str curveId) degree pointCount
         let newcurve = curve.Rebuild(pointCount, degree, preserveTangents=false)
@@ -5386,7 +5385,7 @@ type RhinoScriptSyntax private () =
     ///    of the existing knots, then the knot closest to the specified parameter
     ///    will be removed</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member RemoveCurveKnot(curve:Guid, parameter:float) : bool = 
+    static member RemoveCurveKnot(curve:Guid, parameter:float) : bool =
         let curveInst = RhinoScriptSyntax.CoerceCurve curve
         let success, nParam = curveInst.GetCurveParameterFromNurbsFormParameter(parameter)
         if not <| success then  false
@@ -5405,7 +5404,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Reverses the direction of a Curve object. Same as Rhino's Dir command.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member ReverseCurve(curveId:Guid) : bool = 
+    static member ReverseCurve(curveId:Guid) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         if curve.Reverse() then
             State.Doc.Objects.Replace(curveId, curve)|> ignore
@@ -5435,7 +5434,7 @@ type RhinoScriptSyntax private () =
     ///    16    Do not adjust Curves at G1-joins.
     ///    32    Do not merge adjacent co-linear lines or co-circular arcs or combine consecutive line segments into a polyline</param>
     ///<returns>(bool) True or False.</returns>
-    static member SimplifyCurve(curveId:Guid, [<OPT;DEF(0)>]flags:int) : bool = 
+    static member SimplifyCurve(curveId:Guid, [<OPT;DEF(0)>]flags:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mutable flags = 63
         if (flags &&& 1 )= 1  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.SplitAtFullyMultipleKnots))
@@ -5464,7 +5463,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete the input Curve</param>
     ///<returns>(Guid Rarr) list of new Curves.</returns>
-    static member SplitCurve(curveId:Guid, parameter:float seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+    static member SplitCurve(curveId:Guid, parameter:float seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurves = curve.Split(parameter)
         if isNull newcurves then  RhinoScriptingException.Raise "RhinoScriptSyntax.SplitCurve failed. curveId:'%s' parameter:'%A' deleteInput:'%A'" (Nice.str curveId) parameter deleteInput
@@ -5486,7 +5485,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete the input Curve. If omitted the input Curve is deleted</param>
     ///<returns>(Guid) identifier of the new Curve.</returns>
-    static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  = 
+    static member TrimCurve(curveId:Guid, interval:float * float, [<OPT;DEF(true)>]deleteInput:bool) : Guid  =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurve = curve.Trim(fst interval, snd interval)
         if isNull newcurve then  RhinoScriptingException.Raise "RhinoScriptSyntax.TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Nice.str curveId) interval deleteInput
@@ -5503,7 +5502,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) The object's identifier</param>
     ///<param name="degree">(int) The new degree</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member ChangeCurveDegree(curveId:Guid, degree:int) : bool = 
+    static member ChangeCurveDegree(curveId:Guid, degree:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve curveId
         let nc = curve.ToNurbsCurve()
         if degree > 2 && degree < 12 && curve.Degree <> degree then
@@ -5527,7 +5526,7 @@ type RhinoScriptSyntax private () =
     ///<param name="sampleNumber">(int) Optional, default value: <c>10</c>
     ///    The number of samples points to use if method is 2. The default is 10</param>
     ///<returns>(Guid Rarr) The identifiers of the new tween objects.</returns>
-    static member AddTweenCurves(fromCurveId:Guid, toCurveId:Guid, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Guid Rarr = 
+    static member AddTweenCurves(fromCurveId:Guid, toCurveId:Guid, [<OPT;DEF(1)>]numberOfCurves:int, [<OPT;DEF(0)>]method:int, [<OPT;DEF(10)>]sampleNumber:int) : Guid Rarr =
         let curve0 = RhinoScriptSyntax.CoerceCurve fromCurveId
         let curve1 = RhinoScriptSyntax.CoerceCurve toCurveId
         let mutable outCurves = Array.empty
@@ -5564,7 +5563,7 @@ type RhinoScriptSyntax private () =
     static member AddAlignedDimension(  startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d,  // TODO allow Point3d.Unset an then draw dim in XY plane
-                                        [<OPT;DEF("")>]style:string) : Guid = 
+                                        [<OPT;DEF("")>]style:string) : Guid =
         let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
         if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to create Plane.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O'" startPoint endPoint pointOnDimensionLine
         let success, s, t = plane.ClosestParameter(startPoint)
@@ -5590,7 +5589,7 @@ type RhinoScriptSyntax private () =
     ///    be initialized with the current default dimension style properties.</summary>
     ///<param name="dimStyleName">(string) Name of the new dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddDimStyle(dimStyleName:string) : unit = 
+    static member AddDimStyle(dimStyleName:string) : unit =
         let index = State.Doc.DimStyles.Add(dimStyleName)
         if index<0 then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddDimStyle failed. dimStyleName:'%A'" dimStyleName
 
@@ -5606,15 +5605,15 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of the new leader.</returns>
     static member AddLeader( points:Point3d seq,
                              text:string,
-                             [<OPT;DEF(Plane())>]plane:Plane) : Guid = 
+                             [<OPT;DEF(Plane())>]plane:Plane) : Guid =
         let points2d = Rarr()
-        let plane0 = 
+        let plane0 =
             if plane.IsValid then plane
             else
                 let ps= Rarr(points)
-                if ps.Count<2 then 
+                if ps.Count<2 then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader needs at least two points.  given %A, text:%s" points text
-                elif ps.Count=2 then 
+                elif ps.Count=2 then
                     let y =  ps.[1] - ps.[0]
                     if y.IsTiny(State.Doc.ModelAbsoluteTolerance*100.) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader two points given are identical %A, text:%s" points text
                     let pl = Plane(ps.[0], Vector3d.CrossProduct (y, Vector3d.ZAxis), y)
@@ -5647,8 +5646,8 @@ type RhinoScriptSyntax private () =
     static member AddLinearDimension(   startPoint:Point3d,
                                         endPoint:Point3d,
                                         pointOnDimensionLine:Point3d, // TODO allow Point3d.Unset an then draw dim in XY plane
-                                        [<OPT;DEF(Plane())>] plane:Plane ) : Guid = 
-        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail 
+                                        [<OPT;DEF(Plane())>] plane:Plane ) : Guid =
+        let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
         let success, s, t = plane0.ClosestParameter(startPoint)
@@ -5673,7 +5672,7 @@ type RhinoScriptSyntax private () =
     static member CurrentDimStyle() : string = //GET
         State.Doc.DimStyles.Current.Name
 
-    ///<summary>Changes the current default dimension style. 
+    ///<summary>Changes the current default dimension style.
     ///  Raise a RhinoScriptingException if the style does not exist.</summary>
     ///<param name="dimStyleName">(string) Name of an existing dimension style to make current</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -5690,7 +5689,7 @@ type RhinoScriptSyntax private () =
     ///    to be removed cannot be referenced by any dimension objects.</summary>
     ///<param name="dimStyleName">(string) The name of an unreferenced dimension style</param>
     ///<returns>(unit) void, nothing (fails on error).</returns>
-    static member DeleteDimStyle(dimStyleName:string) : unit = 
+    static member DeleteDimStyle(dimStyleName:string) : unit =
         let ds = State.Doc.DimStyles.FindName(dimStyleName)
         if isNull ds then
             RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDimStyle failed. dimStyleName:'%s'" dimStyleName
@@ -5720,7 +5719,7 @@ type RhinoScriptSyntax private () =
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimensionStyle set failed.  objectId:'%s' dimStyleName:'%s'" (Nice.str objectId) dimStyleName
         let mutable annotation = annotationObject.Geometry:?> AnnotationBase
         annotation.DimensionStyleId <- ds.Id
-        annotationObject.CommitChanges() |> ignore 
+        annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the dimension style of multiple dimension objects.</summary>
@@ -5734,13 +5733,13 @@ type RhinoScriptSyntax private () =
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let mutable annotation = annotationObject.Geometry:?> AnnotationBase
             annotation.DimensionStyleId <- ds.Id
-            annotationObject.CommitChanges() |> ignore 
+            annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the text displayed by a dimension object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(string) The text displayed by a dimension object.</returns>
-    static member DimensionText(objectId:Guid) : string = 
+    static member DimensionText(objectId:Guid) : string =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         annotationObject.DisplayText
 
@@ -5763,7 +5762,7 @@ type RhinoScriptSyntax private () =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> AnnotationBase
         geo.PlainText <- usertext
-        annotationObject.CommitChanges() |> ignore 
+        annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the user text string of multiple dimension objects. The user
@@ -5776,13 +5775,13 @@ type RhinoScriptSyntax private () =
             let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
             let geo = annotationObject.Geometry :?> AnnotationBase
             geo.PlainText <- usertext
-            annotationObject.CommitChanges() |> ignore 
+            annotationObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the value of a dimension object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(float) numeric value of the dimension.</returns>
-    static member DimensionValue(objectId:Guid) : float = 
+    static member DimensionValue(objectId:Guid) : float =
         let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
         let geo = annotationObject.Geometry :?> Dimension
         geo.NumericValue
@@ -5838,7 +5837,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the number of dimension styles in the document.</summary>
     ///<returns>(int) The number of dimension styles in the document.</returns>
-    static member DimStyleCount() : int = 
+    static member DimStyleCount() : int =
         State.Doc.DimStyles.Count
 
 
@@ -5974,7 +5973,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the names of all dimension styles in the document.</summary>
     ///<returns>(string Rarr) The names of all dimension styles in the document.</returns>
-    static member DimStyleNames() : string Rarr = 
+    static member DimStyleNames() : string Rarr =
         rarr {for  ds in State.Doc.DimStyles -> ds.Name }
 
 
@@ -6199,7 +6198,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is an aligned dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsAlignedDimension(objectId:Guid) : bool = 
+    static member IsAlignedDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? LinearDimension as g -> g.Aligned
         | _ -> false
@@ -6208,7 +6207,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is an angular dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsAngularDimension(objectId:Guid) : bool = 
+    static member IsAngularDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? AngularDimension -> true
         | _ -> false
@@ -6217,7 +6216,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is a diameter dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDiameterDimension(objectId:Guid) : bool = 
+    static member IsDiameterDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? RadialDimension as g -> g.IsDiameterDimension
         | _ -> false
@@ -6226,7 +6225,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is a dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimension(objectId:Guid) : bool = 
+    static member IsDimension(objectId:Guid) : bool =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? AnnotationBase  -> true
         | _ -> false
@@ -6235,7 +6234,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  the existence of a dimension style in the document. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of a dimStyle to test for</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimStyle(dimStyle:string) : bool = 
+    static member IsDimStyle(dimStyle:string) : bool =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         notNull ds
 
@@ -6243,7 +6242,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  that an existing dimension style is from a reference file. Returns false for any other Rhino object.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDimStyleReference(dimStyle:string) : bool = 
+    static member IsDimStyleReference(dimStyle:string) : bool =
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then false
         else ds.IsReference
@@ -6252,7 +6251,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is a dimension leader object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLeader(objectId:Guid) : bool = 
+    static member IsLeader(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? Leader  -> true
             | _ -> false
@@ -6261,7 +6260,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is a linear dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLinearDimension(objectId:Guid) : bool = 
+    static member IsLinearDimension(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? LinearDimension  -> true
             | _ -> false
@@ -6270,7 +6269,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is an ordinate dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsOrdinateDimension(objectId:Guid) : bool = 
+    static member IsOrdinateDimension(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? OrdinateDimension  -> true
             | _ -> false
@@ -6279,7 +6278,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if  an object is a radial dimension object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsRadialDimension(objectId:Guid) : bool = 
+    static member IsRadialDimension(objectId:Guid) : bool =
             match RhinoScriptSyntax.CoerceGeometry objectId with
             | :? RadialDimension  -> true
             | _ -> false
@@ -6305,7 +6304,7 @@ type RhinoScriptSyntax private () =
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 g.PlainText <- text               // TODO or use rich text?
                 if not <| State.Doc.Objects.Replace(objectId,g) then RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText: Objects.Replace(objectId,g) get failed. objectId:'%s'" (Nice.str objectId)
-                annotationObject.CommitChanges() |> ignore 
+                annotationObject.CommitChanges() |> ignore
                 State.Doc.Views.Redraw()
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText set failed for  %s"  (Nice.str objectId)
 
@@ -6321,7 +6320,7 @@ type RhinoScriptSyntax private () =
     ///<param name="oldStyle">(string) The name of an existing dimension style</param>
     ///<param name="newStyle">(string) The new dimension style name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameDimStyle(oldStyle:string, newStyle:string) : unit = 
+    static member RenameDimStyle(oldStyle:string, newStyle:string) : unit =
         let mutable ds = State.Doc.DimStyles.FindName(oldStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameDimStyle failed.  oldStyle:'%s' newStyle:'%s'" oldStyle newStyle
         ds.Name <- newStyle
@@ -6354,11 +6353,11 @@ type RhinoScriptSyntax private () =
                                         [<OPT;DEF(0)>]width:int,
                                         [<OPT;DEF(0)>]height:int,
                                         [<OPT;DEF(0)>]flags:int,
-                                        [<OPT;DEF(false)>]wireframe:bool) : bool = 
+                                        [<OPT;DEF(false)>]wireframe:bool) : bool =
         let rhview = RhinoScriptSyntax.CoerceView(view)
         let inline  ( ./. ) (i:int) (j:int) = (float(i)) / (float(j))
         let inline  ( *. ) ( i:int) (f:float) = int(round(float(i) * f))
-        let rhsize = 
+        let rhsize =
             match width, height with
             | 0, 0 -> rhview.ClientRectangle.Size
             | x, 0 ->
@@ -6398,14 +6397,14 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the name of the currently loaded Rhino document (3dm file).</summary>
     ///<returns>(string) The name of the currently loaded Rhino document (3dm file).</returns>
-    static member DocumentName() : string = 
+    static member DocumentName() : string =
         State.Doc.Name |? ""
 
 
 
     ///<summary>Returns full path of the currently loaded Rhino document including the file name (3dm file).</summary>
     ///<returns>(string) The path of the currently loaded Rhino document  including the file name(3dm file).</returns>
-    static member DocumentPath() : string = 
+    static member DocumentPath() : string =
         let p = State.Doc.Path
         if isNull p then ""
         else p
@@ -6423,7 +6422,7 @@ type RhinoScriptSyntax private () =
     ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit = 
+    static member EnableRedraw([<OPT;DEF(true)>]enable:bool) : unit =
         State.Doc.Views.RedrawEnabled <- enable
 
     ///<summary>Disables screen redrawing.
@@ -6432,7 +6431,7 @@ type RhinoScriptSyntax private () =
     ///  and afterwards disable it again if it was disabled before.
     ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
     ///<returns>(unit) void, nothing.</returns>
-    static member DisableRedraw() : unit = 
+    static member DisableRedraw() : unit =
         State.Doc.Views.RedrawEnabled <- false
 
 
@@ -6443,8 +6442,8 @@ type RhinoScriptSyntax private () =
     ///<param name="modelName">(string) Optional, The model (.3dm) from which to extract the
     ///    preview image. If omitted, the currently loaded model is used</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit = 
-        let bmp = 
+    static member ExtractPreviewImage(fileName:string, [<OPT;DEF(null:string)>]modelName:string) : unit =
+        let bmp =
             if notNull modelName  then
                 if notNull State.Doc.Path then RhinoDoc.ExtractPreviewImage(State.Doc.Path) // TODO test this works ok
                 else RhinoScriptingException.Raise "RhinoScriptSyntax.ExtractPreviewImage failed on unsaved file"
@@ -6455,7 +6454,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Checks if the current document has been modified in some way.</summary>
     ///<returns>(bool) True or False.</returns>
-    static member IsDocumentModified() : bool = 
+    static member IsDocumentModified() : bool =
         State.Doc.Modified
 
 
@@ -6478,13 +6477,13 @@ type RhinoScriptSyntax private () =
     ///    determine which version of Rhino last saved the document. Note, this
     ///    function will not return values from referenced or merged files.</summary>
     ///<returns>(int) The file version of the current document.</returns>
-    static member ReadFileVersion() : int = 
+    static member ReadFileVersion() : int =
         State.Doc.ReadFileVersion()
 
 
     ///<summary>Redraws all views.</summary>
     ///<returns>(unit).</returns>
-    static member Redraw() : unit = 
+    static member Redraw() : unit =
         let old = State.Doc.Views.RedrawEnabled
         State.Doc.Views.RedrawEnabled <- true
         State.Doc.Views.Redraw()
@@ -6710,7 +6709,7 @@ type RhinoScriptSyntax private () =
     ///    2: Custom</param>
     ///<returns>(unit) void, nothing.</returns>
     static member RenderMeshQuality(quality:int) : unit = //SET
-        let newValue = 
+        let newValue =
             if quality = 0 then
                 MeshingParameterStyle.Fast
             elif quality = 1 then
@@ -6981,7 +6980,7 @@ type RhinoScriptSyntax private () =
     ///<param name="modelUnits">(bool) Optional, default value: <c>true</c>
     ///    Return the document's model units (True) or the document's page units (False). The default is True</param>
     ///<returns>(string) The name of the current units system.</returns>
-    static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string = 
+    static member UnitSystemName([<OPT;DEF(false)>]capitalize:bool, [<OPT;DEF(true)>]singular:bool, [<OPT;DEF(false)>]abbreviate:bool, [<OPT;DEF(true)>]modelUnits:bool) : string =
         State.Doc.GetUnitSystemName(modelUnits, capitalize, singular, abbreviate)
 
 
@@ -6999,8 +6998,8 @@ type RhinoScriptSyntax private () =
     static member AddClippingPlane( plane:Plane,
                                     uMagnitude:float,
                                     vMagnitude:float,
-                                    [<OPT;DEF(null:string seq)>]views:string seq) : Guid = 
-        let viewlist = 
+                                    [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
+        let viewlist =
             if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
                 let modelviews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
@@ -7036,10 +7035,10 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(true)>]selfIllumination:bool,
                                     [<OPT;DEF(false)>]embed:bool,
                                     [<OPT;DEF(false)>]useAlpha:bool,
-                                    [<OPT;DEF(false)>]makeMesh:bool) : Guid = 
+                                    [<OPT;DEF(false)>]makeMesh:bool) : Guid =
         if not <| IO.File.Exists(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame image %s does not exist" filename
         let rc = State.Doc.Objects.AddPictureFrame(plane, filename, makeMesh, width, height, selfIllumination, embed)
-        if rc = Guid.Empty 
+        if rc = Guid.Empty
             then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPictureFrame: Unable to add picture frame to document. plane:'%s' filename:'%s' width:'%g' height:'%g' selfIllumination:'%b' embed:'%b' useAlpha:'%b' makeMesh:'%b'" plane.ToNiceString filename width height selfIllumination embed useAlpha makeMesh
         State.Doc.Views.Redraw()
         rc
@@ -7049,7 +7048,7 @@ type RhinoScriptSyntax private () =
     ///<param name="y">(float) Y location of point to add</param>
     ///<param name="z">(float) Z location of point to add</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
-    static member AddPoint(x:float, y:float, z:float) : Guid = 
+    static member AddPoint(x:float, y:float, z:float) : Guid =
         let rc = State.Doc.Objects.AddPoint(Point3d(x, y, z))
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  x:'%s' y:'%s' z:'%s'"  (NiceFormat.float x) (NiceFormat.float y) (NiceFormat.float z)
         State.Doc.Views.Redraw()
@@ -7058,7 +7057,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Adds point object to the document.</summary>
     ///<param name="point">(Point3d) point to draw</param>
     ///<returns>(Guid) identifier for the object that was added to the doc.</returns>
-    static member AddPoint(point:Point3d) : Guid = 
+    static member AddPoint(point:Point3d) : Guid =
         let rc = State.Doc.Objects.AddPoint(point)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddPoint: Unable to add point to document.  point:'%s'" point.ToNiceString
         State.Doc.Views.Redraw()
@@ -7069,7 +7068,7 @@ type RhinoScriptSyntax private () =
     ///<param name="points">(Point3d array) List of values where every multiple of three represents a point</param>
     ///<param name="colors">(Drawing.Color IList) Optional, List of colors to apply to each point</param>
     ///<returns>(Guid) identifier of point cloud.</returns>
-    static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color IList)>]colors:Drawing.Color IList) : Guid = 
+    static member AddPointCloud(points:Point3d [], [<OPT;DEF(null:Drawing.Color IList)>]colors:Drawing.Color IList) : Guid =
         if notNull colors && Seq.length(colors) = Seq.length(points) then
             let pc = new PointCloud()
             for i = 0  to -1 + (Seq.length(points)) do
@@ -7089,7 +7088,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Adds one or more point objects to the document.</summary>
     ///<param name="points">(Point3d seq) List of points</param>
     ///<returns>(Guid Rarr) List of identifiers of the new objects.</returns>
-    static member AddPoints(points:Point3d seq) : Guid Rarr = 
+    static member AddPoints(points:Point3d seq) : Guid Rarr =
         let rc = rarr{ for point in points do yield State.Doc.Objects.AddPoint(point) }
         State.Doc.Views.Redraw()
         rc
@@ -7129,13 +7128,13 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
-                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid = 
+                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = //DocObjects.TextVerticalAlignment) : Guid =
 
         if isNull text || text = "" then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText Text invalid.  text:'%s' plane:'%s' height:'%g' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane.ToNiceString height font fontStyle horizontalAlignment verticalAlignment
         let bold   = (1 = fontStyle || 3 = fontStyle)
-        let italic = (2 = fontStyle || 3 = fontStyle)         
+        let italic = (2 = fontStyle || 3 = fontStyle)
         let ds = State.Doc.DimStyles.Current
-        let qn, quartetBoldProp , quartetItalicProp = 
+        let qn, quartetBoldProp , quartetItalicProp =
             if isNull font then
                 ds.Font.QuartetName, ds.Font.Bold, ds.Font.Italic
             else
@@ -7162,7 +7161,7 @@ type RhinoScriptSyntax private () =
 
         te.TextHorizontalAlignment <- LanguagePrimitives.EnumOfValue horizontalAlignment
         te.TextVerticalAlignment <- LanguagePrimitives.EnumOfValue verticalAlignment
-        let objectId = State.Doc.Objects.Add(te)       
+        let objectId = State.Doc.Objects.Add(te)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddText: Unable to add text to document.  text:'%A' plane:'%A' height:'%A' font:'%A' fontStyle:'%A' horizontalAlignment '%A' verticalAlignment:'%A'" text plane height font fontStyle horizontalAlignment verticalAlignment
         State.Doc.Views.Redraw()
         objectId
@@ -7200,7 +7199,7 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(null:string)>]font:string,
                             [<OPT;DEF(0)>]fontStyle:int,
                             [<OPT;DEF(1uy)>]horizontalAlignment:byte, //DocObjects.TextHorizontalAlignment, //TODO how to keep enum type and keep parameter optional ???
-                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid = 
+                            [<OPT;DEF(3uy)>]verticalAlignment  :byte) : Guid =
         let pl = Plane(pt,Vector3d.XAxis,Vector3d.YAxis)
         RhinoScriptSyntax.AddText(text, pl, height, font, fontStyle, horizontalAlignment, verticalAlignment)
 
@@ -7208,29 +7207,29 @@ type RhinoScriptSyntax private () =
     ///<param name="text">(string) String in dot</param>
     ///<param name="point">(Point3d) A 3D point identifying the origin point</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddTextDot(text:string, point:Point3d) : Guid = 
+    static member AddTextDot(text:string, point:Point3d) : Guid =
         let rc = State.Doc.Objects.AddTextDot(text, point)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' point:'%s'" text (Nice.str point)
         State.Doc.Views.Redraw()
         rc
 
     ///<summary>Add a text dot to the document.</summary>
-    ///<param name="text">(string) String in dot</param> 
+    ///<param name="text">(string) String in dot</param>
     ///<param name="x">(float) X position</param>
     ///<param name="y">(float) Y position</param>
     ///<param name="z">(float) Z position</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddTextDot(text:string, x:float,y,z) : Guid = 
+    static member AddTextDot(text:string, x:float,y,z) : Guid =
         let rc = State.Doc.Objects.AddTextDot(text, Point3d(x,y,z))
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddTextDot: Unable to add TextDot to document. text:'%s' at x:%g, y:%g, z:%g" text x y z
         State.Doc.Views.Redraw()
         rc
 
-    
+
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="geometry">(GeometryBase) The geometry to use</param>
     ///<returns>(float) area.</returns>
-    static member Area(geometry:GeometryBase) : float =         
+    static member Area(geometry:GeometryBase) : float =
         let mp = AreaMassProperties.Compute([geometry])
         if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from geometry:'%s'" (Nice.str geometry)
         mp.Area
@@ -7238,7 +7237,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Compute the area of a closed Curve, Hatch, Surface, Polysurface, or Mesh.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(float) area.</returns>
-    static member Area(objectId:Guid) : float = 
+    static member Area(objectId:Guid) : float =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mp = AreaMassProperties.Compute([rhobj.Geometry])
         if mp |> isNull then RhinoScriptingException.Raise "RhinoScriptSyntax.Area: Unable to compute area mass properties from objectId:'%s'" (Nice.str objectId)
@@ -7251,7 +7250,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBoxEstimate(geometries: seq<#GeometryBase>) : BoundingBox = 
+    static member BoundingBoxEstimate(geometries: seq<#GeometryBase>) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
         for g in geometries do
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(false)) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
@@ -7264,7 +7263,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox = 
+    static member BoundingBoxEstimate(objects:Guid seq) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
         for o in objects do
             let g =  RhinoScriptSyntax.CoerceGeometry o
@@ -7278,7 +7277,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBoxEstimate(object:Guid) : BoundingBox = 
+    static member BoundingBoxEstimate(object:Guid) : BoundingBox =
         let g =  RhinoScriptSyntax.CoerceGeometry object
         g.GetBoundingBox(false) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
@@ -7288,7 +7287,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq) : BoundingBox = 
+    static member BoundingBox(objects:Guid seq) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
         for o in objects do
             let g =  RhinoScriptSyntax.CoerceGeometry o
@@ -7300,9 +7299,9 @@ type RhinoScriptSyntax private () =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(geos:seq<#GeometryBase>) : BoundingBox = 
+    static member BoundingBox(geos:seq<#GeometryBase>) : BoundingBox =
         let mutable bbox = BoundingBox.Empty
-        for g in geos do            
+        for g in geos do
             bbox <- BoundingBox.Union(bbox, g.GetBoundingBox(true))
         bbox
 
@@ -7312,7 +7311,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Geometry.BoundingBox) The BoundingBox (oriented to the World XY Plane).
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(object:Guid) : BoundingBox = 
+    static member BoundingBox(object:Guid) : BoundingBox =
         let g =  RhinoScriptSyntax.CoerceGeometry object
         g.GetBoundingBox(true) //https://discourse.mcneel.com/t/questions-about-getboundingbox-bool/32092/5
 
@@ -7325,7 +7324,7 @@ type RhinoScriptSyntax private () =
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box = 
+    static member BoundingBox(objects:Guid seq, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         let mutable bbox = BoundingBox.Empty
         if not plane.IsValid then RhinoScriptingException.Raise "Invalid Geometry.Plane:%s in RhinoScriptSyntax.BoundingBox of %s" plane.ToNiceString (Nice.str objects)
         let worldtoplane = Transform.ChangeBasis(Plane.WorldXY, plane)
@@ -7350,7 +7349,7 @@ type RhinoScriptSyntax private () =
     ///    It cannot be a Geometry.BoundingBox since it is not in World XY
     ///    To get the eight 3D points that define the bounding box call box.GetCorners()
     ///    Points returned in counter-clockwise order starting with the bottom rectangle of the box.</returns>
-    static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box = 
+    static member BoundingBox(object:Guid, plane:Plane, [<OPT;DEF(true)>]inWorldCoords:bool) : Box =
         RhinoScriptSyntax.BoundingBox([object],plane,inWorldCoords)
 
     ///<summary>Returns a new inflated the box with equal amounts in all directions.
@@ -7360,7 +7359,7 @@ type RhinoScriptSyntax private () =
     ///<param name="bbox">(BoundingBox) Geometry.BoundingBox</param>
     ///<param name="amount">(float) amount in model units to expand</param>
     ///<returns>(Geometry.BoundingBox) The new Box.</returns>
-    static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox = 
+    static member BoundingBoxInflate(bbox:BoundingBox, amount:float) : BoundingBox =
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amount)
         if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by %f on %s" amount bbox.ToNiceString
@@ -7375,7 +7374,7 @@ type RhinoScriptSyntax private () =
     ///<param name="amountY">(float) amount on X Axis in model units to expand</param>
     ///<param name="amountZ">(float) amount on X Axis in model units to expand</param>
     ///<returns>(Geometry.BoundingBox) The new Box.</returns>
-    static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox = 
+    static member BoundingBoxInflate(bbox:BoundingBox, amountX:float, amountY:float, amountZ:float) : BoundingBox =
         let b = BoundingBox(bbox.Min,bbox.Max)
         b.Inflate(amountX, amountY, amountZ)
         if not b.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.BoundingBoxInflate Invalid BoundingBox from rs.BoundingBoxInflate by x:%f, y:%f, z:%f, on %s" amountX amountY amountZ bbox.ToNiceString
@@ -7386,7 +7385,7 @@ type RhinoScriptSyntax private () =
     ///<param name="first">(Guid) The identifier of the first object to compare</param>
     ///<param name="second">(Guid) The identifier of the second object to compare</param>
     ///<returns>(bool) True if the objects are geometrically identical, otherwise False.</returns>
-    static member CompareGeometry(first:Guid, second:Guid) : bool = 
+    static member CompareGeometry(first:Guid, second:Guid) : bool =
         let firstG = RhinoScriptSyntax.CoerceGeometry(first)
         let secondG = RhinoScriptSyntax.CoerceGeometry(second)
         GeometryBase.GeometryEquals(firstG, secondG)
@@ -7397,7 +7396,7 @@ type RhinoScriptSyntax private () =
     ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the text object after the Curves have been created</param>
     ///<returns>(Guid array) Array of outline Curves.</returns>
-    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> = 
+    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
@@ -7410,42 +7409,42 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if that an object is a clipping Plane object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a clipping Plane.</returns>
-    static member IsClippingPlane(objectId:Guid) : bool = 
+    static member IsClippingPlane(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? ClippingPlaneSurface
 
 
     ///<summary>Checks if an object is a point object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point.</returns>
-    static member IsPoint(objectId:Guid) : bool = 
+    static member IsPoint(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? Point
 
 
     ///<summary>Checks if an object is a point cloud object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a point cloud.</returns>
-    static member IsPointCloud(objectId:Guid) : bool = 
+    static member IsPointCloud(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? PointCloud
 
 
     ///<summary>Checks if an object is a text object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text object.</returns>
-    static member IsText(objectId:Guid) : bool = 
+    static member IsText(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? TextEntity
 
 
     ///<summary>Checks if an object is a text dot object. Returns false for any other Rhino object.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if the object with a given objectId is a text dot object.</returns>
-    static member IsTextDot(objectId:Guid) : bool = 
+    static member IsTextDot(objectId:Guid) : bool =
         RhinoScriptSyntax.CoerceGeometry objectId :? TextDot
 
 
     ///<summary>Returns the point count of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(int) number of points.</returns>
-    static member PointCloudCount(objectId:Guid) : int = 
+    static member PointCloudCount(objectId:Guid) : int =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.Count
 
@@ -7453,7 +7452,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a point cloud has hidden points.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has hidden points, otherwise False.</returns>
-    static member PointCloudHasHiddenPoints(objectId:Guid) : bool = 
+    static member PointCloudHasHiddenPoints(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.HiddenPointCount>0
 
@@ -7461,7 +7460,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a point cloud has point colors.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(bool) True if cloud has point colors, otherwise False.</returns>
-    static member PointCloudHasPointColors(objectId:Guid) : bool = 
+    static member PointCloudHasPointColors(objectId:Guid) : bool =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.ContainsColors
 
@@ -7489,7 +7488,7 @@ type RhinoScriptSyntax private () =
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudHidePoints length of hidden values does not match point cloud point count"
 
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore 
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -7513,7 +7512,7 @@ type RhinoScriptSyntax private () =
             for i, c in Seq.indexed colors do pc.[i].Color <- c
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointCloudPointColors length of color values does not match PointCloud point count"
-        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore 
+        (RhinoScriptSyntax.CoerceRhinoObject objectId).CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -7521,7 +7520,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
     ///<returns>(Point3d array) list of points.</returns>
-    static member PointCloudPoints(objectId:Guid) : array<Point3d> = 
+    static member PointCloudPoints(objectId:Guid) : array<Point3d> =
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
         pc.GetPoints()
 
@@ -7534,7 +7533,7 @@ type RhinoScriptSyntax private () =
     ///<param name="amount">(int) Optional, default value: <c>1</c>
     ///    The amount of required closest points. Defaults to 1</param>
     ///<returns>(int array seq) nested lists with amount items within a list, with the indices of the found points.</returns>
-    static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> = 
+    static member PointCloudKNeighbors(ptCloud:Point3d seq, needlePoints:Point3d seq, [<OPT;DEF(1)>]amount:int) : seq<int[]> =
         if Seq.length(needlePoints) > 100 then
             RTree.Point3dKNeighbors(ptCloud, needlePoints, amount)
         else
@@ -7547,7 +7546,7 @@ type RhinoScriptSyntax private () =
     ///<param name="needlePoints">(Point3d seq) A list of points to search in the PointCloud. This can also be specified as a point cloud</param>
     ///<param name="distance">(float) The included limit for listing points</param>
     ///<returns>(int array seq) a seq of arrays with the indices of the found points.</returns>
-    static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> = 
+    static member PointCloudClosestPoints(ptCloud:Point3d seq, needlePoints:Point3d seq, distance:float) : seq<int []> =
         RTree.Point3dClosestPoints(ptCloud, needlePoints, distance)
 
 
@@ -7678,7 +7677,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the font used by a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
     ///<returns>(string) The current font face name.</returns>
-    static member TextObjectFont(objectId:Guid) : string = //GET        
+    static member TextObjectFont(objectId:Guid) : string = //GET
         (RhinoScriptSyntax.CoerceTextEntity(objectId)).Font.QuartetName
 
 
@@ -7791,7 +7790,7 @@ type RhinoScriptSyntax private () =
             annotation.PlainText <-  text
             if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) text
         State.Doc.Views.Redraw()
-    
+
 
      ///<summary>Returns the RichText formatting string of a text object.</summary>
     ///<param name="objectId">(Guid) The identifier of a text object</param>
@@ -7810,9 +7809,9 @@ type RhinoScriptSyntax private () =
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style            
+            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style
             annotation.SetRichText(rtfString, ds)
-        else 
+        else
             annotation.RichText <-  rtfString
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s'" (Nice.str objectId) rtfString
         State.Doc.Views.Redraw()
@@ -7824,15 +7823,15 @@ type RhinoScriptSyntax private () =
     ///<param name="rtfString">(string) A new text RichText formatting string</param>
     ///<param name="style">(string) Optional, default value: <c>""</c> Name of dimension style</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET        
+    static member TextObjectRichText(objectIds:Guid seq,  rtfString:string, [<OPT;DEF("")>]style:string ) : unit = //MULTISET
         if style <> "" then
             let ds = State.Doc.DimStyles.FindName(style)
-            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style    
+            if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText, style not found:'%s'"  style
             for objectId in objectIds do
-                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)                
+                let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
                 if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectRichText failed.  objectId:'%s' text:'%s' style:'%s'" (Nice.str objectId) rtfString style
                 annotation.SetRichText(rtfString, ds)
-        else             
+        else
             for objectId in objectIds do
                 let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
                 annotation.RichText <-  rtfString
@@ -7851,15 +7850,15 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectId:Guid, style:int) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font          
-        let f = 
+        let fontdata = annotation.Font
+        let f =
             match style with
             |3 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=true)
             |2 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=true)
             |1 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=true , italic=false)
             |0 -> DocObjects.Font.FromQuartetProperties(fontdata.QuartetName, bold=false, italic=false)
             |_ -> (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style)
-        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName 
+        if isNull f then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' style:%d not available for %s" (Nice.str objectId) style fontdata.QuartetName
         if not <| State.Doc.Objects.Replace(objectId, annotation) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectStyle failed.  objectId:'%s' bad style:%d" (Nice.str objectId) style
         State.Doc.Views.Redraw()
@@ -7873,7 +7872,7 @@ type RhinoScriptSyntax private () =
     ///    3 = Bold and Italic</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectStyle(objectIds:Guid seq, style:int) : unit = //MULTISET
-        for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)        
+        for objectId in objectIds do RhinoScriptSyntax.TextObjectStyle(objectId, style)
 
 
     ///<summary>Modifies the font used by a text object. Keeps the current state of bold and italic when possible.</summary>
@@ -7882,8 +7881,8 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member TextObjectFont(objectId:Guid, font:string) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
-        let fontdata = annotation.Font           
-        let f = 
+        let fontdata = annotation.Font
+        let f =
             DocObjects.Font.FromQuartetProperties(font, fontdata.Bold, fontdata.Italic)
             // normally calls will not  go further than FromQuartetProperties(font, false, false)
             // but there are a few rare fonts that don"t have a regular font
@@ -7891,7 +7890,7 @@ type RhinoScriptSyntax private () =
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=false)
             |? DocObjects.Font.FromQuartetProperties(font, bold=false, italic=true )
             |? DocObjects.Font.FromQuartetProperties(font, bold=true , italic=true )
-            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)        
+            |? (RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font)
         annotation.Font <- f
         if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectFont failed.  objectId:'%s' font:''%s''" (Nice.str objectId) font
         State.Doc.Views.Redraw()
@@ -7915,7 +7914,7 @@ type RhinoScriptSyntax private () =
     ///    If True, the specified object's grips will be turned on.
     ///    If False, they will be turned off</param>
     ///<returns>(bool) True on success, False on failure.</returns>
-    static member EnableObjectGrips(objectId:Guid, [<OPT;DEF(true)>]enable:bool) : bool = 
+    static member EnableObjectGrips(objectId:Guid, [<OPT;DEF(true)>]enable:bool) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if enable <> rhobj.GripsOn then
             rhobj.GripsOn <- enable
@@ -7935,8 +7934,8 @@ type RhinoScriptSyntax private () =
     ///    [2] = location of the grip.</returns>
     static member GetObjectGrip( [<OPT;DEF(null:string)>]message:string,
                                  [<OPT;DEF(false)>]preselect:bool,
-                                 [<OPT;DEF(false)>]select:bool) : Guid * int * Point3d = 
-        let get () = 
+                                 [<OPT;DEF(false)>]select:bool) : Guid * int * Point3d =
+        let get () =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -7949,7 +7948,7 @@ type RhinoScriptSyntax private () =
                 if select then
                     grip.Select(true, true)|> ignore
                     State.Doc.Views.Redraw()
-                (grip.OwnerId, grip.Index, grip.CurrentLocation)            
+                (grip.OwnerId, grip.Index, grip.CurrentLocation)
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -7966,8 +7965,8 @@ type RhinoScriptSyntax private () =
     ///    [n][2] = location of the grip.</returns>
     static member GetObjectGrips( [<OPT;DEF(null:string)>]message:string,
                                   [<OPT;DEF(false)>]preselect:bool,
-                                  [<OPT;DEF(false)>]select:bool) : Rarr<Guid * int * Point3d> = 
-        let get () = 
+                                  [<OPT;DEF(false)>]select:bool) : Rarr<Guid * int * Point3d> =
+        let get () =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -7982,14 +7981,14 @@ type RhinoScriptSyntax private () =
                     let location = grip.CurrentLocation
                     rc.Add((objectId, index, location))
                     if select then grip.Select(true, true)|>ignore
-                if select then State.Doc.Views.Redraw()            
+                if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor get
 
 
 
     /// Internal helper
-    static member private neighborGrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> = 
+    static member private neighborGrip(i, objectId:Guid, index, direction, enable) : Result<DocObjects.GripObject, string> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then Result.Error "rhobj.GetGrips() is null"
@@ -7997,7 +7996,7 @@ type RhinoScriptSyntax private () =
             if grips.Length <= index then Result.Error "rhobj.GetGrips() failed:  grips.Length <= index "
             else
                 let grip = grips.[index]
-                let ng = 
+                let ng =
                     if direction = 0 then
                         grip.NeighborGrip(i, 0, 0, wrap=false)
                     else
@@ -8019,7 +8018,7 @@ type RhinoScriptSyntax private () =
     static member NextObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int ,
-                                  [<OPT;DEF(true)>]enable:bool) : int = 
+                                  [<OPT;DEF(true)>]enable:bool) : int =
         match RhinoScriptSyntax.neighborGrip(1, objectId, index, direction, enable) with
         |Ok r -> r.Index
         |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
@@ -8027,7 +8026,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns number of grips owned by an object.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) number of grips.</returns>
-    static member ObjectGripCount(objectId:Guid) : int = 
+    static member ObjectGripCount(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripCount failed.  objectId:'%s'" (Nice.str objectId)
@@ -8107,7 +8106,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an object's grips are turned on.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating Grips state.</returns>
-    static member ObjectGripsOn(objectId:Guid) : bool = 
+    static member ObjectGripsOn(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.GripsOn
 
@@ -8116,7 +8115,7 @@ type RhinoScriptSyntax private () =
     ///    is selected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member ObjectGripsSelected(objectId:Guid) : bool = 
+    static member ObjectGripsSelected(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
         else
@@ -8139,7 +8138,7 @@ type RhinoScriptSyntax private () =
     static member PrevObjectGrip( objectId:Guid,
                                   index:int,
                                   [<OPT;DEF(0)>]direction:int,
-                                  [<OPT;DEF(true)>]enable:bool) : int = 
+                                  [<OPT;DEF(true)>]enable:bool) : int =
         match RhinoScriptSyntax.neighborGrip(-1, objectId, index, direction, enable) with
         |Ok r -> r.Index
         |Error s -> RhinoScriptingException.Raise "RhinoScriptSyntax.PrevObjectGrip failed with %s for index %d, direction %d on %A" s index direction objectId
@@ -8148,7 +8147,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns a list of grip indices identifying an object's selected grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int Rarr) list of indices.</returns>
-    static member SelectedObjectGrips(objectId:Guid) : int Rarr = 
+    static member SelectedObjectGrips(objectId:Guid) : int Rarr =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let rc = Rarr()
         if not rhobj.GripsOn then rc
@@ -8166,7 +8165,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to select</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member SelectObjectGrip(objectId:Guid, index:int) : bool = 
+    static member SelectObjectGrip(objectId:Guid, index:int) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
         else
@@ -8187,7 +8186,7 @@ type RhinoScriptSyntax private () =
     ///    they will not be selected.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips selected.</returns>
-    static member SelectObjectGrips(objectId:Guid) : int = 
+    static member SelectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.SelectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
@@ -8207,7 +8206,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<param name="index">(int) Index of the grip to unselect</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member UnselectObjectGrip(objectId:Guid, index:int) : bool = 
+    static member UnselectObjectGrip(objectId:Guid, index:int) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then false
         else
@@ -8227,7 +8226,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Unselects an object's grips. Note, the grips will not be turned off.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
     ///<returns>(int) Number of grips unselected.</returns>
-    static member UnselectObjectGrips(objectId:Guid) : int = 
+    static member UnselectObjectGrips(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObjectGrips failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
@@ -8251,7 +8250,7 @@ type RhinoScriptSyntax private () =
     ///<param name="groupName">(string) Optional, Name of the new group. If omitted, Rhino automatically
     ///    generates the group name</param>
     ///<returns>(string) name of the new group.</returns>
-    static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string = 
+    static member AddGroup([<OPT;DEF(null:string)>]groupName:string) : string =
         let mutable index = -1
         if isNull groupName then
             index <- State.Doc.Groups.Add()
@@ -8275,7 +8274,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Adds two or more objects to new group.</summary>
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member GroupObjects(objectIds:Guid seq) : unit = 
+    static member GroupObjects(objectIds:Guid seq) : unit =
         let index = State.Doc.Groups.Add()
         if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects needs to have more than one objects but has %d" (Seq.length objectIds)
         if not <|  State.Doc.Groups.AddToGroup(index, objectIds) then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed on %A"  objectIds
@@ -8285,7 +8284,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectIds">(Guid seq) List of Strings or Guids representing the object identifiers</param>
     ///<param name="groupName">(string) The name of group to create</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member GroupObjects(objectIds:Guid seq, groupName:string) : unit = 
+    static member GroupObjects(objectIds:Guid seq, groupName:string) : unit =
         let index = State.Doc.Groups.Add( groupName )
         if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects failed to create group with name '%s' for %d objects" groupName (Seq.length objectIds)
         if objectIds |> Seq.hasMaximumItems 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.GroupObjects to '%s' needs to have more than one objects but has %d" groupName (Seq.length objectIds)
@@ -8296,7 +8295,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) String or Guid representing the object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddObjectToGroup(objectId:Guid, groupName:string) : unit = 
+    static member AddObjectToGroup(objectId:Guid, groupName:string) : unit =
         let index = State.Doc.Groups.Find(groupName)
         if index < 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectToGroup Can't add object to group, group '%s' not found" groupName
         if not <|  State.Doc.Groups.AddToGroup(index, objectId) then RhinoScriptingException.Raise "RhinoScriptSyntax.AddObjectToGroup failed '%s' and %A" groupName objectId
@@ -8306,7 +8305,7 @@ type RhinoScriptSyntax private () =
     ///    removed. Deleting a group does not delete the member objects.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteGroup(groupName:string) : unit = 
+    static member DeleteGroup(groupName:string) : unit =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteGroup Can't DeleteGroup, group '%s' not found" groupName
         if not <| State.Doc.Groups.Delete(index) then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteGroup failed for group '%s' " groupName
@@ -8314,14 +8313,14 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the number of groups in the document.</summary>
     ///<returns>(int) The number of groups in the document.</returns>
-    static member GroupCount() : int = 
+    static member GroupCount() : int =
         State.Doc.Groups.Count
 
 
     ///<summary>Returns the names of all the groups in the document
     ///    None if no names exist in the document.</summary>
     ///<returns>(string array) The names of all the groups in the document. None if no names exist in the document.</returns>
-    static member GroupNames() : string array = 
+    static member GroupNames() : string array =
         let names = State.Doc.Groups.GroupNames(true)
         if names|> isNull  then [| |]
         else names
@@ -8331,7 +8330,7 @@ type RhinoScriptSyntax private () =
     ///    snapped to, and cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were hidden.</returns>
-    static member HideGroup(groupName:string) : int = 
+    static member HideGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.HideGroup: Can't HideGroup, group '%s' not found" groupName
         State.Doc.Groups.Hide(index);
@@ -8340,14 +8339,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies the existence of a group.</summary>
     ///<param name="groupName">(string) The name of the group to check for</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsGroup(groupName:string) : bool = 
+    static member IsGroup(groupName:string) : bool =
         State.Doc.Groups.Find(groupName)>=0
 
 
     ///<summary>Checks if an existing group is empty, or contains no object members.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(bool) True or False if groupName is empty.</returns>
-    static member IsGroupEmpty(groupName:string) : bool = 
+    static member IsGroupEmpty(groupName:string) : bool =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.IsGroupEmpty: Can't check IsGroupEmpty, group '%s' not found" groupName
         State.Doc.Groups.GroupObjectCount(index)>0
@@ -8357,7 +8356,7 @@ type RhinoScriptSyntax private () =
     ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) Number of objects that were locked.</returns>
-    static member LockGroup(groupName:string) : int = 
+    static member LockGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.LockGroup failed.  groupName:'%A'" groupName
         State.Doc.Groups.Lock(index);
@@ -8367,7 +8366,7 @@ type RhinoScriptSyntax private () =
     ///    Neither the object nor the group can be reference objects.</summary>
     ///<param name="objectId">(Guid) The object identifier</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member RemoveObjectFromAllGroups(objectId:Guid) : bool = 
+    static member RemoveObjectFromAllGroups(objectId:Guid) : bool =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if rhinoObject.GroupCount<1 then false
         else
@@ -8380,7 +8379,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) The object identifier</param>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit = 
+    static member RemoveObjectFromGroup(objectId:Guid, groupName:string) : unit =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RemoveObjectFromGroup failed.  objectId:'%s' groupName:'%A'" (Nice.str objectId) groupName
@@ -8410,7 +8409,7 @@ type RhinoScriptSyntax private () =
     ///<param name="oldName">(string) The name of an existing group</param>
     ///<param name="newName">(string) The new group name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameGroup(oldName:string, newName:string) : unit = 
+    static member RenameGroup(oldName:string, newName:string) : unit =
         let index = State.Doc.Groups.Find(oldName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RenameGroup failed.  oldName:'%A' newName:'%A'" oldName newName
         if not <| State.Doc.Groups.ChangeGroupName(index, newName) then
@@ -8421,7 +8420,7 @@ type RhinoScriptSyntax private () =
     ///    visible, cannot be snapped to, and cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were shown.</returns>
-    static member ShowGroup(groupName:string) : int = 
+    static member ShowGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowGroup failed.  groupName:'%A'" groupName
         State.Doc.Groups.Show(index)
@@ -8431,7 +8430,7 @@ type RhinoScriptSyntax private () =
     ///    can be snapped to, but cannot be selected.</summary>
     ///<param name="groupName">(string) The name of an existing group</param>
     ///<returns>(int) The number of objects that were unlocked.</returns>
-    static member UnlockGroup(groupName:string) : int = 
+    static member UnlockGroup(groupName:string) : int =
         let index = State.Doc.Groups.Find(groupName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockGroup failed.  groupName:'%A'" groupName
         State.Doc.Groups.Unlock(index)
@@ -8440,7 +8439,7 @@ type RhinoScriptSyntax private () =
     ///   This function primarily applies to objects that are members of nested groups.</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
     ///<returns>(int) The top group's name. Fails if object is not in a group.</returns>
-    static member ObjectTopGroup(objId:Guid) : string = 
+    static member ObjectTopGroup(objId:Guid) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
         if isNull groupIndexes then  RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectTopGroup objId not part of a group:'%s'" (Nice.str objId)
@@ -8452,7 +8451,7 @@ type RhinoScriptSyntax private () =
     ///   This function primarily applies to objects that are members of nested groups.</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
     ///<returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group.</returns>
-    static member ObjectGroups(objId:Guid) : Rarr<string> = 
+    static member ObjectGroups(objId:Guid) : Rarr<string> =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
         if isNull groupIndexes then  (new Rarr<string>(0))
@@ -8494,7 +8493,7 @@ type RhinoScriptSyntax private () =
         if isNull <| State.Doc.HatchPatterns.FindName(DocObjects.HatchPattern.Defaults.Squares.Name) then
             State.Doc.HatchPatterns.Add(DocObjects.HatchPattern.Defaults.Squares)|> ignore
 
-    
+
 
     ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
     ///<param name="curves">(Curve seq) Geometry of the closed planar Curves that defines the boundary of the Hatch objects</param>
@@ -8507,37 +8506,37 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+                              [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
         let mutable index = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         if notNull hatchPattern then
             let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
             index <-  if patternInstance|> isNull then RhinoMath.UnsetIntIndex else patternInstance.Index
-            if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to find hatchPattern:'%s'"  hatchPattern           
+            if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to find hatchPattern:'%s'"  hatchPattern
         let rotation = RhinoMath.ToRadians(rotation)
 
         let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
         let hatches = Hatch.Create(curves, index, rotation, scale, tolerance)
-        if isNull hatches then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
-                (Seq.length curves) 
-                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
-                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
+        if isNull hatches then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to create hatch from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
+                (Seq.length curves)
+                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
+                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
                 tolerance
         let ids = Rarr()
         for hatch in hatches do
             let objectId = State.Doc.Objects.AddHatch(hatch)
             if objectId <> Guid.Empty then
                 ids.Add(objectId)
-        if ids.Count = 0 then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' " 
-                (Seq.length curves) 
-                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not )) 
-                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not )) 
+        if ids.Count = 0 then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed to add any hatches from %d curves, not closed: %d, not planar %d, tolerance:'%g' "
+                (Seq.length curves)
+                (curves |> Seq.countIf ( fun c -> c.IsClosed   |> not ))
+                (curves |> Seq.countIf ( fun c -> c.IsPlanar() |> not ))
                 tolerance
         State.Doc.Views.Redraw()
         ids
-    
+
     ///<summary>Creates one  Hatch objects from one closed planar Curve.</summary>
     ///<param name="curve">(Curve) Curve Geometry of the closed planar Curve that defines the boundary of the Hatch object</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
@@ -8549,16 +8548,16 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid  =         
-        try 
-           let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance) 
+                              [<OPT;DEF(0.0)>]tolerance:float) : Guid  =
+        try
+           let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance)
            if rc.Count = 1 then rc.[0]
-           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve.  It created %d Hatches"  rc.Count 
+           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve.  It created %d Hatches"  rc.Count
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve \r\nMessage: %s"  e.Message
-            
-        
+
+
     ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
     ///<param name="curveIds">(Guid seq) Identifiers of the closed planar Curves that defines the   boundary of the Hatch objects</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
@@ -8570,13 +8569,13 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(null:string)>]hatchPattern:string,
                               [<OPT;DEF(1.0)>]scale:float,
                               [<OPT;DEF(0.0)>]rotation:float,
-                              [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+                              [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
-        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation) 
+        try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds:'%s' \r\nMessage: %s" (Nice.str curveIds)  e.Message
-            
+
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
     ///<param name="hatchPattern">(string) Optional, Name of the Hatch pattern to be used by the Hatch object. If omitted, the current Hatch pattern will be used</param>
@@ -8588,12 +8587,12 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(null:string)>]hatchPattern:string,
                             [<OPT;DEF(1.0)>]scale:float,
                             [<OPT;DEF(0.0)>]rotation:float,
-                            [<OPT;DEF(0.0)>]tolerance:float) : Guid = 
-        try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)             
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid =
+        try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve %s\r\nMessage: %s" (Nice.str curveId)  e.Message
-       
+
 
 
 
@@ -8605,7 +8604,7 @@ type RhinoScriptSyntax private () =
     ///    pattern names in the pattern definition file, then the existing Hatch
     ///    patterns will be redefined</param>
     ///<returns>(string Rarr) Names of the newly added Hatch patterns.</returns>
-    static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr = 
+    static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
         if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
         let rc = Rarr()
@@ -8646,7 +8645,7 @@ type RhinoScriptSyntax private () =
     ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the Hatch object</param>
     ///<returns>(Guid Rarr) list of identifiers for the newly created objects.</returns>
-    static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid Rarr = 
+    static member ExplodeHatch(hatchId:Guid, [<OPT;DEF(false)>]delete:bool) : Guid Rarr =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(hatchId)
         let geo =  RhinoScriptSyntax.CoerceHatch(hatchId)
         let pieces = geo.Explode()
@@ -8686,7 +8685,7 @@ type RhinoScriptSyntax private () =
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
         hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-        hatchObj.CommitChanges() |> ignore 
+        hatchObj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Changes multiple Hatch objects's Hatch pattern.</summary>
@@ -8702,13 +8701,13 @@ type RhinoScriptSyntax private () =
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
-            hatchObj.CommitChanges() |> ignore 
+            hatchObj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
     ///<summary>Returns the number of Hatch patterns in the document.</summary>
     ///<returns>(int) The number of Hatch patterns in the document.</returns>
-    static member HatchPatternCount() : int = 
+    static member HatchPatternCount() : int =
         RhinoScriptSyntax.InitHatchPatterns()
         State.Doc.HatchPatterns.Count
 
@@ -8717,7 +8716,7 @@ type RhinoScriptSyntax private () =
     ///    have descriptions.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(string) description of the Hatch pattern.</returns>
-    static member HatchPatternDescription(hatchPattern:string) : string = 
+    static member HatchPatternDescription(hatchPattern:string) : string =
         RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPatternDescription failed.  hatchPattern:'%A'" hatchPattern
@@ -8730,7 +8729,7 @@ type RhinoScriptSyntax private () =
     ///    0 = solid, uses object color
     ///    1 = lines, uses pattern file definition
     ///    2 = gradient, uses fill color definition.</returns>
-    static member HatchPatternFillType(hatchPattern:string) : int = 
+    static member HatchPatternFillType(hatchPattern:string) : int =
         RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPatternFillType failed.  hatchPattern:'%A'" hatchPattern
@@ -8739,7 +8738,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the names of all of the Hatch patterns in the document.</summary>
     ///<returns>(string Rarr) The names of all of the Hatch patterns in the document.</returns>
-    static member HatchPatternNames() : string Rarr = 
+    static member HatchPatternNames() : string Rarr =
         RhinoScriptSyntax.InitHatchPatterns()
         let rc = Rarr()
         for i = 0 to State.Doc.HatchPatterns.Count - 1 do
@@ -8771,7 +8770,7 @@ type RhinoScriptSyntax private () =
         if rotation <> rc then
             let rotation = RhinoMath.ToRadians(rotation)
             hatchObj.HatchGeometry.PatternRotation <- rotation
-            hatchObj.CommitChanges() |> ignore 
+            hatchObj.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rotation applied to the Hatch pattern when
@@ -8787,7 +8786,7 @@ type RhinoScriptSyntax private () =
             if rotation <> rc then
                 let rotation = RhinoMath.ToRadians(rotation)
                 hatchObj.HatchGeometry.PatternRotation <- rotation
-                hatchObj.CommitChanges() |> ignore 
+                hatchObj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -8810,7 +8809,7 @@ type RhinoScriptSyntax private () =
         let rc = hatchObj.HatchGeometry.PatternScale
         if scale <> rc then
             hatchObj.HatchGeometry.PatternScale <- scale
-            hatchObj.CommitChanges() |> ignore 
+            hatchObj.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
 
     ///<summary>Modifies the scale applied to the Hatch pattern when it is
@@ -8824,14 +8823,14 @@ type RhinoScriptSyntax private () =
             let rc = hatchObj.HatchGeometry.PatternScale
             if scale <> rc then
                 hatchObj.HatchGeometry.PatternScale <- scale
-                hatchObj.CommitChanges() |> ignore 
+                hatchObj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
     ///<summary>Verifies the existence of a Hatch object in the document.</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsHatch(objectId:Guid) : bool = 
+    static member IsHatch(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         match rhobj with :? DocObjects.HatchObject  -> true |_ -> false
 
@@ -8839,7 +8838,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies the existence of a Hatch pattern in the document.</summary>
     ///<param name="name">(string) The name of a Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsHatchPattern(name:string) : bool = 
+    static member IsHatchPattern(name:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
         State.Doc.HatchPatterns.FindName(name) |> notNull
 
@@ -8847,7 +8846,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a Hatch pattern is the current Hatch pattern.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsHatchPatternCurrent(hatchPattern:string) : bool = 
+    static member IsHatchPatternCurrent(hatchPattern:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsHatchPatternCurrent failed.  hatchPattern:'%A'" hatchPattern
@@ -8857,7 +8856,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a Hatch pattern is from a reference file.</summary>
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsHatchPatternReference(hatchPattern:string) : bool = 
+    static member IsHatchPatternReference(hatchPattern:string) : bool =
         RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsHatchPatternReference failed.  hatchPattern:'%A'" hatchPattern
@@ -8872,7 +8871,7 @@ type RhinoScriptSyntax private () =
     ///<param name="startPoint">(Point3d) Starting point of the light</param>
     ///<param name="endPoint">(Point3d) Ending point and direction of the light</param>
     ///<returns>(Guid) identifier of the new object.</returns>
-    static member AddDirectionalLight(startPoint:Point3d, endPoint:Point3d) : Guid = 
+    static member AddDirectionalLight(startPoint:Point3d, endPoint:Point3d) : Guid =
         let start =  startPoint
         let ende =  endPoint
         let light = new Light()
@@ -8893,7 +8892,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddLinearLight( startPoint:Point3d,
                                   endPoint:Point3d,
-                                  [<OPT;DEF(0.0)>]lightWidth:float) : Guid = 
+                                  [<OPT;DEF(0.0)>]lightWidth:float) : Guid =
         let start =  startPoint
         let ende =  endPoint
         let mutable width = lightWidth
@@ -8927,7 +8926,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Adds a new point light object to the document.</summary>
     ///<param name="point">(Point3d) The 3d location of the point</param>
     ///<returns>(Guid) identifier of the new object.</returns>
-    static member AddPointLight(point:Point3d) : Guid = 
+    static member AddPointLight(point:Point3d) : Guid =
         let light = new Light()
         light.LightStyle <- LightStyle.WorldPoint
         light.Location <- point
@@ -8945,7 +8944,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddRectangularLight( origin:Point3d,
                                        widthPoint:Point3d,
-                                       heightPoint:Point3d) : Guid = 
+                                       heightPoint:Point3d) : Guid =
         let ptx =  widthPoint
         let pty =  heightPoint
         let length = pty-origin
@@ -8972,7 +8971,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of the new object.</returns>
     static member AddSpotLight( origin:Point3d,
                                 radius:float,
-                                apexPoint:Point3d) : Guid = 
+                                apexPoint:Point3d) : Guid =
         let mutable radius = radius
         if radius<0.0 then radius<-1.0
         let light = new Light()
@@ -9022,7 +9021,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is a directional light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsDirectionalLight(objectId:Guid) : bool = 
+    static member IsDirectionalLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsDirectionalLight
 
@@ -9030,7 +9029,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies an object is a light object.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLight(objectId:Guid) : bool = 
+    static member IsLight(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceLight(objectId)
         |> Option.isSome
 
@@ -9038,7 +9037,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is enabled.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLightEnabled(objectId:Guid) : bool = 
+    static member IsLightEnabled(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsEnabled
 
@@ -9046,7 +9045,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is referenced from another file.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLightReference(objectId:Guid) : bool = 
+    static member IsLightReference(objectId:Guid) : bool =
         let light = State.Doc.Lights.FindId(objectId)
         if isNull light then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLightReference light (a %s) not found" (Nice.str objectId)
         light.IsReference
@@ -9055,7 +9054,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is a linear light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLinearLight(objectId:Guid) : bool = 
+    static member IsLinearLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsLinearLight
 
@@ -9063,7 +9062,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is a point light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsPointLight(objectId:Guid) : bool = 
+    static member IsPointLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsPointLight
 
@@ -9071,7 +9070,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is a rectangular light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsRectangularLight(objectId:Guid) : bool = 
+    static member IsRectangularLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsRectangularLight
 
@@ -9079,7 +9078,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a light object is a spot light.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSpotLight(objectId:Guid) : bool = 
+    static member IsSpotLight(objectId:Guid) : bool =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         light.IsSpotLight
 
@@ -9118,7 +9117,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the number of light objects in the document.</summary>
     ///<returns>(int) The number of light objects in the document.</returns>
-    static member LightCount() : int = 
+    static member LightCount() : int =
         State.Doc.Lights.Count
 
 
@@ -9219,7 +9218,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns list of identifiers of light objects in the document.</summary>
     ///<returns>(Guid Rarr) The list of identifiers of light objects in the document.</returns>
-    static member LightObjects() : Guid Rarr = 
+    static member LightObjects() : Guid Rarr =
         let count = State.Doc.Lights.Count
         let rc = Rarr()
         for i = 0 to count - 1 do
@@ -9231,7 +9230,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the Plane of a rectangular light object.</summary>
     ///<param name="objectId">(Guid) The light object's identifier</param>
     ///<returns>(Plane*float*float) The Plane, X and Y length.</returns>
-    static member RectangularLightPlane(objectId:Guid) : Plane*float*float = 
+    static member RectangularLightPlane(objectId:Guid) : Plane*float*float =
         let light = RhinoScriptSyntax.CoerceLight(objectId)
         if light.LightStyle <> LightStyle.WorldRectangular then
             RhinoScriptingException.Raise "RhinoScriptSyntax.RectangularLightPlane failed.  objectId:'%s'" (Nice.str objectId)
@@ -9373,7 +9372,7 @@ type RhinoScriptSyntax private () =
     ///<param name="line">(Geometry.Line) The finite line</param>
     ///<param name="testPoint">(Point3d) List of 3 numbers or Point3d. The test point</param>
     ///<returns>(Point3d) The point on the finite line that is closest to the test point.</returns>
-    static member LineClosestPointFinite(line:Line, testPoint:Point3d) : Point3d = 
+    static member LineClosestPointFinite(line:Line, testPoint:Point3d) : Point3d =
         line.ClosestPoint(testPoint, true)
 
 
@@ -9382,7 +9381,7 @@ type RhinoScriptSyntax private () =
     ///<param name="line">(Geometry.Line) The line to be considered infinite</param>
     ///<param name="testPoint">(Point3d) The test point</param>
     ///<returns>(Point3d) The point on the infinite line (ray) that is closest to the test point.</returns>
-    static member LineClosestPoint(line:Line, testPoint:Point3d) : Point3d = 
+    static member LineClosestPoint(line:Line, testPoint:Point3d) : Point3d =
         line.ClosestPoint(testPoint, limitToFiniteSegment=false)
 
 
@@ -9393,7 +9392,7 @@ type RhinoScriptSyntax private () =
     ///<param name="cylinderHeight">(float) Height of the cylinder</param>
     ///<param name="cylinderRadius">(float) Radius of the cylinder</param>
     ///<returns>(Point3d array) list of intersection points (0, 1, or 2 points).</returns>
-    static member LineCylinderIntersection(line:Line, cylinderPlane:Plane, cylinderHeight:float, cylinderRadius:float) : Point3d array = 
+    static member LineCylinderIntersection(line:Line, cylinderPlane:Plane, cylinderHeight:float, cylinderRadius:float) : Point3d array =
         let circle = Geometry.Circle( cylinderPlane, cylinderRadius )
         if not <| circle.IsValid then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineCylinderIntersection: Unable to create valid circle with given plane && radius.  line:'%A' cylinderPlane:'%A' cylinderHeight:'%A' cylinderRadius:'%A'" line cylinderPlane cylinderHeight cylinderRadius
         let cyl = Geometry.Cylinder( circle, cylinderHeight )
@@ -9416,7 +9415,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(bool) True if the shortest distance from the line to the other project is
     ///    greater than distance, False otherwise.</returns>
-    static member LineIsFartherThan(line:Line, distance:float, point:Point3d) : bool = 
+    static member LineIsFartherThan(line:Line, distance:float, point:Point3d) : bool =
         let minDist = line.MinimumDistanceTo(point)
         minDist > distance
     ///<summary>Determines if the shortest distance from a line to a point or another
@@ -9426,7 +9425,7 @@ type RhinoScriptSyntax private () =
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(bool) True if the shortest distance from the line to the other project is
     ///    greater than distance, False otherwise.</returns>
-    static member LineIsFartherThan(line:Line, distance:float, line2:Line) : bool = 
+    static member LineIsFartherThan(line:Line, distance:float, line2:Line) : bool =
         let minDist = line.MinimumDistanceTo(line2)
         minDist > distance
 
@@ -9438,7 +9437,7 @@ type RhinoScriptSyntax private () =
     ///<param name="lineA">(Geometry.Line) LineA of lines to intersect</param>
     ///<param name="lineB">(Geometry.Line) LineB of lines to intersect</param>
     ///<returns>(Point3d * Point3d) containing a point on the first line and a point on the second line.</returns>
-    static member LineLineIntersection(lineA:Line, lineB:Line) : Point3d * Point3d = 
+    static member LineLineIntersection(lineA:Line, lineB:Line) : Point3d * Point3d =
         let rc, a, b = Intersect.Intersection.LineLine(lineA, lineB)
         if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineLineIntersection failed on lineA:%A lineB:%A , are they parallel?" lineA lineB
         lineA.PointAt(a), lineB.PointAt(b)
@@ -9448,14 +9447,14 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) The test point or test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
     /// then D is bigger than Rhino.Distance(Q, P).</returns>
-    static member LineMaxDistanceTo(line:Line, point:Point3d) : float = 
+    static member LineMaxDistanceTo(line:Line, point:Point3d) : float =
         line.MaximumDistanceTo(point)
     ///<summary>Finds the longest distance between a line as a finite chord, and a line.</summary>
     ///<param name="line">(Geometry.Line) Line</param>
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
     /// then D is bigger than Rhino.Distance(Q, P).</returns>
-    static member LineMaxDistanceTo(line:Line, line2:Line) : float = 
+    static member LineMaxDistanceTo(line:Line, line2:Line) : float =
         line.MaximumDistanceTo(line2)
 
 
@@ -9464,7 +9463,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) The test point</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
     /// then D is smaller than Rhino.Distance(Q, P).</returns>
-    static member LineMinDistanceTo(line:Line, point:Point3d) : float = 
+    static member LineMinDistanceTo(line:Line, point:Point3d) : float =
         line.MinimumDistanceTo(point)
 
     ///<summary>Finds the shortest distance between a line as a finite chord, and a point or another line.</summary>
@@ -9472,7 +9471,7 @@ type RhinoScriptSyntax private () =
     ///<param name="line2">(Geometry.Line) The test line</param>
     ///<returns>(float) A distance (D) such that if Q is any point on the line and P is any point on the other object,
     /// then D is smaller than Rhino.Distance(Q, P).</returns>
-    static member LineMinDistanceTo(line:Line, line2:Line) : float = 
+    static member LineMinDistanceTo(line:Line, line2:Line) : float =
         line.MinimumDistanceTo(line2)
 
 
@@ -9481,7 +9480,7 @@ type RhinoScriptSyntax private () =
     ///    the line. If possible, a Plane parallel to the world XY, YZ, or ZX Plane is returned.</summary>
     ///<param name="line">(Geometry.Line) a Line</param>
     ///<returns>(Plane) The Plane.</returns>
-    static member LinePlane(line:Line) : Plane = 
+    static member LinePlane(line:Line) : Plane =
         let rc, plane = line.TryGetPlane()
         if not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LinePlane failed.  line:'%A'" line
         plane
@@ -9491,7 +9490,7 @@ type RhinoScriptSyntax private () =
     ///<param name="line">(Line) The line to intersect</param>
     ///<param name="plane">(Plane) The Plane to intersect</param>
     ///<returns>(Point3d) The 3D point of intersection is successful.</returns>
-    static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d = 
+    static member LinePlaneIntersection(line:Line, plane:Plane) : Point3d =
         let rc, t = Intersect.Intersection.LinePlane(line, plane)
         if  not <| rc then  RhinoScriptingException.Raise "RhinoScriptSyntax.LinePlaneIntersection failed. Parallel? line:'%A' plane:'%A'" line plane
         line.PointAt(t)
@@ -9502,7 +9501,7 @@ type RhinoScriptSyntax private () =
     ///<param name="sphereCenter">(Point3d) The center point of the sphere</param>
     ///<param name="sphereRadius">(float) The radius of the sphere</param>
     ///<returns>(Point3d array) list of intersection points.</returns>
-    static member LineSphereIntersection(line:Line, sphereCenter:Point3d, sphereRadius:float) : Point3d array = 
+    static member LineSphereIntersection(line:Line, sphereCenter:Point3d, sphereRadius:float) : Point3d array =
         let sphere = Sphere(sphereCenter, sphereRadius)
         let rc, pt1, pt2 = Intersect.Intersection.LineSphere(line, sphere)
         if rc= Intersect.LineSphereIntersection.None then  [||]
@@ -9517,8 +9516,8 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member LineTransform(    lineId:Guid,
                                     xForm:Transform,
-                                    [<OPT;DEF(false)>]copy:bool)  : Guid = 
-        
+                                    [<OPT;DEF(false)>]copy:bool)  : Guid =
+
         // the original python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
         let line = RhinoScriptSyntax.CoerceLine lineId
         let ln = Line(line.From,line.To)
@@ -9538,14 +9537,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies the existence of a line-type in the document.</summary>
     ///<param name="name">(string) The name of an existing line-type</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLinetype(name:string) : bool = 
+    static member IsLinetype(name:string) : bool =
         notNull <| State.Doc.Linetypes.FindName(name)
 
 
     ///<summary>Checks if an existing line-type is from a reference file.</summary>
     ///<param name="name">(string) The name of an existing line-type</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsLinetypeReference(name:string) : bool = 
+    static member IsLinetypeReference(name:string) : bool =
         let lt = State.Doc.Linetypes.FindName(name)
         if isNull lt then RhinoScriptingException.Raise "RhinoScriptSyntax.IsLinetypeReference unable to find '%s' in a line-types" name
         lt.IsReference
@@ -9553,13 +9552,13 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns number of line-types in the document.</summary>
     ///<returns>(int) The number of line-types in the document.</returns>
-    static member LinetypeCount() : int = 
+    static member LinetypeCount() : int =
         State.Doc.Linetypes.Count
 
 
     ///<summary>Returns names of all line-types in the document.</summary>
     ///<returns>(string Rarr) list of line-type names.</returns>
-    static member LinetypeNames() : string Rarr = 
+    static member LinetypeNames() : string Rarr =
         let count = State.Doc.Linetypes.Count
         let rc = Rarr()
         for i = 0 to count - 1 do
@@ -9578,7 +9577,7 @@ type RhinoScriptSyntax private () =
     ///    returned.</summary>
     ///<param name="layer">(string) Name of an existing layer.</param>
     ///<returns>(int) Material index of the layer.</returns>
-    static member AddMaterialToLayer(layer:string) : int = 
+    static member AddMaterialToLayer(layer:string) : int =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         if layer.RenderMaterialIndex> -1 then layer.RenderMaterialIndex
         else
@@ -9591,7 +9590,7 @@ type RhinoScriptSyntax private () =
     ///    object already has a material, the object's current material index is returned.</summary>
     ///<param name="objectId">(Guid) Identifier of an object.</param>
     ///<returns>(int) material index of the object.</returns>
-    static member AddMaterialToObject(objectId:Guid) : int = 
+    static member AddMaterialToObject(objectId:Guid) : int =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable attr = rhinoObject.Attributes
         if attr.MaterialSource <> DocObjects.ObjectMaterialSource.MaterialFromObject then
@@ -9611,7 +9610,7 @@ type RhinoScriptSyntax private () =
     ///<param name="sourceIndex">(int) Source index of materials to copy.</param>
     ///<param name="destinationIndex">(int) Destination index materials to copy.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool = 
+    static member CopyMaterial(sourceIndex:int, destinationIndex:int) : bool =
         if sourceIndex = destinationIndex then true // originally false
         else
             let source = State.Doc.Materials.[sourceIndex]
@@ -9627,7 +9626,7 @@ type RhinoScriptSyntax private () =
     ///    assigned a material.</summary>
     ///<param name="materialIndex">(int) The zero-based material index.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsMaterialDefault(materialIndex:int) : bool = 
+    static member IsMaterialDefault(materialIndex:int) : bool =
         let mat = State.Doc.Materials.[materialIndex]
         notNull mat && mat.IsDefaultMaterial
 
@@ -9635,7 +9634,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a material is referenced from another file.</summary>
     ///<param name="materialIndex">(int) The zero-based material index.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsMaterialReference(materialIndex:int) : bool = 
+    static member IsMaterialReference(materialIndex:int) : bool =
         let mat = State.Doc.Materials.[materialIndex]
         notNull mat && mat.IsReference
 
@@ -9645,7 +9644,7 @@ type RhinoScriptSyntax private () =
     ///    The object must have a material assigned.</param>
     ///<param name="destination">(Guid seq) Id of the destination object.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member MatchMaterial(source:Guid, destination:Guid seq) : unit = 
+    static member MatchMaterial(source:Guid, destination:Guid seq) : unit =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(source)
         let source = rhobj.Attributes.MaterialIndex
         let mat = State.Doc.Materials.[source]
@@ -9656,23 +9655,19 @@ type RhinoScriptSyntax private () =
             if notNull rhobj then
                 rhobj.Attributes.MaterialIndex <- source
                 rhobj.Attributes.MaterialSource <- DocObjects.ObjectMaterialSource.MaterialFromObject
-                rhobj.CommitChanges() |> ignore 
+                rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
 
     ///<summary>Returns a material's bump bitmap filename.</summary>
     ///<param name="materialIndex">(int) Zero based material index.</param>
-    ///<returns>(string) The current bump bitmap filename. 
+    ///<returns>(string) The current bump bitmap filename.
     /// Or an empty string if no Bump texture is present on the Material.</returns>
     static member MaterialBump(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Bump)
-        #else
-        let texture = mat.GetBumpTexture()
-        #endif
         if notNull texture then texture.FileName else ""
 
 
@@ -9684,15 +9679,10 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
-
-            mat.CommitChanges() |> ignore 
+            mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
@@ -9715,7 +9705,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialColor failed.  materialIndex:'%A' color:'%A'" materialIndex color
         mat.DiffuseColor <- color
-        mat.CommitChanges() |> ignore 
+        mat.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -9726,11 +9716,7 @@ type RhinoScriptSyntax private () =
     static member MaterialEnvironmentMap(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Emap)
-        #else
-        let texture = mat.GetEnvironmentTexture()
-        #endif
         if notNull texture then texture.FileName  else ""
 
     ///<summary>Modifies a material's environment bitmap filename.</summary>
@@ -9741,13 +9727,9 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if not <| mat.SetEnvironmentTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -9772,7 +9754,7 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialName failed.  materialIndex:'%A' name:'%A'" materialIndex name
         mat.Name <- name
-        mat.CommitChanges() |> ignore 
+        mat.CommitChanges() |> ignore
 
 
 
@@ -9829,11 +9811,7 @@ type RhinoScriptSyntax private () =
     static member MaterialTexture(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Bitmap)
-        #else
-        let texture = mat.GetBitmapTexture()
-        #endif
         if notNull texture then texture.FileName else ""
 
     ///<summary>Modifies a material's texture bitmap filename.</summary>
@@ -9844,14 +9822,9 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if  not <| mat.SetBitmapTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
-
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -9889,11 +9862,7 @@ type RhinoScriptSyntax private () =
     static member MaterialTransparencyMap(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Transparency)
-        #else
-        let texture = mat.GetTransparencyTexture()
-        #endif
         if notNull texture then texture.FileName else ""
 
 
@@ -9905,13 +9874,9 @@ type RhinoScriptSyntax private () =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if  not <| mat.SetTransparencyTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -9922,7 +9887,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Resets a material to Rhino's default material.</summary>
     ///<param name="materialIndex">(int) Zero based material index</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member ResetMaterial(materialIndex:int) : bool = 
+    static member ResetMaterial(materialIndex:int) : bool =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then false
         else
@@ -9951,7 +9916,7 @@ type RhinoScriptSyntax private () =
                            faceVertices:seq<#IList<int>>, // works on  nested arrays !
                            [<OPT;DEF(null:Vector3f seq)>]vertexNormals:Vector3f seq,
                            [<OPT;DEF(null:Point2f seq)>]textureCoordinates:Point2f seq,
-                           [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid = 
+                           [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         let mesh = new Mesh()
         for pt in vertices do
             mesh.Vertices.Add(pt) |> ignore
@@ -10007,7 +9972,7 @@ type RhinoScriptSyntax private () =
                            faceVertices:seq<int*int*int*int>,
                            [<OPT;DEF(null:Vector3f seq)>]vertexNormals:Vector3f seq,
                            [<OPT;DEF(null:Point2f seq)>]textureCoordinates:Point2f seq,
-                           [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid = 
+                           [<OPT;DEF(null:Drawing.Color seq)>]vertexColors:Drawing.Color seq) : Guid =
         let mesh = new Mesh()
         for pt in vertices do
             mesh.Vertices.Add(pt) |> ignore
@@ -10053,7 +10018,7 @@ type RhinoScriptSyntax private () =
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<param name="pointD">(Point3d) Fourth corner point</param>
     ///<returns>(Guid) The identifier of the new Mesh.</returns>
-    static member AddMeshQuad(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid = 
+    static member AddMeshQuad(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
           let mesh = new Mesh()
           mesh.Vertices.Add(pointA) |> ignore
           mesh.Vertices.Add(pointB) |> ignore
@@ -10070,7 +10035,7 @@ type RhinoScriptSyntax private () =
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<returns>(Guid) The identifier of the new Mesh.</returns>
-    static member AddMeshTriangle(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid = 
+    static member AddMeshTriangle(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
           let mesh = new Mesh()
           mesh.Vertices.Add(pointA) |> ignore
           mesh.Vertices.Add(pointB) |> ignore
@@ -10086,7 +10051,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    If True, delete the input Curve defined by objectId</param>
     ///<returns>(Guid) id of the new Mesh.</returns>
-    static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+    static member AddPlanarMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(objectId)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let mesh = Mesh.CreateFromPlanarBoundary(curve, MeshingParameters.Default, tolerance)
@@ -10107,7 +10072,7 @@ type RhinoScriptSyntax private () =
     ///        [0] = point of intersection
     ///        [1] = Mesh face index where intersection lies.</returns>
     static member CurveMeshIntersection( curveId:Guid,
-                                         meshId:Guid) : array<Point3d>*array<int> = 
+                                         meshId:Guid) : array<Point3d>*array<int> =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -10120,7 +10085,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns number of Meshes that could be created by calling SplitDisjointMesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of Meshes that could be created.</returns>
-    static member DisjointMeshCount(objectId:Guid) : int = 
+    static member DisjointMeshCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.DisjointMeshCount
 
@@ -10128,7 +10093,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Creates Curves that duplicates a Mesh border.</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Guid Rarr) list of Curve ids.</returns>
-    static member DuplicateMeshBorder(meshId:Guid) : Guid Rarr = 
+    static member DuplicateMeshBorder(meshId:Guid) : Guid Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let polylines = mesh.GetNakedEdges()
         let rc = Rarr()
@@ -10149,7 +10114,7 @@ type RhinoScriptSyntax private () =
     ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the input Meshes</param>
     ///<returns>(Guid Rarr) List of resulting objects after explode.</returns>
-    static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid Rarr = 
+    static member ExplodeMeshes(meshIds:Guid seq, [<OPT;DEF(false)>]delete:bool) : Guid Rarr =
         //id = RhinoScriptSyntax.CoerceGuid(meshIds)
         let rc = Rarr()
         for meshid in meshIds do
@@ -10169,7 +10134,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies if an object is a Mesh.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsMesh(objectId:Guid) : bool = 
+    static member IsMesh(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceMesh(objectId)
         |> Option.isSome
 
@@ -10177,7 +10142,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Mesh object is closed.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsMeshClosed(objectId:Guid) : bool = 
+    static member IsMeshClosed(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
         | Some mesh -> mesh.IsClosed
         | None -> false
@@ -10188,7 +10153,7 @@ type RhinoScriptSyntax private () =
     ///    that is shared by more than two faces, then that Mesh is called non-manifold.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True, otherwise False.</returns>
-    static member IsMeshManifold(objectId:Guid) : bool = 
+    static member IsMeshManifold(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceMesh(objectId) with
         | Some mesh -> mesh.IsManifold(true)  |> t1
         | None -> false
@@ -10203,12 +10168,12 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True , otherwise False.</returns>
     static member IsPointOnMesh(    objectId:Guid,
                                     point:Point3d,
-                                    [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
-        let maxdistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
+        let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maxdistance)
+        let face = mesh.ClosestPoint(point, pt, maxDistance)
         face>=0
 
 
@@ -10217,29 +10182,21 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, Default Value <c>false</c>
     ///   Delete input objects?</param>
     ///<returns>(Mesh) newly created Mesh.</returns>
-    static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh = 
-        let joinedmesh = new Mesh()
-        #if RHINO7  
-        joinedmesh.Append(meshes)
-        #else// only for Rh6.0, would not be needed for latest releases of Rh6
-        for mesh in meshes do joinedmesh.Append(mesh)
-        #endif
-        joinedmesh
+    static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
+        let joinedMesh = new Mesh()
+        joinedMesh.Append(meshes)
+        joinedMesh
 
     ///<summary>Joins two or or more Mesh objects together.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of two or more Mesh objects</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete input after joining</param>
     ///<returns>(Guid) identifier of newly created Mesh.</returns>
-    static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+    static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        let joinedmesh = new Mesh()
-        #if RHINO7
-        joinedmesh.Append(meshes)
-        #else
-        for mesh in meshes do joinedmesh.Append(mesh)
-        #endif// only for Rh6.0, would not be needed for latest releases of Rh6
-        let rc = State.Doc.Objects.AddMesh(joinedmesh)
+        let joinedMesh = new Mesh()
+        joinedMesh.Append(meshes)
+        let rc = State.Doc.Objects.AddMesh(joinedMesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinMeshes: Failed to join Meshes %A" (Nice.str objectIds)
         if deleteInput then
             for objectId in objectIds do
@@ -10252,7 +10209,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns approximate area of one mesh object.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh objects</param>
     ///<returns>(float) total area of Mesh.</returns>
-    static member MeshArea(objectId:Guid ) : float = 
+    static member MeshArea(objectId:Guid ) : float =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
         if notNull mp then
@@ -10265,7 +10222,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Calculates the area centroid of a Mesh object.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Point3d) representing the area centroid.</returns>
-    static member MeshAreaCentroid(objectId:Guid) : Point3d = 
+    static member MeshAreaCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = AreaMassProperties.Compute(mesh)
         if mp|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshAreaCentroid failed.  objectId:'%s'" (Nice.str objectId)
@@ -10280,7 +10237,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of newly created Meshes.</returns>
     static member MeshBooleanDifference( input0:Guid seq,
                                          input1:Guid seq,
-                                         [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+                                         [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let meshes0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanDifference: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
@@ -10305,7 +10262,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of new Meshes.</returns>
     static member MeshBooleanIntersection( input0:Guid seq,
                                            input1:Guid seq,
-                                           [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+                                           [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let meshes0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanIntersection: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
@@ -10331,7 +10288,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of new Meshes.</returns>
     static member MeshBooleanSplit( input0:Guid seq,
                                     input1:Guid seq,
-                                    [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+                                    [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let meshes0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let meshes1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         if meshes0.Count = 0 || meshes1.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanSplit: CreateBooleanSplit: No meshes to work with.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
@@ -10353,7 +10310,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete the input Meshes</param>
     ///<returns>(Guid Rarr) identifiers of new Meshes.</returns>
-    static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+    static member MeshBooleanUnion(meshIds:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         if Seq.length(meshIds)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshBooleanUnion: MeshIds must contain at least 2 meshes.  meshIds:'%A' deleteInput:'%A'" meshIds deleteInput
         let meshes =  rarr { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let newmeshes = Mesh.CreateBooleanUnion(meshes)
@@ -10380,7 +10337,7 @@ type RhinoScriptSyntax private () =
     ///    [1] = the index of the Mesh face on which the 3-D point lies.</returns>
     static member MeshClosestPoint( objectId:Guid,
                                     point:Point3d,
-                                    [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int = 
+                                    [<OPT;DEF(0.0)>]maximumDistance:float) : Point3d * int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pt = ref Point3d.Origin
         let face = mesh.ClosestPoint(point, pt, maximumDistance)
@@ -10391,7 +10348,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the center of each face of the Mesh object.</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Point3d Rarr) points defining the center of each face.</returns>
-    static member MeshFaceCenters(meshId:Guid) : Point3d Rarr = 
+    static member MeshFaceCenters(meshId:Guid) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         rarr {for i = 0 to mesh.Faces.Count - 1 do mesh.Faces.GetFaceCenter(i) }
 
@@ -10399,7 +10356,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns total face count of a Mesh object.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of Mesh faces.</returns>
-    static member MeshFaceCount(objectId:Guid) : int = 
+    static member MeshFaceCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Faces.Count
 
@@ -10407,7 +10364,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the face unit normal for each face of a Mesh object.</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Vector3d Rarr) 3D vectors that define the face unit normals of the Mesh.</returns>
-    static member MeshFaceNormals(meshId:Guid) : Vector3d Rarr = 
+    static member MeshFaceNormals(meshId:Guid) : Vector3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         if mesh.FaceNormals.Count <> mesh.Faces.Count then
             mesh.FaceNormals.ComputeFaceNormals() |> ignore
@@ -10429,7 +10386,7 @@ type RhinoScriptSyntax private () =
     ///    (every four  3D points). For triangles, the third and fourth vertex will be identical.
     ///    If faceType is False, then faces are returned as only triangles
     ///    (very three 3D points). Quads will be converted to triangles.</returns>
-    static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d Rarr = 
+    static member MeshFaces(objectId:Guid, [<OPT;DEF(true)>]faceType:bool) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
         for i = 0 to mesh.Faces.Count - 1 do
@@ -10489,7 +10446,7 @@ type RhinoScriptSyntax private () =
     ///<returns>((int*int*int*int) Rarr) containing tuples of 4 numbers that define the vertex indices for
     ///    each face of the Mesh. Both quad and triangle faces are returned. If the
     ///    third and fourth vertex indices are identical, the face is a triangle.</returns>
-    static member MeshFaceVertices(objectId:Guid) : Rarr<int*int*int*int> = 
+    static member MeshFaceVertices(objectId:Guid) : Rarr<int*int*int*int> =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
         for i = 0 to mesh.Faces.Count - 1 do
@@ -10501,7 +10458,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Mesh object has face normals.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member MeshHasFaceNormals(objectId:Guid) : bool = 
+    static member MeshHasFaceNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.FaceNormals.Count>0
 
@@ -10509,7 +10466,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Mesh object has texture coordinates.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member MeshHasTextureCoordinates(objectId:Guid) : bool = 
+    static member MeshHasTextureCoordinates(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.TextureCoordinates.Count>0
 
@@ -10517,7 +10474,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Mesh object has vertex colors.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member MeshHasVertexColors(objectId:Guid) : bool = 
+    static member MeshHasVertexColors(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.VertexColors.Count>0
 
@@ -10525,7 +10482,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Mesh object has vertex normals.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member MeshHasVertexNormals(objectId:Guid) : bool = 
+    static member MeshHasVertexNormals(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Normals.Count>0
 
@@ -10538,14 +10495,10 @@ type RhinoScriptSyntax private () =
     ///<returns>(Polyline array) Array of points that define the vertices of the intersection Curves.</returns>
     static member MeshMeshIntersection( mesh1:Guid,
                                         mesh2:Guid,
-                                        [<OPT;DEF(0.0)>]tolerance:float) : Polyline array = 
+                                        [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
         let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
-        #if RHINO7
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
-        #else        
-        let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202        
-        #endif
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
 
@@ -10558,7 +10511,7 @@ type RhinoScriptSyntax private () =
     ///    naked or not. The number of elements in the list will be equal to
     ///    the value returned by MeshVertexCount. In which case, the list will
     ///    identify the naked status for each vertex returned by MeshVertices.</returns>
-    static member MeshNakedEdgePoints(objectId:Guid) : bool array = 
+    static member MeshNakedEdgePoints(objectId:Guid) : bool array =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.GetNakedEdgePointStatus()
 
@@ -10569,7 +10522,7 @@ type RhinoScriptSyntax private () =
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<param name="distance">(float) The distance to offset</param>
     ///<returns>(Guid) identifier of the new Mesh object.</returns>
-    static member MeshOffset(meshId:Guid, distance:float) : Guid = 
+    static member MeshOffset(meshId:Guid, distance:float) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let offsetmesh = mesh.Offset(distance)
         if offsetmesh|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MeshOffset failed.  meshId:'%s' distance:'%A'" (Nice.str meshId) distance
@@ -10584,7 +10537,7 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, default value: <c>Top View</c>
     ///    View to use for outline direction</param>
     ///<returns>(Guid Rarr) Polyline Curve identifiers.</returns>
-    static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid Rarr = 
+    static member MeshOutline(objectIds:Guid seq, [<OPT;DEF(null:string)>]view:string) : Guid Rarr =
         let  meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let rc = Rarr()
         if notNull view then
@@ -10611,7 +10564,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the number of quad faces of a Mesh object.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of quad Mesh faces.</returns>
-    static member MeshQuadCount(objectId:Guid) : int = 
+    static member MeshQuadCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Faces.QuadCount
 
@@ -10619,7 +10572,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Converts a Mesh object's quad faces to triangles.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member MeshQuadsToTriangles(objectId:Guid) : bool = 
+    static member MeshQuadsToTriangles(objectId:Guid) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mutable rc = true
         if mesh.Faces.QuadCount>0 then
@@ -10642,7 +10595,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers for the new breps.</returns>
     static member MeshToNurb( objectId:Guid,
                               [<OPT;DEF(true)>]trimmedTriangles:bool,
-                              [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+                              [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
         let breps =  rarr { for piece in pieces do yield Brep.CreateFromMesh(piece, trimmedTriangles) }
@@ -10657,7 +10610,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns number of triangular faces of a Mesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of triangular Mesh faces.</returns>
-    static member MeshTriangleCount(objectId:Guid) : int = 
+    static member MeshTriangleCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Faces.TriangleCount
 
@@ -10694,7 +10647,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the vertex count of a Mesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of Mesh vertices.</returns>
-    static member MeshVertexCount(objectId:Guid) : int = 
+    static member MeshVertexCount(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         mesh.Vertices.Count
 
@@ -10703,7 +10656,7 @@ type RhinoScriptSyntax private () =
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<param name="vertexIndex">(int) Index of the Mesh vertex to find faces for</param>
     ///<returns>(int array) face indices.</returns>
-    static member MeshVertexFaces(meshId:Guid, vertexIndex:int) : int array = 
+    static member MeshVertexFaces(meshId:Guid, vertexIndex:int) : int array =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         mesh.Vertices.GetVertexFaces(vertexIndex)
 
@@ -10711,7 +10664,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the vertex unit normal for each vertex of a Mesh.</summary>
     ///<param name="meshId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Vector3d Rarr) List of vertex normals, (empty list if no normals exist).</returns>.ToNiceString
-    static member MeshVertexNormals(meshId:Guid) : Vector3d Rarr = 
+    static member MeshVertexNormals(meshId:Guid) : Vector3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let count = mesh.Normals.Count
         if count<1 then rarr {()}
@@ -10721,7 +10674,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the vertices of a Mesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Point3d Rarr) vertex points in the Mesh.</returns>
-    static member MeshVertices(objectId:Guid) : Point3d Rarr = 
+    static member MeshVertices(objectId:Guid) : Point3d Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let count = mesh.Vertices.Count
         let rc = Rarr()
@@ -10734,7 +10687,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the approximate volume of one or more closed Meshes.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of one or more Mesh objects</param>
     ///<returns>(float) total volume of all Meshes.</returns>
-    static member MeshVolume(objectIds:Guid seq) : float = 
+    static member MeshVolume(objectIds:Guid seq) : float =
         let mutable totalVolume  = 0.0
         for objectId in objectIds do
             // TODO add check for mesh being closed
@@ -10750,9 +10703,9 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the approximate volume of one or more closed Meshes.</summary>
     ///<param name="meshes">(Geometry.Mesh seq)  Mesh Geometries</param>
     ///<returns>(float) total volume of all Meshes.</returns>
-    static member MeshVolume(meshes:Mesh seq) : float = 
+    static member MeshVolume(meshes:Mesh seq) : float =
         let mutable totalVolume  = 0.0
-        for mesh in meshes do        
+        for mesh in meshes do
             // TODO add check for mesh being closed
             let mp = VolumeMassProperties.Compute(mesh)
             if notNull mp then
@@ -10765,7 +10718,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Calculates the volume centroid of a Mesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(Point3d) Point3d representing the volume centroid.</returns>
-    static member MeshVolumeCentroid(objectId:Guid) : Point3d = 
+    static member MeshVolumeCentroid(objectId:Guid) : Point3d =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let mp = VolumeMassProperties.Compute(mesh)
         if notNull mp then mp.Centroid
@@ -10786,7 +10739,7 @@ type RhinoScriptSyntax private () =
     ///<param name="meshId">(Guid) Identifier of Mesh that pulls</param>
     ///<param name="curveId">(Guid) Identifier of Curve to pull</param>
     ///<returns>(Guid) identifier new Curve.</returns>
-    static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid = 
+    static member PullCurveToMesh(meshId:Guid, curveId:Guid) : Guid =
         let mesh = RhinoScriptSyntax.CoerceMesh(meshId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -10803,7 +10756,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete the input object</param>
     ///<returns>(Guid Rarr) identifiers for the new Meshes.</returns>
-    static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+    static member SplitDisjointMesh(objectId:Guid, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let pieces = mesh.SplitDisjointPieces()
         let rc =  rarr { for piece in pieces do yield State.Doc.Objects.AddMesh(piece) }
@@ -10817,7 +10770,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Fixes inconsistencies in the directions of faces of a Mesh.</summary>
     ///<param name="objectId">(Guid) Identifier of a Mesh object</param>
     ///<returns>(int) The number of faces that were modified.</returns>
-    static member UnifyMeshNormals(objectId:Guid) : int = 
+    static member UnifyMeshNormals(objectId:Guid) : int =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = mesh.UnifyNormals()
         if rc>0 then
@@ -10859,7 +10812,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) The identifier of the transformed object.</returns>
     static member TransformObject(  objectId:Guid,
                                     matrix:Transform,
-                                    [<OPT;DEF(false)>]copy:bool) : Guid = 
+                                    [<OPT;DEF(false)>]copy:bool) : Guid =
         let res = State.Doc.Objects.Transform(objectId, matrix, not copy)
         if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TransformObject: Cannot apply transform to objectId:'%s' matrix:'%A' copy:'%A'"  (Nice.str objectId) matrix copy
         res
@@ -10869,8 +10822,8 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) Object to copy</param>
     ///<param name="translation">(Vector3d) Optional, additional Translation vector to apply</param>
     ///<returns>(Guid) objectId for the copy.</returns>
-    static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid = 
-        let translation = 
+    static member CopyObject(objectId:Guid, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid =
+        let translation =
             if not translation.IsZero then
                 Transform.Translation(translation)
             else
@@ -10886,7 +10839,7 @@ type RhinoScriptSyntax private () =
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
     ///<returns>(Guid Rarr) identifiers for the copies.</returns>
     static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
-        let translation = 
+        let translation =
             if not translation.IsZero then
                 Transform.Translation(translation)
             else
@@ -10902,7 +10855,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Deletes a single object from the document.</summary>
     ///<param name="objectId">(Guid) Identifier of object to delete</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteObject(objectId:Guid) : unit =         
+    static member DeleteObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Delete(objectId, quiet=true)  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
@@ -10925,7 +10878,7 @@ type RhinoScriptSyntax private () =
     ///    If True, flash between object color and selection color.
     ///    If False, flash between visible and invisible</param>
     ///<returns>(unit).</returns>
-    static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit = 
+    static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
         let rhobjs = rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.Count>0 then
             State.Doc.Views.FlashObjects(rhobjs, style)
@@ -10934,14 +10887,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Hides a single object.</summary>
     ///<param name="objectId">(Guid) Id of object to hide</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member HideObject(objectId:Guid) : bool = 
+    static member HideObject(objectId:Guid) : bool =
         State.Doc.Objects.Hide(objectId, ignoreLayerMode=false)
 
 
     ///<summary>Hides one or more objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects to hide</param>
     ///<returns>(int) Number of objects hidden.</returns>
-    static member HideObjects(objectIds:Guid seq) : int = //PLURAL        
+    static member HideObjects(objectIds:Guid seq) : int = //PLURAL
         let mutable rc = 0
         for objectId in objectIds do
             if State.Doc.Objects.Hide(objectId, ignoreLayerMode=false) then rc <- rc + 1
@@ -10952,7 +10905,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an object is in on a page layout space. (as opposed to model space).</summary>
     ///<param name="objectId">(Guid) Id of an object to test</param>
     ///<returns>(bool) True if the object is in page layout space, False if the object is in model space.</returns>
-    static member IsLayoutObject(objectId:Guid) : bool = 
+    static member IsLayoutObject(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace
 
@@ -10960,7 +10913,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies the existence of an object in the State.Doc.Objects table. Fails on empty Guid.</summary>
     ///<param name="objectId">(Guid) An object to test</param>
     ///<returns>(bool) True if the object exists, False if the object does not exist.</returns>
-    static member IsObject(objectId:Guid) : bool = 
+    static member IsObject(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceRhinoObject(objectId) <> None
 
 
@@ -10968,7 +10921,7 @@ type RhinoScriptSyntax private () =
     ///    be snapped to, and cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is hidden, False if the object is not hidden.</returns>
-    static member IsObjectHidden(objectId:Guid) : bool = 
+    static member IsObjectHidden(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsHidden
 
@@ -10982,7 +10935,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True if object is inside box, False is object is not inside box.</returns>
     static member IsObjectInBox( objectId:Guid,
                                  box:BoundingBox,
-                                 [<OPT;DEF(true)>]testMode:bool) : bool = 
+                                 [<OPT;DEF(true)>]testMode:bool) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let objbox = rhobj.Geometry.GetBoundingBox(true)
         if testMode then
@@ -10999,7 +10952,7 @@ type RhinoScriptSyntax private () =
     ///    was not specified, the object is a member of some group.
     ///    False if the object  is not a member of the specified group.
     ///    If a groupName was not specified, the object is not a member of any group.</returns>
-    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool = 
+    static member IsObjectInGroup(objectId:Guid, [<OPT;DEF(null:string)>]groupName:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let count = rhobj.GroupCount
         if count<1 then false
@@ -11017,7 +10970,7 @@ type RhinoScriptSyntax private () =
     ///    be snapped to, but cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is locked, False if the object is not locked.</returns>
-    static member IsObjectLocked(objectId:Guid) : bool = 
+    static member IsObjectLocked(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsLocked
 
@@ -11026,7 +10979,7 @@ type RhinoScriptSyntax private () =
     ///    snapped to, and can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to be tested</param>
     ///<returns>(bool) True if the object is normal, False if the object is not normal.</returns>
-    static member IsObjectNormal(objectId:Guid) : bool = 
+    static member IsObjectNormal(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsNormal
 
@@ -11035,7 +10988,7 @@ type RhinoScriptSyntax private () =
     ///    objects that are not part of the current document.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is a reference object, False if the object is not a reference object.</returns>
-    static member IsObjectReference(objectId:Guid) : bool = 
+    static member IsObjectReference(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsReference
 
@@ -11043,7 +10996,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if an object can be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsObjectSelectable(objectId:Guid) : bool = 
+    static member IsObjectSelectable(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelectable( ignoreSelectionState=true,
                             ignoreGripsState    =false ,
@@ -11058,7 +11011,7 @@ type RhinoScriptSyntax private () =
     ///    1, the object is selected
     ///    2, the object is entirely persistently selected
     ///    3, one or more proper sub-objects are selected.</returns>
-    static member IsObjectSelected(objectId:Guid) : int = 
+    static member IsObjectSelected(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.IsSelected(false)
 
@@ -11066,9 +11019,9 @@ type RhinoScriptSyntax private () =
     ///<summary>Determines if an object is closed or solid.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is solid, or a Mesh is closed, False otherwise.</returns>
-    static member IsObjectSolid(objectId:Guid) : bool = 
+    static member IsObjectSolid(objectId:Guid) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197 
+        // rhobj.IsSolid //TODO  'rhobj.IsSolid'  could be used from RhCommon 7.5 onwards see https://github.com/mcneel/rhinoscriptsyntax/pull/197
         // and https://github.com/mcneel/rhinoscriptsyntax/commit/aaa0906fa43003db093c1e6f58bf12c813eddbeb
         let geom = rhobj.Geometry
         match geom with
@@ -11076,9 +11029,7 @@ type RhinoScriptSyntax private () =
         | :? Extrusion as s -> s.IsSolid
         | :? Surface   as s -> s.IsSolid
         | :? Brep      as s -> s.IsSolid
-        #if RHINO7
-        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher        
-        #endif
+        | :? SubD      as s -> s.IsSolid // only for Rh7 and higher
         | _                 ->
             RhinoScriptingException.Raise "RhinoScriptSyntax.IsObjectSolid only Mesh, Extrusion, Surface, Brep or SubD can be tested for solidity but not %s" (Nice.str objectId)
 
@@ -11087,7 +11038,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies an object's geometry is valid and without error.</summary>
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<returns>(bool) True if the object is valid.</returns>
-    static member IsObjectValid(objectId:Guid) : bool = 
+    static member IsObjectValid(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceRhinoObject(objectId) with
         |None -> false
         |Some rhobj ->  rhobj.IsValid
@@ -11097,7 +11048,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) The identifier of an object to test</param>
     ///<param name="view">(string) Optional, default value: <c>ActiveView.MainViewport</c> The title of the view. If omitted, the current active view is used</param>
     ///<returns>(bool) True if the object is visible in the specified view, otherwise False.</returns>
-    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool = 
+    static member IsVisibleInView(objectId:Guid, [<OPT;DEF(null:string)>]view:string) : bool =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let viewport = if notNull view then (RhinoScriptSyntax.CoerceView(view)).MainViewport else State.Doc.Views.ActiveView.MainViewport
         let bbox = rhobj.Geometry.GetBoundingBox(true)
@@ -11108,7 +11059,7 @@ type RhinoScriptSyntax private () =
     ///    snapped to. But, they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member LockObject(objectId:Guid) : bool = 
+    static member LockObject(objectId:Guid) : bool =
         State.Doc.Objects.Lock(objectId, ignoreLayerMode=false)
 
 
@@ -11129,8 +11080,8 @@ type RhinoScriptSyntax private () =
     ///<param name="sourceId">(Guid) Optional, Identifier of object to copy attributes from. If None,
     ///    then the default attributes are copied to the targetIds</param>
     ///<returns>(int) number of objects modified.</returns>
-    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int = 
-        let sourceAttr = 
+    static member MatchObjectAttributes(targetIds:Guid seq, [<OPT;DEF(Guid())>]sourceId:Guid) : int =
+        let sourceAttr =
             if Guid.Empty <> sourceId then
                 let source = RhinoScriptSyntax.CoerceRhinoObject(sourceId)
                 source.Attributes.Duplicate()
@@ -11154,7 +11105,7 @@ type RhinoScriptSyntax private () =
     static member MirrorObject( objectId:Guid,
                                 startPoint:Point3d,
                                 endPoint:Point3d,
-                                [<OPT;DEF(false)>]copy:bool) : Guid = 
+                                [<OPT;DEF(false)>]copy:bool) : Guid =
         let vec = endPoint-startPoint
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObject Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectId) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
@@ -11280,7 +11231,7 @@ type RhinoScriptSyntax private () =
         let source : DocObjects.ObjectColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.ColorSource <- source
-        rhobj.CommitChanges() |> ignore 
+        rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the color source of multiple objects.</summary>
@@ -11296,7 +11247,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.ColorSource <- source
-            rhobj.CommitChanges() |> ignore 
+            rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11306,7 +11257,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns a description of the object type (e.g. Line, Surface, Text,...).</summary>
     ///<param name="objectId">(Guid) Identifier of an object</param>
     ///<returns>(string) A short text description of the object.</returns>
-    static member ObjectDescription(objectId:Guid) : string = 
+    static member ObjectDescription(objectId:Guid) : string =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.ShortDescription(false)
 
@@ -11315,12 +11266,12 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the count for each object type in a List of objects.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of objects</param>
     ///<returns>(string) A short text description of the object.</returns>
-    static member ObjectDescription(objectIds:Guid seq) : string = 
-        let count =  objectIds|> Seq.countBy (fun id -> 
+    static member ObjectDescription(objectIds:Guid seq) : string =
+        let count =  objectIds|> Seq.countBy (fun id ->
                         /// TODO could be optimized by using Object-type integer instead of string
                         let o = RhinoScriptSyntax.CoerceRhinoObject(id)
                         o.ShortDescription(true) + if o.IsDeleted then " (deleted !)" else ""
-                        ) 
+                        )
         let typesk = Seq.length count
         let mutable tx = ""
         if typesk = 0 then
@@ -11372,7 +11323,7 @@ type RhinoScriptSyntax private () =
     static member ObjectLayout(objectId:Guid, layout:string) : unit = //SET
         // this fixes bug in rhinoscriptsyntax, see https://github.com/mcneel/rhinoscriptsyntax/pull/203
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let view= 
+        let view=
             if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                 let pageid = rhobj.Attributes.ViewportId
                 let pageview = State.Doc.Views.Find(pageid)
@@ -11392,7 +11343,7 @@ type RhinoScriptSyntax private () =
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
                 | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayout: Setting it failed, layout is not a Page view for '%s' and '%A'"  layout objectId
 
-            rhobj.CommitChanges() |> ignore 
+            rhobj.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
 
     ///<summary>Changes the layout or model space of an objects.</summary>
@@ -11403,7 +11354,7 @@ type RhinoScriptSyntax private () =
     ///    from page layout space to model space, just specify an empty string.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectLayout(objectIds:Guid seq, layout:string) : unit = //MULTISET
-        let lay = 
+        let lay =
             if layout<>"" then
                 match State.Doc.Views.Find(layout, compareCase=false) with
                 | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLayout: Setting it failed, layout not found for '%s' and '%A'"  layout objectIds
@@ -11414,7 +11365,7 @@ type RhinoScriptSyntax private () =
 
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let view= 
+            let view=
                 if rhobj.Attributes.Space = DocObjects.ActiveSpace.PageSpace then
                     let pageid = rhobj.Attributes.ViewportId
                     let pageview = State.Doc.Views.Find(pageid)
@@ -11430,7 +11381,7 @@ type RhinoScriptSyntax private () =
                     rhobj.Attributes.ViewportId <- lay.Value.MainViewport.Id
                     rhobj.Attributes.Space <- DocObjects.ActiveSpace.PageSpace
 
-                rhobj.CommitChanges() |> ignore 
+                rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11452,7 +11403,7 @@ type RhinoScriptSyntax private () =
         if newIndex <0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetype: Setting it failed for '%A' and '%A'"  linetype objectId
         rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
         rhinoObject.Attributes.LinetypeIndex <- newIndex
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype of multiple object.</summary>
@@ -11466,7 +11417,7 @@ type RhinoScriptSyntax private () =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- DocObjects.ObjectLinetypeSource.LinetypeFromObject
             rhinoObject.Attributes.LinetypeIndex <- newIndex
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11494,7 +11445,7 @@ type RhinoScriptSyntax private () =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectLinetypeSource: Setting it failed for '%A' and '%A'"  source objectId
         let source : DocObjects.ObjectLinetypeSource = LanguagePrimitives.EnumOfValue source
         rhinoObject.Attributes.LinetypeSource <- source
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the linetype source of multiple objects.</summary>
@@ -11511,7 +11462,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.LinetypeSource <- source
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11583,7 +11534,7 @@ type RhinoScriptSyntax private () =
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the rendering material source of multiple objects.</summary>
@@ -11600,7 +11551,7 @@ type RhinoScriptSyntax private () =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let rc = int(rhinoObject.Attributes.MaterialSource)
             rhinoObject.Attributes.MaterialSource <- source
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11614,8 +11565,8 @@ type RhinoScriptSyntax private () =
     static member IsGoodStringId    ( name:string
                                     , [<OPT;DEF(false)>]allowEmpty:bool
                                     , [<OPT;DEF(false)>]limitToAscii:bool
-                                    ) : bool = 
-        if limitToAscii then 
+                                    ) : bool =
+        if limitToAscii then
             Util.isASCIIStringId( name, allowEmpty)
         else
             Util.isGoodStringId( name, allowEmpty)
@@ -11635,11 +11586,11 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid)Id of object</param>
     ///<param name="name">(string) The new object name. Or empty string</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ObjectName(objectId:Guid, name:string) : unit = //SET        
+    static member ObjectName(objectId:Guid, name:string) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if RhinoScriptSyntax.IsGoodStringId( name, allowEmpty=true) then
             rhinoObject.Attributes.Name <- name
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -11652,7 +11603,7 @@ type RhinoScriptSyntax private () =
             for objectId in objectIds do
                 let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
                 rhinoObject.Attributes.Name <- name
-                rhinoObject.CommitChanges() |> ignore 
+                rhinoObject.CommitChanges() |> ignore
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectName: Setting it string '%s' cannot be used as Name. see RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." name
 
@@ -11675,7 +11626,7 @@ type RhinoScriptSyntax private () =
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
         rhinoObject.Attributes.PlotColor <- color
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color of multiple objects.</summary>
@@ -11687,7 +11638,7 @@ type RhinoScriptSyntax private () =
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotColorSource <- DocObjects.ObjectPlotColorSource.PlotColorFromObject
             rhinoObject.Attributes.PlotColor <- color
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print color source of an object.</summary>
@@ -11713,7 +11664,7 @@ type RhinoScriptSyntax private () =
         let source : DocObjects.ObjectPlotColorSource = LanguagePrimitives.EnumOfValue source
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhobj.Attributes.PlotColorSource <- source
-        rhobj.CommitChanges() |> ignore 
+        rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print color source of multiple objects.</summary>
@@ -11729,7 +11680,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhobj.Attributes.PlotColorSource <- source
-            rhobj.CommitChanges() |> ignore 
+            rhobj.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Returns the print width of an object.</summary>
@@ -11751,7 +11702,7 @@ type RhinoScriptSyntax private () =
         let rc = rhinoObject.Attributes.PlotWeight
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width of multiple objects.</summary>
@@ -11766,7 +11717,7 @@ type RhinoScriptSyntax private () =
             let rc = rhinoObject.Attributes.PlotWeight
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11791,7 +11742,7 @@ type RhinoScriptSyntax private () =
     static member ObjectPrintWidthSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-        rhinoObject.CommitChanges() |> ignore 
+        rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the print width source of multiple objects.</summary>
@@ -11805,7 +11756,7 @@ type RhinoScriptSyntax private () =
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             rhinoObject.Attributes.PlotWeightSource <- LanguagePrimitives.EnumOfValue source
-            rhinoObject.CommitChanges() |> ignore 
+            rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
 
 
@@ -11834,7 +11785,7 @@ type RhinoScriptSyntax private () =
     ///      268435456   Phantom
     ///      536870912   Clipping Plane
     ///      1073741824  Extrusion.</returns>
-    static member ObjectType(objectId:Guid) : int = 
+    static member ObjectType(objectId:Guid) : int =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let geom = rhobj.Geometry
         match geom with
@@ -11845,9 +11796,9 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Orients a single object based on input points.
-    /// If two 3-D points are specified, then this method will 
-    /// function similar to Rhino's Orient command.  
-    /// If more than two 3-D points are specified, 
+    /// If two 3-D points are specified, then this method will
+    /// function similar to Rhino's Orient command.
+    /// If more than two 3-D points are specified,
     /// then the function will orient similar to Rhino's Orient3Pt command.
     /// </summary>
     ///<param name="objectId">(Guid) Identifier of object</param>
@@ -11860,49 +11811,49 @@ type RhinoScriptSyntax private () =
     ///    3       Scale and copy.
     ///</param>
     ///<returns>(Guid) The identifier of the oriented object. The original or the copied object. Depending on given flags</returns>
-    static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid = 
-        if referencePts.Count <> targetPts.Count then 
+    static member OrientObject( objectId:Guid,  referencePts:IList<Point3d>,  targetPts:IList<Point3d>,   [<OPT;DEF(0)>]flags:int) : Guid =
+        if referencePts.Count <> targetPts.Count then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count <> targetPts.Count: %d <> %d " referencePts.Count targetPts.Count
-        if referencePts.Count < 2 then 
-            RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count < 2: %d  " referencePts.Count 
-        if targetPts.Count < 2 then 
+        if referencePts.Count < 2 then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject referencePts.Count < 2: %d  " referencePts.Count
+        if targetPts.Count < 2 then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject targetPts.Count < 2 : %d"  targetPts.Count
 
         let copy  = (flags &&& 1) = 1
         let scale = (flags &&& 2) = 2
-        let xform = 
-            if referencePts.Count > 2 then 
+        let xform =
+            if referencePts.Count > 2 then
                 //Orient3Pt
                 let fromPlane = Rhino.Geometry.Plane(referencePts.[0], referencePts.[1], referencePts.[2])
                 let toPlane = Rhino.Geometry.Plane(targetPts.[0], targetPts.[1], targetPts.[2])
-                if not fromPlane.IsValid || not toPlane.IsValid then 
+                if not fromPlane.IsValid || not toPlane.IsValid then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject unable to create valid planes from point lists %A and %A " referencePts targetPts
                 Rhino.Geometry.Transform.PlaneToPlane(fromPlane, toPlane)
             else
                 //Orient2Pt
-                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )                 
+                let xformMove = Rhino.Geometry.Transform.Translation( targetPts.[0]-referencePts.[0] )
                 let v0 = referencePts.[1] - referencePts.[0]
                 let v1 = targetPts.[1] - targetPts.[0]
                 let xformScale =
-                    if scale then 
+                    if scale then
                         let len0 = v0.Length
                         let len1 = v1.Length
                         if len0 < 0.000001 || len1 < 0.000001 then RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject vector lengths too short"
                         let scaleF = len1 / len0
-                        if abs(1.0-scaleF) >= 0.000001 then 
+                        if abs(1.0-scaleF) >= 0.000001 then
                             let plane = Rhino.Geometry.Plane(referencePts.[0], v0)
                             Rhino.Geometry.Transform.Scale(plane, scaleF, scaleF, scaleF)
                         else
                             Rhino.Geometry.Transform.Identity
                     else
                         Rhino.Geometry.Transform.Identity
-                v0.Unitize()  |> ignore 
-                v1.Unitize()  |> ignore 
+                v0.Unitize()  |> ignore
+                v1.Unitize()  |> ignore
                 let xformRotate = Rhino.Geometry.Transform.Rotation(v0, v1, referencePts.[0])
                 xformMove * xformScale * xformRotate
-  
+
         let rc = RhinoScriptSyntax.Ot.Transform(objectId, xform, not copy)
-        if rc=System.Guid.Empty then 
+        if rc=System.Guid.Empty then
             RhinoScriptingException.Raise "RhinoScriptSyntax.OrientObject failed"
         RhinoScriptSyntax.Doc.Views.Redraw()
         rc
@@ -11920,7 +11871,7 @@ type RhinoScriptSyntax private () =
                                 centerPoint:Point3d,
                                 rotationAngle:float,
                                 [<OPT;DEF(Vector3d())>]axis:Vector3d,
-                                [<OPT;DEF(false)>]copy:bool) : Guid = 
+                                [<OPT;DEF(false)>]copy:bool) : Guid =
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
@@ -11963,7 +11914,7 @@ type RhinoScriptSyntax private () =
     static member ScaleObject( objectId:Guid,
                                origin:Point3d,
                                scale:float*float*float,
-                               [<OPT;DEF(false)>]copy:bool) : Guid = 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let x, y, z = scale
@@ -12043,7 +11994,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member SelectObject( objectId:Guid,
                                 [<OPT;DEF(false)>]forceVisible:bool,
-                                [<OPT;DEF(false)>]ignoreErrors:bool) : unit = 
+                                [<OPT;DEF(false)>]ignoreErrors:bool) : unit =
         RhinoSync.DoSync (fun () ->
             let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             if 0 = rhobj.Select(true) then
@@ -12120,7 +12071,7 @@ type RhinoScriptSyntax private () =
                                origin:Point3d,
                                referencePoint:Point3d,
                                angleDegrees:float,
-                               [<OPT;DEF(false)>]copy:bool) : Guid = 
+                               [<OPT;DEF(false)>]copy:bool) : Guid =
        if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObject failed because (origin-referencePoint).IsTiny() : %s and %s" origin.ToNiceString referencePoint.ToNiceString
        let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
        let mutable frame = Plane(plane)
@@ -12184,7 +12135,7 @@ type RhinoScriptSyntax private () =
     ///    be snapped to and cannot be selected.</summary>
     ///<param name="objectId">(Guid) Representing id of object to show</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ShowObject(objectId:Guid) : unit = 
+    static member ShowObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
@@ -12204,7 +12155,7 @@ type RhinoScriptSyntax private () =
     ///    but they cannot be selected.</summary>
     ///<param name="objectId">(Guid) The identifier of an object</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnlockObject(objectId:Guid) : unit = 
+    static member UnlockObject(objectId:Guid) : unit =
         if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
 
@@ -12222,7 +12173,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Unselects a single selected object.</summary>
     ///<param name="objectId">(Guid) Id of object to unselect.</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member UnselectObject(objectId:Guid) : unit = 
+    static member UnselectObject(objectId:Guid) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if 0 <> obj.Select(false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnselectObject failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
@@ -12244,7 +12195,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) List of 3 numbers or Point3d</param>
     ///<returns>(float) The distance.</returns>
-    static member DistanceToPlane(plane:Plane, point:Point3d) : float = 
+    static member DistanceToPlane(plane:Plane, point:Point3d) : float =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
         plane.DistanceTo(point)
@@ -12255,7 +12206,7 @@ type RhinoScriptSyntax private () =
     ///<param name="u">(float) U parameter to evaluate</param>
     ///<param name="v">(float) V parameter to evaluate</param>
     ///<returns>(Point3d) Point3d.</returns>
-    static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d = 
+    static member EvaluatePlane(plane:Plane, u:float , v: float) : Point3d =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         plane.PointAt(u, v)
 
@@ -12267,7 +12218,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point3d) The intersection point between the 3 Planes.</returns>
     static member IntersectPlanes( plane1:Plane,
                                    plane2:Plane,
-                                   plane3:Plane) : Point3d = 
+                                   plane3:Plane) : Point3d =
         //plane1 = RhinoScriptSyntax.CoercePlane(plane1)
         //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
         //plane3 = RhinoScriptSyntax.CoercePlane(plane3)
@@ -12280,7 +12231,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) Plane </param>
     ///<param name="origin">(Point3d) Point3d or list of three numbers</param>
     ///<returns>(Plane) moved Plane.</returns>
-    static member MovePlane(plane:Plane, origin:Point3d) : Plane = 
+    static member MovePlane(plane:Plane, origin:Point3d) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         let mutable rc = Plane(plane)
@@ -12290,7 +12241,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Flip this Plane by swapping out the X and Y axes and inverting the Z axis.</summary>
     ///<param name="plane">(Plane) Plane </param>
     ///<returns>(Plane) moved Plane.</returns>
-    static member FlipPlane(plane:Plane) : Plane = 
+    static member FlipPlane(plane:Plane) : Plane =
         let pl = Plane(plane)
         pl.Flip()
         pl
@@ -12300,7 +12251,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(Point3d) The 3-D point.</returns>
-    static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d = 
+    static member PlaneClosestPoint( plane:Plane, point:Point3d) : Point3d =
         plane.ClosestPoint(point)
 
 
@@ -12308,7 +12259,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) The Plane</param>
     ///<param name="point">(Point3d) The 3-D point to test</param>
     ///<returns>(float*float) The u and v parameter on the Plane of the closest point.</returns>
-    static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float = 
+    static member PlaneClosestParameter( plane:Plane, point:Point3d) : float*float =
         let rc, s, t = plane.ClosestParameter(point)
         if rc then s, t
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PlaneClosestParameter failed for %A; %A" plane point
@@ -12345,7 +12296,7 @@ type RhinoScriptSyntax private () =
     ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6).</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
-                                          [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > = 
+                                          [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
@@ -12374,7 +12325,7 @@ type RhinoScriptSyntax private () =
     ///    equation of a Plane with a non-zero vector is Ax + By + Cz + D = 0.</summary>
     ///<param name="plane">(Plane) The Plane to deconstruct</param>
     ///<returns>(float * float * float * float) containing four numbers that represent the coefficients of the equation  (A, B, C, D).</returns>
-    static member PlaneEquation(plane:Plane) : float * float * float * float = 
+    static member PlaneEquation(plane:Plane) : float * float * float * float =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         let rc = plane.GetPlaneEquation()
         rc.[0], rc.[1], rc.[2], rc.[3]
@@ -12383,7 +12334,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns a Plane that was fit through an array of 3D points.</summary>
     ///<param name="points">(Point3d seq) An array of 3D points</param>
     ///<returns>(Plane) The Plane.</returns>
-    static member PlaneFitFromPoints(points:Point3d seq) : Plane = 
+    static member PlaneFitFromPoints(points:Point3d seq) : Plane =
         //points = RhinoScriptSyntax.Coerce3dPointlist(points)
         let rc, plane = Plane.FitPlaneToPoints(points)
         if rc = PlaneFitResult.Success then plane
@@ -12400,7 +12351,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromFrame( origin:Point3d,
                                   xAxis:Vector3d,
-                                  yAxis:Vector3d) : Plane = 
+                                  yAxis:Vector3d) : Plane =
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         //xAxis = RhinoScriptSyntax.Coerce3dvector(xAxis)
         //yAxis = RhinoScriptSyntax.Coerce3dvector(yAxis)
@@ -12414,7 +12365,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromNormal( origin:Point3d,
                                    normal:Vector3d,
-                                   [<OPT;DEF(Vector3d())>]xAxis:Vector3d) : Plane = 
+                                   [<OPT;DEF(Vector3d())>]xAxis:Vector3d) : Plane =
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         //normal = RhinoScriptSyntax.Coerce3dvector(normal)
         let mutable rc = Plane(origin, normal)
@@ -12434,7 +12385,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Plane) The Plane.</returns>
     static member PlaneFromPoints( origin:Point3d,
                                    x:Point3d,
-                                   y:Point3d) : Plane = 
+                                   y:Point3d) : Plane =
         //origin = RhinoScriptSyntax.Coerce3dPoint(origin)
         //x = RhinoScriptSyntax.Coerce3dPoint(x)
         //y = RhinoScriptSyntax.Coerce3dPoint(y)
@@ -12447,7 +12398,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane1">(Plane) The 1st Plane to intersect</param>
     ///<param name="plane2">(Plane) The 2nd Plane to intersect</param>
     ///<returns>(Line) a line with two 3d points identifying the starting/ending points of the intersection.</returns>
-    static member PlanePlaneIntersection(plane1:Plane, plane2:Plane) : Line = 
+    static member PlanePlaneIntersection(plane1:Plane, plane2:Plane) : Line =
         //plane1 = RhinoScriptSyntax.CoercePlane(plane1)
         //plane2 = RhinoScriptSyntax.CoercePlane(plane2)
         let rc, line = Intersect.Intersection.PlanePlane(plane1, plane2)
@@ -12468,7 +12419,7 @@ type RhinoScriptSyntax private () =
     ///    [2]      number     If a circle intersection, then the radius of the circle.</returns>
     static member PlaneSphereIntersection( plane:Plane,
                                            spherePlane:Plane,
-                                           sphereRadius:float) : int * Plane * float = 
+                                           sphereRadius:float) : int * Plane * float =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //spherePlane = RhinoScriptSyntax.CoercePlane(spherePlane)
         let sphere = Sphere(spherePlane, sphereRadius)
@@ -12485,7 +12436,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) Plane to transform</param>
     ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Plane) The resulting Plane.</returns>
-    static member PlaneTransform(plane:Plane, xForm:Transform) : Plane = 
+    static member PlaneTransform(plane:Plane, xForm:Transform) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //xForm = RhinoScriptSyntax.CoercexForm(xForm)
         let rc = Plane(plane)
@@ -12500,7 +12451,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Plane) rotated Plane.</returns>
     static member RotatePlane( plane:Plane,
                                angleDegrees:float,
-                               axis:Vector3d) : Plane = 
+                               axis:Vector3d) : Plane =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         //axis = RhinoScriptSyntax.Coerce3dvector(axis)
         let angleradians = toRadians(angleDegrees)
@@ -12511,19 +12462,19 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns Rhino's world XY Plane.</summary>
     ///<returns>(Plane) Rhino's world XY Plane.</returns>
-    static member WorldXYPlane() : Plane = 
+    static member WorldXYPlane() : Plane =
         Plane.WorldXY
 
 
     ///<summary>Returns Rhino's world YZ Plane.</summary>
     ///<returns>(Plane) Rhino's world YZ Plane.</returns>
-    static member WorldYZPlane() : Plane = 
+    static member WorldYZPlane() : Plane =
         Plane.WorldYZ
 
 
     ///<summary>Returns Rhino's world ZX Plane.</summary>
     ///<returns>(Plane) Rhino's world ZX Plane.</returns>
-    static member WorldZXPlane() : Plane = 
+    static member WorldZXPlane() : Plane =
         Plane.WorldZX
 
 
@@ -12544,7 +12495,7 @@ type RhinoScriptSyntax private () =
     ///      1 = the vectors are parallel.</returns>
     static member IsVectorParallelTo(   vector1:Vector3d,
                                         vector2:Vector3d,
-                                        [<OPT;DEF(0.0)>]toleranceDegree:float) : int = 
+                                        [<OPT;DEF(0.0)>]toleranceDegree:float) : int =
         if toleranceDegree = 0.0 then vector1.IsParallelTo(vector2)
         else vector1.IsParallelTo(vector2, toRadians(toleranceDegree))
 
@@ -12557,7 +12508,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True if vectors are perpendicular, otherwise False.</returns>
     static member IsVectorPerpendicularTo(  vector1:Vector3d,
                                             vector2:Vector3d,
-                                            [<OPT;DEF(0.0)>]toleranceDegree:float) : bool = 
+                                            [<OPT;DEF(0.0)>]toleranceDegree:float) : bool =
         if toleranceDegree = 0.0 then vector1.IsPerpendicularTo(vector2)
         else vector1.IsPerpendicularTo(vector2, toRadians(toleranceDegree))
 
@@ -12566,14 +12517,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a vector is very short. The X, Y, Z elements are smaller than 1.0e-12.</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is tiny, otherwise False.</returns>
-    static member IsVectorTiny(vector:Vector3d) : bool = 
+    static member IsVectorTiny(vector:Vector3d) : bool =
         vector.IsTiny( 1.0e-12 )
 
 
     ///<summary>Checks if a vector is zero. The X, Y, Z elements are equal to 0.0.</summary>
     ///<param name="vector">(Vector3d) The vector to check</param>
     ///<returns>(bool) True if the vector is zero, otherwise False.</returns>
-    static member IsVectorZero(vector:Vector3d) : bool = 
+    static member IsVectorZero(vector:Vector3d) : bool =
         vector.IsZero
 
 
@@ -12581,7 +12532,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point1">(Point3d) Point1 of the points to add</param>
     ///<param name="point2">(Point3d) Point2 of the points to add</param>
     ///<returns>(Point3d) The resulting 3D point.</returns>
-    static member PointAdd(point1:Point3d, point2:Point3d) : Point3d = 
+    static member PointAdd(point1:Point3d, point2:Point3d) : Point3d =
         point1 + point2
 
 
@@ -12589,7 +12540,7 @@ type RhinoScriptSyntax private () =
     ///<param name="points">(Point3d IList) List of points</param>
     ///<param name="testPoint">(Point3d) The point to compare against</param>
     ///<returns>(int) index of the element in the point list that is closest to the test point.</returns>
-    static member PointArrayClosestPoint(points:Point3d IList, testPoint:Point3d) : int = 
+    static member PointArrayClosestPoint(points:Point3d IList, testPoint:Point3d) : int =
         let index = Rhino.Collections.Point3dList.ClosestIndexInList(points, testPoint)
         if index>=0 then index
         else RhinoScriptingException.Raise "RhinoScriptSyntax.PointArrayClosestPoint failed on %A, %A" points testPoint
@@ -12599,7 +12550,7 @@ type RhinoScriptSyntax private () =
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<param name="xForm">(Transform) Transformation to apply</param>
     ///<returns>(Point3d Rarr) transformed points.</returns>
-    static member PointArrayTransform(points:Point3d seq, xForm:Transform) : Point3d Rarr = 
+    static member PointArrayTransform(points:Point3d seq, xForm:Transform) : Point3d Rarr =
         rarr {for point in points do
                 let p = Point3d(point) //copy first !
                 p.Transform(xForm)
@@ -12612,7 +12563,7 @@ type RhinoScriptSyntax private () =
     ///      [0] Guid, closest  objectId
     ///      [1] the point on object
     ///      [2] the distance.</returns>
-    static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float = 
+    static member PointClosestObject(point:Point3d, objectIds:Guid seq) : Guid * Point3d * float =
         let mutable closest = Unchecked.defaultof<Guid*Point3d*float>
         let mutable distance = Double.MaxValue
         for objectId in objectIds do
@@ -12676,7 +12627,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False.</returns>
     static member PointCompare( point1:Point3d,
                                 point2:Point3d,
-                                [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+                                [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance = Util.ifZero2 RhinoMath.ZeroTolerance  tolerance
         let vector = point2-point1
         vector.IsTiny(tolerance)
@@ -12686,7 +12637,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) The point to divide</param>
     ///<param name="divide">(float) A non-zero value to divide</param>
     ///<returns>(Point3d) resulting point.</returns>
-    static member PointDivide(point:Point3d, divide:float) : Point3d = 
+    static member PointDivide(point:Point3d, divide:float) : Point3d =
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
             RhinoScriptingException.Raise "RhinoScriptSyntax.PointDivide: Cannot divide by Zero or almost Zero %f" divide
         else
@@ -12698,7 +12649,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>1.0e-12</c> = RhinoMath.ZeroTolerance
     ///    Tolerance to use when verifying</param>
     ///<returns>(bool) True or False.</returns>
-    static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+    static member PointsAreCoplanar(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance = Util.ifZero1 tolerance RhinoMath.ZeroTolerance
         Point3d.ArePointsCoplanar(points, tolerance)
 
@@ -12707,7 +12658,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) The point to divide</param>
     ///<param name="scale">(float) Scale factor to apply</param>
     ///<returns>(Point3d) resulting point.</returns>
-    static member PointScale(point:Point3d, scale:float) : Point3d = 
+    static member PointScale(point:Point3d, scale:float) : Point3d =
         point*scale
 
 
@@ -12715,7 +12666,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point1">(Point3d) Point1 of the points to subtract</param>
     ///<param name="point2">(Point3d) Point2 of the points to subtract</param>
     ///<returns>(Point3d) The resulting 3D point.</returns>
-    static member PointSubtract(point1:Point3d, point2:Point3d) : Point3d = 
+    static member PointSubtract(point1:Point3d, point2:Point3d) : Point3d =
         let v = point1-point2
         Point3d(v)
 
@@ -12724,7 +12675,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) The point to transform</param>
     ///<param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     ///<returns>(Point3d) transformed Point.</returns>
-    static member PointTransform(point:Point3d, xForm:Transform) : Point3d = 
+    static member PointTransform(point:Point3d, xForm:Transform) : Point3d =
         let p = Point3d(point) //copy first !
         p.Transform(xForm)
         p
@@ -12738,7 +12689,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point3d array) projected points.</returns>
     static member ProjectPointToMesh( points:Point3d seq,
                                       meshIds:Guid seq,
-                                      direction:Vector3d) : Point3d array = 
+                                      direction:Vector3d) : Point3d array =
         let meshes =  rarr { for objectId in meshIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToMeshes(meshes, points, direction, tolerance)
@@ -12752,7 +12703,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point3d array) projected points.</returns>
     static member ProjectPointToSurface( points:Point3d seq,
                                          surfaceIds:Guid seq,
-                                         direction:Vector3d) : Point3d array = 
+                                         direction:Vector3d) : Point3d array =
         let breps =  rarr { for objectId in surfaceIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         Intersect.Intersection.ProjectPointsToBreps(breps, points, direction, tolerance)
@@ -12763,11 +12714,11 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) The identifier of the Surface or Mesh object that pulls</param>
     ///<param name="points">(Point3d seq) List of 3D points</param>
     ///<returns>(Point3d array) 3D points pulled onto Surface or Mesh.</returns>
-    static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array = 
+    static member PullPoints(objectId:Guid, points:Point3d seq) : Point3d array =
         match RhinoScriptSyntax.CoerceGeometry(objectId) with
         | :? Mesh as mesh->
             let points = mesh.PullPointsToMesh(points)
-            points       
+            points
         | :? Brep as brep->
             if brep.Faces.Count = 1 then
                 let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -12781,7 +12732,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to add</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to add</param>
     ///<returns>(Vector3d) The resulting 3D vector.</returns>
-    static member VectorAdd(vector1:Vector3d, vector2:Vector3d) : Vector3d = 
+    static member VectorAdd(vector1:Vector3d, vector2:Vector3d) : Vector3d =
         vector1 + vector2
 
 
@@ -12789,7 +12740,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector1">(Vector3d) The first 3-D vector</param>
     ///<param name="vector2">(Vector3d) The second 3-D vector</param>
     ///<returns>(float) The angle in degrees.</returns>
-    static member VectorAngle(vector1:Vector3d, vector2:Vector3d) : float = 
+    static member VectorAngle(vector1:Vector3d, vector2:Vector3d) : float =
         let vector1 = Vector3d(vector1.X, vector1.Y, vector1.Z)
         let vector2 = Vector3d(vector2.X, vector2.Y, vector2.Z)
         if not <| vector1.Unitize() || not <| vector2.Unitize() then
@@ -12807,7 +12758,7 @@ type RhinoScriptSyntax private () =
     ///    -1 if vector1 is less than vector2
     ///    0 if vector1 is equal to vector2
     ///    1 if vector1 is greater than vector2.</returns>
-    static member VectorCompare(vector1:Vector3d, vector2:Vector3d) : int = 
+    static member VectorCompare(vector1:Vector3d, vector2:Vector3d) : int =
         vector1.CompareTo(vector2)
 
 
@@ -12815,7 +12766,7 @@ type RhinoScriptSyntax private () =
     ///<param name="fromPoint">(Point3d) Start point of vector</param>
     ///<param name="toPoint">(Point3d) End point vector</param>
     ///<returns>(Vector3d) The resulting vector.</returns>
-    static member VectorCreate( fromPoint:Point3d, toPoint:Point3d) : Vector3d = 
+    static member VectorCreate( fromPoint:Point3d, toPoint:Point3d) : Vector3d =
         toPoint-fromPoint
 
 
@@ -12823,7 +12774,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to perform cross product on</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to perform cross product on</param>
     ///<returns>(Vector3d) The resulting cross product direction.</returns>
-    static member VectorCrossProduct(vector1:Vector3d, vector2:Vector3d) : Vector3d = 
+    static member VectorCrossProduct(vector1:Vector3d, vector2:Vector3d) : Vector3d =
         Vector3d.CrossProduct( vector1, vector2 )
 
 
@@ -12831,7 +12782,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector">(Vector3d) The vector to divide</param>
     ///<param name="divide">(float) A non-zero value to divide</param>
     ///<returns>(Vector3d) resulting vector.</returns>
-    static member VectorDivide(vector:Vector3d, divide:float) : Vector3d = 
+    static member VectorDivide(vector:Vector3d, divide:float) : Vector3d =
         if divide < RhinoMath.ZeroTolerance && divide > -RhinoMath.ZeroTolerance then
             RhinoScriptingException.Raise "RhinoScriptSyntax.VectorDivide: Cannot divide by Zero or almost Zero %f" divide
         else
@@ -12842,14 +12793,14 @@ type RhinoScriptSyntax private () =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to perform the dot product on</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to perform the dot product on</param>
     ///<returns>(float) The resulting dot product.</returns>
-    static member VectorDotProduct(vector1:Vector3d, vector2:Vector3d) : float = 
+    static member VectorDotProduct(vector1:Vector3d, vector2:Vector3d) : float =
         vector1*vector2
 
 
     ///<summary>Returns the length of a 3D vector.</summary>
     ///<param name="vector">(Vector3d) The 3-D vector</param>
     ///<returns>(float) The length of the vector.</returns>
-    static member VectorLength(vector:Vector3d) : float = 
+    static member VectorLength(vector:Vector3d) : float =
         vector.Length
 
 
@@ -12857,14 +12808,14 @@ type RhinoScriptSyntax private () =
     ///<param name="vector1">(Vector3d) Vector1 of the vectors to multiply</param>
     ///<param name="vector2">(Vector3d) Vector2 of the vectors to multiply</param>
     ///<returns>(float) The resulting inner (dot) product.</returns>
-    static member VectorMultiply(vector1:Vector3d, vector2:Vector3d) : float = 
+    static member VectorMultiply(vector1:Vector3d, vector2:Vector3d) : float =
         vector1* vector2
 
 
     ///<summary>Reverses the direction of a 3D vector.</summary>
     ///<param name="vector">(Vector3d) The vector to reverse</param>
     ///<returns>(Vector3d) reversed vector.</returns>
-    static member VectorReverse(vector:Vector3d) : Vector3d = 
+    static member VectorReverse(vector:Vector3d) : Vector3d =
         Vector3d(-vector.X, -vector.Y, -vector.Z)
 
 
@@ -12876,7 +12827,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Vector3d) rotated vector.</returns>
     static member VectorRotate( vector:Vector3d,
                                 angleDegrees:float,
-                                axis:Vector3d) : Vector3d = 
+                                axis:Vector3d) : Vector3d =
         let angleradians = RhinoMath.ToRadians(angleDegrees)
         let rc = Vector3d(vector.X, vector.Y, vector.Z)
         if rc.Rotate(angleradians, axis) then rc
@@ -12887,7 +12838,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector">(Vector3d) The vector to scale</param>
     ///<param name="scale">(float) Scale factor to apply</param>
     ///<returns>(Vector3d) resulting vector.</returns>
-    static member VectorScale(vector:Vector3d, scale:float) : Vector3d = 
+    static member VectorScale(vector:Vector3d, scale:float) : Vector3d =
         vector*scale
 
 
@@ -12895,7 +12846,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector1">(Vector3d) The vector to subtract from</param>
     ///<param name="vector2">(Vector3d) The vector to subtract</param>
     ///<returns>(Vector3d) The resulting 3D vector.</returns>
-    static member VectorSubtract(vector1:Vector3d, vector2:Vector3d) : Vector3d = 
+    static member VectorSubtract(vector1:Vector3d, vector2:Vector3d) : Vector3d =
         vector1-vector2
 
 
@@ -12903,7 +12854,7 @@ type RhinoScriptSyntax private () =
     ///<param name="vector">(Vector3d) The vector to transform</param>
     ///<param name="xForm">(Transform) A valid 4x4 transformation matrix</param>
     ///<returns>(Vector3d) transformed vector.</returns>
-    static member VectorTransform(vector:Vector3d, xForm:Transform) : Vector3d =         
+    static member VectorTransform(vector:Vector3d, xForm:Transform) : Vector3d =
         let v = Vector3d(vector)
         v.Transform(xForm)
         v
@@ -12912,7 +12863,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Unitizes, or normalizes a 3D vector. Note, zero vectors cannot be unitized.</summary>
     ///<param name="vector">(Vector3d) The vector to unitize</param>
     ///<returns>(Vector3d) unitized vector.</returns>
-    static member inline VectorUnitize(vector:Vector3d) : Vector3d = 
+    static member inline VectorUnitize(vector:Vector3d) : Vector3d =
         let le = sqrt (vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z)
         if Double.IsInfinity le || le < RhinoMath.ZeroTolerance then RhinoScriptingException.Raise "RhinoScriptSyntax.VectorUnitize failed on zero length or very short Vector %s" vector.ToNiceString
         let f = 1. / le
@@ -12951,7 +12902,7 @@ type RhinoScriptSyntax private () =
     static member AllObjects(  [<OPT;DEF(false)>]select:bool,
                                [<OPT;DEF(false)>]includeLights:bool,
                                [<OPT;DEF(false)>]includeGrips:bool,
-                               [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                               [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -12976,7 +12927,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) The identifier of the object.</returns>
     static member FirstObject(      [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(false)>]includeLights:bool,
-                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid = 
+                                    [<OPT;DEF(false)>]includeGrips:bool) : Guid =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.IncludeLights <- includeLights
             it.IncludeGrips <- includeGrips
@@ -13000,11 +12951,11 @@ type RhinoScriptSyntax private () =
     ///    [2]  Enum     DocObjects.SelectionMethod
     ///    [3]  point    selection point
     ///    [4]  number   the Curve parameter of the selection point
-    ///    [5]  str      name of the view selection was made. 
+    ///    [5]  str      name of the view selection was made.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetCurveObject(   [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(true)>]preselect:bool,
-                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string = 
+                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * float * string =
         let get () =  // TODO Add check if already hidden, then don't even hide and show
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
@@ -13016,7 +12967,7 @@ type RhinoScriptSyntax private () =
             go.GroupSelect <- false
             go.AcceptNothing(true)
             let res = go.Get()
-            if res <> Input.GetResult.Object then                
+            if res <> Input.GetResult.Object then
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetCurveObject(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -13032,7 +12983,7 @@ type RhinoScriptSyntax private () =
                     State.Doc.Objects.UnselectAll()|> ignore
                     State.Doc.Views.Redraw()
                 obj.Select(select)  |> ignore
-                (objectId, presel, selmethod, point, curveparameter, viewname)            
+                (objectId, presel, selmethod, point, curveparameter, viewname)
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -13058,8 +13009,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter,
-                                    [<OPT;DEF(false)>]subObjects:bool) : Guid = 
-        let get () = 
+                                    [<OPT;DEF(false)>]subObjects:bool) : Guid =
+        let get () =
             if not  preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -13117,8 +13068,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(0)>]filter:int,
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string = 
-        let get () = 
+                                    [<OPT;DEF(null:Guid seq)>]objects:Guid seq) : Guid * bool * DocObjects.SelectionMethod * Point3d * string =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -13135,7 +13086,7 @@ type RhinoScriptSyntax private () =
             go.AcceptNothing(true)
             let res = go.Get()
             if res <> Input.GetResult.Object then
-                
+
                 RhinoUserInteractionException.Raise "No Object was selected in RhinoScriptSyntax.GetObjectEx(message=%A), Interaction result: %A" message res
             else
                 let objref = go.Object(0)
@@ -13178,7 +13129,7 @@ type RhinoScriptSyntax private () =
     ///<param name="printCount">(bool) Optional, default value: <c>true</c> Print object count to command window.</param>
     ///<param name="customFilter">(Input.Custom.GetObjectGeometryFilter) Optional, Will be ignored if 'objects' are set. Calls a custom function in the script and passes
     ///    the Rhino Object, Geometry, and component index and returns true or false indicating if the object can be selected</param>
-    ///<returns>(Guid Rarr) List of identifiers of the picked objects. 
+    ///<returns>(Guid Rarr) List of identifiers of the picked objects.
     ///A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetObjects(       [<OPT;DEF("Select objects")>]message:string,
                                     [<OPT;DEF(0)>]filter:int,
@@ -13189,8 +13140,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(1)>]minimumCount:int,
                                     [<OPT;DEF(0)>]maximumCount:int,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Rarr<Guid> = 
-        let get () = 
+                                    [<OPT;DEF(null:Input.Custom.GetObjectGeometryFilter)>]customFilter:Input.Custom.GetObjectGeometryFilter)  : Rarr<Guid> =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -13259,8 +13210,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(true)>]preselect:bool,
                                     [<OPT;DEF(false)>]select:bool,
                                     [<OPT;DEF(true)>]printCount:bool,
-                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr = 
-        let get () = 
+                                    [<OPT;DEF(null:Guid seq)>]objectsToSelectFrom:Guid seq) : (Guid*bool*DocObjects.SelectionMethod*Point3d*string) Rarr =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -13298,7 +13249,7 @@ type RhinoScriptSyntax private () =
                     |> Rarr.map ( fun (id, _, _, _, _) -> id )
                     |> RhinoScriptSyntax.ObjectDescription
                     |> InternalToNiceStringSetup.printfnBlue "RhinoScriptSyntax.GetObjectsEx(...) returned %s"
-                rc            
+                rc
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -13309,7 +13260,7 @@ type RhinoScriptSyntax private () =
     ///    Allow for the selection of pre-selected objects. If omitted, pre-selected objects are not accepted</param>
     ///<returns>(Point3d Rarr) List of 3d points.</returns>
     static member GetPointCoordinates(  [<OPT;DEF("Select Point Objects")>] message:string,
-                                        [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr = 
+                                        [<OPT;DEF(false)>]                  preselect:bool) : Point3d Rarr =
         let ids =  RhinoScriptSyntax.GetObjects(message, RhinoScriptSyntax.Filter.Point, preselect = preselect)
         let rc = Rarr<Point3d>()
         for objectId in ids do
@@ -13338,8 +13289,8 @@ type RhinoScriptSyntax private () =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetSurfaceObject( [<OPT;DEF("Select surface")>]message:string, // TODO add selection method return value.  see help
                                     [<OPT;DEF(true)>]preselect:bool,
-                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string = 
-        let get () = 
+                                    [<OPT;DEF(false)>]select:bool) : Guid * bool * DocObjects.SelectionMethod * Point3d * (float * float) * string =
+        let get () =
             if not <| preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
                 State.Doc.Views.Redraw()
@@ -13387,7 +13338,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers the locked objects.</returns>
     static member LockedObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
             let settings = DocObjects.ObjectEnumeratorSettings()
             settings.ActiveObjects <- true
             settings.NormalObjects <- true
@@ -13414,7 +13365,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of the hidden objects.</returns>
     static member HiddenObjects(    [<OPT;DEF(false)>]includeLights:bool,
                                     [<OPT;DEF(false)>]includeGrips:bool,
-                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                    [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.ActiveObjects <- true
         settings.NormalObjects <- true
@@ -13439,7 +13390,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of the newly selected objects.</returns>
     static member InvertSelectedObjects([<OPT;DEF(false)>]includeLights:bool,
                                         [<OPT;DEF(false)>]includeGrips:bool,
-                                        [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                        [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
@@ -13464,7 +13415,7 @@ type RhinoScriptSyntax private () =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the object. If omitted, the object is not selected</param>
     ///<returns>(Guid Rarr) identifiers of the most recently created or changed objects.</returns>
-    static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member LastCreatedObjects([<OPT;DEF(false)>]select:bool) : Guid Rarr =
         match State.CommandSerialNumbers with
         |None -> Rarr()
         |Some (serialnum, ende) ->
@@ -13491,7 +13442,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of the object.</returns>
     static member LastObject( [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
-                              [<OPT;DEF(false)>]includeGrips:bool) : Guid = 
+                              [<OPT;DEF(false)>]includeGrips:bool) : Guid =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
@@ -13520,7 +13471,7 @@ type RhinoScriptSyntax private () =
     static member NextObject( objectId:Guid,
                               [<OPT;DEF(false)>]select:bool,
                               [<OPT;DEF(false)>]includeLights:bool,
-                              [<OPT;DEF(false)>]includeGrips:bool) : Guid = 
+                              [<OPT;DEF(false)>]includeGrips:bool) : Guid =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.IncludeLights <- includeLights
         settings.IncludeGrips <- includeGrips
@@ -13543,7 +13494,7 @@ type RhinoScriptSyntax private () =
     ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grips objects. If omitted, grips objects are not returned</param>
     ///<returns>(Guid Rarr) identifier of normal objects.</returns>
-    static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
+    static member NormalObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let iter = DocObjects.ObjectEnumeratorSettings()
         iter.NormalObjects <- true
         iter.LockedObjects <- false
@@ -13561,7 +13512,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of objects of the selected color.</returns>
     static member ObjectsByColor( color:Drawing.Color,
                                   [<OPT;DEF(false)>]select:bool,
-                                  [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr = 
+                                  [<OPT;DEF(false)>]includeLights:bool) : Guid Rarr =
         let rhinoobjects = State.Doc.Objects.FindByDrawColor(color, includeLights)
         if select then
             for obj in rhinoobjects do obj.Select(true)|> ignore // TODO needs sync ? apparently not needed!
@@ -13574,7 +13525,7 @@ type RhinoScriptSyntax private () =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
     ///<returns>(Guid Rarr) identifiers for objects in the group.</returns>
-    static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member ObjectsByGroup(groupName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let groupinstance = State.Doc.Groups.FindName(groupName)
         if isNull groupinstance then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectsByGroup: '%s' does not exist in GroupTable" groupName
@@ -13593,7 +13544,7 @@ type RhinoScriptSyntax private () =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the objects</param>
     ///<returns>(Guid Rarr) identifiers for objects in the specified layer.</returns>
-    static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member ObjectsByLayer(layerName:string, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let layer = RhinoScriptSyntax.CoerceLayer(layerName)
         let rhinoobjects = State.Doc.Objects.FindByLayer(layer)
         if isNull rhinoobjects then Rarr()
@@ -13617,7 +13568,7 @@ type RhinoScriptSyntax private () =
     static member ObjectsByName( name:string,
                                  [<OPT;DEF(false)>]select:bool,
                                  [<OPT;DEF(false)>]includeLights:bool,
-                                 [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr = 
+                                 [<OPT;DEF(false)>]includeReferences:bool) : Guid Rarr =
         let settings = DocObjects.ObjectEnumeratorSettings()
         settings.HiddenObjects <- true
         settings.DeletedObjects <- false
@@ -13671,7 +13622,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of object that fit the specified type(s).</returns>
     static member ObjectsByType( geometryType:int,
                                  [<OPT;DEF(false)>]select:bool,
-                                 [<OPT;DEF(0)>]state:int) : Guid Rarr = 
+                                 [<OPT;DEF(0)>]state:int) : Guid Rarr =
         let mutable state = state
         if state = 0 then state <- 7
         let mutable bSurface = false
@@ -13734,14 +13685,14 @@ type RhinoScriptSyntax private () =
     ///<param name="includeGrips">(bool) Optional, default value: <c>false</c>
     ///    Include grip objects</param>
     ///<returns>(Guid Rarr) identifiers of selected objects.</returns>
-    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
+    static member SelectedObjects([<OPT;DEF(false)>]includeLights:bool, [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let selobjects = State.Doc.Objects.GetSelectedObjects(includeLights, includeGrips)
         rarr {for obj in selobjects do obj.Id }
 
 
     ///<summary>Unselects all objects in the document.</summary>
     ///<returns>(int) The number of objects that were unselected.</returns>
-    static member UnselectAllObjects() : int = 
+    static member UnselectAllObjects() : int =
         let rc = State.Doc.Objects.UnselectAll()
         if rc>0 then State.Doc.Views.Redraw()
         rc
@@ -13761,7 +13712,7 @@ type RhinoScriptSyntax private () =
     static member VisibleObjectsInView(   [<OPT;DEF(null:string)>]view:string,
                                           [<OPT;DEF(false)>]select:bool,
                                           [<OPT;DEF(false)>]includeLights:bool,
-                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr = 
+                                          [<OPT;DEF(false)>]includeGrips:bool) : Guid Rarr =
         let get () =
             let it = DocObjects.ObjectEnumeratorSettings()
             it.DeletedObjects <- false
@@ -13777,7 +13728,7 @@ type RhinoScriptSyntax private () =
             for object in e do
                 let bbox = object.Geometry.GetBoundingBox(true)
                 if viewport.IsVisible(bbox) then
-                    if select then object.Select(true) |> ignore 
+                    if select then object.Select(true) |> ignore
                     objectIds.Add(object.Id)
             if objectIds.Count>0 && select then State.Doc.Views.Redraw()
             objectIds
@@ -13797,9 +13748,9 @@ type RhinoScriptSyntax private () =
                               corner2:Point3d,
                               [<OPT;DEF(null:string)>]view:string,
                               [<OPT;DEF(false)>]select:bool,
-                              [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr = 
+                              [<OPT;DEF(true)>]inWindow:bool) : Guid Rarr =
 
-        let pick () = 
+        let pick () =
             let view = if notNull view then RhinoScriptSyntax.CoerceView(view) else State.Doc.Views.ActiveView
             let viewport = view.MainViewport
             let screen1 = Point2d(corner1)
@@ -13809,7 +13760,7 @@ type RhinoScriptSyntax private () =
             screen2.Transform(xf)
 
 
-            let objects = 
+            let objects =
                 // updated from https://github.com/mcneel/rhinoscriptsyntax/pull/185
                 let pc = new Input.Custom.PickContext()
                 pc.View <- view
@@ -13835,7 +13786,7 @@ type RhinoScriptSyntax private () =
                 for rhobjr in objects do
                     let rhobj = rhobjr.Object()
                     rc.Add(rhobj.Id)
-                    if select then rhobj.Select(true) |> ignore 
+                    if select then rhobj.Select(true) |> ignore
                 if select then State.Doc.Views.Redraw()
             rc
         RhinoSync.DoSyncRedrawHideEditor pick
@@ -13849,7 +13800,7 @@ type RhinoScriptSyntax private () =
     ///<param name="corners">(Point3d seq) 8 points that define the corners of the box. Points need to
     ///    be in counter-clockwise order starting with the bottom rectangle of the box</param>
     ///<returns>(Guid) identifier of the new object.</returns>
-    static member AddBox(corners:Point3d seq) : Guid = 
+    static member AddBox(corners:Point3d seq) : Guid =
         let brep = Brep.CreateFromBox(corners)
         if isNull brep then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBox: Unable to create brep from box.  %d corners:'%A'" (Seq.length corners) corners
         let rc = State.Doc.Objects.AddBrep(brep)
@@ -13857,8 +13808,8 @@ type RhinoScriptSyntax private () =
         State.Doc.Views.Redraw()
         rc
 
-    ///<summary>Adds a cone shaped Polysurface to the document. 
-    /// The cone will have it's tip at the origin of the given plane. And grow along its Z axis. 
+    ///<summary>Adds a cone shaped Polysurface to the document.
+    /// The cone will have it's tip at the origin of the given plane. And grow along its Z axis.
     /// So it will be an upside down cone on world XY plane</summary>
     ///<param name="basis">(Plane) The plane at the tip of the cone. From this tip the cone wil expand along the Z axis. </param>
     ///<param name="height">(float) The height of cone. </param>
@@ -13868,14 +13819,14 @@ type RhinoScriptSyntax private () =
     static member AddCone( basis:Plane,
                            height:float,
                            radius:float,
-                           [<OPT;DEF(true)>]cap:bool) : Guid = 
+                           [<OPT;DEF(true)>]cap:bool) : Guid =
         let cone = Cone(basis, height, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
         let rc = State.Doc.Objects.AddBrep(brep)
         State.Doc.Views.Redraw()
         rc
 
-    ///<summary>Adds a cone shaped Polysurface to the document. 
+    ///<summary>Adds a cone shaped Polysurface to the document.
     /// The cone will have it's base center at the first point and the tip at the second point</summary>
     ///<param name="baseCenter">(Point3d) The point in the center of the base.</param>
     ///<param name="tip">(Point3d) The tip of cone. </param>
@@ -13885,8 +13836,8 @@ type RhinoScriptSyntax private () =
     static member AddCone( baseCenter:Point3d,
                            tip:Point3d,
                            radius:float,
-                           [<OPT;DEF(true)>]cap:bool) : Guid = 
-        let n = baseCenter-tip 
+                           [<OPT;DEF(true)>]cap:bool) : Guid =
+        let n = baseCenter-tip
         let pl = RhinoScriptSyntax.PlaneFromNormal(tip,n)
         let cone = Cone(pl, n.Length, radius)
         let brep = Brep.CreateFromCone(cone, cap)// cone is upside down
@@ -13908,18 +13859,17 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of new object.</returns>
     static member AddCutPlane( objectIds:Guid seq,
                                startPoint:Point3d,
-                               endPoint:Point3d, 
+                               endPoint:Point3d,
                                [<OPT;DEF(Vector3d())>]normal:Vector3d) : Guid =
-        #if RHINO7 // needs GetTightBoundingBox
-        // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955        
-        let bbox = 
+        // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955
+        let bbox =
             let objs = objectIds|> Seq.map RhinoScriptSyntax.CoerceRhinoObject
             let mutable ok,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
             if not bbox0.IsValid then
-                RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Nice.str objectIds) 
+                RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Nice.str objectIds)
             let mutable bboxMin = bbox0.Min
             let mutable bboxMax = bbox0.Max
-            for i=0 to 2 do 
+            for i=0 to 2 do
                 if (abs(bboxMin.[i] - bboxMax.[i]) < RhinoMath.SqrtEpsilon)then
                     bboxMin.[i] <- bboxMin.[i] - 1.0
                     bboxMax.[i] <- bboxMax.[i] + 1.0
@@ -13929,15 +13879,15 @@ type RhinoScriptSyntax private () =
             bboxMin <- bboxMax - v
             bboxMax <- p
             Rhino.Geometry.BoundingBox(bboxMin, bboxMax)
-        #else
-        let bbox = BoundingBox.Unset
-        for objectId in objectIds do
-            let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let geometry = rhobj.Geometry
-            bbox.Union( geometry.GetBoundingBox(true))        
-        if not bbox.IsValid then
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Nice.str objectIds) startPoint endPoint normal        
-        #endif
+        // #else RH6
+        // let bbox = BoundingBox.Unset
+        // for objectId in objectIds do
+        //     let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
+        //     let geometry = rhobj.Geometry
+        //     bbox.Union( geometry.GetBoundingBox(true))
+        // if not bbox.IsValid then
+        //     RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Nice.str objectIds) startPoint endPoint normal
+        // #endif
         let line = Geometry.Line(startPoint, endPoint)
         let normal = if normal.IsZero then Vector3d.ZAxis else normal // TODO or use original ?? : scriptcontext.doc.Views.ActiveView.ActiveViewport.ConstructionPlane().Normal
         let surface = Rhino.Geometry.PlaneSurface.CreateThroughBox(line, normal, bbox)
@@ -13946,7 +13896,7 @@ type RhinoScriptSyntax private () =
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane failed.  objectIds:'%A' startPoint:'%A' endPoint:'%A' normal:'%A'" (Nice.str objectIds) startPoint endPoint normal
         State.Doc.Views.Redraw()
         objectId
-        
+
 
 
     ///<summary>Adds a cylinder-shaped Polysurface to the document.</summary>
@@ -13962,7 +13912,7 @@ type RhinoScriptSyntax private () =
     static member AddCylinder( basis:Plane,
                                height:float,
                                radius:float,
-                               [<OPT;DEF(true)>]cap:bool) : Guid = 
+                               [<OPT;DEF(true)>]cap:bool) : Guid =
         let circle = Circle(basis, radius)
         let cylinder = Cylinder(circle, height)
         let brep = cylinder.ToBrep(cap, cap)
@@ -13975,7 +13925,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Creates a Surface from 2, 3, or 4 edge Curves.</summary>
     ///<param name="curveIds">(Guid seq) List of Curves</param>
     ///<returns>(Guid) identifier of new object.</returns>
-    static member AddEdgeSrf(curveIds:Guid seq) : Guid = 
+    static member AddEdgeSrf(curveIds:Guid seq) : Guid =
         let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let brep = Brep.CreateEdgeSurface(curves)
         if brep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (Nice.str curveIds)
@@ -14001,7 +13951,7 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(1)>]continuity:int,
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
-                                 [<OPT;DEF(0.0)>]angleTolerance:float) : Guid = 
+                                 [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
         let curves =  rarr { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) }
         let surf, err = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
@@ -14027,7 +13977,7 @@ type RhinoScriptSyntax private () =
                                    knotsU:float seq,
                                    knotsV:float seq,
                                    degree:int * int,
-                                   [<OPT;DEF(null:float IList)>]weights:float IList) : Guid = 
+                                   [<OPT;DEF(null:float IList)>]weights:float IList) : Guid =
         let pu, pv = pointCount
         let du, dv = degree
         if points.Count < (pu*pv) then
@@ -14063,18 +14013,18 @@ type RhinoScriptSyntax private () =
                 index <- index + 1
 
         //add the knots
-        let mutable i = 0 
+        let mutable i = 0
         for ku in knotsU do
             ns.KnotsU.[i] <-  ku
             i<-i+1
         if i<> ns.KnotsU.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  knotsU expected %d knots but input had %d" ns.KnotsU.Count i
-        let mutable j = 0 
+        let mutable j = 0
         for kv in knotsV do
             ns.KnotsV.[j] <-  kv
             j<-j+1
         if j<> ns.KnotsV.Count then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  knotsV expected %d knots but input had %d" ns.KnotsV.Count j
 
-        
+
         if not ns.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
         let objectId = State.Doc.Objects.AddSurface(ns)
         if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNurbsSurface failed.  pointCount:'%A' points:'%A' knotsU:'%A' knotsV:'%A' degree:'%A' weights:'%A'" pointCount points knotsU knotsV degree weights
@@ -14114,7 +14064,7 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(0.1)>]pointSpacing:float,
                               [<OPT;DEF(1.0)>]flexibility:float,
                               [<OPT;DEF(1.0)>]surfacePull:float,
-                              [<OPT;DEF(false)>]fixEdges:bool) : Guid = 
+                              [<OPT;DEF(false)>]fixEdges:bool) : Guid =
                     let uspan, vspan = 10, 10
                     let geometry =   rarr{for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
                     let surface = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
@@ -14161,7 +14111,7 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(0.1)>]pointSpacing:float,
                             [<OPT;DEF(1.0)>]flexibility:float,
                             [<OPT;DEF(1.0)>]surfacePull:float,
-                            [<OPT;DEF(false)>]fixEdges:bool) : Guid = 
+                            [<OPT;DEF(false)>]fixEdges:bool) : Guid =
 
         let uspan, vspan = uvSpans
         let geometry =   rarr{for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
@@ -14192,7 +14142,7 @@ type RhinoScriptSyntax private () =
                            radii:float seq,
                            [<OPT;DEF(0)>]blendType:int,
                            [<OPT;DEF(0)>]cap:int,
-                           [<OPT;DEF(false)>]fit:bool) : Guid Rarr = 
+                           [<OPT;DEF(false)>]fit:bool) : Guid Rarr =
         let rail = RhinoScriptSyntax.CoerceCurve(curveId)
         let abstol = State.Doc.ModelAbsoluteTolerance
         let angtol = State.Doc.ModelAngleToleranceRadians
@@ -14207,7 +14157,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Creates one Surface from one Polyline Geometry.</summary>
     ///<param name="polyline">(Polyline) one Polyline Geometry to use for creating planar Surfaces</param>
     ///<returns>(Guid) identifier of Surface created .</returns>
-    static member AddPlanarSrf(polyline:Polyline) : Guid= 
+    static member AddPlanarSrf(polyline:Polyline) : Guid=
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(new PolylineCurve(polyline), tolerance)
         if notNull breps then
@@ -14221,7 +14171,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Creates one Surface from one planar Curve.</summary>
     ///<param name="curve">(Curve) one Curve Geometry to use for creating planar Surfaces</param>
     ///<returns>(Guid) identifier of Surface created .</returns>
-    static member AddPlanarSrf(curve:Curve) : Guid= 
+    static member AddPlanarSrf(curve:Curve) : Guid=
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curve, tolerance)
         if notNull breps then
@@ -14235,7 +14185,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="curves">(Curve seq) several Curves Geometries to use for creating planar Surfaces</param>
     ///<returns>(Guid Rarr) identifiers of Surfaces created .</returns>
-    static member AddPlanarSrf(curves:Curve seq) : Guid Rarr = 
+    static member AddPlanarSrf(curves:Curve seq) : Guid Rarr =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
@@ -14248,7 +14198,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
     ///<returns>(Guid Rarr) identifiers of Surfaces created .</returns>
-    static member AddPlanarSrf(objectIds:Guid seq) : Guid Rarr = 
+    static member AddPlanarSrf(objectIds:Guid seq) : Guid Rarr =
         let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
@@ -14268,7 +14218,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) The identifier of the new object.</returns>
     static member AddPlaneSurface( plane:Plane,
                                    uDir:float,
-                                   vDir:float) : Guid = 
+                                   vDir:float) : Guid =
         //plane = RhinoScriptSyntax.CoercePlane(plane)
         let uinterval = Interval(0.0, uDir)
         let vinterval = Interval(0.0, vDir)
@@ -14311,7 +14261,7 @@ type RhinoScriptSyntax private () =
                               [<OPT;DEF(0)>]loftType:int,
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
-                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr = 
+                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
         if loftType<0 || loftType>4 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
@@ -14350,7 +14300,7 @@ type RhinoScriptSyntax private () =
     static member AddRevSrf( curveId:Guid,
                              axis:Line,
                              [<OPT;DEF(0.0)>]startAngle:float,
-                             [<OPT;DEF(360.0)>]endAngle:float) : Guid = 
+                             [<OPT;DEF(360.0)>]endAngle:float) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         //axis = RhinoScriptSyntax.Coerceline(axis)
         let startAngle = toRadians(startAngle)
@@ -14368,7 +14318,7 @@ type RhinoScriptSyntax private () =
     ///<param name="center">(Point3d) Center point of the sphere</param>
     ///<param name="radius">(float) Radius of the sphere in the current model units</param>
     ///<returns>(Guid) identifier of the new object .</returns>
-    static member AddSphere(center:Point3d, radius:float) : Guid = 
+    static member AddSphere(center:Point3d, radius:float) : Guid =
         let sphere = Sphere(center, radius)
         let rc = State.Doc.Objects.AddSphere(sphere)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSphere failed.  centerOrPlane:'%A' radius:'%A'" center radius
@@ -14383,7 +14333,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) The Plane that defines the cutting Plane</param>
     ///<returns>(Guid Rarr) ids of new contour Curves .</returns>
     static member AddSrfContourCrvs( objectId:Guid,
-                                     plane:Plane) : Guid Rarr = 
+                                     plane:Plane) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         //plane = RhinoScriptSyntax.CoercePlane(pointsOrPlane)
         let curves =  Brep.CreateContourCurves(brep, plane)
@@ -14406,7 +14356,7 @@ type RhinoScriptSyntax private () =
     static member AddSrfContourCrvs( objectId:Guid,
                                      startPoint:Point3d,
                                      endPoint :Point3d ,
-                                     interval:float) : Guid Rarr= 
+                                     interval:float) : Guid Rarr=
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let curves =  Brep.CreateContourCurves(brep, startPoint , endPoint, interval)
         let rc = Rarr()
@@ -14426,7 +14376,7 @@ type RhinoScriptSyntax private () =
     static member AddSrfControlPtGrid( count:int * int,
                                        points:Point3d seq,
                                        [<OPT;DEF(3)>]degreeU:int,
-                                       [<OPT;DEF(3)>]degreeV:int           ) : Guid = 
+                                       [<OPT;DEF(3)>]degreeV:int           ) : Guid =
         //points = RhinoScriptSyntax.Coerce3dPointlist(points)
         let surf = NurbsSurface.CreateFromPoints(points, fst count, snd count,  degreeU,  degreeV)
         if isNull surf then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfControlPtGrid failed.  count:'%A' points:'%A' degree:'%A'" count points (degreeU,degreeV)
@@ -14443,7 +14393,7 @@ type RhinoScriptSyntax private () =
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<param name="pointD">(Point3d) Fourth corner point</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid = 
+    static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d , pointD: Point3d) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC , pointD)
         if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A, %A and %A" pointA pointB pointC pointD
         let rc = State.Doc.Objects.AddSurface(surface)
@@ -14456,7 +14406,7 @@ type RhinoScriptSyntax private () =
     ///<param name="pointB">(Point3d) Second  corner point</param>
     ///<param name="pointC">(Point3d) Third corner point</param>
     ///<returns>(Guid) The identifier of the new object.</returns>
-    static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid = 
+    static member AddSrfPt(pointA:Point3d , pointB:Point3d , pointC: Point3d ) : Guid =
         let surface = NurbsSurface.CreateFromCorners(pointA , pointB , pointC)
         if surface|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPt failed.  points:'%A, %A and %A" pointA pointB pointC
         let rc = State.Doc.Objects.AddSurface(surface)
@@ -14478,7 +14428,7 @@ type RhinoScriptSyntax private () =
                                 [<OPT;DEF(3)>]degreeU:int,
                                 [<OPT;DEF(3)>]degreeV:int,
                                 [<OPT;DEF(false)>]closedU:bool,
-                                [<OPT;DEF(false)>]closedV:bool) : Guid = 
+                                [<OPT;DEF(false)>]closedV:bool) : Guid =
         //points = RhinoScriptSyntax.Coerce3dPointlist(points)
         let surf = NurbsSurface.CreateThroughPoints(points, fst count, snd count, degreeU, degreeV, closedU, closedV)
         if isNull surf then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSrfPtGrid failed.  count:'%A' points:'%A' degree:'%A' closed:'%A'" count points (degreeU,degreeV) (closedU,closedV)
@@ -14499,7 +14449,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) List of new Surface objects.</returns>
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
-                             [<OPT;DEF(false)>]closed:bool) : Guid Rarr = 
+                             [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
         let rail = RhinoScriptSyntax.CoerceCurve(rail)
         let shapes =  rarr { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -14519,7 +14469,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) List of new Surface objects.</returns>
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
-                             [<OPT;DEF(false)>]closed:bool) : Guid Rarr = 
+                             [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
         let rail1 = RhinoScriptSyntax.CoerceCurve(fst rails)
         let rail2 = RhinoScriptSyntax.CoerceCurve(snd rails)
         let shapes =  rarr { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
@@ -14542,7 +14492,7 @@ type RhinoScriptSyntax private () =
     static member AddRailRevSrf( profile:Guid,
                                  rail:Guid,
                                  axis:Line,
-                                 [<OPT;DEF(false)>]scaleHeight:bool) : Guid = 
+                                 [<OPT;DEF(false)>]scaleHeight:bool) : Guid =
         let profileinst = RhinoScriptSyntax.CoerceCurve(profile)
         let railinst = RhinoScriptSyntax.CoerceCurve(rail)
         let surface = NurbsSurface.CreateRailRevolvedSurface(profileinst, railinst, axis, scaleHeight)
@@ -14559,7 +14509,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) The identifier of the new object.</returns>
     static member AddTorus( basis:Plane,
                             majorRadius:float,
-                            minorRadius:float) : Guid = 
+                            minorRadius:float) : Guid =
         let torus = Torus(basis, majorRadius, minorRadius)
         let revsurf = torus.ToRevSurface()
         let rc = State.Doc.Objects.AddSurface(revsurf)
@@ -14577,7 +14527,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
     static member BooleanDifference( input0:Guid seq,
                                      input1:Guid seq,
-                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
 
         let breps0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let breps1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
@@ -14602,7 +14552,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
-                                       [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+                                       [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         let breps0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let breps1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -14623,7 +14573,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete all input objects</param>
     ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
-    static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr = 
+    static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
         if Seq.length(input)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
         let breps =  rarr { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
@@ -14656,7 +14606,7 @@ type RhinoScriptSyntax private () =
     ///                                   BrepLoop   5 Targets a brep loop index.
     ///      4        int             The index of the brep component
     ///      5        Vector3d        The normal to the brepFace, or the tangent to the brepEdge.</returns>
-    static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d = 
+    static member BrepClosestPoint(objectId:Guid, point:Point3d) : Point3d * float * float * ComponentIndexType * int * Vector3d =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let clpt = ref Point3d.Origin
         let ci = ref ComponentIndex.Unset
@@ -14675,7 +14625,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Caps planar holes in a Surface or Polysurface.</summary>
     ///<param name="surfaceId">(Guid) The identifier of the Surface or Polysurface to cap</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member CapPlanarHoles(surfaceId:Guid) : bool = 
+    static member CapPlanarHoles(surfaceId:Guid) : bool =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbrep = brep.CapPlanarHoles(tolerance)
@@ -14699,7 +14649,7 @@ type RhinoScriptSyntax private () =
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the duplicated edge Curves. The default is not to select (False)</param>
     ///<returns>(Guid Rarr) identifying the newly created Curve objects.</returns>
-    static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid Rarr = 
+    static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let outcurves = brep.DuplicateEdgeCurves()
         let curves = Rarr()
@@ -14724,7 +14674,7 @@ type RhinoScriptSyntax private () =
     ///    1 = exterior
     ///    2 = interior</param>
     ///<returns>(Guid Rarr) list of Curve ids .</returns>
-    static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid Rarr = 
+    static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
@@ -14745,7 +14695,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point3d) a 3-D point.</returns>
     static member EvaluateSurface( surfaceId:Guid,
                                    u:float ,
-                                   v:float ) : Point3d = 
+                                   v:float ) : Point3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc = surface.PointAt(u, v)
         if rc.IsValid then rc
@@ -14765,7 +14715,7 @@ type RhinoScriptSyntax private () =
     static member ExtendSurface( surfaceId:Guid,
                                  parameter:float * float,
                                  length:float,
-                                 [<OPT;DEF(true)>]smooth:bool) : bool = 
+                                 [<OPT;DEF(true)>]smooth:bool) : bool =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let edge = surface.ClosestSide(parameter|> fst, parameter|> snd)
         let newsrf = surface.Extend(edge, length, smooth)
@@ -14782,7 +14732,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete input objects after exploding</param>
     ///<returns>(Guid Rarr) List of identifiers of exploded pieces .</returns>
-    static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+    static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let ids = Rarr()
         for objectId in objectIds do
             let brep = RhinoScriptSyntax.CoerceBrep(objectId)
@@ -14806,7 +14756,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) List of Curve ids .</returns>
     static member ExtractIsoCurve( surfaceId:Guid,
                                    parameter:float * float,
-                                   direction:int) : Guid Rarr = 
+                                   direction:int) : Guid Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ids = Rarr()
         let mutable curves = [| |]
@@ -14845,7 +14795,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of extracted Surface objects .</returns>
     static member ExtractSurface( objectId:Guid,
                                   faceIndices:int seq,
-                                  [<OPT;DEF(false)>]copy:bool) : Guid Rarr = 
+                                  [<OPT;DEF(false)>]copy:bool) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let rc = Rarr()
         let faceIndices = Seq.sort(faceIndices)|> Seq.rev
@@ -14865,7 +14815,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve to extrude</param>
     ///<param name="pathId">(Guid) Identifier of the path Curve</param>
     ///<returns>(Guid) identifier of new Surface .</returns>
-    static member ExtrudeCurve(curveId:Guid, pathId:Guid) : Guid = 
+    static member ExtrudeCurve(curveId:Guid, pathId:Guid) : Guid =
         let curve1 = RhinoScriptSyntax.CoerceCurve(curveId)
         let curve2 = RhinoScriptSyntax.CoerceCurve(pathId)
         let srf = SumSurface.Create(curve1, curve2)
@@ -14879,7 +14829,7 @@ type RhinoScriptSyntax private () =
     ///<param name="curveId">(Guid) Identifier of the Curve to extrude</param>
     ///<param name="point">(Point3d) 3D point</param>
     ///<returns>(Guid) identifier of new Surface .</returns>
-    static member ExtrudeCurvePoint(curveId:Guid, point:Point3d) : Guid = 
+    static member ExtrudeCurvePoint(curveId:Guid, point:Point3d) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
         let srf = Surface.CreateExtrusionToPoint(curve, point)
@@ -14896,7 +14846,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of new Surface .</returns>
     static member ExtrudeCurveStraight( curveId:Guid,
                                         startPoint:Point3d,
-                                        endPoint:Point3d) : Guid = 
+                                        endPoint:Point3d) : Guid =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         //startPoint = RhinoScriptSyntax.Coerce3dPoint(startPoint)
         //endPoint = RhinoScriptSyntax.Coerce3dPoint(endPoint)
@@ -14916,7 +14866,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of new Surface .</returns>
     static member ExtrudeSurface( surfaceId:Guid,
                                   curveId:Guid,
-                                  [<OPT;DEF(true)>]cap:bool) : Guid = 
+                                  [<OPT;DEF(true)>]cap:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newbrep = brep.Faces.[0].CreateExtrusion(curve, cap)
@@ -14941,11 +14891,11 @@ type RhinoScriptSyntax private () =
                                   surface1:Guid,
                                   radius:float,
                                   [<OPT;DEF(Point2d())>]uvparam0:Point2d,
-                                  [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Guid Rarr= 
+                                  [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Guid Rarr=
         let surface0 = RhinoScriptSyntax.CoerceSurface(surface0)
         let surface1 = RhinoScriptSyntax.CoerceSurface(surface1)
         let tol = State.Doc.ModelAbsoluteTolerance
-        let surfaces = 
+        let surfaces =
             if uvparam0<>Point2d.Origin && uvparam1<>Point2d.Origin then
                 Surface.CreateRollingBallFillet(surface0, uvparam0, surface1, uvparam1, radius, tol)
             else
@@ -14973,7 +14923,7 @@ type RhinoScriptSyntax private () =
     /// Use RhinoScriptSyntax.IsSurfaceFliped to get State.</summary>
     ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="flip">(bool) New normal orientation, either flipped(True) or not flipped (False)</param>
-    ///<returns>(unit) void, nothing.</returns>    
+    ///<returns>(unit) void, nothing.</returns>
     static member FlipSurface(surfaceId:Guid, flip:bool) : unit = //SET
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         if brep.Faces.Count>1 then RhinoScriptingException.Raise "RhinoScriptSyntax.FlipSurface failed. surfaceId:'%s' flip:'%A'" (Nice.str surfaceId) flip
@@ -15012,7 +14962,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifying the newly created intersection Curve and point objects.</returns>
     static member IntersectBreps( brep1:Guid,
                                   brep2:Guid,
-                                  [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+                                  [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let brep1 = RhinoScriptSyntax.CoerceBrep(brep1)
         let brep2 = RhinoScriptSyntax.CoerceBrep(brep2)
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance  tolerance
@@ -15057,7 +15007,7 @@ type RhinoScriptSyntax private () =
     static member IntersectSpheres( spherePlane0:Plane,
                                     sphereRadius0:float,
                                     spherePlane1:Plane,
-                                    sphereRadius1:float) : int * Circle * float = 
+                                    sphereRadius1:float) : int * Circle * float =
         let sphere0 = Sphere(spherePlane0, sphereRadius0)
         let sphere1 = Sphere(spherePlane1, sphereRadius1)
         let rc, circle = Intersect.Intersection.SphereSphere(sphere0, sphere1)
@@ -15075,7 +15025,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Determines if a Surface is a portion of a cone.</summary>
     ///<param name="objectId">(Guid) The Surface object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsCone(objectId:Guid) : bool = 
+    static member IsCone(objectId:Guid) : bool =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         surface.IsCone()
 
@@ -15083,7 +15033,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Determines if a Surface is a portion of a cone.</summary>
     ///<param name="objectId">(Guid) The cylinder object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsCylinder(objectId:Guid) : bool = 
+    static member IsCylinder(objectId:Guid) : bool =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         surface.IsCylinder()
 
@@ -15092,7 +15042,7 @@ type RhinoScriptSyntax private () =
     ///    the Plane command. Note, a Plane Surface is not a planar NURBS Surface.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsPlaneSurface(objectId:Guid) : bool = 
+    static member IsPlaneSurface(objectId:Guid) : bool =
         let face = RhinoScriptSyntax.CoerceSurface(objectId)
         match face with
         | :? BrepFace  as bface ->
@@ -15117,7 +15067,7 @@ type RhinoScriptSyntax private () =
     static member IsPointInSurface( objectId:Guid,
                                     point:Point3d,
                                     [<OPT;DEF(false)>]strictlyIn:bool,
-                                    [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+                                    [<OPT;DEF(0.0)>]tolerance:float) : bool =
         //objectId = RhinoScriptSyntax.CoerceGuid(objectId)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
         //if objectId|> isNull  || point|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.IsPointInSurface failed.  objectId:'%s' point:'%A' strictlyIn:'%A' tolerance:'%A'" (Nice.str objectId) point strictlyIn tolerance
@@ -15142,7 +15092,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="point">(Point3d) The test, or sampling point</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsPointOnSurface(objectId:Guid, point:Point3d) : bool = 
+    static member IsPointOnSurface(objectId:Guid, point:Point3d) : bool =
         let surf = RhinoScriptSyntax.CoerceSurface(objectId)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
         let mutable rc, u, v = surf.ClosestPoint(point)
@@ -15163,7 +15113,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies an object is a Polysurface or Extrusion. Polysurfaces consist of two or more Surfaces joined together.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
-    static member IsPolysurface(objectId:Guid) : bool = 
+    static member IsPolysurface(objectId:Guid) : bool =
         match State.Doc.Objects.FindId(objectId) with
         | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurface: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with
@@ -15174,7 +15124,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies an object is a or Extrusion. </summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
-    static member IsExtrusion(objectId:Guid) : bool = 
+    static member IsExtrusion(objectId:Guid) : bool =
         match State.Doc.Objects.FindId(objectId) with
         | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsExtrusion: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with
@@ -15184,7 +15134,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies an object is a Brep. That is a trimmed surface or a polysurface but not an extrusion.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
-    static member IsBrep(objectId:Guid) : bool = 
+    static member IsBrep(objectId:Guid) : bool =
         match State.Doc.Objects.FindId(objectId) with
         | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsBrep: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with
@@ -15197,7 +15147,7 @@ type RhinoScriptSyntax private () =
     ///    a volume, it is considered a solid.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True if successful, otherwise False.</returns>
-    static member IsPolysurfaceClosed(objectId:Guid) : bool = 
+    static member IsPolysurfaceClosed(objectId:Guid) : bool =
         match State.Doc.Objects.FindId(objectId) with
         | null -> RhinoScriptingException.Raise "RhinoScriptSyntax.IsPolysurfaceClosed: %A is not an object in State.Doc.Objects table" objectId
         | o ->  match o.Geometry with
@@ -15209,7 +15159,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Determines if a Surface is a portion of a Sphere.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsSphere(objectId:Guid) : bool = 
+    static member IsSphere(objectId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(objectId) with
         | Some b ->  b.IsSphere()
         | _ -> false
@@ -15219,7 +15169,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies an object is a Surface, Extrusion or Brep objects with only one face.</summary>
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsSurface(objectId:Guid) : bool = 
+    static member IsSurface(objectId:Guid) : bool =
         RhinoScriptSyntax.TryCoerceSurface(objectId).IsSome
 
 
@@ -15230,7 +15180,7 @@ type RhinoScriptSyntax private () =
     ///    0 = U direction check,
     ///    1 = V direction check</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSurfaceClosed(surfaceId:Guid, direction:int) : bool = 
+    static member IsSurfaceClosed(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
         | Some surface ->  surface.IsClosed(direction)
         | _ -> false
@@ -15242,7 +15192,7 @@ type RhinoScriptSyntax private () =
     ///    0 = U direction check,
     ///    1 = V direction check</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSurfacePeriodic(surfaceId:Guid, direction:int) : bool = 
+    static member IsSurfacePeriodic(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
         | Some surface ->  surface.IsPeriodic(direction)
         | _ -> false
@@ -15255,7 +15205,7 @@ type RhinoScriptSyntax private () =
     ///    Tolerance used when checked. If omitted, the current absolute
     ///    tolerance is used</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool = 
+    static member IsSurfacePlanar(surfaceId:Guid, [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let tolerance = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with
         | Some surface ->  surface.IsPlanar(tolerance)
@@ -15265,7 +15215,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Surface object is rational.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsSurfaceRational(surfaceId:Guid) : bool = 
+    static member IsSurfaceRational(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions
         | Some surface ->
             let ns = surface.ToNurbsSurface()
@@ -15283,7 +15233,7 @@ type RhinoScriptSyntax private () =
     ///    2 = north
     ///    3 = west</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSurfaceSingular(surfaceId:Guid, direction:int) : bool = 
+    static member IsSurfaceSingular(surfaceId:Guid, direction:int) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with    //TODO better fail if input is not a surface ?? here and above functions
         | Some surface ->
             surface.IsSingular(direction)
@@ -15293,7 +15243,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a Surface object has been trimmed.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsSurfaceTrimmed(surfaceId:Guid) : bool = 
+    static member IsSurfaceTrimmed(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceBrep(surfaceId) with
         | Some brep ->  not brep.IsSurface
         | _ -> false //TODO better fail if input is not a surface ?? here and above functions
@@ -15303,7 +15253,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Determines if a Surface is a portion of a torus.</summary>
     ///<param name="surfaceId">(Guid) The Surface object's identifier</param>
     ///<returns>(bool) True , otherwise False.</returns>
-    static member IsTorus(surfaceId:Guid) : bool = 
+    static member IsTorus(surfaceId:Guid) : bool =
         match RhinoScriptSyntax.TryCoerceSurface(surfaceId) with //TODO better fail if input is not a surface ?? here and above functions
         | Some surface ->  surface.IsTorus()
         | _ -> false
@@ -15312,7 +15262,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Gets the sphere definition from a Surface, if possible.</summary>
     ///<param name="surfaceId">(Guid) The identifier of the Surface object</param>
     ///<returns>(Plane * float) The equatorial Plane of the sphere, and its radius.</returns>
-    static member SurfaceSphere(surfaceId:Guid) : Plane * float = 
+    static member SurfaceSphere(surfaceId:Guid) : Plane * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let sphere = ref Sphere.Unset
@@ -15327,7 +15277,7 @@ type RhinoScriptSyntax private () =
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete the original Surfaces</param>
     ///<returns>(Guid) identifier of newly created object.</returns>
-    static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+    static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let breps =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         if breps.Count<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (Nice.str objectIds) deleteInput
         let tol = State.Doc.ModelAbsoluteTolerance * 2.1
@@ -15356,7 +15306,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) if deleteInput is False, identifier of the new Surface.</returns>
     static member MakeSurfacePeriodic( surfaceId:Guid,
                                        direction:int,
-                                       [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+                                       [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let newsurf = Surface.CreatePeriodicSurface(surface, direction)
         if newsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MakeSurfacePeriodic failed.  surfaceId:'%s' direction:'%A' deleteInput:'%A'" (Nice.str surfaceId) direction deleteInput
@@ -15387,7 +15337,7 @@ type RhinoScriptSyntax private () =
                                  distance:float,
                                  [<OPT;DEF(0.0)>]tolerance:float,
                                  [<OPT;DEF(false)>]bothSides:bool,
-                                 [<OPT;DEF(false)>]createSolid:bool) : Guid = 
+                                 [<OPT;DEF(false)>]createSolid:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let mutable face = null
         if (1 = brep.Faces.Count) then face <- brep.Faces.[0]
@@ -15409,7 +15359,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) List of new Curves.</returns>
     static member PullCurve( surface:Guid,
                              curve:Guid,
-                             [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+                             [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let crvobj = RhinoScriptSyntax.CoerceRhinoObject(curve)
         let brep = RhinoScriptSyntax.CoerceBrep(surface)
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
@@ -15434,7 +15384,7 @@ type RhinoScriptSyntax private () =
                                   [<OPT;DEF(3)>]degreeU:int,
                                   [<OPT;DEF(3)>]degreeV:int,
                                   [<OPT;DEF(10)>]pointcountU:int ,
-                                  [<OPT;DEF(10)>]pointcountV:int ) : bool = 
+                                  [<OPT;DEF(10)>]pointcountV:int ) : bool =
 
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         let newsurf = surface.Rebuild( degreeU, degreeV, pointcountU, pointcountV )
@@ -15454,7 +15404,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True of False indicating success or failure.</returns>
     static member RemoveSurfaceKnot( surface:Guid,
                                      uvParameter:float * float,
-                                     vDirection:bool) : bool = 
+                                     vDirection:bool) : bool =
         let srfinst = RhinoScriptSyntax.CoerceSurface(surface)
         let uparam = uvParameter|> fst
         let vparam = uvParameter|> snd
@@ -15481,7 +15431,7 @@ type RhinoScriptSyntax private () =
     ///    2 = reverse V
     ///    4 = transpose U and V (values can be combined)</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member ReverseSurface(surfaceId:Guid, direction:int) : unit = 
+    static member ReverseSurface(surfaceId:Guid, direction:int) : unit =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (Nice.str surfaceId) direction
         let face = brep.Faces.[0]
@@ -15503,7 +15453,7 @@ type RhinoScriptSyntax private () =
     static member ShootRay( surfaceIds:Guid seq,
                             startPoint:Point3d,
                             direction:Vector3d,
-                            [<OPT;DEF(10)>]reflections:int) : Point3d array = 
+                            [<OPT;DEF(10)>]reflections:int) : Point3d array =
         //startPoint = RhinoScriptSyntax.Coerce3dPoint(startPoint)
         //direction = RhinoScriptSyntax.Coerce3dvector(direction)
         //id = RhinoScriptSyntax.CoerceGuid(surfaceIds)
@@ -15523,7 +15473,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) identifier of the new Surface.</returns>
     static member ShortPath( surfaceId:Guid,
                              startPoint:Point3d,
-                             endPoint:Point3d) : Guid = 
+                             endPoint:Point3d) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //start = RhinoScriptSyntax.Coerce3dPoint(startPoint)
         //end = RhinoScriptSyntax.Coerce3dPoint(endPoint)
@@ -15547,7 +15497,7 @@ type RhinoScriptSyntax private () =
     ///<param name="createCopy">(bool) Optional, default value: <c>false</c>
     ///    If True, the original Surface is not deleted</param>
     ///<returns>(Guid) If createCopy is true the new Guid, else the input Guid.</returns>
-    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid = 
+    static member ShrinkTrimmedSurface(objectId:Guid, [<OPT;DEF(false)>]createCopy:bool) : Guid =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         if brep.Faces.ShrinkFaces() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShrinkTrimmedSurface failed.  objectId:'%s' createCopy:'%A'" (Nice.str objectId) createCopy
         if  createCopy then
@@ -15572,7 +15522,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of split pieces.</returns>
     static member SplitBrep( brepId:Guid,
                              cutterId:Guid,
-                             [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr = 
+                             [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let cutter = RhinoScriptSyntax.CoerceBrep(cutterId)
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -15590,8 +15540,8 @@ type RhinoScriptSyntax private () =
     /// The results are based on the current drawing units.</summary>
     ///<param name="srf">(Geometry.Surface) The Surface geometry</param>
     ///<returns>(float) of area.</returns>
-    static member SurfaceArea(srf:Surface) : float  = 
-        let amp =AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)            
+    static member SurfaceArea(srf:Surface) : float  =
+        let amp =AreaMassProperties.Compute(srf, area=true, firstMoments=false, secondMoments=false, productMoments=false)
         if isNull amp then  RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea failed on Surface: %A" srf
         amp.Area
 
@@ -15600,8 +15550,8 @@ type RhinoScriptSyntax private () =
     /// The results are based on the current drawing units.</summary>
     ///<param name="brep">(Geometry.Brep) The Polysurface geometry</param>
     ///<returns>(float) of area.</returns>
-    static member SurfaceArea(brep:Brep) : float  = 
-        let amp = AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)           
+    static member SurfaceArea(brep:Brep) : float  =
+        let amp = AreaMassProperties.Compute(brep, area=true, firstMoments=false, secondMoments=false, productMoments=false)
         if isNull amp then  RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea failed on Brep: %A" brep
         amp.Area
 
@@ -15609,7 +15559,7 @@ type RhinoScriptSyntax private () =
     /// The results are based on the current drawing units.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float) of area.</returns>
-    static member SurfaceArea(objectId:Guid) : float  = 
+    static member SurfaceArea(objectId:Guid) : float  =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Surface as s -> RhinoScriptSyntax.SurfaceArea s
         | :? Brep    as b -> RhinoScriptSyntax.SurfaceArea b
@@ -15619,7 +15569,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Calculates the area centroid of a Surface or Polysurface.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(Point3d ) Area centroid.</returns>
-    static member SurfaceAreaCentroid(objectId:Guid) : Point3d = 
+    static member SurfaceAreaCentroid(objectId:Guid) : Point3d =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.map AreaMassProperties.Compute
@@ -15651,7 +15601,7 @@ type RhinoScriptSyntax private () =
     ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///    [13]    (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
-    static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) Rarr = 
+    static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) Rarr =
         surfaceId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.map AreaMassProperties.Compute
@@ -15684,7 +15634,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
     ///<returns>(Point3d) The closest point on the Surface.</returns>
-    static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d = 
+    static member SurfaceClosestPoint(surfaceId:Guid, testPoint:Point3d) : Point3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, u, v = surface.ClosestPoint(testPoint)
         if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceClosestPoint failed on %A and %A" surfaceId testPoint
@@ -15694,7 +15644,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) Identifier of a Surface object</param>
     ///<param name="testPoint">(Point3d) Sampling point</param>
     ///<returns>(float * float) The U, V parameters of the closest point on the Surface.</returns>
-    static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float = 
+    static member SurfaceClosestParameter(surfaceId:Guid, testPoint:Point3d) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, u, v = surface.ClosestPoint(testPoint)
         if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceClosestParameter failed on %A and %A" surfaceId testPoint
@@ -15708,7 +15658,7 @@ type RhinoScriptSyntax private () =
     ///      Plane's origin and the axis of the cone is the Plane's z-axis
     ///    [1]   the height of the cone
     ///    [2]   the radius of the cone.</returns>
-    static member SurfaceCone(surfaceId:Guid) : Plane * float * float = 
+    static member SurfaceCone(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, cone = surface.TryGetCone()
         if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCone failed.  surfaceId:'%s'" (Nice.str surfaceId)
@@ -15728,7 +15678,7 @@ type RhinoScriptSyntax private () =
     ///    [5]   minimum principal curvature direction
     ///    [6]   gaussian curvature
     ///    [7]   mean curvature.</returns>
-    static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float= 
+    static member SurfaceCurvature(surfaceId:Guid, parameter:float * float) : Point3d * Vector3d * float * Vector3d * float * Vector3d * float * float=
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         //if Seq.length(parameter)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceCurvature failed.  surfaceId:'%s' parameter:'%A'" (Nice.str surfaceId) parameter
         let c = surface.CurvatureAt(parameter|> fst, parameter|> snd)
@@ -15739,7 +15689,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the definition of a cylinder Surface.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Plane * float * float) of the cylinder Plane, height and radius.</returns>
-    static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float = 
+    static member SurfaceCylinder(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let tol = State.Doc.ModelAbsoluteTolerance
         let cy = ref Cylinder.Unset
@@ -15754,7 +15704,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the U and V degrees of a Surface.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(int*int) The degree in U and V direction.</returns>
-    static member SurfaceDegree(surfaceId:Guid ) : int*int = 
+    static member SurfaceDegree(surfaceId:Guid ) : int*int =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         surface.Degree(0), surface.Degree(1)
 
@@ -15763,7 +15713,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="direction">(int) Domain direction 0 = U, or 1 = V</param>
     ///<returns>(float * float) containing the domain interval in the specified direction.</returns>
-    static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float = 
+    static member SurfaceDomain(surfaceId:Guid, direction:int) : float * float =
         if direction <> 0 && direction <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceDomain failed.  surfaceId:'%s' direction:'%A'" (Nice.str surfaceId) direction
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let domain = surface.Domain(direction)
@@ -15778,7 +15728,7 @@ type RhinoScriptSyntax private () =
     ///    the function will return Surface edit points based on whether or not the
     ///    Surface is closed or periodic</param>
     ///<returns>(Point3d Rarr) a list of 3D points.</returns>
-    static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr = 
+    static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
         if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (Nice.str surfaceId) returnAll
@@ -15812,7 +15762,7 @@ type RhinoScriptSyntax private () =
     ///    the function will return Surface edit points based on whether or not the
     ///    Surface is closed or periodic</param>
     ///<returns>((float*float) Rarr) a list of U and V parameters.</returns>
-    static member SurfaceEditPointParameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr = 
+    static member SurfaceEditPointParameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
         if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPointParameters failed.  surfaceId:'%s'  returnAll:'%A'" (Nice.str surfaceId) returnAll
@@ -15844,7 +15794,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter to evaluate</param>
     ///<param name="derivative">(int) Number of derivatives to evaluate</param>
-    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2 
+    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2
     ///    Elements of tuple:
     ///    [fst] The 3-D point.
     ///    [snd] List of Vectors:
@@ -15856,7 +15806,7 @@ type RhinoScriptSyntax private () =
     ///            [5]      etc...</returns>
     static member SurfaceEvaluate( surfaceId:Guid,
                                    parameter:float * float,
-                                   derivative:int) : Point3d * Vector3d Rarr = 
+                                   derivative:int) : Point3d * Vector3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
         if not success then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (Nice.str surfaceId) parameter derivative
@@ -15871,7 +15821,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="uvParameter">(float * float) U, v parameter to evaluate</param>
     ///<returns>(Plane) Plane.</returns>
-    static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane = 
+    static member SurfaceFrame(surfaceId:Guid, uvParameter:float * float) : Plane =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, frame = surface.FrameAt(uvParameter|> fst, uvParameter|> snd)
         if rc  then frame
@@ -15915,17 +15865,17 @@ type RhinoScriptSyntax private () =
         | :?  DocObjects.BrepObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore 
+                rhinoObject.CommitChanges() |> ignore
                 State.Doc.Views.Redraw()
         | :?  DocObjects.SurfaceObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore 
+                rhinoObject.CommitChanges() |> ignore
                 State.Doc.Views.Redraw()
         | :?  DocObjects.ExtrusionObject as rhinoObject ->
                 let dens = if density<0 then -1 else density
                 rhinoObject.Attributes.WireDensity <- dens
-                rhinoObject.CommitChanges() |> ignore 
+                rhinoObject.CommitChanges() |> ignore
                 State.Doc.Views.Redraw()
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Nice.str surfaceId) density
 
@@ -15947,15 +15897,15 @@ type RhinoScriptSyntax private () =
             | :?  DocObjects.BrepObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore 
+                    rhinoObject.CommitChanges() |> ignore
             | :?  DocObjects.SurfaceObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore 
+                    rhinoObject.CommitChanges() |> ignore
             | :?  DocObjects.ExtrusionObject as rhinoObject ->
                     let dens = if density<0 then -1 else density
                     rhinoObject.Attributes.WireDensity <- dens
-                    rhinoObject.CommitChanges() |> ignore 
+                    rhinoObject.CommitChanges() |> ignore
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceIsocurveDensity Get failed.  surfaceId:'%s' density:'%A'" (Nice.str surfaceId) density
         State.Doc.Views.Redraw()
 
@@ -15963,7 +15913,7 @@ type RhinoScriptSyntax private () =
     ///    SurfaceId = the Surface's identifier.</summary>
     ///<param name="surfaceId">(Guid) The Surface object's identifier</param>
     ///<returns>(int * int) a list containing (U count, V count).</returns>
-    static member SurfaceKnotCount(surfaceId:Guid) : int * int = 
+    static member SurfaceKnotCount(surfaceId:Guid) : int * int =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
         ns.KnotsU.Count, ns.KnotsV.Count
@@ -15976,7 +15926,7 @@ type RhinoScriptSyntax private () =
     ///    Element   Description
     ///      [0]     Knot vectors in U direction
     ///      [1]     Knot vectors in V direction.</returns>
-    static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList= 
+    static member SurfaceKnots(surfaceId:Guid) : Collections.NurbsSurfaceKnotList * Collections.NurbsSurfaceKnotList=
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurbsurf = surface.ToNurbsSurface()
         if nurbsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (Nice.str surfaceId)
@@ -15991,14 +15941,14 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="uvParameter">(float * float) The uv parameter to evaluate</param>
     ///<returns>(Vector3d) Normal vector.</returns>
-    static member SurfaceNormal(surfaceId:Guid, uvParameter:float * float) : Vector3d = 
+    static member SurfaceNormal(surfaceId:Guid, uvParameter:float * float) : Vector3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         surface.NormalAt(uvParameter|> fst, uvParameter|> snd)
 
     ///<summary>Returns 3D vector that is the normal to a Surface at mid parameter.</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<returns>(Vector3d) Normal vector.</returns>
-    static member SurfaceNormal(surfaceId:Guid) : Vector3d = 
+    static member SurfaceNormal(surfaceId:Guid) : Vector3d =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let u = surface.Domain(0).ParameterAt(0.5)
         let v = surface.Domain(1).ParameterAt(0.5)
@@ -16010,7 +15960,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) The Surface parameter to convert</param>
     ///<returns>(float * float) normalized Surface parameter.</returns>
-    static member SurfaceNormalizedParameter(surfaceId:Guid, parameter:float * float) : float * float = 
+    static member SurfaceNormalizedParameter(surfaceId:Guid, parameter:float * float) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let udomain = surface.Domain(0)
         let vdomain = surface.Domain(1)
@@ -16028,7 +15978,7 @@ type RhinoScriptSyntax private () =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) The normalized parameter to convert</param>
     ///<returns>(float * float) u and v Surface parameters.</returns>
-    static member SurfaceParameter(surfaceId:Guid, parameter:float * float) : float * float = 
+    static member SurfaceParameter(surfaceId:Guid, parameter:float * float) : float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let x = surface.Domain(0).ParameterAt(parameter|> fst)
         let y = surface.Domain(1).ParameterAt(parameter|> snd)
@@ -16039,7 +15989,7 @@ type RhinoScriptSyntax private () =
     ///    SurfaceId = the Surface's identifier.</summary>
     ///<param name="surfaceId">(Guid) The Surface object's identifier</param>
     ///<returns>(int * int) THe number of control points in UV direction. (U count, V count).</returns>
-    static member SurfacePointCount(surfaceId:Guid) : int * int = 
+    static member SurfacePointCount(surfaceId:Guid) : int * int =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
         ns.Points.CountU, ns.Points.CountV
@@ -16052,7 +16002,7 @@ type RhinoScriptSyntax private () =
     ///    the function will return Surface edit points based on whether or not
     ///    the Surface is closed or periodic</param>
     ///<returns>(Point3d Rarr) The control points.</returns>
-    static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr = 
+    static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
         if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (Nice.str surfaceId) returnAll
@@ -16070,7 +16020,7 @@ type RhinoScriptSyntax private () =
     ///    [0]   the base Plane of the torus
     ///    [1]   the major radius of the torus
     ///    [2]   the minor radius of the torus.</returns>
-    static member SurfaceTorus(surfaceId:Guid) : Plane * float * float = 
+    static member SurfaceTorus(surfaceId:Guid) : Plane * float * float =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let rc, torus = surface.TryGetTorus()
         if rc then torus.Plane, torus.MajorRadius, torus.MinorRadius
@@ -16080,7 +16030,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Calculates volume of a closed Surface or Polysurface.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float) The volume.</returns>
-    static member SurfaceVolume(objectId:Guid) : float = 
+    static member SurfaceVolume(objectId:Guid) : float =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.map VolumeMassProperties.Compute
@@ -16096,7 +16046,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Calculates volume centroid of a closed Surface or Polysurface.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(Point3d) Volume Centroid.</returns>
-    static member SurfaceVolumeCentroid(objectId:Guid) : Point3d = 
+    static member SurfaceVolumeCentroid(objectId:Guid) : Point3d =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeCentroid failed on  open Brep %A" (Nice.str objectId))
@@ -16131,7 +16081,7 @@ type RhinoScriptSyntax private () =
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///    [13]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
     /// </returns>
-    static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) Rarr = 
+    static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) Rarr =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Brep %A" (Nice.str objectId))
@@ -16168,7 +16118,7 @@ type RhinoScriptSyntax private () =
     ///    in the U and V directions.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
     ///<returns>(float Rarr) point weights.</returns>
-    static member SurfaceWeights(objectId:Guid) : float Rarr = 
+    static member SurfaceWeights(objectId:Guid) : float Rarr =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         let ns = surface.ToNurbsSurface()
         if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceWeights failed.  objectId:'%s'" (Nice.str objectId)
@@ -16186,7 +16136,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of retained components.</returns>
     static member TrimBrep( objectId:Guid,
                             cutter:Guid,
-                            [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
         let tolerance= Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
@@ -16216,7 +16166,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid Rarr) identifiers of retained components.</returns>
     static member TrimBrep( objectId:Guid,
                             cutter:Plane,
-                            [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr = 
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let tolerance = Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
@@ -16246,7 +16196,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) new Surface identifier.</returns>
     static member TrimSurfaceU( surfaceId:Guid,
                                 interval:float*float,
-                                [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+                                [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
@@ -16269,7 +16219,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid) new Surface identifier.</returns>
     static member TrimSurfaceV( surfaceId:Guid,
                                interval:float*float,
-                               [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+                               [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
@@ -16295,7 +16245,7 @@ type RhinoScriptSyntax private () =
     static member TrimSurfaceUV( surfaceId:Guid,
                                intervalU:float*float,
                                intervalV:float*float,
-                               [<OPT;DEF(false)>]deleteInput:bool) : Guid = 
+                               [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let mutable u = surface.Domain(0)
         let mutable v = surface.Domain(1)
@@ -16329,7 +16279,7 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(false)>]explode:bool,
                                  [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq,
                                  [<OPT;DEF(0.0)>]absoluteTolerance:float,
-                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid Rarr * Guid Rarr = 
+                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid Rarr * Guid Rarr =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let unroll = Unroller(brep)
         unroll.ExplodeOutput <- explode
@@ -16367,7 +16317,7 @@ type RhinoScriptSyntax private () =
     ///<param name="objectId">(Guid) The object's identifier</param>
     ///<param name="degree">(int * int) Two integers, specifying the degrees for the U  V directions</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member ChangeSurfaceDegree(objectId:Guid, degree:int * int) : bool = 
+    static member ChangeSurfaceDegree(objectId:Guid, degree:int * int) : bool =
         let surface = RhinoScriptSyntax.CoerceNurbsSurface(objectId)
         let u, v = degree
         let maxnurbsdegree = 11
@@ -16390,7 +16340,7 @@ type RhinoScriptSyntax private () =
     ///    If True, user will be prompted to save the collection file
     ///    if it has been modified prior to closing</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member CloseToolbarCollection(name:string, [<OPT;DEF(false)>]prompt:bool) : bool = 
+    static member CloseToolbarCollection(name:string, [<OPT;DEF(false)>]prompt:bool) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then  tbfile.Close(prompt)
         else false
@@ -16400,7 +16350,7 @@ type RhinoScriptSyntax private () =
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbarGroup">(string) Name of a tool-bar group to hide</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member HideToolbar(name:string, toolbarGroup:string) : bool = 
+    static member HideToolbar(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
@@ -16419,7 +16369,7 @@ type RhinoScriptSyntax private () =
     ///<param name="group">(bool) Optional, default value: <c>false</c>
     ///    If tool-bar parameter is referring to a tool-bar group</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsToolbar(name:string, toolbar:string, [<OPT;DEF(false)>]group:bool) : bool = 
+    static member IsToolbar(name:string, toolbar:string, [<OPT;DEF(false)>]group:bool) : bool =
        let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
        if notNull tbfile then
            if group then
@@ -16435,7 +16385,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a tool-bar collection is open.</summary>
     ///<param name="file">(string) Full path to a tool-bar collection file</param>
     ///<returns>(string) Rhino-assigned name of the tool-bar collection.</returns>
-    static member IsToolbarCollection(file:string) : string = 
+    static member IsToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.FindByPath(file)
         if notNull tbfile then  tbfile.Name
         else ""
@@ -16445,7 +16395,7 @@ type RhinoScriptSyntax private () =
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbarGroup">(string) Name of a tool-bar group</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsToolbarDocked(name:string, toolbarGroup:string) : bool = 
+    static member IsToolbarDocked(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
@@ -16458,7 +16408,7 @@ type RhinoScriptSyntax private () =
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbarGroup">(string) Name of a tool-bar group</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsToolbarVisible(name:string, toolbarGroup:string) : bool = 
+    static member IsToolbarVisible(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
@@ -16470,7 +16420,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Opens a tool-bar collection file.</summary>
     ///<param name="file">(string) Full path to the collection file</param>
     ///<returns>(string) Rhino-assigned name of the tool-bar collection.</returns>
-    static member OpenToolbarCollection(file:string) : string = 
+    static member OpenToolbarCollection(file:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.Open(file)
         if notNull tbfile then  tbfile.Name
         else RhinoScriptingException.Raise "RhinoScriptSyntax.OpenToolbarCollection failed on file '%s'" file
@@ -16479,7 +16429,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Saves an open tool-bar collection to disk.</summary>
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member SaveToolbarCollection(name:string) : bool = 
+    static member SaveToolbarCollection(name:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then  tbfile.Save()
         else false
@@ -16489,7 +16439,7 @@ type RhinoScriptSyntax private () =
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="file">(string) Full path to file name to save to</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member SaveToolbarCollectionAs(name:string, file:string) : bool = 
+    static member SaveToolbarCollectionAs(name:string, file:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then  tbfile.SaveAs(file)
         else false
@@ -16499,7 +16449,7 @@ type RhinoScriptSyntax private () =
     ///<param name="name">(string) Name of a currently open tool-bar file</param>
     ///<param name="toolbarGroup">(string) Name of a tool-bar group to show</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member ShowToolbar(name:string, toolbarGroup:string) : bool = 
+    static member ShowToolbar(name:string, toolbarGroup:string) : bool =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
             let group = tbfile.GetGroup(toolbarGroup)
@@ -16514,20 +16464,20 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns number of currently open tool-bar collections.</summary>
     ///<returns>(int) The number of currently open tool-bar collections.</returns>
-    static member ToolbarCollectionCount() : int = 
+    static member ToolbarCollectionCount() : int =
         RhinoApp.ToolbarFiles.Count
 
 
     ///<summary>Returns names of all currently open tool-bar collections.</summary>
     ///<returns>(string Rarr) The names of all currently open tool-bar collections.</returns>
-    static member ToolbarCollectionNames() : string Rarr = 
+    static member ToolbarCollectionNames() : string Rarr =
         rarr { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
 
 
     ///<summary>Returns full path to a currently open tool-bar collection file.</summary>
     ///<param name="name">(string) Name of currently open tool-bar collection</param>
     ///<returns>(string) The full path.</returns>
-    static member ToolbarCollectionPath(name:string) : string = 
+    static member ToolbarCollectionPath(name:string) : string =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then  tbfile.Path
         else ""
@@ -16538,7 +16488,7 @@ type RhinoScriptSyntax private () =
     ///<param name="groups">(bool) Optional, default value: <c>false</c>
     ///    If true, return the number of tool-bar groups in the file</param>
     ///<returns>(int) number of tool-bars.</returns>
-    static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int = 
+    static member ToolbarCount(name:string, [<OPT;DEF(false)>]groups:bool) : int =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         if notNull tbfile then
             if groups then  tbfile.GroupCount
@@ -16553,7 +16503,7 @@ type RhinoScriptSyntax private () =
     ///<param name="groups">(bool) Optional, default value: <c>false</c>
     ///    If true, return the names of tool-bar groups in the file</param>
     ///<returns>(string Rarr) names of all tool-bars (or tool-bar groups).</returns>
-    static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string Rarr = 
+    static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string Rarr =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
         let rc = Rarr()
         if notNull tbfile then
@@ -16571,7 +16521,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Verifies a matrix is the identity matrix.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsXformIdentity(xForm:Transform) : bool = 
+    static member IsXformIdentity(xForm:Transform) : bool =
         xForm = Transform.Identity
 
 
@@ -16580,23 +16530,23 @@ type RhinoScriptSyntax private () =
     ///    rotations, and reflections.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True if this transformation is an orientation preserving similarity, otherwise False.</returns>
-    static member IsXformSimilarity(xForm:Transform) : bool = 
+    static member IsXformSimilarity(xForm:Transform) : bool =
         xForm.SimilarityType <> TransformSimilarityType.NotSimilarity
 
 
     ///<summary>Checks if a matrix is a zero transformation matrix.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member IsXformZero(xForm:Transform) : bool =          
+    static member IsXformZero(xForm:Transform) : bool =
         xForm.IsZero4x4
-        
+
 
 
     ///<summary>Returns a change of basis transformation matrix or None on error.</summary>
     ///<param name="initialPlane">(Plane) The initial Plane</param>
     ///<param name="finalPlane">(Plane) The final Plane</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform = 
+    static member XformChangeBasis(initialPlane:Plane, finalPlane:Plane) : Transform =
         let xForm = Transform.ChangeBasis(initialPlane, finalPlane)
         if not xForm.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
@@ -16615,7 +16565,7 @@ type RhinoScriptSyntax private () =
                                      z0:Vector3d,
                                      x1:Vector3d,
                                      y1:Vector3d,
-                                     z1:Vector3d) : Transform = 
+                                     z1:Vector3d) : Transform =
         let xForm = Transform.ChangeBasis(x0, y0, z0, x1, y1, z1)
         if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformChangeBasis2 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
@@ -16627,7 +16577,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(int) -1 if xForm1 is smaller than xForm2
     ///    1 if xForm1 bigger than xForm2
     ///    0 if xForm1 = xForm2.</returns>
-    static member XformCompare(xForm1:Transform, xForm2:Transform) : int = 
+    static member XformCompare(xForm1:Transform, xForm2:Transform) : int =
         xForm1.CompareTo(xForm2)
 
 
@@ -16635,7 +16585,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) A 3D point in construction Plane coordinates</param>
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(Point3d) A 3D point in world coordinates.</returns>
-    static member XformCPlaneToWorld(point:Point3d, plane:Plane) : Point3d = 
+    static member XformCPlaneToWorld(point:Point3d, plane:Plane) : Point3d =
         plane.Origin + point.X*plane.XAxis + point.Y*plane.YAxis + point.Z*plane.ZAxis
 
 
@@ -16644,7 +16594,7 @@ type RhinoScriptSyntax private () =
     ///    matrices do not have inverses.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(float) The determinant.</returns>
-    static member XformDeterminant(xForm:Transform) : float = 
+    static member XformDeterminant(xForm:Transform) : float =
         xForm.Determinant
 
 
@@ -16652,20 +16602,20 @@ type RhinoScriptSyntax private () =
     ///    the bottom row [0, 0, 0, 1].</summary>
     ///<param name="diagonalValue">(float) The diagonal value</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformDiagonal(diagonalValue:float) : Transform = 
+    static member XformDiagonal(diagonalValue:float) : Transform =
         Transform(diagonalValue)
 
 
     ///<summary>returns the identity transformation matrix.</summary>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformIdentity() : Transform = 
+    static member XformIdentity() : Transform =
         Transform.Identity
 
 
     ///<summary>Returns the inverse of a non-singular transformation matrix.</summary>
     ///<param name="xForm">(Transform) Rhino.Geometry.Transform. A 4x4 transformation matrix</param>
     ///<returns>(Transform) The inverted 4x4 transformation matrix.</returns>
-    static member XformInverse(xForm:Transform) : Transform = 
+    static member XformInverse(xForm:Transform) : Transform =
         let rc, inverse = xForm.TryGetInverse()
         if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.XformInverse failed.  xForm:'%A'" xForm
         inverse
@@ -16675,7 +16625,7 @@ type RhinoScriptSyntax private () =
     ///<param name="mirrorPlanePoint">(Point3d) Point on the mirror Plane</param>
     ///<param name="mirrorPlaneNormal">(Vector3d) A 3D vector that is normal to the mirror Plane</param>
     ///<returns>(Transform) mirror Transform matrix.</returns>
-    static member XformMirror(mirrorPlanePoint:Point3d, mirrorPlaneNormal:Vector3d) : Transform = 
+    static member XformMirror(mirrorPlanePoint:Point3d, mirrorPlaneNormal:Vector3d) : Transform =
         Transform.Mirror(mirrorPlanePoint, mirrorPlaneNormal)
 
 
@@ -16683,14 +16633,14 @@ type RhinoScriptSyntax private () =
     ///<param name="xForm1">(Transform) Rhino.Geometry.Transform. The first 4x4 transformation matrix to multiply</param>
     ///<param name="xForm2">(Transform) Rhino.Geometry.Transform. The second 4x4 transformation matrix to multiply</param>
     ///<returns>(Transform) result transformation.</returns>
-    static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform = 
+    static member XformMultiply(xForm1:Transform, xForm2:Transform) : Transform =
         xForm1*xForm2
 
 
     ///<summary>Returns a transformation matrix that projects to a Plane.</summary>
     ///<param name="plane">(Plane) The Plane to project to</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformPlanarProjection(plane:Plane) : Transform = 
+    static member XformPlanarProjection(plane:Plane) : Transform =
         Transform.PlanarProjection(plane)
 
 
@@ -16699,7 +16649,7 @@ type RhinoScriptSyntax private () =
     ///<param name="initialPlane">(Plane) Plane to rotate from</param>
     ///<param name="finalPlane">(Plane) Plane to rotate to</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform = 
+    static member XformRotation1(initialPlane:Plane, finalPlane:Plane) : Transform =
         let xForm = Transform.PlaneToPlane(initialPlane, finalPlane)
         if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation1 failed.  initialPlane:'%A' finalPlane:'%A'" initialPlane finalPlane
         xForm
@@ -16712,7 +16662,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformRotation2( angleDegrees:float,
                                   rotationAxis:Vector3d,
-                                  centerPoint:Point3d) : Transform = 
+                                  centerPoint:Point3d) : Transform =
         let anglerad = toRadians(angleDegrees)
         let xForm = Transform.Rotation(anglerad, rotationAxis, centerPoint)
         if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation2 failed.  angleDegrees:'%A' rotationAxis:'%A' centerPoint:'%A'" angleDegrees rotationAxis centerPoint
@@ -16727,7 +16677,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
     static member XformRotation3( startDirection:Vector3d,
                                   endDirection:Vector3d,
-                                  centerPoint:Point3d) : Transform = 
+                                  centerPoint:Point3d) : Transform =
         let xForm = Transform.Rotation(startDirection, endDirection, centerPoint)
         if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation3 failed.  startDirection:'%A' endDirection:'%A' centerPoint:'%A'" startDirection endDirection centerPoint
         xForm
@@ -16746,7 +16696,7 @@ type RhinoScriptSyntax private () =
                                   z0:Vector3d,
                                   x1:Vector3d,
                                   y1:Vector3d,
-                                  z1:Vector3d) : Transform = 
+                                  z1:Vector3d) : Transform =
         let xForm = Transform.Rotation(x0, y0, z0, x1, y1, z1)
         if not xForm.IsValid   then RhinoScriptingException.Raise "RhinoScriptSyntax.XformRotation4 failed.  x0:'%A' y0:'%A' z0:'%A' x1:'%A' y1:'%A' z1:'%A'" x0 y0 z0 x1 y1 z1
         xForm
@@ -16758,21 +16708,21 @@ type RhinoScriptSyntax private () =
     ///<param name="scaleZ">(float) Scale in Z direction</param>
     ///<param name="point">(Point3d) Center of scale</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformScale(scaleX, scaleY, scaleZ, point:Point3d) : Transform = 
+    static member XformScale(scaleX, scaleY, scaleZ, point:Point3d) : Transform =
         let plane = Plane(point, Vector3d.ZAxis)
         Transform.Scale(plane, scaleX, scaleY, scaleZ)
 
     ///<summary>Creates a scale transformation based on World Origin point.</summary>
     ///<param name="scale">(float) Scale in X , Y and Z direction</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformScale(scale) : Transform = 
+    static member XformScale(scale) : Transform =
         Transform.Scale(Plane.WorldXY, scale, scale, scale)
 
     ///<summary>Creates a scale transformation.</summary>
     ///<param name="scale">(float) Scale in X , Y and Z direction</param>
     ///<param name="point">(Point3d) Center of scale</param>
     ///<returns>(Transform) The 4x4 transformation matrix.</returns>
-    static member XformScale(scale, point:Point3d) : Transform = 
+    static member XformScale(scale, point:Point3d) : Transform =
         let plane = Plane(point, Vector3d.ZAxis)
         Transform.Scale(plane, scale, scale, scale)
 
@@ -16788,7 +16738,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point3d) The transformedPoint.</returns>
     static member XformScreenToWorld( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
-                                      [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =         
+                                      [<OPT;DEF(false)>]screenCoordinates:bool) : Point3d =
         let view = RhinoScriptSyntax.CoerceView(view |? "") // ""to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
@@ -16810,14 +16760,14 @@ type RhinoScriptSyntax private () =
     static member XformShear( plane:Plane,
                               x:Vector3d,
                               y:Vector3d,
-                              z:Vector3d) : Transform = 
+                              z:Vector3d) : Transform =
         Transform.Shear(plane, x, y, z)
 
 
     ///<summary>Creates a translation transformation matrix.</summary>
     ///<param name="vector">(Vector3d) List of 3 numbers, Point3d, or Vector3d. A 3-D translation vector</param>
     ///<returns>(Transform) The 4x4 transformation matrix if successful.</returns>
-    static member XformTranslation(vector:Vector3d) : Transform = 
+    static member XformTranslation(vector:Vector3d) : Transform =
         Transform.Translation(vector)
 
 
@@ -16825,7 +16775,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point">(Point3d) A 3D point in world coordinates</param>
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(Point3d) 3D point in construction Plane coordinates.</returns>
-    static member XformWorldToCPlane(point:Point3d, plane:Plane) : Point3d = 
+    static member XformWorldToCPlane(point:Point3d, plane:Plane) : Point3d =
         let v = point - plane.Origin;
         Point3d(v*plane.XAxis, v*plane.YAxis, v*plane.ZAxis)
 
@@ -16841,7 +16791,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point2d) 2D point.</returns>
     static member XformWorldToScreen( point:Point3d,
                                       [<OPT;DEF(null:string)>]view:string,
-                                      [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d = 
+                                      [<OPT;DEF(false)>]screenCoordinates:bool) : Point2d =
         let view = RhinoScriptSyntax.CoerceView(view |? "")// to get active view
         let viewport = view.MainViewport
         let xForm = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen)
@@ -16856,7 +16806,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns a zero transformation matrix.</summary>
     ///<returns>(Transform) a zero transformation matrix.</returns>
-    static member XformZero() : Transform = 
+    static member XformZero() : Transform =
         Transform()
 
 
@@ -16868,19 +16818,19 @@ type RhinoScriptSyntax private () =
     ///<param name="section">(string) Optional, Section name. If omitted, all sections and their corresponding entries are removed</param>
     ///<param name="entry">(string) Optional, Entry name. If omitted, all entries for section are removed</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit = 
+    static member DeleteDocumentData([<OPT;DEF(null:string)>]section:string, [<OPT;DEF(null:string)>]entry:string) : unit =
         State.Doc.Strings.Delete(section, entry) //TODO check null case
 
 
     ///<summary>Returns the number of user data strings in the current document.</summary>
     ///<returns>(int) The number of user data strings in the current document.</returns>
-    static member DocumentDataCount() : int = 
+    static member DocumentDataCount() : int =
         State.Doc.Strings.DocumentDataCount
 
 
     ///<summary>Returns the number of user text strings in the current document.</summary>
     ///<returns>(int) The number of user text strings in the current document.</returns>
-    static member DocumentUserTextCount() : int = 
+    static member DocumentUserTextCount() : int =
         State.Doc.Strings.DocumentUserTextCount
 
 
@@ -16888,7 +16838,7 @@ type RhinoScriptSyntax private () =
     ///<param name="sectionName">(string) Optional, Section name. If omitted, all section names are returned</param>
     ///<returns>(string array) Array of all section names if sectionName is omitted,
     /// else all entry names in this section.</returns>
-    static member GetDocumentData([<OPT;DEF(null:string)>]sectionName:string) : array<string> = 
+    static member GetDocumentData([<OPT;DEF(null:string)>]sectionName:string) : array<string> =
         if notNull sectionName then
             State.Doc.Strings.GetSectionNames()
         else
@@ -16898,19 +16848,19 @@ type RhinoScriptSyntax private () =
     ///<param name="section">(string) Section name</param>
     ///<param name="entry">(string) Entry name</param>
     ///<returns>(string) The entry value.</returns>
-    static member GetDocumentDataEntry(section:string, entry:string) : string = 
+    static member GetDocumentDataEntry(section:string, entry:string) : string =
         State.Doc.Strings.GetValue(section, entry)
 
 
     ///<summary>Returns user text stored in the document.</summary>
     ///<param name="key">(string) Key to use for retrieving user text</param>
     ///<returns>(string) If key is specified, then the associated value.</returns>
-    static member GetDocumentUserText(key:string) : string = 
+    static member GetDocumentUserText(key:string) : string =
         State.Doc.Strings.GetValue(key) //TODO add null checking
 
     ///<summary>Returns all document user text keys.</summary>
     ///<returns>(string Rarr) all document user text keys.</returns>
-    static member GetDocumentUserTextKeys() : string Rarr = 
+    static member GetDocumentUserTextKeys() : string Rarr =
         rarr { for i = 0 to State.Doc.Strings.Count-1  do
                     let k = State.Doc.Strings.GetKey(i)
                     if not <| k.Contains "\\" then  // TODO why ??
@@ -16922,7 +16872,7 @@ type RhinoScriptSyntax private () =
     ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
     ///<returns>(string Rarr) all keys.</returns>
-    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Rarr = 
+    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Rarr =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             let uss = obj.Geometry.GetUserStrings()
@@ -16938,14 +16888,14 @@ type RhinoScriptSyntax private () =
     ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
     ///<returns>(string) if key is specified, the associated value,fails if non existing.</returns>
-    static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string = 
+    static member GetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let s = 
+        let s =
             if attachedToGeometry then  obj.Geometry.GetUserString(key)
             else                        obj.Attributes.GetUserString(key)
 
         if isNull s then
-            let err = 
+            let err =
                 str{
                     yield! sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
                     let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
@@ -16972,9 +16922,9 @@ type RhinoScriptSyntax private () =
     ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
     ///<returns>(string Option) if key is specified, Some(value) else None .</returns>
-    static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option= 
+    static member TryGetUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Option=
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let s = 
+        let s =
             if attachedToGeometry then  obj.Geometry.GetUserString(key)
             else                        obj.Attributes.GetUserString(key)
         if isNull s then None
@@ -16985,7 +16935,7 @@ type RhinoScriptSyntax private () =
     ///<param name="key">(string) The key name</param>
     ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to retrieve the user text</param>
     ///<returns>(bool) if key exist true.</returns>
-    static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool = 
+    static member HasUserText(objectId:Guid, key:string, [<OPT;DEF(false)>]attachedToGeometry:bool) : bool =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             notNull <| obj.Geometry.GetUserString(key)
@@ -16995,13 +16945,13 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Checks if the current document contains user data.</summary>
     ///<returns>(bool) True or False indicating the presence of Script user data.</returns>
-    static member IsDocumentData() : bool = 
+    static member IsDocumentData() : bool =
         State.Doc.Strings.Count > 0 //DocumentDataCount > 0
 
 
     ///<summary>Checks if the current document contains user text.</summary>
     ///<returns>(bool) True or False indicating the presence of Script user text.</returns>
-    static member IsDocumentUserText() : bool = 
+    static member IsDocumentUserText() : bool =
         State.Doc.Strings.Count > 0 //.DocumentUserTextCount > 0
 
 
@@ -17012,7 +16962,7 @@ type RhinoScriptSyntax private () =
     ///    1 = attribute user text
     ///    2 = geometry user text
     ///    3 = both attribute and geometry user text.</returns>
-    static member IsUserText(objectId:Guid) : int = 
+    static member IsUserText(objectId:Guid) : int =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         let mutable rc = 0
         if obj.Attributes.UserStringCount > 0 then  rc <- rc ||| 1
@@ -17025,7 +16975,7 @@ type RhinoScriptSyntax private () =
     ///<param name="entry">(string) The entry name</param>
     ///<param name="value">(string) The string value</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SetDocumentData(section:string, entry:string, value:string) : unit = 
+    static member SetDocumentData(section:string, entry:string, value:string) : unit =
         // TODO verify input strings
         State.Doc.Strings.SetString(section, entry, value) |> ignoreObj
 
@@ -17033,14 +16983,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Sets a user text stored in the document.</summary>
     ///<param name="key">(string) Key name to set. Cannot be empty string.</param>
     ///<param name="value">(string) The string value to set. Can be empty string. To delete a key use rs.DeleteDocumentUserText</param>
-    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters, 
+    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters,
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SetDocumentUserText(key:string, value:string, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = 
+    static member SetDocumentUserText(key:string, value:string, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit =
         if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You may be able bypass this restrictions in Rhino.Scripting by using RhinoCommon directly." key
-            
-        if allowAllUnicode then 
+
+        if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
@@ -17052,7 +17002,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Removes user text stored in the document.</summary>
     ///<param name="key">(string) Key name to delete</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteDocumentUserText(key:string) : unit = 
+    static member DeleteDocumentUserText(key:string) : unit =
         if isNull key  then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed on for null key"
         let p = State.Doc.Strings.SetString(key, null)
         if isNull p then RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteDocumentUserText failed,  key '%s' does not exist"  key
@@ -17062,14 +17012,14 @@ type RhinoScriptSyntax private () =
     ///<param name="key">(string) The key name to set. Cannot be an empty string.</param>
     ///<param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
     ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to store the user text</param>
-    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters, 
+    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow all Unicode characters,
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = 
+    static member SetUserText(objectId:Guid, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit =
         if not <| RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
-        
-        if allowAllUnicode then 
+
+        if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
@@ -17082,22 +17032,22 @@ type RhinoScriptSyntax private () =
         else
             if not <| obj.Attributes.SetUserString(key, value) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText failed on %s for key '%s' value '%s'" (Nice.str objectId) key value
-        
+
         obj.CommitChanges() |> ignore // should not be needed but still do it because of this potential bug: https://mcneel.myjetbrains.com/youtrack/issue/RH-71536
-               
+
     ///<summary>Sets or removes user text stored on multiple objects. Key and value must noy contain ambiguous Unicode characters.</summary>
     ///<param name="objectIds">(Guid seq) The object identifiers</param>
     ///<param name="key">(string) The key name to set. Cannot be an empty string.</param>
     ///<param name="value">(string) The string value to set. Can be an empty string. Use rs.DeleteUserText to delete keys</param>
     ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to store the user text</param>
-    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow Unicode characters, 
+    ///<param name="allowAllUnicode">(bool) Optional, default value: <c>false</c> , set to true to allow Unicode characters,
     ///     (even the ones that look like ASCII characters but are not ASCII) in the value</param>
     ///<returns>(unit) void, nothing.</returns>
     static member SetUserText(objectIds:Guid seq, key:string, value:string, [<OPT;DEF(false)>]attachToGeometry:bool, [<OPT;DEF(false)>]allowAllUnicode:bool) : unit = //PLURAL
         if not <|  RhinoScriptSyntax.IsGoodStringId( key, allowEmpty=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as key. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." key
-        
-        if allowAllUnicode then 
+
+        if allowAllUnicode then
             if not <| Util.isAcceptableStringId( value, true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use RhinoCommon to bypass some of these restrictions." value
         else
@@ -17119,7 +17069,7 @@ type RhinoScriptSyntax private () =
     ///<param name="key">(string) The key name to delete</param>
     ///<param name="attachToGeometry">(bool) Optional, default value: <c>false</c> Location on the object to delete the user text from</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit = 
+    static member DeleteUserText(objectId:Guid, key:string,  [<OPT;DEF(false)>]attachToGeometry:bool) : unit =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachToGeometry then obj.Geometry.SetUserString  (key, null) |> ignore // returns false if key does not exist yet, otherwise true
         else                     obj.Attributes.SetUserString(key, null) |> ignore
@@ -17147,8 +17097,8 @@ type RhinoScriptSyntax private () =
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<returns>(string) selected folder or None if selection was canceled.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string = 
-        let getKeepEditor () = 
+    static member BrowseForFolder([<OPT;DEF(null:string)>]folder:string, [<OPT;DEF(null:string)>]message:string) : string =
+        let getKeepEditor () =
             use dlg = new System.Windows.Forms.FolderBrowserDialog()
             dlg.ShowNewFolderButton <- true
             if notNull folder then
@@ -17181,11 +17131,11 @@ type RhinoScriptSyntax private () =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
-                                [<OPT;DEF(null:string)>]title:string) :Rarr<string*bool> = 
+                                [<OPT;DEF(null:string)>]title:string) :Rarr<string*bool> =
         let checkstates = rarr { for  item in items -> snd item }
         let itemstrs =    rarr { for item in items -> fst item}
 
-        let newcheckstates = 
+        let newcheckstates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemstrs, checkstates)
             RhinoSync.DoSync getKeepEditor
 
@@ -17202,8 +17152,8 @@ type RhinoScriptSyntax private () =
     ///<param name="title">(string) Optional, A dialog box title</param>
     ///<returns>(string) Option of The selected item.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string= 
-        let getKeepEditor () = 
+    static member ComboListBox(items:string seq, [<OPT;DEF(null:string)>]message:string, [<OPT;DEF(null:string)>]title:string) : string=
+        let getKeepEditor () =
             match UI.Dialogs.ShowComboListBox(title, message, items|> Array.ofSeq) with
             | null -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.ComboListBox()"
             | :? string as s -> s
@@ -17220,8 +17170,8 @@ type RhinoScriptSyntax private () =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member EditBox(  [<OPT;DEF(null:string)>]defaultValString:string,
                             [<OPT;DEF(null:string)>]message:string,
-                            [<OPT;DEF(null:string)>]title:string) : string = 
-        let getKeepEditor () = 
+                            [<OPT;DEF(null:string)>]title:string) : string =
+        let getKeepEditor () =
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValString, true)
             if rc then text else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.EditBox()"
         RhinoSync.DoSync getKeepEditor
@@ -17239,14 +17189,14 @@ type RhinoScriptSyntax private () =
     static member GetAngle( [<OPT;DEF(Point3d())>]point:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(Point3d())>]referencePoint:Point3d,
                             [<OPT;DEF(0.0)>]defaultValAngleDegrees:float,
-                            [<OPT;DEF(null:string)>]message:string) : float= 
-        let get () = 
+                            [<OPT;DEF(null:string)>]message:string) : float=
+        let get () =
             let point = if point = Point3d.Origin then Point3d.Unset else point
             let referencepoint = if referencePoint = Point3d.Origin then Point3d.Unset else referencePoint
             let defaultangle = toRadians(defaultValAngleDegrees)
             let rc, angle = Input.RhinoGet.GetAngle(message, point, referencepoint, defaultangle)
             if rc = Commands.Result.Success then toDegrees(angle)
-            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetAngle()"            
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetAngle()"
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17260,8 +17210,8 @@ type RhinoScriptSyntax private () =
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
     ///<returns>(bool Rarr) Option of a list of values that represent the boolean values.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : Rarr<bool> = 
-        let get () = 
+    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : Rarr<bool> =
+        let get () =
             use go = new Input.Custom.GetOption()
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
@@ -17279,11 +17229,11 @@ type RhinoScriptSyntax private () =
             while getrc = Input.GetResult.Option do
                 getrc <- go.Get()
 
-            let res = 
+            let res =
                 if getrc <> Input.GetResult.Nothing then
                     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBoolean()"
                 else
-                    (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)            
+                    (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
             res
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -17306,10 +17256,10 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(Point3d())>]basePoint:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                             [<OPT;DEF(null:string)>]prompt1:string,
                             [<OPT;DEF(null:string)>]prompt2:string,
-                            [<OPT;DEF(null:string)>]prompt3:string) : (Point3d [])= 
-        let get () = 
+                            [<OPT;DEF(null:string)>]prompt3:string) : (Point3d [])=
+        let get () =
             let basePoint = if basePoint <> Point3d.Origin then basePoint else  Point3d.Unset
-            let m = 
+            let m =
                 match mode with
                 |0 -> Input.GetBoxMode.All
                 |1 -> Input.GetBoxMode.Corner
@@ -17321,7 +17271,7 @@ type RhinoScriptSyntax private () =
             let box = ref (Box())
             let rc= Input.RhinoGet.GetBox(box, m, basePoint, prompt1, prompt2, prompt3)
             if rc = Commands.Result.Success then ((!box).GetCorners())
-            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"            
+            else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBox()"
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17329,12 +17279,12 @@ type RhinoScriptSyntax private () =
     ///<param name="color">(Drawing.Color) Optional, default value: <c>Drawing.Color.Black</c></param>
     ///<returns>(Drawing.Color) RGB color.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color = 
-        let get () = 
+    static member GetColor([<OPT;DEF(Drawing.Color())>]color:Drawing.Color) : Drawing.Color =
+        let get () =
             let zero = Drawing.Color()
             let col = ref(if color = zero then  Drawing.Color.Black else color)
             let rc = UI.Dialogs.ShowColorDialog(col)
-            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"            
+            if rc then (!col) else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetColor()"
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17344,7 +17294,7 @@ type RhinoScriptSyntax private () =
     ///    1  Point2d: cursor position in screen coordinates
     ///    2  Guid:    objectId of the active view-port
     ///    3  Point2d: cursor position in client coordinates.</returns>
-    static member GetCursorPos() : Point3d * Point2d * Guid * Point2d = 
+    static member GetCursorPos() : Point3d * Point2d * Guid * Point2d =
         let get () =   //or skip ?
             let view = State.Doc.Views.ActiveView
             let screenpt = UI.MouseCursor.Location
@@ -17352,7 +17302,7 @@ type RhinoScriptSyntax private () =
             let viewport = view.ActiveViewport
             let xf = viewport.GetTransform(DocObjects.CoordinateSystem.Screen, DocObjects.CoordinateSystem.World)
             let worldpt = Point3d(clientpt.X, clientpt.Y, 0.0)
-            worldpt.Transform(xf)            
+            worldpt.Transform(xf)
             worldpt, screenpt, viewport.Id, clientpt
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -17369,9 +17319,9 @@ type RhinoScriptSyntax private () =
     static member GetDistance(  [<OPT;DEF(Point3d())>]firstPt:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                                 [<OPT;DEF(0.0)>]distance:float,
                                 [<OPT;DEF("First distance point")>]firstPtMsg:string,
-                                [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float = 
-        let get () = 
-            let pt1 = 
+                                [<OPT;DEF("Second distance point")>]secondPtMsg:string) : float =
+        let get () =
+            let pt1 =
                 if firstPt = Point3d.Origin then
                     let gp1 = new Input.Custom.GetPoint()
                     gp1.SetCommandPrompt(firstPtMsg)
@@ -17406,7 +17356,7 @@ type RhinoScriptSyntax private () =
                 | _ ->
                     gp2.Dispose()
                     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetDistance()"
-            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetDistance()"           
+            | _ -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetDistance()"
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17424,8 +17374,8 @@ type RhinoScriptSyntax private () =
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
-                                    [<OPT;DEF(false)>]select:bool) : Rarr<Guid*Guid*Point3d> = 
-        let get () = 
+                                    [<OPT;DEF(false)>]select:bool) : Rarr<Guid*Guid*Point3d> =
+        let get () =
             if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
             go.SetCommandPrompt(message)
@@ -17449,7 +17399,7 @@ type RhinoScriptSyntax private () =
                         let rhobj = State.Doc.Objects.FindId(t1 item)
                         rhobj.Select(true)|> ignore
                     State.Doc.Views.Redraw()
-                r           
+                r
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17463,8 +17413,8 @@ type RhinoScriptSyntax private () =
     static member GetInteger(   [<OPT;DEF(null:string)>]message:string,
                                 [<OPT;DEF(2147482999)>]number:int,
                                 [<OPT;DEF(2147482999)>]minimum:int,
-                                [<OPT;DEF(2147482999)>]maximum:int) : int = 
-        let get () = 
+                                [<OPT;DEF(2147482999)>]maximum:int) : int =
+        let get () =
             use gi = new Input.Custom.GetInteger()
             if notNull message then gi.SetCommandPrompt(message)
             if number  <> 2147482999 then gi.SetDefaultInteger(number)
@@ -17476,7 +17426,7 @@ type RhinoScriptSyntax private () =
             else
                 let rc = gi.Number()
                 gi.Dispose()
-                rc            
+                rc
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17493,8 +17443,8 @@ type RhinoScriptSyntax private () =
     static member GetLayer( [<OPT;DEF("Select Layer")>]title:string,
                             [<OPT;DEF(null:string)>]layer:string,
                             [<OPT;DEF(false)>]showNewButton:bool,
-                            [<OPT;DEF(false)>]showSetCurrent:bool) : string = 
-        let getKeepEditor () = 
+                            [<OPT;DEF(false)>]showSetCurrent:bool) : string =
+        let getKeepEditor () =
             let layerindex = ref State.Doc.Layers.CurrentLayerIndex
             if notNull layer then
                 let layerinstance = State.Doc.Layers.FindName(layer)
@@ -17507,7 +17457,6 @@ type RhinoScriptSyntax private () =
         RhinoSync.DoSync getKeepEditor
 
 
-
     ///<summary>Displays a dialog box prompting the user to select one or more layers.</summary>
     ///<param name="title">(string) Optional, default value: <c>"Select Layers"</c>
     ///    Dialog box title</param>
@@ -17515,16 +17464,14 @@ type RhinoScriptSyntax private () =
     ///    Optional button to show on the dialog</param>
     ///<returns>(string Rarr) The names of selected layers.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string Rarr = 
-        let getKeepEditor () = 
+    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string Rarr =
+        let getKeepEditor () =
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
             if rc then
                 (rarr { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayers()"
         RhinoSync.DoSync getKeepEditor
-
-
 
 
     ///<summary>Prompts the user to pick points that define a line.</summary>
@@ -17550,8 +17497,8 @@ type RhinoScriptSyntax private () =
                             [<OPT;DEF(Point3d())>]point:Point3d,
                             [<OPT;DEF(null:string)>]message1:string,
                             [<OPT;DEF(null:string)>]message2:string,
-                            [<OPT;DEF(null:string)>]message3:string) : Line = 
-        let get () = 
+                            [<OPT;DEF(null:string)>]message3:string) : Line =
+        let get () =
             use gl = new Input.Custom.GetLine()
             if mode = 0 then gl.EnableAllVariations(true)
             else  gl.GetLineMode <- LanguagePrimitives.EnumOfValue( mode-1)
@@ -17565,7 +17512,7 @@ type RhinoScriptSyntax private () =
                 line
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLine()"
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17576,16 +17523,17 @@ type RhinoScriptSyntax private () =
     ///<returns>(string) The names of selected line-type.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
-                                [<OPT;DEF(false)>]showByLayer:bool) : string = 
-        let getKeepEditor () = 
+                                [<OPT;DEF(false)>]showByLayer:bool) : string =
+        let getKeepEditor () =
             let mutable ltinstance = State.Doc.Linetypes.CurrentLinetype
             if notNull defaultValLinetype then
                 let ltnew = State.Doc.Linetypes.FindName(defaultValLinetype)
                 if notNull ltnew  then ltinstance <- ltnew
-            try                  
+            try
                 let objectId = UI.Dialogs.ShowLineTypes("Select Linetype", "Select Linetype", State.Doc) :?> Guid  // this fails if clicking in void
+                // https://github.com/mcneel/rhinoscriptsyntax/pull/211/files
                 let linetype = State.Doc.Linetypes.FindId(objectId)
-                linetype.Name                
+                linetype.Name
             with _ ->
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLinetype()"
         RhinoSync.DoSync getKeepEditor
@@ -17606,8 +17554,8 @@ type RhinoScriptSyntax private () =
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
-                                [<OPT;DEF(0)>]maxCount:int) : Rarr<int> = 
-        let get () = 
+                                [<OPT;DEF(0)>]maxCount:int) : Rarr<int> =
+        let get () =
             State.Doc.Objects.UnselectAll() |> ignore
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
@@ -17621,7 +17569,7 @@ type RhinoScriptSyntax private () =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 rc
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17640,8 +17588,8 @@ type RhinoScriptSyntax private () =
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
-                                    [<OPT;DEF(0)>]maxCount:int) : Rarr<int> = 
-        let get () = 
+                                    [<OPT;DEF(0)>]maxCount:int) : Rarr<int> =
+        let get () =
             State.Doc.Objects.UnselectAll() |> ignore
             State.Doc.Views.Redraw()
             use go = new Input.Custom.GetObject()
@@ -17655,7 +17603,7 @@ type RhinoScriptSyntax private () =
                 let objrefs = go.Objects()
                 let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 rc
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17670,8 +17618,8 @@ type RhinoScriptSyntax private () =
     static member GetPoint( [<OPT;DEF(null:string)>]message:string,
                             [<OPT;DEF(Point3d())>]basePoint:Point3d,
                             [<OPT;DEF(0.0)>]distance:float,
-                            [<OPT;DEF(false)>]inPlane:bool) : Point3d = 
-        let get () = 
+                            [<OPT;DEF(false)>]inPlane:bool) : Point3d =
+        let get () =
             use gp = new Input.Custom.GetPoint()
             if notNull message then gp.SetCommandPrompt(message)
             if basePoint <> Point3d.Origin then
@@ -17685,7 +17633,7 @@ type RhinoScriptSyntax private () =
             else
                 let pt = gp.Point()
                 pt
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17696,8 +17644,8 @@ type RhinoScriptSyntax private () =
     ///    A prompt of message</param>
     ///<returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d = 
-        let get () = 
+    static member GetPointOnCurve(curveId:Guid, [<OPT;DEF("Pick Point On Curve")>]message:string) : Point3d =
+        let get () =
             let curve = RhinoScriptSyntax.CoerceCurve(curveId)
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
@@ -17708,7 +17656,7 @@ type RhinoScriptSyntax private () =
             else
                 let pt = gp.Point()
                 pt
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17718,13 +17666,13 @@ type RhinoScriptSyntax private () =
     ///    A prompt or message</param>
     ///<returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d = 
-        let get () =             
+    static member GetPointOnMesh(meshId:Guid, [<OPT;DEF("Pick Point On Mesh")>]message:string) : Point3d =
+        let get () =
             //let cmdrc, point = Input.RhinoGet.GetPointOnMesh(State.Doc, meshId, message, acceptNothing=false) // TODO later versions of RhinoCommon7 require this !?
-            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7            
+            let cmdrc, point = Input.RhinoGet.GetPointOnMesh( meshId, message, acceptNothing=false) //still Ok in earlier versions of RhinoCommon 7
             if cmdrc = Commands.Result.Success then point
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPointOnMesh()"
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17735,8 +17683,8 @@ type RhinoScriptSyntax private () =
     ///    A prompt or message</param>
     ///<returns>(Point3d) 3d point.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d = 
-        let get () = 
+    static member GetPointOnSurface(surfaceId:Guid, [<OPT;DEF("Pick Point on Surface or Polysurface")>]message:string) : Point3d =
+        let get () =
             use gp = new Input.Custom.GetPoint()
             gp.SetCommandPrompt(message)
             match RhinoScriptSyntax.CoerceGeometry surfaceId with
@@ -17755,7 +17703,7 @@ type RhinoScriptSyntax private () =
             else
                 let pt = gp.Point()
                 pt
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17774,10 +17722,10 @@ type RhinoScriptSyntax private () =
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
                                 [<OPT;DEF(null:string)>]message2:string,
-                                [<OPT;DEF(0)>]maxPoints:int) :Point3d Rarr = 
+                                [<OPT;DEF(0)>]maxPoints:int) :Point3d Rarr =
                                 //[<OPT;DEF(Point3d())>]basePoint:Point3d) // Ignored here because ignored in python too
 
-        let get () = 
+        let get () =
             use gp = new Input.Custom.GetPoint()
             if notNull message1 then gp.SetCommandPrompt(message1)
             gp.EnableDrawLineFromPoint( drawLines )
@@ -17822,7 +17770,7 @@ type RhinoScriptSyntax private () =
                     rc
                 else
                     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoints()"
-            
+
 
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -17853,8 +17801,8 @@ type RhinoScriptSyntax private () =
                                         [<OPT;DEF(null:string)>]message3:string,
                                         [<OPT;DEF(null:string)>]message4:string,
                                         [<OPT;DEF(2147482999)>]min:int,
-                                        [<OPT;DEF(0)>]max:int) : Polyline = 
-        let get () = 
+                                        [<OPT;DEF(0)>]max:int) : Polyline =
+        let get () =
             let gpl = new Input.Custom.GetPolyline()
             if notNull message1 then gpl.FirstPointPrompt <- message1
             if notNull message2 then gpl.SecondPointPrompt <- message2
@@ -17866,7 +17814,7 @@ type RhinoScriptSyntax private () =
             State.Doc.Views.Redraw()
             if rc = Commands.Result.Success then polyline
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPolyline()"
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17881,20 +17829,20 @@ type RhinoScriptSyntax private () =
     static member GetReal(              [<OPT;DEF("Number")>]message:string,
                                         [<OPT;DEF(7e89)>]number:float,
                                         [<OPT;DEF(7e89)>]minimum:float,
-                                        [<OPT;DEF(7e89)>]maximum:float) : float = 
-        let get () = 
+                                        [<OPT;DEF(7e89)>]maximum:float) : float =
+        let get () =
             let gn = new Input.Custom.GetNumber()
             if notNull message then gn.SetCommandPrompt(message)
             if number <> 7e89 then gn.SetDefaultNumber(number)
             if minimum <> 7e89 then gn.SetLowerLimit(minimum, strictlyGreaterThan=false)
             if maximum <> 7e89 then gn.SetUpperLimit(maximum, strictlyLessThan=false)
-            if gn.Get() <> Input.GetResult.Number then 
+            if gn.Get() <> Input.GetResult.Number then
                 RhinoUserInteractionException.Raise "No number was given in RhinoScriptSyntax.GetReal()"
             else
                 let rc = gn.Number()
                 gn.Dispose()
                 rc
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17915,8 +17863,8 @@ type RhinoScriptSyntax private () =
                                         [<OPT;DEF(Point3d())>]basePoint:Point3d,
                                         [<OPT;DEF(null:string)>]prompt1:string,
                                         [<OPT;DEF(null:string)>]prompt2:string,
-                                        [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d = 
-        let get () = 
+                                        [<OPT;DEF(null:string)>]prompt3:string) : Point3d * Point3d * Point3d * Point3d =
+        let get () =
             let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
 
             let basePoint = if basePoint = Point3d.Origin then Point3d.Unset else basePoint
@@ -17927,7 +17875,7 @@ type RhinoScriptSyntax private () =
             let rc, corners = Input.RhinoGet.GetRectangle(mode, basePoint, prompts)
             if rc = Commands.Result.Success then  (corners.[0], corners.[1], corners.[2], corners.[3])
             else RhinoUserInteractionException.Raise "No rectangle was given by user in RhinoScriptSyntax.GetRectangle()"
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17937,12 +17885,12 @@ type RhinoScriptSyntax private () =
     ///<param name="strings">(string seq) Optional, List of strings to be displayed as a click-able command options.
     ///    Note, strings cannot begin with a numeric character</param>
     ///<returns>(string) The string either input or selected by the user .
-    ///    If the user presses the Enter key without typing in a string, an empty string "" is returned.  
+    ///    If the user presses the Enter key without typing in a string, an empty string "" is returned.
     ///    A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetString(            [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]defaultValString:string,
-                                        [<OPT;DEF(null:string seq)>]strings:string seq) : string = 
-        let get () = 
+                                        [<OPT;DEF(null:string seq)>]strings:string seq) : string =
+        let get () =
             let gs = new Input.Custom.GetString()
             gs.AcceptNothing(true)
             if notNull message then gs.SetCommandPrompt(message)
@@ -17956,7 +17904,7 @@ type RhinoScriptSyntax private () =
                 gs.Option().EnglishName
             else
                 gs.StringResult()
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -17969,8 +17917,8 @@ type RhinoScriptSyntax private () =
     static member ListBox(              items:string IList,
                                         [<OPT;DEF(null:string)>]message:string,
                                         [<OPT;DEF(null:string)>]title:string,
-                                        [<OPT;DEF(null:string)>]defaultVal:string) : string = 
-        let getKeepEditor () = 
+                                        [<OPT;DEF(null:string)>]defaultVal:string) : string =
+        let getKeepEditor () =
             match UI.Dialogs.ShowListBox(title, message, Array.ofSeq items , defaultVal) with
             | null ->  RhinoUserInteractionException.Raise "No items was given by user in RhinoScriptSyntax.ListBox()"
             |  :? string as s ->  s
@@ -18016,8 +17964,8 @@ type RhinoScriptSyntax private () =
     ///    _      A RhinoUserInteractionException is raised if input is cancelled.</returns>
     static member MessageBox(           message:string,
                                         [<OPT;DEF(0)>]buttons:int,
-                                        [<OPT;DEF("")>]title:string) : int = 
-        let getKeepEditor () = 
+                                        [<OPT;DEF("")>]title:string) : int =
+        let getKeepEditor () =
             let mutable buttontyp =  buttons &&& 0x00000007 //111 in binary
             let mutable btn = UI.ShowMessageButton.OK
             if   buttontyp = 1 then btn <- UI.ShowMessageButton.OKCancel
@@ -18062,8 +18010,8 @@ type RhinoScriptSyntax private () =
     static member PropertyListBox(  items:string IList,
                                     values:string seq,
                                     [<OPT;DEF(null:string)>]message:string,
-                                    [<OPT;DEF(null:string)>]title:string) : string array = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string)>]title:string) : string array =
+        let getKeepEditor () =
             let values = rarr { for  v in values do yield v.ToString() }
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.PropertyListBox"
@@ -18081,10 +18029,10 @@ type RhinoScriptSyntax private () =
     static member MultiListBox(     items:string IList,
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string,
-                                    [<OPT;DEF(null:string IList)>]defaultVals:string IList) : string array = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string IList)>]defaultVals:string IList) : string array =
+        let getKeepEditor () =
             let r =  UI.Dialogs.ShowMultiListBox(title, message, items, defaultVals)
-            if notNull r then r 
+            if notNull r then r
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.MultiListBox"
         RhinoSync.DoSync getKeepEditor
 
@@ -18104,8 +18052,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]filename:string,
-                                    [<OPT;DEF(null:string)>]extension:string) : string = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string)>]extension:string) : string =
+        let getKeepEditor () =
             let fd = UI.OpenFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
@@ -18132,8 +18080,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]filename:string,
-                                    [<OPT;DEF(null:string)>]extension:string) : string array = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string)>]extension:string) : string array =
+        let getKeepEditor () =
             let fd = UI.OpenFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
@@ -18164,8 +18112,8 @@ type RhinoScriptSyntax private () =
     static member PopupMenu(        items:string seq,
                                     [<OPT;DEF(null:int seq)>]modes:int seq,
                                     [<OPT;DEF(Point3d())>]point:Point3d,
-                                    [<OPT;DEF(null:string)>]view:string) : int = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string)>]view:string) : int =
+        let getKeepEditor () =
             let mutable screenpoint = Windows.Forms.Cursor.Position
             if Point3d.Origin <> point then
                 let view = RhinoScriptSyntax.CoerceView(view)
@@ -18190,8 +18138,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(7e89)>]defaultValNumber:float,
                                     [<OPT;DEF("")>]title:string,
                                     [<OPT;DEF(7e89)>]minimum:float,
-                                    [<OPT;DEF(7e89)>]maximum:float) : float = 
-        let get () = 
+                                    [<OPT;DEF(7e89)>]maximum:float) : float =
+        let get () =
             let defaultValNumber = ref <| if defaultValNumber = 7e89 then RhinoMath.UnsetValue else defaultValNumber
             let minimum = if minimum = 7e89 then RhinoMath.UnsetValue else minimum
             let maximum = if maximum = 7e89 then RhinoMath.UnsetValue else maximum
@@ -18199,7 +18147,7 @@ type RhinoScriptSyntax private () =
             let rc = UI.Dialogs.ShowNumberBox(title, message, defaultValNumber, minimum, maximum)
             if  rc then (!defaultValNumber)
             else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.RealBox()"
-            
+
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -18218,8 +18166,8 @@ type RhinoScriptSyntax private () =
                                     [<OPT;DEF(null:string)>]filter:string,
                                     [<OPT;DEF(null:string)>]folder:string,
                                     [<OPT;DEF(null:string)>]filename:string,
-                                    [<OPT;DEF(null:string)>]extension:string) : string = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string)>]extension:string) : string =
+        let getKeepEditor () =
             let fd = UI.SaveFileDialog()
             if notNull title then fd.Title <- title
             if notNull filter then fd.Filter <- filter
@@ -18238,8 +18186,8 @@ type RhinoScriptSyntax private () =
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member StringBox(        [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]defaultValValue:string,
-                                    [<OPT;DEF(null:string)>]title:string) : string = 
-        let getKeepEditor () = 
+                                    [<OPT;DEF(null:string)>]title:string) : string =
+        let getKeepEditor () =
             let rc, text = UI.Dialogs.ShowEditBox(title, message, defaultValValue, multiline=false)
             if rc then text else RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.StringBox()"
         RhinoSync.DoSync getKeepEditor
@@ -18250,8 +18198,8 @@ type RhinoScriptSyntax private () =
     ///<param name="title">(string) Optional, The message title</param>
     ///<returns>(unit) void, nothing.</returns>
     static member TextOut(message:string,
-                          [<OPT;DEF(null:string)>]title:string) : unit = 
-        let getKeepEditor () = 
+                          [<OPT;DEF(null:string)>]title:string) : unit =
+        let getKeepEditor () =
             UI.Dialogs.ShowTextDialog(message, title)
         RhinoSync.DoSync getKeepEditor
 
@@ -18263,13 +18211,13 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Return true if the script is being executed in the context of Rhino(currently always true).</summary>
     ///<returns>(bool) true if the script is being executed in the context of Rhino(currently always true).</returns>
-    static member ContextIsRhino() : bool = 
+    static member ContextIsRhino() : bool =
         true //TODO implement correctly
 
 
     ///<summary>Return true if the script is being executed in a grasshopper component(currently always false).</summary>
     ///<returns>(bool) true if the script is being executed in a grasshopper component(currently always false).</returns>
-    static member ContextIsGrasshopper() : bool = 
+    static member ContextIsGrasshopper() : bool =
         false //TODO implement correctly
 
 
@@ -18284,7 +18232,7 @@ type RhinoScriptSyntax private () =
     ///    element 2 = delta in the X direction
     ///    element 3 = delta in the Y direction
     ///    element 4 = delta in the Z direction.</returns>
-    static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  = 
+    static member Angle(point1:Point3d, point2:Point3d, [<OPT;DEF(Plane())>]plane:Plane) : float * float * float * float * float  =
         let plane = if plane.IsValid then plane else Plane.WorldXY
         let vector = point2 - point1
         let mutable x = vector.X
@@ -18307,7 +18255,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(float * float) containing the following elements .
     ///    0 The angle in degrees.
     ///    1 The reflex angle in degrees.</returns>
-    static member Angle2(line1:Line, line2:Line) : float * float = 
+    static member Angle2(line1:Line, line2:Line) : float * float =
         let vec0 = line1.To - line1.From
         let vec1 = line2.To - line2.From
         if not <| vec0.Unitize() || not <| vec1.Unitize() then  RhinoScriptingException.Raise "RhinoScriptSyntax.Angle2 two failed on %A and %A" line1 line2
@@ -18321,8 +18269,8 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Gets the text string in the Windows clipboard.</summary>
-    ///<returns>(string) The current text in the clipboard 
-    /// or an empty string if the content of the clipboard is not a text</returns> 
+    ///<returns>(string) The current text in the clipboard
+    /// or an empty string if the content of the clipboard is not a text</returns>
     static member ClipboardText() : string = //GET
         if Windows.Forms.Clipboard.ContainsText() then Windows.Forms.Clipboard.GetText() else ""
 
@@ -18342,7 +18290,7 @@ type RhinoScriptSyntax private () =
     ///    If True, luma specifies how much to increment or decrement the
     ///    current luminance. If False, luma specified the absolute luminance</param>
     ///<returns>(Drawing.Color) modified rgb value.</returns>
-    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color = 
+    static member ColorAdjustLuma(rgb:Drawing.Color, luma:float, [<OPT;DEF(false)>]isScaleRelative:bool) : Drawing.Color =
         let mutable hsl = Display.ColorHSL(rgb)
         let mutable luma = luma / 1000.0
         if isScaleRelative then luma <- hsl.L + luma
@@ -18353,21 +18301,21 @@ type RhinoScriptSyntax private () =
     ///<summary>Retrieves intensity value for the blue component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The blue component.</returns>
-    static member ColorBlueValue(rgb:Drawing.Color) : int = 
+    static member ColorBlueValue(rgb:Drawing.Color) : int =
        int rgb.B
 
 
     ///<summary>Retrieves intensity value for the green component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The green component.</returns>
-    static member ColorGreenValue(rgb:Drawing.Color) : int = 
+    static member ColorGreenValue(rgb:Drawing.Color) : int =
        int rgb.G
 
 
     ///<summary>Converts colors from hue-luminance-saturation to RGB.</summary>
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value.</returns>
-    static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color = 
+    static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
         let hls = Display.ColorHSL(hls.A.ToFloat/240.0, hls.R.ToFloat/240.0, hls.G.ToFloat/240.0, hls.B.ToFloat/240.0) // TODO test if correct with reverse function
         hls.ToArgbColor()
 
@@ -18375,14 +18323,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Retrieves intensity value for the red component of an RGB color.</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(int) The red color value.</returns>
-    static member ColorRedValue(rgb:Drawing.Color) : int = 
+    static member ColorRedValue(rgb:Drawing.Color) : int =
         int rgb.R
 
 
     ///<summary>Convert colors from RGB to  HSL ( Hue, Saturation and Luminance).</summary>
     ///<param name="rgb">(Drawing.Color) The RGB color value</param>
     ///<returns>(Display.ColorHSL) The HLS color value.</returns>
-    static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL = 
+    static member ColorRGBToHLS(rgb:Drawing.Color) : Display.ColorHSL =
         let hsl = Display.ColorHSL(rgb)
         hsl
 
@@ -18392,7 +18340,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
     ///<returns>(float Rarr) numbers with duplicates removed.</returns>
-    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr = 
+    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
         if Seq.length numbers < 2 then Rarr(numbers )
         else
             let tol = Util.ifZero1 tolerance  RhinoMath.ZeroTolerance // or State.Doc.ModelAbsoluteTolerance
@@ -18416,7 +18364,7 @@ type RhinoScriptSyntax private () =
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c> Minimum distance between points.
     /// Points within this tolerance will be discarded.</param>
     ///<returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
-    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array = 
+    static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
         Geometry.Point3d.CullDuplicates(points, tolerance)
 
@@ -18425,7 +18373,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The square distance.</returns>
-    static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float = 
+    static member inline DistanceSquare(point1:Point3d, point2:Point3d) : float =
         let x = point1.X - point2.X
         let y = point1.Y - point2.Y
         let z = point1.Z - point2.Z
@@ -18435,7 +18383,7 @@ type RhinoScriptSyntax private () =
     ///<param name="point1">(Point3d) The first 3D point</param>
     ///<param name="point2">(Point3d) The second 3D point</param>
     ///<returns>(float) The distance.</returns>
-    static member inline Distance(point1:Point3d, point2:Point3d) : float = 
+    static member inline Distance(point1:Point3d, point2:Point3d) : float =
         let x = point1.X - point2.X
         let y = point1.Y - point2.Y
         let z = point1.Z - point2.Z
@@ -18448,7 +18396,7 @@ type RhinoScriptSyntax private () =
     ///<param name="plane">(Plane) Optional, Plane to base the transformation. If omitted, the world
     ///    x-y Plane is used</param>
     ///<returns>(Point3d) resulting point is successful.</returns>
-    static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d = 
+    static member Polar(point:Point3d, angleDegrees:float, distance:float, [<OPT;DEF(Plane())>]plane:Plane) : Point3d =
         let angle = toRadians(angleDegrees)
         let mutable offset = plane.XAxis
         offset.Unitize() |> ignore
@@ -18462,19 +18410,19 @@ type RhinoScriptSyntax private () =
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
     ///<returns>(float Rarr) A one-dimensional list containing real numbers.</returns>
-    static member SimplifyArray(points:Point3d seq) : float Rarr = 
-        rarr {  
+    static member SimplifyArray(points:Point3d seq) : float Rarr =
+        rarr {
             for p in points do
                 yield p.X
                 yield p.Y
-                yield p.Z 
+                yield p.Z
             }
 
 
     ///<summary>Suspends execution of a running script for the specified interval. Then refreshes Rhino UI.</summary>
     ///<param name="milliseconds">(int) Thousands of a second</param>
     ///<returns>(unit).</returns>
-    static member Sleep(milliseconds:int) : unit = 
+    static member Sleep(milliseconds:int) : unit =
         Threading.Thread.Sleep(milliseconds)
         RhinoApp.Wait()
 
@@ -18485,7 +18433,7 @@ type RhinoScriptSyntax private () =
     ///    Minimum distance between points. Points that fall within this tolerance
     ///    will be discarded.</param>
     ///<returns>(Point3d array) Array of sorted 3D points.</returns>
-    static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array = 
+    static member SortPointList(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
         Point3d.SortAndCullPointList(points, tol)
 
@@ -18504,8 +18452,8 @@ type RhinoScriptSyntax private () =
     ///    4           Z, X, Y
     ///    5           Z, Y, X</param>
     ///<returns>(Point3d seq) sorted 3-D points.</returns>
-    static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq = 
-        let f = 
+    static member SortPoints(points:Point3d seq, [<OPT;DEF(true)>]ascending:bool, [<OPT;DEF(0)>]order:int) : Point3d seq =
+        let f =
             match order with
             |0 -> fun (p:Point3d) -> p.X, p.Y, p.Z
             |1 -> fun (p:Point3d) -> p.X, p.Z, p.Y
@@ -18521,14 +18469,14 @@ type RhinoScriptSyntax private () =
     ///<summary>convert a formatted string value into a 3D point value.</summary>
     ///<param name="point">(string) A string that contains a delimited point like "1, 2, 3"</param>
     ///<returns>(Point3d) Point structure from the input string.</returns>
-    static member Str2Pt(point:string) : Point3d = 
+    static member Str2Pt(point:string) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
 
     ///<summary>Converts 'point' into a Rhino.Geometry.Point3d if possible.</summary>
     ///<param name="point">('T) any value that can be converted or parsed to a point</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
-    static member CreatePoint(point:'T ) : Point3d = 
+    static member CreatePoint(point:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint point
 
     ///<summary>Converts x, y and z into a Rhino.Geometry.Point3d if possible.</summary>
@@ -18536,21 +18484,21 @@ type RhinoScriptSyntax private () =
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Point3d) a Rhino.Geometry.Point3d.</returns>
-    static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d = 
+    static member CreatePoint(x:'T, y:'T, z:'T ) : Point3d =
         RhinoScriptSyntax.Coerce3dPoint ((x, y, z))
 
 
     ///<summary>Converts 'Vector' into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="vector">('T) any value that can be converted or parsed to a Vector</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
-    static member CreateVector(vector:'T ) : Vector3d = 
+    static member CreateVector(vector:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector vector
     ///<summary>Converts x, y and z into a Rhino.Geometry.Vector3d if possible.</summary>
     ///<param name="x">('T) any value that can be converted or parsed to X coordinate</param>
     ///<param name="y">('T) any value that can be converted or parsed to Y coordinate</param>
     ///<param name="z">('T) any value that can be converted or parsed to Z coordinate</param>
     ///<returns>(Vector3d) a Rhino.Geometry.Vector3d.</returns>
-    static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d = 
+    static member CreateVector(x:'T, y:'T, z:'T ) : Vector3d =
         RhinoScriptSyntax.Coerce3dVector ((x, y, z))
 
 
@@ -18562,7 +18510,7 @@ type RhinoScriptSyntax private () =
     ///<param name="yAxis">(Vector3d) Optional, default value: <c>Vector3d.YAxis</c>
     ///    Direction of Y-Axis</param>
     ///<returns>(Plane) A Rhino.Geometry.Plane.</returns>
-    static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane = 
+    static member CreatePlane(origin:Point3d , [<OPT;DEF(Vector3d())>]xAxis:Vector3d, [<OPT;DEF(Vector3d())>]yAxis:Vector3d) : Plane =
         if xAxis.IsZero || yAxis.IsZero then
             Plane(origin, Vector3d.XAxis, Vector3d.YAxis)
         else
@@ -18572,7 +18520,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Converts input into a Rhino.Geometry.Transform object if possible.</summary>
     ///<param name="xForm">(float seq seq) The transform. This can be seen as a 4x4 matrix, given as nested lists</param>
     ///<returns>(Transform) A Rhino.Geometry.Transform. result[0, 3] gives access to the first row, last column.</returns>
-    static member CreateXform(xForm:seq<seq<float>>) : Transform = 
+    static member CreateXform(xForm:seq<seq<float>>) : Transform =
         RhinoScriptSyntax.CoerceXform(xForm) // TODO verify row, column order !!
 
 
@@ -18581,7 +18529,7 @@ type RhinoScriptSyntax private () =
     ///<param name="green">(int) Green value between 0 and 255 </param>
     ///<param name="blue">(int) Blue value between 0 and 255 </param>
     ///<returns>(System.Drawing.Color) a Color.</returns>
-    static member CreateColor(red:int, green:int, blue:int) : Drawing.Color = 
+    static member CreateColor(red:int, green:int, blue:int) : Drawing.Color =
         if red   < 0 || red > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor red value out of range 0 to 255: %d" red
         if green < 0 || green > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor green value out of range 0 to 255: %d" green
         if blue  < 0 || blue > 255 then RhinoScriptingException.Raise "RhinoScriptSyntax.CreateColor blue value out of range 0 to 255: %d" blue
@@ -18592,7 +18540,7 @@ type RhinoScriptSyntax private () =
     ///<param name="green">(byte) Green value</param>
     ///<param name="blue">(byte) Blue value</param>
     ///<returns>(System.Drawing.Color) a Color.</returns>
-    static member CreateColor(red:byte, green:byte, blue:byte) : Drawing.Color =         
+    static member CreateColor(red:byte, green:byte, blue:byte) : Drawing.Color =
         Drawing.Color.FromArgb(int red, int green, int blue)
 
     ///<summary>Converts input into a Rhino.Geometry.Interval. This interval can be increasing or decreasing</summary>
@@ -18601,16 +18549,16 @@ type RhinoScriptSyntax private () =
     ///<returns>(Rhino.Geometry.Interval) This can be seen as an object made of two items:
     ///    [0] start of interval
     ///    [1] end of interval.</returns>
-    static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval = 
+    static member CreateInterval(start:float, ende:float) : Rhino.Geometry.Interval =
         Geometry.Interval(start , ende)
 
 
-    (* 
+    (*
     manipulating ini files like in original Rhinoscript could be include via
     <PackageReference Include="ini-parser" Version="2.5.2" />
     however for now it is excluded to keep the dependencies at just FsEx.
     If ini-file reading and writing is needed I would suggest to use the "ini-parser" package directly and not the below functions.
-    
+
     open IniParser
     open IniParser.Model
 
@@ -18620,7 +18568,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(string array)
     ///    If section is NOT specified, a list containing all section names
     ///    If section is specified, a list containing all entry names for the given section.</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr = 
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =
         //https://github.com/rickyah/ini-parser
 
         //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
@@ -18637,11 +18585,11 @@ type RhinoScriptSyntax private () =
     ///<param name="section">(string) Section containing the entry,for keys without section use empty string</param>
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
     ///<returns>(string) a value for entry.</returns>
-    static member GetSettings(filename:string, section:string, entry:string) : string = 
+    static member GetSettings(filename:string, section:string, entry:string) : string =
         let parser = new FileIniDataParser()
         let data = parser.ReadFile(filename)
         data.Configuration.ThrowExceptionsOnError <-true
-        let s = 
+        let s =
             if section = "" then
                 data.Global.[entry]
             else
@@ -18655,7 +18603,7 @@ type RhinoScriptSyntax private () =
     ///<param name="entry">(string) Entry whose associated string is to be returned</param>
     ///<param name="value">(string) The Value of this entry</param>
     ///<returns>(string) a value for entry.</returns>
-    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit = 
+    static member SaveSettings(filename:string, section:string, entry:string,value:string) : unit =
         if IO.File.Exists filename then
             let parser = new FileIniDataParser()
             parser.Parser.Configuration.ThrowExceptionsOnError <-true
@@ -18701,7 +18649,7 @@ type RhinoScriptSyntax private () =
                              corner1:Point2d,
                              corner2:Point2d,
                              [<OPT;DEF(null:string)>]title:string,
-                             [<OPT;DEF(1)>]projection:int) : Guid = 
+                             [<OPT;DEF(1)>]projection:int) : Guid =
         if projection<1 || projection>7 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail: Projection must be a value between 1-7.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
         let layout = RhinoScriptSyntax.CoercePageView(layoutName)//TODO test this
         if isNull layout then RhinoScriptingException.Raise "RhinoScriptSyntax.AddDetail: No layout found for given layoutId.  layoutId:'%s' corner1:'%A' corner2:'%A' title:'%A' projection:'%A'" layoutName corner1 corner2 title projection
@@ -18719,8 +18667,8 @@ type RhinoScriptSyntax private () =
     ///<returns>(Guid*string) Id and Name of new layout.</returns>
     static member AddLayout([<OPT;DEF(null:string)>]title:string,
                             [<OPT;DEF(0.0)>]width:float,
-                            [<OPT;DEF(0.0)>]height:float) : Guid*string = 
-        let page = 
+                            [<OPT;DEF(0.0)>]height:float) : Guid*string =
+        let page =
             if width=0.0 || height=0.0  then State.Doc.Views.AddPageView(title)
             else                             State.Doc.Views.AddPageView(title, width, height)
         if notNull page then page.MainViewport.Id, page.PageName
@@ -18731,7 +18679,7 @@ type RhinoScriptSyntax private () =
     ///<param name="cPlaneName">(string) The name of the new named construction Plane</param>
     ///<param name="plane">(Plane) The construction Plane</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddNamedCPlane(cPlaneName:string, plane:Plane) : unit = 
+    static member AddNamedCPlane(cPlaneName:string, plane:Plane) : unit =
         if isNull cPlaneName then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedCPlane: cPlaneName = null.  plane:'%A'"  plane
         let index = State.Doc.NamedConstructionPlanes.Add(cPlaneName, plane)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedCPlane failed.  cPlaneName:'%A' plane:'%A'" cPlaneName plane
@@ -18743,7 +18691,7 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, The title of the view to save. If omitted, the current
     ///    active view is saved</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit = 
+    static member AddNamedView(name:string, [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         if isNull name then RhinoScriptingException.Raise "RhinoScriptSyntax.AddNamedView: Name = null.  view:'%A'"  view
         let viewportId = view.MainViewport.Id
@@ -18790,14 +18738,14 @@ type RhinoScriptSyntax private () =
     ///<summary>Removes a named construction Plane from the document.</summary>
     ///<param name="name">(string) Name of the construction Plane to remove</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteNamedCPlane(name:string) : bool = 
+    static member DeleteNamedCPlane(name:string) : bool =
         State.Doc.NamedConstructionPlanes.Delete(name)
 
 
     ///<summary>Removes a named view from the document.</summary>
     ///<param name="name">(string) Name of the named view to remove</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
-    static member DeleteNamedView(name:string) : bool = 
+    static member DeleteNamedView(name:string) : bool =
         State.Doc.NamedViews.Delete(name)
 
 
@@ -18813,7 +18761,7 @@ type RhinoScriptSyntax private () =
     ///<param name="lock">(bool) The new lock state</param>
     ///<returns>(unit) void, nothing.</returns>
     static member DetailLock(detailId:Guid, lock:bool) : unit = //SET
-        let detail = 
+        let detail =
             try State.Doc.Objects.FindId(detailId) :?> DocObjects.DetailViewObject
             with _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.DetailLock: Setting it failed. detailId is a %s  lock:'%A'" (Nice.str detailId)  lock
         if lock <> detail.DetailGeometry.IsProjectionLocked then
@@ -18839,7 +18787,7 @@ type RhinoScriptSyntax private () =
         let modelunits = State.Doc.ModelUnitSystem
         let pageunits = State.Doc.PageUnitSystem
         if detail.DetailGeometry.SetScale(modelLength, modelunits, pageLength, pageunits) then
-            detail.CommitChanges() |> ignore 
+            detail.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
             RhinoScriptingException.Raise "RhinoScriptSyntax.DetailScale failed.  detailId:'%s' modelLength:'%A' pageLength:'%A'" (Nice.str detailId) modelLength pageLength
@@ -18850,7 +18798,7 @@ type RhinoScriptSyntax private () =
     ///<param name="layout">(string) Title of an existing page layout</param>
     ///<param name="detail">(string) Title of an existing detail view</param>
     ///<returns>(bool) True if detail is a detail view, False if detail is not a detail view.</returns>
-    static member IsDetail(layout:string, detail:string) : bool = 
+    static member IsDetail(layout:string, detail:string) : bool =
         let view = RhinoScriptSyntax.CoercePageView(layout)
         let det = RhinoScriptSyntax.CoerceView(detail)
         view.GetDetailViews()
@@ -18860,7 +18808,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if a view is a page layout view.</summary>
     ///<param name="layout">(string) Title of an existing page layout view</param>
     ///<returns>(bool) True if layout is a page layout view, False is layout is a standard model view.</returns>
-    static member IsLayout(layout:string) : bool = 
+    static member IsLayout(layout:string) : bool =
         if   State.Doc.Views.GetViewList(includeStandardViews=false,includePageViews=true) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
             true
         elif State.Doc.Views.GetViewList(includeStandardViews=true ,includePageViews=false) |> Array.exists (fun v -> v.MainViewport.Name = layout) then
@@ -18872,7 +18820,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if the specified view exists.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member IsView(view:string) : bool = 
+    static member IsView(view:string) : bool =
         State.Doc.Views.GetViewList(includeStandardViews=false, includePageViews=true) |> Array.exists ( fun v -> v.MainViewport.Name = view)
 
 
@@ -18880,7 +18828,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if the specified view is the current, or active view.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False indicating success or failure.</returns>
-    static member IsViewCurrent(view:string) : bool = 
+    static member IsViewCurrent(view:string) : bool =
         let activeview = State.Doc.Views.ActiveView
         view = activeview.MainViewport.Name
 
@@ -18890,7 +18838,7 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current
     ///    view is used</param>
     ///<returns>(bool) True of False.</returns>
-    static member IsViewMaximized([<OPT;DEF("")>]view:string) : bool = 
+    static member IsViewMaximized([<OPT;DEF("")>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.Maximized
 
@@ -18898,7 +18846,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if the specified view's projection is set to perspective.</summary>
     ///<param name="view">(string) Title of the view</param>
     ///<returns>(bool) True of False.</returns>
-    static member IsViewPerspective(view:string) : bool = 
+    static member IsViewPerspective(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.MainViewport.IsPerspectiveProjection
 
@@ -18907,7 +18855,7 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(bool) True of False.</returns>
-    static member IsViewTitleVisible([<OPT;DEF("")>]view:string) : bool = 
+    static member IsViewTitleVisible([<OPT;DEF("")>]view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.TitleVisible
 
@@ -18915,7 +18863,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Checks if the specified view contains a wallpaper image.</summary>
     ///<param name="view">(string) View to verify</param>
     ///<returns>(bool) True or False.</returns>
-    static member IsWallpaper(view:string) : bool = 
+    static member IsWallpaper(view:string) : bool =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.MainViewport.WallpaperFilename.Length > 0
 
@@ -18924,7 +18872,7 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(unit).</returns>
-    static member MaximizeRestoreView([<OPT;DEF("")>]view:string) : unit = 
+    static member MaximizeRestoreView([<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         view.Maximized <- not view.Maximized
 
@@ -18932,7 +18880,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the Plane geometry of the specified named construction Plane.</summary>
     ///<param name="name">(string) The name of the construction Plane</param>
     ///<returns>(Plane) a Plane.</returns>
-    static member NamedCPlane(name:string) : Plane = 
+    static member NamedCPlane(name:string) : Plane =
         let index = State.Doc.NamedConstructionPlanes.Find(name)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.NamedCPlane failed.  name:'%A'" name
         State.Doc.NamedConstructionPlanes.[index].Plane
@@ -18940,7 +18888,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the names of all named construction Planes in the document.</summary>
     ///<returns>(string Rarr) The names of all named construction Planes in the document.</returns>
-    static member NamedCPlanes() : string Rarr = 
+    static member NamedCPlanes() : string Rarr =
         let count = State.Doc.NamedConstructionPlanes.Count
         rarr {for i = 0 to count - 1 do State.Doc.NamedConstructionPlanes.[i].Name }
 
@@ -18948,7 +18896,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Returns the names of all named views in the document.</summary>
     ///<returns>(string Rarr) The names of all named views in the document.</returns>
-    static member NamedViews() : string Rarr = 
+    static member NamedViews() : string Rarr =
         let count = State.Doc.NamedViews.Count
         rarr {for i = 0 to count - 1 do State.Doc.NamedViews.[i].Name }
 
@@ -18957,7 +18905,7 @@ type RhinoScriptSyntax private () =
     ///<param name="oldTitle">(string) The title of the view to rename</param>
     ///<param name="newTitle">(string) The new title of the view</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameView(oldTitle:string, newTitle:string) : unit = 
+    static member RenameView(oldTitle:string, newTitle:string) : unit =
         if isNull oldTitle || isNull newTitle then RhinoScriptingException.Raise "RhinoScriptSyntax.RenameView failed.  oldTitle:'%A' newTitle:'%A'" oldTitle newTitle
         let foundview = RhinoScriptSyntax.CoerceView(oldTitle)
         foundview.MainViewport.Name <- newTitle
@@ -18969,7 +18917,7 @@ type RhinoScriptSyntax private () =
     ///<param name="view">(string) Optional, The title of the view. If omitted, the current
     ///    active view is used</param>
     ///<returns>(string) name of the restored named construction Plane.</returns>
-    static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string = 
+    static member RestoreNamedCPlane(cplaneName:string, [<OPT;DEF("")>]view:string) : string =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = State.Doc.NamedConstructionPlanes.Find(cplaneName)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedCPlane failed.  cplaneName:'%A' view:'%A'" cplaneName view
@@ -18988,7 +18936,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member RestoreNamedView( namedView:string,
                                     [<OPT;DEF("")>]view:string,
-                                    [<OPT;DEF(false)>]restoreBitmap:bool) : unit = 
+                                    [<OPT;DEF(false)>]restoreBitmap:bool) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let index = State.Doc.NamedViews.FindByName(namedView)
         if index<0 then RhinoScriptingException.Raise "RhinoScriptSyntax.RestoreNamedView failed.  namedView:'%A' view:'%A' restoreBitmap:'%A'" namedView view restoreBitmap
@@ -19013,7 +18961,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member RotateCamera( direction:int,
                                 angle:float,
-                                [<OPT;DEF("")>]view:string) : unit = 
+                                [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle = RhinoMath.ToRadians( abs(angle))
@@ -19052,7 +19000,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member RotateView( direction:int,
                               angle:float,
-                              [<OPT;DEF("")>]view:string) : unit = 
+                              [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle =  RhinoMath.ToRadians( abs(angle))
@@ -19158,7 +19106,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member TiltView( direction:int,
                             angle:float,
-                            [<OPT;DEF("")>]view:string) : unit = 
+                            [<OPT;DEF("")>]view:string) : unit =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         let mutable angle = angle
@@ -19211,7 +19159,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the orientation of a view's camera.</summary>
     ///<param name="view">(string) Optional, Title of the view. If omitted, the current active view is used</param>
     ///<returns>(Plane) The view's camera Plane.</returns>
-    static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane = 
+    static member ViewCameraPlane([<OPT;DEF("")>]view:string) : Plane =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc, frame = view.ActiveViewport.GetCameraFrame()
         if not rc then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewCameraPlane failed.  view:'%A'" view
@@ -19298,7 +19246,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Return id of a display mode given it's name.</summary>
     ///<param name="name">(string) Name of the display mode</param>
     ///<returns>(Guid) The id of the display mode.</returns>
-    static member ViewDisplayModeId(name:string) : Guid = 
+    static member ViewDisplayModeId(name:string) : Guid =
         let desc = Display.DisplayModeDescription.FindByName(name)
         if notNull desc then desc.Id
         else
@@ -19317,7 +19265,7 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Return list of display modes.</summary>
     ///<returns>(string Rarr) strings identifying the display mode names.</returns>
-    static member ViewDisplayModes() : string Rarr = 
+    static member ViewDisplayModes() : string Rarr =
         let modes = Display.DisplayModeDescription.GetDisplayModes()
         rarr {for mode in modes do mode.EnglishName }
 
@@ -19329,7 +19277,7 @@ type RhinoScriptSyntax private () =
     ///    1 = page layout views
     ///    2 = both standard and page layout views</param>
     ///<returns>(string Rarr) List of the view names.</returns>
-    static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr = 
+    static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr =
         let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
         rarr { for view in views do view.MainViewport.Name}
@@ -19340,7 +19288,7 @@ type RhinoScriptSyntax private () =
     ///    in determining the "real world" size of a parallel-projected view.</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(Point3d * Point3d * Point3d * Point3d) Four Point3d that define the corners of the rectangle (counter-clockwise order).</returns>
-    static member ViewNearCorners([<OPT;DEF("")>]view:string) : Point3d * Point3d * Point3d * Point3d = 
+    static member ViewNearCorners([<OPT;DEF("")>]view:string) : Point3d * Point3d * Point3d * Point3d =
         let view = RhinoScriptSyntax.CoerceView(view)
         let rc = view.ActiveViewport.GetNearRect()
         rc.[0], rc.[1], rc.[3], rc.[2]
@@ -19418,7 +19366,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the width and height in pixels of the specified view.</summary>
     ///<param name="view">(string) Title of the view. Use "" empty string for the current active view</param>
     ///<returns>(int * int ) of two numbers identifying width and height.</returns>
-    static member ViewSize([<OPT;DEF(null:string)>]view:string) : int * int = 
+    static member ViewSize([<OPT;DEF(null:string)>]view:string) : int * int =
         let view = RhinoScriptSyntax.CoerceView(view)
         let cr = view.ClientRectangle
         cr.Width, cr.Height
@@ -19443,7 +19391,7 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(100)>]frames:int,
                                  [<OPT;DEF(true)>]freeze:bool,
                                  [<OPT;DEF(0)>]direction:int,
-                                 [<OPT;DEF(5.0)>]angleDegrees:float) : float = 
+                                 [<OPT;DEF(5.0)>]angleDegrees:float) : float =
         let view = RhinoScriptSyntax.CoerceView(view)
         let angleradians = toRadians(angleDegrees)
         view.SpeedTest(frames, freeze, direction, angleradians)
@@ -19472,7 +19420,7 @@ type RhinoScriptSyntax private () =
     ///<summary>Returns the name, or title, of a given view's identifier.</summary>
     ///<param name="viewId">(Guid) The identifier of the view</param>
     ///<returns>(string) name or title of the view.</returns>
-    static member ViewTitle(viewId:Guid) : string = 
+    static member ViewTitle(viewId:Guid) : string =
         let view = RhinoScriptSyntax.CoerceView(viewId)
         view.MainViewport.Name
 
@@ -19550,7 +19498,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit).</returns>
     static member ZoomBoundingBox( boundingBox:BoundingBox,
                                    [<OPT;DEF("")>]view:string,
-                                   [<OPT;DEF(false)>]all:bool) : unit = 
+                                   [<OPT;DEF(false)>]all:bool) : unit =
           if all then
               let views = State.Doc.Views.GetViewList(true, true)
               for view in views do view.ActiveViewport.ZoomBoundingBox(boundingBox) |> ignore
@@ -19565,7 +19513,7 @@ type RhinoScriptSyntax private () =
     ///<param name="all">(bool) Optional, default value: <c>false</c>
     ///    Zoom extents in all views</param>
     ///<returns>(unit).</returns>
-    static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit = 
+    static member ZoomExtents([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if  all then
             let views = State.Doc.Views.GetViewList(true, true)
             for view in views do view.ActiveViewport.ZoomExtents()|> ignore
@@ -19580,7 +19528,7 @@ type RhinoScriptSyntax private () =
     ///<param name="all">(bool) Optional, default value: <c>false</c>
     ///    Zoom extents in all views</param>
     ///<returns>(unit).</returns>
-    static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit = 
+    static member ZoomSelected([<OPT;DEF("")>]view:string, [<OPT;DEF(false)>]all:bool) : unit =
         if all then
             let views = State.Doc.Views.GetViewList(true, true)
             for view in views do view.ActiveViewport.ZoomExtentsSelected()|> ignore

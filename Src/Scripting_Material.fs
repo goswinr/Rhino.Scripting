@@ -114,11 +114,7 @@ module AutoOpenMaterial =
     static member MaterialBump(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Bump)
-        #else
-        let texture = mat.GetBumpTexture()
-        #endif
         if notNull texture then texture.FileName else ""
 
 
@@ -130,14 +126,9 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bump) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if not <| mat.SetBumpTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialBump failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
-
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -172,11 +163,7 @@ module AutoOpenMaterial =
     static member MaterialEnvironmentMap(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Emap)
-        #else
-        let texture = mat.GetEnvironmentTexture()
-        #endif
         if notNull texture then texture.FileName  else ""
 
     ///<summary>Modifies a material's environment bitmap filename.</summary>
@@ -187,13 +174,9 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Emap)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if not <| mat.SetEnvironmentTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialEnvironmentMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -275,11 +258,7 @@ module AutoOpenMaterial =
     static member MaterialTexture(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Bitmap)
-        #else
-        let texture = mat.GetBitmapTexture()
-        #endif
         if notNull texture then texture.FileName else ""
 
     ///<summary>Modifies a material's texture bitmap filename.</summary>
@@ -290,14 +269,9 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Bitmap) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if  not <| mat.SetBitmapTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTexture failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
-
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else
@@ -335,11 +309,7 @@ module AutoOpenMaterial =
     static member MaterialTransparencyMap(materialIndex:int) : string = //GET
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A'" materialIndex
-        #if RHINO7
         let texture = mat.GetTexture(DocObjects.TextureType.Transparency)
-        #else
-        let texture = mat.GetTransparencyTexture()
-        #endif
         if notNull texture then texture.FileName else ""
 
 
@@ -351,13 +321,9 @@ module AutoOpenMaterial =
         let mat = State.Doc.Materials.[materialIndex]
         if mat|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
         if IO.File.Exists filename then
-            #if RHINO7
             let texture = new DocObjects.Texture()
             texture.FileName <- filename
             if not <| mat.SetTexture(texture,DocObjects.TextureType.Transparency)then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #else
-            if  not <| mat.SetTransparencyTexture(filename) then RhinoScriptingException.Raise "RhinoScriptSyntax.MaterialTransparencyMap failed.  materialIndex:'%A' filename:'%A'" materialIndex filename
-            #endif
             mat.CommitChanges() |> ignore
             State.Doc.Views.Redraw()
         else

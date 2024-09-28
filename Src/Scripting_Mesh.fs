@@ -290,9 +290,9 @@ module AutoOpenMesh =
                                     [<OPT;DEF(0.0)>]tolerance:float) : bool =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         //point = RhinoScriptSyntax.Coerce3dPoint(point)
-        let maxdistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
+        let maxDistance = Util.ifZero1 tolerance RhinoMath.SqrtEpsilon
         let pt = ref Point3d.Origin
-        let face = mesh.ClosestPoint(point, pt, maxdistance)
+        let face = mesh.ClosestPoint(point, pt, maxDistance)
         face>=0
 
 
@@ -302,13 +302,9 @@ module AutoOpenMesh =
     ///   Delete input objects?</param>
     ///<returns>(Mesh) newly created Mesh.</returns>
     static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
-        let joinedmesh = new Mesh()
-        #if RHINO7
-        joinedmesh.Append(meshes)
-        #else// only for Rh6.0, would not be needed for latest releases of Rh6
-        for mesh in meshes do joinedmesh.Append(mesh)
-        #endif
-        joinedmesh
+        let joinedMesh = new Mesh()
+        joinedMesh.Append(meshes)
+        joinedMesh
 
     ///<summary>Joins two or or more Mesh objects together.</summary>
     ///<param name="objectIds">(Guid seq) Identifiers of two or more Mesh objects</param>
@@ -317,13 +313,9 @@ module AutoOpenMesh =
     ///<returns>(Guid) identifier of newly created Mesh.</returns>
     static member JoinMeshes(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
         let meshes =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceMesh(objectId) }
-        let joinedmesh = new Mesh()
-        #if RHINO7
-        joinedmesh.Append(meshes)
-        #else
-        for mesh in meshes do joinedmesh.Append(mesh)
-        #endif// only for Rh6.0, would not be needed for latest releases of Rh6
-        let rc = State.Doc.Objects.AddMesh(joinedmesh)
+        let joinedMesh = new Mesh()
+        joinedMesh.Append(meshes)
+        let rc = State.Doc.Objects.AddMesh(joinedMesh)
         if rc = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinMeshes: Failed to join Meshes %A" (Nice.str objectIds)
         if deleteInput then
             for objectId in objectIds do
@@ -625,11 +617,7 @@ module AutoOpenMesh =
                                         [<OPT;DEF(0.0)>]tolerance:float) : Polyline array =
         let mesh1 = RhinoScriptSyntax.CoerceMesh(mesh1)
         let mesh2 = RhinoScriptSyntax.CoerceMesh(mesh2)
-        #if RHINO7
         let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance*Intersect.Intersection.MeshIntersectionsTolerancesCoefficient) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
-        #else
-        let tolerance = Util.ifZero1 tolerance (State.Doc.ModelAbsoluteTolerance) // see https://github.com/mcneel/rhinoscriptsyntax/pull/202
-        #endif
         Intersect.Intersection.MeshMeshAccurate(mesh1, mesh2, tolerance)
 
 
