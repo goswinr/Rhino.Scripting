@@ -439,10 +439,10 @@ module AutoOpenSelection =
                 rhobj.Select(select) |> ignore
                 State.Doc.Views.Redraw()
                 let objectId = rhobj.Id
-                let prepicked = go.ObjectsWerePreselected
+                let prePicked = go.ObjectsWerePreselected
                 let selmethod = objref.SelectionMethod()
                 let mutable point = objref.SelectionPoint()
-                let surf, u, v = objref.SurfaceParameter()
+                let _, u, v = objref.SurfaceParameter()
                 let mutable uv = (u, v)
                 if not <| point.IsValid then
                     point <- Point3d.Unset
@@ -450,10 +450,10 @@ module AutoOpenSelection =
                 let view = go.View()
                 let name = view.ActiveViewport.Name
                 go.Dispose()
-                if not <| select && not <| prepicked then
+                if not <| select && not <| prePicked then
                     State.Doc.Objects.UnselectAll() |> ignore
                     State.Doc.Views.Redraw()
-                (objectId, prepicked, selmethod, point, uv, name)
+                (objectId, prePicked, selmethod, point, uv, name)
         RhinoSync.DoSyncRedrawHideEditor get
 
 

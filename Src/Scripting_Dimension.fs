@@ -34,11 +34,11 @@ module AutoOpenDimension =
                                         [<OPT;DEF("")>]style:string) : Guid =
         let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
         if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to create Plane.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O'" startPoint endPoint pointOnDimensionLine
-        let success, s, t = plane.ClosestParameter(startPoint)
+        let _, s, t = plane.ClosestParameter(startPoint)
         let start2 = Point2d(s, t)
-        let success, s, t = plane.ClosestParameter(endPoint)
+        let _, s, t = plane.ClosestParameter(endPoint)
         let ende2 = Point2d(s, t)
-        let success, s, t = plane.ClosestParameter(pointOnDimensionLine)
+        let _, s, t = plane.ClosestParameter(pointOnDimensionLine)
         let onpoint2 = Point2d(s, t)
         let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
         if isNull ldim then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed.startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O' style:'%s'" startPoint endPoint pointOnDimensionLine style
@@ -118,11 +118,11 @@ module AutoOpenDimension =
         let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
-        let success, s, t = plane0.ClosestParameter(startPoint)
+        let _, s, t = plane0.ClosestParameter(startPoint)
         let start = Point2d(s, t)
-        let success, s, t = plane0.ClosestParameter(endPoint)
+        let _, s, t = plane0.ClosestParameter(endPoint)
         let ende = Point2d(s, t)
-        let success, s, t = plane0.ClosestParameter(pointOnDimensionLine)
+        let _, s, t = plane0.ClosestParameter(pointOnDimensionLine)
         let onpoint = Point2d(s, t)
         // Add the dimension
         let ldim = new LinearDimension(plane0, start, ende, onpoint)

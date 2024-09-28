@@ -379,7 +379,7 @@ module AutoOpenApplication =
     static member EnablePlugIn(plugin:string, enable:bool) : unit = //SET
         RhinoSync.DoSync (fun () ->
             let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-            let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
+            let rc, _ = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
             else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
             )
@@ -483,7 +483,7 @@ module AutoOpenApplication =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId = Guid.Empty then false
         else
-            let rc, loaded, loadprot = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
+            let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
             rc
 
 

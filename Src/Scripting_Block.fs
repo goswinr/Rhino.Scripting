@@ -42,7 +42,7 @@ module AutoOpenBlock =
             elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Phantom object '%s' to '%s'" (Nice.str objectId) name
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
-                let uses, nesting = bli.UsesDefinition(found.Index)
+                let uses, _ = bli.UsesDefinition(found.Index) // _ = nesting
                 if uses then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Instance Ref object '%s' to '%s'" (Nice.str objectId) name
 
             objects.Add(obj)

@@ -1135,20 +1135,29 @@ module AutoOpenCurve =
         curve.Domain
 
 
-    ///<summary>Returns the edit, or Greville, points of a Curve object.
-    ///    For each Curve control point, there is a corresponding edit point.</summary>
+    ///<summary>Returns the Edit-, or Greville-Points of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point.
+    /// see rs.CurveEditParameters for parameters, not points</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
-    ///<param name="returnParameters">(bool) Optional, default value: <c>false</c>
-    ///    If True, return as a list of Curve parameters.
-    ///    If False, return as a list of 3d points</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a polycurve</param>
     ///<returns>(Collections.Point3dList) Curve edit points.</returns>
-    static member CurveEditPoints(curveId:Guid, [<OPT;DEF(false)>]returnParameters:bool, [<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
+    static member CurveEditPoints(curveId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditPoints faile for %A" curveId
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditPoints failed for %A" curveId
         nc.GrevillePoints()
 
+
+    ///<summary>Returns the Edit-, or Greville-Parameters of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point parameter.</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve object</param>
+    ///<param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a polycurve</param>
+    ///<returns>(Collections.Point3dList)  A list of Curve parameters</returns>
+    static member CurveEditParameters(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float[] =
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        let nc = curve.ToNurbsCurve()
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditParameters failed for %A" curveId
+        nc.GrevilleParameters()
 
     ///<summary>Returns the end point of a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -1547,9 +1556,6 @@ module AutoOpenCurve =
             let e = eventType, item.PointA, item.PointA2, item.PointB, item.PointB2, oa.[0], oa.[1], u.[0], u.[1], v.[0], v.[1]
             events.Add(e)
         events
-
-
-
 
     ///<summary>Returns a 3D vector that is the tangent to a Curve at a parameter.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
