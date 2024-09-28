@@ -770,7 +770,6 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let rc = int(rhinoObject.Attributes.MaterialSource)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
@@ -789,7 +788,6 @@ module AutoOpenObject =
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = int(rhinoObject.Attributes.MaterialSource)
             rhinoObject.Attributes.MaterialSource <- source
             rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
@@ -939,7 +937,6 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let rc = rhinoObject.Attributes.PlotWeight
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
         rhinoObject.CommitChanges() |> ignore
@@ -954,7 +951,6 @@ module AutoOpenObject =
     static member ObjectPrintWidth(objectIds:Guid seq, width:float) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = rhinoObject.Attributes.PlotWeight
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
             rhinoObject.CommitChanges() |> ignore
@@ -1385,7 +1381,6 @@ module AutoOpenObject =
     ///<param name="objectIds">(Guid seq) Ids of objects to show.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ShowObjects(objectIds:Guid seq) : unit = //PLURAL
-        let mutable rc = 0
         for objectId in objectIds do
             if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
@@ -1404,7 +1399,6 @@ module AutoOpenObject =
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
     ///<returns>(unit) void, nothing.</returns>
     static member UnlockObjects(objectIds:Guid seq) : unit =  //PLURAL
-        let mutable rc = 0
         for objectId in objectIds do
             if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()

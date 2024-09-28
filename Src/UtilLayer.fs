@@ -6,13 +6,11 @@ open System
 open System.Globalization // for UnicodeCategory
 open Rhino.DocObjects
 
-
 module internal UtilLayer =
 
     let randomLayerColor()=
         let c = FsEx.Color.randomForRhino()
         Drawing.Color.FromArgb(int c.Red, int c.Green, int c.Blue)
-
 
     let eVSLN = "RhinoScriptSyntax.UtilLayer.failOnBadShortLayerName"
 

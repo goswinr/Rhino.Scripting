@@ -172,7 +172,6 @@ module AutoOpenGrips =
         if isNull grips || index<0 || index>=grips.Length then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
         let grip = grips.[index]
-        let rc = grip.CurrentLocation
         grip.CurrentLocation <-  point
         State.Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
         State.Doc.Views.Redraw()

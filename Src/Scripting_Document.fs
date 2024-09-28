@@ -107,7 +107,7 @@ module AutoOpenDocument =
     ///  All UI interacting functions (such as rs.GetObject) of Rhino.Scripting
     ///  will automatically enable redraw if needed
     ///  and afterwards disable it again if it was disabled before.
-    ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
+    ///  At the end of a script run in Fesh Editor Redraw will be automatically enabled again.</summary>
     ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -118,7 +118,7 @@ module AutoOpenDocument =
     ///  All UI interacting functions (such as rs.GetObject) of Rhino.Scripting
     ///  will automatically enable redraw if needed
     ///  and afterwards disable it again if it was disabled before.
-    ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
+    ///  At the end of a script run in Fesh Editor Redraw will be automatically enabled again.</summary>
     ///<returns>(unit) void, nothing.</returns>
     static member DisableRedraw() : unit =
         State.Doc.Views.RedrawEnabled <- false
@@ -349,7 +349,6 @@ module AutoOpenDocument =
     ///<returns>(unit) void, nothing.</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        let rc = current.MinimumEdgeLength
         if distance > 0.0 then
             current.MinimumEdgeLength <- distance
             State.Doc.SetCustomMeshingParameters(current)
@@ -370,7 +369,6 @@ module AutoOpenDocument =
     ///<returns>(unit) void, nothing.</returns>
     static member RenderMeshMinInitialGridQuads(quads:int) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        let rc = current.GridMinCount
         if quads > 0 then
             current.GridMinCount <- quads
             State.Doc.SetCustomMeshingParameters(current)

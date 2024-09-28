@@ -270,13 +270,10 @@ module AutoOpenDimension =
     static member DimStyleAnglePrecision(dimStyle:string, precision:int) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
-        let rc = ds.AngleResolution
         if precision >= 0 then
             ds.AngleResolution <- precision
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
             State.Doc.Views.Redraw()
-
-
 
     ///<summary>Returns the arrow size of a dimension style.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -293,7 +290,6 @@ module AutoOpenDimension =
     static member DimStyleArrowSize(dimStyle:string, size:float) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
-        let rc = ds.ArrowLength
         if size > 0.0 then
             ds.ArrowLength <- size
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed. dimStyle:'%s' size: %g" dimStyle size
@@ -324,7 +320,6 @@ module AutoOpenDimension =
     static member DimStyleExtension(dimStyle:string, extension:float) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension set failed. dimStyle:'%s' extension:'%A'" dimStyle extension
-        let rc = ds.ExtensionLineExtension
         if extension > 0.0 then
             ds.ExtensionLineExtension <- extension
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
@@ -757,7 +752,7 @@ module AutoOpenDimension =
     ///<returns>(string) The current text string.</returns>
     static member LeaderText(objectId:Guid) : string = //GET
             match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? Leader as g ->
+            | :? Leader ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (Nice.str objectId)

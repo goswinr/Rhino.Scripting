@@ -66,7 +66,7 @@ module AutoOpenMesh =
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
             let colors = Array.zeroCreate count
-            for i, color in Seq.indexed(vertexColors) do
+            // for i, color in Seq.indexed(vertexColors) do
                 //colors.[i] = RhinoScriptSyntax.CoerceColor(color)
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
@@ -120,7 +120,7 @@ module AutoOpenMesh =
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
             let colors = Array.zeroCreate count
-            for i, color in Seq.indexed(vertexColors) do
+            // for i, color in Seq.indexed(vertexColors) do
                 //colors.[i] = RhinoScriptSyntax.CoerceColor(color)
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
@@ -298,10 +298,8 @@ module AutoOpenMesh =
 
     ///<summary>Joins two or or more Mesh objects together.</summary>
     ///<param name="meshes">(Mesh seq) Mesh objects</param>
-    ///<param name="deleteInput">(bool) Optional, Default Value <c>false</c>
-    ///   Delete input objects?</param>
     ///<returns>(Mesh) newly created Mesh.</returns>
-    static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
+    static member JoinMeshes(meshes:Mesh seq) : Mesh =
         let joinedMesh = new Mesh()
         joinedMesh.Append(meshes)
         joinedMesh
@@ -509,7 +507,7 @@ module AutoOpenMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
         for i = 0 to mesh.Faces.Count - 1 do
-            let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
             let p2 = Point3d(p2)
@@ -534,7 +532,7 @@ module AutoOpenMesh =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
         for i = 0 to mesh.Faces.Count - 1 do
-            let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
             let p2 = Point3d(p2)

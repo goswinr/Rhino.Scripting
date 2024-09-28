@@ -159,7 +159,8 @@ module AutoOpenLayer =
                                  , newLayerName:string
                                  , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
+        if i = RhinoMath.UnsetIntIndex then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
             UtilLayer.failOnBadShortLayerName (newLayerName, newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
@@ -167,7 +168,7 @@ module AutoOpenLayer =
             ps.Last <- newLayerName
             let np = String.concat "::" ps
             let ni = State.Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
-            if i >= 0 then
+            if ni >= 0 then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
             else
                 lay.Name <- newLayerName
@@ -183,12 +184,9 @@ module AutoOpenLayer =
     ///<param name="layer">(string) The name of an existing layer to make current</param>
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentLayer(layer:string) : unit = //SET
-        let rc = State.Doc.Layers.CurrentLayer.FullPath
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
         if not<|  State.Doc.Layers.SetCurrentLayerIndex(i, quiet=true) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer Set CurrentLayer to %s failed" layer
-
-
 
     ///<summary>Removes an existing layer from the document. The layer to be removed
     ///    cannot be the current layer. Unlike the PurgeLayer method, the layer must
@@ -619,7 +617,6 @@ module AutoOpenLayer =
     ///<returns>(unit) void, nothing.</returns>
     static member LayerPrintColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let rc = layer.PlotColor
         //color = RhinoScriptSyntax.CoerceColor(color)
         layer.PlotColor <- color
         State.Doc.Views.Redraw()
@@ -732,13 +729,13 @@ module AutoOpenLayer =
 
 
     ///<summary>Renames an existing layer.</summary>
-    ///<param name="oldname">(string) Original layer name</param>
-    ///<param name="newname">(string) New layer name</param>
+    ///<param name="oldName">(string) Original layer name</param>
+    ///<param name="newName">(string) New layer name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameLayer(oldname:string, newname:string) : unit =
-        if oldname <> newname then
-            let layer = RhinoScriptSyntax.CoerceLayer(oldname)
-            layer.Name <- newname // TODO test with bad chars in layer string
+    static member RenameLayer(oldName:string, newName:string) : unit =
+        if oldName <> newName then
+            let layer = RhinoScriptSyntax.CoerceLayer(oldName)
+            layer.Name <- newName // TODO test with bad chars in layer string
 
     ///<summary>Collapse a layer in UI if it has children. This is the opposite of rs.ExpandLayer(..) </summary>
     ///<param name="layerName">(string) full or short layer name</param>

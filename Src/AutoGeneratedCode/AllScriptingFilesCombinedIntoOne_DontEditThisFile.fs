@@ -148,6 +148,8 @@ type RhinoScriptSyntax private () =
                                 RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
                             RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v
+                if collapseParents then
+                    State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a
 
         match box geo with
@@ -301,7 +303,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLight (objectId:Guid) : Light =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Geometry.Light as l -> l
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLight failed on: %s " (Nice.str objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLight failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get Mesh class from given Guid. Fails on empty Guid.</summary>
@@ -617,10 +619,10 @@ type RhinoScriptSyntax private () =
             if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: failed on null for view name input" // or State.Doc.Views.ActiveView
             elif view = "" then State.Doc.Views.ActiveView
             else
-                let allviews =
+                let allViews =
                     State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=true)
                     |> Array.filter (fun v-> v.MainViewport.Name = view)
-                if allviews.Length = 1 then allviews.[0]
+                if allViews.Length = 1 then allViews.[0]
                 else  RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: could not CoerceView '%s'" view
 
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceView: Cannot get view from %A" nameOrId
@@ -632,19 +634,18 @@ type RhinoScriptSyntax private () =
     static member CoercePageView (nameOrId:'T) : Display.RhinoPageView =
         match box nameOrId with
         | :? Guid as g ->
-            let viewo = State.Doc.Views.Find(g)
-            if isNull viewo then RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: could not CoerceView  from '%O'" g
+            let view = State.Doc.Views.Find(g)
+            if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: could not CoerceView  from '%O'" g
             else
-                try viewo :?> Display.RhinoPageView
-                with _  -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: the view found '%s' is not a page view" viewo.MainViewport.Name
+                try view :?> Display.RhinoPageView
+                with _  -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: the view found '%s' is not a page view" view.MainViewport.Name
 
         | :? string as view ->
             if isNull view then RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: failed on null for view name input" // or State.Doc.Views.ActiveView
             else
-                let allviews = State.Doc.Views.GetPageViews()|> Array.filter (fun v-> v.PageName = view)
-                let l = allviews.Length
-                if allviews.Length = 1 then allviews.[0]
-                elif allviews.Length > 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: more than one page called '%s'" view
+                let allViews = State.Doc.Views.GetPageViews()|> Array.filter (fun v-> v.PageName = view)
+                if allViews.Length = 1 then allViews.[0]
+                elif allViews.Length > 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: more than one page called '%s'" view
                 else  RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: Layout called '%s' not found" view
 
         | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePageView: Cannot get view from %O" nameOrId
@@ -655,7 +656,7 @@ type RhinoScriptSyntax private () =
     static member CoerceDetailView (objectId:Guid) : DetailView =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  DetailView as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %s"  (Nice.str objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceDetailView failed on %s"  (Nice.str objectId)
 
     ///<summary>Attempt to get Detail view rectangle Object.</summary>
     ///<param name="objectId">(Guid) objectId of Detail object</param>
@@ -717,7 +718,7 @@ type RhinoScriptSyntax private () =
     static member CoerceAnnotation (objectId:Guid) : DocObjects.AnnotationObjectBase =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.AnnotationObjectBase as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (Nice.str objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceAnnotation failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get Rhino Leader Annotation Object.</summary>
@@ -726,7 +727,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLeader (objectId:Guid) : DocObjects.LeaderObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LeaderObject as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (Nice.str objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLeader failed on: %s " (Nice.str objectId)
 
     ///<summary>Attempt to get Rhino LinearDimension Annotation Object.</summary>
     ///<param name="objectId">(Guid) objectId of LinearDimension object</param>
@@ -734,7 +735,7 @@ type RhinoScriptSyntax private () =
     static member CoerceLinearDimension (objectId:Guid) : DocObjects.LinearDimensionObject =
         match RhinoScriptSyntax.CoerceRhinoObject objectId with
         | :?  DocObjects.LinearDimensionObject as a -> a
-        | o -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (Nice.str objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoerceLinearDimension failed on: %s " (Nice.str objectId)
 
     //---------Geometry ------------
 
@@ -846,7 +847,7 @@ type RhinoScriptSyntax private () =
                 let mutable pl = Plane.WorldXY
                 pl.Origin <- pt
                 pl
-            with e ->
+            with _ ->
                 RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePlane failed on: %s " (Nice.str plane)
 
     ///<summary>Convert input into a Rhino.Geometry.Transform Transformation Matrix if possible.</summary>
@@ -895,7 +896,7 @@ type RhinoScriptSyntax private () =
     static member CoercePointCloud (objectId:Guid) : PointCloud =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :?  PointCloud as a -> a
-        | g -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePointCloud failed on: %s " (Nice.str objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.CoercePointCloud failed on: %s " (Nice.str objectId)
 
 
     ///<summary>Attempt to get a System.Drawing.Color also works on natural language color strings see Drawing.ColorTranslator.FromHtml.</summary>
@@ -1103,7 +1104,8 @@ type RhinoScriptSyntax private () =
                                  , newLayerName:string
                                  , [<OPT;DEF(false:bool)>]allowUnicode:bool ) : unit =
         let i = State.Doc.Layers.FindByFullPath(currentLayerName, RhinoMath.UnsetIntIndex)
-        if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
+        if i = RhinoMath.UnsetIntIndex then
+            RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not FindByFullPath Layer from currentLayerName: '%s'" currentLayerName
         else
             UtilLayer.failOnBadShortLayerName (newLayerName, newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
@@ -1111,7 +1113,7 @@ type RhinoScriptSyntax private () =
             ps.Last <- newLayerName
             let np = String.concat "::" ps
             let ni = State.Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
-            if i >= 0 then
+            if ni >= 0 then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.ChangeLayerName: could not rename Layer '%s' to '%s', it already exists." currentLayerName np
             else
                 lay.Name <- newLayerName
@@ -1127,12 +1129,9 @@ type RhinoScriptSyntax private () =
     ///<param name="layer">(string) The name of an existing layer to make current</param>
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentLayer(layer:string) : unit = //SET
-        let rc = State.Doc.Layers.CurrentLayer.FullPath
         let i = State.Doc.Layers.FindByFullPath(layer, RhinoMath.UnsetIntIndex)
         if i = RhinoMath.UnsetIntIndex then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer: could not FindByFullPath Layer from name'%s'" layer
         if not<|  State.Doc.Layers.SetCurrentLayerIndex(i, quiet=true) then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentLayer Set CurrentLayer to %s failed" layer
-
-
 
     ///<summary>Removes an existing layer from the document. The layer to be removed
     ///    cannot be the current layer. Unlike the PurgeLayer method, the layer must
@@ -1563,7 +1562,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member LayerPrintColor(layer:string, color:Drawing.Color) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
-        let rc = layer.PlotColor
         //color = RhinoScriptSyntax.CoerceColor(color)
         layer.PlotColor <- color
         State.Doc.Views.Redraw()
@@ -1676,13 +1674,13 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Renames an existing layer.</summary>
-    ///<param name="oldname">(string) Original layer name</param>
-    ///<param name="newname">(string) New layer name</param>
+    ///<param name="oldName">(string) Original layer name</param>
+    ///<param name="newName">(string) New layer name</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member RenameLayer(oldname:string, newname:string) : unit =
-        if oldname <> newname then
-            let layer = RhinoScriptSyntax.CoerceLayer(oldname)
-            layer.Name <- newname // TODO test with bad chars in layer string
+    static member RenameLayer(oldName:string, newName:string) : unit =
+        if oldName <> newName then
+            let layer = RhinoScriptSyntax.CoerceLayer(oldName)
+            layer.Name <- newName // TODO test with bad chars in layer string
 
     ///<summary>Collapse a layer in UI if it has children. This is the opposite of rs.ExpandLayer(..) </summary>
     ///<param name="layerName">(string) full or short layer name</param>
@@ -2098,7 +2096,7 @@ type RhinoScriptSyntax private () =
     static member EnablePlugIn(plugin:string, enable:bool) : unit = //SET
         RhinoSync.DoSync (fun () ->
             let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
-            let rc, loadSilent = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
+            let rc, _ = Rhino.PlugIns.PlugIn.GetLoadProtection(objectId)
             if rc then PlugIns.PlugIn.SetLoadProtection(objectId, enable)
             else RhinoScriptingException.Raise "RhinoScriptSyntax.EnablePlugIn: %s GetLoadProtection failed" plugin
             )
@@ -2202,7 +2200,7 @@ type RhinoScriptSyntax private () =
         let objectId = Rhino.PlugIns.PlugIn.IdFromName(plugin)
         if objectId = Guid.Empty then false
         else
-            let rc, loaded, loadprot = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
+            let rc, _ , _ = Rhino.PlugIns.PlugIn.PlugInExists(objectId)
             rc
 
 
@@ -2584,7 +2582,7 @@ type RhinoScriptSyntax private () =
             elif ot= DocObjects.ObjectType.Phantom then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Phantom object '%s' to '%s'" (Nice.str objectId) name
             elif ot= DocObjects.ObjectType.InstanceReference && notNull found then
                 let bli = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId) // not obj ?
-                let uses, nesting = bli.UsesDefinition(found.Index)
+                let uses, _ = bli.UsesDefinition(found.Index) // _ = nesting
                 if uses then RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Instance Ref object '%s' to '%s'" (Nice.str objectId) name
 
             objects.Add(obj)
@@ -4018,20 +4016,29 @@ type RhinoScriptSyntax private () =
         curve.Domain
 
 
-    ///<summary>Returns the edit, or Greville, points of a Curve object.
-    ///    For each Curve control point, there is a corresponding edit point.</summary>
+    ///<summary>Returns the Edit-, or Greville-Points of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point.
+    /// see rs.CurveEditParameters for parameters, not points</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
-    ///<param name="returnParameters">(bool) Optional, default value: <c>false</c>
-    ///    If True, return as a list of Curve parameters.
-    ///    If False, return as a list of 3d points</param>
     ///<param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a polycurve</param>
     ///<returns>(Collections.Point3dList) Curve edit points.</returns>
-    static member CurveEditPoints(curveId:Guid, [<OPT;DEF(false)>]returnParameters:bool, [<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
+    static member CurveEditPoints(curveId:Guid,[<OPT;DEF(-1)>]segmentIndex:int) : Collections.Point3dList =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
         let nc = curve.ToNurbsCurve()
-        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditPoints faile for %A" curveId
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditPoints failed for %A" curveId
         nc.GrevillePoints()
 
+
+    ///<summary>Returns the Edit-, or Greville-Parameters of a Curve object.
+    ///    For each Curve control point, there is a corresponding edit point parameter.</summary>
+    ///<param name="curveId">(Guid) Identifier of the Curve object</param>
+    ///<param name="segmentIndex">(int) Optional, The Curve segment index is `curveId` identifies a polycurve</param>
+    ///<returns>(Collections.Point3dList)  A list of Curve parameters</returns>
+    static member CurveEditParameters(curveId:Guid, [<OPT;DEF(-1)>]segmentIndex:int) : float[] =
+        let curve = RhinoScriptSyntax.CoerceCurve(curveId, segmentIndex)
+        let nc = curve.ToNurbsCurve()
+        if isNull nc then  RhinoScriptingException.Raise "RhinoScriptSyntax.CurveEditParameters failed for %A" curveId
+        nc.GrevilleParameters()
 
     ///<summary>Returns the end point of a Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
@@ -4431,9 +4438,6 @@ type RhinoScriptSyntax private () =
             events.Add(e)
         events
 
-
-
-
     ///<summary>Returns a 3D vector that is the tangent to a Curve at a parameter.</summary>
     ///<param name="curveId">(Guid) Identifier of the Curve object</param>
     ///<param name="parameter">(float) Parameter to evaluate</param>
@@ -4441,7 +4445,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(Vector3d) A 3D vector.</returns>
     static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
-        let mutable rc = Point3d.Unset
         if curve.Domain.IncludesParameter(parameter) then
             curve.TangentAt(parameter)
         else
@@ -4785,14 +4788,14 @@ type RhinoScriptSyntax private () =
             |  0 ->  CurveExtensionStyle.Line
             |  1 ->  CurveExtensionStyle.Arc
             |  2 ->  CurveExtensionStyle.Smooth
-            |  x ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
+            |  _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
 
         let sidet =
             match side with
-            |0  -> CurveEnd.Start
-            |1  -> CurveEnd.End
-            |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
+            | 0  -> CurveEnd.Start
+            | 1  -> CurveEnd.End
+            | 2  -> CurveEnd.Both
+            | _  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
 
         let newcurve = curve.Extend(sidet, extensionTypet, point)
         if notNull newcurve && newcurve.IsValid then
@@ -5023,7 +5026,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsEllipse(tol)
 
@@ -5436,14 +5439,14 @@ type RhinoScriptSyntax private () =
     ///<returns>(bool) True or False.</returns>
     static member SimplifyCurve(curveId:Guid, [<OPT;DEF(0)>]flags:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let mutable flags = 63
-        if (flags &&& 1 )= 1  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.SplitAtFullyMultipleKnots))
-        if (flags &&& 2 )= 2  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.RebuildLines))
-        if (flags &&& 4 )= 4  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.RebuildArcs))
-        if (flags &&& 8 )= 8  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.RebuildRationals))
-        if (flags &&& 16)= 16 then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.AdjustG1))
-        if (flags &&& 32)= 32 then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.Merge))
-        let flags0: CurveSimplifyOptions = EnumOfValue flags
+        let mutable flagsDefault = 63
+        if (flags &&& 1 )= 1  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.SplitAtFullyMultipleKnots))
+        if (flags &&& 2 )= 2  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.RebuildLines))
+        if (flags &&& 4 )= 4  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.RebuildArcs))
+        if (flags &&& 8 )= 8  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.RebuildRationals))
+        if (flags &&& 16)= 16 then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.AdjustG1))
+        if (flags &&& 32)= 32 then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.Merge))
+        let flags0: CurveSimplifyOptions = EnumOfValue flagsDefault
         //TODO test bitwise operations
         let tol = State.Doc.ModelAbsoluteTolerance
         let angTol = State.Doc.ModelAngleToleranceRadians
@@ -5489,7 +5492,6 @@ type RhinoScriptSyntax private () =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurve = curve.Trim(fst interval, snd interval)
         if isNull newcurve then  RhinoScriptingException.Raise "RhinoScriptSyntax.TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Nice.str curveId) interval deleteInput
-        let att = None
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = State.Doc.Objects.AddCurve(newcurve, rhobj.Attributes)
         if deleteInput then
@@ -5566,11 +5568,11 @@ type RhinoScriptSyntax private () =
                                         [<OPT;DEF("")>]style:string) : Guid =
         let plane = Geometry.Plane(startPoint, endPoint, pointOnDimensionLine)
         if not plane.IsValid then RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed to create Plane.  startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O'" startPoint endPoint pointOnDimensionLine
-        let success, s, t = plane.ClosestParameter(startPoint)
+        let _, s, t = plane.ClosestParameter(startPoint)
         let start2 = Point2d(s, t)
-        let success, s, t = plane.ClosestParameter(endPoint)
+        let _, s, t = plane.ClosestParameter(endPoint)
         let ende2 = Point2d(s, t)
-        let success, s, t = plane.ClosestParameter(pointOnDimensionLine)
+        let _, s, t = plane.ClosestParameter(pointOnDimensionLine)
         let onpoint2 = Point2d(s, t)
         let ldim = new LinearDimension(plane, start2, ende2, onpoint2)
         if isNull ldim then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddAlignedDimension failed.startPoint:'%O' endPoint:'%O' pointOnDimensionLine:'%O' style:'%s'" startPoint endPoint pointOnDimensionLine style
@@ -5650,11 +5652,11 @@ type RhinoScriptSyntax private () =
         let mutable plane0 = if not plane.IsValid then Plane.WorldXY else Plane(plane) // copy // TODO or fail
         plane0.Origin <- startPoint // needed ?
         // Calculate 2d dimension points
-        let success, s, t = plane0.ClosestParameter(startPoint)
+        let _, s, t = plane0.ClosestParameter(startPoint)
         let start = Point2d(s, t)
-        let success, s, t = plane0.ClosestParameter(endPoint)
+        let _, s, t = plane0.ClosestParameter(endPoint)
         let ende = Point2d(s, t)
-        let success, s, t = plane0.ClosestParameter(pointOnDimensionLine)
+        let _, s, t = plane0.ClosestParameter(pointOnDimensionLine)
         let onpoint = Point2d(s, t)
         // Add the dimension
         let ldim = new LinearDimension(plane0, start, ende, onpoint)
@@ -5802,13 +5804,10 @@ type RhinoScriptSyntax private () =
     static member DimStyleAnglePrecision(dimStyle:string, precision:int) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
-        let rc = ds.AngleResolution
         if precision >= 0 then
             ds.AngleResolution <- precision
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleAnglePrecision set failed. dimStyle:'%s' precision:%d" dimStyle precision
             State.Doc.Views.Redraw()
-
-
 
     ///<summary>Returns the arrow size of a dimension style.</summary>
     ///<param name="dimStyle">(string) The name of an existing dimension style</param>
@@ -5825,7 +5824,6 @@ type RhinoScriptSyntax private () =
     static member DimStyleArrowSize(dimStyle:string, size:float) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed. dimStyle:'%s' size:'%A'" dimStyle size
-        let rc = ds.ArrowLength
         if size > 0.0 then
             ds.ArrowLength <- size
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleArrowSize set failed. dimStyle:'%s' size: %g" dimStyle size
@@ -5856,7 +5854,6 @@ type RhinoScriptSyntax private () =
     static member DimStyleExtension(dimStyle:string, extension:float) : unit = //SET
         let ds = State.Doc.DimStyles.FindName(dimStyle)
         if isNull ds then  RhinoScriptingException.Raise "RhinoScriptSyntax.DimStyleExtension set failed. dimStyle:'%s' extension:'%A'" dimStyle extension
-        let rc = ds.ExtensionLineExtension
         if extension > 0.0 then
             ds.ExtensionLineExtension <- extension
             if not <| State.Doc.DimStyles.Modify(ds, ds.Id, quiet=false) then
@@ -6289,7 +6286,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(string) The current text string.</returns>
     static member LeaderText(objectId:Guid) : string = //GET
             match RhinoScriptSyntax.CoerceGeometry objectId with
-            | :? Leader as g ->
+            | :? Leader ->
                 let annotationObject = RhinoScriptSyntax.CoerceAnnotation(objectId)
                 annotationObject.DisplayText
             | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.LeaderText get failed.  objectId:'%s'" (Nice.str objectId)
@@ -6418,7 +6415,7 @@ type RhinoScriptSyntax private () =
     ///  All UI interacting functions (such as rs.GetObject) of Rhino.Scripting
     ///  will automatically enable redraw if needed
     ///  and afterwards disable it again if it was disabled before.
-    ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
+    ///  At the end of a script run in Fesh Editor Redraw will be automatically enabled again.</summary>
     ///<param name="enable">(bool) Optional, default value: <c>true</c>
     ///    True to enable, False to disable</param>
     ///<returns>(unit) void, nothing.</returns>
@@ -6429,7 +6426,7 @@ type RhinoScriptSyntax private () =
     ///  All UI interacting functions (such as rs.GetObject) of Rhino.Scripting
     ///  will automatically enable redraw if needed
     ///  and afterwards disable it again if it was disabled before.
-    ///  At the end of a script run in Seff Editor Redraw will be automatically enabled again.</summary>
+    ///  At the end of a script run in Fesh Editor Redraw will be automatically enabled again.</summary>
     ///<returns>(unit) void, nothing.</returns>
     static member DisableRedraw() : unit =
         State.Doc.Views.RedrawEnabled <- false
@@ -6660,7 +6657,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member RenderMeshMinEdgeLength(distance:float) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        let rc = current.MinimumEdgeLength
         if distance > 0.0 then
             current.MinimumEdgeLength <- distance
             State.Doc.SetCustomMeshingParameters(current)
@@ -6681,7 +6677,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member RenderMeshMinInitialGridQuads(quads:int) : unit = //SET
         let current = State.Doc.GetMeshingParameters(State.Doc.MeshingParameterStyle)
-        let rc = current.GridMinCount
         if quads > 0 then
             current.GridMinCount <- quads
             State.Doc.SetCustomMeshingParameters(current)
@@ -8059,7 +8054,6 @@ type RhinoScriptSyntax private () =
         if isNull grips || index<0 || index>=grips.Length then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
         let grip = grips.[index]
-        let rc = grip.CurrentLocation
         grip.CurrentLocation <-  point
         State.Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
         State.Doc.Views.Redraw()
@@ -8552,10 +8546,10 @@ type RhinoScriptSyntax private () =
         try
            let rc = RhinoScriptSyntax.AddHatches([curve], hatchPattern, scale, rotation,tolerance)
            if rc.Count = 1 then rc.[0]
-           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve.  It created %d Hatches"  rc.Count
+           else RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed to create exactly on hatch from curve. It created %d Hatches"  rc.Count
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve \r\nMessage: %s"  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f \r\nMessage: %s" tolerance  e.Message
 
 
     ///<summary>Creates one or more new Hatch objects from a list of closed planar Curves.</summary>
@@ -8574,7 +8568,7 @@ type RhinoScriptSyntax private () =
         try RhinoScriptSyntax.AddHatches(curves, hatchPattern, scale, rotation)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds:'%s' \r\nMessage: %s" (Nice.str curveIds)  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatches failed on curveIds using tolerance %f :'%s' \r\nMessage: %s" tolerance (Nice.str curveIds)  e.Message
 
     ///<summary>Creates a new Hatch object from a closed planar Curve object.</summary>
     ///<param name="curveId">(Guid) Identifier of the closed planar Curve that defines the boundary of the Hatch object</param>
@@ -8591,7 +8585,7 @@ type RhinoScriptSyntax private () =
         try RhinoScriptSyntax.AddHatch(RhinoScriptSyntax.CoerceCurve(curveId), hatchPattern, scale, rotation, tolerance)
         with e->
             let tolerance = if tolerance <= 0.0 then State.Doc.ModelAbsoluteTolerance else tolerance
-            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve %s\r\nMessage: %s" (Nice.str curveId)  e.Message
+            RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatch failed on one curve using tolerance %f : %s\r\nMessage: %s" tolerance (Nice.str curveId)  e.Message
 
 
 
@@ -8606,14 +8600,14 @@ type RhinoScriptSyntax private () =
     ///<returns>(string Rarr) Names of the newly added Hatch patterns.</returns>
     static member AddHatchPatterns(filename:string, [<OPT;DEF(false)>]replace:bool) : string Rarr =
         let patterns = DocObjects.HatchPattern.ReadFromFile(filename, true)
-        if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if isNull patterns then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed. filename:'%A' replace:'%A'" filename replace
         let rc = Rarr()
         for pattern in patterns do
              let index = State.Doc.HatchPatterns.Add(pattern)
              if index>=0 then
                  let pattern = State.Doc.HatchPatterns.[index]
                  rc.Add(pattern.Name)
-        if  rc.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed.  filename:'%A' replace:'%A'" filename replace
+        if  rc.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddHatchPatterns failed. filename:'%A' replace:'%A'" filename replace
         rc
 
 
@@ -8630,7 +8624,6 @@ type RhinoScriptSyntax private () =
     ///<param name="hatchPattern">(string) Name of an existing Hatch pattern to make current</param>
     ///<returns>(unit) void, nothing.</returns>
     static member CurrentHatchPattern(hatchPattern:string) : unit = //SET
-        let rc = State.Doc.HatchPatterns.CurrentHatchPatternIndex
         RhinoScriptSyntax.InitHatchPatterns()
         let patternInstance = State.Doc.HatchPatterns.FindName(hatchPattern)
         if patternInstance|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.CurrentHatchPattern: Setting it failed. hatchPattern:'%A'" hatchPattern
@@ -8680,7 +8673,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member HatchPattern(hatchId:Guid, hatchPattern:string) : unit = //SET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
-        let oldIndex = hatchObj.HatchGeometry.PatternIndex
         RhinoScriptSyntax.InitHatchPatterns()
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
@@ -8697,7 +8689,6 @@ type RhinoScriptSyntax private () =
         RhinoScriptSyntax.InitHatchPatterns()
         for hatchId in hatchIds do
             let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
-            let oldIndex = hatchObj.HatchGeometry.PatternIndex
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
@@ -9237,7 +9228,6 @@ type RhinoScriptSyntax private () =
         let location = light.Location
         let length = light.Length
         let width = light.Width
-        let direction = light.Direction
         let plane = Plane(location, length, width)
         plane, length.Length, width.Length
 
@@ -9513,21 +9503,22 @@ type RhinoScriptSyntax private () =
     ///<param name="lineId">(Guid) The line to transform</param>
     ///<param name="xForm">(Transform) The transformation to apply</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the Line object</param>
-    ///<returns>(unit) void, nothing.</returns>
+    ///<returns>(Guid) The same Guid, or a new Guid if copy=true.</returns>
     static member LineTransform(    lineId:Guid,
                                     xForm:Transform,
                                     [<OPT;DEF(false)>]copy:bool)  : Guid =
 
         // the original python  implementation has a bug, does not return Guid: https://github.com/mcneel/rhinoscriptsyntax/pull/204
         let line = RhinoScriptSyntax.CoerceLine lineId
-        let ln = Line(line.From,line.To)
-        let success = ln.Transform(xForm)
-        if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
         if copy then
+            let ln = Line(line.From,line.To)
+            let success = ln.Transform(xForm)
+            if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
             State.Ot.AddLine(ln)
         else
-            let lo = RhinoScriptSyntax.CoerceRhinoObject(lineId)
-            if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to replace geometry: line %A with  %A" line xForm
+            // if not <| State.Ot.Replace(lineId,ln) then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to replace geometry: line %A with  %A" line xForm
+            let success =line.Transform(xForm)
+            if not <| success then  RhinoScriptingException.Raise "RhinoScriptSyntax.LineTransform unable to transform line %A with  %A" line xForm
             lineId
 
 
@@ -9947,7 +9938,7 @@ type RhinoScriptSyntax private () =
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
             let colors = Array.zeroCreate count
-            for i, color in Seq.indexed(vertexColors) do
+            // for i, color in Seq.indexed(vertexColors) do
                 //colors.[i] = RhinoScriptSyntax.CoerceColor(color)
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
@@ -10001,7 +9992,7 @@ type RhinoScriptSyntax private () =
         if notNull vertexColors then
             let count = Seq.length(vertexColors)
             let colors = Array.zeroCreate count
-            for i, color in Seq.indexed(vertexColors) do
+            // for i, color in Seq.indexed(vertexColors) do
                 //colors.[i] = RhinoScriptSyntax.CoerceColor(color)
             mesh.VertexColors.SetColors(colors)   |>   ignore
 
@@ -10179,10 +10170,8 @@ type RhinoScriptSyntax private () =
 
     ///<summary>Joins two or or more Mesh objects together.</summary>
     ///<param name="meshes">(Mesh seq) Mesh objects</param>
-    ///<param name="deleteInput">(bool) Optional, Default Value <c>false</c>
-    ///   Delete input objects?</param>
     ///<returns>(Mesh) newly created Mesh.</returns>
-    static member JoinMeshes(meshes:Mesh seq, [<OPT;DEF(false)>]deleteInput:bool) : Mesh =
+    static member JoinMeshes(meshes:Mesh seq) : Mesh =
         let joinedMesh = new Mesh()
         joinedMesh.Append(meshes)
         joinedMesh
@@ -10390,7 +10379,7 @@ type RhinoScriptSyntax private () =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
         for i = 0 to mesh.Faces.Count - 1 do
-            let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
             let p2 = Point3d(p2)
@@ -10415,7 +10404,7 @@ type RhinoScriptSyntax private () =
         let mesh = RhinoScriptSyntax.CoerceMesh(objectId)
         let rc = Rarr()
         for i = 0 to mesh.Faces.Count - 1 do
-            let getrc, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
+            let _, p0, p1, p2, p3 = mesh.Faces.GetFaceVertices(i)
             let p0 = Point3d(p0)
             let p1 = Point3d(p1)
             let p2 = Point3d(p2)
@@ -11530,7 +11519,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectMaterialSource(objectId:Guid, source:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let rc = int(rhinoObject.Attributes.MaterialSource)
         if source <0 || source >3 || source = 2 then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialSource: Setting it failed for '%A' and '%A'"  source objectId
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         rhinoObject.Attributes.MaterialSource <- source
@@ -11549,7 +11537,6 @@ type RhinoScriptSyntax private () =
         let source :DocObjects.ObjectMaterialSource  = LanguagePrimitives.EnumOfValue  source
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = int(rhinoObject.Attributes.MaterialSource)
             rhinoObject.Attributes.MaterialSource <- source
             rhinoObject.CommitChanges() |> ignore
         State.Doc.Views.Redraw()
@@ -11699,7 +11686,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member ObjectPrintWidth(objectId:Guid, width:float) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let rc = rhinoObject.Attributes.PlotWeight
         rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
         rhinoObject.Attributes.PlotWeight <- width
         rhinoObject.CommitChanges() |> ignore
@@ -11714,7 +11700,6 @@ type RhinoScriptSyntax private () =
     static member ObjectPrintWidth(objectIds:Guid seq, width:float) : unit = //MULTISET
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-            let rc = rhinoObject.Attributes.PlotWeight
             rhinoObject.Attributes.PlotWeightSource <- DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
             rhinoObject.Attributes.PlotWeight <- width
             rhinoObject.CommitChanges() |> ignore
@@ -12145,7 +12130,6 @@ type RhinoScriptSyntax private () =
     ///<param name="objectIds">(Guid seq) Ids of objects to show.</param>
     ///<returns>(unit) void, nothing.</returns>
     static member ShowObjects(objectIds:Guid seq) : unit = //PLURAL
-        let mutable rc = 0
         for objectId in objectIds do
             if not <| State.Doc.Objects.Show(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.ShowObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
@@ -12164,7 +12148,6 @@ type RhinoScriptSyntax private () =
     ///<param name="objectIds">(Guid seq) The identifiers of objects</param>
     ///<returns>(unit) void, nothing.</returns>
     static member UnlockObjects(objectIds:Guid seq) : unit =  //PLURAL
-        let mutable rc = 0
         for objectId in objectIds do
             if not <| State.Doc.Objects.Unlock(objectId, ignoreLayerMode=false) then RhinoScriptingException.Raise "RhinoScriptSyntax.UnlockObjects failed on %s" (Nice.str objectId)
         State.Doc.Views.Redraw()
@@ -12975,7 +12958,7 @@ type RhinoScriptSyntax private () =
                 let presel = go.ObjectsWerePreselected
                 let selmethod = objref.SelectionMethod()
                 let point = objref.SelectionPoint()
-                let crv, curveparameter = objref.CurveParameter()
+                let _, curveparameter = objref.CurveParameter() // _ = curve
                 let viewname = go.View().ActiveViewport.Name
                 let obj = go.Object(0).Object()
                 go.Dispose()
@@ -13309,10 +13292,10 @@ type RhinoScriptSyntax private () =
                 rhobj.Select(select) |> ignore
                 State.Doc.Views.Redraw()
                 let objectId = rhobj.Id
-                let prepicked = go.ObjectsWerePreselected
+                let prePicked = go.ObjectsWerePreselected
                 let selmethod = objref.SelectionMethod()
                 let mutable point = objref.SelectionPoint()
-                let surf, u, v = objref.SurfaceParameter()
+                let _, u, v = objref.SurfaceParameter()
                 let mutable uv = (u, v)
                 if not <| point.IsValid then
                     point <- Point3d.Unset
@@ -13320,10 +13303,10 @@ type RhinoScriptSyntax private () =
                 let view = go.View()
                 let name = view.ActiveViewport.Name
                 go.Dispose()
-                if not <| select && not <| prepicked then
+                if not <| select && not <| prePicked then
                     State.Doc.Objects.UnselectAll() |> ignore
                     State.Doc.Views.Redraw()
-                (objectId, prepicked, selmethod, point, uv, name)
+                (objectId, prePicked, selmethod, point, uv, name)
         RhinoSync.DoSyncRedrawHideEditor get
 
 
@@ -13477,14 +13460,16 @@ type RhinoScriptSyntax private () =
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
         State.Doc.Objects.GetObjectList(settings)
-        |> Seq.thisNext
-        |> Seq.skipLast // dont loop
-        |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
-        |>  function
-            |None -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Nice.str objectId)
-            |Some (t, n) ->
-                if select then n.Select(true) |> ignore // TODO needs sync ? apparently not needed!
-                n.Id
+        |> Seq.skipWhile (fun obj -> obj.Id <> objectId)
+        |> Seq.skip 1
+        |> Seq.tryHead
+        |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Nice.str objectId))
+        |> fun obj ->
+            if select then
+                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                State.Doc.Views.Redraw()
+            obj.Id
+
 
 
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects
@@ -13864,7 +13849,7 @@ type RhinoScriptSyntax private () =
         // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955
         let bbox =
             let objs = objectIds|> Seq.map RhinoScriptSyntax.CoerceRhinoObject
-            let mutable ok,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
+            let  _,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
             if not bbox0.IsValid then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Nice.str objectIds)
             let mutable bboxMin = bbox0.Min
@@ -13953,7 +13938,7 @@ type RhinoScriptSyntax private () =
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
                                  [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
         let curves =  rarr { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) }
-        let surf, err = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
+        let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             let rc = State.Doc.Objects.AddSurface(surf)
             State.Doc.Views.Redraw()
@@ -15563,7 +15548,7 @@ type RhinoScriptSyntax private () =
         match RhinoScriptSyntax.CoerceGeometry objectId with
         | :? Surface as s -> RhinoScriptSyntax.SurfaceArea s
         | :? Brep    as b -> RhinoScriptSyntax.SurfaceArea b
-        | x -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea doesnt work on on %A" (Nice.str  objectId)
+        | _ -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceArea doesnt work on on %A" (Nice.str  objectId)
 
 
     ///<summary>Calculates the area centroid of a Surface or Polysurface.</summary>
@@ -16141,7 +16126,6 @@ type RhinoScriptSyntax private () =
         let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
         let tolerance= Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
-        let attrs = None
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
@@ -16170,7 +16154,6 @@ type RhinoScriptSyntax private () =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let tolerance = Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
-        let attrs = None
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
@@ -17516,14 +17499,13 @@ type RhinoScriptSyntax private () =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Displays a dialog box prompting the user to select one line-type.</summary>
+    ///<summary>Displays a dialog box prompting the user to select one line-type.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
-    ///<param name="showByLayer">(bool) Optional, default value: <c>false</c>
-    ///    If True, the "by Layer" line-type will show. Defaults to False</param>
-    ///<returns>(string) The names of selected line-type.
-    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
-                                [<OPT;DEF(false)>]showByLayer:bool) : string =
+    ///<returns>(string) The names of selected line-type.</returns>
+    static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string) : string =
+        // the original python script has an unused parameter showByLayer
+        //<param name="showByLayer">(bool) Optional, default value: <c>false</c> If True, the "by Layer" line-type will show. Defaults to False</param>
         let getKeepEditor () =
             let mutable ltinstance = State.Doc.Linetypes.CurrentLinetype
             if notNull defaultValLinetype then
@@ -17778,13 +17760,6 @@ type RhinoScriptSyntax private () =
 
 
     ///<summary>Prompts the user to pick points that define a polyline.</summary>
-    ///<param name="flags">(int) Optional, default value: <c>3</c>
-    ///    The options are bit coded flags. Values can be added together to specify more than one option.
-    ///    value description
-    ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed Polyline will be returned.
-    ///    2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed Polyline will be returned.
-    ///    4     Force close. If specified, then the returned Polyline is always closed. If specified, then max must be 0 or bigger than 4.
-    ///    Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
     ///<param name="message3">(string) Optional, A prompt or message for the third point</param>
@@ -17795,13 +17770,13 @@ type RhinoScriptSyntax private () =
     ///    The maximum number of points to require; 0 for no limit.</param>
     ///<returns>(Polyline) a  polyline.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
-                                        [<OPT;DEF(null:string)>]message1:string,
-                                        [<OPT;DEF(null:string)>]message2:string,
-                                        [<OPT;DEF(null:string)>]message3:string,
-                                        [<OPT;DEF(null:string)>]message4:string,
-                                        [<OPT;DEF(2147482999)>]min:int,
-                                        [<OPT;DEF(0)>]max:int) : Polyline =
+    static member GetPolyline( [<OPT;DEF(null:string)>]message1:string,
+                               [<OPT;DEF(null:string)>]message2:string,
+                               [<OPT;DEF(null:string)>]message3:string,
+                               [<OPT;DEF(null:string)>]message4:string,
+                               [<OPT;DEF(2147482999)>]min:int,
+                               [<OPT;DEF(0)>]max:int) : Polyline =
+        // original python code has a flags parameter, but it is not used in the code
         let get () =
             let gpl = new Input.Custom.GetPolyline()
             if notNull message1 then gpl.FirstPointPrompt <- message1
@@ -18366,7 +18341,7 @@ type RhinoScriptSyntax private () =
     ///<returns>(Point3d array) Array of 3D points with duplicates removed.</returns>
     static member CullDuplicatePoints(points:Point3d seq, [<OPT;DEF(0.0)>]tolerance:float) : Point3d array =
         let tol = Util.ifZero1 tolerance State.Doc.ModelAbsoluteTolerance // RhinoMath.ZeroTolerance
-        Geometry.Point3d.CullDuplicates(points, tolerance)
+        Geometry.Point3d.CullDuplicates(points, tol)
 
 
     ///<summary>Measures Square distance between two 3D points. Does not validate input.</summary>
@@ -19333,7 +19308,8 @@ type RhinoScriptSyntax private () =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
-        let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        // let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        let _, _, b, _, d, _, _ = viewport.GetFrustum()
         let frusright = b
         let frustop = d
         let oldradius = min frustop frusright
@@ -19352,7 +19328,8 @@ type RhinoScriptSyntax private () =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
-        let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        // let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        let _, _, b, _, d, _, _ = viewport.GetFrustum()
         let frusright = b
         let frustop = d
         let oldradius = min frustop frusright
@@ -19441,7 +19418,6 @@ type RhinoScriptSyntax private () =
     ///<returns>(unit) void, nothing.</returns>
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
-        let rc = viewo.ActiveViewport.WallpaperFilename
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()

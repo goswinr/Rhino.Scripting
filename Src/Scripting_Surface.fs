@@ -90,7 +90,7 @@ module AutoOpenSurface =
         // from commit in v8.x : https://github.com/mcneel/rhinoscriptsyntax/commit/85e122790647a932e50d743a37af5efe9cfda955
         let bbox =
             let objs = objectIds|> Seq.map RhinoScriptSyntax.CoerceRhinoObject
-            let mutable ok,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
+            let  _,bbox0 = DocObjects.RhinoObject.GetTightBoundingBox(objs) //not available on Rhino 6 !!
             if not bbox0.IsValid then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.AddCutPlane GetTightBoundingBox failed.startPoint:'%A' endPoint:'%A' normal:'%A' objectIds:%s "startPoint endPoint normal (Nice.str objectIds)
             let mutable bboxMin = bbox0.Min
@@ -2367,7 +2367,6 @@ module AutoOpenSurface =
         let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
         let tolerance= Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
-        let attrs = None
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes

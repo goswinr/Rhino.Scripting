@@ -1564,7 +1564,6 @@ module AutoOpenCurve =
     ///<returns>(Vector3d) A 3D vector.</returns>
     static member CurveTangent(curveId:Guid, parameter:float, [<OPT;DEF(-1)>]segmentIndex:int) : Vector3d =
         let curve = RhinoScriptSyntax.CoerceCurve (curveId, segmentIndex)
-        let mutable rc = Point3d.Unset
         if curve.Domain.IncludesParameter(parameter) then
             curve.TangentAt(parameter)
         else
@@ -1908,14 +1907,14 @@ module AutoOpenCurve =
             |  0 ->  CurveExtensionStyle.Line
             |  1 ->  CurveExtensionStyle.Arc
             |  2 ->  CurveExtensionStyle.Smooth
-            |  x ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
+            |  _ ->  RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint ExtensionType must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
 
         let sidet =
             match side with
-            |0  -> CurveEnd.Start
-            |1  -> CurveEnd.End
-            |2  -> CurveEnd.Both
-            |_  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
+            | 0  -> CurveEnd.Start
+            | 1  -> CurveEnd.End
+            | 2  -> CurveEnd.Both
+            | _  -> RhinoScriptingException.Raise "RhinoScriptSyntax.ExtendCurvePoint Side must be 0, 1, or 2. curveId:'%s' side:'%A' point:'%A' extensionType:'%A'" (Nice.str curveId) side point extensionType
 
         let newcurve = curve.Extend(sidet, extensionTypet, point)
         if notNull newcurve && newcurve.IsValid then
@@ -2146,7 +2145,7 @@ module AutoOpenCurve =
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member IsEllipse(curveId:Guid, [<OPT;DEF(0.0)>]tolerance:float, [<OPT;DEF(-1)>]segmentIndex:int) : bool =
         let tol = Util.ifZero2 RhinoMath.ZeroTolerance tolerance
-        match RhinoScriptSyntax.TryCoerceCurve curveId with
+        match RhinoScriptSyntax.TryCoerceCurve(curveId,segmentIndex) with
         |None -> false
         |Some curve  -> curve.IsEllipse(tol)
 
@@ -2559,14 +2558,14 @@ module AutoOpenCurve =
     ///<returns>(bool) True or False.</returns>
     static member SimplifyCurve(curveId:Guid, [<OPT;DEF(0)>]flags:int) : bool =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
-        let mutable flags = 63
-        if (flags &&& 1 )= 1  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.SplitAtFullyMultipleKnots))
-        if (flags &&& 2 )= 2  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.RebuildLines))
-        if (flags &&& 4 )= 4  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.RebuildArcs))
-        if (flags &&& 8 )= 8  then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.RebuildRationals))
-        if (flags &&& 16)= 16 then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.AdjustG1))
-        if (flags &&& 32)= 32 then flags <- flags &&& ( ~~~ (int CurveSimplifyOptions.Merge))
-        let flags0: CurveSimplifyOptions = EnumOfValue flags
+        let mutable flagsDefault = 63
+        if (flags &&& 1 )= 1  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.SplitAtFullyMultipleKnots))
+        if (flags &&& 2 )= 2  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.RebuildLines))
+        if (flags &&& 4 )= 4  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.RebuildArcs))
+        if (flags &&& 8 )= 8  then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.RebuildRationals))
+        if (flags &&& 16)= 16 then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.AdjustG1))
+        if (flags &&& 32)= 32 then flagsDefault <- flagsDefault &&& ( ~~~ (int CurveSimplifyOptions.Merge))
+        let flags0: CurveSimplifyOptions = EnumOfValue flagsDefault
         //TODO test bitwise operations
         let tol = State.Doc.ModelAbsoluteTolerance
         let angTol = State.Doc.ModelAngleToleranceRadians
@@ -2612,7 +2611,6 @@ module AutoOpenCurve =
         let curve = RhinoScriptSyntax.CoerceCurve(curveId)
         let newcurve = curve.Trim(fst interval, snd interval)
         if isNull newcurve then  RhinoScriptingException.Raise "RhinoScriptSyntax.TrimCurve failed. curveId:'%s' interval:'%A' deleteInput:'%A'" (Nice.str curveId) interval deleteInput
-        let att = None
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(curveId)
         let rc = State.Doc.Objects.AddCurve(newcurve, rhobj.Attributes)
         if deleteInput then

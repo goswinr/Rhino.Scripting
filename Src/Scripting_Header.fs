@@ -148,6 +148,8 @@ type RhinoScriptSyntax private () =
                                 RhinoScriptingException.Raise "RhinoScriptSyntax.Add: SetUserText the string '%s' cannot be used as value. See RhinoScriptSyntax.IsGoodStringId. You can use checkStrings=false parameter to bypass some of these restrictions." v
                         if not <| a.SetUserString(k,v) then
                             RhinoScriptingException.Raise "RhinoScriptSyntax.Add: failed to set key value pair '%s' and '%s' " k v
+                if collapseParents then
+                    State.Doc.Layers.[layerIndex].IsExpanded <- false
                 a
 
         match box geo with

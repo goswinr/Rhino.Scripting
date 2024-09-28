@@ -725,7 +725,8 @@ module AutoOpenViews =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
-        let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        // let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        let _, _, b, _, d, _, _ = viewport.GetFrustum()
         let frusright = b
         let frustop = d
         let oldradius = min frustop frusright
@@ -744,7 +745,8 @@ module AutoOpenViews =
         let view = RhinoScriptSyntax.CoerceView(view)
         let viewport = view.ActiveViewport
         if not viewport.IsParallelProjection then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewRadius view is not ParallelProjection.  view:'%A'" view
-        let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        // let ok, a, b, c, d, e, f = viewport.GetFrustum()
+        let _, _, b, _, d, _, _ = viewport.GetFrustum()
         let frusright = b
         let frustop = d
         let oldradius = min frustop frusright
@@ -833,7 +835,6 @@ module AutoOpenViews =
     ///<returns>(unit) void, nothing.</returns>
     static member Wallpaper(view:string, filename:string) : unit = //SET
         let viewo = RhinoScriptSyntax.CoerceView(view)
-        let rc = viewo.ActiveViewport.WallpaperFilename
         if not <| viewo.ActiveViewport.SetWallpaper(filename, grayscale=false) then
             RhinoScriptingException.Raise "RhinoScriptSyntax.Wallpaper failed to set wallpaper to %s in view %s" filename view
         viewo.Redraw()

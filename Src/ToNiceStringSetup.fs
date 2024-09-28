@@ -66,7 +66,7 @@ module InternalToNiceStringSetup =
                 eprintfn "Initializing NiceString pretty printing in Rhino.InternalToNiceStringSetup.init() via Rhino.Scripting.dll failed with:\r\n%A" e
 
 
-    /// Like printfn but in Blue if used from Seff Editor. Adds a new line at end.
+    /// Like printfn but in Blue if used from Fesh Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
     let internal printfnBlue msg =
         init()
@@ -75,7 +75,7 @@ module InternalToNiceStringSetup =
             Printfn.blue "%s" s
             RhinoApp.Wait())  msg // no switch to UI Thread needed !
 
-    /// Like printfn but in Red if used from Seff Editor. Adds a new line at end.
+    /// Like printfn but in Red if used from Fesh Editor. Adds a new line at end.
     /// Prints to Console.Out and to Rhino Commandline.
     let internal printfnRed msg =
         init()

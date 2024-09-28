@@ -446,14 +446,13 @@ module AutoOpenUserInterface =
         RhinoSync.DoSyncRedrawHideEditor get
 
 
-    ///<summary>Displays a dialog box prompting the user to select one line-type.</summary>
+    ///<summary>Displays a dialog box prompting the user to select one line-type.
+    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</summary>
     ///<param name="defaultValLinetype">(string) Optional, Optional. The name of the line-type to select. If omitted, the current line-type will be selected</param>
-    ///<param name="showByLayer">(bool) Optional, default value: <c>false</c>
-    ///    If True, the "by Layer" line-type will show. Defaults to False</param>
-    ///<returns>(string) The names of selected line-type.
-    /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string,
-                                [<OPT;DEF(false)>]showByLayer:bool) : string =
+    ///<returns>(string) The names of selected line-type.</returns>
+    static member GetLinetype(  [<OPT;DEF(null:string)>]defaultValLinetype:string) : string =
+        // the original python script has an unused parameter showByLayer
+        //<param name="showByLayer">(bool) Optional, default value: <c>false</c> If True, the "by Layer" line-type will show. Defaults to False</param>
         let getKeepEditor () =
             let mutable ltinstance = State.Doc.Linetypes.CurrentLinetype
             if notNull defaultValLinetype then
@@ -708,13 +707,6 @@ module AutoOpenUserInterface =
 
 
     ///<summary>Prompts the user to pick points that define a polyline.</summary>
-    ///<param name="flags">(int) Optional, default value: <c>3</c>
-    ///    The options are bit coded flags. Values can be added together to specify more than one option.
-    ///    value description
-    ///    1     Permit close option. If specified, then after 3 points have been picked, the user can type "Close" and a closed Polyline will be returned.
-    ///    2     Permit close snap. If specified, then after 3 points have been picked, the user can pick near the start point and a closed Polyline will be returned.
-    ///    4     Force close. If specified, then the returned Polyline is always closed. If specified, then max must be 0 or bigger than 4.
-    ///    Note: the default is 3, or "Permit close option = True", "Permit close snap = True", and "Force close = False"</param>
     ///<param name="message1">(string) Optional, A prompt or message for the first point</param>
     ///<param name="message2">(string) Optional, A prompt or message for the second point</param>
     ///<param name="message3">(string) Optional, A prompt or message for the third point</param>
@@ -725,13 +717,13 @@ module AutoOpenUserInterface =
     ///    The maximum number of points to require; 0 for no limit.</param>
     ///<returns>(Polyline) a  polyline.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetPolyline(          [<OPT;DEF(3)>]flags:int,
-                                        [<OPT;DEF(null:string)>]message1:string,
-                                        [<OPT;DEF(null:string)>]message2:string,
-                                        [<OPT;DEF(null:string)>]message3:string,
-                                        [<OPT;DEF(null:string)>]message4:string,
-                                        [<OPT;DEF(2147482999)>]min:int,
-                                        [<OPT;DEF(0)>]max:int) : Polyline =
+    static member GetPolyline( [<OPT;DEF(null:string)>]message1:string,
+                               [<OPT;DEF(null:string)>]message2:string,
+                               [<OPT;DEF(null:string)>]message3:string,
+                               [<OPT;DEF(null:string)>]message4:string,
+                               [<OPT;DEF(2147482999)>]min:int,
+                               [<OPT;DEF(0)>]max:int) : Polyline =
+        // original python code has a flags parameter, but it is not used in the code
         let get () =
             let gpl = new Input.Custom.GetPolyline()
             if notNull message1 then gpl.FirstPointPrompt <- message1

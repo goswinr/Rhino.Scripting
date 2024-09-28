@@ -105,7 +105,7 @@ module AutoOpenSelection =
                 let presel = go.ObjectsWerePreselected
                 let selmethod = objref.SelectionMethod()
                 let point = objref.SelectionPoint()
-                let crv, curveparameter = objref.CurveParameter()
+                let _, curveparameter = objref.CurveParameter() // _ = curve
                 let viewname = go.View().ActiveViewport.Name
                 let obj = go.Object(0).Object()
                 go.Dispose()
@@ -607,14 +607,16 @@ module AutoOpenSelection =
         settings.IncludeGrips <- includeGrips
         settings.DeletedObjects <- false
         State.Doc.Objects.GetObjectList(settings)
-        |> Seq.thisNext
-        |> Seq.skipLast // dont loop
-        |> Seq.tryFind (fun (t, n) -> objectId = t.Id)
-        |>  function
-            |None -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Nice.str objectId)
-            |Some (t, n) ->
-                if select then n.Select(true) |> ignore // TODO needs sync ? apparently not needed!
-                n.Id
+        |> Seq.skipWhile (fun obj -> obj.Id <> objectId)
+        |> Seq.skip 1
+        |> Seq.tryHead
+        |> Option.defaultWith ( fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.NextObject not found for %A" (Nice.str objectId))
+        |> fun obj ->
+            if select then
+                obj.Select(true) |> ignore // TODO needs sync ? apparently not needed!
+                State.Doc.Views.Redraw()
+            obj.Id
+
 
 
     ///<summary>Returns identifiers of all normal objects in the document. Normal objects

@@ -390,7 +390,6 @@ module AutoOpenLight =
         let location = light.Location
         let length = light.Length
         let width = light.Width
-        let direction = light.Direction
         let plane = Plane(location, length, width)
         plane, length.Length, width.Length
 

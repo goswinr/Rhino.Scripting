@@ -234,7 +234,6 @@ module AutoOpenHatch =
     ///<returns>(unit) void, nothing.</returns>
     static member HatchPattern(hatchId:Guid, hatchPattern:string) : unit = //SET
         let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
-        let oldIndex = hatchObj.HatchGeometry.PatternIndex
         RhinoScriptSyntax.InitHatchPatterns()
         let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
         if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
@@ -251,7 +250,6 @@ module AutoOpenHatch =
         RhinoScriptSyntax.InitHatchPatterns()
         for hatchId in hatchIds do
             let hatchObj = RhinoScriptSyntax.CoerceHatchObject(hatchId)
-            let oldIndex = hatchObj.HatchGeometry.PatternIndex
             let newPattern = State.Doc.HatchPatterns.FindName(hatchPattern)
             if newPattern|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.HatchPattern failed.  hatchId:'%s' hatchPattern:'%A'" (Nice.str hatchId) hatchPattern
             hatchObj.HatchGeometry.PatternIndex <- newPattern.Index
