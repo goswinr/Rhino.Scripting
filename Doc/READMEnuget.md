@@ -43,8 +43,8 @@ However you can use this library just as well in compiled F#, C# or VB.net proje
 First reference the assemblies.
 
 ```csharp
-#r "nuget: FSharp.Core, 7.0.0"
-#r "nuget: FsEx, 0.15.0"
+#r "nuget: FSharp.Core, 6.0.7"// dependency of Rhino.Scripting
+#r "nuget: FsEx, 0.15.0" // dependency of Rhino.Scripting
 #r "nuget: Rhino.Scripting, 0.8.0"
 ```
 The main namespace is  `Rhino.Scripting`.
@@ -52,8 +52,7 @@ The main class of this library is called `RhinoScriptSyntax` it has all ~900 fun
 In C# you can create an alias like this:
 
 ```csharp
-open Rhino.Scripting;
-using rs = RhinoScriptSyntax;
+using rs = Rhino.Scripting.RhinoScriptSyntax;
 ```
 
 then you can use it like the RhinoScriptSyntax in Python:
