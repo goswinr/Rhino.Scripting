@@ -58,7 +58,7 @@
     <!-- <SymbolPackageFormat>snupkg</SymbolPackageFormat>   --><!-- using  snupkg the readme does not pack https://github.com/NuGet/Home/issues/10791 -->
     <PackageReadmeFile>READMEnuget.md</PackageReadmeFile>
     <PackageDescription>A complete re-implementation of the RhinoPython scripting syntax for use with F# and C#. For Rhino 6.0 or higher.</PackageDescription>
-    <PackageTags>rhino3d Rhinoscript RhinoCommon</PackageTags>
+    <PackageTags>RhinoScript RhinoCommon Rhino3dm Rhino3d Rhino Rhinoceros 3dm</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
