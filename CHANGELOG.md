@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.8.1] - 2025-02-23
-## Changed
+## [0.8.2] - 2025-02-23
+### Changed
 - build and deploy with GitHub Actions
 - update FsEx to 0.16.0
 

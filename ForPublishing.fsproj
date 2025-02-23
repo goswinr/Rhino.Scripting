@@ -64,7 +64,7 @@
     <FsDocsFaviconSource>img/favicon.ico</FsDocsFaviconSource>
     <FsDocsWarnOnMissingDocs>true</FsDocsWarnOnMissingDocs>
 
-    <ChangelogFile>../CHANGELOG.md</ChangelogFile>
+    <ChangelogFile>./CHANGELOG.md</ChangelogFile>
   </PropertyGroup>
 
   <ItemGroup>
