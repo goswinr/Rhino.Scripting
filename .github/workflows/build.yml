@@ -21,9 +21,9 @@ jobs:
         with:
           dotnet-version: '9.x'
 
-      - name: Run dotnet publish net48
+      - name: Run dotnet build ForEditing
         run: dotnet build ForEditing.fsproj
 
-      - name: Run dotnet publish net9.0
+      - name: Run dotnet build ForPublishing
         run: dotnet build ForPublishing.fsproj
 

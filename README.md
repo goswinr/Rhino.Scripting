@@ -1,10 +1,12 @@
-![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Docs/img/logo400.png)
+![logo](https://raw.githubusercontent.com/goswinr/Rhino.Scripting/main/Docs/img/logo.png)
 # Rhino.Scripting
 
-[![Rhino.Scripting on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting.svg)](https://nuget.org/packages/Rhino.Scripting)
-[![Rhino.Scripting on fuget.org](https://www.fuget.org/packages/Rhino.Scripting/badge.svg)](https://www.fuget.org/packages/Rhino.Scripting)
+[![Rhino.Scripting on nuget.org](https://img.shields.io/nuget/v/Rhino.Scripting)](https://www.nuget.org/packages/Rhino.Scripting/)
+[![Build Status](https://github.com/goswinr/Rhino.Scripting/actions/workflows/build.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/build.yml)
+[![Docs Build Status](https://github.com/goswinr/Rhino.Scripting/actions/workflows/docs.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/docs.yml)
+[![Check dotnet tools](https://github.com/goswinr/Rhino.Scripting/actions/workflows/outdatedDotnetTool.yml/badge.svg)](https://github.com/goswinr/Rhino.Scripting/actions/workflows/outdatedDotnetTool.yml)
+[![license](https://img.shields.io/github/license/goswinr/Rhino.Scripting)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Rhino.Scripting.svg)
-[![license](https://img.shields.io/github/license/goswinr/Rhino.Scripting)](LICENSE)
 
 
 Rhino.Scripting is an complete re-implementation of the original **RhinoScript syntax** in and for F# (and C#).
@@ -46,7 +48,7 @@ However you can use this library just as well in compiled F#, C# or VB.net proje
 
 First reference the assemblies.
 ```fsharp
-#r "nuget: Rhino.Scripting, 0.8.0"
+#r "nuget: Rhino.Scripting, 0.9.0"
 ```
 
 The main namespace is  `Rhino.Scripting`.
@@ -71,8 +73,8 @@ First reference the assemblies.
 
 ```csharp
 #r "nuget: FSharp.Core, 6.0.7"// dependency of Rhino.Scripting
-#r "nuget: FsEx, 0.15.0" // dependency of Rhino.Scripting
-#r "nuget: Rhino.Scripting, 0.8.0"
+#r "nuget: FsEx, 0.16.0" // dependency of Rhino.Scripting
+#r "nuget: Rhino.Scripting, 0.9.0"
 ```
 The main namespace is  `Rhino.Scripting`.
 The main class of this library is called `RhinoScriptSyntax` it has all ~900 functions as static methods.
@@ -103,7 +105,7 @@ for example `rs.ObjectLayer` can be called in several ways:
 `rs.ObjectLayer(guid, string)` To set the layer of one object (fails if layer does not exist), no return value.
 `rs.ObjectLayer(guid, string, createLayerIfMissing = true )` To set the layer of one object, and create the layer if it does not exist yet, no return value.
 `rs.ObjectLayer(list of guids, string)` To set the layer of several objects (fails if layer does not exist), no return value.
-`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` To set the layer of several objects, and create the layer if it does not exist yet , no return value.
+`rs.ObjectLayer(list of guids, string, createLayerIfMissing = true )` To set the layer of several objects, and create the layer if it does not exist yet, no return value.
 
 These are implemented with 3 overloads and  `Optional` and `DefaultParameterValue` parameters:
 ```fsharp
@@ -176,6 +178,11 @@ These are implemented with 3 overloads and  `Optional` and `DefaultParameterValu
         State.Doc.Views.Redraw()
 ```
 
+
+### Full API Documentation
+
+[goswinr.github.io/Rhino.Scripting](https://goswinr.github.io/Rhino.Scripting/reference/str.html)
+
 ## Thread Safety
 While the main Rhino Document is officially not thread safe, this library can be used from any thread.
 If running async this library will automatically marshal all calls that affect the UI to the main Rhino UI thread and wait for switching back till completion on UI thread.
@@ -185,37 +192,8 @@ The main reason to use this library async is to keep the Rhino UI and Fesh scrip
 ## Contributing
 Contributions are welcome even for small things like typos. If you have problems with this library please submit an issue.
 
-## Change Log
+### License
+[MIT](https://github.com/goswinr/Rhino.Scripting/blob/main/LICENSE.md)
 
-`0.8.0`
-- drop support for Rhino 6.0 ( 7.0 or higher is required)
-- fix minor bugs about unused optional parameters
-
-`0.7.0`
-- renamed main static class from Rhino.Scripting to Rhino.Scripting.RhinoScriptSyntax !
-
-`0.6.2`
-- even better window sync with Fesh Editor
-
-`0.6.1`
-- better window sync with Fesh Editor
-- fixes in docs
-
-`0.6.0`
-- don't check result of CommitChanges() anymore
-- relax constraints on UserText values
-
-`0.5.1`
-- fix readme
-- improve finding of SynchronizationContext
-
-`0.4.0`
-- fix threading bug in to make it work in RhinoCode
-- fix typos
-
-`0.3.0`
-- remove WPF dependency
-- don't return F# options anymore
-
-`0.2.0`
-- first public release
+### Changelog
+see [CHANGELOG.md](https://github.com/goswinr/Rhino.Scripting/blob/main/CHANGELOG.md)

@@ -78,8 +78,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="README.md" />
-    <None Include="Docs/img/READMEnuget.md" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
     <None Include="Docs/img/logo128.png"    Pack="true" PackagePath="" /> <!--PackagePath = "" makes the file available to nuget pack tool-->
 
     <Compile Include="Src/Exceptions.fs" />
