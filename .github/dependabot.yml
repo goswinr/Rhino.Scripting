@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Update GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # don't do nuget here, WPF does not build correctly on linux , just Win forms too?
+
+  # Update NuGet packages
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "FSharp.Core"
+      - dependency-name: "RhinoCommon"
+
+
+
+

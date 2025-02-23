@@ -1,3 +1,9 @@
 bin/
 obj/
 .vs/
+
+# FSharp.Formatting
+.fsdocs/
+output/
+tmp/
+DocsGenerated/

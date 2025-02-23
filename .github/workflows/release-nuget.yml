@@ -1,0 +1,46 @@
+name: Build and Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+' # regex for semantic versioning
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.x'
+
+    - name: dotnet build
+      run: dotnet build ForPublishing.fsproj --configuration Release
+
+    - name: Check version consistency of git tag and CHANGELOG.md
+      # needs in fsproj:
+      # <Target Name="WriteChangelogVersion" AfterTargets="AfterBuild"><!-- for version checks in github tag based builds -->
+      #   <WriteLinesToFile File="./bin/ChangelogVersion.txt" Lines="@(CurrentReleaseChangelog)" Overwrite="true" ContinueOnError="false" />
+      # </Target>
+      id: check_version
+      shell: bash
+      run: |
+        CHANGELOG_VERSION=$(cat ./bin/ChangelogVersion.txt | tr -d '[:space:]')        
+        if [ "${{ github.ref_name }}" != "$CHANGELOG_VERSION" ]; then
+          echo "Version mismatch: git tag (${{ github.ref_name }}) and version in CHANGELOG.md ($CHANGELOG_VERSION) are not the same."
+          exit 1
+        fi 
+        echo "CHANGELOG_VERSION=$CHANGELOG_VERSION"
+        echo "github.ref_name=${{ github.ref_name }}"  
+        echo "Version check of git tag and CHANGELOG.md passed successfully." 
+
+    - name: Push NuGet package to nuget.org
+      run: |
+        dotnet nuget push `
+        ./bin/Release/Rhino.Scripting.${{ github.ref_name }}.symbols.nupkg `
+        --api-key ${{ secrets.NUGET_API_KEY }} `
+        --source https://api.nuget.org/v3/index.json
