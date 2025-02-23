@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.1] - 2025-02-23
 ## Changed
 - build and deploy with GitHub Actions
+- update FsEx to 0.16.0
 
 ## [0.8.0] - 2024-09-28
 ### Changed
@@ -55,16 +56,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First public release
 
-[Unreleased]: https://github.com/goswinr/Str/compare/0.8.0...HEAD
-[0.8.0]: https://github.com/goswinr/Str/compare/0.7.0...0.8.0
-[0.7.0]: https://github.com/goswinr/Str/compare/0.6.2...0.7.0
-[0.6.2]: https://github.com/goswinr/Str/compare/0.6.1...0.6.2
-[0.6.1]: https://github.com/goswinr/Str/compare/0.6.0...0.6.1
-[0.6.0]: https://github.com/goswinr/Str/compare/0.5.1...0.6.0
-[0.5.1]: https://github.com/goswinr/Str/compare/0.4.0...0.5.1
-[0.4.0]: https://github.com/goswinr/Str/compare/0.3.0...0.4.0
-[0.3.0]: https://github.com/goswinr/Str/compare/0.2.0...0.3.0
-[0.2.0]: https://github.com/goswinr/Str/releases/tag/0.2.0
+[Unreleased]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.1...HEAD
+[0.8.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.8.0...0.8.1
+[0.8.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.7.0...0.8.0
+[0.7.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.6.2...0.7.0
+[0.6.2]: https://github.com/goswinr/Rhino.Scripting/compare/0.6.1...0.6.2
+[0.6.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.6.0...0.6.1
+[0.6.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.5.1...0.6.0
+[0.5.1]: https://github.com/goswinr/Rhino.Scripting/compare/0.4.0...0.5.1
+[0.4.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/goswinr/Rhino.Scripting/compare/0.2.0...0.3.0
+[0.2.0]: https://github.com/goswinr/Rhino.Scripting/releases/tag/0.2.0
 
 <!--
 use to get tag dates:

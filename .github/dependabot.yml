@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  # don't do nuget here, WPF does not build correctly on linux , just Win forms too?
+  # WPF does not build correctly on linux , but Win forms does so dependabot works?
 
   # Update NuGet packages
   - package-ecosystem: "nuget"
