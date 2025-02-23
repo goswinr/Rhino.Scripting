@@ -12,7 +12,7 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     ignore:
       - dependency-name: "FSharp.Core"
       - dependency-name: "RhinoCommon"
