@@ -1,7 +1,7 @@
 ﻿#r "nuget: FsEx"
 
 open System
-open FsEx
+// open FsEx
 
 let dir = @"C:\GitHub\Rhino.Scripting\Src"
 

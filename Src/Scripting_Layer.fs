@@ -5,13 +5,15 @@ open Rhino
 
 open System
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
-open FsEx.CompareOperators
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
+// open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenLayer =
+  module ResizeArray = ResizeArray.ResizeArray
+
   type RhinoScriptSyntax with
     //---The members below are in this file only for development. This brings acceptable tooling performance (e.g. autocomplete)
     //---Before compiling the script combineIntoOneFile.fsx is run to combine them all into one file.
@@ -164,7 +166,7 @@ module AutoOpenLayer =
         else
             UtilLayer.failOnBadShortLayerName (newLayerName, newLayerName, allowUnicode)
             let lay = State.Doc.Layers.[i]
-            let ps= lay.FullPath |> String.split "::" |> Rarr.ofArray
+            let ps = lay.FullPath.Split( [|"::"|], StringSplitOptions.RemoveEmptyEntries) //|> ResizeArray.ofArray
             ps.Last <- newLayerName
             let np = String.concat "::" ps
             let ni = State.Doc.Layers.FindByFullPath(np, RhinoMath.UnsetIntIndex)
@@ -332,17 +334,22 @@ module AutoOpenLayer =
 
     ///<summary>Returns the immediate child layers of a layer. ( excluding children of children) </summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(string Rarr) List of children layer names.</returns>
-    static member LayerChildren(layer:string) : string Rarr =
+    ///<returns>(string ResizeArray) List of children layer names.</returns>
+    static member LayerChildren(layer:string) : string ResizeArray =
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let children = layer.GetChildren()
-        if notNull children then rarr {for child in children do child.FullPath }
-        else rarr { () } //empty list
+        if notNull children then
+            let ls = ResizeArray()
+            for child in children do
+                ls.Add(child.FullPath)
+            ls
+        else ResizeArray() //empty list
+
 
     ///<summary>Returns all (immediate and descendent) child and grand child layers of a layer.</summary>
     ///<param name="layer">(string) The name of an existing layer</param>
-    ///<returns>(string Rarr) List of children layer names.</returns>
-    static member LayerChildrenAll(layer:string) : string Rarr =
+    ///<returns>(string ResizeArray) List of children layer names.</returns>
+    static member LayerChildrenAll(layer:string) : string ResizeArray =
         let rec loop (l:DocObjects.Layer) =
             seq{
                 let children = l.GetChildren()
@@ -354,7 +361,7 @@ module AutoOpenLayer =
         |> RhinoScriptSyntax.CoerceLayer
         |> loop
         |> Seq.map ( fun l -> l.FullPath)
-        |> Rarr.ofSeq
+        |> ResizeArray
 
     ///<summary>Returns the color of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
@@ -380,11 +387,12 @@ module AutoOpenLayer =
 
 
     ///<summary>Return identifiers of all layers in the document.</summary>
-    ///<returns>(Guid Rarr) The identifiers of all layers in the document.</returns>
-    static member LayerIds() : Guid Rarr =
-        rarr {for layer in State.Doc.Layers do
-                        if not layer.IsDeleted then
-                            layer.Id }
+    ///<returns>(Guid ResizeArray) The identifiers of all layers in the document.</returns>
+    static member LayerIds() : Guid ResizeArray =
+        State.Doc.Layers
+        |> Seq.filter (fun layer -> not layer.IsDeleted)
+        |> Seq.map (fun layer -> layer.Id)
+        |> ResizeArray
 
 
     ///<summary>Returns the line type of a layer.</summary>
@@ -398,16 +406,16 @@ module AutoOpenLayer =
 
     ///<summary>Changes the line type of a layer.</summary>
     ///<param name="layer">(string) Name of an existing layer</param>
-    ///<param name="linetyp">(string) Name of a line type</param>
+    ///<param name="lineType">(string) Name of a line type</param>
     ///<returns>(unit) void, nothing.</returns>
-    static member LayerLinetype(layer:string, linetyp:string) : unit = //SET
+    static member LayerLinetype(layer:string, lineType:string) : unit = //SET
         let layer = RhinoScriptSyntax.CoerceLayer(layer)
         let mutable index = layer.LinetypeIndex
-        if linetyp = State.Doc.Linetypes.ContinuousLinetypeName then
+        if lineType = State.Doc.Linetypes.ContinuousLinetypeName then
             index <- -1
         else
-            let lt = State.Doc.Linetypes.FindName(linetyp)
-            if lt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath linetyp
+            let lt = State.Doc.Linetypes.FindName(lineType)
+            if lt|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.LayerLinetype not found. layer:'%s' line typ:'%s'" layer.FullPath lineType
             index <- lt.LinetypeIndex
         layer.LinetypeIndex <- index
         State.Doc.Views.Redraw()
@@ -583,9 +591,9 @@ module AutoOpenLayer =
 
 
     ///<summary>Returns the names of all layers in the document.</summary>
-    ///<returns>(string Rarr) list of layer names.</returns>
-    static member LayerNames() : string Rarr =
-        let rc = Rarr()
+    ///<returns>(string ResizeArray) list of layer names.</returns>
+    static member LayerNames() : string ResizeArray =
+        let rc = ResizeArray()
         for layer in State.Doc.Layers do
             if not layer.IsDeleted then rc.Add(layer.FullPath)
         rc
@@ -690,7 +698,7 @@ module AutoOpenLayer =
     ///    'false' to remove current layer too if its empty. Any other non empty layer might be the new current</param>
     ///<returns>(unit) void, nothing.</returns>
     static member PurgeEmptyLayers([<OPT;DEF(true)>]keepCurrent:bool) : unit =
-        let taken=Hashset()
+        let taken=Collections.Generic.HashSet<Guid>()
         let Layers = State.Doc.Layers
         let mutable nonEmptyIndex = -1
         let rec addLoop(g:Guid)=

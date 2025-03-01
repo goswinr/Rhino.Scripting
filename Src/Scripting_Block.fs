@@ -7,8 +7,8 @@ open System
 
 open Rhino.Geometry
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenBlock =
@@ -32,7 +32,7 @@ module AutoOpenBlock =
     static member AddBlock(objectIds:Guid seq, basePoint:Point3d, [<OPT;DEF("")>]name:string, [<OPT;DEF(false)>]deleteInput:bool) : string =
         let name = if name="" then State.Doc.InstanceDefinitions.GetUnusedInstanceDefinitionName() else name
         let found = State.Doc.InstanceDefinitions.Find(name)
-        let objects = Rarr()
+        let objects = ResizeArray()
         for objectId in objectIds do
             let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)  //Coerce should not be needed
             if obj.IsReference then  RhinoScriptingException.Raise "RhinoScriptSyntax.AddBlock: cannot add Reference object '%s' to '%s'" (Nice.str objectId) name
@@ -64,12 +64,12 @@ module AutoOpenBlock =
     ///<summary>Returns names of the block definitions that contain a specified block
     ///    definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
-    ///<returns>(string Rarr) A list of block definition names.</returns>
-    static member BlockContainers(blockName:string) : string Rarr =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockContainers: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let containers = idef.GetContainers()
-        let rc = Rarr()
+    ///<returns>(string ResizeArray) A list of block definition names.</returns>
+    static member BlockContainers(blockName:string) : string ResizeArray =
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockContainers: '%s' does not exist in InstanceDefinitionsTable" blockName
+        let containers = instDef.GetContainers()
+        let rc = ResizeArray()
         for item in containers do
             if not <| item.IsDeleted then  rc.Add(item.Name)
         rc
@@ -92,18 +92,18 @@ module AutoOpenBlock =
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<returns>(string) The current description.</returns>
     static member BlockDescription(blockName:string) : string = //GET
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockDescription: '%s' does not exist in InstanceDefinitionsTable" blockName
-        idef.Description
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockDescription: '%s' does not exist in InstanceDefinitionsTable" blockName
+        instDef.Description
 
     ///<summary>Sets the description of a block definition.</summary>
     ///<param name="blockName">(string) The name of an existing block definition</param>
     ///<param name="description">(string) The new description</param>
     ///<returns>(unit) void, nothing.</returns>
     static member BlockDescription(blockName:string, description:string) : unit = //SET
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockDescription:'%s' does not exist in InstanceDefinitionsTable" blockName
-        State.Doc.InstanceDefinitions.Modify( idef, idef.Name, description, true ) |>ignore
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockDescription:'%s' does not exist in InstanceDefinitionsTable" blockName
+        State.Doc.InstanceDefinitions.Modify( instDef, instDef.Name, description, true ) |>ignore
 
 
     ///<summary>Counts number of instances of the block in the document.
@@ -116,9 +116,9 @@ module AutoOpenBlock =
     ///    2 = check for references from other instance definitions, counts every instance of nested block</param>
     ///<returns>(int) The number of instances of the block in the document.</returns>
     static member BlockInstanceCount(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : int =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockInstanceCount: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let  refs = idef.GetReferences(whereToLook)
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockInstanceCount: '%s' does not exist in InstanceDefinitionsTable" blockName
+        let  refs = instDef.GetReferences(whereToLook)
         refs.Length
 
 
@@ -138,8 +138,8 @@ module AutoOpenBlock =
     ///<returns>(string) The block name of a block instance.</returns>
     static member BlockInstanceName(objectId:Guid) : string =
         let mutable instance = RhinoScriptSyntax.CoerceBlockInstanceObject(objectId)
-        let mutable idef = instance.InstanceDefinition
-        idef.Name
+        let mutable instDef = instance.InstanceDefinition
+        instDef.Name
 
 
     ///<summary>Returns the identifiers of the inserted instances of a block.</summary>
@@ -148,12 +148,14 @@ module AutoOpenBlock =
     ///    0 = get top level references in active document.
     ///    1 = get top level and nested references in active document.
     ///    2 = check for references from other instance definitions</param>
-    ///<returns>(Guid Rarr) Ids identifying the instances of a block in the model.</returns>
-    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : Rarr<Guid> =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockInstances: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let instances = idef.GetReferences(whereToLook)
-        rarr { for item in instances do yield item.Id }
+    ///<returns>(Guid ResizeArray) Ids identifying the instances of a block in the model.</returns>
+    static member BlockInstances(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : ResizeArray<Guid> =
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockInstances: '%s' does not exist in InstanceDefinitionsTable" blockName
+        let instances = instDef.GetReferences(whereToLook)
+        let rc = ResizeArray(instances.Length)
+        for item in instances do rc.Add(item.Id)
+        rc
 
 
     ///<summary>Returns the location of a block instance relative to the world coordinate
@@ -168,10 +170,13 @@ module AutoOpenBlock =
 
 
     ///<summary>Returns the names of all block definitions in the document.</summary>
-    ///<returns>(string Rarr) The names of all block definitions in the document.</returns>
-    static member BlockNames() : string Rarr =
-        let  ideflist = State.Doc.InstanceDefinitions.GetList(true)
-        rarr { for item in ideflist do yield item.Name}
+    ///<returns>(string ResizeArray) The names of all block definitions in the document.</returns>
+    static member BlockNames() : string ResizeArray =
+        let  instDefList = State.Doc.InstanceDefinitions.GetList(true)
+        let rc = ResizeArray(instDefList.Length)
+        for item in instDefList do rc.Add(item.Name)
+        rc
+
 
 
 
@@ -179,19 +184,21 @@ module AutoOpenBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(int) The number of objects that make up a block definition.</returns>
     static member BlockObjectCount(blockName:string) : int =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount:'%s' does not exist in InstanceDefinitionsTable" blockName
-        idef.ObjectCount
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjectCount:'%s' does not exist in InstanceDefinitionsTable" blockName
+        instDef.ObjectCount
 
 
     ///<summary>Returns identifiers of the objects that make up a block definition.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
-    ///<returns>(Guid Rarr) list of identifiers.</returns>
-    static member BlockObjects(blockName:string) : Rarr<Guid> =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjects: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let  rhobjs = idef.GetObjects()
-        rarr { for obj in rhobjs -> obj.Id}
+    ///<returns>(Guid ResizeArray) list of identifiers.</returns>
+    static member BlockObjects(blockName:string) : ResizeArray<Guid> =
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockObjects: '%s' does not exist in InstanceDefinitionsTable" blockName
+        let  rhobjs = instDef.GetObjects()
+        let rc = ResizeArray(rhobjs.Length)
+        for item in rhobjs do rc.Add(item.Id)
+        rc
 
 
     ///<summary>Returns path to the source of a linked or embedded block definition.
@@ -200,9 +207,9 @@ module AutoOpenBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(string) path to the linked block.</returns>
     static member BlockPath(blockName:string) : string =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockPath: '%s' does not exist in InstanceDefinitionsTable" blockName
-        idef.SourceArchive
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.BlockPath: '%s' does not exist in InstanceDefinitionsTable" blockName
+        instDef.SourceArchive
 
 
     ///<summary>Returns the status of a linked block.</summary>
@@ -217,18 +224,18 @@ module AutoOpenBlock =
     ///      2    The linked block definition's file is older than definition.
     ///      3    The linked block definition's file is different than definition.</returns>
     static member BlockStatus(blockName:string) : int =
-        let  idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  -3
-        else int(idef.ArchiveFileStatus)
+        let  instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  -3
+        else int(instDef.ArchiveFileStatus)
 
 
     ///<summary>Deletes a block definition and all of it's inserted instances.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member DeleteBlock(blockName:string) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let  rc = State.Doc.InstanceDefinitions.Delete(idef.Index, deleteReferences=true, quiet=false)
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.DeleteBlock: '%s' does not exist in InstanceDefinitionsTable" blockName
+        let  rc = State.Doc.InstanceDefinitions.Delete(instDef.Index, deleteReferences=true, quiet=false)
         State.Doc.Views.Redraw()
         rc
 
@@ -251,9 +258,9 @@ module AutoOpenBlock =
     ///<param name="xForm">(Transform) 4x4 transformation matrix to apply</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
     static member InsertBlock2(blockName:string, xForm:Transform) : Guid =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.InsertBlock2: '%s' does not exist in InstanceDefinitionsTable" blockName
-        let objectId = State.Doc.Objects.AddInstanceObject(idef.Index, xForm )
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.InsertBlock2: '%s' does not exist in InstanceDefinitionsTable" blockName
+        let objectId = State.Doc.Objects.AddInstanceObject(instDef.Index, xForm )
         if objectId<>System.Guid.Empty then
             State.Doc.Views.Redraw()
         objectId
@@ -270,7 +277,7 @@ module AutoOpenBlock =
     ///    The axis of rotation</param>
     ///<returns>(Guid) objectId for the block that was added to the doc.</returns>
     static member InsertBlock(blockName:string, insertionPoint:Point3d, [<OPT;DEF(Vector3d())>]scale:Vector3d, [<OPT;DEF(0.0)>]angleDegrees:float, [<OPT;DEF(Vector3d())>]rotationNormal:Vector3d) : Guid =
-        let angleRadians = UtilMath.toRadians(angleDegrees)
+        let angleRadians = toRadians(angleDegrees)
         let sc= if scale.IsZero then Vector3d(1. , 1. , 1.) else scale
         let rotationNormal0 = if rotationNormal.IsZero then Vector3d.ZAxis else rotationNormal
         let move = Transform.Translation(insertionPoint.X, insertionPoint.Y, insertionPoint.Z)
@@ -284,17 +291,17 @@ module AutoOpenBlock =
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlock(blockName:string) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        not <| isNull idef
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        not <| isNull instDef
 
 
     ///<summary>Checks if a block definition is embedded, or linked, from an external file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockEmbedded(blockName:string) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded '%s' does not exist in InstanceDefinitionsTable" blockName
-        match int( idef.UpdateType) with
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockEmbedded '%s' does not exist in InstanceDefinitionsTable" blockName
+        match int( instDef.UpdateType) with
         | 1  -> true //DocObjects.InstanceDefinitionUpdateType.Embedded
         | 2  -> true //DocObjects.InstanceDefinitionUpdateType.LinkedAndEmbedded
         |_-> false
@@ -318,18 +325,18 @@ module AutoOpenBlock =
     ///    2 = Check for references in other instance definitions</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockInUse(blockName:string, [<OPT;DEF(0)>]whereToLook:int) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse '%s' does not exist in InstanceDefinitionsTable" blockName
-        idef.InUse(whereToLook)
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockInUse '%s' does not exist in InstanceDefinitionsTable" blockName
+        instDef.InUse(whereToLook)
 
 
     ///<summary>Checks if that a block definition is from a reference file.</summary>
     ///<param name="blockName">(string) Name of an existing block definition</param>
     ///<returns>(bool) True or False.</returns>
     static member IsBlockReference(blockName:string) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference '%s' does not exist in InstanceDefinitionsTable" blockName
-        idef.IsReference
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.IsBlockReference '%s' does not exist in InstanceDefinitionsTable" blockName
+        instDef.IsReference
 
 
     ///<summary>Renames an existing block definition.</summary>
@@ -337,10 +344,10 @@ module AutoOpenBlock =
     ///<param name="newName">(string) Name to change to</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member RenameBlock(blockName:string, newName:string) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock '%s' does not exist in InstanceDefinitionsTable" blockName
-        let description = idef.Description
-        State.Doc.InstanceDefinitions.Modify(idef, newName, description, quiet=false)
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.RenameBlock '%s' does not exist in InstanceDefinitionsTable" blockName
+        let description = instDef.Description
+        State.Doc.InstanceDefinitions.Modify(instDef, newName, description, quiet=false)
 
 
     ///<summary>Replace the objects inside an existing block definition.</summary>
@@ -349,8 +356,8 @@ module AutoOpenBlock =
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c> delete the input objects from document, so that they only exist in the block definition.</param>
     ///<returns>(bool) True or False indicating success or failure.</returns>
     static member ReplaceBlockObjects(blockName:string, newObjects:seq<Guid>,[<OPT;DEF(true)>]deleteInput:bool) : bool =
-        let idef = State.Doc.InstanceDefinitions.Find(blockName)
-        if isNull idef then  RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects '%s' does not exist in InstanceDefinitionsTable" blockName
+        let instDef = State.Doc.InstanceDefinitions.Find(blockName)
+        if isNull instDef then  RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects '%s' does not exist in InstanceDefinitionsTable" blockName
         let objs  = newObjects |> Seq.map RhinoScriptSyntax.CoerceRhinoObject |> Array.ofSeq // just to be sure its not lazy
         let geos  = objs |> Array.map (fun o-> o.Geometry)
         let attrs = objs |> Array.map (fun o-> o.Attributes)
@@ -358,5 +365,5 @@ module AutoOpenBlock =
             let k = State.Doc.Objects.Delete(newObjects, quiet=true)
             let l = Seq.length newObjects
             if k <> l then RhinoScriptingException.Raise "RhinoScriptSyntax.ReplaceBlockObjects failed to delete input on %d out of %s" (l-k) (Nice.str newObjects)
-        State.Doc.InstanceDefinitions.ModifyGeometry(idef.Index,geos,attrs)
+        State.Doc.InstanceDefinitions.ModifyGeometry(instDef.Index,geos,attrs)
 

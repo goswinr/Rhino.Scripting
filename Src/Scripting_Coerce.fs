@@ -7,10 +7,10 @@ open System
 
 open Rhino.Geometry
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
-open FsEx.CompareOperators
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
+// open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenCoerce =

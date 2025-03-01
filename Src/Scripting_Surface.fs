@@ -7,10 +7,11 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
+open ResizeArray
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenSurface =
@@ -152,7 +153,7 @@ module AutoOpenSurface =
     ///<param name="curveIds">(Guid seq) List of Curves</param>
     ///<returns>(Guid) identifier of new object.</returns>
     static member AddEdgeSrf(curveIds:Guid seq) : Guid =
-        let curves =  rarr { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves =  resizeArray { for objectId in curveIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let brep = Brep.CreateEdgeSurface(curves)
         if brep|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.AddEdgeSrf failed.  curveIds:'%s'" (Nice.str curveIds)
         let objectId = State.Doc.Objects.AddBrep(brep)
@@ -178,7 +179,7 @@ module AutoOpenSurface =
                                  [<OPT;DEF(0.0)>]edgeTolerance:float,
                                  [<OPT;DEF(0.0)>]interiorTolerance:float,
                                  [<OPT;DEF(0.0)>]angleTolerance:float) : Guid =
-        let curves =  rarr { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) }
+        let curves =  resizeArray { for curve in curves do yield RhinoScriptSyntax.CoerceCurve(curve) }
         let surf, _ = NurbsSurface.CreateNetworkSurface(curves, continuity, edgeTolerance, interiorTolerance, angleTolerance)// 0.0 Tolerance OK ? TODO
         if notNull surf then
             let rc = State.Doc.Objects.AddSurface(surf)
@@ -292,7 +293,7 @@ module AutoOpenSurface =
                               [<OPT;DEF(1.0)>]surfacePull:float,
                               [<OPT;DEF(false)>]fixEdges:bool) : Guid =
                     let uspan, vspan = 10, 10
-                    let geometry =   rarr{for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
+                    let geometry =   resizeArray {for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
                     let surface = RhinoScriptSyntax.CoerceSurface(startSurfaceId)
                     let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
                     let b =  Array.create 4 fixEdges
@@ -340,7 +341,7 @@ module AutoOpenSurface =
                             [<OPT;DEF(false)>]fixEdges:bool) : Guid =
 
         let uspan, vspan = uvSpans
-        let geometry =   rarr{for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
+        let geometry =   resizeArray {for objectId in objectIds do RhinoScriptSyntax.CoerceRhinoObject(objectId).Geometry }
         let tolerance = if 0.0 = tolerance then State.Doc.ModelAbsoluteTolerance else tolerance
         let b =  Array.create 4 fixEdges
         let brep = Brep.CreatePatch(geometry, null, uspan, vspan, trim, false, pointSpacing, flexibility, surfacePull, b, tolerance) //TODO test with null as srf
@@ -362,19 +363,19 @@ module AutoOpenSurface =
     ///    0(none), 1(flat), 2(round)</param>
     ///<param name="fit">(bool) Optional, default value: <c>false</c>
     ///    Attempt to fit a single Surface</param>
-    ///<returns>(Guid Rarr) identifiers of new objects created.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of new objects created.</returns>
     static member AddPipe( curveId:Guid,
                            parameters:float seq,
                            radii:float seq,
                            [<OPT;DEF(0)>]blendType:int,
                            [<OPT;DEF(0)>]cap:int,
-                           [<OPT;DEF(false)>]fit:bool) : Guid Rarr =
+                           [<OPT;DEF(false)>]fit:bool) : Guid ResizeArray =
         let rail = RhinoScriptSyntax.CoerceCurve(curveId)
         let abstol = State.Doc.ModelAbsoluteTolerance
         let angtol = State.Doc.ModelAngleToleranceRadians
         let cap :PipeCapMode  = LanguagePrimitives.EnumOfValue  cap
         let breps = Brep.CreatePipe(rail, parameters, radii, (blendType = 0), cap, fit, abstol, angtol)
-        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
         State.Doc.Views.Redraw()
         rc
 
@@ -410,12 +411,12 @@ module AutoOpenSurface =
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="curves">(Curve seq) several Curves Geometries to use for creating planar Surfaces</param>
-    ///<returns>(Guid Rarr) identifiers of Surfaces created .</returns>
-    static member AddPlanarSrf(curves:Curve seq) : Guid Rarr =
+    ///<returns>(Guid ResizeArray) identifiers of Surfaces created .</returns>
+    static member AddPlanarSrf(curves:Curve seq) : Guid ResizeArray =
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
             State.Doc.Views.Redraw()
             rc
         else
@@ -423,13 +424,13 @@ module AutoOpenSurface =
 
     ///<summary>Creates one or more Surfaces from planar Curves.</summary>
     ///<param name="objectIds">(Guid seq) Curves to use for creating planar Surfaces</param>
-    ///<returns>(Guid Rarr) identifiers of Surfaces created .</returns>
-    static member AddPlanarSrf(objectIds:Guid seq) : Guid Rarr =
-        let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+    ///<returns>(Guid ResizeArray) identifiers of Surfaces created .</returns>
+    static member AddPlanarSrf(objectIds:Guid seq) : Guid ResizeArray =
+        let curves =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreatePlanarBreps(curves, tolerance)
         if notNull breps then
-            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
             State.Doc.Views.Redraw()
             rc
         else
@@ -480,17 +481,17 @@ module AutoOpenSurface =
     ///<param name="refit">(float) Optional, if given the loft is refitted, the value is the tolerance used to rebuild</param>
     ///<param name="closed">(bool) Optional, default value: <c>false</c>
     ///    Close the loft back to the first Curve</param>
-    ///<returns>(Guid Rarr) Array containing the identifiers of the new Surface objects.</returns>
+    ///<returns>(Guid ResizeArray) Array containing the identifiers of the new Surface objects.</returns>
     static member AddLoftSrf( objectIds:Guid seq,
                               [<OPT;DEF(Point3d())>]start:Point3d, //TODO make overload instead,[<OPT;DEF(Point3d())>] may leak  see draw vector and transform point!
                               [<OPT;DEF(Point3d())>]ende:Point3d,
                               [<OPT;DEF(0)>]loftType:int,
                               [<OPT;DEF(0)>]rebuild:int,
                               [<OPT;DEF(0.0)>]refit:float,
-                              [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
+                              [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         if loftType<0 || loftType>4 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf: LoftType must be 0-4.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         if rebuild<>0 && refit<>0.0 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf: set either rebuild or refit to a value ! not both.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
-        let curves =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
+        let curves =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceCurve(objectId) }
         if Seq.length(curves)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
         let start = if start = Point3d.Origin  then Point3d.Unset else start
         let ende  = if ende  = Point3d.Origin  then Point3d.Unset else ende
@@ -507,7 +508,7 @@ module AutoOpenSurface =
         elif refit > 0.0 then
             breps <- Brep.CreateFromLoftRefit(curves, start, ende, lt, closed, refit)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddLoftSrf failed.  objectIds:'%A' start:'%A' end:'%A' loftType:'%A' rebuild:'%A' refit:'%A' closed:'%A'" (Nice.str objectIds) start ende loftType rebuild refit closed
-        let idlist = Rarr()
+        let idlist = ResizeArray()
         for brep in breps do
             let objectId = State.Doc.Objects.AddBrep(brep)
             if objectId <> Guid.Empty then idlist.Add(objectId)
@@ -557,13 +558,13 @@ module AutoOpenSurface =
     ///    information, see Rhino help for details on the Contour command.</summary>
     ///<param name="objectId">(Guid) Object identifier to contour</param>
     ///<param name="plane">(Plane) The Plane that defines the cutting Plane</param>
-    ///<returns>(Guid Rarr) ids of new contour Curves .</returns>
+    ///<returns>(Guid ResizeArray) ids of new contour Curves .</returns>
     static member AddSrfContourCrvs( objectId:Guid,
-                                     plane:Plane) : Guid Rarr =
+                                     plane:Plane) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         //plane = RhinoScriptSyntax.CoercePlane(pointsOrPlane)
         let curves =  Brep.CreateContourCurves(brep, plane)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for crv in curves do
             let objectId = State.Doc.Objects.AddCurve(crv)
             if objectId <> Guid.Empty then rc.Add(objectId)
@@ -578,14 +579,14 @@ module AutoOpenSurface =
     ///<param name="startPoint">(Point3d) The start point of a center line</param>
     ///<param name="endPoint">(Point3d)   the end point of a center line</param>
     ///<param name="interval">(float) Distance between contour Curves</param>
-    ///<returns>(Guid Rarr) ids of new contour Curves .</returns>
+    ///<returns>(Guid ResizeArray) ids of new contour Curves .</returns>
     static member AddSrfContourCrvs( objectId:Guid,
                                      startPoint:Point3d,
                                      endPoint :Point3d ,
-                                     interval:float) : Guid Rarr=
+                                     interval:float) : Guid ResizeArray=
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let curves =  Brep.CreateContourCurves(brep, startPoint , endPoint, interval)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for crv in curves do
             let objectId = State.Doc.Objects.AddCurve(crv)
             if objectId <> Guid.Empty then rc.Add(objectId)
@@ -672,16 +673,16 @@ module AutoOpenSurface =
     ///<param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     ///<param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    ///<returns>(Guid Rarr) List of new Surface objects.</returns>
+    ///<returns>(Guid ResizeArray) List of new Surface objects.</returns>
     static member AddSweep1( rail:Guid,
                              shapes:Guid seq,
-                             [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
+                             [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         let rail = RhinoScriptSyntax.CoerceCurve(rail)
-        let shapes =  rarr { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
+        let shapes =  resizeArray { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSweep1 failed.  rail:'%A' shapes:'%A' closed:'%A'" rail shapes closed
-        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
         State.Doc.Views.Redraw()
         rc
 
@@ -692,17 +693,17 @@ module AutoOpenSurface =
     ///<param name="shapes">(Guid seq) One or more cross section shape Curves</param>
     ///<param name="closed">(bool) Optional, default value: <c>false</c>
     ///    If True, then create a closed Surface</param>
-    ///<returns>(Guid Rarr) List of new Surface objects.</returns>
+    ///<returns>(Guid ResizeArray) List of new Surface objects.</returns>
     static member AddSweep2( rails:Guid * Guid,
                              shapes:Guid seq,
-                             [<OPT;DEF(false)>]closed:bool) : Guid Rarr =
+                             [<OPT;DEF(false)>]closed:bool) : Guid ResizeArray =
         let rail1 = RhinoScriptSyntax.CoerceCurve(fst rails)
         let rail2 = RhinoScriptSyntax.CoerceCurve(snd rails)
-        let shapes =  rarr { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
+        let shapes =  resizeArray { for shape in shapes do yield RhinoScriptSyntax.CoerceCurve(shape) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let breps = Brep.CreateFromSweep(rail1, rail2, shapes, closed, tolerance)
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.AddSweep2 failed.  rails:'%A' shapes:'%A' closed:'%A'" rails shapes closed
-        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
         State.Doc.Views.Redraw()
         rc
 
@@ -750,17 +751,17 @@ module AutoOpenSurface =
     ///<param name="input1">(Guid seq) List of Surfaces to be subtracted</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete all input objects</param>
-    ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
+    ///<returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
     static member BooleanDifference( input0:Guid seq,
                                      input1:Guid seq,
-                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
+                                     [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
 
-        let breps0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let breps1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanDifference(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanDifference failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc =  rarr { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc =  resizeArray { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
@@ -775,16 +776,16 @@ module AutoOpenSurface =
     ///<param name="input1">(Guid seq) List of Surfaces</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete all input objects</param>
-    ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
+    ///<returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
     static member BooleanIntersection( input0:Guid seq,
                                        input1:Guid seq,
-                                       [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
-        let breps0 =  rarr { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
-        let breps1 =  rarr { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+                                       [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
+        let breps0 =  resizeArray { for objectId in input0 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps1 =  resizeArray { for objectId in input1 do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanIntersection(breps0, breps1, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanIntersection failed.  input0:'%A' input1:'%A' deleteInput:'%A'" input0 input1 deleteInput
-        let rc =  rarr { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc =  resizeArray { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
         if deleteInput then
             for objectId in input0 do State.Doc.Objects.Delete(objectId, true)|> ignore
             for objectId in input1 do State.Doc.Objects.Delete(objectId, true)|> ignore
@@ -798,14 +799,14 @@ module AutoOpenSurface =
     ///<param name="input">(Guid seq) List of Surfaces to union</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>true</c>
     ///    Delete all input objects</param>
-    ///<returns>(Guid Rarr) List of identifiers of newly created objects .</returns>
-    static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid Rarr =
+    ///<returns>(Guid ResizeArray) List of identifiers of newly created objects .</returns>
+    static member BooleanUnion(input:Guid seq, [<OPT;DEF(true)>]deleteInput:bool) : Guid ResizeArray =
         if Seq.length(input)<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let breps =  rarr { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps =  resizeArray { for objectId in input do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         let tolerance = State.Doc.ModelAbsoluteTolerance
         let newbreps = Brep.CreateBooleanUnion(breps, tolerance)
         if newbreps|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.BooleanUnion failed.  input:'%A' deleteInput:'%A'" input deleteInput
-        let rc =  rarr { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
+        let rc =  resizeArray { for brep in newbreps do yield State.Doc.Objects.AddBrep(brep) }
         if  deleteInput then
             for objectId in input do State.Doc.Objects.Delete(objectId, true)|> ignore
         State.Doc.Views.Redraw()
@@ -874,11 +875,11 @@ module AutoOpenSurface =
     ///<param name="objectId">(Guid) The identifier of the Surface or Polysurface object</param>
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the duplicated edge Curves. The default is not to select (False)</param>
-    ///<returns>(Guid Rarr) identifying the newly created Curve objects.</returns>
-    static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid Rarr =
+    ///<returns>(Guid ResizeArray) identifying the newly created Curve objects.</returns>
+    static member DuplicateEdgeCurves(objectId:Guid, [<OPT;DEF(false)>]select:bool) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let outcurves = brep.DuplicateEdgeCurves()
-        let curves = Rarr()
+        let curves = ResizeArray()
         for curve in outcurves do
             if curve.IsValid then
                 let rc = State.Doc.Objects.AddCurve(curve)
@@ -899,8 +900,8 @@ module AutoOpenSurface =
     ///    0 = both exterior and interior,
     ///    1 = exterior
     ///    2 = interior</param>
-    ///<returns>(Guid Rarr) list of Curve ids .</returns>
-    static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid Rarr =
+    ///<returns>(Guid ResizeArray) list of Curve ids .</returns>
+    static member DuplicateSurfaceBorder(surfaceId:Guid, [<OPT;DEF(0)>]typ:int) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let inner = typ = 0 || typ = 2
         let outer = typ = 0 || typ = 1
@@ -909,7 +910,7 @@ module AutoOpenSurface =
         let tolerance = State.Doc.ModelAbsoluteTolerance * 2.1
         curves <- Curve.JoinCurves(curves, tolerance)
         if curves|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.DuplicateSurfaceBorder failed.  surfaceId:'%s' type:'%d'" (Nice.str surfaceId) typ
-        let rc =  rarr { for c in curves do yield State.Doc.Objects.AddCurve(c) }
+        let rc =  resizeArray { for c in curves do yield State.Doc.Objects.AddCurve(c) }
         State.Doc.Views.Redraw()
         rc
 
@@ -957,9 +958,9 @@ module AutoOpenSurface =
     ///<param name="objectIds">(Guid seq) Identifiers of Polysurfaces to explode</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete input objects after exploding</param>
-    ///<returns>(Guid Rarr) List of identifiers of exploded pieces .</returns>
-    static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
-        let ids = Rarr()
+    ///<returns>(Guid ResizeArray) List of identifiers of exploded pieces .</returns>
+    static member ExplodePolysurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
+        let ids = ResizeArray()
         for objectId in objectIds do
             let brep = RhinoScriptSyntax.CoerceBrep(objectId)
             if brep.Faces.Count>1 then
@@ -979,12 +980,12 @@ module AutoOpenSurface =
     ///    0 = u
     ///    1 = v
     ///    2 = both</param>
-    ///<returns>(Guid Rarr) List of Curve ids .</returns>
+    ///<returns>(Guid ResizeArray) List of Curve ids .</returns>
     static member ExtractIsoCurve( surfaceId:Guid,
                                    parameter:float * float,
-                                   direction:int) : Guid Rarr =
+                                   direction:int) : Guid ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
-        let ids = Rarr()
+        let ids = ResizeArray()
         let mutable curves = [| |]
         if direction = 0 || direction = 2 then
 
@@ -1018,12 +1019,12 @@ module AutoOpenSurface =
     ///<param name="faceIndices">(int seq) One or more numbers representing faces</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>
     ///    If True the faces are copied. If False, the faces are extracted</param>
-    ///<returns>(Guid Rarr) identifiers of extracted Surface objects .</returns>
+    ///<returns>(Guid ResizeArray) identifiers of extracted Surface objects .</returns>
     static member ExtractSurface( objectId:Guid,
                                   faceIndices:int seq,
-                                  [<OPT;DEF(false)>]copy:bool) : Guid Rarr =
+                                  [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
-        let rc = Rarr()
+        let rc = ResizeArray()
         let faceIndices = Seq.sort(faceIndices)|> Seq.rev
         for index in faceIndices do
             let face = brep.Faces.[index]
@@ -1112,12 +1113,12 @@ module AutoOpenSurface =
     ///<param name="uvparam0">(Point2d) Optional, A u, v Surface parameter of Surface0 near where the fillet
     ///    is expected to hit the Surface</param>
     ///<param name="uvparam1">(Point2d) Optional, Same as uvparam0, but for Surface1</param>
-    ///<returns>(Guid Rarr) ids of Surfaces created .</returns>
+    ///<returns>(Guid ResizeArray) ids of Surfaces created .</returns>
     static member FilletSurfaces( surface0:Guid,
                                   surface1:Guid,
                                   radius:float,
                                   [<OPT;DEF(Point2d())>]uvparam0:Point2d,
-                                  [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Guid Rarr=
+                                  [<OPT;DEF(Point2d())>]uvparam1:Point2d) : Guid ResizeArray=
         let surface0 = RhinoScriptSyntax.CoerceSurface(surface0)
         let surface1 = RhinoScriptSyntax.CoerceSurface(surface1)
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -1127,7 +1128,7 @@ module AutoOpenSurface =
             else
                 Surface.CreateRollingBallFillet(surface0, surface1, radius, tol)
         if isNull surfaces then RhinoScriptingException.Raise "RhinoScriptSyntax.FilletSurfaces failed.  surface0:'%A' surface1:'%A' radius:'%A' uvparam0:'%A' uvparam1:'%A'" surface0 surface1 radius uvparam0 uvparam1
-        let rc = Rarr()
+        let rc = ResizeArray()
         for surf in surfaces do
             rc.Add( State.Doc.Objects.AddSurface(surf))
         State.Doc.Views.Redraw()
@@ -1185,15 +1186,15 @@ module AutoOpenSurface =
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    Distance tolerance at segment midpoints. If omitted,
     ///    the current absolute tolerance is used</param>
-    ///<returns>(Guid Rarr) identifying the newly created intersection Curve and point objects.</returns>
+    ///<returns>(Guid ResizeArray) identifying the newly created intersection Curve and point objects.</returns>
     static member IntersectBreps( brep1:Guid,
                                   brep2:Guid,
-                                  [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
+                                  [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let brep1 = RhinoScriptSyntax.CoerceBrep(brep1)
         let brep2 = RhinoScriptSyntax.CoerceBrep(brep2)
         let tolerance = Util.ifZero2 State.Doc.ModelAbsoluteTolerance  tolerance
         let ok, outcurves, outpoints = Intersect.Intersection.BrepBrep(brep1, brep2, tolerance)
-        let ids = Rarr()
+        let ids = ResizeArray()
         if not ok then ids // empty array TODO or fail ?
         else
             let mergedcurves = Curve.JoinCurves(outcurves, 2.1 * tolerance)
@@ -1504,7 +1505,7 @@ module AutoOpenSurface =
     ///    Delete the original Surfaces</param>
     ///<returns>(Guid) identifier of newly created object.</returns>
     static member JoinSurfaces(objectIds:Guid seq, [<OPT;DEF(false)>]deleteInput:bool) : Guid =
-        let breps =  rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
+        let breps =  resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceBrep(objectId) }
         if breps.Count<2 then RhinoScriptingException.Raise "RhinoScriptSyntax.JoinSurfaces failed, less than two objects given.  objectIds:'%A' deleteInput:'%A'" (Nice.str objectIds) deleteInput
         let tol = State.Doc.ModelAbsoluteTolerance * 2.1
         let joinedbreps = Brep.JoinBreps(breps, tol)
@@ -1582,16 +1583,16 @@ module AutoOpenSurface =
     ///<param name="curve">(Guid) The Curve's identifier</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Should the input items be deleted</param>
-    ///<returns>(Guid Rarr) List of new Curves.</returns>
+    ///<returns>(Guid ResizeArray) List of new Curves.</returns>
     static member PullCurve( surface:Guid,
                              curve:Guid,
-                             [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
+                             [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let crvobj = RhinoScriptSyntax.CoerceRhinoObject(curve)
         let brep = RhinoScriptSyntax.CoerceBrep(surface)
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let tol = State.Doc.ModelAbsoluteTolerance
         let curves = Curve.PullToBrepFace(curve, brep.Faces.[0], tol)
-        let rc =  rarr { for curve in curves do yield State.Doc.Objects.AddCurve(curve) }
+        let rc =  resizeArray { for curve in curves do yield State.Doc.Objects.AddCurve(curve) }
         if deleteInput  then
             State.Doc.Objects.Delete(crvobj, true) |> ignore
         State.Doc.Views.Redraw()
@@ -1661,9 +1662,9 @@ module AutoOpenSurface =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         if brep.Faces.Count <> 1 then RhinoScriptingException.Raise "RhinoScriptSyntax.ReverseSurface failed.  surfaceId:'%s' direction:'%A'" (Nice.str surfaceId) direction
         let face = brep.Faces.[0]
-        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignoreObj
-        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignoreObj
-        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignoreObj
+        if direction &&& 1 <> 0 then            face.Reverse(0, true)|> ignore
+        if direction &&& 2 <> 0 then            face.Reverse(1, true)|> ignore
+        if direction &&& 4 <> 0 then            face.Transpose(true) |> ignore
         State.Doc.Objects.Replace(surfaceId, brep)|> ignore
         State.Doc.Views.Redraw()
 
@@ -1685,7 +1686,7 @@ module AutoOpenSurface =
         //id = RhinoScriptSyntax.CoerceGuid(surfaceIds)
         //if notNull objectId then surfaceIds <- .[id]
         let ray = Ray3d(startPoint, direction)
-        let breps = rarr{for objectId in surfaceIds do RhinoScriptSyntax.CoerceBrep(objectId)}
+        let breps = resizeArray {for objectId in surfaceIds do RhinoScriptSyntax.CoerceBrep(objectId)}
         if breps.Count = 0 then RhinoScriptingException.Raise "RhinoScriptSyntax.ShootRay failed.  surfaceIds:'%A' startPoint:'%A' direction:'%A' reflections:'%A'"  surfaceIds startPoint direction reflections
         Intersect.Intersection.RayShoot(ray, Seq.cast breps, reflections)
 
@@ -1745,10 +1746,10 @@ module AutoOpenSurface =
     ///<param name="cutterId">(Guid) Identifier of the brep to split with</param>
     ///<param name="deleteInput">(bool) Optional, default value: <c>false</c>
     ///    Delete input breps</param>
-    ///<returns>(Guid Rarr) identifiers of split pieces.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of split pieces.</returns>
     static member SplitBrep( brepId:Guid,
                              cutterId:Guid,
-                             [<OPT;DEF(false)>]deleteInput:bool) : Guid Rarr =
+                             [<OPT;DEF(false)>]deleteInput:bool) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(brepId)
         let cutter = RhinoScriptSyntax.CoerceBrep(cutterId)
         let tol = State.Doc.ModelAbsoluteTolerance
@@ -1757,7 +1758,7 @@ module AutoOpenSurface =
         if deleteInput then
             //brepId = RhinoScriptSyntax.CoerceGuid(brepId)
             State.Doc.Objects.Delete(brepId, true) |> ignore
-        let rc =  rarr { for piece in pieces do yield State.Doc.Objects.AddBrep(piece) }
+        let rc =  resizeArray { for piece in pieces do yield State.Doc.Objects.AddBrep(piece) }
         State.Doc.Views.Redraw()
         rc
 
@@ -1811,7 +1812,7 @@ module AutoOpenSurface =
     ///<summary>Calculates area moments of inertia of a Surface or Polysurface object.
     ///    See the Rhino help for "Mass Properties calculation details".</summary>
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
-    ///<returns>((float*float*float) Rarr ) of moments and error bounds in tuples(X, Y, Z) - see help topic
+    ///<returns>((float*float*float) ResizeArray ) of moments and error bounds in tuples(X, Y, Z) - see help topic
     ///    Index   Description
     ///    [0]     First Moments.
     ///    [1]     The absolute (+/-) error bound for the First Moments.
@@ -1827,7 +1828,7 @@ module AutoOpenSurface =
     ///    [11]    The absolute (+/-) error bound for the Area Moments of Inertia about the Centroid Coordinate Axes.
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///    [13]    (Not implemented yet) The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.</returns>
-    static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) Rarr =
+    static member SurfaceAreaMoments(surfaceId:Guid) : (float*float*float) ResizeArray =
         surfaceId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.map AreaMassProperties.Compute
@@ -1838,7 +1839,7 @@ module AutoOpenSurface =
             )
         |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceAreaMoments failed on %A" surfaceId)
         |> fun mp ->
-            rarr{
+            resizeArray {
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
                 yield (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
                 yield (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
@@ -1953,8 +1954,8 @@ module AutoOpenSurface =
     ///    If True, all Surface edit points are returned. If False,
     ///    the function will return Surface edit points based on whether or not the
     ///    Surface is closed or periodic</param>
-    ///<returns>(Point3d Rarr) a list of 3D points.</returns>
-    static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
+    ///<returns>(Point3d ResizeArray) a list of 3D points.</returns>
+    static member SurfaceEditPoints( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
         if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPoints failed.  surfaceId:'%s'  returnAll:'%A'" (Nice.str surfaceId) returnAll
@@ -1974,7 +1975,7 @@ module AutoOpenSurface =
                 degree <- nurb.Degree(1)
                 vfirst <- degree/2
                 vlast <- nurb.Points.CountV-degree + vfirst
-        rarr{
+        resizeArray {
             for u = ufirst to ulast-1 do
                 for v = vfirst to  vlast-1 do
                     let pt = nurb.Points.GetGrevillePoint(u, v)
@@ -1987,8 +1988,8 @@ module AutoOpenSurface =
     ///    If True, all Surface edit points are returned. If False,
     ///    the function will return Surface edit points based on whether or not the
     ///    Surface is closed or periodic</param>
-    ///<returns>((float*float) Rarr) a list of U and V parameters.</returns>
-    static member SurfaceEditPointParameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) Rarr =
+    ///<returns>((float*float) ResizeArray) a list of U and V parameters.</returns>
+    static member SurfaceEditPointParameters( surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : (float*float) ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let nurb = surface.ToNurbsSurface()
         if isNull nurb then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEditPointParameters failed.  surfaceId:'%s'  returnAll:'%A'" (Nice.str surfaceId) returnAll
@@ -2008,7 +2009,7 @@ module AutoOpenSurface =
                 degree <- nurb.Degree(1)
                 vfirst <- degree/2
                 vlast <- nurb.Points.CountV-degree + vfirst
-        rarr{
+        resizeArray {
             for u = ufirst to ulast-1 do
                 for v = vfirst to  vlast-1 do
                     let pt = nurb.Points.GetGrevillePoint(u, v)
@@ -2020,7 +2021,7 @@ module AutoOpenSurface =
     ///<param name="surfaceId">(Guid) The Surface's identifier</param>
     ///<param name="parameter">(float * float) U, v parameter to evaluate</param>
     ///<param name="derivative">(int) Number of derivatives to evaluate</param>
-    ///<returns>(Point3d * Vector3d Rarr) list length (derivative + 1)*(derivative + 2)/2
+    ///<returns>(Point3d * Vector3d ResizeArray) list length (derivative + 1)*(derivative + 2)/2
     ///    Elements of tuple:
     ///    [fst] The 3-D point.
     ///    [snd] List of Vectors:
@@ -2032,11 +2033,11 @@ module AutoOpenSurface =
     ///            [5]      etc...</returns>
     static member SurfaceEvaluate( surfaceId:Guid,
                                    parameter:float * float,
-                                   derivative:int) : Point3d * Vector3d Rarr =
+                                   derivative:int) : Point3d * Vector3d ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let success, point, der = surface.Evaluate(parameter|> fst, parameter|> snd, derivative)
         if not success then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceEvaluate failed.  surfaceId:'%s' parameter:'%A' derivative:'%A'" (Nice.str surfaceId) parameter derivative
-        let rc = rarr{()}
+        let rc = resizeArray {()}
         if der.Length > 0 then
           for d in der do rc.Add(d)
         point, rc
@@ -2157,8 +2158,8 @@ module AutoOpenSurface =
         let nurbsurf = surface.ToNurbsSurface()
         if nurbsurf|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (Nice.str surfaceId)
         nurbsurf.KnotsU , nurbsurf.KnotsV
-        //let sknots =  rarr { for knot in nurbsurf.KnotsU do yield knot }
-        //let tknots =  rarr { for knot in nurbsurf.KnotsV do yield knot }
+        //let sknots =  resizeArray { for knot in nurbsurf.KnotsU do yield knot }
+        //let tknots =  resizeArray { for knot in nurbsurf.KnotsV do yield knot }
         //if isNull sknots || not tknots then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceKnots failed.  surfaceId:'%s'" (Nice.str surfaceId)
         //sknots, tknots
 
@@ -2227,12 +2228,12 @@ module AutoOpenSurface =
     ///    If True all Surface edit points are returned. If False,
     ///    the function will return Surface edit points based on whether or not
     ///    the Surface is closed or periodic</param>
-    ///<returns>(Point3d Rarr) The control points.</returns>
-    static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d Rarr =
+    ///<returns>(Point3d ResizeArray) The control points.</returns>
+    static member SurfacePoints(surfaceId:Guid, [<OPT;DEF(true)>]returnAll:bool) : Point3d ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(surfaceId)
         let ns = surface.ToNurbsSurface()
         if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfacePoints failed.  surfaceId:'%s' returnAll:'%A'" (Nice.str surfaceId) returnAll
-        let rc = Rarr()
+        let rc = ResizeArray()
         for u = 0 to ns.Points.CountU - 1 do
             for v = 0 to ns.Points.CountV - 1 do
                 let pt = ns.Points.GetControlPoint(u, v)
@@ -2290,7 +2291,7 @@ module AutoOpenSurface =
     ///<summary>Calculates volume moments of inertia of a Surface or Polysurface object.
     ///    For more information, see Rhino help for "Mass Properties calculation details".</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
-    ///<returns>((float*float*float) Rarr) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
+    ///<returns>((float*float*float) ResizeArray) A List of moments and error bounds in tuple(X, Y, Z) - see help topic
     ///    Index   Description
     ///    [ 0]    First Moments.
     ///    [ 1]    The absolute (+/-) error bound for the First Moments.
@@ -2307,7 +2308,7 @@ module AutoOpenSurface =
     ///    [12]    Area Radii of Gyration about the Centroid Coordinate Axes.
     ///    [13]    (0,0,0) NOT WORKING , but should be: The absolute (+/-) error bound for the Area Radii of Gyration about the Centroid Coordinate Axes.
     /// </returns>
-    static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) Rarr =
+    static member SurfaceVolumeMoments(objectId:Guid) : (float*float*float) ResizeArray =
         objectId
         |> RhinoScriptSyntax.TryCoerceBrep
         |> Option.bind (fun b -> if b.IsSolid then Some b else RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on  open Brep %A" (Nice.str objectId))
@@ -2320,7 +2321,7 @@ module AutoOpenSurface =
             )
         |> Option.defaultWith (fun () -> RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceVolumeMoments failed on %A" (Nice.str objectId))
         |> fun mp ->
-            rarr{
+            resizeArray {
                 yield (mp.WorldCoordinatesFirstMoments.X, mp.WorldCoordinatesFirstMoments.Y, mp.WorldCoordinatesFirstMoments.Z)                                     //  [0]     First Moments.
                 yield (mp.WorldCoordinatesFirstMomentsError.X, mp.WorldCoordinatesFirstMomentsError.Y, mp.WorldCoordinatesFirstMomentsError.Z)                      //  [1]     The absolute (+/-) error bound for the First Moments.
                 yield (mp.WorldCoordinatesSecondMoments.X, mp.WorldCoordinatesSecondMoments.Y, mp.WorldCoordinatesSecondMoments.Z)                                  //  [2]     Second Moments.
@@ -2343,12 +2344,12 @@ module AutoOpenSurface =
     ///    The number of weights returned will be equal to the number of control points
     ///    in the U and V directions.</summary>
     ///<param name="objectId">(Guid) The Surface's identifier</param>
-    ///<returns>(float Rarr) point weights.</returns>
-    static member SurfaceWeights(objectId:Guid) : float Rarr =
+    ///<returns>(float ResizeArray) point weights.</returns>
+    static member SurfaceWeights(objectId:Guid) : float ResizeArray =
         let surface = RhinoScriptSyntax.CoerceSurface(objectId)
         let ns = surface.ToNurbsSurface()
         if ns|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.SurfaceWeights failed.  objectId:'%s'" (Nice.str objectId)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for u = 0 to ns.Points.CountU - 1 do
             for v = 0 to ns.Points.CountV - 1 do
                 let pt = ns.Points.GetControlPoint(u, v)
@@ -2359,10 +2360,10 @@ module AutoOpenSurface =
     ///<param name="objectId">(Guid) Surface or Polysurface identifier</param>
     ///<param name="cutter">(Guid) Surface or Polysurface  performing the trim</param>
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
-    ///<returns>(Guid Rarr) identifiers of retained components.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of retained components.</returns>
     static member TrimBrep( objectId:Guid,
                             cutter:Guid,
-                            [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let cutter = RhinoScriptSyntax.CoerceBrep(cutter)
         let tolerance= Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
@@ -2370,7 +2371,7 @@ module AutoOpenSurface =
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
-            let rc = Rarr()
+            let rc = ResizeArray()
             for i = 0 to breps.Length - 1 do
                 if i = 0 then
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
@@ -2380,7 +2381,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
             State.Doc.Views.Redraw()
             rc
 
@@ -2388,17 +2389,17 @@ module AutoOpenSurface =
     ///<param name="objectId">(Guid) Surface or Polysurface identifier</param>
     ///<param name="cutter">(Plane) Plane performing the trim</param>
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c></param>
-    ///<returns>(Guid Rarr) identifiers of retained components.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of retained components.</returns>
     static member TrimBrep( objectId:Guid,
                             cutter:Plane,
-                            [<OPT;DEF(0.0)>]tolerance:float) : Guid Rarr =
+                            [<OPT;DEF(0.0)>]tolerance:float) : Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(objectId)
         let tolerance = Util.ifZero1 tolerance  State.Doc.ModelAbsoluteTolerance
         let breps = brep.Trim(cutter, tolerance)
         if breps.Length > 1 then
             let rho = RhinoScriptSyntax.CoerceRhinoObject(objectId)
             let attrs = rho.Attributes
-            let rc = Rarr()
+            let rc = ResizeArray()
             for i = 0 to breps.Length - 1 do
                 if i = 0 then
                     State.Doc.Objects.Replace(objectId, breps.[i]) |> ignore
@@ -2408,7 +2409,7 @@ module AutoOpenSurface =
             State.Doc.Views.Redraw()
             rc
         else
-            let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+            let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
             State.Doc.Views.Redraw()
             rc
 
@@ -2498,12 +2499,12 @@ module AutoOpenSurface =
     ///    Absolute tolerance</param>
     ///<param name="relativeTolerance">(float) Optional, default value: <c>State.Doc.ModelRelativeTolerance</c>
     ///    Relative tolerance</param>
-    ///<returns>(Guid Rarr * Guid Rarr) Two lists: List of unrolled Surface ids and list of following objects.</returns>
+    ///<returns>(Guid ResizeArray * Guid ResizeArray) Two lists: List of unrolled Surface ids and list of following objects.</returns>
     static member UnrollSurface( surfaceId:Guid,
                                  [<OPT;DEF(false)>]explode:bool,
                                  [<OPT;DEF(null:Guid seq)>]followingGeometry:Guid seq,
                                  [<OPT;DEF(0.0)>]absoluteTolerance:float,
-                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid Rarr * Guid Rarr =
+                                 [<OPT;DEF(0.0)>]relativeTolerance:float) : Guid ResizeArray * Guid ResizeArray =
         let brep = RhinoScriptSyntax.CoerceBrep(surfaceId)
         let unroll = Unroller(brep)
         unroll.ExplodeOutput <- explode
@@ -2522,8 +2523,8 @@ module AutoOpenSurface =
 
         let breps, curves, points, dots = unroll.PerformUnroll()
         if isNull breps then RhinoScriptingException.Raise "RhinoScriptSyntax.UnrollSurface: failed on  %A" surfaceId
-        let rc =  rarr { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
-        let newfollowing = Rarr()
+        let rc =  resizeArray { for brep in breps do yield State.Doc.Objects.AddBrep(brep) }
+        let newfollowing = ResizeArray()
         for curve in curves do
             let objectId = State.Doc.Objects.AddCurve(curve) //TODO verify order is correct ???
             newfollowing.Add(objectId)

@@ -6,10 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
-
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
+open ResizeArray
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenViews =
@@ -279,18 +279,18 @@ module AutoOpenViews =
 
 
     ///<summary>Returns the names of all named construction Planes in the document.</summary>
-    ///<returns>(string Rarr) The names of all named construction Planes in the document.</returns>
-    static member NamedCPlanes() : string Rarr =
+    ///<returns>(string ResizeArray) The names of all named construction Planes in the document.</returns>
+    static member NamedCPlanes() : string ResizeArray =
         let count = State.Doc.NamedConstructionPlanes.Count
-        rarr {for i = 0 to count - 1 do State.Doc.NamedConstructionPlanes.[i].Name }
+        resizeArray {for i = 0 to count - 1 do State.Doc.NamedConstructionPlanes.[i].Name }
 
 
 
     ///<summary>Returns the names of all named views in the document.</summary>
-    ///<returns>(string Rarr) The names of all named views in the document.</returns>
-    static member NamedViews() : string Rarr =
+    ///<returns>(string ResizeArray) The names of all named views in the document.</returns>
+    static member NamedViews() : string ResizeArray =
         let count = State.Doc.NamedViews.Count
-        rarr {for i = 0 to count - 1 do State.Doc.NamedViews.[i].Name }
+        resizeArray {for i = 0 to count - 1 do State.Doc.NamedViews.[i].Name }
 
 
     ///<summary>Changes the title of the specified view.</summary>
@@ -656,10 +656,10 @@ module AutoOpenViews =
 
 
     ///<summary>Return list of display modes.</summary>
-    ///<returns>(string Rarr) strings identifying the display mode names.</returns>
-    static member ViewDisplayModes() : string Rarr =
+    ///<returns>(string ResizeArray) strings identifying the display mode names.</returns>
+    static member ViewDisplayModes() : string ResizeArray =
         let modes = Display.DisplayModeDescription.GetDisplayModes()
-        rarr {for mode in modes do mode.EnglishName }
+        resizeArray {for mode in modes do mode.EnglishName }
 
 
     ///<summary>Return the names/titles, of all views in the document.</summary>
@@ -668,11 +668,11 @@ module AutoOpenViews =
     ///    0 = standard model views
     ///    1 = page layout views
     ///    2 = both standard and page layout views</param>
-    ///<returns>(string Rarr) List of the view names.</returns>
-    static member ViewNames([<OPT;DEF(0)>]viewType:int) : string Rarr =
+    ///<returns>(string ResizeArray) List of the view names.</returns>
+    static member ViewNames([<OPT;DEF(0)>]viewType:int) : string ResizeArray =
         let views = State.Doc.Views.GetViewList(viewType <> 1, viewType>0)
         if views|> isNull  then RhinoScriptingException.Raise "RhinoScriptSyntax.ViewNames failed. viewType:'%A'" viewType
-        rarr { for view in views do view.MainViewport.Name}
+        resizeArray { for view in views do view.MainViewport.Name}
 
 
 

@@ -7,9 +7,10 @@ open System
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 open Rhino.Geometry
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
+open ResizeArray
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenDocument =
@@ -89,8 +90,6 @@ module AutoOpenDocument =
     static member DocumentName() : string =
         State.Doc.Name |? ""
 
-
-
     ///<summary>Returns full path of the currently loaded Rhino document including the file name (3dm file).</summary>
     ///<returns>(string) The path of the currently loaded Rhino document  including the file name(3dm file).</returns>
     static member DocumentPath() : string =
@@ -100,7 +99,6 @@ module AutoOpenDocument =
             //let slash = string Path.DirectorySeparatorChar
             //if p.EndsWith slash then p
             //else p + slash // add \ or / at the ende to be consistent with RhinoScript
-
 
 
     ///<summary>Enables or disables screen redrawing.

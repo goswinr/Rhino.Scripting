@@ -3,7 +3,7 @@
 //#r @"D:\OneDrive\10_Dev\01_Nuget\fparsec.1.1.1\lib\netstandard2.0\FParsec.dll"
 
 open System
-open FsEx
+// open FsEx
 
 let dir = @"D:\Git\Rhino.Scripting\Src\RhinoScriptSyntax"
 //let dir = @"D:\Git\Rhino.Scripting\Src"

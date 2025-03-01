@@ -6,9 +6,9 @@ open System
 
 open Rhino.Geometry
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenPlane =
@@ -99,7 +99,7 @@ module AutoOpenPlane =
     ///<param name="curve">(Guid) The identifier of the Curve object</param>
     ///<param name="tolerance">(float) Optional, default value: <c>State.Doc.ModelAbsoluteTolerance</c>
     ///    The intersection tolerance.</param>
-    ///<returns>(Rarr of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float)
+    ///<returns>(ResizeArray of int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float)
     ///A list of intersection information tuple . The list will contain one or more of the following tuple:
     ///    Element Type        Description
     ///    [0]       Number      The intersection event type, either Point (1) or Overlap (2).
@@ -125,12 +125,12 @@ module AutoOpenPlane =
     ///      If the event type is Overlap (2), then the V Plane parameter for Curve at (n, 6).</returns>
     static member PlaneCurveIntersection( plane:Plane,
                                           curve:Guid,
-                                          [<OPT;DEF(0.0)>]tolerance:float) : Rarr<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
+                                          [<OPT;DEF(0.0)>]tolerance:float) : ResizeArray<int * Point3d * Point3d * Point3d * Point3d * float * float * float * float* float * float > =
         let curve = RhinoScriptSyntax.CoerceCurve(curve)
         let  tolerance = if tolerance = 0.0 then  State.Doc.ModelAbsoluteTolerance else tolerance
         let intersections = Intersect.Intersection.CurvePlane(curve, plane, tolerance)
         if notNull intersections then
-            let rc = Rarr()
+            let rc = ResizeArray()
             for intersection in intersections do
                 let mutable a = 1
                 if intersection.IsOverlap then a <- 2

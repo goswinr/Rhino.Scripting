@@ -7,12 +7,13 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
+open ResizeArray
 
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
-open FsEx.CompareOperators
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
+// open FsEx.CompareOperators
 
 [<AutoOpen>]
 module AutoOpenObject =
@@ -30,12 +31,12 @@ module AutoOpenObject =
     ///<param name="matrix">(Transform) The transformation matrix (4x4 array of numbers)</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid Rarr) ids identifying the newly transformed objects.</returns>
+    ///<returns>(Guid ResizeArray) ids identifying the newly transformed objects.</returns>
     static member TransformObjects( objectIds:Guid seq,
                                     matrix:Transform,
-                                    [<OPT;DEF(false)>]copy:bool) : Guid Rarr =   //PLURAL
+                                    [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =   //PLURAL
         // this is also called by Copy, Scale, Mirror, Move, and Rotate functions defined below
-        let rc = Rarr()
+        let rc = ResizeArray()
         for objId in objectIds do
             let objectId = State.Doc.Objects.Transform(objId, matrix, not copy)
             if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.TransformObjects: Cannot apply transform to object '%s' from objectId:'%s' matrix:'%A' copy:'%A'" (Nice.str objId) (Nice.str objectId) matrix copy
@@ -77,14 +78,14 @@ module AutoOpenObject =
     ///<summary>Copies one or more objects from one location to another, or in-place.</summary>
     ///<param name="objectIds">(Guid seq) List of objects to copy</param>
     ///<param name="translation">(Vector3d) Optional, Vector3d representing translation vector to apply to copied set</param>
-    ///<returns>(Guid Rarr) identifiers for the copies.</returns>
-    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid Rarr = //PLURAL
+    ///<returns>(Guid ResizeArray) identifiers for the copies.</returns>
+    static member CopyObjects(objectIds:Guid seq, [<OPT;DEF(Vector3d())>]translation:Vector3d) : Guid ResizeArray = //PLURAL
         let translation =
             if not translation.IsZero then
                 Transform.Translation(translation)
             else
                 Transform.Identity
-        let rc = Rarr()
+        let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, translation, deleteOriginal=false)
             if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.CopyObjects failed.  objectId:'%s' translation:'%A'" (Nice.str objectId) translation
@@ -119,7 +120,7 @@ module AutoOpenObject =
     ///    If False, flash between visible and invisible</param>
     ///<returns>(unit).</returns>
     static member FlashObject(objectIds:Guid seq, [<OPT;DEF(true)>]style:bool) : unit =
-        let rhobjs = rarr { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
+        let rhobjs = resizeArray { for objectId in objectIds do yield RhinoScriptSyntax.CoerceRhinoObject(objectId) }
         if rhobjs.Count>0 then
             State.Doc.Views.FlashObjects(rhobjs, style)
 
@@ -363,18 +364,18 @@ module AutoOpenObject =
     ///<param name="endPoint">(Point3d) End of the mirror Plane</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid Rarr) List of identifiers of the mirrored objects.</returns>
+    ///<returns>(Guid ResizeArray) List of identifiers of the mirrored objects.</returns>
     static member MirrorObjects(  objectIds:Guid seq,
                                  startPoint:Point3d,
                                  endPoint:Point3d,
-                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
+                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         let vec = endPoint-startPoint
         if vec.IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObjects Start and  end points are too close to each other.  objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectIds) startPoint endPoint copy
         let normal = Plane.WorldXY.Normal
         let xv = Vector3d.CrossProduct(vec, normal)
         xv.Unitize() |> ignore
         let xf = Transform.Mirror(startPoint, vec)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for objectId in objectIds do
             let objectId = State.Doc.Objects.Transform(objectId, xf, not copy)
             if objectId = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.MirrorObjects Cannot apply MirrorObjects to objectId:'%s' startPoint:'%A' endPoint:'%A' copy:'%A'" (Nice.str objectId) startPoint endPoint copy
@@ -399,7 +400,7 @@ module AutoOpenObject =
     ///<returns>(unit) void, nothing.</returns>
     static member MoveObjects(objectIds:Guid seq, translation:Vector3d) : unit =  //PLURAL
         let xf = Transform.Translation(translation)
-        //let rc = Rarr()
+        //let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, deleteOriginal=true)
             if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.MoveObjects Cannot apply MoveObjects Transform to objectId:'%s'  translation:'%A'" (Nice.str objectId) translation
@@ -727,7 +728,7 @@ module AutoOpenObject =
     ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectId:Guid, materialIndex:int) : unit = //SET
         let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        if 0 <=. materialIndex .< State.Doc.Materials.Count then
+        if 0 <= materialIndex && materialIndex < State.Doc.Materials.Count then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectId
         let attrs = rhinoObject.Attributes
         attrs.MaterialIndex <- materialIndex
@@ -741,7 +742,7 @@ module AutoOpenObject =
     ///<param name="objectIds">(Guid seq) Identifiers of an objects</param>
     ///<param name="materialIndex">(int) The new material index</param>
     static member ObjectMaterialIndex(objectIds:Guid seq, materialIndex:int) : unit = //MULTISET
-        if 0 <=. materialIndex .< State.Doc.Materials.Count then
+        if 0 <= materialIndex && materialIndex < State.Doc.Materials.Count then
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectMaterialIndex: Setting it failed for '%A' and '%A'"  materialIndex objectIds
         for objectId in objectIds do
             let rhinoObject = RhinoScriptSyntax.CoerceRhinoObject(objectId)
@@ -1123,16 +1124,16 @@ module AutoOpenObject =
     ///<param name="axis">(Vector3d) Optional, default value: <c>Vector3d.ZAxis</c>
     ///    Axis of rotation, If omitted, the Vector3d.ZAxis is used as the rotation axis</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the object</param>
-    ///<returns>(Guid Rarr) identifiers of the rotated objects.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of the rotated objects.</returns>
     static member RotateObjects( objectIds:Guid seq,
                                  centerPoint:Point3d,
                                  rotationAngle:float,
                                  [<OPT;DEF(Vector3d())>]axis:Vector3d,
-                                 [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
+                                 [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         let axis = if axis.IsZero then Vector3d.ZAxis else axis
         let rotationAngle = RhinoMath.ToRadians(rotationAngle)
         let xf = Transform.Rotation(rotationAngle, axis, centerPoint)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
             if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.RotateObjects failed.  objectId:'%s' centerPoint:'%A' rotationAngle:'%A' axis:'%A' copy:'%A'" (Nice.str objectId) centerPoint rotationAngle axis copy
@@ -1182,16 +1183,16 @@ module AutoOpenObject =
     ///<param name="origin">(Point3d) The origin of the scale transformation</param>
     ///<param name="scale">(float*float*float) Three numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>. Copy the objects</param>
-    ///<returns>(Guid Rarr) identifiers of the scaled objects.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
     static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float*float*float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURAL
+                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =  //PLURAL
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let x, y, z = scale
         let xf = Transform.Scale(plane, x, y, z)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
             if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%s' origin:'%s' scale:'%A' copy:'%b'" (Nice.str objectId) origin.ToNiceString scale  copy
@@ -1204,15 +1205,15 @@ module AutoOpenObject =
     ///<param name="scale">(float) One numbers that identify the X, Y, and Z axis scale factors to apply</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid Rarr) identifiers of the scaled objects.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of the scaled objects.</returns>
     static member ScaleObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 scale:float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr =  //PLURAL ALT
+                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray =  //PLURAL ALT
         let mutable plane = Plane.WorldXY
         plane.Origin <- origin
         let xf = Transform.Scale(plane, scale, scale, scale)
-        let rc = Rarr()
+        let rc = ResizeArray()
         for objectId in objectIds do
             let res = State.Doc.Objects.Transform(objectId, xf, not copy)
             if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ScaleObjects failed.  objectId:'%s' origin:'%A' scale:'%A' copy:'%A'" (Nice.str objectId) origin scale  copy
@@ -1337,12 +1338,12 @@ module AutoOpenObject =
     ///<param name="angleDegrees">(float) The shear angle in degrees</param>
     ///<param name="copy">(bool) Optional, default value: <c>false</c>
     ///    Copy the objects</param>
-    ///<returns>(Guid Rarr) identifiers of the sheared objects.</returns>
+    ///<returns>(Guid ResizeArray) identifiers of the sheared objects.</returns>
     static member ShearObjects( objectIds:Guid seq,
                                 origin:Point3d,
                                 referencePoint:Point3d,
                                 angleDegrees:float,
-                                [<OPT;DEF(false)>]copy:bool) : Guid Rarr = //PLURAL
+                                [<OPT;DEF(false)>]copy:bool) : Guid ResizeArray = //PLURAL
         if (origin-referencePoint).IsTiny() then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObjects failed because (origin-referencePoint).IsTiny() : %s and %s" origin.ToNiceString referencePoint.ToNiceString
         let plane = State.Doc.Views.ActiveView.MainViewport.ConstructionPlane()
         let mutable frame = Plane(plane)
@@ -1360,7 +1361,7 @@ module AutoOpenObject =
         shear2d.[0, 1] <- tan(toRadians(angleDegrees))
         let cobinv = Transform.ChangeBasis(frame, worldPlane)
         let xf = cobinv * shear2d * cob
-        rarr{
+        resizeArray {
             for ob in objectIds do
                 let res = State.Doc.Objects.Transform(ob, xf, not copy)
                 if res = Guid.Empty then RhinoScriptingException.Raise "RhinoScriptSyntax.ShearObjects failed for %s, origin %s, ref point  %s and angle in Deg  %f" (Nice.str ob) origin.ToNiceString referencePoint.ToNiceString angleDegrees

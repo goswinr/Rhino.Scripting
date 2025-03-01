@@ -7,42 +7,37 @@
     <!-- <TargetFrameworks>net48;net7.0</TargetFrameworks> -->
     <!-- <NoWarn>NU1701</NoWarn>  -->
     <!-- to suppress warning about RhinoCommon targeting only for net48 -->
-
     <!-- <UseWindowsForms>true</UseWindowsForms>  use Eto Forms instead -->
     <LangVersion>preview</LangVersion>
-    <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>  <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
-    <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags> <!-- 1182: warn on unused variables -->
-
+    <OtherFlags>$(OtherFlags)--warnon:3390</OtherFlags>
+    <!-- warnon:3390 is to verify xml docstrings https://devblogs.microsoft.com/dotnet/announcing-f-5/#improved-compiler-analysis-for-library-authors -->
+    <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>
+    <!-- 1182: warn on unused variables -->
   </PropertyGroup>
-
   <ItemGroup>
     <!-- otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
     <PackageReference Update="FSharp.Core" Version="6.0.7" />
     <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="FsEx" Version="0.16.0" />
-    <!-- <PackageReference Include="ResizeArray" Version="0.22.0" /> -->
+    <PackageReference Include="ResizeArray" Version="0.22.0" />
     <PackageReference Include="Eto.Forms" Version="2.9.0" />
-
     <!-- see https://discourse.mcneel.com/t/system-drawing-object-has-no-attribute-bitmap-rhino-8-wip/150608/6 -->
     <!-- <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime"/> -->
     <!-- <PackageReference Include="RhinoCommon" Version="9.0.25051.305-wip"  ExcludeAssets="runtime" /> -->
     <!-- <Reference Include="C:\Program Files\Rhino 8\System\RhinoCommon.dll" ExcludeAssets="runtime"/> -->
-
   </ItemGroup>
-
   <ItemGroup>
     <None Include="combineIntoOneFile.fsx" />
-  	<None Include="Readme.md" />
-
+    <None Include="Readme.md" />
     <Compile Include="Src/Exceptions.fs" />
+    <Compile Include="Src\FsExUtils.fs" />
     <Compile Include="Src/RhinoSync.fs" />
     <Compile Include="Src/State.fs" />
     <Compile Include="Src/ToNiceStringExtensions.fs" />
     <Compile Include="Src/ToNiceStringSetup.fs" />
-    <Compile Include="Src/Util.fs" />
+    <Compile Include="Src/UtilString.fs" />
     <Compile Include="Src/UtilLayer.fs" />
     <Compile Include="Src/ObjectFilterEnum.fs" />
-
     <Compile Include="Src/Scripting_Header.fs" />
     <Compile Include="Src/Scripting_Coerce.fs" />
     <Compile Include="Src/Scripting_Layer.fs" />
@@ -71,11 +66,9 @@
     <Compile Include="Src/Scripting_UserInterface.fs" />
     <Compile Include="Src/Scripting_Utility.fs" />
     <Compile Include="Src/Scripting_Views.fs" />
-
     <!-- included only for editing referenced file names:-->
     <None Include="ForPublishing.fsproj" />
     <None Include="ForPublishingV7.fsproj" />
     <None Include="ForEditingV7.fsproj" />
   </ItemGroup>
-
 </Project>

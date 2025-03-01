@@ -6,9 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
+open ResizeArray
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenGrips =
@@ -72,13 +73,13 @@ module AutoOpenGrips =
     ///    Allow for selection of pre-selected object grips</param>
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the picked object grips</param>
-    ///<returns>((Guid * int * Point3d) Rarr) containing one or more grip records. Each grip record is a tuple
+    ///<returns>((Guid * int * Point3d) ResizeArray) containing one or more grip records. Each grip record is a tuple
     ///    [n][0] = identifier of the object that owns the grip
     ///    [n][1] = index value of the grip
     ///    [n][2] = location of the grip.</returns>
     static member GetObjectGrips( [<OPT;DEF(null:string)>]message:string,
                                   [<OPT;DEF(false)>]preselect:bool,
-                                  [<OPT;DEF(false)>]select:bool) : Rarr<Guid * int * Point3d> =
+                                  [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid * int * Point3d> =
         let get () =
             if not preselect then
                 State.Doc.Objects.UnselectAll() |> ignore
@@ -86,7 +87,7 @@ module AutoOpenGrips =
             let grips = ref null
             let re = Input.RhinoGet.GetGrips(grips, message)
             let grips = !grips
-            let rc = Rarr()
+            let rc = ResizeArray()
             if re = Commands.Result.Success && notNull grips then
                 for grip in grips do
                     let objectId = grip.OwnerId
@@ -173,7 +174,7 @@ module AutoOpenGrips =
             RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocation failed.  objectId:'%s' index:'%A' point:'%A'" (Nice.str objectId) index point
         let grip = grips.[index]
         grip.CurrentLocation <-  point
-        State.Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
+        State.Doc.Objects.GripUpdate(rhobj, true)|> ignore
         State.Doc.Views.Redraw()
 
 
@@ -184,13 +185,13 @@ module AutoOpenGrips =
     /// the grips, you must provide a list of points that contain the same number
     /// of points at grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(Point3d Rarr) The current location of all grips.</returns>
-    static member ObjectGripLocations(objectId:Guid) : Point3d Rarr = //GET
+    ///<returns>(Point3d ResizeArray) The current location of all grips.</returns>
+    static member ObjectGripLocations(objectId:Guid) : Point3d ResizeArray = //GET
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if not rhobj.GripsOn then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
         let grips = rhobj.GetGrips()
         if isNull grips then RhinoScriptingException.Raise "RhinoScriptSyntax.ObjectGripLocations failed.  objectId:'%s'" (Nice.str objectId)
-        rarr { for grip in grips do yield grip.CurrentLocation }
+        resizeArray { for grip in grips do yield grip.CurrentLocation }
 
 
 
@@ -210,7 +211,7 @@ module AutoOpenGrips =
         if Seq.length(points) = Seq.length(grips) then
             for pt, grip in Seq.zip points grips do
                 grip.CurrentLocation <- pt
-            State.Doc.Objects.GripUpdate(rhobj, true)|> ignoreObj
+            State.Doc.Objects.GripUpdate(rhobj, true)|> ignore
             State.Doc.Views.Redraw()
 
 
@@ -258,10 +259,10 @@ module AutoOpenGrips =
 
     ///<summary>Returns a list of grip indices identifying an object's selected grips.</summary>
     ///<param name="objectId">(Guid) Identifier of the object</param>
-    ///<returns>(int Rarr) list of indices.</returns>
-    static member SelectedObjectGrips(objectId:Guid) : int Rarr =
+    ///<returns>(int ResizeArray) list of indices.</returns>
+    static member SelectedObjectGrips(objectId:Guid) : int ResizeArray =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
-        let rc = Rarr()
+        let rc = ResizeArray()
         if not rhobj.GripsOn then rc
         else
             let grips = rhobj.GetGrips()

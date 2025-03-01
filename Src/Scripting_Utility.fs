@@ -6,10 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
-
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
+open ResizeArray
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenUtility =
@@ -182,7 +182,7 @@ module AutoOpenUtility =
     ///<param name="hls">(Drawing.Color) The HLS color value</param>
     ///<returns>(Drawing.Color) The RGB color value.</returns>
     static member ColorHLSToRGB(hls:Drawing.Color) : Drawing.Color =
-        let hls = Display.ColorHSL(hls.A.ToFloat/240.0, hls.R.ToFloat/240.0, hls.G.ToFloat/240.0, hls.B.ToFloat/240.0) // TODO test if correct with reverse function
+        let hls = Display.ColorHSL((float hls.A) /240.0, (float hls.R)/240.0, (float hls.G)/240.0, (float hls.B)/240.0) // TODO test if correct with reverse function
         hls.ToArgbColor()
 
 
@@ -205,16 +205,16 @@ module AutoOpenUtility =
     ///<param name="numbers">(float seq) List of Doubles</param>
     ///<param name="tolerance">(float) Optional, default value: <c>RhinoMath.ZeroTolerance</c>
     ///    The minimum distance between numbers. Numbers that fall within this tolerance will be discarded</param>
-    ///<returns>(float Rarr) numbers with duplicates removed.</returns>
-    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float Rarr =
-        if Seq.length numbers < 2 then Rarr(numbers )
+    ///<returns>(float ResizeArray) numbers with duplicates removed.</returns>
+    static member CullDuplicateNumbers(numbers:float seq, [<OPT;DEF(0.0)>]tolerance:float) : float ResizeArray =
+        if Seq.length numbers < 2 then ResizeArray(numbers )
         else
             let tol = Util.ifZero1 tolerance  RhinoMath.ZeroTolerance // or State.Doc.ModelAbsoluteTolerance
             let nums = numbers|> Seq.sort
             let first = Seq.head nums
             let second = (Seq.item 1 nums)
             let mutable lastOK = first
-            rarr{
+            resizeArray {
                 if abs(first-second) > tol then
                     yield first
                     lastOK <- second
@@ -275,9 +275,9 @@ module AutoOpenUtility =
 
     ///<summary>Flattens an array of 3-D points into a one-dimensional list of real numbers. For example, if you had an array containing three 3-D points, this method would return a one-dimensional array containing nine real numbers.</summary>
     ///<param name="points">(Point3d seq) Points to flatten</param>
-    ///<returns>(float Rarr) A one-dimensional list containing real numbers.</returns>
-    static member SimplifyArray(points:Point3d seq) : float Rarr =
-        rarr {
+    ///<returns>(float ResizeArray) A one-dimensional list containing real numbers.</returns>
+    static member SimplifyArray(points:Point3d seq) : float ResizeArray =
+        resizeArray {
             for p in points do
                 yield p.X
                 yield p.Y
@@ -434,7 +434,7 @@ module AutoOpenUtility =
     ///<returns>(string array)
     ///    If section is NOT specified, a list containing all section names
     ///    If section is specified, a list containing all entry names for the given section.</returns>
-    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string Rarr =
+    static member GetSettings(filename:string, [<OPT;DEF(null:string)>]section:string) : string ResizeArray =
         //https://github.com/rickyah/ini-parser
 
         //https://github.com/rickyah/ini-parser/wiki/Configuring-parser-behavior
@@ -442,9 +442,9 @@ module AutoOpenUtility =
         let data = parser.ReadFile(filename)
         data.Configuration.ThrowExceptionsOnError <-true
         if isNull section then
-            rarr { for s in data.Sections do s.SectionName }
+            resizeArray { for s in data.Sections do s.SectionName }
         else
-            rarr { for k in data.[section] do k.KeyName}
+            resizeArray { for k in data.[section] do k.KeyName}
 
     ///<summary>Returns string from a specified section and entry in an ini file.</summary>
     ///<param name="filename">(string) Name  and path of the ini file</param>

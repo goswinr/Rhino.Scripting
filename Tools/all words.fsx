@@ -1,7 +1,7 @@
 ﻿#r "nuget: FsEx"
 
 open System
-open FsEx
+// open FsEx
 
 let folder = @"D:\Git\Rhino.Scripting\Src\"
 let files = IO.getAllFilesByPattern folder "*.fs" |> Rarr.ofSeq

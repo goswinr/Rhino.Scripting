@@ -6,9 +6,10 @@ open Rhino
 open System
 
 open Rhino.Geometry
+open ResizeArray
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenDimension =
@@ -74,11 +75,11 @@ module AutoOpenDimension =
     static member AddLeader( points:Point3d seq,
                              text:string,
                              [<OPT;DEF(Plane())>]plane:Plane) : Guid =
-        let points2d = Rarr()
+        let points2d = ResizeArray()
         let plane0 =
             if plane.IsValid then plane
             else
-                let ps= Rarr(points)
+                let ps= ResizeArray(points)
                 if ps.Count<2 then
                     RhinoScriptingException.Raise "RhinoScriptSyntax.AddLeader needs at least two points.  given %A, text:%s" points text
                 elif ps.Count=2 then
@@ -435,9 +436,9 @@ module AutoOpenDimension =
 
 
     ///<summary>Returns the names of all dimension styles in the document.</summary>
-    ///<returns>(string Rarr) The names of all dimension styles in the document.</returns>
-    static member DimStyleNames() : string Rarr =
-        rarr {for  ds in State.Doc.DimStyles -> ds.Name }
+    ///<returns>(string ResizeArray) The names of all dimension styles in the document.</returns>
+    static member DimStyleNames() : string ResizeArray =
+        resizeArray {for  ds in State.Doc.DimStyles -> ds.Name }
 
 
     ///<summary>Returns the number display format of a dimension style.</summary>

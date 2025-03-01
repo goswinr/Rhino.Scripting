@@ -4,7 +4,7 @@
 #r @"D:\Git\_Rhino.Scripting_\Rhino.Scripting\bin\Release\net48\Rhino.Scripting.dll"
 
 open System
-open FsEx
+// open FsEx
 open Eto
 
 type rs =  Rhino.Scripting.RhinoScriptSyntax

@@ -4,7 +4,7 @@ namespace Rhino.Scripting
 open Rhino
 
 
-open FsEx
+// open FsEx
 
 [<AutoOpen>]
 module AutoOpenLinetype =
@@ -39,10 +39,10 @@ module AutoOpenLinetype =
 
 
     ///<summary>Returns names of all line-types in the document.</summary>
-    ///<returns>(string Rarr) list of line-type names.</returns>
-    static member LinetypeNames() : string Rarr =
+    ///<returns>(string ResizeArray) list of line-type names.</returns>
+    static member LinetypeNames() : string ResizeArray =
         let count = State.Doc.Linetypes.Count
-        let rc = Rarr()
+        let rc = ResizeArray()
         for i = 0 to count - 1 do
             let linetype = State.Doc.Linetypes.[i]
             if not linetype.IsDeleted then  rc.Add(linetype.Name)

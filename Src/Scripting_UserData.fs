@@ -4,9 +4,9 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-
-open FsEx
-open FsEx.SaveIgnore
+open ResizeArray
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenUserData =
@@ -63,27 +63,29 @@ module AutoOpenUserData =
         State.Doc.Strings.GetValue(key) //TODO add null checking
 
     ///<summary>Returns all document user text keys.</summary>
-    ///<returns>(string Rarr) all document user text keys.</returns>
-    static member GetDocumentUserTextKeys() : string Rarr =
-        rarr { for i = 0 to State.Doc.Strings.Count-1  do
-                    let k = State.Doc.Strings.GetKey(i)
-                    if not <| k.Contains "\\" then  // TODO why ??
-                        yield k }
+    ///<returns>(string ResizeArray) all document user text keys.</returns>
+    static member GetDocumentUserTextKeys() : string ResizeArray =
+        resizeArray {
+            for i = 0 to State.Doc.Strings.Count-1  do
+                let k = State.Doc.Strings.GetKey(i)
+                if not <| k.Contains "\\" then  // TODO why ??
+                    yield k
+            }
 
 
     ///<summary>Returns all user text keys stored on an object.</summary>
     ///<param name="objectId">(Guid) The object's identifies</param>
     ///<param name="attachedToGeometry">(bool) Optional, default value: <c>false</c>
     ///    Location on the object to retrieve the user text</param>
-    ///<returns>(string Rarr) all keys.</returns>
-    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string Rarr =
+    ///<returns>(string ResizeArray) all keys.</returns>
+    static member GetUserTextKeys(objectId:Guid, [<OPT;DEF(false)>]attachedToGeometry:bool) : string ResizeArray =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objectId)
         if attachedToGeometry then
             let uss = obj.Geometry.GetUserStrings()
-            rarr { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
+            resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
         else
             let uss = obj.Attributes.GetUserStrings()
-            rarr { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
+            resizeArray { for  i = 0 to uss.Count-1 do yield uss.GetKey(i)}
 
 
     ///<summary>Returns user text stored on an object, fails if non existing.</summary>
@@ -99,25 +101,26 @@ module AutoOpenUserData =
             else                        obj.Attributes.GetUserString(key)
 
         if isNull s then
-            let err =
-                str{
-                    yield! sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
-                    let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
-                    if ks.Count = 0 then
-                        yield!  "This Object does not have any UserText."
-                    else
-                        yield!  "Available keys on Object are:"
-                        for k in RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false) do
-                            yield "    "
-                            yield! k
-                    let gks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=true)
-                    if gks.Count > 0 then
-                        yield! "Available keys on Geometry:"
-                        for k in RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=true) do
-                            yield "    "
-                            yield! k
-                }
-            RhinoScriptingException.Raise "%s" err
+            let err = Text.StringBuilder()
+            let addLn (s:String) = err.AppendLine s |> ignore
+            let add (s:String) = err.Append s |> ignore
+            addLn <| sprintf "RhinoScriptSyntax.GetUserText key: '%s' does not exist on %s" key (Nice.str objectId)
+            let ks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false)
+            if ks.Count = 0 then
+                addLn  "This Object does not have any UserText."
+            else
+                addLn  "Available keys on Object are:"
+                for k in RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=false) do
+                    add "    "
+                    addLn k
+            let gks = RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=true)
+            if gks.Count > 0 then
+                addLn "Available keys on Geometry:"
+                for k in RhinoScriptSyntax.GetUserTextKeys(objectId, attachedToGeometry=true) do
+                    add "    "
+                    addLn k
+
+            RhinoScriptingException.Raise "%s" (err.ToString())
         s
 
     ///<summary>Returns user text stored on an object, returns Option.None if non existing.</summary>
@@ -181,7 +184,7 @@ module AutoOpenUserData =
     ///<returns>(unit) void, nothing.</returns>
     static member SetDocumentData(section:string, entry:string, value:string) : unit =
         // TODO verify input strings
-        State.Doc.Strings.SetString(section, entry, value) |> ignoreObj
+        State.Doc.Strings.SetString(section, entry, value) |> ignore
 
 
     ///<summary>Sets a user text stored in the document.</summary>
@@ -200,7 +203,7 @@ module AutoOpenUserData =
         else
             if not <|  RhinoScriptSyntax.IsGoodStringId( value, allowEmpty=true) then
                 RhinoScriptingException.Raise "RhinoScriptSyntax.SetDocumentUserText the string '%s' cannot be used as value. You may be able bypass this restrictions by using the optional argument: allowAllUnicode=true" value
-        State.Doc.Strings.SetString(key, value) |> ignoreObj
+        State.Doc.Strings.SetString(key, value) |> ignore
 
 
     ///<summary>Removes user text stored in the document.</summary>

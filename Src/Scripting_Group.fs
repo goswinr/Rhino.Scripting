@@ -4,7 +4,8 @@ namespace Rhino.Scripting
 open Rhino
 
 open System
-open FsEx
+open ResizeArray
+// open FsEx
 
 [<AutoOpen>]
 module AutoOpenGroup =
@@ -222,14 +223,14 @@ module AutoOpenGroup =
     ///   This function primarily applies to objects that are members of nested groups.</summary>
     ///<param name="objId">(Guid) id of the object to query </param>
     ///<returns>(int) The group's names sorted from bottom to top. Or an empty List if object is not in a group.</returns>
-    static member ObjectGroups(objId:Guid) : Rarr<string> =
+    static member ObjectGroups(objId:Guid) : ResizeArray<string> =
         let obj = RhinoScriptSyntax.CoerceRhinoObject(objId)
         let groupIndexes = obj.GetGroupList()
-        if isNull groupIndexes then  (new Rarr<string>(0))
+        if isNull groupIndexes then  (new ResizeArray<string>(0))
         else
             groupIndexes
-            |>  Rarr.ofArray
-            |>! Rarr.sortInPlace
-            |>  Rarr.map (fun i -> State.Doc.Groups.FindIndex(i).Name)
+            |>  ResizeArray.ofArray
+            |>! ResizeArray.sortInPlace
+            |>  ResizeArray.map (fun i -> State.Doc.Groups.FindIndex(i).Name)
 
 

@@ -5,8 +5,8 @@ open Rhino
 
 open System
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenMaterial =

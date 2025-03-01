@@ -7,8 +7,8 @@ open System
 open Rhino.Geometry
 open Rhino.ApplicationSettings
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenApplication =

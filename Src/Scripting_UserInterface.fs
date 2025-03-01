@@ -5,12 +5,12 @@ open Rhino
 
 open System
 open System.Collections.Generic
-
+open ResizeArray
 open Rhino.Geometry
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenUserInterface =
@@ -65,20 +65,20 @@ module AutoOpenUserInterface =
     ///<param name="items">((string*bool) seq) A list of tuples containing a string and a boolean check state</param>
     ///<param name="message">(string) Optional, A prompt or message</param>
     ///<param name="title">(string) Optional, A dialog box title</param>
-    ///<returns>((string*bool) Rarr) Option of tuples containing the input string in items along with their new boolean check value.
+    ///<returns>((string*bool) ResizeArray) Option of tuples containing the input string in items along with their new boolean check value.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member CheckListBox( items:(string*bool) seq,
                                 [<OPT;DEF(null:string)>]message:string,
-                                [<OPT;DEF(null:string)>]title:string) :Rarr<string*bool> =
-        let checkStates = rarr { for  item in items -> snd item }
-        let itemStrings =    rarr { for item in items -> fst item}
+                                [<OPT;DEF(null:string)>]title:string) :ResizeArray<string*bool> =
+        let checkStates = resizeArray { for  item in items -> snd item }
+        let itemStrings =    resizeArray { for item in items -> fst item}
 
         let newCheckStates =
             let getKeepEditor () = UI.Dialogs.ShowCheckListBox(title, message, itemStrings, checkStates)
             RhinoSync.DoSync getKeepEditor
 
         if notNull newCheckStates then
-            (Seq.zip itemStrings newCheckStates |>  Rarr.ofSeq)
+            (Seq.zip itemStrings newCheckStates |>  ResizeArray.ofSeq)
         else
             //RhinoScriptingException.Raise "RhinoScriptSyntax.CheckListBox failed.  items:'%A' message:'%A' title:'%A'" items message title
             RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.CheckListBox()"
@@ -146,16 +146,16 @@ module AutoOpenUserInterface =
     ///    [n][2]    string identifying the false value
     ///    [n][3]    string identifying the true value</param>
     ///<param name="defaultVals">(bool seq) List of boolean values used as default or starting values</param>
-    ///<returns>(bool Rarr) Option of a list of values that represent the boolean values.
+    ///<returns>(bool ResizeArray) Option of a list of values that represent the boolean values.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : Rarr<bool> =
+    static member GetBoolean(message:string, items:(string*string*string) array, defaultVals:bool array) : ResizeArray<bool> =
         let get () =
             use go = new Input.Custom.GetOption()
             go.AcceptNothing(true)
             go.SetCommandPrompt( message )
             let count = Seq.length(items)
             if count < 1 || count <> Seq.length(defaultVals) then RhinoScriptingException.Raise "RhinoScriptSyntax.GetBoolean failed.  message:'%A' items:'%A' defaultVals:'%A'" message items defaultVals
-            let toggles = Rarr()
+            let toggles = ResizeArray()
             for i = 0 to count - 1 do
                 let initial = defaultVals.[i]
                 let item = items.[i]
@@ -171,7 +171,7 @@ module AutoOpenUserInterface =
                 if getrc <> Input.GetResult.Nothing then
                     RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetBoolean()"
                 else
-                    (Rarr.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
+                    (ResizeArray.map (fun (t:Input.Custom.OptionToggle) ->  t.CurrentValue) toggles)
             res
         RhinoSync.DoSyncRedrawHideEditor get
 
@@ -299,7 +299,7 @@ module AutoOpenUserInterface =
                 match gp2.Get() with
                 | Input.GetResult.Point ->
                     let d = gp2.Point().DistanceTo(pt)
-                    InternalToNiceStringSetup.printfnBlue "Distance: %s %s" d.ToNiceString (
+                    InternalToNiceStringSetup.printfnBlue "Distance: %s %s" (NiceFormat.float d) (
                                 State.Doc.GetUnitSystemName(modelUnits=true, capitalize=true, singular=false, abbreviate=false))
 
                     gp2.Dispose()
@@ -320,12 +320,12 @@ module AutoOpenUserInterface =
     ///    Maximum number of edges to select</param>
     ///<param name="select">(bool) Optional, default value: <c>false</c>
     ///    Select the duplicated edge Curves</param>
-    ///<returns>((Guid*Guid*Point3d) Rarr) a List of selection prompts (curve objectId, parent objectId, selection point).
+    ///<returns>((Guid*Guid*Point3d) ResizeArray) a List of selection prompts (curve objectId, parent objectId, selection point).
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetEdgeCurves(    [<OPT;DEF("Select Edges")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
                                     [<OPT;DEF(0)>]maxCount:int,
-                                    [<OPT;DEF(false)>]select:bool) : Rarr<Guid*Guid*Point3d> =
+                                    [<OPT;DEF(false)>]select:bool) : ResizeArray<Guid*Guid*Point3d> =
         let get () =
             if maxCount > 0 && minCount > maxCount then RhinoScriptingException.Raise "RhinoScriptSyntax.GetEdgeCurves: minCount %d is bigger than  maxCount %d" minCount  maxCount
             use go = new Input.Custom.GetObject()
@@ -336,7 +336,7 @@ module AutoOpenUserInterface =
             let rc = go.GetMultiple(minCount, maxCount)
             if rc <> Input.GetResult.Object then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetEdgeCurves()"
             else
-                let r = Rarr()
+                let r = ResizeArray()
                 for i = 0 to go.ObjectCount - 1 do
                     let edge = go.Object(i).Edge()
                     if notNull edge then
@@ -413,13 +413,13 @@ module AutoOpenUserInterface =
     ///    Dialog box title</param>
     ///<param name="showNewButton">(bool) Optional, default value: <c>false</c>
     ///    Optional button to show on the dialog</param>
-    ///<returns>(string Rarr) The names of selected layers.
+    ///<returns>(string ResizeArray) The names of selected layers.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
-    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string Rarr =
+    static member GetLayers([<OPT;DEF("Select Layers")>]title:string, [<OPT;DEF(false)>]showNewButton:bool) : string ResizeArray =
         let getKeepEditor () =
             let rc, layerindices = UI.Dialogs.ShowSelectMultipleLayersDialog(null, title, showNewButton)
             if rc then
-                (rarr { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
+                (resizeArray { for index in layerindices do yield  State.Doc.Layers.[index].FullPath })
             else
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetLayers()"
         RhinoSync.DoSync getKeepEditor
@@ -499,12 +499,12 @@ module AutoOpenUserInterface =
     ///    The maximum number of faces to select.
     ///    If 0, the user must press enter to finish selection.
     ///    If -1, selection stops as soon as there are at least minCount faces selected</param>
-    ///<returns>(int Rarr) Mesh face indices.
+    ///<returns>(int ResizeArray) Mesh face indices.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetMeshFaces( objectId:Guid,
                                 [<OPT;DEF("Select Mesh Faces")>]message:string,
                                 [<OPT;DEF(1)>]minCount:int,
-                                [<OPT;DEF(0)>]maxCount:int) : Rarr<int> =
+                                [<OPT;DEF(0)>]maxCount:int) : ResizeArray<int> =
         let get () =
             State.Doc.Objects.UnselectAll() |> ignore
             State.Doc.Views.Redraw()
@@ -517,7 +517,7 @@ module AutoOpenUserInterface =
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetMeshFaces()"
             else
                 let objrefs = go.Objects()
-                let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
+                let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 rc
 
         RhinoSync.DoSyncRedrawHideEditor get
@@ -533,12 +533,12 @@ module AutoOpenUserInterface =
     ///    The maximum number of vertices to select. If 0, the user must
     ///    press enter to finish selection. If -1, selection stops as soon as there
     ///    are at least minCount vertices selected</param>
-    ///<returns>(int Rarr) Mesh vertex indices.
+    ///<returns>(int ResizeArray) Mesh vertex indices.
     /// A RhinoUserInteractionException is raised if input is cancelled via Esc Key.</returns>
     static member GetMeshVertices(  objectId:Guid,
                                     [<OPT;DEF("Select Mesh Vertices")>]message:string,
                                     [<OPT;DEF(1)>]minCount:int,
-                                    [<OPT;DEF(0)>]maxCount:int) : Rarr<int> =
+                                    [<OPT;DEF(0)>]maxCount:int) : ResizeArray<int> =
         let get () =
             State.Doc.Objects.UnselectAll() |> ignore
             State.Doc.Views.Redraw()
@@ -551,7 +551,7 @@ module AutoOpenUserInterface =
                 RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetMeshVertices()"
             else
                 let objrefs = go.Objects()
-                let rc = rarr { for  item in objrefs do yield item.GeometryComponentIndex.Index }
+                let rc = resizeArray { for  item in objrefs do yield item.GeometryComponentIndex.Index }
                 rc
 
         RhinoSync.DoSyncRedrawHideEditor get
@@ -672,7 +672,7 @@ module AutoOpenUserInterface =
                                 [<OPT;DEF(false)>]inPlane:bool,
                                 [<OPT;DEF(null:string)>]message1:string,
                                 [<OPT;DEF(null:string)>]message2:string,
-                                [<OPT;DEF(0)>]maxPoints:int) :Point3d Rarr =
+                                [<OPT;DEF(0)>]maxPoints:int) :Point3d ResizeArray =
                                 //[<OPT;DEF(Point3d())>]basePoint:Point3d) // Ignored here because ignored in python too
 
         let get () =
@@ -687,7 +687,7 @@ module AutoOpenUserInterface =
             if gp.CommandResult() <> Commands.Result.Success then RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.GetPoints()"
             else
                 let mutable prevPoint = gp.Point()
-                let rc = Rarr([prevPoint])
+                let rc = ResizeArray([prevPoint])
                 if maxPoints = 0 || maxPoints > 1 then
                     let mutable currentpoint = 1
                     if notNull message2 then gp.SetCommandPrompt(message2)
@@ -811,7 +811,7 @@ module AutoOpenUserInterface =
             let mode : Input.GetBoxMode = LanguagePrimitives.EnumOfValue mode
 
             let basePoint = if basePoint = Point3d.Origin then Point3d.Unset else basePoint
-            let prompts = Rarr([""; ""; ""])
+            let prompts = ResizeArray([""; ""; ""])
             if notNull prompt1 then prompts.[0] <- prompt1
             if notNull prompt2 then prompts.[1] <- prompt2
             if notNull prompt3 then prompts.[2] <- prompt3
@@ -955,7 +955,7 @@ module AutoOpenUserInterface =
                                     [<OPT;DEF(null:string)>]message:string,
                                     [<OPT;DEF(null:string)>]title:string) : string array =
         let getKeepEditor () =
-            let values = rarr { for  v in values do yield v.ToString() }
+            let values = resizeArray { for  v in values do yield v.ToString() }
             match UI.Dialogs.ShowPropertyListBox(title, message, Array.ofSeq items , values) with
             | null -> RhinoUserInteractionException.Raise "User Input was cancelled in RhinoScriptSyntax.PropertyListBox"
             | s -> s

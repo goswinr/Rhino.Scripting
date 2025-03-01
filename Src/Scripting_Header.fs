@@ -12,10 +12,10 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 open Rhino.Geometry
 open Rhino.ApplicationSettings
 
-open FsEx
-open FsEx.UtilMath
-open FsEx.SaveIgnore
-open FsEx.CompareOperators
+// open FsEx
+// open FsEx.UtilMath
+// open FsEx.SaveIgnore
+// open FsEx.CompareOperators
 
 
 
@@ -97,11 +97,11 @@ type RhinoScriptSyntax private () =
             RhinoScriptingException.Raise "RhinoScriptSyntax.FxrangePython: Stop value cannot be reached: start=%f, step=%f, stop=%f (steps:%f)" start step stop steps //or Seq.empty
         else
             // the actual algorithm:
-            let rec floatrange (start, i, steps) =
+            let rec floatRange (start, i, steps) =
                 seq { if i <= steps then
                         yield start + i*step
-                        yield! floatrange (start, (i + 1.0), steps) } // tail recursive !
-            floatrange (start, 0.0, steps)
+                        yield! floatRange (start, (i + 1.0), steps) } // tail recursive !
+            floatRange (start, 0.0, steps)
 
     ///<summary>Like the Python 'range' function for integers this creates a range of floating point values.
     ///    This last or stop value will NOT be included in range as per python semantics, this is different from F# semantics on range expressions.
@@ -109,9 +109,9 @@ type RhinoScriptSyntax private () =
     ///<param name="start">(float) first value of range</param>
     ///<param name="stop">(float) end of range( The last value will not be included in range, Python semantics.)</param>
     ///<param name="step">(float) step size between two values</param>
-    ///<returns>(float Rarr).</returns>
-    static member FrangePython (start:float, stop:float, step:float) : float Rarr =
-        RhinoScriptSyntax.FxrangePython (start, stop, step) |> Rarr.ofSeq
+    ///<returns>(float ResizeArray).</returns>
+    static member FrangePython (start:float, stop:float, step:float) : float ResizeArray =
+        RhinoScriptSyntax.FxrangePython (start, stop, step) |> ResizeArray
 
     ///<summary>Adds any geometry object (struct or class) to the Rhino document.
     /// works not only on any subclass of GeometryBase but also on Point3d, Line, Arc and similar structs </summary>

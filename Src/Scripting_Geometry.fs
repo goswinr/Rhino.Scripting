@@ -7,10 +7,11 @@ open System
 open System.Collections.Generic
 
 open Rhino.Geometry
+open ResizeArray
 
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 
 [<AutoOpen>]
@@ -34,15 +35,16 @@ module AutoOpenGeometry =
                                     uMagnitude:float,
                                     vMagnitude:float,
                                     [<OPT;DEF(null:string seq)>]views:string seq) : Guid =
-        let viewlist =
+        let viewList =
             if isNull views then [State.Doc.Views.ActiveView.ActiveViewportID]
             else
-                let modelviews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
+                let modelViews = State.Doc.Views.GetViewList(includeStandardViews=true, includePageViews=false)
                 [for view in views do
-                    for item in modelviews do
+                    for item in modelViews do
                         if item.ActiveViewport.Name = view then
-                            yield item.ActiveViewportID]
-        let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewlist)
+                            yield item.ActiveViewportID
+                ]
+        let rc = State.Doc.Objects.AddClippingPlane(plane, uMagnitude, vMagnitude, viewList)
         if rc = Guid.Empty then
             RhinoScriptingException.Raise "RhinoScriptSyntax.AddClippingPlane: Unable to add clipping plane to document.  plane:'%s' uMagnitude:'%g' vMagnitude:'%g' views:'%s'" plane.ToNiceString uMagnitude vMagnitude (Nice.str views)
         State.Doc.Views.Redraw()
@@ -122,9 +124,9 @@ module AutoOpenGeometry =
 
     ///<summary>Adds one or more point objects to the document.</summary>
     ///<param name="points">(Point3d seq) List of points</param>
-    ///<returns>(Guid Rarr) List of identifiers of the new objects.</returns>
-    static member AddPoints(points:Point3d seq) : Guid Rarr =
-        let rc = rarr{ for point in points do yield State.Doc.Objects.AddPoint(point) }
+    ///<returns>(Guid ResizeArray) List of identifiers of the new objects.</returns>
+    static member AddPoints(points:Point3d seq) : Guid ResizeArray =
+        let rc = resizeArray { for point in points do yield State.Doc.Objects.AddPoint(point) }
         State.Doc.Views.Redraw()
         rc
 
@@ -431,11 +433,11 @@ module AutoOpenGeometry =
     ///<param name="delete">(bool) Optional, default value: <c>false</c>
     ///    Delete the text object after the Curves have been created</param>
     ///<returns>(Guid array) Array of outline Curves.</returns>
-    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : Rarr<Guid> =
+    static member ExplodeText(textId:Guid, [<OPT;DEF(false)>]delete:bool) : ResizeArray<Guid> =
         let rhobj = RhinoScriptSyntax.CoerceRhinoObject(textId)
         let curves = (rhobj.Geometry:?>TextEntity).Explode()
         let attr = rhobj.Attributes
-        let rc = rarr { for curve in curves do yield State.Doc.Objects.AddCurve(curve, attr) }
+        let rc = resizeArray { for curve in curves do yield State.Doc.Objects.AddCurve(curve, attr) }
         if delete then State.Doc.Objects.Delete(rhobj, quiet=true) |>ignore
         State.Doc.Views.Redraw()
         rc
@@ -502,10 +504,10 @@ module AutoOpenGeometry =
 
     ///<summary>Returns the hidden points of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
-    ///<returns>(bool Rarr) List of point cloud hidden states.</returns>
-    static member PointCloudHidePoints(objectId:Guid) : Rarr<bool> = //GET
+    ///<returns>(bool ResizeArray) List of point cloud hidden states.</returns>
+    static member PointCloudHidePoints(objectId:Guid) : ResizeArray<bool> = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud(objectId)
-        rarr { for item in pc do yield item.Hidden }
+        resizeArray { for item in pc do yield item.Hidden }
 
 
     ///<summary>Modifies the hidden points of a point cloud object.</summary>
@@ -530,10 +532,10 @@ module AutoOpenGeometry =
 
     ///<summary>Returns the point colors of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
-    ///<returns>(Drawing.Color Rarr) List of point cloud colors.</returns>
-    static member PointCloudPointColors(objectId:Guid) : Drawing.Color Rarr = //GET
+    ///<returns>(Drawing.Color ResizeArray) List of point cloud colors.</returns>
+    static member PointCloudPointColors(objectId:Guid) : Drawing.Color ResizeArray = //GET
         let pc = RhinoScriptSyntax.CoercePointCloud objectId
-        rarr { for item in pc do yield item.Color }
+        resizeArray { for item in pc do yield item.Color }
 
     ///<summary>Modifies the point colors of a point cloud object.</summary>
     ///<param name="objectId">(Guid) The point cloud object's identifier</param>
@@ -730,7 +732,7 @@ module AutoOpenGeometry =
     static member TextObjectHeight(objectId:Guid, height:float) : unit = //SET
         let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
         annotation.TextHeight <-  height
-        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) height.ToNiceString
+        if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) (NiceFormat.float height)
         State.Doc.Views.Redraw()
 
     ///<summary>Modifies the height of multiple text objects.</summary>
@@ -741,7 +743,7 @@ module AutoOpenGeometry =
         for objectId in objectIds do
             let annotation = RhinoScriptSyntax.CoerceTextEntity(objectId)
             annotation.TextHeight <-  height
-            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) height.ToNiceString
+            if not <| State.Doc.Objects.Replace(objectId, annotation) then RhinoScriptingException.Raise "RhinoScriptSyntax.TextObjectHeight failed.  objectId:'%s' height:'%s'" (Nice.str objectId) (NiceFormat.float height)
         State.Doc.Views.Redraw()
         State.Doc.Views.Redraw()
 

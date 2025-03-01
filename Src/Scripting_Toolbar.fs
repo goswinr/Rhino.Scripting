@@ -5,8 +5,9 @@ open Rhino
 
 open System
 
-open FsEx
-open FsEx.SaveIgnore
+open ResizeArray
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenToolbar =
@@ -153,9 +154,9 @@ module AutoOpenToolbar =
 
 
     ///<summary>Returns names of all currently open tool-bar collections.</summary>
-    ///<returns>(string Rarr) The names of all currently open tool-bar collections.</returns>
-    static member ToolbarCollectionNames() : string Rarr =
-        rarr { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
+    ///<returns>(string ResizeArray) The names of all currently open tool-bar collections.</returns>
+    static member ToolbarCollectionNames() : string ResizeArray =
+        resizeArray { for tbfile in RhinoApp.ToolbarFiles -> tbfile.Name }
 
 
     ///<summary>Returns full path to a currently open tool-bar collection file.</summary>
@@ -186,10 +187,10 @@ module AutoOpenToolbar =
     ///<param name="name">(string) Name of currently open tool-bar collection</param>
     ///<param name="groups">(bool) Optional, default value: <c>false</c>
     ///    If true, return the names of tool-bar groups in the file</param>
-    ///<returns>(string Rarr) names of all tool-bars (or tool-bar groups).</returns>
-    static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string Rarr =
+    ///<returns>(string ResizeArray) names of all tool-bars (or tool-bar groups).</returns>
+    static member ToolbarNames(name:string, [<OPT;DEF(false)>]groups:bool) : string ResizeArray =
         let tbfile = RhinoApp.ToolbarFiles.FindByName(name, true)
-        let rc = Rarr()
+        let rc = ResizeArray()
         if notNull tbfile then
             if groups then
                 for i = 0 to tbfile.GroupCount-1 do rc.Add(tbfile.GetGroup(i).Name)

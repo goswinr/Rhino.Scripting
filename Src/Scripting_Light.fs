@@ -7,8 +7,8 @@ open System
 
 open Rhino.Geometry
 
-open FsEx
-open FsEx.SaveIgnore
+// open FsEx
+// open FsEx.SaveIgnore
 
 [<AutoOpen>]
 module AutoOpenLight =
@@ -370,10 +370,10 @@ module AutoOpenLight =
 
 
     ///<summary>Returns list of identifiers of light objects in the document.</summary>
-    ///<returns>(Guid Rarr) The list of identifiers of light objects in the document.</returns>
-    static member LightObjects() : Guid Rarr =
+    ///<returns>(Guid ResizeArray) The list of identifiers of light objects in the document.</returns>
+    static member LightObjects() : Guid ResizeArray =
         let count = State.Doc.Lights.Count
-        let rc = Rarr()
+        let rc = ResizeArray()
         for i = 0 to count - 1 do
             let rhlight = State.Doc.Lights.[i]
             if not rhlight.IsDeleted then rc.Add(rhlight.Id)
